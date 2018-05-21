@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.lib.SafeLong;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;

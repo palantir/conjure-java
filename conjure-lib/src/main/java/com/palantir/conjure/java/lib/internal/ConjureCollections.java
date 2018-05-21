@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.lib.internal;
+package com.palantir.conjure.java.lib.internal;
 
 import java.util.Collection;
 

@@ -26,7 +26,9 @@ buildscript {
     }
 
     dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
         classpath 'com.netflix.nebula:nebula-dependency-recommender:5.2.0'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:7.0.12'
         classpath 'com.palantir.baseline:gradle-baseline-java:0.19.0'
         classpath 'com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.3.0'
         classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.10.0'
@@ -35,7 +37,6 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
 apply plugin: 'com.palantir.baseline-config'
 apply plugin: 'com.palantir.baseline-idea'
 apply plugin: 'com.palantir.circle.style'
@@ -67,14 +68,13 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'jacoco'
     apply plugin: 'com.palantir.baseline-checkstyle'
     apply plugin: 'com.palantir.baseline-eclipse'
     apply plugin: 'com.palantir.baseline-idea'
     apply plugin: 'com.palantir.baseline-error-prone'
     apply plugin: 'org.inferred.processors'
-    apply plugin: 'maven-publish'
 
     jacocoTestReport {
         reports {

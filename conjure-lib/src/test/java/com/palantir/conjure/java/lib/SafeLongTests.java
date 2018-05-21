@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.lib;
+package com.palantir.conjure.java.lib;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

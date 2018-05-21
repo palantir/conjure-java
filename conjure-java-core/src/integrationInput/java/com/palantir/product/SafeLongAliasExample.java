@@ -2,7 +2,7 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.lib.SafeLong;
+import com.palantir.conjure.java.lib.SafeLong;
 import java.util.Objects;
 import javax.annotation.Generated;
 

@@ -18,8 +18,8 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.lib.SafeLong;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EteService;
