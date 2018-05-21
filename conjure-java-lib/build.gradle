@@ -22,7 +22,7 @@ bintray {
     publish = true
     pkg {
         repo = System.env.CIRCLE_TAG ? 'releases' : 'snapshots'
-        name = 'conjure-java'
+        name = project.name
         userOrg = 'palantir'
         licenses = ['Apache-2.0']
         publications = ['nebula']
