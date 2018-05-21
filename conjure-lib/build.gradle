@@ -1,8 +1,8 @@
-apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
 apply plugin: 'nebula.maven-publish'
-apply plugin: 'nebula.source-jar'
 apply plugin: 'nebula.publish-verification'
+apply plugin: 'nebula.source-jar'
 
 dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind'
@@ -22,7 +22,7 @@ bintray {
     key = System.env.BINTRAY_PASSWORD
     publish = true
     pkg {
-        repo = System.env.CIRCLE_TAG ? 'releases' : 'snapshots'
+        repo = 'releases'
         name = project.name
         userOrg = 'palantir'
         licenses = ['Apache-2.0']
@@ -31,3 +31,6 @@ bintray {
 }
 
 publish.dependsOn bintrayUpload
+bintrayUpload.onlyIf {
+    versionDetails().isCleanTag
+}
