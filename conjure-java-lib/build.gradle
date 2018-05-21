@@ -1,3 +1,8 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'nebula.maven-publish'
+apply plugin: 'nebula.source-jar'
+apply plugin: 'nebula.publish-verification'
+
 dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.palantir.ri:resource-identifier'
@@ -9,14 +14,6 @@ dependencies {
     testCompile 'org.mockito:mockito-core'
 
     processor 'org.immutables:value'
-}
-
-publishing {
-    publications {
-        nebula(MavenPublication) {
-            from components.java
-        }
-    }
 }
 
 bintray {
@@ -31,3 +28,5 @@ bintray {
         publications = ['nebula']
     }
 }
+
+publish.dependsOn bintrayUpload
