@@ -35,7 +35,6 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
 apply plugin: 'com.palantir.baseline-config'
 apply plugin: 'com.palantir.baseline-idea'
 apply plugin: 'com.palantir.circle.style'
@@ -67,7 +66,7 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'jacoco'
     apply plugin: 'com.palantir.baseline-checkstyle'
     apply plugin: 'com.palantir.baseline-eclipse'
