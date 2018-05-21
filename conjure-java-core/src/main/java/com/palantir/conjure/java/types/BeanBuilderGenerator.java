@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
-import com.palantir.conjure.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;

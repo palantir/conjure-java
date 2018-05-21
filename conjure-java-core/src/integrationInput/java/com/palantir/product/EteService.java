@@ -1,6 +1,6 @@
 package com.palantir.product;
 
-import com.palantir.conjure.lib.SafeLong;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;

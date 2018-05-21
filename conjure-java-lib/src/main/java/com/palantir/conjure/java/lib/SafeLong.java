@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.lib;
+package com.palantir.conjure.java.lib;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

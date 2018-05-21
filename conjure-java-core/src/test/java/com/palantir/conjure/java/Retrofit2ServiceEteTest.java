@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
-import com.palantir.conjure.lib.SafeLong;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EteServiceRetrofit;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
