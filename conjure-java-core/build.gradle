@@ -31,7 +31,7 @@ idea {
 tasks.checkstyleIntegrationInput.enabled = false
 
 dependencies {
-    compile project(':conjure-java-lib')
+    compile project(':conjure-lib')
     compile 'com.palantir.ri:resource-identifier'
     compile 'com.palantir.tokens:auth-tokens'
     compile 'com.palantir.remoting-api:errors'
@@ -53,7 +53,7 @@ dependencies {
     testCompile 'com.palantir.remoting3:retrofit2-clients'
     testCompile 'io.dropwizard:dropwizard-testing'
 
-    integrationInputCompile project(':conjure-java-lib')
+    integrationInputCompile project(':conjure-lib')
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
 
     processor 'org.immutables:value'
