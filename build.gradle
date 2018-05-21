@@ -75,7 +75,6 @@ subprojects {
     apply plugin: 'com.palantir.baseline-idea'
     apply plugin: 'com.palantir.baseline-error-prone'
     apply plugin: 'org.inferred.processors'
-    apply plugin: 'maven-publish'
 
     jacocoTestReport {
         reports {
