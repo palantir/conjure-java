@@ -15,6 +15,8 @@
  */
 
 apply plugin: 'application'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
 
 dependencies {
     compile project(':conjure-java-core')
@@ -27,3 +29,30 @@ dependencies {
 }
 
 mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
+
+publishing {
+    publications {
+        dist(MavenPublication) {
+            artifact distTar
+        }
+    }
+}
+
+bintray {
+    user = System.env.BINTRAY_USERNAME
+    key = System.env.BINTRAY_PASSWORD
+    publish = true
+    pkg {
+        repo = System.env.CIRCLE_TAG ? 'releases' : 'snapshots'
+        name = 'conjure-java'
+        userOrg = 'palantir'
+        licenses = ['Apache-2.0']
+        publications = ['dist']
+    }
+}
+
+publish.dependsOn bintrayUpload
+bintrayUpload.onlyIf {
+    versionDetails().isCleanTag
+}
+
