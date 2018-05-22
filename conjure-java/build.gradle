@@ -30,6 +30,8 @@ dependencies {
 
 mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
 
+distTar.compression = Compression.GZIP
+
 publishing {
     publications {
         dist(MavenPublication) {
