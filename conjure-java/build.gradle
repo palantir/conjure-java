@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-apply plugin: 'application'
+apply from: "$rootDir/gradle/publish-dist.gradle"
+
+mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
 
 dependencies {
     compile project(':conjure-java-core')
@@ -25,5 +27,3 @@ dependencies {
 
     processor 'org.immutables:value'
 }
-
-mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
