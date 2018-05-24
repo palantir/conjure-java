@@ -17,7 +17,6 @@
 apply from: "$rootDir/gradle/publish-dist.gradle"
 
 mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
-distTar.compression = Compression.GZIP
 
 dependencies {
     compile project(':conjure-java-core')
