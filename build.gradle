@@ -52,6 +52,7 @@ allprojects {
             url 'https://dl.bintray.com/palantir/releases/'
         }
     }
+
     apply plugin: 'com.palantir.configuration-resolver'
     apply plugin: 'nebula.dependency-recommender'
 
@@ -77,10 +78,6 @@ subprojects {
     apply plugin: 'org.inferred.processors'
 
     sourceCompatibility = 1.8
-
-    if (System.env.CIRCLE_TEST_REPORTS) {
-        test.reports.junitXml.destination = new File(System.env.CIRCLE_TEST_REPORTS, it.getName())
-    }
 
     tasks.withType(JavaCompile) {
         options.compilerArgs += ['-XepDisableWarningsInGeneratedCode', '-Werror']
