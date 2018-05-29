@@ -143,14 +143,14 @@ public final class EnumDefinition {
         }
 
         @JsonSetter("values")
-        public Builder values(Iterable<EnumValueDefinition> values) {
+        public Builder values(Iterable<? extends EnumValueDefinition> values) {
             this.values.clear();
             ConjureCollections.addAll(
                     this.values, Objects.requireNonNull(values, "values cannot be null"));
             return this;
         }
 
-        public Builder addAllValues(Iterable<EnumValueDefinition> values) {
+        public Builder addAllValues(Iterable<? extends EnumValueDefinition> values) {
             ConjureCollections.addAll(
                     this.values, Objects.requireNonNull(values, "values cannot be null"));
             return this;
@@ -162,8 +162,9 @@ public final class EnumDefinition {
         }
 
         @JsonSetter("docs")
-        public Builder docs(Optional<Documentation> docs) {
-            this.docs = Objects.requireNonNull(docs, "docs cannot be null");
+        public Builder docs(Optional<? extends Documentation> docs) {
+            this.docs =
+                    (Optional<Documentation>) Objects.requireNonNull(docs, "docs cannot be null");
             return this;
         }
 

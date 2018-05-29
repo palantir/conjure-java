@@ -143,14 +143,14 @@ public final class UnionDefinition {
         }
 
         @JsonSetter("union")
-        public Builder union(Iterable<FieldDefinition> union) {
+        public Builder union(Iterable<? extends FieldDefinition> union) {
             this.union.clear();
             ConjureCollections.addAll(
                     this.union, Objects.requireNonNull(union, "union cannot be null"));
             return this;
         }
 
-        public Builder addAllUnion(Iterable<FieldDefinition> union) {
+        public Builder addAllUnion(Iterable<? extends FieldDefinition> union) {
             ConjureCollections.addAll(
                     this.union, Objects.requireNonNull(union, "union cannot be null"));
             return this;
@@ -162,8 +162,9 @@ public final class UnionDefinition {
         }
 
         @JsonSetter("docs")
-        public Builder docs(Optional<Documentation> docs) {
-            this.docs = Objects.requireNonNull(docs, "docs cannot be null");
+        public Builder docs(Optional<? extends Documentation> docs) {
+            this.docs =
+                    (Optional<Documentation>) Objects.requireNonNull(docs, "docs cannot be null");
             return this;
         }
 

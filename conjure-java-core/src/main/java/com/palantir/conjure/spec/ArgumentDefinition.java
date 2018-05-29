@@ -192,8 +192,9 @@ public final class ArgumentDefinition {
         }
 
         @JsonSetter("docs")
-        public Builder docs(Optional<Documentation> docs) {
-            this.docs = Objects.requireNonNull(docs, "docs cannot be null");
+        public Builder docs(Optional<? extends Documentation> docs) {
+            this.docs =
+                    (Optional<Documentation>) Objects.requireNonNull(docs, "docs cannot be null");
             return this;
         }
 
@@ -203,14 +204,14 @@ public final class ArgumentDefinition {
         }
 
         @JsonSetter("markers")
-        public Builder markers(Iterable<Type> markers) {
+        public Builder markers(Iterable<? extends Type> markers) {
             this.markers.clear();
             ConjureCollections.addAll(
                     this.markers, Objects.requireNonNull(markers, "markers cannot be null"));
             return this;
         }
 
-        public Builder addAllMarkers(Iterable<Type> markers) {
+        public Builder addAllMarkers(Iterable<? extends Type> markers) {
             ConjureCollections.addAll(
                     this.markers, Objects.requireNonNull(markers, "markers cannot be null"));
             return this;

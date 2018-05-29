@@ -199,8 +199,9 @@ public final class ErrorDefinition {
         }
 
         @JsonSetter("docs")
-        public Builder docs(Optional<Documentation> docs) {
-            this.docs = Objects.requireNonNull(docs, "docs cannot be null");
+        public Builder docs(Optional<? extends Documentation> docs) {
+            this.docs =
+                    (Optional<Documentation>) Objects.requireNonNull(docs, "docs cannot be null");
             return this;
         }
 
@@ -222,14 +223,14 @@ public final class ErrorDefinition {
         }
 
         @JsonSetter("safeArgs")
-        public Builder safeArgs(Iterable<FieldDefinition> safeArgs) {
+        public Builder safeArgs(Iterable<? extends FieldDefinition> safeArgs) {
             this.safeArgs.clear();
             ConjureCollections.addAll(
                     this.safeArgs, Objects.requireNonNull(safeArgs, "safeArgs cannot be null"));
             return this;
         }
 
-        public Builder addAllSafeArgs(Iterable<FieldDefinition> safeArgs) {
+        public Builder addAllSafeArgs(Iterable<? extends FieldDefinition> safeArgs) {
             ConjureCollections.addAll(
                     this.safeArgs, Objects.requireNonNull(safeArgs, "safeArgs cannot be null"));
             return this;
@@ -241,7 +242,7 @@ public final class ErrorDefinition {
         }
 
         @JsonSetter("unsafeArgs")
-        public Builder unsafeArgs(Iterable<FieldDefinition> unsafeArgs) {
+        public Builder unsafeArgs(Iterable<? extends FieldDefinition> unsafeArgs) {
             this.unsafeArgs.clear();
             ConjureCollections.addAll(
                     this.unsafeArgs,
@@ -249,7 +250,7 @@ public final class ErrorDefinition {
             return this;
         }
 
-        public Builder addAllUnsafeArgs(Iterable<FieldDefinition> unsafeArgs) {
+        public Builder addAllUnsafeArgs(Iterable<? extends FieldDefinition> unsafeArgs) {
             ConjureCollections.addAll(
                     this.unsafeArgs,
                     Objects.requireNonNull(unsafeArgs, "unsafeArgs cannot be null"));

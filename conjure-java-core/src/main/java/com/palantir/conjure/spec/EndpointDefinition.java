@@ -279,8 +279,8 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("auth")
-        public Builder auth(Optional<AuthType> auth) {
-            this.auth = Objects.requireNonNull(auth, "auth cannot be null");
+        public Builder auth(Optional<? extends AuthType> auth) {
+            this.auth = (Optional<AuthType>) Objects.requireNonNull(auth, "auth cannot be null");
             return this;
         }
 
@@ -290,14 +290,14 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("args")
-        public Builder args(Iterable<ArgumentDefinition> args) {
+        public Builder args(Iterable<? extends ArgumentDefinition> args) {
             this.args.clear();
             ConjureCollections.addAll(
                     this.args, Objects.requireNonNull(args, "args cannot be null"));
             return this;
         }
 
-        public Builder addAllArgs(Iterable<ArgumentDefinition> args) {
+        public Builder addAllArgs(Iterable<? extends ArgumentDefinition> args) {
             ConjureCollections.addAll(
                     this.args, Objects.requireNonNull(args, "args cannot be null"));
             return this;
@@ -309,8 +309,9 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("returns")
-        public Builder returns(Optional<Type> returns) {
-            this.returns = Objects.requireNonNull(returns, "returns cannot be null");
+        public Builder returns(Optional<? extends Type> returns) {
+            this.returns =
+                    (Optional<Type>) Objects.requireNonNull(returns, "returns cannot be null");
             return this;
         }
 
@@ -320,8 +321,9 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("docs")
-        public Builder docs(Optional<Documentation> docs) {
-            this.docs = Objects.requireNonNull(docs, "docs cannot be null");
+        public Builder docs(Optional<? extends Documentation> docs) {
+            this.docs =
+                    (Optional<Documentation>) Objects.requireNonNull(docs, "docs cannot be null");
             return this;
         }
 
@@ -331,8 +333,10 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("deprecated")
-        public Builder deprecated(Optional<Documentation> deprecated) {
-            this.deprecated = Objects.requireNonNull(deprecated, "deprecated cannot be null");
+        public Builder deprecated(Optional<? extends Documentation> deprecated) {
+            this.deprecated =
+                    (Optional<Documentation>)
+                            Objects.requireNonNull(deprecated, "deprecated cannot be null");
             return this;
         }
 
@@ -343,14 +347,14 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("markers")
-        public Builder markers(Iterable<Type> markers) {
+        public Builder markers(Iterable<? extends Type> markers) {
             this.markers.clear();
             ConjureCollections.addAll(
                     this.markers, Objects.requireNonNull(markers, "markers cannot be null"));
             return this;
         }
 
-        public Builder addAllMarkers(Iterable<Type> markers) {
+        public Builder addAllMarkers(Iterable<? extends Type> markers) {
             ConjureCollections.addAll(
                     this.markers, Objects.requireNonNull(markers, "markers cannot be null"));
             return this;

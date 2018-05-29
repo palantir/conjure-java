@@ -139,14 +139,14 @@ public final class ListExample {
         }
 
         @JsonSetter("items")
-        public Builder items(Iterable<String> items) {
+        public Builder items(Iterable<? extends String> items) {
             this.items.clear();
             ConjureCollections.addAll(
                     this.items, Objects.requireNonNull(items, "items cannot be null"));
             return this;
         }
 
-        public Builder addAllItems(Iterable<String> items) {
+        public Builder addAllItems(Iterable<? extends String> items) {
             ConjureCollections.addAll(
                     this.items, Objects.requireNonNull(items, "items cannot be null"));
             return this;
@@ -158,7 +158,7 @@ public final class ListExample {
         }
 
         @JsonSetter("primitiveItems")
-        public Builder primitiveItems(Iterable<Integer> primitiveItems) {
+        public Builder primitiveItems(Iterable<? extends Integer> primitiveItems) {
             this.primitiveItems.clear();
             ConjureCollections.addAll(
                     this.primitiveItems,
@@ -166,7 +166,7 @@ public final class ListExample {
             return this;
         }
 
-        public Builder addAllPrimitiveItems(Iterable<Integer> primitiveItems) {
+        public Builder addAllPrimitiveItems(Iterable<? extends Integer> primitiveItems) {
             ConjureCollections.addAll(
                     this.primitiveItems,
                     Objects.requireNonNull(primitiveItems, "primitiveItems cannot be null"));
@@ -179,7 +179,7 @@ public final class ListExample {
         }
 
         @JsonSetter("doubleItems")
-        public Builder doubleItems(Iterable<Double> doubleItems) {
+        public Builder doubleItems(Iterable<? extends Double> doubleItems) {
             this.doubleItems.clear();
             ConjureCollections.addAll(
                     this.doubleItems,
@@ -187,7 +187,7 @@ public final class ListExample {
             return this;
         }
 
-        public Builder addAllDoubleItems(Iterable<Double> doubleItems) {
+        public Builder addAllDoubleItems(Iterable<? extends Double> doubleItems) {
             ConjureCollections.addAll(
                     this.doubleItems,
                     Objects.requireNonNull(doubleItems, "doubleItems cannot be null"));

@@ -269,8 +269,10 @@ public final class ManyFieldExample {
 
         /** docs for optionalItem field */
         @JsonSetter("optionalItem")
-        public Builder optionalItem(Optional<String> optionalItem) {
-            this.optionalItem = Objects.requireNonNull(optionalItem, "optionalItem cannot be null");
+        public Builder optionalItem(Optional<? extends String> optionalItem) {
+            this.optionalItem =
+                    (Optional<String>)
+                            Objects.requireNonNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
 
@@ -284,7 +286,7 @@ public final class ManyFieldExample {
 
         /** docs for items field */
         @JsonSetter("items")
-        public Builder items(Iterable<String> items) {
+        public Builder items(Iterable<? extends String> items) {
             this.items.clear();
             ConjureCollections.addAll(
                     this.items, Objects.requireNonNull(items, "items cannot be null"));
@@ -292,7 +294,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for items field */
-        public Builder addAllItems(Iterable<String> items) {
+        public Builder addAllItems(Iterable<? extends String> items) {
             ConjureCollections.addAll(
                     this.items, Objects.requireNonNull(items, "items cannot be null"));
             return this;
@@ -306,14 +308,14 @@ public final class ManyFieldExample {
 
         /** docs for set field */
         @JsonSetter("set")
-        public Builder set(Iterable<String> set) {
+        public Builder set(Iterable<? extends String> set) {
             this.set.clear();
             ConjureCollections.addAll(this.set, Objects.requireNonNull(set, "set cannot be null"));
             return this;
         }
 
         /** docs for set field */
-        public Builder addAllSet(Iterable<String> set) {
+        public Builder addAllSet(Iterable<? extends String> set) {
             ConjureCollections.addAll(this.set, Objects.requireNonNull(set, "set cannot be null"));
             return this;
         }

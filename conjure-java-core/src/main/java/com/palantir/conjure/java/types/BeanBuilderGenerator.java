@@ -42,6 +42,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -232,7 +233,7 @@ public final class BeanBuilderGenerator {
                 .build();
         boolean shouldClearFirst = true;
         MethodSpec.Builder setterBuilder = publicSetter(enriched)
-                .addParameter(widenToIterableIfPossible(field.type, type), field.name)
+                .addParameter(widenParameterIfPossible(field.type, type), field.name)
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
         if (enriched.isPrimitive()) {
@@ -253,27 +254,37 @@ public final class BeanBuilderGenerator {
                 .addJavadoc(enriched.conjureDef().getDocs().map(Documentation::get).orElse(""))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
-                .addParameter(widenToIterableIfPossible(field.type, type), field.name)
+                .addParameter(widenParameterIfPossible(field.type, type), field.name)
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
                 .addStatement("return this")
                 .build();
     }
 
-    private TypeName widenToIterableIfPossible(TypeName current, Type type) {
+    private TypeName widenParameterIfPossible(TypeName current, Type type) {
         if (type.accept(TypeVisitor.IS_LIST)) {
             TypeName typeName = typeMapper.getClassName(type.accept(TypeVisitor.LIST).getItemType()).box();
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), typeName);
+            return ParameterizedTypeName.get(ClassName.get(Iterable.class), WildcardTypeName.subtypeOf(typeName));
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
             TypeName typeName = typeMapper.getClassName(type.accept(TypeVisitor.SET).getItemType()).box();
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), typeName);
+            return ParameterizedTypeName.get(ClassName.get(Iterable.class), WildcardTypeName.subtypeOf(typeName));
+        }
+
+        if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+            OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
+            if (isPrimitiveOptional(optionalType)) {
+                // we can't widen primitive optionals
+                return current;
+            }
+            TypeName innerType = typeMapper.getClassName(type.accept(TypeVisitor.OPTIONAL).getItemType()).box();
+            return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerType));
         }
 
         return current;
     }
 
-    private static CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
+    private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             CodeBlock addStatement = CodeBlocks.statement(
@@ -298,6 +309,22 @@ public final class BeanBuilderGenerator {
                             ByteBuffer.class)
                     .addStatement("this.$1N.rewind()", spec.name)
                     .build();
+        } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+            OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
+            CodeBlock nullCheckedValue = Expressions.requireNonNull(
+                    spec.name, enriched.fieldName().get() + " cannot be null");
+
+            if (isPrimitiveOptional(optionalType)) {
+                // no need to null-check primitives
+                return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
+            } else {
+                // covariant optionals need to be narrowed to invariant type before assignment
+                Type innerType = optionalType.getItemType();
+                return CodeBlock.builder()
+                        .addStatement("this.$1N = ($3T<$4T>) $2L",
+                                spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType))
+                        .build();
+            }
         } else {
             CodeBlock nullCheckedValue = spec.type.isPrimitive()
                     ? CodeBlock.of("$N", spec.name) // primitive types can't be null, so no need for requireNonNull!
@@ -348,29 +375,31 @@ public final class BeanBuilderGenerator {
     @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private CodeBlock optionalAssignmentStatement(EnrichedField enriched, OptionalType type) {
         FieldSpec spec = enriched.poetSpec();
-        if (type.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+        if (isPrimitiveOptional(type)) {
+            return CodeBlocks.statement("this.$1N = $2T.of($1N)",
+                    enriched.poetSpec().name, asRawType(typeMapper.getClassName(Type.optional(type))));
+        } else {
+            return CodeBlocks.statement("this.$1N = $2T.of($3L)",
+                    spec.name, Optional.class,
+                    Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
+        }
+    }
 
-            switch (type.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
+    /**
+     * Check if the optionalType contains a primitive boolean, double or integer.
+     */
+    private boolean isPrimitiveOptional(OptionalType optionalType) {
+        if (optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+            switch (optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
                 case INTEGER:
                 case DOUBLE:
                 case BOOLEAN:
-                    return CodeBlocks.statement("this.$1N = $2T.of($1N)",
-                            enriched.poetSpec().name, asRawType(typeMapper.getClassName(Type.optional(type))));
-                case SAFELONG:
-                case STRING:
-                case RID:
-                case BEARERTOKEN:
-                case UUID:
-                case ANY:
-                case DATETIME:
-                case BINARY:
+                    return true;
                 default:
                     // not special
             }
         }
-        return CodeBlocks.statement("this.$1N = $2T.of($3L)",
-                spec.name, Optional.class, Expressions.requireNonNull(
-                        spec.name, enriched.fieldName().get() + " cannot be null"));
+        return false;
     }
 
     private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {

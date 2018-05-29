@@ -143,14 +143,14 @@ public final class ObjectDefinition {
         }
 
         @JsonSetter("fields")
-        public Builder fields(Iterable<FieldDefinition> fields) {
+        public Builder fields(Iterable<? extends FieldDefinition> fields) {
             this.fields.clear();
             ConjureCollections.addAll(
                     this.fields, Objects.requireNonNull(fields, "fields cannot be null"));
             return this;
         }
 
-        public Builder addAllFields(Iterable<FieldDefinition> fields) {
+        public Builder addAllFields(Iterable<? extends FieldDefinition> fields) {
             ConjureCollections.addAll(
                     this.fields, Objects.requireNonNull(fields, "fields cannot be null"));
             return this;
@@ -162,8 +162,9 @@ public final class ObjectDefinition {
         }
 
         @JsonSetter("docs")
-        public Builder docs(Optional<Documentation> docs) {
-            this.docs = Objects.requireNonNull(docs, "docs cannot be null");
+        public Builder docs(Optional<? extends Documentation> docs) {
+            this.docs =
+                    (Optional<Documentation>) Objects.requireNonNull(docs, "docs cannot be null");
             return this;
         }
 

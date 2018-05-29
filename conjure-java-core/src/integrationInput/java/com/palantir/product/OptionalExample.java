@@ -98,8 +98,8 @@ public final class OptionalExample {
         }
 
         @JsonSetter("item")
-        public Builder item(Optional<String> item) {
-            this.item = Objects.requireNonNull(item, "item cannot be null");
+        public Builder item(Optional<? extends String> item) {
+            this.item = (Optional<String>) Objects.requireNonNull(item, "item cannot be null");
             return this;
         }
 
