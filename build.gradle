@@ -74,7 +74,6 @@ subprojects {
     apply plugin: 'com.palantir.baseline-eclipse'
     apply plugin: 'com.palantir.baseline-idea'
     apply plugin: 'com.palantir.baseline-error-prone'
-    apply plugin: 'com.palantir.baseline-class-uniqueness'
     apply plugin: 'org.inferred.processors'
 
     sourceCompatibility = 1.8
