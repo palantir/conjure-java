@@ -30,11 +30,17 @@ types:
       OptionalExample:
         fields:
           item: optional<string>
+      CovariantOptionalExample:
+        fields:
+          item: optional<any>
       ListExample:
         fields:
           items: list<string>
           primitiveItems: list<integer>
           doubleItems: list<double>
+      CovariantListExample:
+        fields:
+          items: list<any>
       SetExample:
         fields:
           items: set<string>
