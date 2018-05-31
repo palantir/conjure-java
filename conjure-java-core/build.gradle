@@ -31,7 +31,7 @@ idea {
 tasks.checkstyleIntegrationInput.enabled = false
 
 dependencies {
-    compile project(':conjure-lib')
+    compile 'com.palantir.conjure:conjure-core'
     compile 'com.palantir.ri:resource-identifier'
     compile 'com.palantir.tokens:auth-tokens'
     compile 'com.palantir.remoting-api:errors'

@@ -1,1 +1,0 @@
-{"version":1,"errors":[],"types":[],"services":[{"serviceName":{"name":"CookieService","package":"test.api"},"endpoints":[{"endpointName":"eatCookies","httpMethod":"GET","httpPath":"/cookies","auth":{"type":"cookie","cookie":{"cookieName":"PALANTIR_TOKEN"}},"args":[],"returns":null,"docs":null,"deprecated":null,"markers":[]}],"docs":null}]}

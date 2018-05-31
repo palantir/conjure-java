@@ -19,6 +19,8 @@ package com.palantir.conjure.java;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
@@ -34,9 +36,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 public final class JerseyServiceGeneratorTests extends TestBase {
-
-    private static final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
-
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
@@ -56,16 +55,11 @@ public final class JerseyServiceGeneratorTests extends TestBase {
 
     @Test
     public void testConjureImports() throws IOException {
-        //        ConjureDefinition conjure = Conjure.parse(
-        //                ImmutableList.of(
-        //                        new File("src/test/resources/example-conjure-imports.yml"),
-        //                        new File("src/test/resources/example-types.yml"),
-        //                        new File("src/test/resources/example-service.yml")));
-        //        mapper.writeValue(new File("src/test/resources/testConjureImports.json"), conjure);
-
-        ConjureDefinition conjure = mapper.readValue(new File("src/test/resources/testConjureImports.json"),
-                ConjureDefinition.class);
-
+        ConjureDefinition conjure = Conjure.parse(
+                ImmutableList.of(
+                        new File("src/test/resources/example-conjure-imports.yml"),
+                        new File("src/test/resources/example-types.yml"),
+                        new File("src/test/resources/example-service.yml")));
         File src = folder.newFolder("src");
         JerseyServiceGenerator generator = new JerseyServiceGenerator();
         generator.emit(conjure, src);
@@ -77,13 +71,8 @@ public final class JerseyServiceGeneratorTests extends TestBase {
 
     @Test
     public void testBinaryReturnInputStream() throws IOException {
-        //        ConjureDefinition def = Conjure.parse(
-        //                ImmutableList.of(new File("src/test/resources/example-binary.yml")));
-        //        mapper.writeValue(new File("src/test/resources/testBinaryReturnInputStream.json"), def);
-
-        ConjureDefinition def = mapper.readValue(new File("src/test/resources/testBinaryReturnInputStream.json"),
-                ConjureDefinition.class);
-
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-binary.yml")));
         List<Path> files = new JerseyServiceGenerator()
                 .emit(def, folder.getRoot());
 
@@ -100,11 +89,8 @@ public final class JerseyServiceGeneratorTests extends TestBase {
     }
 
     private void testServiceGeneration(String conjureFile) throws IOException {
-        //        ConjureDefinition def = Conjure.parse(
-        //                ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        //        mapper.writeValue(new File("src/test/resources/"+conjureFile + ".json"), def);
-        ConjureDefinition def = mapper.readValue(new File("src/test/resources/" + conjureFile + ".json"),
-                ConjureDefinition.class);
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
         List<Path> files = new JerseyServiceGenerator().emit(def, folder.getRoot());
 
         for (Path file : files) {

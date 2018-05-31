@@ -18,6 +18,8 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -126,11 +128,8 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        // ConjureDefinition def = Conjure.parse(
-        //         ImmutableList.of(new File("src/test/resources/ete-service.yml")));
-        // ObjectMappers.newServerObjectMapper().writeValue(new File("src/test/resources/ete-service.json"), def);
-        ConjureDefinition def = ObjectMappers.newServerObjectMapper().readValue(
-                new File("src/test/resources/ete-service.json"), ConjureDefinition.class);
+         ConjureDefinition def = Conjure.parse(
+                 ImmutableList.of(new File("src/test/resources/ete-service.yml")));
         List<Path> files = new JerseyServiceGenerator().emit(def, folder.getRoot());
 
         for (Path file : files) {
