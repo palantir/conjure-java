@@ -25,7 +25,6 @@ import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EteService;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -128,8 +127,8 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-         ConjureDefinition def = Conjure.parse(
-                 ImmutableList.of(new File("src/test/resources/ete-service.yml")));
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/ete-service.yml")));
         List<Path> files = new JerseyServiceGenerator().emit(def, folder.getRoot());
 
         for (Path file : files) {

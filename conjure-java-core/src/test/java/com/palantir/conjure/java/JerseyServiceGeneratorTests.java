@@ -18,12 +18,10 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
