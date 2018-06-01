@@ -15,6 +15,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
@@ -50,6 +51,7 @@ public interface EteServiceRetrofit {
     Call<ZonedDateTime> datetime(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/binary")
+    @Headers("Transfer-Encoding: chunked")
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
 }
