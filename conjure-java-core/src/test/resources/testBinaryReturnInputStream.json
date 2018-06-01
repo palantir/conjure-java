@@ -1,1 +1,0 @@
-{"version":1,"errors":[],"types":[],"services":[{"serviceName":{"name":"TestService","package":"test.api"},"endpoints":[{"endpointName":"getBinary","httpMethod":"GET","httpPath":"/","auth":null,"args":[],"returns":{"type":"primitive","primitive":"BINARY"},"docs":null,"deprecated":null,"markers":[]}],"docs":null}]}

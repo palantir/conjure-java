@@ -45,6 +45,9 @@ dependencies {
     compile 'org.apache.commons:commons-lang3'
     compile 'org.slf4j:slf4j-api'
 
+    testCompile('com.palantir.conjure:conjure-core') {
+        exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'
+    }
     testCompile 'com.palantir.remoting3:jackson-support'
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'

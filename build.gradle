@@ -65,6 +65,12 @@ allprojects {
         resolutionStrategy {
             failOnVersionConflict()
         }
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.glassfish.hk2.external' && details.requested.name == 'javax.inject') {
+                details.useTarget group: 'javax.inject', name: 'javax.inject', version: '1'
+                details.because "The glassfish shaded copy is only necessary for OSGI environments, which we do not endorse."
+            }
+        }
     }
 }
 

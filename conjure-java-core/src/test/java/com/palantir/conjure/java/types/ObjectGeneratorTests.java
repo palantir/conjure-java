@@ -6,9 +6,9 @@ package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,18 +23,14 @@ import org.junit.rules.TemporaryFolder;
 public final class ObjectGeneratorTests {
 
     private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
-    private static final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void testObjectGenerator_allExamples() throws IOException {
-//        ConjureDefinition def = Conjure.parse(
-//                ImmutableList.of(new File("src/test/resources/example-types.yml")));
-//        mapper.writeValue(new File("src/test/resources/example-types.json"), def);
-        ConjureDefinition def = mapper.readValue(new File("src/test/resources/example-types.json"),
-                ConjureDefinition.class);
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-types.yml")));
         List<Path> files = new ObjectGenerator().emit(def, folder.getRoot());
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -42,13 +38,11 @@ public final class ObjectGeneratorTests {
 
     @Test
     public void testConjureImports() throws IOException {
-//        ConjureDefinition conjure = Conjure.parse(
-//                ImmutableList.of(
-//                        new File("src/test/resources/example-conjure-imports.yml"),
-//                        new File("src/test/resources/example-types.yml"),
-//                        new File("src/test/resources/example-service.yml")));
-        ConjureDefinition conjure = mapper.readValue(new File("src/test/resources/testConjureImports.json"),
-                ConjureDefinition.class);
+        ConjureDefinition conjure = Conjure.parse(
+                ImmutableList.of(
+                        new File("src/test/resources/example-conjure-imports.yml"),
+                        new File("src/test/resources/example-types.yml"),
+                        new File("src/test/resources/example-service.yml")));
         File src = folder.newFolder("src");
         ObjectGenerator generator = new ObjectGenerator();
         generator.emit(conjure, src);
@@ -65,11 +59,8 @@ public final class ObjectGeneratorTests {
 
     @Test
     public void testConjureErrors() throws IOException {
-//        ConjureDefinition def = Conjure.parse(
-//                ImmutableList.of(new File("src/test/resources/example-errors.yml")));
-//        mapper.writeValue(new File("src/test/resources/example-errors.json"), def);
-        ConjureDefinition def = mapper.readValue(new File("src/test/resources/example-errors.json"),
-                ConjureDefinition.class);
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-errors.yml")));
         List<Path> files = new ObjectGenerator().emit(def, folder.getRoot());
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
