@@ -128,6 +128,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .build());
 
         if (endpointDef.getReturns().map(type -> type.accept(TypeVisitor.IS_BINARY)).orElse(false)) {
+            AnnotationSpec chunkedTransfer = AnnotationSpec.builder(ClassName.get("retrofit2.http", "Headers"))
+                    .addMember("value", "$S", "Transfer-Encoding: chunked")
+                    .build();
+            methodBuilder.addAnnotation(chunkedTransfer);
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming")).build());
         }
 
