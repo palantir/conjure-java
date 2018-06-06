@@ -50,10 +50,11 @@ jobs:
           name: Format all markdown files with remark-cli (https://github.com/remarkjs/remark-lint)
           command: |
             find . -name '*.md' -exec remark -o {} {} \;
-      - run:
-          name: Ensure git tree is clean
-          command: |
-            [ -z "$(git status --porcelain)" ]
+      - run: |
+          if [ ! -z "$(git status --porcelain)" ]; then
+            echo "Run 'find . -name '*.md' -exec remark -o {} {} \;' to fix the following files:\n`git status --porcelain`"
+            exit 1
+          fi
 
 
 workflows:
