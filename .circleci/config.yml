@@ -52,7 +52,7 @@ jobs:
             find . -name '*.md' -exec remark -o {} {} \;
       - run: |
           if [ ! -z "$(git status --porcelain)" ]; then
-            echo "Run 'find . -name '*.md' -exec remark -o {} {} \;' to fix the following files:\n`git status --porcelain`"
+            printf "Run 'find . -name '*.md' -exec remark -o {} {} \;' to fix the following files:\n`git status --porcelain`"
             exit 1
           fi
 
