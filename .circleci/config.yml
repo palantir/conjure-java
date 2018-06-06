@@ -42,10 +42,10 @@ jobs:
 
   markdown:
     docker:
-      - image: circleci/openjdk:8u171-jdk-node-browsers
+      - image: circleci/node:10.3.0
     steps:
       - checkout
-      - run: npm install -g remark-cli@5.0.0
+      - run: sudo npm install -g remark-cli@5.0.0
       - run:
           name: Format all markdown files with remark-cli (https://github.com/remarkjs/remark-lint)
           command: |
