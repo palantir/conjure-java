@@ -29,7 +29,7 @@ public abstract class CliConfiguration {
     public static final String OBJECTS_OPTION = "objects";
     public static final String JERSEY_OPTION = "jersey";
     public static final String RETROFIT_OPTION = "retrofit";
-    public static final String FEATURE_FLAGS = "features";
+    public static final String RETROFIT_COMPLETABLE_FUTURES = "retrofitCompletableFutures";
 
     abstract File target();
 
@@ -76,6 +76,7 @@ public abstract class CliConfiguration {
         Builder builder = new Builder()
                 .target(new File(target))
                 .outputDirectory(new File(outputDirectory));
+        ImmutableSet.Builder<FeatureFlags> flagsBuilder = ImmutableSet.builder();
         for (Option option : options) {
             switch (option.getOpt()) {
                 case OBJECTS_OPTION:
@@ -87,22 +88,15 @@ public abstract class CliConfiguration {
                 case RETROFIT_OPTION:
                     builder.generateRetrofit(true);
                     break;
-                case FEATURE_FLAGS:
-                    ImmutableSet.Builder<FeatureFlags> flagsBuilder = ImmutableSet.builder();
-                    for (String flag : option.getValues()) {
-                        try {
-                            flagsBuilder.add(FeatureFlags.valueOf(flag));
-                        } catch (IllegalArgumentException e) {
-                            throw new IllegalArgumentException(String.format("Unexpected feature flag: %s", flag));
-                        }
-                    }
-                    builder.featureFlags(flagsBuilder.build());
+                case RETROFIT_COMPLETABLE_FUTURES:
+                    flagsBuilder.add(FeatureFlags.RetrofitCompletableFutures);
                     break;
                 default:
                     break;
             }
         }
 
+        builder.featureFlags(flagsBuilder.build());
         return builder.build();
     }
 

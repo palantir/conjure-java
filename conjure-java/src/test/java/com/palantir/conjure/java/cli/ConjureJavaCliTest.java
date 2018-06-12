@@ -64,8 +64,7 @@ public final class ConjureJavaCliTest {
                 targetFile.getAbsolutePath(),
                 folder.getRoot().getAbsolutePath(),
                 "--objects",
-                "--features",
-                "RetrofitCompletableFutures"
+                "--retrofitCompletableFutures"
         };
         CliConfiguration expectedConfiguration = CliConfiguration.builder()
                 .target(targetFile)
@@ -83,13 +82,11 @@ public final class ConjureJavaCliTest {
                 targetFile.getAbsolutePath(),
                 folder.getRoot().getAbsolutePath(),
                 "--objects",
-                "--features",
-                "RetrofitCompletableFutures",
-                "foo"
+                "--foo"
         };
         assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Unexpected feature flag: foo");
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Unrecognized option: --foo");
     }
 
     @Test
@@ -97,7 +94,7 @@ public final class ConjureJavaCliTest {
         String[] args = {};
         assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Usage: conjure-java generate <target> <output>");
+                .hasMessage("Usage: conjure-java generate <target> <output> [...options]");
     }
 
     @Test
