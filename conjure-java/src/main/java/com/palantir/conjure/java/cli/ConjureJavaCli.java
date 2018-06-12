@@ -52,16 +52,16 @@ public final class ConjureJavaCli {
         options.addOption(new Option(CliConfiguration.OBJECTS_OPTION, "Generate java objects"));
         options.addOption(new Option(CliConfiguration.JERSEY_OPTION, "Generate jersey services"));
         options.addOption(new Option(CliConfiguration.RETROFIT_OPTION, "Generate retrofit services"));
-        Option featureOption = new Option(CliConfiguration.FEATURE_FLAGS, true, "Features to enable");
-        featureOption.setArgs(Option.UNLIMITED_VALUES);
-        options.addOption(featureOption);
+        options.addOption(new Option(
+                CliConfiguration.RETROFIT_COMPLETABLE_FUTURES,
+                "Generate retrofit services which return completableFutures"));
 
         try {
-            CommandLine cmd = parser.parse(options, args);
+            CommandLine cmd = parser.parse(options, args, false);
             String[] parsedArgs = cmd.getArgs();
 
             Preconditions.checkArgument(parsedArgs.length == 3 && GENERATE_COMMAND.equals(args[0]),
-                    "Usage: conjure-java %s <target> <output>", GENERATE_COMMAND);
+                    "Usage: conjure-java %s <target> <output> [...options]", GENERATE_COMMAND);
 
             return CliConfiguration.of(parsedArgs[1], parsedArgs[2], cmd.getOptions());
         } catch (ParseException e) {
