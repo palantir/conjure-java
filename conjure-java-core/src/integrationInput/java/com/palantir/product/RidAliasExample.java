@@ -37,6 +37,7 @@ public final class RidAliasExample {
         return value.hashCode();
     }
 
+    @JsonCreator
     public static RidAliasExample valueOf(String value) {
         return new RidAliasExample(ResourceIdentifier.valueOf(value));
     }

@@ -37,6 +37,7 @@ public final class UuidAliasExample {
         return value.hashCode();
     }
 
+    @JsonCreator
     public static UuidAliasExample valueOf(String value) {
         return new UuidAliasExample(UUID.fromString(value));
     }

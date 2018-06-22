@@ -37,6 +37,7 @@ public final class SafeLongAliasExample {
         return value.hashCode();
     }
 
+    @JsonCreator
     public static SafeLongAliasExample valueOf(String value) {
         return new SafeLongAliasExample(SafeLong.valueOf(value));
     }

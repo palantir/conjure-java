@@ -34,6 +34,7 @@ public final class BooleanAliasExample {
         return Boolean.hashCode(value);
     }
 
+    @JsonCreator
     public static BooleanAliasExample valueOf(String value) {
         return new BooleanAliasExample(Boolean.parseBoolean(value));
     }

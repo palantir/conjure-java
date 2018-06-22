@@ -34,6 +34,7 @@ public final class DoubleAliasExample {
         return Double.hashCode(value);
     }
 
+    @JsonCreator
     public static DoubleAliasExample valueOf(String value) {
         return new DoubleAliasExample(Double.parseDouble(value));
     }
