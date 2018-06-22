@@ -82,6 +82,7 @@ public final class AliasGenerator {
         if (maybeValueOfFactoryMethod.isPresent()) {
             spec.addMethod(MethodSpec.methodBuilder("valueOf")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addAnnotation(JsonCreator.class)
                     .addParameter(String.class, "value")
                     .returns(thisClass)
                     .addCode(maybeValueOfFactoryMethod.get())

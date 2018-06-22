@@ -37,6 +37,7 @@ public final class BearerTokenAliasExample {
         return value.hashCode();
     }
 
+    @JsonCreator
     public static BearerTokenAliasExample valueOf(String value) {
         return new BearerTokenAliasExample(BearerToken.valueOf(value));
     }

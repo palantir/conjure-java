@@ -37,6 +37,7 @@ public final class DateTimeAliasExample {
         return value.hashCode();
     }
 
+    @JsonCreator
     public static DateTimeAliasExample valueOf(String value) {
         return new DateTimeAliasExample(ZonedDateTime.parse(value));
     }

@@ -36,6 +36,7 @@ public final class StringAliasExample {
         return value.hashCode();
     }
 
+    @JsonCreator
     public static StringAliasExample valueOf(String value) {
         return new StringAliasExample(value);
     }

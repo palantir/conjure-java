@@ -34,6 +34,7 @@ public final class IntegerAliasExample {
         return Integer.hashCode(value);
     }
 
+    @JsonCreator
     public static IntegerAliasExample valueOf(String value) {
         return new IntegerAliasExample(Integer.parseInt(value));
     }
