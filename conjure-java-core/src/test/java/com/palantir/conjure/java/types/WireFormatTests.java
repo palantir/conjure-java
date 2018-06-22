@@ -162,6 +162,12 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void testPrimitiveAliasTypesCanBeDeserializedFromString() throws Exception {
+        assertThat(mapper.readValue("\"123\"", IntegerAliasExample.class)).isEqualTo(IntegerAliasExample.of(123));
+        assertThat(mapper.readValue("\"123.0\"", DoubleAliasExample.class)).isEqualTo(DoubleAliasExample.of(123.0));
+    }
+
+    @Test
     public void testAliasTypesHashCodeEqualWhenInnerTypeEqual() throws Exception {
         assertThat(StringAliasExample.of("a").hashCode()).isEqualTo(StringAliasExample.of("a").hashCode());
         assertThat(IntegerAliasExample.of(103).hashCode()).isEqualTo(IntegerAliasExample.of(103).hashCode());
