@@ -124,9 +124,7 @@ public interface TestService {
 
     @Deprecated
     default int testQueryParams(
-            @HeaderParam("Authorization") AuthHeader authHeader,
-            @QueryParam("different") ResourceIdentifier something,
-            @QueryParam("implicit") ResourceIdentifier implicit) {
+            AuthHeader authHeader, ResourceIdentifier something, ResourceIdentifier implicit) {
         return testQueryParams(
                 authHeader,
                 something,
@@ -138,10 +136,10 @@ public interface TestService {
 
     @Deprecated
     default int testQueryParams(
-            @HeaderParam("Authorization") AuthHeader authHeader,
-            @QueryParam("different") ResourceIdentifier something,
-            @QueryParam("implicit") ResourceIdentifier implicit,
-            @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle) {
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle) {
         return testQueryParams(
                 authHeader,
                 something,
@@ -153,11 +151,11 @@ public interface TestService {
 
     @Deprecated
     default int testQueryParams(
-            @HeaderParam("Authorization") AuthHeader authHeader,
-            @QueryParam("different") ResourceIdentifier something,
-            @QueryParam("implicit") ResourceIdentifier implicit,
-            @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
-            @QueryParam("setEnd") Set<String> setEnd) {
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd) {
         return testQueryParams(
                 authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty());
     }

@@ -122,7 +122,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
-                .addParameters(createServiceMethodParameters(endpointDef, methodTypeMapper));
+                .addParameters(createServiceMethodParameters(endpointDef, methodTypeMapper, true));
 
         // @Path("") is invalid in Feign JaxRs and equivalent to absent on an endpoint method
         String rawHttpPath = endpointDef.getHttpPath().get();
@@ -198,15 +198,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             TypeMapper returnTypeMapper,
             TypeMapper methodTypeMapper,
             List<ArgumentDefinition> extraArgs) {
-        List<ParameterSpec> params = createServiceMethodParameters(endpointDef, methodTypeMapper);
+        List<ParameterSpec> params = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
                 .addParameters(params);
-
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
-                ClassName.get("java.lang", "Deprecated")));
 
         endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
 
@@ -237,39 +234,45 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     private static List<ParameterSpec> createServiceMethodParameters(
             EndpointDefinition endpointDef,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            boolean withAnnotations) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
         Optional<AuthType> auth = endpointDef.getAuth();
-        createAuthParameter(auth).ifPresent(parameterSpecs::add);
+        createAuthParameter(auth, withAnnotations).ifPresent(parameterSpecs::add);
 
         List<ArgumentDefinition> sortedArgList = new ArrayList<>(endpointDef.getArgs());
         sortedArgList.sort(Comparator.comparing(o ->
                 o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER)));
 
         sortedArgList.forEach(def -> {
-            parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def));
+            parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations));
         });
         return ImmutableList.copyOf(parameterSpecs);
     }
 
-    private static ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def) {
+    private static ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
+            boolean withAnnotations) {
         ParameterSpec.Builder param = ParameterSpec.builder(
                 typeMapper.getClassName(def.getType()), def.getArgName().get());
-        getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
-
-        param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
+        if (withAnnotations) {
+            getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
+            param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
+        }
         return param.build();
     }
 
-    private static Optional<ParameterSpec> createAuthParameter(Optional<AuthType> auth) {
+    private static Optional<ParameterSpec> createAuthParameter(Optional<AuthType> auth, boolean withAnnotations) {
+        if (!auth.isPresent()) {
+            return Optional.empty();
+        }
+
         ClassName annotationClassName;
         ClassName tokenClassName;
         String paramName;
         String tokenName;
-        if (!auth.isPresent()) {
-            return Optional.empty();
-        } else if (auth.get().accept(AuthTypeVisitor.IS_HEADER)) {
+
+        if (auth.get().accept(AuthTypeVisitor.IS_HEADER)) {
             annotationClassName = ClassName.get("javax.ws.rs", "HeaderParam");
             tokenClassName = ClassName.get("com.palantir.tokens.auth", "AuthHeader");
             paramName = "authHeader";
@@ -282,11 +285,13 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         } else {
             throw new IllegalStateException("Unrecognized auth type: " + auth.get());
         }
-        return Optional.of(
-                ParameterSpec.builder(tokenClassName, paramName)
-                        .addAnnotation(AnnotationSpec.builder(annotationClassName)
-                                .addMember("value", "$S", tokenName).build())
-                        .build());
+
+        ParameterSpec.Builder paramSpec = ParameterSpec.builder(tokenClassName, paramName);
+        if (withAnnotations) {
+                paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
+                    .addMember("value", "$S", tokenName).build());
+        }
+        return Optional.of(paramSpec.build());
     }
 
     private static Optional<AnnotationSpec> getParamTypeAnnotation(ArgumentDefinition def) {
