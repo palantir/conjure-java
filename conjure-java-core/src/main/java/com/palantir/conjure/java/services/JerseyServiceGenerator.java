@@ -19,28 +19,45 @@ package com.palantir.conjure.java.services;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.JerseyMethodTypeClassNameVisitor;
 import com.palantir.conjure.java.types.JerseyReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
+import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.ExternalReference;
+import com.palantir.conjure.spec.HeaderParameterType;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.MapType;
+import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
+import com.palantir.conjure.spec.PathParameterType;
+import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -85,6 +102,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, methodTypeMapper))
+                .collect(Collectors.toList()));
+
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+                .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper,
+                        methodTypeMapper))
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList()));
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
@@ -137,6 +160,81 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         return methodBuilder.build();
     }
 
+    /** Provides a linear expansion of optional query arguments to improve Java back-compat. */
+    private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper methodTypeMapper) {
+
+        List<ArgumentDefinition> args = Lists.newArrayList();
+        List<ArgumentDefinition> queryArgs = Lists.newArrayList();
+
+        for (ArgumentDefinition arg : endpointDef.getArgs()) {
+            if (!arg.getParamType().accept(QUERY_PARAM_PREDICATE) || !arg.getType().accept(
+                    TYPE_BACKFILL_PREDICATE)) {
+                args.add(arg);
+            } else {
+                queryArgs.add(arg);
+            }
+        }
+
+        List<MethodSpec> alternateMethods = Lists.newArrayList();
+        for (int i = 0; i < queryArgs.size(); i++) {
+            alternateMethods.add(createCompatibilityBackfillMethod(
+                    EndpointDefinition.builder()
+                            .from(endpointDef)
+                            .args(Iterables.concat(args, queryArgs.subList(0, i)))
+                    .build(),
+                    returnTypeMapper,
+                    methodTypeMapper,
+                    queryArgs.subList(i, queryArgs.size())));
+        }
+
+        return alternateMethods;
+    }
+
+    private MethodSpec createCompatibilityBackfillMethod(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper methodTypeMapper,
+            List<ArgumentDefinition> extraArgs) {
+        List<ParameterSpec> params = createServiceMethodParameters(endpointDef, methodTypeMapper);
+
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+                .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
+                .addAnnotation(Deprecated.class)
+                .addParameters(params);
+
+        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
+                ClassName.get("java.lang", "Deprecated")));
+
+        endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
+
+        StringBuilder sb = new StringBuilder("return $N(");
+        for (ParameterSpec param : params) {
+            sb.append("$N, ");
+        }
+
+        List<CodeBlock> fillerValues = Lists.newArrayList();
+        for (ArgumentDefinition arg : extraArgs) {
+            sb.append("$L, ");
+            fillerValues.add(arg.getType().accept(TYPE_DEFAULT_VALUE));
+        }
+        // trim the end
+        sb.setLength(sb.length() - 2);
+        sb.append(")");
+
+        ImmutableList<Object> methodCallArgs = ImmutableList.builder()
+                .add(endpointDef.getEndpointName().get())
+                .addAll(params)
+                .addAll(fillerValues)
+                .build();
+
+        methodBuilder.addStatement(sb.toString(), methodCallArgs.toArray(new Object[0]));
+
+        return methodBuilder.build();
+    }
+
     private static List<ParameterSpec> createServiceMethodParameters(
             EndpointDefinition endpointDef,
             TypeMapper typeMapper) {
@@ -145,7 +243,11 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         Optional<AuthType> auth = endpointDef.getAuth();
         createAuthParameter(auth).ifPresent(parameterSpecs::add);
 
-        endpointDef.getArgs().forEach(def -> {
+        List<ArgumentDefinition> sortedArgList = new ArrayList<>(endpointDef.getArgs());
+        sortedArgList.sort(Comparator.comparing(o ->
+                o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER)));
+
+        sortedArgList.forEach(def -> {
             parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def));
         });
         return ImmutableList.copyOf(parameterSpecs);
@@ -236,4 +338,189 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
         }
     }
+
+    private static final ParameterType.Visitor<Boolean> QUERY_PARAM_PREDICATE = new ParameterType.Visitor<Boolean>() {
+        @Override
+        public Boolean visitBody(BodyParameterType value) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitHeader(HeaderParameterType value) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitPath(PathParameterType value) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitQuery(QueryParameterType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitUnknown(String unknownType) {
+            return false;
+        }
+    };
+
+    /** Produces an ordering for ParamaterType of Header, Path, Query, Body. */
+    private static final ParameterType.Visitor<Integer> PARAM_SORT_ORDER = new ParameterType.Visitor<Integer>() {
+        @Override
+        public Integer visitBody(BodyParameterType value) {
+            return 30;
+        }
+
+        @Override
+        public Integer visitHeader(HeaderParameterType value) {
+            return 0;
+        }
+
+        @Override
+        public Integer visitPath(PathParameterType value) {
+            return 10;
+        }
+
+        @Override
+        public Integer visitQuery(QueryParameterType value) {
+            return 20;
+        }
+
+        @Override
+        public Integer visitUnknown(String unknownType) {
+            return -1;
+        }
+    };
+
+    /**
+     * Produces a type sort ordering for use with {@link #PARAM_SORT_ORDER} such that types with known defaults come
+     * after types without known defaults.
+     */
+    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new Type.Visitor<Integer>() {
+        @Override
+        public Integer visitPrimitive(PrimitiveType value) {
+            return 0;
+        }
+
+        @Override
+        public Integer visitOptional(OptionalType value) {
+            return 1;
+        }
+
+        @Override
+        public Integer visitList(ListType value) {
+            return 1;
+        }
+
+        @Override
+        public Integer visitSet(SetType value) {
+            return 1;
+        }
+
+        @Override
+        public Integer visitMap(MapType value) {
+            return 1;
+        }
+
+        @Override
+        public Integer visitReference(TypeName value) {
+            return 0;
+        }
+
+        @Override
+        public Integer visitExternal(ExternalReference value) {
+            return 0;
+        }
+
+        @Override
+        public Integer visitUnknown(String unknownType) {
+            return 0;
+        }
+    };
+
+    private static final Type.Visitor<Boolean> TYPE_BACKFILL_PREDICATE = new Type.Visitor<Boolean>() {
+        @Override
+        public Boolean visitPrimitive(PrimitiveType value) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitOptional(OptionalType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitList(ListType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitSet(SetType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitMap(MapType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitReference(TypeName value) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitExternal(ExternalReference value) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitUnknown(String unknownType) {
+            return false;
+        }
+    };
+
+    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new Type.Visitor<CodeBlock>() {
+        @Override
+        public CodeBlock visitPrimitive(PrimitiveType value) {
+            throw new IllegalArgumentException("Cannot handle primitive types in query parameter backfill.");
+        }
+
+        @Override
+        public CodeBlock visitOptional(OptionalType value) {
+            return CodeBlock.of("$T.empty()", Optional.class);
+        }
+
+        @Override
+        public CodeBlock visitList(ListType value) {
+            return CodeBlock.of("$T.emptyList()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitSet(SetType value) {
+            return CodeBlock.of("$T.emptySet()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitMap(MapType value) {
+            return CodeBlock.of("$T.emptyMap()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitReference(TypeName value) {
+            throw new IllegalArgumentException("Cannot handle reference types in query parameter backfill.");
+        }
+
+        @Override
+        public CodeBlock visitExternal(ExternalReference value) {
+            throw new IllegalArgumentException("Cannot handle external types in query parameter backfill.");
+        }
+
+        @Override
+        public CodeBlock visitUnknown(String unknownType) {
+            throw new IllegalArgumentException("Cannot handle unknown types in query parameter backfill.");
+        }
+    };
 }

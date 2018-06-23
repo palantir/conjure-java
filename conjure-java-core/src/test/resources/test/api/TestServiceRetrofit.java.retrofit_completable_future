@@ -92,7 +92,10 @@ public interface TestServiceRetrofit {
     CompletableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
-            @Query("implicit") ResourceIdentifier implicit);
+            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Query("setEnd") Set<String> setEnd,
+            @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
 
     @GET("./catalog/boolean")
     CompletableFuture<Boolean> testBoolean(@Header("Authorization") AuthHeader authHeader);
