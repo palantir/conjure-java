@@ -403,12 +403,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
      * Produces a type sort ordering for use with {@link #PARAM_SORT_ORDER} such that types with known defaults come
      * after types without known defaults.
      */
-    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new Type.Visitor<Integer>() {
-        @Override
-        public Integer visitPrimitive(PrimitiveType value) {
-            return 0;
-        }
-
+    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new DefaultTypeVisitor<Integer>() {
         @Override
         public Integer visitOptional(OptionalType value) {
             return 1;
@@ -430,27 +425,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         }
 
         @Override
-        public Integer visitReference(TypeName value) {
-            return 0;
-        }
-
-        @Override
-        public Integer visitExternal(ExternalReference value) {
-            return 0;
-        }
-
-        @Override
-        public Integer visitUnknown(String unknownType) {
+        public Integer visitDefault() {
             return 0;
         }
     };
 
-    private static final Type.Visitor<Boolean> TYPE_BACKFILL_PREDICATE = new Type.Visitor<Boolean>() {
-        @Override
-        public Boolean visitPrimitive(PrimitiveType value) {
-            return false;
-        }
-
+    private static final Type.Visitor<Boolean> TYPE_BACKFILL_PREDICATE = new DefaultTypeVisitor<Boolean>() {
         @Override
         public Boolean visitOptional(OptionalType value) {
             return true;
@@ -472,27 +452,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         }
 
         @Override
-        public Boolean visitReference(TypeName value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitExternal(ExternalReference value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitUnknown(String unknownType) {
+        public Boolean visitDefault() {
             return false;
         }
     };
 
-    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new Type.Visitor<CodeBlock>() {
-        @Override
-        public CodeBlock visitPrimitive(PrimitiveType value) {
-            throw new IllegalArgumentException("Cannot handle primitive types in query parameter backfill.");
-        }
-
+    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new DefaultTypeVisitor<CodeBlock>() {
         @Override
         public CodeBlock visitOptional(OptionalType value) {
             return CodeBlock.of("$T.empty()", Optional.class);
@@ -514,18 +479,52 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         }
 
         @Override
-        public CodeBlock visitReference(TypeName value) {
-            throw new IllegalArgumentException("Cannot handle reference types in query parameter backfill.");
-        }
-
-        @Override
-        public CodeBlock visitExternal(ExternalReference value) {
-            throw new IllegalArgumentException("Cannot handle external types in query parameter backfill.");
-        }
-
-        @Override
-        public CodeBlock visitUnknown(String unknownType) {
-            throw new IllegalArgumentException("Cannot handle unknown types in query parameter backfill.");
+        public CodeBlock visitDefault() {
+            throw new IllegalArgumentException("Cannot backfill non-defaultable parameter type.");
         }
     };
+
+    private interface DefaultTypeVisitor<T> extends Type.Visitor<T> {
+        @Override
+        default T visitPrimitive(PrimitiveType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitOptional(OptionalType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitList(ListType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitSet(SetType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitMap(MapType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitReference(TypeName value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitExternal(ExternalReference value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitUnknown(String unknownType) {
+            return visitDefault();
+        }
+
+        T visitDefault();
+    }
 }
