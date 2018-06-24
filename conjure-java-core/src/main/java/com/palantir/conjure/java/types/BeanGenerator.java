@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.util.CaseConverter;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -63,6 +64,9 @@ public final class BeanGenerator {
 
     private static final String UNKNOWN_PROPS_FIELD = "__unknownProperties";
 
+    private static final FieldSpec UNKNOWN_PROPS_FIELDSPEC = FieldSpec.builder(MAP_STRING_OBJ, UNKNOWN_PROPS_FIELD,
+            Modifier.PRIVATE, Modifier.FINAL).build();
+
     public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef) {
         String typePackage = typeDef.getTypeName().getPackage();
         return JavaFile.builder(typePackage,
@@ -82,6 +86,10 @@ public final class BeanGenerator {
 
         Collection<EnrichedField> fields = createFields(typeMapper, typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(fields);
+        if (captureUnknownFields) {
+            poetFields = ImmutableList.<FieldSpec>builder().addAll(poetFields).add(UNKNOWN_PROPS_FIELDSPEC).build();
+        }
+
         Collection<EnrichedField> nonPrimitiveEnrichedFields = fields.stream()
                 .filter(f -> !f.poetSpec().type.isPrimitive())
                 .collect(Collectors.toList());
@@ -89,12 +97,10 @@ public final class BeanGenerator {
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addModifiers(Modifier.FINAL)
                 .addFields(poetFields)
-                .addMethod(createConstructor(fields, poetFields, captureUnknownFields))
+                .addMethod(createConstructor(fields, nonPrimitiveEnrichedFields, captureUnknownFields))
                 .addMethods(createGetters(fields));
 
         if (captureUnknownFields) {
-            typeBuilder.addField(MAP_STRING_OBJ, UNKNOWN_PROPS_FIELD, Modifier.PRIVATE, Modifier.FINAL);
-
             typeBuilder.addMethod(MethodSpec.methodBuilder("unknownProperties")
                     .addAnnotation(JsonAnyGetter.class)
                     .returns(MAP_STRING_OBJ)
@@ -167,14 +173,14 @@ public final class BeanGenerator {
 
     private static MethodSpec createConstructor(
             Collection<EnrichedField> fields,
-            Collection<FieldSpec> poetFields,
+            Collection<EnrichedField> nonPrimitiveEnrichedFields,
             boolean captureUnknownFields) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE);
 
-        Collection<FieldSpec> nonPrimitivePoetFields = Collections2.filter(poetFields, f -> !f.type.isPrimitive());
-        if (!nonPrimitivePoetFields.isEmpty()) {
-            builder.addStatement("$L", Expressions.localMethodCall("validateFields", nonPrimitivePoetFields));
+        if (!nonPrimitiveEnrichedFields.isEmpty()) {
+            builder.addStatement("$L", Expressions.localMethodCall("validateFields",
+                    Collections2.transform(nonPrimitiveEnrichedFields, ef -> ef.poetSpec())));
         }
 
         CodeBlock.Builder body = CodeBlock.builder();

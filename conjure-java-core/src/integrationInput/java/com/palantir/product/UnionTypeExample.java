@@ -232,7 +232,8 @@ public final class UnionTypeExample {
                     && this.alsoAnInteger.equals(other.alsoAnInteger)
                     && this.if_.equals(other.if_)
                     && this.new_.equals(other.new_)
-                    && this.interface_.equals(other.interface_);
+                    && this.interface_.equals(other.interface_)
+                    && this.__unknownProperties.equals(other.__unknownProperties);
         }
 
         @Override
@@ -247,7 +248,8 @@ public final class UnionTypeExample {
                                 alsoAnInteger,
                                 if_,
                                 new_,
-                                interface_);
+                                interface_,
+                                __unknownProperties);
             }
             return memoizedHashCode;
         }
