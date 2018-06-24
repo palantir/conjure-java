@@ -121,7 +121,7 @@ public final class UnionGenerator {
                 .build(),
                 true)
                 .toBuilder()
-                .addModifiers(Modifier.STATIC)
+                .addModifiers(Modifier.STATIC, Modifier.PRIVATE)
                 .addAnnotation(AnnotationSpec.builder(JsonInclude.class)
                         .addMember("value", "$T.NON_EMPTY", JsonInclude.Include.class).build())
                 .build();

@@ -65,7 +65,10 @@ public final class BeanGenerator {
 
     public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef) {
         String typePackage = typeDef.getTypeName().getPackage();
-        return JavaFile.builder(typePackage, generateBeanTypeSpec(typeMapper, typeDef, false))
+        return JavaFile.builder(typePackage,
+                generateBeanTypeSpec(typeMapper, typeDef, false)
+                        .toBuilder().addModifiers(Modifier.PUBLIC)
+                        .build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
@@ -84,7 +87,7 @@ public final class BeanGenerator {
                 .collect(Collectors.toList());
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(typeDef.getTypeName().getName())
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addModifiers(Modifier.FINAL)
                 .addFields(poetFields)
                 .addMethod(createConstructor(fields, poetFields, captureUnknownFields))
                 .addMethods(createGetters(fields));
