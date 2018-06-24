@@ -34,7 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public final class Retrofit2ServiceGeneratorTests extends TestBase {
+public final class Retrofit2ServiceGeneratorTests {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -54,7 +54,8 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
                 Files.copy(file, output);
             }
 
-            assertThat(readFromFile(file)).isEqualTo(readFromResource("/test/api/" + file.getFileName() + ".retrofit"));
+            assertThat(TestUtils.readFromFile(file)).isEqualTo(
+                    TestUtils.readFromResource("/test/api/" + file.getFileName() + ".retrofit"));
         }
     }
 
@@ -74,8 +75,8 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
                 Files.copy(file, output);
             }
 
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromResource("/test/api/" + file.getFileName() + ".retrofit_completable_future"));
+            assertThat(TestUtils.readFromFile(file)).isEqualTo(
+                    TestUtils.readFromResource("/test/api/" + file.getFileName() + ".retrofit_completable_future"));
         }
     }
 

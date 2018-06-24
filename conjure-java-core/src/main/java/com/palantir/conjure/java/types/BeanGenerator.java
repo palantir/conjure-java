@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -36,11 +37,13 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -56,8 +59,19 @@ public final class BeanGenerator {
     /** The name of the singleton instance field generated for empty types. */
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
-    public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef) {
+    private static final TypeName MAP_STRING_OBJ = ParameterizedTypeName.get(Map.class, String.class, Object.class);
 
+    private static final String UNKNOWN_PROPS_FIELD = "__unknownProperties";
+
+    public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef) {
+        String typePackage = typeDef.getTypeName().getPackage();
+        return JavaFile.builder(typePackage, generateBeanTypeSpec(typeMapper, typeDef, false))
+                .skipJavaLangImports(true)
+                .indent("    ")
+                .build();
+    }
+
+    public static TypeSpec generateBeanTypeSpec(TypeMapper typeMapper, ObjectDefinition typeDef, boolean captureUnknownFields) {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName objectClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
@@ -71,8 +85,18 @@ public final class BeanGenerator {
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(poetFields)
-                .addMethod(createConstructor(fields, poetFields))
+                .addMethod(createConstructor(fields, poetFields, captureUnknownFields))
                 .addMethods(createGetters(fields));
+
+        if (captureUnknownFields) {
+            typeBuilder.addField(MAP_STRING_OBJ, UNKNOWN_PROPS_FIELD, Modifier.PRIVATE, Modifier.FINAL);
+
+            typeBuilder.addMethod(MethodSpec.methodBuilder("unknownProperties")
+                    .addAnnotation(JsonAnyGetter.class)
+                    .returns(MAP_STRING_OBJ)
+                    .addStatement("return $L", UNKNOWN_PROPS_FIELD)
+                    .build());
+        }
 
         if (!poetFields.isEmpty()) {
             typeBuilder
@@ -107,7 +131,7 @@ public final class BeanGenerator {
                             .addMember("builder", "$T.class", builderClass).build())
                     .addMethod(createBuilder(builderClass))
                     .addType(BeanBuilderGenerator.generate(
-                            typeMapper, objectClass, builderClass, typeDef));
+                            typeMapper, objectClass, builderClass, typeDef, captureUnknownFields));
         }
 
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
@@ -115,10 +139,7 @@ public final class BeanGenerator {
         typeDef.getDocs().ifPresent(docs ->
                 typeBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 
-        return JavaFile.builder(typePackage, typeBuilder.build())
-                .skipJavaLangImports(true)
-                .indent("    ")
-                .build();
+        return typeBuilder.build();
     }
 
     private static FieldSpec createSingletonField(ClassName objectClass) {
@@ -140,7 +161,10 @@ public final class BeanGenerator {
                 .collect(Collectors.toList());
     }
 
-    private static MethodSpec createConstructor(Collection<EnrichedField> fields, Collection<FieldSpec> poetFields) {
+    private static MethodSpec createConstructor(
+            Collection<EnrichedField> fields,
+            Collection<FieldSpec> poetFields,
+            boolean captureUnknownFields) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE);
 
@@ -167,6 +191,11 @@ public final class BeanGenerator {
             } else {
                 body.addStatement("this.$1N = $1N", spec);
             }
+        }
+
+        if (captureUnknownFields) {
+            builder.addParameter(MAP_STRING_OBJ, UNKNOWN_PROPS_FIELD);
+            body.addStatement("this.$1N = $2T.unmodifiableMap($1N)", UNKNOWN_PROPS_FIELD, Collections.class);
         }
 
         builder.addCode(body.build());
@@ -301,9 +330,7 @@ public final class BeanGenerator {
 
         @Value.Derived
         default String getterName() {
-            String lowerCamelCaseName = CaseConverter.toCase(
-                    fieldName().get(), CaseConverter.Case.LOWER_CAMEL_CASE);
-            return "get" + StringUtils.capitalize(lowerCamelCaseName);
+            return asGetterName(fieldName().get());
         }
 
         @Value.Parameter
@@ -319,5 +346,10 @@ public final class BeanGenerator {
         static Collection<FieldSpec> toPoetSpecs(Collection<EnrichedField> fields) {
             return fields.stream().map(EnrichedField::poetSpec).collect(Collectors.toList());
         }
+    }
+
+    public static String asGetterName(String fieldName) {
+        String lowerCamelCaseName = CaseConverter.toCase(fieldName, CaseConverter.Case.LOWER_CAMEL_CASE);
+        return "get" + StringUtils.capitalize(lowerCamelCaseName);
     }
 }

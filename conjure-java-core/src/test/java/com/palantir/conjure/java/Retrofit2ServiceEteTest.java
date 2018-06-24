@@ -47,7 +47,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public final class Retrofit2ServiceEteTest extends TestBase {
+public final class Retrofit2ServiceEteTest {
 
     @ClassRule
     public static final TemporaryFolder folder = new TemporaryFolder();
@@ -135,7 +135,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
                 Files.copy(file, output);
             }
 
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
+            assertThat(TestUtils.readFromFile(file)).isEqualTo(TestUtils.readFromFile(output));
         }
     }
 }

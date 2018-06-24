@@ -23,9 +23,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public abstract class TestBase {
+public final class TestUtils {
 
-    protected static final String readFromFile(Path file) {
+    public static final String readFromFile(Path file) {
         try {
             return new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -33,10 +33,10 @@ public abstract class TestBase {
         }
     }
 
-    protected final String readFromResource(String path) {
+    public static final String readFromResource(String path) {
         try {
             return CharStreams.toString(
-                    new InputStreamReader(getClass().getResourceAsStream(path), StandardCharsets.UTF_8));
+                    new InputStreamReader(TestUtils.class.getResourceAsStream(path), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

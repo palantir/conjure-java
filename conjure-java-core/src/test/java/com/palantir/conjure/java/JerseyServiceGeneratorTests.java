@@ -33,7 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public final class JerseyServiceGeneratorTests extends TestBase {
+public final class JerseyServiceGeneratorTests {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
@@ -81,8 +81,9 @@ public final class JerseyServiceGeneratorTests extends TestBase {
                 Files.copy(file, output);
             }
 
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey.binary")));
+            assertThat(TestUtils.readFromFile(file)).isEqualTo(
+                    TestUtils.readFromFile(
+                            Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey.binary")));
         }
     }
 
@@ -98,8 +99,8 @@ public final class JerseyServiceGeneratorTests extends TestBase {
                 Files.copy(file, output);
             }
 
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey")));
+            assertThat(TestUtils.readFromFile(file)).isEqualTo(
+                    TestUtils.readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey")));
         }
     }
 

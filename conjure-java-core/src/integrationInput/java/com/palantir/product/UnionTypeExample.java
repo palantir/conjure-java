@@ -4,128 +4,102 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.HashMap;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
 
 /** A type which can either be a StringExample, a set of strings, or an integer. */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionTypeExample {
-    private final Base value;
+    @JsonUnwrapped private final Union union;
 
     @JsonCreator
-    private UnionTypeExample(Base value) {
-        this.value = value;
-    }
-
-    @JsonValue
-    private Base getValue() {
-        return value;
-    }
-
-    /** Docs for when UnionTypeExample is of type StringExample. */
-    public static UnionTypeExample stringExample(StringExample value) {
-        return new UnionTypeExample(new StringExampleWrapper(value));
-    }
-
-    public static UnionTypeExample set(Set<String> value) {
-        return new UnionTypeExample(new SetWrapper(value));
-    }
-
-    public static UnionTypeExample thisFieldIsAnInteger(int value) {
-        return new UnionTypeExample(new ThisFieldIsAnIntegerWrapper(value));
-    }
-
-    public static UnionTypeExample alsoAnInteger(int value) {
-        return new UnionTypeExample(new AlsoAnIntegerWrapper(value));
-    }
-
-    public static UnionTypeExample if_(int value) {
-        return new UnionTypeExample(new IfWrapper(value));
-    }
-
-    public static UnionTypeExample new_(int value) {
-        return new UnionTypeExample(new NewWrapper(value));
-    }
-
-    public static UnionTypeExample interface_(int value) {
-        return new UnionTypeExample(new InterfaceWrapper(value));
+    private UnionTypeExample(@JsonUnwrapped Union union) {
+        Objects.requireNonNull(union, "union must not be null");
+        this.union = union;
     }
 
     public <T> T accept(Visitor<T> visitor) {
-        if (value instanceof StringExampleWrapper) {
-            return visitor.visitStringExample(((StringExampleWrapper) value).value);
-        } else if (value instanceof SetWrapper) {
-            return visitor.visitSet(((SetWrapper) value).value);
-        } else if (value instanceof ThisFieldIsAnIntegerWrapper) {
-            return visitor.visitThisFieldIsAnInteger(((ThisFieldIsAnIntegerWrapper) value).value);
-        } else if (value instanceof AlsoAnIntegerWrapper) {
-            return visitor.visitAlsoAnInteger(((AlsoAnIntegerWrapper) value).value);
-        } else if (value instanceof IfWrapper) {
-            return visitor.visitIf(((IfWrapper) value).value);
-        } else if (value instanceof NewWrapper) {
-            return visitor.visitNew(((NewWrapper) value).value);
-        } else if (value instanceof InterfaceWrapper) {
-            return visitor.visitInterface(((InterfaceWrapper) value).value);
-        } else if (value instanceof UnknownWrapper) {
-            return visitor.visitUnknown(((UnknownWrapper) value).getType());
+        if (union.getStringExample().isPresent()) {
+            return visitor.visitStringExample(union.getStringExample().get());
+        } else if (union.getSet().isPresent()) {
+            return visitor.visitSet(union.getSet().get());
+        } else if (union.getThisFieldIsAnInteger().isPresent()) {
+            return visitor.visitThisFieldIsAnInteger(union.getThisFieldIsAnInteger().getAsInt());
+        } else if (union.getAlsoAnInteger().isPresent()) {
+            return visitor.visitAlsoAnInteger(union.getAlsoAnInteger().getAsInt());
+        } else if (union.getIf().isPresent()) {
+            return visitor.visitIf(union.getIf().getAsInt());
+        } else if (union.getNew().isPresent()) {
+            return visitor.visitNew(union.getNew().getAsInt());
+        } else if (union.getInterface().isPresent()) {
+            return visitor.visitInterface(union.getInterface().getAsInt());
         }
-        throw new IllegalStateException(
-                String.format("Could not identify type %s", value.getClass()));
+        return visitor.visitUnknown(union.getType());
     }
 
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof UnionTypeExample && equalTo((UnionTypeExample) other))
-                || (other instanceof StringExample
-                        && value instanceof StringExampleWrapper
-                        && Objects.equals(((StringExampleWrapper) value).value, other))
-                || (other instanceof Set
-                        && value instanceof SetWrapper
-                        && Objects.equals(((SetWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof ThisFieldIsAnIntegerWrapper
-                        && Objects.equals(((ThisFieldIsAnIntegerWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof AlsoAnIntegerWrapper
-                        && Objects.equals(((AlsoAnIntegerWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof IfWrapper
-                        && Objects.equals(((IfWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof NewWrapper
-                        && Objects.equals(((NewWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof InterfaceWrapper
-                        && Objects.equals(((InterfaceWrapper) value).value, other));
+                || (other instanceof UnionTypeExample && equalTo((UnionTypeExample) other));
     }
 
     private boolean equalTo(UnionTypeExample other) {
-        return this.value.equals(other.value);
+        return this.union.equals(other.union);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return union.hashCode();
     }
 
     @Override
     public String toString() {
-        return new StringBuilder("UnionTypeExample")
-                .append("{")
-                .append("value")
-                .append(": ")
-                .append(value)
-                .append("}")
-                .toString();
+        return union.toString();
+    }
+
+    /** Docs for when UnionTypeExample is of type StringExample. */
+    public static UnionTypeExample stringExample(StringExample value) {
+        return new UnionTypeExample(
+                Union.builder().type("stringExample").stringExample(value).build());
+    }
+
+    public static UnionTypeExample set(Set<String> value) {
+        return new UnionTypeExample(Union.builder().type("set").set(value).build());
+    }
+
+    public static UnionTypeExample thisFieldIsAnInteger(int value) {
+        return new UnionTypeExample(
+                Union.builder().type("thisFieldIsAnInteger").thisFieldIsAnInteger(value).build());
+    }
+
+    public static UnionTypeExample alsoAnInteger(int value) {
+        return new UnionTypeExample(
+                Union.builder().type("alsoAnInteger").alsoAnInteger(value).build());
+    }
+
+    public static UnionTypeExample if_(int value) {
+        return new UnionTypeExample(Union.builder().type("if").if_(value).build());
+    }
+
+    public static UnionTypeExample new_(int value) {
+        return new UnionTypeExample(Union.builder().type("new").new_(value).build());
+    }
+
+    public static UnionTypeExample interface_(int value) {
+        return new UnionTypeExample(Union.builder().type("interface").interface_(value).build());
     }
 
     public interface Visitor<T> {
@@ -146,384 +120,360 @@ public final class UnionTypeExample {
         T visitUnknown(String unknownType);
     }
 
-    @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        property = "type",
-        visible = true,
-        defaultImpl = UnknownWrapper.class
-    )
-    @JsonSubTypes({
-        @JsonSubTypes.Type(StringExampleWrapper.class),
-        @JsonSubTypes.Type(SetWrapper.class),
-        @JsonSubTypes.Type(ThisFieldIsAnIntegerWrapper.class),
-        @JsonSubTypes.Type(AlsoAnIntegerWrapper.class),
-        @JsonSubTypes.Type(IfWrapper.class),
-        @JsonSubTypes.Type(NewWrapper.class),
-        @JsonSubTypes.Type(InterfaceWrapper.class)
-    })
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private interface Base {}
+    @JsonDeserialize(builder = Union.Builder.class)
+    @Generated("com.palantir.conjure.java.types.BeanGenerator")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public static final class Union {
+        private final String type;
 
-    @JsonTypeName("stringExample")
-    private static class StringExampleWrapper implements Base {
-        private final StringExample value;
+        private final Optional<StringExample> stringExample;
 
-        @JsonCreator
-        private StringExampleWrapper(@JsonProperty("stringExample") StringExample value) {
-            Objects.requireNonNull(value, "stringExample cannot be null");
-            this.value = value;
+        private final Optional<Set<String>> set;
+
+        private final OptionalInt thisFieldIsAnInteger;
+
+        private final OptionalInt alsoAnInteger;
+
+        private final OptionalInt if_;
+
+        private final OptionalInt new_;
+
+        private final OptionalInt interface_;
+
+        private final Map<String, Object> __unknownProperties;
+
+        private volatile int memoizedHashCode;
+
+        private Union(
+                String type,
+                Optional<StringExample> stringExample,
+                Optional<Set<String>> set,
+                OptionalInt thisFieldIsAnInteger,
+                OptionalInt alsoAnInteger,
+                OptionalInt if_,
+                OptionalInt new_,
+                OptionalInt interface_,
+                Map<String, Object> __unknownProperties) {
+            validateFields(
+                    type,
+                    stringExample,
+                    set,
+                    thisFieldIsAnInteger,
+                    alsoAnInteger,
+                    if_,
+                    new_,
+                    interface_);
+            this.type = type;
+            this.stringExample = stringExample;
+            this.set = set;
+            this.thisFieldIsAnInteger = thisFieldIsAnInteger;
+            this.alsoAnInteger = alsoAnInteger;
+            this.if_ = if_;
+            this.new_ = new_;
+            this.interface_ = interface_;
+            this.__unknownProperties = Collections.unmodifiableMap(__unknownProperties);
+        }
+
+        @JsonProperty("type")
+        public String getType() {
+            return this.type;
         }
 
         @JsonProperty("stringExample")
-        private StringExample getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof StringExampleWrapper
-                            && equalTo((StringExampleWrapper) other));
-        }
-
-        private boolean equalTo(StringExampleWrapper other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("StringExampleWrapper")
-                    .append("{")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    @JsonTypeName("set")
-    private static class SetWrapper implements Base {
-        private final Set<String> value;
-
-        @JsonCreator
-        private SetWrapper(@JsonProperty("set") Set<String> value) {
-            Objects.requireNonNull(value, "set cannot be null");
-            this.value = value;
+        public Optional<StringExample> getStringExample() {
+            return this.stringExample;
         }
 
         @JsonProperty("set")
-        private Set<String> getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof SetWrapper && equalTo((SetWrapper) other));
-        }
-
-        private boolean equalTo(SetWrapper other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("SetWrapper")
-                    .append("{")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    @JsonTypeName("thisFieldIsAnInteger")
-    private static class ThisFieldIsAnIntegerWrapper implements Base {
-        private final int value;
-
-        @JsonCreator
-        private ThisFieldIsAnIntegerWrapper(@JsonProperty("thisFieldIsAnInteger") int value) {
-            Objects.requireNonNull(value, "thisFieldIsAnInteger cannot be null");
-            this.value = value;
+        public Optional<Set<String>> getSet() {
+            return this.set;
         }
 
         @JsonProperty("thisFieldIsAnInteger")
-        private int getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof ThisFieldIsAnIntegerWrapper
-                            && equalTo((ThisFieldIsAnIntegerWrapper) other));
-        }
-
-        private boolean equalTo(ThisFieldIsAnIntegerWrapper other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("ThisFieldIsAnIntegerWrapper")
-                    .append("{")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    @JsonTypeName("alsoAnInteger")
-    private static class AlsoAnIntegerWrapper implements Base {
-        private final int value;
-
-        @JsonCreator
-        private AlsoAnIntegerWrapper(@JsonProperty("alsoAnInteger") int value) {
-            Objects.requireNonNull(value, "alsoAnInteger cannot be null");
-            this.value = value;
+        public OptionalInt getThisFieldIsAnInteger() {
+            return this.thisFieldIsAnInteger;
         }
 
         @JsonProperty("alsoAnInteger")
-        private int getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof AlsoAnIntegerWrapper
-                            && equalTo((AlsoAnIntegerWrapper) other));
-        }
-
-        private boolean equalTo(AlsoAnIntegerWrapper other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("AlsoAnIntegerWrapper")
-                    .append("{")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    @JsonTypeName("if")
-    private static class IfWrapper implements Base {
-        private final int value;
-
-        @JsonCreator
-        private IfWrapper(@JsonProperty("if") int value) {
-            Objects.requireNonNull(value, "if cannot be null");
-            this.value = value;
+        public OptionalInt getAlsoAnInteger() {
+            return this.alsoAnInteger;
         }
 
         @JsonProperty("if")
-        private int getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof IfWrapper && equalTo((IfWrapper) other));
-        }
-
-        private boolean equalTo(IfWrapper other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("IfWrapper")
-                    .append("{")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    @JsonTypeName("new")
-    private static class NewWrapper implements Base {
-        private final int value;
-
-        @JsonCreator
-        private NewWrapper(@JsonProperty("new") int value) {
-            Objects.requireNonNull(value, "new cannot be null");
-            this.value = value;
+        public OptionalInt getIf() {
+            return this.if_;
         }
 
         @JsonProperty("new")
-        private int getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof NewWrapper && equalTo((NewWrapper) other));
-        }
-
-        private boolean equalTo(NewWrapper other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("NewWrapper")
-                    .append("{")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    @JsonTypeName("interface")
-    private static class InterfaceWrapper implements Base {
-        private final int value;
-
-        @JsonCreator
-        private InterfaceWrapper(@JsonProperty("interface") int value) {
-            Objects.requireNonNull(value, "interface cannot be null");
-            this.value = value;
+        public OptionalInt getNew() {
+            return this.new_;
         }
 
         @JsonProperty("interface")
-        private int getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof InterfaceWrapper && equalTo((InterfaceWrapper) other));
-        }
-
-        private boolean equalTo(InterfaceWrapper other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("InterfaceWrapper")
-                    .append("{")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true
-    )
-    private static class UnknownWrapper implements Base {
-        private final String type;
-
-        private final Map<String, Object> value;
-
-        @JsonCreator
-        private UnknownWrapper(@JsonProperty("type") String type) {
-            this(type, new HashMap<String, Object>());
-        }
-
-        private UnknownWrapper(String type, Map<String, Object> value) {
-            Objects.requireNonNull(type, "type cannot be null");
-            Objects.requireNonNull(value, "value cannot be null");
-            this.type = type;
-            this.value = value;
-        }
-
-        @JsonProperty
-        private String getType() {
-            return type;
+        public OptionalInt getInterface() {
+            return this.interface_;
         }
 
         @JsonAnyGetter
-        private Map<String, Object> getValue() {
-            return value;
-        }
-
-        @JsonAnySetter
-        private void put(String key, Object val) {
-            value.put(key, val);
+        Map<String, Object> unknownProperties() {
+            return __unknownProperties;
         }
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
+            return this == other || (other instanceof Union && equalTo((Union) other));
         }
 
-        private boolean equalTo(UnknownWrapper other) {
-            return this.type.equals(other.type) && this.value.equals(other.value);
+        private boolean equalTo(Union other) {
+            return this.type.equals(other.type)
+                    && this.stringExample.equals(other.stringExample)
+                    && this.set.equals(other.set)
+                    && this.thisFieldIsAnInteger.equals(other.thisFieldIsAnInteger)
+                    && this.alsoAnInteger.equals(other.alsoAnInteger)
+                    && this.if_.equals(other.if_)
+                    && this.new_.equals(other.new_)
+                    && this.interface_.equals(other.interface_);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(type, value);
+            if (memoizedHashCode == 0) {
+                memoizedHashCode =
+                        Objects.hash(
+                                type,
+                                stringExample,
+                                set,
+                                thisFieldIsAnInteger,
+                                alsoAnInteger,
+                                if_,
+                                new_,
+                                interface_);
+            }
+            return memoizedHashCode;
         }
 
         @Override
         public String toString() {
-            return new StringBuilder("UnknownWrapper")
+            return new StringBuilder("Union")
                     .append("{")
                     .append("type")
                     .append(": ")
                     .append(type)
                     .append(", ")
-                    .append("value")
+                    .append("stringExample")
                     .append(": ")
-                    .append(value)
+                    .append(stringExample)
+                    .append(", ")
+                    .append("set")
+                    .append(": ")
+                    .append(set)
+                    .append(", ")
+                    .append("thisFieldIsAnInteger")
+                    .append(": ")
+                    .append(thisFieldIsAnInteger)
+                    .append(", ")
+                    .append("alsoAnInteger")
+                    .append(": ")
+                    .append(alsoAnInteger)
+                    .append(", ")
+                    .append("if")
+                    .append(": ")
+                    .append(if_)
+                    .append(", ")
+                    .append("new")
+                    .append(": ")
+                    .append(new_)
+                    .append(", ")
+                    .append("interface")
+                    .append(": ")
+                    .append(interface_)
                     .append("}")
                     .toString();
+        }
+
+        private static void validateFields(
+                String type,
+                Optional<StringExample> stringExample,
+                Optional<Set<String>> set,
+                OptionalInt thisFieldIsAnInteger,
+                OptionalInt alsoAnInteger,
+                OptionalInt if_,
+                OptionalInt new_,
+                OptionalInt interface_) {
+            List<String> missingFields = null;
+            missingFields = addFieldIfMissing(missingFields, type, "type");
+            missingFields = addFieldIfMissing(missingFields, stringExample, "stringExample");
+            missingFields = addFieldIfMissing(missingFields, set, "set");
+            missingFields =
+                    addFieldIfMissing(missingFields, thisFieldIsAnInteger, "thisFieldIsAnInteger");
+            missingFields = addFieldIfMissing(missingFields, alsoAnInteger, "alsoAnInteger");
+            missingFields = addFieldIfMissing(missingFields, if_, "if");
+            missingFields = addFieldIfMissing(missingFields, new_, "new");
+            missingFields = addFieldIfMissing(missingFields, interface_, "interface");
+            if (missingFields != null) {
+                throw new IllegalArgumentException(
+                        "Some required fields have not been set: " + missingFields);
+            }
+        }
+
+        private static List<String> addFieldIfMissing(
+                List<String> prev, Object fieldValue, String fieldName) {
+            List<String> missingFields = prev;
+            if (fieldValue == null) {
+                if (missingFields == null) {
+                    missingFields = new ArrayList<>(8);
+                }
+                missingFields.add(fieldName);
+            }
+            return missingFields;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        public static final class Builder {
+            private String type;
+
+            private Optional<StringExample> stringExample = Optional.empty();
+
+            private Optional<Set<String>> set = Optional.empty();
+
+            private OptionalInt thisFieldIsAnInteger = OptionalInt.empty();
+
+            private OptionalInt alsoAnInteger = OptionalInt.empty();
+
+            private OptionalInt if_ = OptionalInt.empty();
+
+            private OptionalInt new_ = OptionalInt.empty();
+
+            private OptionalInt interface_ = OptionalInt.empty();
+
+            Map<String, Object> __unknownProperties = new LinkedHashMap<>();
+
+            private Builder() {}
+
+            public Builder from(Union other) {
+                type(other.getType());
+                stringExample(other.getStringExample());
+                set(other.getSet());
+                thisFieldIsAnInteger(other.getThisFieldIsAnInteger());
+                alsoAnInteger(other.getAlsoAnInteger());
+                if_(other.getIf());
+                new_(other.getNew());
+                interface_(other.getInterface());
+                return this;
+            }
+
+            @JsonSetter("type")
+            public Builder type(String type) {
+                this.type = Objects.requireNonNull(type, "type cannot be null");
+                return this;
+            }
+
+            @JsonSetter("stringExample")
+            public Builder stringExample(Optional<StringExample> stringExample) {
+                this.stringExample =
+                        Objects.requireNonNull(stringExample, "stringExample cannot be null");
+                return this;
+            }
+
+            public Builder stringExample(StringExample stringExample) {
+                this.stringExample =
+                        Optional.of(
+                                Objects.requireNonNull(
+                                        stringExample, "stringExample cannot be null"));
+                return this;
+            }
+
+            @JsonSetter("set")
+            public Builder set(Optional<Set<String>> set) {
+                this.set = Objects.requireNonNull(set, "set cannot be null");
+                return this;
+            }
+
+            public Builder set(Set<String> set) {
+                this.set = Optional.of(Objects.requireNonNull(set, "set cannot be null"));
+                return this;
+            }
+
+            @JsonSetter("thisFieldIsAnInteger")
+            public Builder thisFieldIsAnInteger(OptionalInt thisFieldIsAnInteger) {
+                this.thisFieldIsAnInteger =
+                        Objects.requireNonNull(
+                                thisFieldIsAnInteger, "thisFieldIsAnInteger cannot be null");
+                return this;
+            }
+
+            public Builder thisFieldIsAnInteger(int thisFieldIsAnInteger) {
+                this.thisFieldIsAnInteger = OptionalInt.of(thisFieldIsAnInteger);
+                return this;
+            }
+
+            @JsonSetter("alsoAnInteger")
+            public Builder alsoAnInteger(OptionalInt alsoAnInteger) {
+                this.alsoAnInteger =
+                        Objects.requireNonNull(alsoAnInteger, "alsoAnInteger cannot be null");
+                return this;
+            }
+
+            public Builder alsoAnInteger(int alsoAnInteger) {
+                this.alsoAnInteger = OptionalInt.of(alsoAnInteger);
+                return this;
+            }
+
+            @JsonSetter("if")
+            public Builder if_(OptionalInt if_) {
+                this.if_ = Objects.requireNonNull(if_, "if cannot be null");
+                return this;
+            }
+
+            public Builder if_(int if_) {
+                this.if_ = OptionalInt.of(if_);
+                return this;
+            }
+
+            @JsonSetter("new")
+            public Builder new_(OptionalInt new_) {
+                this.new_ = Objects.requireNonNull(new_, "new cannot be null");
+                return this;
+            }
+
+            public Builder new_(int new_) {
+                this.new_ = OptionalInt.of(new_);
+                return this;
+            }
+
+            @JsonSetter("interface")
+            public Builder interface_(OptionalInt interface_) {
+                this.interface_ = Objects.requireNonNull(interface_, "interface cannot be null");
+                return this;
+            }
+
+            public Builder interface_(int interface_) {
+                this.interface_ = OptionalInt.of(interface_);
+                return this;
+            }
+
+            public Union build() {
+                return new Union(
+                        type,
+                        stringExample,
+                        set,
+                        thisFieldIsAnInteger,
+                        alsoAnInteger,
+                        if_,
+                        new_,
+                        interface_,
+                        __unknownProperties);
+            }
+
+            @JsonAnySetter
+            private void setUnknownProperties(String key, Object value) {
+                __unknownProperties.put(key, value);
+            }
         }
     }
 }
