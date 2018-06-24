@@ -122,7 +122,7 @@ public final class UnionTypeExample {
 
     @JsonDeserialize(builder = Union.Builder.class)
     @Generated("com.palantir.conjure.java.types.BeanGenerator")
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     private static final class Union {
         private final String type;
 

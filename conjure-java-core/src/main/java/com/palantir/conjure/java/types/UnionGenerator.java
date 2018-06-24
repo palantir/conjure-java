@@ -123,7 +123,7 @@ public final class UnionGenerator {
                 .toBuilder()
                 .addModifiers(Modifier.STATIC, Modifier.PRIVATE)
                 .addAnnotation(AnnotationSpec.builder(JsonInclude.class)
-                        .addMember("value", "$T.NON_EMPTY", JsonInclude.Include.class).build())
+                        .addMember("value", "$T.NON_ABSENT", JsonInclude.Include.class).build())
                 .build();
     }
 
