@@ -63,7 +63,8 @@ public final class BeanBuilderGenerator {
     private final ClassName objectClass;
     private final boolean captureUnknownFields;
 
-    private BeanBuilderGenerator(TypeMapper typeMapper, ClassName builderClass, ClassName objectClass, boolean captureUnknownFields) {
+    private BeanBuilderGenerator(
+            TypeMapper typeMapper, ClassName builderClass, ClassName objectClass, boolean captureUnknownFields) {
         this.typeMapper = typeMapper;
         this.builderClass = builderClass;
         this.objectClass = objectClass;

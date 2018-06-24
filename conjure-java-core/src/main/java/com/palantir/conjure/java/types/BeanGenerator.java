@@ -71,7 +71,8 @@ public final class BeanGenerator {
                 .build();
     }
 
-    public static TypeSpec generateBeanTypeSpec(TypeMapper typeMapper, ObjectDefinition typeDef, boolean captureUnknownFields) {
+    public static TypeSpec generateBeanTypeSpec(
+            TypeMapper typeMapper, ObjectDefinition typeDef, boolean captureUnknownFields) {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName objectClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");

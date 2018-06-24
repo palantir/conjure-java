@@ -25,7 +25,9 @@ import java.nio.file.Path;
 
 public final class TestUtils {
 
-    public static final String readFromFile(Path file) {
+    private TestUtils() {}
+
+    public static String readFromFile(Path file) {
         try {
             return new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -33,7 +35,7 @@ public final class TestUtils {
         }
     }
 
-    public static final String readFromResource(String path) {
+    public static String readFromResource(String path) {
         try {
             return CharStreams.toString(
                     new InputStreamReader(TestUtils.class.getResourceAsStream(path), StandardCharsets.UTF_8));
