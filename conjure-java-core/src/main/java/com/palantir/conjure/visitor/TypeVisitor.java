@@ -47,6 +47,50 @@ public final class TypeVisitor {
     public static final IsBinaryType IS_BINARY = new IsBinaryType();
     public static final IsAnyType IS_ANY = new IsAnyType();
 
+    public interface Default<T> extends Type.Visitor<T> {
+        @Override
+        default T visitPrimitive(PrimitiveType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitOptional(OptionalType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitList(ListType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitSet(SetType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitMap(MapType value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitReference(TypeName value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitExternal(ExternalReference value) {
+            return visitDefault();
+        }
+
+        @Override
+        default T visitUnknown(String unknownType) {
+            return visitDefault();
+        }
+
+        T visitDefault();
+    }
+
     private static class IsPrimitiveTypeVisitor extends IsTypeVisitor {
         @Override
         public Boolean visitPrimitive(PrimitiveType value) {
@@ -125,50 +169,14 @@ public final class TypeVisitor {
         }
     }
 
-    private static class IsTypeVisitor implements Type.Visitor<Boolean> {
+    private static class IsTypeVisitor implements Default<Boolean> {
         @Override
-        public Boolean visitPrimitive(PrimitiveType value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitOptional(OptionalType value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitList(ListType value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitSet(SetType value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitMap(MapType value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitReference(TypeName value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitExternal(ExternalReference value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitUnknown(String unknownType) {
+        public Boolean visitDefault() {
             return false;
         }
     }
 
-    private static class DefaultTypeVisitor<T> implements Type.Visitor<T> {
-
+    private static class DefaultToThrowingTypeVisitor<T> implements Type.Visitor<T> {
         @Override
         public T visitPrimitive(PrimitiveType value) {
             return null;
@@ -210,14 +218,14 @@ public final class TypeVisitor {
         }
     }
 
-    private static class PrimitiveTypeVisitor extends DefaultTypeVisitor<PrimitiveType> {
+    private static class PrimitiveTypeVisitor extends DefaultToThrowingTypeVisitor<PrimitiveType> {
         @Override
         public PrimitiveType visitPrimitive(PrimitiveType value) {
             return value;
         }
     }
 
-    private static class ReferenceTypeVisitor extends DefaultTypeVisitor<TypeName> {
+    private static class ReferenceTypeVisitor extends DefaultToThrowingTypeVisitor<TypeName> {
         @Override
         public TypeName visitReference(TypeName value) {
             return value;
@@ -229,28 +237,28 @@ public final class TypeVisitor {
         }
     }
 
-    private static class MapTypeVisitor extends DefaultTypeVisitor<MapType> {
+    private static class MapTypeVisitor extends DefaultToThrowingTypeVisitor<MapType> {
         @Override
         public MapType visitMap(MapType value) {
             return value;
         }
     }
 
-    private static class ListTypeVisitor extends DefaultTypeVisitor<ListType> {
+    private static class ListTypeVisitor extends DefaultToThrowingTypeVisitor<ListType> {
         @Override
         public ListType visitList(ListType value) {
             return value;
         }
     }
 
-    private static class SetTypeVisitor extends DefaultTypeVisitor<SetType> {
+    private static class SetTypeVisitor extends DefaultToThrowingTypeVisitor<SetType> {
         @Override
         public SetType visitSet(SetType value) {
             return value;
         }
     }
 
-    private static class OptionalTypeVisitor extends DefaultTypeVisitor<OptionalType> {
+    private static class OptionalTypeVisitor extends DefaultToThrowingTypeVisitor<OptionalType> {
         @Override
         public OptionalType visitOptional(OptionalType value) {
             return value;
