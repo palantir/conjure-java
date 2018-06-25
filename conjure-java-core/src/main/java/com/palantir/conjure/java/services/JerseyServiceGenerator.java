@@ -170,8 +170,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         List<ArgumentDefinition> queryArgs = Lists.newArrayList();
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {
-            if (!arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY) ||
-                    !arg.getType().accept(TYPE_DEFAULTABLE_PREDICATE)) {
+            if (!arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
+                    || !arg.getType().accept(TYPE_DEFAULTABLE_PREDICATE)) {
                 args.add(arg);
             } else {
                 queryArgs.add(arg);
