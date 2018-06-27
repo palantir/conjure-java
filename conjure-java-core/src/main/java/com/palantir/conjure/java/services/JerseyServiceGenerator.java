@@ -19,28 +19,42 @@ package com.palantir.conjure.java.services;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.JerseyMethodTypeClassNameVisitor;
 import com.palantir.conjure.java.types.JerseyReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
+import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.HeaderParameterType;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.MapType;
+import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
+import com.palantir.conjure.spec.PathParameterType;
+import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -87,6 +101,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, methodTypeMapper))
                 .collect(Collectors.toList()));
 
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+                .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper,
+                        methodTypeMapper))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
                 .indent("    ")
                 .build();
@@ -99,7 +119,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
-                .addParameters(createServiceMethodParameters(endpointDef, methodTypeMapper));
+                .addParameters(createServiceMethodParameters(endpointDef, methodTypeMapper, true));
 
         // @Path("") is invalid in Feign JaxRs and equivalent to absent on an endpoint method
         String rawHttpPath = endpointDef.getHttpPath().get();
@@ -137,37 +157,119 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         return methodBuilder.build();
     }
 
+    /** Provides a linear expansion of optional query arguments to improve Java back-compat. */
+    private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper methodTypeMapper) {
+
+        List<ArgumentDefinition> args = Lists.newArrayList();
+        List<ArgumentDefinition> queryArgs = Lists.newArrayList();
+
+        for (ArgumentDefinition arg : endpointDef.getArgs()) {
+            if (!arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
+                    || !arg.getType().accept(TYPE_DEFAULTABLE_PREDICATE)) {
+                args.add(arg);
+            } else {
+                queryArgs.add(arg);
+            }
+        }
+
+        List<MethodSpec> alternateMethods = Lists.newArrayList();
+        for (int i = 0; i < queryArgs.size(); i++) {
+            alternateMethods.add(createCompatibilityBackfillMethod(
+                    EndpointDefinition.builder()
+                            .from(endpointDef)
+                            .args(Iterables.concat(args, queryArgs.subList(0, i)))
+                    .build(),
+                    returnTypeMapper,
+                    methodTypeMapper,
+                    queryArgs.subList(i, queryArgs.size())));
+        }
+
+        return alternateMethods;
+    }
+
+    private MethodSpec createCompatibilityBackfillMethod(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper methodTypeMapper,
+            List<ArgumentDefinition> extraArgs) {
+        List<ParameterSpec> params = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
+
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+                .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
+                .addAnnotation(Deprecated.class)
+                .addParameters(params);
+
+        endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
+
+        StringBuilder sb = new StringBuilder("return $N(");
+        for (ParameterSpec param : params) {
+            sb.append("$N, ");
+        }
+
+        List<CodeBlock> fillerValues = Lists.newArrayList();
+        for (ArgumentDefinition arg : extraArgs) {
+            sb.append("$L, ");
+            fillerValues.add(arg.getType().accept(TYPE_DEFAULT_VALUE));
+        }
+        // trim the end
+        sb.setLength(sb.length() - 2);
+        sb.append(")");
+
+        ImmutableList<Object> methodCallArgs = ImmutableList.builder()
+                .add(endpointDef.getEndpointName().get())
+                .addAll(params)
+                .addAll(fillerValues)
+                .build();
+
+        methodBuilder.addStatement(sb.toString(), methodCallArgs.toArray(new Object[0]));
+
+        return methodBuilder.build();
+    }
+
     private static List<ParameterSpec> createServiceMethodParameters(
             EndpointDefinition endpointDef,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            boolean withAnnotations) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
         Optional<AuthType> auth = endpointDef.getAuth();
-        createAuthParameter(auth).ifPresent(parameterSpecs::add);
+        createAuthParameter(auth, withAnnotations).ifPresent(parameterSpecs::add);
 
-        endpointDef.getArgs().forEach(def -> {
-            parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def));
+        List<ArgumentDefinition> sortedArgList = new ArrayList<>(endpointDef.getArgs());
+        sortedArgList.sort(Comparator.comparing(o ->
+                o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER)));
+
+        sortedArgList.forEach(def -> {
+            parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations));
         });
         return ImmutableList.copyOf(parameterSpecs);
     }
 
-    private static ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def) {
+    private static ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
+            boolean withAnnotations) {
         ParameterSpec.Builder param = ParameterSpec.builder(
                 typeMapper.getClassName(def.getType()), def.getArgName().get());
-        getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
-
-        param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
+        if (withAnnotations) {
+            getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
+            param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
+        }
         return param.build();
     }
 
-    private static Optional<ParameterSpec> createAuthParameter(Optional<AuthType> auth) {
+    private static Optional<ParameterSpec> createAuthParameter(Optional<AuthType> auth, boolean withAnnotations) {
+        if (!auth.isPresent()) {
+            return Optional.empty();
+        }
+
         ClassName annotationClassName;
         ClassName tokenClassName;
         String paramName;
         String tokenName;
-        if (!auth.isPresent()) {
-            return Optional.empty();
-        } else if (auth.get().accept(AuthTypeVisitor.IS_HEADER)) {
+
+        if (auth.get().accept(AuthTypeVisitor.IS_HEADER)) {
             annotationClassName = ClassName.get("javax.ws.rs", "HeaderParam");
             tokenClassName = ClassName.get("com.palantir.tokens.auth", "AuthHeader");
             paramName = "authHeader";
@@ -180,11 +282,13 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         } else {
             throw new IllegalStateException("Unrecognized auth type: " + auth.get());
         }
-        return Optional.of(
-                ParameterSpec.builder(tokenClassName, paramName)
-                        .addAnnotation(AnnotationSpec.builder(annotationClassName)
-                                .addMember("value", "$S", tokenName).build())
-                        .build());
+
+        ParameterSpec.Builder paramSpec = ParameterSpec.builder(tokenClassName, paramName);
+        if (withAnnotations) {
+            paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
+                    .addMember("value", "$S", tokenName).build());
+        }
+        return Optional.of(paramSpec.build());
     }
 
     private static Optional<AnnotationSpec> getParamTypeAnnotation(ArgumentDefinition def) {
@@ -236,4 +340,118 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
         }
     }
+
+    /** Produces an ordering for ParamaterType of Header, Path, Query, Body. */
+    private static final ParameterType.Visitor<Integer> PARAM_SORT_ORDER = new ParameterType.Visitor<Integer>() {
+        @Override
+        public Integer visitBody(BodyParameterType value) {
+            return 30;
+        }
+
+        @Override
+        public Integer visitHeader(HeaderParameterType value) {
+            return 0;
+        }
+
+        @Override
+        public Integer visitPath(PathParameterType value) {
+            return 10;
+        }
+
+        @Override
+        public Integer visitQuery(QueryParameterType value) {
+            return 20;
+        }
+
+        @Override
+        public Integer visitUnknown(String unknownType) {
+            return -1;
+        }
+    };
+
+    /**
+     * Produces a type sort ordering for use with {@link #PARAM_SORT_ORDER} such that types with known defaults come
+     * after types without known defaults.
+     */
+    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new TypeVisitor.Default<Integer>() {
+        @Override
+        public Integer visitOptional(OptionalType value) {
+            return 1;
+        }
+
+        @Override
+        public Integer visitList(ListType value) {
+            return 1;
+        }
+
+        @Override
+        public Integer visitSet(SetType value) {
+            return 1;
+        }
+
+        @Override
+        public Integer visitMap(MapType value) {
+            return 1;
+        }
+
+        @Override
+        public Integer visitDefault() {
+            return 0;
+        }
+    };
+
+    /** Indicates whether a particular type has a defaultable value. */
+    private static final Type.Visitor<Boolean> TYPE_DEFAULTABLE_PREDICATE = new TypeVisitor.Default<Boolean>() {
+        @Override
+        public Boolean visitOptional(OptionalType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitList(ListType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitSet(SetType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitMap(MapType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitDefault() {
+            return false;
+        }
+    };
+
+    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new TypeVisitor.Default<CodeBlock>() {
+        @Override
+        public CodeBlock visitOptional(OptionalType value) {
+            return CodeBlock.of("$T.empty()", Optional.class);
+        }
+
+        @Override
+        public CodeBlock visitList(ListType value) {
+            return CodeBlock.of("$T.emptyList()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitSet(SetType value) {
+            return CodeBlock.of("$T.emptySet()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitMap(MapType value) {
+            return CodeBlock.of("$T.emptyMap()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitDefault() {
+            throw new IllegalArgumentException("Cannot backfill non-defaultable parameter type.");
+        }
+    };
 }

@@ -155,8 +155,17 @@ services:
             type: ResourceIdentifier
             param-id: different
             param-type: query
+          optionalMiddle:
+            type: optional<ResourceIdentifier>
+            param-type: query
           implicit:
             type: ResourceIdentifier
+            param-type: query
+          setEnd:
+            type: set<string>
+            param-type: query
+          optionalEnd:
+            type: optional<ResourceIdentifier>
             param-type: query
         returns: integer
 
