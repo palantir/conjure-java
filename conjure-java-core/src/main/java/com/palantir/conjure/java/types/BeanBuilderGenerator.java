@@ -195,11 +195,10 @@ public final class BeanBuilderGenerator {
     private static CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
-            CodeBlock addStatement = CodeBlocks.statement(
-                    "$1T.addAll(this.$2N, $3L)",
-                    ConjureCollections.class,
-                    spec.name,
-                    Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
+            CodeBlock addStatement = CodeBlock.builder()
+                    .addStatement(Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"))
+                    .addStatement("$1N.forEach(this.$1N::add)", spec.name)
+                    .build();
             return shouldClearFirst ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
                     : addStatement;
         } else if (type.accept(TypeVisitor.IS_MAP)) {

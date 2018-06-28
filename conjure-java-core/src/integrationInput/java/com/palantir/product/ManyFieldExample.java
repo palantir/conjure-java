@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -280,15 +279,15 @@ public final class ManyFieldExample {
         @JsonSetter("items")
         public Builder items(Iterable<String> items) {
             this.items.clear();
-            ConjureCollections.addAll(
-                    this.items, Objects.requireNonNull(items, "items cannot be null"));
+            Objects.requireNonNull(items, "items cannot be null");
+            items.forEach(this.items::add);
             return this;
         }
 
         /** docs for items field */
         public Builder addAllItems(Iterable<String> items) {
-            ConjureCollections.addAll(
-                    this.items, Objects.requireNonNull(items, "items cannot be null"));
+            Objects.requireNonNull(items, "items cannot be null");
+            items.forEach(this.items::add);
             return this;
         }
 
@@ -302,13 +301,15 @@ public final class ManyFieldExample {
         @JsonSetter("set")
         public Builder set(Iterable<String> set) {
             this.set.clear();
-            ConjureCollections.addAll(this.set, Objects.requireNonNull(set, "set cannot be null"));
+            Objects.requireNonNull(set, "set cannot be null");
+            set.forEach(this.set::add);
             return this;
         }
 
         /** docs for set field */
         public Builder addAllSet(Iterable<String> set) {
-            ConjureCollections.addAll(this.set, Objects.requireNonNull(set, "set cannot be null"));
+            Objects.requireNonNull(set, "set cannot be null");
+            set.forEach(this.set::add);
             return this;
         }
 
