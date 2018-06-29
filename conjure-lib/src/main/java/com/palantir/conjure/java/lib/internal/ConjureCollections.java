@@ -31,6 +31,8 @@ public final class ConjureCollections {
     @SuppressWarnings("unchecked")
     public static <T> void addAll(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
         if (elementsToAdd instanceof Collection) {
+            // This special-casing allows us to take advantage of the more performant
+            // ArrayList#addAll method which does a single System.arraycopy.
             addTo.addAll((Collection<T>) elementsToAdd);
         } else {
             for (T element : elementsToAdd) {
