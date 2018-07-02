@@ -47,7 +47,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public final class JerseyServiceEteTest extends TestBase {
+public final class JerseyServiceEteTest {
 
     @ClassRule
     public static final TemporaryFolder folder = new TemporaryFolder();
@@ -138,7 +138,7 @@ public final class JerseyServiceEteTest extends TestBase {
                 Files.copy(file, output);
             }
 
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
+            assertThat(TestUtils.readFromFile(file)).isEqualTo(TestUtils.readFromFile(output));
         }
     }
 }

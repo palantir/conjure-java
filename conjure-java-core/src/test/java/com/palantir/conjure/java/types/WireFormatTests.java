@@ -6,7 +6,6 @@ package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.product.BinaryAliasExample;
@@ -53,6 +52,11 @@ public final class WireFormatTests {
     @Test
     public void testPresentOptionalDeserializesWithElement() throws Exception {
         assertThat(mapper.readValue("{\"item\": \"a\"}", OptionalExample.class).getItem()).contains("a");
+    }
+
+    @Test
+    public void testOptionalSerialization() throws Exception {
+        assertThat(mapper.writeValueAsString(OptionalExample.of("a"))).isEqualTo("{\"item\":\"a\"}");
     }
 
     @Test
@@ -194,10 +198,6 @@ public final class WireFormatTests {
         assertThat(mapper.readValue(serializedUnionTypeSet, UnionTypeExample.class)).isEqualTo(unionTypeSet);
         assertThat(mapper.readValue(serializedUnionTypeInt, UnionTypeExample.class)).isEqualTo(unionTypeInt);
 
-        assertThat(unionTypeStringExample).isEqualTo(stringExample);
-        assertThat(unionTypeSet).isEqualTo(ImmutableSet.of("item"));
-        assertThat(unionTypeInt).isEqualTo(5);
-
         // visitor
         UnionTypeExample.Visitor<Integer> visitor = new TestVisitor();
         assertThat(unionTypeStringExample.accept(visitor)).isEqualTo("foo".length());
@@ -216,7 +216,7 @@ public final class WireFormatTests {
     @Test
     public void testUnionType_noType() throws Exception {
         String noType = "{\"typ\":\"unknown\",\"value\":5}";
-        expectedException.expect(JsonMappingException.class);
+        expectedException.expect(IllegalArgumentException.class);
         mapper.readValue(noType, UnionTypeExample.class);
     }
 
