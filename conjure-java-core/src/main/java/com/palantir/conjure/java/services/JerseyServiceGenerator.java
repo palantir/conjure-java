@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -191,29 +192,34 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             TypeMapper returnTypeMapper,
             TypeMapper methodTypeMapper,
             List<ArgumentDefinition> extraArgs) {
-        List<ParameterSpec> params = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
+        List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
+        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
+                extraArgs.stream()
+                        .filter(arg -> arg.getArgName().get().equals(param.name))
+                        .findFirst())
+                .collect(Collectors.toList());
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
-                .addParameters(params);
+                .addParameters(IntStream.range(0, sortedParams.size())
+                        .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
+                        .mapToObj(sortedParams::get)
+                        .collect(Collectors.toList()));
 
         endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
 
         StringBuilder sb = new StringBuilder("return $N(");
-        List<Object> values = params.stream().map(param -> {
-            Optional<ArgumentDefinition> maybeArgDef = extraArgs.stream()
-                    .filter(arg -> arg.getArgName().get().equals(param.name))
-                    .findFirst();
+        List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
+            Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
             if (maybeArgDef.isPresent()) {
                 sb.append("$L, ");
                 return maybeArgDef.get().getType().accept(TYPE_DEFAULT_VALUE);
             } else {
                 sb.append("$N, ");
-                return param;
+                return sortedParams.get(i);
             }
         }).collect(Collectors.toList());
-
         // trim the end
         sb.setLength(sb.length() - 2);
         sb.append(")");
