@@ -149,8 +149,9 @@ services:
         returns: optional<string>
 
       testQueryParams:
-        http: GET /test-query-params
+        http: POST /test-query-params
         args:
+          query: string
           something:
             type: ResourceIdentifier
             param-id: different

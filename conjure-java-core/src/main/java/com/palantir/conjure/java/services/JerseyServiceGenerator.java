@@ -19,7 +19,6 @@ package com.palantir.conjure.java.services;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.JerseyMethodTypeClassNameVisitor;
@@ -178,10 +177,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         List<MethodSpec> alternateMethods = Lists.newArrayList();
         for (int i = 0; i < queryArgs.size(); i++) {
             alternateMethods.add(createCompatibilityBackfillMethod(
-                    EndpointDefinition.builder()
-                            .from(endpointDef)
-                            .args(Iterables.concat(args, queryArgs.subList(0, i)))
-                    .build(),
+                    endpointDef,
                     returnTypeMapper,
                     methodTypeMapper,
                     queryArgs.subList(i, queryArgs.size())));
@@ -205,23 +201,26 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
 
         StringBuilder sb = new StringBuilder("return $N(");
-        for (ParameterSpec param : params) {
-            sb.append("$N, ");
-        }
+        List<Object> values = params.stream().map(param -> {
+            Optional<ArgumentDefinition> maybeArgDef = extraArgs.stream()
+                    .filter(arg -> arg.getArgName().get().equals(param.name))
+                    .findFirst();
+            if (maybeArgDef.isPresent()) {
+                sb.append("$L, ");
+                return maybeArgDef.get().getType().accept(TYPE_DEFAULT_VALUE);
+            } else {
+                sb.append("$N, ");
+                return param;
+            }
+        }).collect(Collectors.toList());
 
-        List<CodeBlock> fillerValues = Lists.newArrayList();
-        for (ArgumentDefinition arg : extraArgs) {
-            sb.append("$L, ");
-            fillerValues.add(arg.getType().accept(TYPE_DEFAULT_VALUE));
-        }
         // trim the end
         sb.setLength(sb.length() - 2);
         sb.append(")");
 
         ImmutableList<Object> methodCallArgs = ImmutableList.builder()
                 .add(endpointDef.getEndpointName().get())
-                .addAll(params)
-                .addAll(fillerValues)
+                .addAll(values)
                 .build();
 
         methodBuilder.addStatement(sb.toString(), methodCallArgs.toArray(new Object[0]));

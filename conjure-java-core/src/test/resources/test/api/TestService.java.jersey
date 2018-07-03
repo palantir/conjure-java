@@ -100,7 +100,7 @@ public interface TestService {
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
-    @GET
+    @POST
     @Path("catalog/test-query-params")
     int testQueryParams(
             @HeaderParam("Authorization") AuthHeader authHeader,
@@ -108,7 +108,8 @@ public interface TestService {
             @QueryParam("implicit") ResourceIdentifier implicit,
             @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @QueryParam("setEnd") Set<String> setEnd,
-            @QueryParam("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
+            @QueryParam("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
+            String query);
 
     @GET
     @Path("catalog/boolean")
@@ -124,29 +125,21 @@ public interface TestService {
 
     @Deprecated
     default int testQueryParams(
-            AuthHeader authHeader, ResourceIdentifier something, ResourceIdentifier implicit) {
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query) {
         return testQueryParams(
                 authHeader,
                 something,
                 implicit,
                 Optional.empty(),
                 Collections.emptySet(),
-                Optional.empty());
-    }
-
-    @Deprecated
-    default int testQueryParams(
-            AuthHeader authHeader,
-            ResourceIdentifier something,
-            ResourceIdentifier implicit,
-            Optional<ResourceIdentifier> optionalMiddle) {
-        return testQueryParams(
-                authHeader,
-                something,
-                implicit,
-                optionalMiddle,
-                Collections.emptySet(),
-                Optional.empty());
+                Optional.empty(),
+                query);
     }
 
     @Deprecated
@@ -155,8 +148,29 @@ public interface TestService {
             ResourceIdentifier something,
             ResourceIdentifier implicit,
             Optional<ResourceIdentifier> optionalMiddle,
-            Set<String> setEnd) {
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query) {
         return testQueryParams(
-                authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty());
+                authHeader,
+                something,
+                implicit,
+                optionalMiddle,
+                Collections.emptySet(),
+                Optional.empty(),
+                query);
+    }
+
+    @Deprecated
+    default int testQueryParams(
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query) {
+        return testQueryParams(
+                authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
     }
 }
