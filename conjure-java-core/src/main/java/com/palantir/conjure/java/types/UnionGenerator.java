@@ -138,9 +138,7 @@ public final class UnionGenerator {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addAnnotation(AnnotationSpec.builder(JsonCreator.class).build())
-                .addParameter(ParameterSpec.builder(unionClass.nestedClass("Union"), UNION_FIELD_NAME)
-                        .addAnnotation(JsonUnwrapped.class)
-                        .build())
+                .addParameter(ParameterSpec.builder(unionClass.nestedClass("Union"), UNION_FIELD_NAME).build())
                 .addStatement(Expressions.requireNonNull(UNION_FIELD_NAME, "union must not be null"))
                 .addStatement("this.$1L = $1L", UNION_FIELD_NAME)
                 .build();

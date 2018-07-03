@@ -26,7 +26,7 @@ public final class UnionTypeExample {
     @JsonUnwrapped private final Union union;
 
     @JsonCreator
-    private UnionTypeExample(@JsonUnwrapped Union union) {
+    private UnionTypeExample(Union union) {
         Objects.requireNonNull(union, "union must not be null");
         this.union = union;
     }
