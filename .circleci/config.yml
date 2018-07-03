@@ -40,6 +40,25 @@ jobs:
               ./gradlew --stacktrace --continue publish
             fi
 
+  markdown:
+    docker:
+      - image: circleci/node:10.3.0
+    steps:
+      - checkout
+      - run: sudo npm install -g remark-cli@5.0.0
+      - run:
+          name: Format all markdown files with remark-cli (https://github.com/remarkjs/remark-lint)
+          command: |
+            find . -name '*.md' -exec remark -o {} {} \;
+      - run:
+          name: Verify git tree is clean
+          command: |
+            if [ ! -z "$(git status --porcelain)" ]; then
+              printf "Run 'find . -name '*.md' -exec remark -o {} {} \;' to fix the following files:\n`git status --porcelain`"
+              exit 1
+            fi
+
+
 workflows:
   version: 2
   build:
@@ -47,5 +66,10 @@ workflows:
       - build:
           filters:
             # CircleCI2 will ignore tags without this. https://circleci.com/docs/2.0/workflows/#git-tag-job-execution
+            tags:
+              only: /.*/
+
+      - markdown:
+          filters:
             tags:
               only: /.*/
