@@ -39,6 +39,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.BeforeClass;
@@ -129,7 +130,7 @@ public final class JerseyServiceEteTest {
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/ete-service.yml")));
-        List<Path> files = new JerseyServiceGenerator().emit(def, folder.getRoot());
+        List<Path> files = new JerseyServiceGenerator(Collections.emptySet()).emit(def, folder.getRoot());
 
         for (Path file : files) {
             Path output = Paths.get("src/integrationInput/java/com/palantir/product/" + file.getFileName());

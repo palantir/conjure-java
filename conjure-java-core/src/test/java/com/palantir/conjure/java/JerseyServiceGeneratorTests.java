@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,7 +60,7 @@ public final class JerseyServiceGeneratorTests {
                         new File("src/test/resources/example-types.yml"),
                         new File("src/test/resources/example-service.yml")));
         File src = folder.newFolder("src");
-        JerseyServiceGenerator generator = new JerseyServiceGenerator();
+        JerseyServiceGenerator generator = new JerseyServiceGenerator(Collections.emptySet());
         generator.emit(conjure, src);
 
         // Generated files contain imports
@@ -71,7 +72,7 @@ public final class JerseyServiceGeneratorTests {
     public void testBinaryReturnInputStream() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-binary.yml")));
-        List<Path> files = new JerseyServiceGenerator()
+        List<Path> files = new JerseyServiceGenerator(Collections.emptySet())
                 .emit(def, folder.getRoot());
 
         for (Path file : files) {
@@ -90,7 +91,7 @@ public final class JerseyServiceGeneratorTests {
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        List<Path> files = new JerseyServiceGenerator().emit(def, folder.getRoot());
+        List<Path> files = new JerseyServiceGenerator(Collections.emptySet()).emit(def, folder.getRoot());
 
         for (Path file : files) {
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {

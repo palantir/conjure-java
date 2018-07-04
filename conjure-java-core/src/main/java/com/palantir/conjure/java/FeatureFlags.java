@@ -25,4 +25,9 @@ public enum FeatureFlags {
      */
     RetrofitCompletableFutures,
 
+    /**
+     * Instructs the {@link JerseyServiceGenerator} to generate add {@link javax.validation.constraints.NotNull}
+     * annotations to all auth parameters, as well as all non-optional body params.
+     */
+    RequireAuthParamsAndBodyParamsAreNotNull,
 }
