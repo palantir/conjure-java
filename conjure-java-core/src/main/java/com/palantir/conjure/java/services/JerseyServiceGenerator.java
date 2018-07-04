@@ -192,6 +192,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             TypeMapper returnTypeMapper,
             TypeMapper methodTypeMapper,
             List<ArgumentDefinition> extraArgs) {
+        // ensure the correct ordering of parameters by creating the complete sorted parameter list
         List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
         List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
                 extraArgs.stream()
@@ -199,6 +200,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                         .findFirst())
                 .collect(Collectors.toList());
 
+        // omit extraArgs from the back fill method signature
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
@@ -209,6 +211,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
 
+        // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder("return $N(");
         List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
             Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
