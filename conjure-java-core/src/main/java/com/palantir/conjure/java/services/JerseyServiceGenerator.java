@@ -19,7 +19,6 @@ package com.palantir.conjure.java.services;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.JerseyMethodTypeClassNameVisitor;
@@ -59,6 +58,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -178,10 +178,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         List<MethodSpec> alternateMethods = Lists.newArrayList();
         for (int i = 0; i < queryArgs.size(); i++) {
             alternateMethods.add(createCompatibilityBackfillMethod(
-                    EndpointDefinition.builder()
-                            .from(endpointDef)
-                            .args(Iterables.concat(args, queryArgs.subList(0, i)))
-                    .build(),
+                    endpointDef,
                     returnTypeMapper,
                     methodTypeMapper,
                     queryArgs.subList(i, queryArgs.size())));
@@ -195,33 +192,44 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             TypeMapper returnTypeMapper,
             TypeMapper methodTypeMapper,
             List<ArgumentDefinition> extraArgs) {
-        List<ParameterSpec> params = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
+        // ensure the correct ordering of parameters by creating the complete sorted parameter list
+        List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
+        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
+                extraArgs.stream()
+                        .filter(arg -> arg.getArgName().get().equals(param.name))
+                        .findFirst())
+                .collect(Collectors.toList());
 
+        // omit extraArgs from the back fill method signature
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
-                .addParameters(params);
+                .addParameters(IntStream.range(0, sortedParams.size())
+                        .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
+                        .mapToObj(sortedParams::get)
+                        .collect(Collectors.toList()));
 
         endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
 
+        // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder("return $N(");
-        for (ParameterSpec param : params) {
-            sb.append("$N, ");
-        }
-
-        List<CodeBlock> fillerValues = Lists.newArrayList();
-        for (ArgumentDefinition arg : extraArgs) {
-            sb.append("$L, ");
-            fillerValues.add(arg.getType().accept(TYPE_DEFAULT_VALUE));
-        }
+        List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
+            Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
+            if (maybeArgDef.isPresent()) {
+                sb.append("$L, ");
+                return maybeArgDef.get().getType().accept(TYPE_DEFAULT_VALUE);
+            } else {
+                sb.append("$N, ");
+                return sortedParams.get(i);
+            }
+        }).collect(Collectors.toList());
         // trim the end
         sb.setLength(sb.length() - 2);
         sb.append(")");
 
         ImmutableList<Object> methodCallArgs = ImmutableList.builder()
                 .add(endpointDef.getEndpointName().get())
-                .addAll(params)
-                .addAll(fillerValues)
+                .addAll(values)
                 .build();
 
         methodBuilder.addStatement(sb.toString(), methodCallArgs.toArray(new Object[0]));

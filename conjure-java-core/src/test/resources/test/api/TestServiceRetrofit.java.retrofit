@@ -88,9 +88,10 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
-    @GET("./catalog/test-query-params")
+    @POST("./catalog/test-query-params")
     Call<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
+            @Body String query,
             @Query("different") ResourceIdentifier something,
             @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @Query("implicit") ResourceIdentifier implicit,
