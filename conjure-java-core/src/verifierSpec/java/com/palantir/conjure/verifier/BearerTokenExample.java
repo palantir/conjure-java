@@ -13,18 +13,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = BearerTokenExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class BearerTokenExample {
-    private final BearerToken bearerTokenValue;
+    private final BearerToken value;
 
     private volatile int memoizedHashCode;
 
-    private BearerTokenExample(BearerToken bearerTokenValue) {
-        validateFields(bearerTokenValue);
-        this.bearerTokenValue = bearerTokenValue;
+    private BearerTokenExample(BearerToken value) {
+        validateFields(value);
+        this.value = value;
     }
 
-    @JsonProperty("bearerTokenValue")
-    public BearerToken getBearerTokenValue() {
-        return this.bearerTokenValue;
+    @JsonProperty("value")
+    public BearerToken getValue() {
+        return this.value;
     }
 
     @Override
@@ -34,13 +34,13 @@ public final class BearerTokenExample {
     }
 
     private boolean equalTo(BearerTokenExample other) {
-        return this.bearerTokenValue.equals(other.bearerTokenValue);
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(bearerTokenValue);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -49,20 +49,20 @@ public final class BearerTokenExample {
     public String toString() {
         return new StringBuilder("BearerTokenExample")
                 .append("{")
-                .append("bearerTokenValue")
+                .append("value")
                 .append(": ")
-                .append(bearerTokenValue)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static BearerTokenExample of(BearerToken bearerTokenValue) {
-        return builder().bearerTokenValue(bearerTokenValue).build();
+    public static BearerTokenExample of(BearerToken value) {
+        return builder().value(value).build();
     }
 
-    private static void validateFields(BearerToken bearerTokenValue) {
+    private static void validateFields(BearerToken value) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, bearerTokenValue, "bearerTokenValue");
+        missingFields = addFieldIfMissing(missingFields, value, "value");
         if (missingFields != null) {
             throw new IllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
@@ -88,24 +88,23 @@ public final class BearerTokenExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private BearerToken bearerTokenValue;
+        private BearerToken value;
 
         private Builder() {}
 
         public Builder from(BearerTokenExample other) {
-            bearerTokenValue(other.getBearerTokenValue());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("bearerTokenValue")
-        public Builder bearerTokenValue(BearerToken bearerTokenValue) {
-            this.bearerTokenValue =
-                    Objects.requireNonNull(bearerTokenValue, "bearerTokenValue cannot be null");
+        @JsonSetter("value")
+        public Builder value(BearerToken value) {
+            this.value = Objects.requireNonNull(value, "value cannot be null");
             return this;
         }
 
         public BearerTokenExample build() {
-            return new BearerTokenExample(bearerTokenValue);
+            return new BearerTokenExample(value);
         }
     }
 }

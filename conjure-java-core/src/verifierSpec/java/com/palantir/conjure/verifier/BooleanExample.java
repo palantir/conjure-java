@@ -10,17 +10,17 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = BooleanExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class BooleanExample {
-    private final boolean coin;
+    private final boolean value;
 
     private volatile int memoizedHashCode;
 
-    private BooleanExample(boolean coin) {
-        this.coin = coin;
+    private BooleanExample(boolean value) {
+        this.value = value;
     }
 
-    @JsonProperty("coin")
-    public boolean getCoin() {
-        return this.coin;
+    @JsonProperty("value")
+    public boolean getValue() {
+        return this.value;
     }
 
     @Override
@@ -30,13 +30,13 @@ public final class BooleanExample {
     }
 
     private boolean equalTo(BooleanExample other) {
-        return this.coin == other.coin;
+        return this.value == other.value;
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(coin);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -45,15 +45,15 @@ public final class BooleanExample {
     public String toString() {
         return new StringBuilder("BooleanExample")
                 .append("{")
-                .append("coin")
+                .append("value")
                 .append(": ")
-                .append(coin)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static BooleanExample of(boolean coin) {
-        return builder().coin(coin).build();
+    public static BooleanExample of(boolean value) {
+        return builder().value(value).build();
     }
 
     public static Builder builder() {
@@ -63,23 +63,23 @@ public final class BooleanExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private boolean coin;
+        private boolean value;
 
         private Builder() {}
 
         public Builder from(BooleanExample other) {
-            coin(other.getCoin());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("coin")
-        public Builder coin(boolean coin) {
-            this.coin = coin;
+        @JsonSetter("value")
+        public Builder value(boolean value) {
+            this.value = value;
             return this;
         }
 
         public BooleanExample build() {
-            return new BooleanExample(coin);
+            return new BooleanExample(value);
         }
     }
 }

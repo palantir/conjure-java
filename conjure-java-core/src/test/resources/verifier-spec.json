@@ -2,6 +2,187 @@
   "version" : 1,
   "errors" : [ ],
   "types" : [ {
+    "type" : "alias",
+    "alias" : {
+      "typeName" : {
+        "name" : "EndpointName",
+        "package" : "com.palantir.conjure.verifier"
+      },
+      "alias" : {
+        "type" : "primitive",
+        "primitive" : "STRING"
+      }
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "PositiveAndNegativeTestCases",
+        "package" : "com.palantir.conjure.verifier"
+      },
+      "fields" : [ {
+        "fieldName" : "positive",
+        "type" : {
+          "type" : "list",
+          "list" : {
+            "itemType" : {
+              "type" : "primitive",
+              "primitive" : "STRING"
+            }
+          }
+        }
+      }, {
+        "fieldName" : "negative",
+        "type" : {
+          "type" : "list",
+          "list" : {
+            "itemType" : {
+              "type" : "primitive",
+              "primitive" : "STRING"
+            }
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "TestCasesYml",
+        "package" : "com.palantir.conjure.verifier"
+      },
+      "fields" : [ {
+        "fieldName" : "autoDeserialize",
+        "type" : {
+          "type" : "map",
+          "map" : {
+            "keyType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "EndpointName",
+                "package" : "com.palantir.conjure.verifier"
+              }
+            },
+            "valueType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "PositiveAndNegativeTestCases",
+                "package" : "com.palantir.conjure.verifier"
+              }
+            }
+          }
+        }
+      }, {
+        "fieldName" : "manualStuff",
+        "type" : {
+          "type" : "map",
+          "map" : {
+            "keyType" : {
+              "type" : "reference",
+              "reference" : {
+                "name" : "EndpointName",
+                "package" : "com.palantir.conjure.verifier"
+              }
+            },
+            "valueType" : {
+              "type" : "list",
+              "list" : {
+                "itemType" : {
+                  "type" : "reference",
+                  "reference" : {
+                    "name" : "ServiceTestStructure",
+                    "package" : "com.palantir.conjure.verifier"
+                  }
+                }
+              }
+            }
+          }
+        }
+      } ]
+    }
+  }, {
+    "type" : "object",
+    "object" : {
+      "typeName" : {
+        "name" : "ServiceTestStructure",
+        "package" : "com.palantir.conjure.verifier"
+      },
+      "fields" : [ {
+        "fieldName" : "auth",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "primitive",
+              "primitive" : "STRING"
+            }
+          }
+        }
+      }, {
+        "fieldName" : "cookie",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "primitive",
+              "primitive" : "STRING"
+            }
+          }
+        }
+      }, {
+        "fieldName" : "header-params",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "map",
+              "map" : {
+                "keyType" : {
+                  "type" : "primitive",
+                  "primitive" : "STRING"
+                },
+                "valueType" : {
+                  "type" : "primitive",
+                  "primitive" : "STRING"
+                }
+              }
+            }
+          }
+        }
+      }, {
+        "fieldName" : "path-params",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "map",
+              "map" : {
+                "keyType" : {
+                  "type" : "primitive",
+                  "primitive" : "STRING"
+                },
+                "valueType" : {
+                  "type" : "primitive",
+                  "primitive" : "ANY"
+                }
+              }
+            }
+          }
+        }
+      }, {
+        "fieldName" : "body",
+        "type" : {
+          "type" : "optional",
+          "optional" : {
+            "itemType" : {
+              "type" : "primitive",
+              "primitive" : "ANY"
+            }
+          }
+        }
+      } ]
+    }
+  }, {
     "type" : "object",
     "object" : {
       "typeName" : {
@@ -152,7 +333,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "bearerTokenValue",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "BEARERTOKEN"
@@ -167,7 +348,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "binary",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "BINARY"
@@ -182,7 +363,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "coin",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "BOOLEAN"
@@ -197,7 +378,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "datetime",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "DATETIME"
@@ -212,7 +393,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "doubleValue",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "DOUBLE"
@@ -227,7 +408,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "integer",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "INTEGER"
@@ -242,7 +423,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "ridValue",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "RID"
@@ -257,7 +438,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "safeLongValue",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "SAFELONG"
@@ -272,7 +453,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "string",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "STRING"
@@ -287,7 +468,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "uuid",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "UUID"
@@ -302,7 +483,7 @@
         "package" : "com.palantir.conjure.verifier"
       },
       "fields" : [ {
-        "fieldName" : "any",
+        "fieldName" : "value",
         "type" : {
           "type" : "primitive",
           "primitive" : "ANY"
@@ -1042,134 +1223,278 @@
       } ],
       "docs" : "A type which can either be a StringExample, a set of strings, or an integer."
     }
-  }, {
-    "type" : "alias",
-    "alias" : {
-      "typeName" : {
-        "name" : "EndpointName",
-        "package" : "com.palantir.conjure.verifier"
-      },
-      "alias" : {
-        "type" : "primitive",
-        "primitive" : "STRING"
-      }
-    }
-  }, {
-    "type" : "alias",
-    "alias" : {
-      "typeName" : {
-        "name" : "TestCasesYml",
-        "package" : "com.palantir.conjure.verifier"
-      },
-      "alias" : {
-        "type" : "map",
-        "map" : {
-          "keyType" : {
-            "type" : "reference",
-            "reference" : {
-              "name" : "EndpointName",
-              "package" : "com.palantir.conjure.verifier"
-            }
-          },
-          "valueType" : {
-            "type" : "list",
-            "list" : {
-              "itemType" : {
-                "type" : "reference",
-                "reference" : {
-                  "name" : "ServiceTestStructure",
-                  "package" : "com.palantir.conjure.verifier"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }, {
-    "type" : "object",
-    "object" : {
-      "typeName" : {
-        "name" : "ServiceTestStructure",
-        "package" : "com.palantir.conjure.verifier"
-      },
-      "fields" : [ {
-        "fieldName" : "auth",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "STRING"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "cookie",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "STRING"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "header-params",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "map",
-              "map" : {
-                "keyType" : {
-                  "type" : "primitive",
-                  "primitive" : "STRING"
-                },
-                "valueType" : {
-                  "type" : "primitive",
-                  "primitive" : "STRING"
-                }
-              }
-            }
-          }
-        }
-      }, {
-        "fieldName" : "path-params",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "map",
-              "map" : {
-                "keyType" : {
-                  "type" : "primitive",
-                  "primitive" : "STRING"
-                },
-                "valueType" : {
-                  "type" : "primitive",
-                  "primitive" : "ANY"
-                }
-              }
-            }
-          }
-        }
-      }, {
-        "fieldName" : "body",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "ANY"
-            }
-          }
-        }
-      } ]
-    }
   } ],
   "services" : [ {
+    "serviceName" : {
+      "name" : "AutoDeserializePrimitivesTestService",
+      "package" : "com.palantir.conjure.verifier"
+    },
+    "endpoints" : [ {
+      "endpointName" : "receiveBearerTokenExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveBearerTokenExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "BearerTokenExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveBinaryExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveBinaryExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "BinaryExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveBooleanExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveBooleanExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "BooleanExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveDateTimeExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveDateTimeExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "DateTimeExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveDoubleExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveDoubleExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "DoubleExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveIntegerExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveIntegerExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "IntegerExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveRidExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveRidExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "RidExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveSafeLongExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveSafeLongExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "SafeLongExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveStringExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveStringExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "StringExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveUuidExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveUuidExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "UuidExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveAnyExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveAnyExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "AnyExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    } ]
+  }, {
     "serviceName" : {
       "name" : "TestService",
       "package" : "com.palantir.conjure.verifier"

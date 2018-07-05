@@ -12,18 +12,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = AnyExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class AnyExample {
-    private final Object any;
+    private final Object value;
 
     private volatile int memoizedHashCode;
 
-    private AnyExample(Object any) {
-        validateFields(any);
-        this.any = any;
+    private AnyExample(Object value) {
+        validateFields(value);
+        this.value = value;
     }
 
-    @JsonProperty("any")
-    public Object getAny() {
-        return this.any;
+    @JsonProperty("value")
+    public Object getValue() {
+        return this.value;
     }
 
     @Override
@@ -32,13 +32,13 @@ public final class AnyExample {
     }
 
     private boolean equalTo(AnyExample other) {
-        return this.any.equals(other.any);
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(any);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -47,20 +47,20 @@ public final class AnyExample {
     public String toString() {
         return new StringBuilder("AnyExample")
                 .append("{")
-                .append("any")
+                .append("value")
                 .append(": ")
-                .append(any)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static AnyExample of(Object any) {
-        return builder().any(any).build();
+    public static AnyExample of(Object value) {
+        return builder().value(value).build();
     }
 
-    private static void validateFields(Object any) {
+    private static void validateFields(Object value) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, any, "any");
+        missingFields = addFieldIfMissing(missingFields, value, "value");
         if (missingFields != null) {
             throw new IllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
@@ -86,23 +86,23 @@ public final class AnyExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private Object any;
+        private Object value;
 
         private Builder() {}
 
         public Builder from(AnyExample other) {
-            any(other.getAny());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("any")
-        public Builder any(Object any) {
-            this.any = Objects.requireNonNull(any, "any cannot be null");
+        @JsonSetter("value")
+        public Builder value(Object value) {
+            this.value = Objects.requireNonNull(value, "value cannot be null");
             return this;
         }
 
         public AnyExample build() {
-            return new AnyExample(any);
+            return new AnyExample(value);
         }
     }
 }

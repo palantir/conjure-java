@@ -13,18 +13,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = DateTimeExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class DateTimeExample {
-    private final ZonedDateTime datetime;
+    private final ZonedDateTime value;
 
     private volatile int memoizedHashCode;
 
-    private DateTimeExample(ZonedDateTime datetime) {
-        validateFields(datetime);
-        this.datetime = datetime;
+    private DateTimeExample(ZonedDateTime value) {
+        validateFields(value);
+        this.value = value;
     }
 
-    @JsonProperty("datetime")
-    public ZonedDateTime getDatetime() {
-        return this.datetime;
+    @JsonProperty("value")
+    public ZonedDateTime getValue() {
+        return this.value;
     }
 
     @Override
@@ -34,13 +34,13 @@ public final class DateTimeExample {
     }
 
     private boolean equalTo(DateTimeExample other) {
-        return this.datetime.isEqual(other.datetime);
+        return this.value.isEqual(other.value);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(datetime.toInstant());
+            memoizedHashCode = Objects.hash(value.toInstant());
         }
         return memoizedHashCode;
     }
@@ -49,20 +49,20 @@ public final class DateTimeExample {
     public String toString() {
         return new StringBuilder("DateTimeExample")
                 .append("{")
-                .append("datetime")
+                .append("value")
                 .append(": ")
-                .append(datetime)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static DateTimeExample of(ZonedDateTime datetime) {
-        return builder().datetime(datetime).build();
+    public static DateTimeExample of(ZonedDateTime value) {
+        return builder().value(value).build();
     }
 
-    private static void validateFields(ZonedDateTime datetime) {
+    private static void validateFields(ZonedDateTime value) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, datetime, "datetime");
+        missingFields = addFieldIfMissing(missingFields, value, "value");
         if (missingFields != null) {
             throw new IllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
@@ -88,23 +88,23 @@ public final class DateTimeExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private ZonedDateTime datetime;
+        private ZonedDateTime value;
 
         private Builder() {}
 
         public Builder from(DateTimeExample other) {
-            datetime(other.getDatetime());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("datetime")
-        public Builder datetime(ZonedDateTime datetime) {
-            this.datetime = Objects.requireNonNull(datetime, "datetime cannot be null");
+        @JsonSetter("value")
+        public Builder value(ZonedDateTime value) {
+            this.value = Objects.requireNonNull(value, "value cannot be null");
             return this;
         }
 
         public DateTimeExample build() {
-            return new DateTimeExample(datetime);
+            return new DateTimeExample(value);
         }
     }
 }

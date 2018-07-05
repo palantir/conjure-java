@@ -13,18 +13,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = UuidExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class UuidExample {
-    private final UUID uuid;
+    private final UUID value;
 
     private volatile int memoizedHashCode;
 
-    private UuidExample(UUID uuid) {
-        validateFields(uuid);
-        this.uuid = uuid;
+    private UuidExample(UUID value) {
+        validateFields(value);
+        this.value = value;
     }
 
-    @JsonProperty("uuid")
-    public UUID getUuid() {
-        return this.uuid;
+    @JsonProperty("value")
+    public UUID getValue() {
+        return this.value;
     }
 
     @Override
@@ -33,13 +33,13 @@ public final class UuidExample {
     }
 
     private boolean equalTo(UuidExample other) {
-        return this.uuid.equals(other.uuid);
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(uuid);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -48,20 +48,20 @@ public final class UuidExample {
     public String toString() {
         return new StringBuilder("UuidExample")
                 .append("{")
-                .append("uuid")
+                .append("value")
                 .append(": ")
-                .append(uuid)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static UuidExample of(UUID uuid) {
-        return builder().uuid(uuid).build();
+    public static UuidExample of(UUID value) {
+        return builder().value(value).build();
     }
 
-    private static void validateFields(UUID uuid) {
+    private static void validateFields(UUID value) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, uuid, "uuid");
+        missingFields = addFieldIfMissing(missingFields, value, "value");
         if (missingFields != null) {
             throw new IllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
@@ -87,23 +87,23 @@ public final class UuidExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private UUID uuid;
+        private UUID value;
 
         private Builder() {}
 
         public Builder from(UuidExample other) {
-            uuid(other.getUuid());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("uuid")
-        public Builder uuid(UUID uuid) {
-            this.uuid = Objects.requireNonNull(uuid, "uuid cannot be null");
+        @JsonSetter("value")
+        public Builder value(UUID value) {
+            this.value = Objects.requireNonNull(value, "value cannot be null");
             return this;
         }
 
         public UuidExample build() {
-            return new UuidExample(uuid);
+            return new UuidExample(value);
         }
     }
 }

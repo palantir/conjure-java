@@ -49,12 +49,11 @@ public class SpecVerifierTest {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-
         ConjureDefinition definition = objectMapper
                 .readValue(new File("src/test/resources/verifier-spec.json"), ConjureDefinition.class);
         File outputDir = new File("src/verifierSpec/java");
 
-        if (Boolean.FALSE) {
+        if (true) {
             new ObjectGenerator().emit(definition, outputDir);
             new JerseyServiceGenerator().emit(definition, outputDir);
         }

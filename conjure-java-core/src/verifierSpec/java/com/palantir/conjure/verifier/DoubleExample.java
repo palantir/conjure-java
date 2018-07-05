@@ -10,17 +10,17 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = DoubleExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class DoubleExample {
-    private final double doubleValue;
+    private final double value;
 
     private volatile int memoizedHashCode;
 
-    private DoubleExample(double doubleValue) {
-        this.doubleValue = doubleValue;
+    private DoubleExample(double value) {
+        this.value = value;
     }
 
-    @JsonProperty("doubleValue")
-    public double getDoubleValue() {
-        return this.doubleValue;
+    @JsonProperty("value")
+    public double getValue() {
+        return this.value;
     }
 
     @Override
@@ -29,13 +29,13 @@ public final class DoubleExample {
     }
 
     private boolean equalTo(DoubleExample other) {
-        return this.doubleValue == other.doubleValue;
+        return this.value == other.value;
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(doubleValue);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -44,15 +44,15 @@ public final class DoubleExample {
     public String toString() {
         return new StringBuilder("DoubleExample")
                 .append("{")
-                .append("doubleValue")
+                .append("value")
                 .append(": ")
-                .append(doubleValue)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static DoubleExample of(double doubleValue) {
-        return builder().doubleValue(doubleValue).build();
+    public static DoubleExample of(double value) {
+        return builder().value(value).build();
     }
 
     public static Builder builder() {
@@ -62,23 +62,23 @@ public final class DoubleExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private double doubleValue;
+        private double value;
 
         private Builder() {}
 
         public Builder from(DoubleExample other) {
-            doubleValue(other.getDoubleValue());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("doubleValue")
-        public Builder doubleValue(double doubleValue) {
-            this.doubleValue = doubleValue;
+        @JsonSetter("value")
+        public Builder value(double value) {
+            this.value = value;
             return this;
         }
 
         public DoubleExample build() {
-            return new DoubleExample(doubleValue);
+            return new DoubleExample(value);
         }
     }
 }

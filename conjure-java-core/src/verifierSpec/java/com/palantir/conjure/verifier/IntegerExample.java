@@ -10,17 +10,17 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = IntegerExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class IntegerExample {
-    private final int integer;
+    private final int value;
 
     private volatile int memoizedHashCode;
 
-    private IntegerExample(int integer) {
-        this.integer = integer;
+    private IntegerExample(int value) {
+        this.value = value;
     }
 
-    @JsonProperty("integer")
-    public int getInteger() {
-        return this.integer;
+    @JsonProperty("value")
+    public int getValue() {
+        return this.value;
     }
 
     @Override
@@ -30,13 +30,13 @@ public final class IntegerExample {
     }
 
     private boolean equalTo(IntegerExample other) {
-        return this.integer == other.integer;
+        return this.value == other.value;
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(integer);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -45,15 +45,15 @@ public final class IntegerExample {
     public String toString() {
         return new StringBuilder("IntegerExample")
                 .append("{")
-                .append("integer")
+                .append("value")
                 .append(": ")
-                .append(integer)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static IntegerExample of(int integer) {
-        return builder().integer(integer).build();
+    public static IntegerExample of(int value) {
+        return builder().value(value).build();
     }
 
     public static Builder builder() {
@@ -63,23 +63,23 @@ public final class IntegerExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private int integer;
+        private int value;
 
         private Builder() {}
 
         public Builder from(IntegerExample other) {
-            integer(other.getInteger());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("integer")
-        public Builder integer(int integer) {
-            this.integer = integer;
+        @JsonSetter("value")
+        public Builder value(int value) {
+            this.value = value;
             return this;
         }
 
         public IntegerExample build() {
-            return new IntegerExample(integer);
+            return new IntegerExample(value);
         }
     }
 }

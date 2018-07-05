@@ -13,18 +13,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = RidExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class RidExample {
-    private final ResourceIdentifier ridValue;
+    private final ResourceIdentifier value;
 
     private volatile int memoizedHashCode;
 
-    private RidExample(ResourceIdentifier ridValue) {
-        validateFields(ridValue);
-        this.ridValue = ridValue;
+    private RidExample(ResourceIdentifier value) {
+        validateFields(value);
+        this.value = value;
     }
 
-    @JsonProperty("ridValue")
-    public ResourceIdentifier getRidValue() {
-        return this.ridValue;
+    @JsonProperty("value")
+    public ResourceIdentifier getValue() {
+        return this.value;
     }
 
     @Override
@@ -33,13 +33,13 @@ public final class RidExample {
     }
 
     private boolean equalTo(RidExample other) {
-        return this.ridValue.equals(other.ridValue);
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(ridValue);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -48,20 +48,20 @@ public final class RidExample {
     public String toString() {
         return new StringBuilder("RidExample")
                 .append("{")
-                .append("ridValue")
+                .append("value")
                 .append(": ")
-                .append(ridValue)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static RidExample of(ResourceIdentifier ridValue) {
-        return builder().ridValue(ridValue).build();
+    public static RidExample of(ResourceIdentifier value) {
+        return builder().value(value).build();
     }
 
-    private static void validateFields(ResourceIdentifier ridValue) {
+    private static void validateFields(ResourceIdentifier value) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, ridValue, "ridValue");
+        missingFields = addFieldIfMissing(missingFields, value, "value");
         if (missingFields != null) {
             throw new IllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
@@ -87,23 +87,23 @@ public final class RidExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private ResourceIdentifier ridValue;
+        private ResourceIdentifier value;
 
         private Builder() {}
 
         public Builder from(RidExample other) {
-            ridValue(other.getRidValue());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("ridValue")
-        public Builder ridValue(ResourceIdentifier ridValue) {
-            this.ridValue = Objects.requireNonNull(ridValue, "ridValue cannot be null");
+        @JsonSetter("value")
+        public Builder value(ResourceIdentifier value) {
+            this.value = Objects.requireNonNull(value, "value cannot be null");
             return this;
         }
 
         public RidExample build() {
-            return new RidExample(ridValue);
+            return new RidExample(value);
         }
     }
 }

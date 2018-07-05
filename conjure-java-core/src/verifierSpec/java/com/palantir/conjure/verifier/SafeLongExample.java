@@ -13,18 +13,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = SafeLongExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class SafeLongExample {
-    private final SafeLong safeLongValue;
+    private final SafeLong value;
 
     private volatile int memoizedHashCode;
 
-    private SafeLongExample(SafeLong safeLongValue) {
-        validateFields(safeLongValue);
-        this.safeLongValue = safeLongValue;
+    private SafeLongExample(SafeLong value) {
+        validateFields(value);
+        this.value = value;
     }
 
-    @JsonProperty("safeLongValue")
-    public SafeLong getSafeLongValue() {
-        return this.safeLongValue;
+    @JsonProperty("value")
+    public SafeLong getValue() {
+        return this.value;
     }
 
     @Override
@@ -34,13 +34,13 @@ public final class SafeLongExample {
     }
 
     private boolean equalTo(SafeLongExample other) {
-        return this.safeLongValue.equals(other.safeLongValue);
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(safeLongValue);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -49,20 +49,20 @@ public final class SafeLongExample {
     public String toString() {
         return new StringBuilder("SafeLongExample")
                 .append("{")
-                .append("safeLongValue")
+                .append("value")
                 .append(": ")
-                .append(safeLongValue)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static SafeLongExample of(SafeLong safeLongValue) {
-        return builder().safeLongValue(safeLongValue).build();
+    public static SafeLongExample of(SafeLong value) {
+        return builder().value(value).build();
     }
 
-    private static void validateFields(SafeLong safeLongValue) {
+    private static void validateFields(SafeLong value) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, safeLongValue, "safeLongValue");
+        missingFields = addFieldIfMissing(missingFields, value, "value");
         if (missingFields != null) {
             throw new IllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
@@ -88,24 +88,23 @@ public final class SafeLongExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private SafeLong safeLongValue;
+        private SafeLong value;
 
         private Builder() {}
 
         public Builder from(SafeLongExample other) {
-            safeLongValue(other.getSafeLongValue());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("safeLongValue")
-        public Builder safeLongValue(SafeLong safeLongValue) {
-            this.safeLongValue =
-                    Objects.requireNonNull(safeLongValue, "safeLongValue cannot be null");
+        @JsonSetter("value")
+        public Builder value(SafeLong value) {
+            this.value = Objects.requireNonNull(value, "value cannot be null");
             return this;
         }
 
         public SafeLongExample build() {
-            return new SafeLongExample(safeLongValue);
+            return new SafeLongExample(value);
         }
     }
 }

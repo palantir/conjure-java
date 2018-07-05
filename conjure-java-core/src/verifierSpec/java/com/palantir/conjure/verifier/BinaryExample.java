@@ -13,18 +13,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = BinaryExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class BinaryExample {
-    private final ByteBuffer binary;
+    private final ByteBuffer value;
 
     private volatile int memoizedHashCode;
 
-    private BinaryExample(ByteBuffer binary) {
-        validateFields(binary);
-        this.binary = binary;
+    private BinaryExample(ByteBuffer value) {
+        validateFields(value);
+        this.value = value;
     }
 
-    @JsonProperty("binary")
-    public ByteBuffer getBinary() {
-        return this.binary.asReadOnlyBuffer();
+    @JsonProperty("value")
+    public ByteBuffer getValue() {
+        return this.value.asReadOnlyBuffer();
     }
 
     @Override
@@ -33,13 +33,13 @@ public final class BinaryExample {
     }
 
     private boolean equalTo(BinaryExample other) {
-        return this.binary.equals(other.binary);
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(binary);
+            memoizedHashCode = Objects.hash(value);
         }
         return memoizedHashCode;
     }
@@ -48,20 +48,20 @@ public final class BinaryExample {
     public String toString() {
         return new StringBuilder("BinaryExample")
                 .append("{")
-                .append("binary")
+                .append("value")
                 .append(": ")
-                .append(binary)
+                .append(value)
                 .append("}")
                 .toString();
     }
 
-    public static BinaryExample of(ByteBuffer binary) {
-        return builder().binary(binary).build();
+    public static BinaryExample of(ByteBuffer value) {
+        return builder().value(value).build();
     }
 
-    private static void validateFields(ByteBuffer binary) {
+    private static void validateFields(ByteBuffer value) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, binary, "binary");
+        missingFields = addFieldIfMissing(missingFields, value, "value");
         if (missingFields != null) {
             throw new IllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
@@ -87,25 +87,25 @@ public final class BinaryExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private ByteBuffer binary;
+        private ByteBuffer value;
 
         private Builder() {}
 
         public Builder from(BinaryExample other) {
-            binary(other.getBinary());
+            value(other.getValue());
             return this;
         }
 
-        @JsonSetter("binary")
-        public Builder binary(ByteBuffer binary) {
-            Objects.requireNonNull(binary, "binary cannot be null");
-            this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
-            this.binary.rewind();
+        @JsonSetter("value")
+        public Builder value(ByteBuffer value) {
+            Objects.requireNonNull(value, "value cannot be null");
+            this.value = ByteBuffer.allocate(value.remaining()).put(value.duplicate());
+            this.value.rewind();
             return this;
         }
 
         public BinaryExample build() {
-            return new BinaryExample(binary);
+            return new BinaryExample(value);
         }
     }
 }
