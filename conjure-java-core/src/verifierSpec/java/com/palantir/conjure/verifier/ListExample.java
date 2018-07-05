@@ -16,33 +16,16 @@ import javax.annotation.Generated;
 public final class ListExample {
     private final List<String> items;
 
-    private final List<Integer> primitiveItems;
-
-    private final List<Double> doubleItems;
-
     private volatile int memoizedHashCode;
 
-    private ListExample(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
-        validateFields(items, primitiveItems, doubleItems);
+    private ListExample(List<String> items) {
+        validateFields(items);
         this.items = Collections.unmodifiableList(items);
-        this.primitiveItems = Collections.unmodifiableList(primitiveItems);
-        this.doubleItems = Collections.unmodifiableList(doubleItems);
     }
 
     @JsonProperty("items")
     public List<String> getItems() {
         return this.items;
-    }
-
-    @JsonProperty("primitiveItems")
-    public List<Integer> getPrimitiveItems() {
-        return this.primitiveItems;
-    }
-
-    @JsonProperty("doubleItems")
-    public List<Double> getDoubleItems() {
-        return this.doubleItems;
     }
 
     @Override
@@ -51,15 +34,13 @@ public final class ListExample {
     }
 
     private boolean equalTo(ListExample other) {
-        return this.items.equals(other.items)
-                && this.primitiveItems.equals(other.primitiveItems)
-                && this.doubleItems.equals(other.doubleItems);
+        return this.items.equals(other.items);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(items, primitiveItems, doubleItems);
+            memoizedHashCode = Objects.hash(items);
         }
         return memoizedHashCode;
     }
@@ -71,33 +52,17 @@ public final class ListExample {
                 .append("items")
                 .append(": ")
                 .append(items)
-                .append(", ")
-                .append("primitiveItems")
-                .append(": ")
-                .append(primitiveItems)
-                .append(", ")
-                .append("doubleItems")
-                .append(": ")
-                .append(doubleItems)
                 .append("}")
                 .toString();
     }
 
-    public static ListExample of(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
-        return builder()
-                .items(items)
-                .primitiveItems(primitiveItems)
-                .doubleItems(doubleItems)
-                .build();
+    public static ListExample of(List<String> items) {
+        return builder().items(items).build();
     }
 
-    private static void validateFields(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
+    private static void validateFields(List<String> items) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
-        missingFields = addFieldIfMissing(missingFields, primitiveItems, "primitiveItems");
-        missingFields = addFieldIfMissing(missingFields, doubleItems, "doubleItems");
         if (missingFields != null) {
             throw new IllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
@@ -109,7 +74,7 @@ public final class ListExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(3);
+                missingFields = new ArrayList<>(1);
             }
             missingFields.add(fieldName);
         }
@@ -125,16 +90,10 @@ public final class ListExample {
     public static final class Builder {
         private List<String> items = new ArrayList<>();
 
-        private List<Integer> primitiveItems = new ArrayList<>();
-
-        private List<Double> doubleItems = new ArrayList<>();
-
         private Builder() {}
 
         public Builder from(ListExample other) {
             items(other.getItems());
-            primitiveItems(other.getPrimitiveItems());
-            doubleItems(other.getDoubleItems());
             return this;
         }
 
@@ -157,50 +116,8 @@ public final class ListExample {
             return this;
         }
 
-        @JsonSetter("primitiveItems")
-        public Builder primitiveItems(Iterable<Integer> primitiveItems) {
-            this.primitiveItems.clear();
-            ConjureCollections.addAll(
-                    this.primitiveItems,
-                    Objects.requireNonNull(primitiveItems, "primitiveItems cannot be null"));
-            return this;
-        }
-
-        public Builder addAllPrimitiveItems(Iterable<Integer> primitiveItems) {
-            ConjureCollections.addAll(
-                    this.primitiveItems,
-                    Objects.requireNonNull(primitiveItems, "primitiveItems cannot be null"));
-            return this;
-        }
-
-        public Builder primitiveItems(int primitiveItems) {
-            this.primitiveItems.add(primitiveItems);
-            return this;
-        }
-
-        @JsonSetter("doubleItems")
-        public Builder doubleItems(Iterable<Double> doubleItems) {
-            this.doubleItems.clear();
-            ConjureCollections.addAll(
-                    this.doubleItems,
-                    Objects.requireNonNull(doubleItems, "doubleItems cannot be null"));
-            return this;
-        }
-
-        public Builder addAllDoubleItems(Iterable<Double> doubleItems) {
-            ConjureCollections.addAll(
-                    this.doubleItems,
-                    Objects.requireNonNull(doubleItems, "doubleItems cannot be null"));
-            return this;
-        }
-
-        public Builder doubleItems(double doubleItems) {
-            this.doubleItems.add(doubleItems);
-            return this;
-        }
-
         public ListExample build() {
-            return new ListExample(items, primitiveItems, doubleItems);
+            return new ListExample(items);
         }
     }
 }

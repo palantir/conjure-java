@@ -508,28 +508,6 @@
             }
           }
         }
-      }, {
-        "fieldName" : "primitiveItems",
-        "type" : {
-          "type" : "list",
-          "list" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "INTEGER"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "doubleItems",
-        "type" : {
-          "type" : "list",
-          "list" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "DOUBLE"
-            }
-          }
-        }
       } ]
     }
   }, {
@@ -591,186 +569,6 @@
     "type" : "object",
     "object" : {
       "typeName" : {
-        "name" : "AnyMapExample",
-        "package" : "com.palantir.conjure.verifier"
-      },
-      "fields" : [ {
-        "fieldName" : "items",
-        "type" : {
-          "type" : "map",
-          "map" : {
-            "keyType" : {
-              "type" : "primitive",
-              "primitive" : "STRING"
-            },
-            "valueType" : {
-              "type" : "primitive",
-              "primitive" : "ANY"
-            }
-          }
-        }
-      } ]
-    }
-  }, {
-    "type" : "object",
-    "object" : {
-      "typeName" : {
-        "name" : "AliasAsMapKeyExample",
-        "package" : "com.palantir.conjure.verifier"
-      },
-      "fields" : [ {
-        "fieldName" : "strings",
-        "type" : {
-          "type" : "map",
-          "map" : {
-            "keyType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "StringAliasExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            },
-            "valueType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "ManyFieldExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            }
-          }
-        }
-      }, {
-        "fieldName" : "rids",
-        "type" : {
-          "type" : "map",
-          "map" : {
-            "keyType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "RidAliasExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            },
-            "valueType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "ManyFieldExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            }
-          }
-        }
-      }, {
-        "fieldName" : "bearertokens",
-        "type" : {
-          "type" : "map",
-          "map" : {
-            "keyType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "BearerTokenAliasExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            },
-            "valueType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "ManyFieldExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            }
-          }
-        }
-      }, {
-        "fieldName" : "integers",
-        "type" : {
-          "type" : "map",
-          "map" : {
-            "keyType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "IntegerAliasExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            },
-            "valueType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "ManyFieldExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            }
-          }
-        }
-      }, {
-        "fieldName" : "safelongs",
-        "type" : {
-          "type" : "map",
-          "map" : {
-            "keyType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "SafeLongAliasExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            },
-            "valueType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "ManyFieldExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            }
-          }
-        }
-      }, {
-        "fieldName" : "datetimes",
-        "type" : {
-          "type" : "map",
-          "map" : {
-            "keyType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "DateTimeAliasExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            },
-            "valueType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "ManyFieldExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            }
-          }
-        }
-      }, {
-        "fieldName" : "uuids",
-        "type" : {
-          "type" : "map",
-          "map" : {
-            "keyType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "UuidAliasExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            },
-            "valueType" : {
-              "type" : "reference",
-              "reference" : {
-                "name" : "ManyFieldExample",
-                "package" : "com.palantir.conjure.verifier"
-              }
-            }
-          }
-        }
-      } ]
-    }
-  }, {
-    "type" : "object",
-    "object" : {
-      "typeName" : {
         "name" : "OptionalExample",
         "package" : "com.palantir.conjure.verifier"
       },
@@ -782,92 +580,6 @@
             "itemType" : {
               "type" : "primitive",
               "primitive" : "STRING"
-            }
-          }
-        }
-      } ]
-    }
-  }, {
-    "type" : "object",
-    "object" : {
-      "typeName" : {
-        "name" : "PrimitiveOptionalsExample",
-        "package" : "com.palantir.conjure.verifier"
-      },
-      "fields" : [ {
-        "fieldName" : "num",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "DOUBLE"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "bool",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "BOOLEAN"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "integer",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "INTEGER"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "safelong",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "SAFELONG"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "rid",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "RID"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "bearertoken",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "BEARERTOKEN"
-            }
-          }
-        }
-      }, {
-        "fieldName" : "uuid",
-        "type" : {
-          "type" : "optional",
-          "optional" : {
-            "itemType" : {
-              "type" : "primitive",
-              "primitive" : "UUID"
             }
           }
         }
@@ -1226,276 +938,6 @@
   } ],
   "services" : [ {
     "serviceName" : {
-      "name" : "AutoDeserializePrimitivesTestService",
-      "package" : "com.palantir.conjure.verifier"
-    },
-    "endpoints" : [ {
-      "endpointName" : "receiveBearerTokenExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveBearerTokenExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "BearerTokenExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveBinaryExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveBinaryExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "BinaryExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveBooleanExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveBooleanExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "BooleanExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveDateTimeExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveDateTimeExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "DateTimeExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveDoubleExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveDoubleExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "DoubleExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveIntegerExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveIntegerExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "IntegerExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveRidExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveRidExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "RidExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveSafeLongExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveSafeLongExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "SafeLongExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveStringExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveStringExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "StringExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveUuidExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveUuidExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "UuidExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    }, {
-      "endpointName" : "receiveAnyExample",
-      "httpMethod" : "GET",
-      "httpPath" : "/receiveAnyExample/{index}",
-      "args" : [ {
-        "argName" : "index",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        },
-        "paramType" : {
-          "type" : "path",
-          "path" : { }
-        },
-        "markers" : [ ]
-      } ],
-      "returns" : {
-        "type" : "reference",
-        "reference" : {
-          "name" : "AnyExample",
-          "package" : "com.palantir.conjure.verifier"
-        }
-      },
-      "markers" : [ ]
-    } ]
-  }, {
-    "serviceName" : {
       "name" : "TestService",
       "package" : "com.palantir.conjure.verifier"
     },
@@ -1800,6 +1242,372 @@
         "type" : "reference",
         "reference" : {
           "name" : "BinaryAlias",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    } ]
+  }, {
+    "serviceName" : {
+      "name" : "AutoDeserializeService",
+      "package" : "com.palantir.conjure.verifier"
+    },
+    "endpoints" : [ {
+      "endpointName" : "receiveBearerTokenExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveBearerTokenExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "BearerTokenExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveBinaryExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveBinaryExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "BinaryExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveBooleanExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveBooleanExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "BooleanExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveDateTimeExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveDateTimeExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "DateTimeExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveDoubleExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveDoubleExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "DoubleExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveIntegerExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveIntegerExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "IntegerExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveRidExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveRidExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "RidExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveSafeLongExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveSafeLongExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "SafeLongExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveStringExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveStringExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "StringExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveUuidExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveUuidExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "UuidExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveAnyExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveAnyExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "AnyExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveListExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveListExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "ListExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveSetExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveSetExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "SetExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveMapExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveMapExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "MapExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "receiveOptionalExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/receiveOptionalExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "OptionalExample",
           "package" : "com.palantir.conjure.verifier"
         }
       },

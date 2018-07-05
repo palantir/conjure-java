@@ -25,7 +25,7 @@ import com.palantir.conjure.java.EteTestServer;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.conjure.verifier.AutoDeserializePrimitivesTestService;
+import com.palantir.conjure.verifier.AutoDeserializeService;
 import com.palantir.conjure.verifier.EndpointName;
 import com.palantir.conjure.verifier.TestCasesYml;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
@@ -46,14 +46,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class AutoDeserializePrimitivesTest {
+public class AutoDeserializeTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(EteTestServer.class);
     private static final SpecVerifier specVerifier = new SpecVerifier();
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private final AutoDeserializePrimitivesTestService testService = JaxRsClient.create(
-            AutoDeserializePrimitivesTestService.class,
+    private final AutoDeserializeService testService = JaxRsClient.create(
+            AutoDeserializeService.class,
             EteTestServer.clientUserAgent(),
             EteTestServer.clientConfiguration());
 

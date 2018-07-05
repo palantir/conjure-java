@@ -1,5 +1,6 @@
 autoDeserialize:
 
+  # primitives
   receiveBearerTokenExample:
     positive:
       - '{"value":"abc123"}'
@@ -132,6 +133,59 @@ autoDeserialize:
       - '{"value":[1,2,3]}'
       - '{"value":{"key":3}}'
       - '{"value":{"key":{"inner-key":[1,2,3]}}}'
+
+
+  # collections
+  receiveListExample:
+    positive:
+      - '{"items":[]}'
+      - '{"items":["","a","b","c","a"]}'
+      - '{}'
+      # - '{"items":null}'
+      #   tag: "lenient"
+    negative:
+      - '{"items":{}}'
+      # - '{"items":null}'
+      #   tag: "!lenient"
+  receiveSetExample:
+    positive:
+      - '{"value":[]}'
+      - '{"value":["","a","b","c"]}'
+      - '{}'
+      # - '{"value":null}'
+      #   tag: "lenient"
+    negative:
+      # - '{"value":null}'
+      #   tag: "!lenient"
+      # TODO SPEC: behavior for an object declared as a "Set" that receives a list with multiple elements that are equal.
+      - '{"value":["a","a"]}'
+  receiveMapExample:
+    positive:
+      - '{"value":{"key":"value","key2":"value2"}}'
+      - '{}'
+      - '{"value":{}}'
+      # - '{"value":null}'
+      #   tag: "lenient"
+    negative:
+      - '{"value":{"key":[1,2,3]}}'
+      - '{"value":"not a map"}'
+      # - '{"value":null}'
+      #   tag: "!lenient"
+  receiveOptionalExample:
+    positive:
+      - '{}'
+      - '{"value":null}'
+      - '{"value":""}'
+      - '{"value":"foo"}'
+    negative:
+      - '{"value":{}}'
+      - '{"value":[]}'
+
+  # complex (TODO)
+
+
+
+
 
 
 
