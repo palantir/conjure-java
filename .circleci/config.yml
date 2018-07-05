@@ -42,10 +42,11 @@ jobs:
   test-parallel-collect:
       machine: { docker_layer_caching: true }
       parallelism: 2
+      environment: { CIRCLE_ARTIFACTS: /home/circleci/artifacts } 
       steps:
-        - run: echo "hi" >> /tmp/$CIRCLE_NODE_INDEX
+        - run: echo "$CIRCLE_NODE_INDEX" >> /tmp/hi
         - store_artifacts:
-            path: /tmp/$CIRCLE_NODE_INDEX
+            path: /tmp/hi
 
 workflows:
   version: 2
