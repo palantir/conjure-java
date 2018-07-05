@@ -66,10 +66,12 @@ public class AutoDeserializeTest {
         List<Object[]> objects = new ArrayList<>();
 
         testCases.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
-            IntStream.range(0, positiveAndNegativeTestCases.getPositive().size())
+            int positiveSize = positiveAndNegativeTestCases.getPositive().size();
+            int negativeSize = positiveAndNegativeTestCases.getNegative().size();
+            IntStream.range(0, positiveSize )
                     .forEach(i -> objects.add(new Object[]{endpointName, i, true}));
 
-            IntStream.range(0, positiveAndNegativeTestCases.getNegative().size())
+            IntStream.range(positiveSize, positiveSize + negativeSize)
                     .forEach(i -> objects.add(new Object[]{endpointName, i, false}));
         });
 

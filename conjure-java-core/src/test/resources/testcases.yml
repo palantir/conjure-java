@@ -181,6 +181,139 @@ autoDeserialize:
       - '{"value":{}}'
       - '{"value":[]}'
 
+  # complex aliases
+  receiveStringAliasExample:
+    positive:
+      - '"exampleOutput"'
+      - '""'
+    negative:
+      - 'null'
+      - '{}'
+      - '[]'
+  receiveDoubleAliasExample:
+    positive:
+      - '10'
+      - '10.0'
+    # TODO: NaN, Infinity
+    negative:
+      - 'null'
+      - '{}'
+      - '[]'
+      - '""'
+  receiveIntegerAliasExample:
+    positive:
+      - '123'
+    negative:
+      - 'null'
+      - '{}'
+      - '[]'
+      - '""'
+      - '123.4'
+  receiveBooleanAliasExample:
+    positive:
+      - 'true'
+      - 'false'
+    negative:
+      - 'null'
+      - '{}'
+      - '[]'
+      - '""'
+  receiveSafeLongAliasExample:
+    positive:
+      - '-9007199254740991'
+      - '0'
+      - '9007199254740991'
+    negative:
+      - '-9007199254740992'
+      - '9007199254740992'
+      - 'null'
+      - '{}'
+      - '[]'
+      - '""'
+  receiveRidAliasExample:
+    positive:
+      - '"ri.service.instance.folder.foo"'
+      - '"ri.a1p2p3.south-west.data-set.my-hello_WORLD-123"'
+      - '"ri.my-service.instance1.graph-node.._"'
+      - '"ri.service.1instance.type.emptyname"'
+      - '"ri.my-service..graph-node.noInstance"'
+      - '"ri.my-service..graph-node.noInstance.multiple.extra.dots"'
+    negative:
+      - 'null'
+      - '{}'
+      - '""'
+      - '"badString"'
+      - '"ri.service.CAPLOCK.type.name"'
+      - '"ri.service.instance.-123.name"'
+      - '"ri..instance.type.noService"'
+      - '"ri.service.instance.type."'
+      - '"id.bad.id.class.b.name"'
+      - '"ri:service::instance:type:name"'
+      - '"ri.service.instance.type.name!@#"'
+      - '"ri.service(name)..folder.foo"'
+      - '{}'
+      - '[]'
+      - '""'
+  receiveBearerTokenAliasExample:
+    positive:
+      - '"abc123"'
+      - '"-._~+/="'
+      - '"abc="'
+      - '"a="'
+    negative:
+      - 'null'
+      - '{}'
+      - '[]'
+      - '""'
+  receiveUuidAliasExample:
+    positive:
+      - '"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b"' # UUID v1
+      - '"80e6dd13-5f42-4e33-ad18-f73875540c8b"' # UUID v4
+    negative:
+      - 'null'
+      - '{}'
+      - '[]'
+      - '""'
+      - '"80e6dd13-5f42-4e33-ad18"'
+  receiveReferenceAliasExample:
+    positive:
+      - '0'
+      - '"content"'
+      - 'true'
+      - '[1,2,3]'
+      - '{"key":3}'
+      - '{"key":{"inner-key":[1,2,3]}}'
+    negative:
+      - 'null'
+      - '{{'
+  receiveDateTimeAliasExample:
+    positive:
+      - '2017-01-02T03:04:05Z"'
+      - '2017-01-02T03:04:05.000Z"'
+      - '2017-01-02T03:04:05.000000Z"'
+      - '2017-01-02T03:04:05.000000000Z"'
+      - '2017-01-02T04:04:05.000000000+01:00"'
+      - '2017-01-02T05:04:05.000000000+02:00"'
+      - '2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"'
+    negative:
+      - '4/3/2018"'
+      - '1523040070"'
+      - '1523040070'
+      - '2017-01-02T03:04:05.0000000000Z"'
+      - '2017-01-02T04:04:05.000000000+01:00[Europe/Berlin][Another/Zone]"'
+      - 'null'
+      - '{}'
+      - '[]'
+      - '""'
+  # receiveBinaryAliasExample:
+  #   positive:
+  #     - ''
+  #   negative:
+  #     - 'null'
+  #     - '{}'
+  #     - '[]'
+  #     - '""'
+
   # complex (TODO)
 
 
