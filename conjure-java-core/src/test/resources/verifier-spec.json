@@ -411,6 +411,15 @@
       "docs" : "This enumerates the numbers 1:2."
     }
   }, {
+    "type" : "enum",
+    "enum" : {
+      "typeName" : {
+        "name" : "EmptyEnumExample",
+        "package" : "com.palantir.conjure.verifier"
+      },
+      "values" : [ ]
+    }
+  }, {
     "type" : "object",
     "object" : {
       "typeName" : {
@@ -449,22 +458,19 @@
         "type" : {
           "type" : "primitive",
           "primitive" : "STRING"
-        },
-        "docs" : "docs for string field"
+        }
       }, {
         "fieldName" : "integer",
         "type" : {
           "type" : "primitive",
           "primitive" : "INTEGER"
-        },
-        "docs" : "docs for integer field"
+        }
       }, {
         "fieldName" : "doubleValue",
         "type" : {
           "type" : "primitive",
           "primitive" : "DOUBLE"
-        },
-        "docs" : "docs for doubleValue field"
+        }
       }, {
         "fieldName" : "optionalItem",
         "type" : {
@@ -475,8 +481,7 @@
               "primitive" : "STRING"
             }
           }
-        },
-        "docs" : "docs for optionalItem field"
+        }
       }, {
         "fieldName" : "items",
         "type" : {
@@ -487,8 +492,7 @@
               "primitive" : "STRING"
             }
           }
-        },
-        "docs" : "docs for items field"
+        }
       }, {
         "fieldName" : "set",
         "type" : {
@@ -499,8 +503,7 @@
               "primitive" : "STRING"
             }
           }
-        },
-        "docs" : "docs for set field"
+        }
       }, {
         "fieldName" : "map",
         "type" : {
@@ -515,8 +518,7 @@
               "primitive" : "STRING"
             }
           }
-        },
-        "docs" : "docs for map field"
+        }
       }, {
         "fieldName" : "alias",
         "type" : {
@@ -525,15 +527,14 @@
             "name" : "StringAliasExample",
             "package" : "com.palantir.conjure.verifier"
           }
-        },
-        "docs" : "docs for alias field"
+        }
       } ]
     }
   }, {
     "type" : "union",
     "union" : {
       "typeName" : {
-        "name" : "UnionTypeExample",
+        "name" : "UnionExample",
         "package" : "com.palantir.conjure.verifier"
       },
       "union" : [ {
@@ -544,8 +545,7 @@
             "name" : "StringExample",
             "package" : "com.palantir.conjure.verifier"
           }
-        },
-        "docs" : "Docs for when UnionTypeExample is of type StringExample."
+        }
       }, {
         "fieldName" : "set",
         "type" : {
@@ -558,37 +558,21 @@
           }
         }
       }, {
-        "fieldName" : "thisFieldIsAnInteger",
+        "fieldName" : "integer",
         "type" : {
           "type" : "primitive",
           "primitive" : "INTEGER"
         }
-      }, {
-        "fieldName" : "alsoAnInteger",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        }
-      }, {
-        "fieldName" : "if",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        }
-      }, {
-        "fieldName" : "new",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        }
-      }, {
-        "fieldName" : "interface",
-        "type" : {
-          "type" : "primitive",
-          "primitive" : "INTEGER"
-        }
-      } ],
-      "docs" : "A type which can either be a StringExample, a set of strings, or an integer."
+      } ]
+    }
+  }, {
+    "type" : "union",
+    "union" : {
+      "typeName" : {
+        "name" : "EmptyUnionExample",
+        "package" : "com.palantir.conjure.verifier"
+      },
+      "union" : [ ]
     }
   }, {
     "type" : "alias",
@@ -1397,6 +1381,78 @@
         "type" : "reference",
         "reference" : {
           "name" : "BinaryAliasExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "recieveEnumExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/recieveEnumExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "EnumExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "recieveEnumFieldExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/recieveEnumFieldExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "EnumFieldExample",
+          "package" : "com.palantir.conjure.verifier"
+        }
+      },
+      "markers" : [ ]
+    }, {
+      "endpointName" : "recieveUnionExample",
+      "httpMethod" : "GET",
+      "httpPath" : "/recieveUnionExample/{index}",
+      "args" : [ {
+        "argName" : "index",
+        "type" : {
+          "type" : "primitive",
+          "primitive" : "INTEGER"
+        },
+        "paramType" : {
+          "type" : "path",
+          "path" : { }
+        },
+        "markers" : [ ]
+      } ],
+      "returns" : {
+        "type" : "reference",
+        "reference" : {
+          "name" : "UnionExample",
           "package" : "com.palantir.conjure.verifier"
         }
       },

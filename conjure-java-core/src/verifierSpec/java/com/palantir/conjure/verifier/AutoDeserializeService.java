@@ -72,4 +72,60 @@ public interface AutoDeserializeService {
     @GET
     @Path("receiveOptionalExample/{index}")
     OptionalExample receiveOptionalExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveStringAliasExample/{index}")
+    StringAliasExample receiveStringAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveDoubleAliasExample/{index}")
+    DoubleAliasExample receiveDoubleAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveIntegerAliasExample/{index}")
+    IntegerAliasExample receiveIntegerAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveBooleanAliasExample/{index}")
+    BooleanAliasExample receiveBooleanAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveSafeLongAliasExample/{index}")
+    SafeLongAliasExample receiveSafeLongAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveRidAliasExample/{index}")
+    RidAliasExample receiveRidAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveBearerTokenAliasExample/{index}")
+    BearerTokenAliasExample receiveBearerTokenAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveUuidAliasExample/{index}")
+    UuidAliasExample receiveUuidAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveReferenceAliasExample/{index}")
+    ReferenceAliasExample receiveReferenceAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveDateTimeAliasExample/{index}")
+    DateTimeAliasExample receiveDateTimeAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("receiveBinaryAliasExample/{index}")
+    BinaryAliasExample receiveBinaryAliasExample(@PathParam("index") int index);
+
+    @GET
+    @Path("recieveEnumExample/{index}")
+    EnumExample recieveEnumExample(@PathParam("index") int index);
+
+    @GET
+    @Path("recieveEnumFieldExample/{index}")
+    EnumFieldExample recieveEnumFieldExample(@PathParam("index") int index);
+
+    @GET
+    @Path("recieveUnionExample/{index}")
+    UnionExample recieveUnionExample(@PathParam("index") int index);
 }

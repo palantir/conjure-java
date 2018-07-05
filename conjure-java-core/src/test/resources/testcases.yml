@@ -314,9 +314,76 @@ autoDeserialize:
   #     - '[]'
   #     - '""'
 
-  # complex (TODO)
+  # complex enum
 
+  recieveEnumExample:
+    positive:
+      - '"ONE"'
+      - '"TWO"'
+      - '"THREE"'
+      - '"UNKNOWN"'
+      # unknown types just map to "UNKNOWN"
+      - '"INVALID"'
+    negative:
+      - '"invalid"'
+      - '"one"'
+      - '1'
+      - 'null'
+  recieveEnumFieldExample:
+      positive:
+      - '{"value": "UNKNOWN"}'
+      - '{"value": "ONE"}'
+      - '{"value": "TWO"}'
+      negative:
+      - '{}'
+      - '{"value": null}'
+      - '{"value": "one"}'
 
+  # complex union
+  recieveUnionExample:
+      positive:
+        - '{"type":"stringExample","stringExample": {"value": "foo"}}'
+        - '{"type":"set","set": ["foo", "bar"]}'
+        - '{"type":"interger","interger": 1}'
+      negative:
+        - '{"type":"fake","fake": 1}'
+        - ''
+        - 'null'
+        - '{}'
+        - '[]'
+        - '""'
+  recieveEmptyUnionExample:
+      positive: []
+      negative:
+        - '{"type":"fake","fake": 1}'
+        - ''
+        - 'null'
+        - '{}'
+        - '[]'
+        - '""'
+
+  # complex object
+  receiveEmptyObjectExample:
+    positive:
+      - '{}'
+    negative:
+      - ''
+      - 'null'
+      - '[]'
+      - '""'
+  receiveManyFieldExample:
+    positive:
+      - '{string": "foo", "integer": 1, "doubleValue": 1.2, "items": [], "set": ["a", "b", "map": {}, "alias": "something"}'
+      - '{string": "foo", "integer": 1, "doubleValue": 1.2, "alias": "something"}'
+      - '{string": "foo", "integer": 1, "doubleValue": 1.2, "optionalItem": "a", "alias": "something"}'
+      - '{string": "foo", "integer": 1, "doubleValue": 1.2, "optionalItem": null, "alias": "something"}'
+    negative:
+      - '{string": "foo", "integer": 1, "doubleValue": 1.2, "optionalItem": "null", "alias": "something"}'
+      - ''
+      - 'null'
+      - '{}'
+      - '[]'
+      - '""'
 
 
 

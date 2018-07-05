@@ -57,49 +57,41 @@ public final class ManyFieldExample {
         this.alias = alias;
     }
 
-    /** docs for string field */
     @JsonProperty("string")
     public String getString() {
         return this.string;
     }
 
-    /** docs for integer field */
     @JsonProperty("integer")
     public int getInteger() {
         return this.integer;
     }
 
-    /** docs for doubleValue field */
     @JsonProperty("doubleValue")
     public double getDoubleValue() {
         return this.doubleValue;
     }
 
-    /** docs for optionalItem field */
     @JsonProperty("optionalItem")
     public Optional<String> getOptionalItem() {
         return this.optionalItem;
     }
 
-    /** docs for items field */
     @JsonProperty("items")
     public List<String> getItems() {
         return this.items;
     }
 
-    /** docs for set field */
     @JsonProperty("set")
     public Set<String> getSet() {
         return this.set;
     }
 
-    /** docs for map field */
     @JsonProperty("map")
     public Map<String, String> getMap() {
         return this.map;
     }
 
-    /** docs for alias field */
     @JsonProperty("alias")
     public StringAliasExample getAlias() {
         return this.alias;
@@ -240,35 +232,30 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for string field */
         @JsonSetter("string")
         public Builder string(String string) {
             this.string = Objects.requireNonNull(string, "string cannot be null");
             return this;
         }
 
-        /** docs for integer field */
         @JsonSetter("integer")
         public Builder integer(int integer) {
             this.integer = integer;
             return this;
         }
 
-        /** docs for doubleValue field */
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             this.doubleValue = doubleValue;
             return this;
         }
 
-        /** docs for optionalItem field */
         @JsonSetter("optionalItem")
         public Builder optionalItem(Optional<String> optionalItem) {
             this.optionalItem = Objects.requireNonNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
 
-        /** docs for optionalItem field */
         public Builder optionalItem(String optionalItem) {
             this.optionalItem =
                     Optional.of(
@@ -276,7 +263,6 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for items field */
         @JsonSetter("items")
         public Builder items(Iterable<String> items) {
             this.items.clear();
@@ -285,20 +271,17 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for items field */
         public Builder addAllItems(Iterable<String> items) {
             ConjureCollections.addAll(
                     this.items, Objects.requireNonNull(items, "items cannot be null"));
             return this;
         }
 
-        /** docs for items field */
         public Builder items(String items) {
             this.items.add(items);
             return this;
         }
 
-        /** docs for set field */
         @JsonSetter("set")
         public Builder set(Iterable<String> set) {
             this.set.clear();
@@ -306,19 +289,16 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for set field */
         public Builder addAllSet(Iterable<String> set) {
             ConjureCollections.addAll(this.set, Objects.requireNonNull(set, "set cannot be null"));
             return this;
         }
 
-        /** docs for set field */
         public Builder set(String set) {
             this.set.add(set);
             return this;
         }
 
-        /** docs for map field */
         @JsonSetter("map")
         public Builder map(Map<String, String> map) {
             this.map.clear();
@@ -326,19 +306,16 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for map field */
         public Builder putAllMap(Map<String, String> map) {
             this.map.putAll(Objects.requireNonNull(map, "map cannot be null"));
             return this;
         }
 
-        /** docs for map field */
         public Builder map(String key, String value) {
             this.map.put(key, value);
             return this;
         }
 
-        /** docs for alias field */
         @JsonSetter("alias")
         public Builder alias(StringAliasExample alias) {
             this.alias = Objects.requireNonNull(alias, "alias cannot be null");
