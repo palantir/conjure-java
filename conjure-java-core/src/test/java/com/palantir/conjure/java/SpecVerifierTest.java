@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
@@ -42,9 +43,13 @@ public class SpecVerifierTest {
             EteTestServer.clientUserAgent(),
             EteTestServer.clientConfiguration());
 
+    private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
+
+    private static final SpecVerifier specVerifier = new SpecVerifier();
+
     @BeforeClass
     public static void beforeClass() throws IOException {
-        ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper();
+
         ConjureDefinition definition = objectMapper
                 .readValue(new File("src/test/resources/verifier-spec.json"), ConjureDefinition.class);
         File outputDir = new File("src/verifierSpec/java");
@@ -56,23 +61,27 @@ public class SpecVerifierTest {
     }
 
     @Test
-    public void getStringAuth_1() {
-        System.out.println(testService.getStringAuth(AuthHeader.valueOf("abcd123")));
+    public void getStringAuth_1() throws JsonProcessingException {
+        String json = objectMapper.writeValueAsString(testService.getStringAuth(AuthHeader.valueOf("abcd123")));
+        specVerifier.verifyResponseJsonIsOk(json);
     }
 
     @Test
-    public void echoHeaderParam() {
-        System.out.println(testService.echoHeaderParam("abcd123"));
+    public void echoHeaderParam() throws JsonProcessingException {
+        String json = objectMapper.writeValueAsString(testService.echoHeaderParam("abcd123"));
+        specVerifier.verifyResponseJsonIsOk(json);
     }
 
     @Test
-    public void echoPathParam_1() {
-        System.out.println(testService.echoPathParam("abcd123"));
+    public void echoPathParam_1() throws JsonProcessingException {
+        String json = objectMapper.writeValueAsString(testService.echoPathParam("abcd123"));
+        specVerifier.verifyResponseJsonIsOk(json);
     }
 
     @Test
-    public void echoPathParam_2() {
-        System.out.println(testService.echoPathParam("!@#$%^&*(),./?"));
+    public void echoPathParam_2() throws JsonProcessingException {
+        String json = objectMapper.writeValueAsString(testService.echoPathParam("!@#$%^&*(),./?"));
+        specVerifier.verifyResponseJsonIsOk(json);
     }
 
     @Test

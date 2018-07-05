@@ -9,7 +9,8 @@ getStringCookie:
   - cookie: testCookie abcd123
 
 echoHeaderParam:
-  - header-params: { "some-header": "abcd123" }
+  - header-params:
+      "some-header": "abcd123"
 
 echoPathParam:
   - path-params:
@@ -26,8 +27,6 @@ echoQueryParam:
 echoOptionalQueryParam:
   - path-params:
       query: null
-
-echoOptionalQueryParam:
   - path-params:
       query: "null"
 
