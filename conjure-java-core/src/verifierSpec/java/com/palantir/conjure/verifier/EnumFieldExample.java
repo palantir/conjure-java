@@ -1,0 +1,109 @@
+package com.palantir.conjure.verifier;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import javax.annotation.Generated;
+
+@JsonDeserialize(builder = EnumFieldExample.Builder.class)
+@Generated("com.palantir.conjure.java.types.BeanGenerator")
+public final class EnumFieldExample {
+    private final EnumExample enum_;
+
+    private volatile int memoizedHashCode;
+
+    private EnumFieldExample(EnumExample enum_) {
+        validateFields(enum_);
+        this.enum_ = enum_;
+    }
+
+    @JsonProperty("enum")
+    public EnumExample getEnum() {
+        return this.enum_;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other
+                || (other instanceof EnumFieldExample && equalTo((EnumFieldExample) other));
+    }
+
+    private boolean equalTo(EnumFieldExample other) {
+        return this.enum_.equals(other.enum_);
+    }
+
+    @Override
+    public int hashCode() {
+        if (memoizedHashCode == 0) {
+            memoizedHashCode = Objects.hash(enum_);
+        }
+        return memoizedHashCode;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("EnumFieldExample")
+                .append("{")
+                .append("enum")
+                .append(": ")
+                .append(enum_)
+                .append("}")
+                .toString();
+    }
+
+    public static EnumFieldExample of(EnumExample enum_) {
+        return builder().enum_(enum_).build();
+    }
+
+    private static void validateFields(EnumExample enum_) {
+        List<String> missingFields = null;
+        missingFields = addFieldIfMissing(missingFields, enum_, "enum");
+        if (missingFields != null) {
+            throw new IllegalArgumentException(
+                    "Some required fields have not been set: " + missingFields);
+        }
+    }
+
+    private static List<String> addFieldIfMissing(
+            List<String> prev, Object fieldValue, String fieldName) {
+        List<String> missingFields = prev;
+        if (fieldValue == null) {
+            if (missingFields == null) {
+                missingFields = new ArrayList<>(1);
+            }
+            missingFields.add(fieldName);
+        }
+        return missingFields;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static final class Builder {
+        private EnumExample enum_;
+
+        private Builder() {}
+
+        public Builder from(EnumFieldExample other) {
+            enum_(other.getEnum());
+            return this;
+        }
+
+        @JsonSetter("enum")
+        public Builder enum_(EnumExample enum_) {
+            this.enum_ = Objects.requireNonNull(enum_, "enum cannot be null");
+            return this;
+        }
+
+        public EnumFieldExample build() {
+            return new EnumFieldExample(enum_);
+        }
+    }
+}
