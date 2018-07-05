@@ -28,6 +28,7 @@ sourceSets {
 
 idea {
     module {
+        sourceDirs += sourceSets.verifierSpec.java.srcDirs
         testSourceDirs += sourceSets.integrationInput.java.srcDirs
     }
 }

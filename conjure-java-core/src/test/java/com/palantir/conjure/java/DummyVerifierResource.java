@@ -16,12 +16,20 @@
 
 package com.palantir.conjure.java;
 
+import com.palantir.conjure.verifier.BinaryAlias;
+import com.palantir.conjure.verifier.OptionalObject;
+import com.palantir.conjure.verifier.PrimitivesObject;
+import com.palantir.conjure.verifier.SimpleEnums;
+import com.palantir.conjure.verifier.SimpleUnion;
+import com.palantir.conjure.verifier.StringAlias;
+import com.palantir.conjure.verifier.TestService;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.StreamingOutput;
 
-public final class DummyVerifierResource implements com.palantir.conjure.verifier.TestService {
+public final class DummyVerifierResource implements TestService {
 
     @Override
     public String getString() {
@@ -54,17 +62,17 @@ public final class DummyVerifierResource implements com.palantir.conjure.verifie
     }
 
     @Override
-    public com.palantir.conjure.verifier.PrimitivesObject simpleBody(com.palantir.conjure.verifier.SimpleUnion body) {
+    public PrimitivesObject simpleBody(SimpleUnion body) {
         return null;
     }
 
     @Override
-    public com.palantir.conjure.verifier.PrimitivesObject getPrimitivesObject() {
+    public PrimitivesObject getPrimitivesObject() {
         return null;
     }
 
     @Override
-    public com.palantir.conjure.verifier.OptionalObject getOptionalObject() {
+    public OptionalObject getOptionalObject() {
         return null;
     }
 

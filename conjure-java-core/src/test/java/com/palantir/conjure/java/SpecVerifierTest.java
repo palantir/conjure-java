@@ -28,7 +28,6 @@ import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.File;
 import java.io.IOException;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -36,10 +35,11 @@ import org.junit.Test;
 public class SpecVerifierTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE =
-            new DropwizardAppRule<>(EteTestServer.class);
+    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(EteTestServer.class);
 
-    private final com.palantir.conjure.verifier.TestService testService = JaxRsClient.create(TestService.class, EteTestServer.clientUserAgent(),
+    private final com.palantir.conjure.verifier.TestService testService = JaxRsClient.create(
+            TestService.class,
+            EteTestServer.clientUserAgent(),
             EteTestServer.clientConfiguration());
 
     @BeforeClass
@@ -55,21 +55,10 @@ public class SpecVerifierTest {
         }
     }
 
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
     @Test
     public void getStringAuth_1() {
         System.out.println(testService.getStringAuth(AuthHeader.valueOf("abcd123")));
     }
-
-//    @Test
-//    public void getStringCookie() {
-//        System.out.println(testService.getStringCookie(AuthHeader.valueOf("abcd123")));
-//    }
-
 
     @Test
     public void echoHeaderParam() {
@@ -93,10 +82,5 @@ public class SpecVerifierTest {
         } catch (Exception e) {
             System.out.println("Error");
         }
-    }
-
-    public void notifyIfFailure() {
-
-
     }
 }
