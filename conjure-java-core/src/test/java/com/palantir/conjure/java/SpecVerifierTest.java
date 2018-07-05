@@ -16,33 +16,31 @@
 
 package com.palantir.conjure.java;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.verifier.TestService;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
+import com.palantir.tokens.auth.AuthHeader;
+import io.dropwizard.Configuration;
+import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-@RunWith(Parameterized.class)
 public class SpecVerifierTest {
 
-    private static com.palantir.conjure.verifier.TestCasesYml testCases;
-    private final com.palantir.conjure.verifier.TestService testService;
-    private final com.palantir.conjure.verifier.EndpointName endpointName;
-    private com.palantir.conjure.verifier.ServiceTestStructure serviceTestStructure;
+    @ClassRule
+    public static final DropwizardAppRule<Configuration> RULE =
+            new DropwizardAppRule<>(EteTestServer.class);
+
+    private final com.palantir.conjure.verifier.TestService testService = JaxRsClient.create(TestService.class, EteTestServer.clientUserAgent(),
+            EteTestServer.clientConfiguration());
 
     @BeforeClass
     public static void beforeClass() throws IOException {
@@ -57,33 +55,48 @@ public class SpecVerifierTest {
         }
     }
 
-    @Parameterized.Parameters(name = "{0} is valid Conjure YML: {1}")
-    public static Collection<Object[]> data() throws IOException {
-        testCases = new ObjectMapper(new YAMLFactory())
-                .registerModule(new Jdk8Module())
-                .readValue(new File("src/test/resources/testcases.yml"),
-                        com.palantir.conjure.verifier.TestCasesYml.class);
-        List<Object[]> objects = new ArrayList<>();
-        testCases.get().forEach((endpointName1, serviceTestStructures) -> {
-            serviceTestStructures.forEach(serviceTestStructure -> {
-                objects.add(new Object[]{endpointName1, serviceTestStructure});
-            });
-        });
-        return objects;
-    }
+    @Before
+    public void setUp() throws Exception {
 
-    public SpecVerifierTest(
-            com.palantir.conjure.verifier.EndpointName endpointName,
-            com.palantir.conjure.verifier.ServiceTestStructure serviceTestStructure) {
-        this.endpointName = endpointName;
-        this.serviceTestStructure = serviceTestStructure;
-        this.testService = JaxRsClient.create(TestService.class, EteTestServer.clientUserAgent(),
-                EteTestServer.clientConfiguration());
     }
 
     @Test
-    public void runTestCase() {
-        System.out.println(this.endpointName);
+    public void getStringAuth_1() {
+        System.out.println(testService.getStringAuth(AuthHeader.valueOf("abcd123")));
     }
 
+//    @Test
+//    public void getStringCookie() {
+//        System.out.println(testService.getStringCookie(AuthHeader.valueOf("abcd123")));
+//    }
+
+
+    @Test
+    public void echoHeaderParam() {
+        System.out.println(testService.echoHeaderParam("abcd123"));
+    }
+
+    @Test
+    public void echoPathParam_1() {
+        System.out.println(testService.echoPathParam("abcd123"));
+    }
+
+    @Test
+    public void echoPathParam_2() {
+        System.out.println(testService.echoPathParam("!@#$%^&*(),./?"));
+    }
+
+    @Test
+    public void badEchoPath() {
+        try {
+            testService.echoPathParam("fooasdasd");
+        } catch (Exception e) {
+            System.out.println("Error");
+        }
+    }
+
+    public void notifyIfFailure() {
+
+
+    }
 }
