@@ -98,6 +98,16 @@ public interface TestServiceRetrofit {
             @Query("setEnd") Set<String> setEnd,
             @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
 
+    @POST("./catalog/test-no-response-query-params")
+    Call<Void> testNoResponseQueryParams(
+            @Header("Authorization") AuthHeader authHeader,
+            @Body String query,
+            @Query("different") ResourceIdentifier something,
+            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Query("setEnd") Set<String> setEnd,
+            @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
+
     @GET("./catalog/boolean")
     Call<Boolean> testBoolean(@Header("Authorization") AuthHeader authHeader);
 
