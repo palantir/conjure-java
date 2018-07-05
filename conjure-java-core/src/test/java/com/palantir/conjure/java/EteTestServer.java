@@ -36,7 +36,6 @@ public final class EteTestServer extends Application<Configuration> {
         environment.jersey().setUrlPattern("/api/*");
         environment.jersey().register(new EteResource());
         environment.jersey().register(new EmptyPathResource());
-        environment.jersey().register(new DummyVerifierResource());
     }
 
     private static final SslConfiguration TRUST_STORE_CONFIGURATION =
