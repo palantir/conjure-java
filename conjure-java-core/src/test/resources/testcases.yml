@@ -1,60 +1,196 @@
+autoDeserialize:
+
+  receiveBearerTokenExample:
+    positive:
+      - '{"value":"abc123"}'
+      - '{"value":"-._~+/="}'
+      - '{"value":"abc="}'
+      - '{"value":"a="}'
+    negative:
+      - '{"value":null}'
+      - '{}'
+      - '{"value":" space"}'
+      - '{"value":"space "}'
+      - '{"value":"with space"}'
+      - '{"value":""}'
+      - '{"value":"#"}'
+      - '{"value":" "}'
+      - '{"value":"("}'
+      - '{"value":"="}'
+      - '{"value":"=a"}'
+  # receiveBinaryExample: # TODO
+    # positive:
+    # negative:
+  #   - '{"value":}'
+  receiveBooleanExample:
+    positive:
+      - '{"value":false}'
+      - '{"value":true}'
+      - '{"value":null}'
+    negative:
+      - '{}'
+      - '{"value":0}'
+      - '{"value":"true"}'
+  receiveDateTimeExample:
+    positive:
+      - '{"value":"2017-01-02T03:04:05Z"}'
+      - '{"value":"2017-01-02T03:04:05.000Z"}'
+      - '{"value":"2017-01-02T03:04:05.000000Z"}'
+      - '{"value":"2017-01-02T03:04:05.000000000Z"}'
+      - '{"value":"2017-01-02T04:04:05.000000000+01:00"}'
+      - '{"value":"2017-01-02T05:04:05.000000000+02:00"}'
+      - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}'
+    negative:
+      - '{"value":"4/3/2018"}'
+      - '{"value":"1523040070"}'
+      - '{"value":1523040070}'
+      - '{"value":"2017-01-02T03:04:05.0000000000Z"}'
+      - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin][Another/Zone]"}'
+  receiveDoubleExample:
+    positive:
+      - '{"value":1.23}'
+      - '{"value":0.0}'
+      - '{"value":13}'
+      - '{"value":123e5}'
+      - '{"value":123e-5}'
+      - '{"value":"NaN"}'
+    negative:
+      - '{"value":null}'
+      - '{}'
+      - '{"value":"1.23"}'
+      - '{"value":"nan"}'
+      - '{"value":nan}'
+  receiveIntegerExample:
+    positive:
+      - '{"value":-2147483648}'
+      - '{"value":0}'
+      - '{"value":2147483647}'
+    negative:
+      - '{"value":-2147483649}'
+      - '{"value":2147483648}'
+      - '{"value":null}'
+      - '{}'
+      - '{"value":1.23}'
+      - '{"value":"12"}'
+  receiveRidExample:
+    positive:
+      - '{"value":"ri.service.instance.folder.foo"}'
+      - '{"value":"ri.a1p2p3.south-west.data-set.my-hello_WORLD-123"}'
+      - '{"value":"ri.my-service.instance1.graph-node.._"}'
+      - '{"value":"ri.service.1instance.type.emptyname"}'
+      - '{"value":"ri.my-service..graph-node.noInstance"}'
+      - '{"value":"ri.my-service..graph-node.noInstance.multiple.extra.dots"}'
+    negative:
+      - '{"value":null}'
+      - '{}'
+      - '{"value":""}'
+      - '{"value":"badString"}'
+      - '{"value":"ri.service.CAPLOCK.type.name"}'
+      - '{"value":"ri.service.instance.-123.name"}'
+      - '{"value":"ri..instance.type.noService"}'
+      - '{"value":"ri.service.instance.type."}'
+      - '{"value":"id.bad.id.class.b.name"}'
+      - '{"value":"ri:service::instance:type:name"}'
+      - '{"value":"ri.service.instance.type.name!@#"}'
+      - '{"value":"ri.service(name)..folder.foo"}'
+  receiveSafeLongExample:
+    positive:
+      - '{"value":-9007199254740991}'
+      - '{"value":0}'
+      - '{"value":9007199254740991}'
+    negative:
+      - '{"value":null}'
+      - '{}'
+      - '{"value":-9007199254740992}'
+      - '{"value":9007199254740992}'
+      - '{"value":1.23}'
+      - '{"value":"12"}'
+  receiveStringExample:
+    positive:
+      - '{"value":"exampleOutput"}'
+      - '{"value":""}'
+    negative:
+      - '{"value":null}'
+      - '{}'
+      - '{"value":8}'
+  receiveUuidExample:
+    positive:
+      - '{"value":"d6ddc1ac-3c1b-11e8-b467-0ed5f89f718b"}' # UUID v1
+      - '{"value":"80e6dd13-5f42-4e33-ad18-f73875540c8b"}' # UUID v4
+    negative:
+      - '{"value":null}'
+      - '{}'
+      - '{"value":""}'
+      - '{"value":"80e6dd13-5f42-4e33-ad18"}'
+  receiveAnyExample:
+    positive:
+      - '{"value":0}'
+      - '{"value":"content"}'
+      - '{"value":true}'
+    negative:
+      - '{"value":null}'
+      - '{"value":[1,2,3]}'
+      - '{"value":{"key":3}}'
+      - '{"value":{"key":{"inner-key":[1,2,3]}}}'
+
+
+
 # serialization of requests
+manualStuff:
+  getString: []
 
-getString: []
+  getStringAuth:
+    - auth: Bearer abcd123
 
-getStringAuth:
-  - auth: Bearer abcd123
+  getStringCookie:
+    - cookie: testCookie abcd123
 
-getStringCookie:
-  - cookie: testCookie abcd123
+  echoHeaderParam:
+    - header-params: { "some-header": "abcd123" }
 
-echoHeaderParam:
-  - header-params:
-      "some-header": "abcd123"
+  echoPathParam:
+    - path-params:
+        content: "abcd123"
+    - path-params:
+        content: "!@#$%^&*(),./?"
 
-echoPathParam:
-  - path-params:
-      content: "abcd123"
-  - path-params:
-      content: "!@#$%^&*(),./?"
+  echoQueryParam:
+    - path-params:
+        query: "abcd123"
+    - path-params:
+        query: "!@#$%^&*(),./?"
 
-echoQueryParam:
-  - path-params:
-      query: "abcd123"
-  - path-params:
-      query: "!@#$%^&*(),./?"
+  echoOptionalQueryParam:
+    - path-params:
+        query: null
+    - path-params:
+        query: "null"
 
-echoOptionalQueryParam:
-  - path-params:
-      query: null
-  - path-params:
-      query: "null"
+  simpleBody:
+    - body:
+        type: "foo"
+        foo: "bar"
 
-simpleBody:
-  - body:
-      type: "foo"
-      foo: "bar"
+  sendBinaryNonBody: []
 
-sendBinaryNonBody: []
+  getObject: []
 
-getObject: []
+  getPrimitivesObject: []
 
-getPrimitivesObject: []
+  getOptionalObject: []
 
-getOptionalObject: []
+  getUnions: []
 
-getUnions: []
+  getEnums: []
 
-getEnums: []
+  getAlias: []
 
-getAlias: []
+  getBinary: []
 
-getBinary: []
+  echoBinaryAlias:
+    - body: "<andjksahdlkasjd>"
 
-echoBinaryAlias:
-  - body: "<andjksahdlkasjd>"
+  sendBinary:
+    - body: "<some base64 string>"
 
-sendBinary:
-  - body: "<some base64 string>"
-
-getExtraFields: [] # client should just not fail when we send back extra cruft
+  getExtraFields: [] # client should just not fail when we send back extra cruft
