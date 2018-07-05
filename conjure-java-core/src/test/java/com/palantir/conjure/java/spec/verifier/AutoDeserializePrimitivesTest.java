@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.spec.verifier;
 
+import static org.assertj.core.api.Fail.failBecauseExceptionWasNotThrown;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -23,15 +25,16 @@ import com.palantir.conjure.java.EteTestServer;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.conjure.verifier.AutoDeserializePrimitivesTestService;
 import com.palantir.conjure.verifier.EndpointName;
 import com.palantir.conjure.verifier.TestCasesYml;
-import com.palantir.conjure.verifier.TestService;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,8 +51,9 @@ public class AutoDeserializePrimitivesTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(EteTestServer.class);
     private static final SpecVerifier specVerifier = new SpecVerifier();
-    private final TestService testService = JaxRsClient.create(
-            TestService.class,
+    private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
+    private final AutoDeserializePrimitivesTestService testService = JaxRsClient.create(
+            AutoDeserializePrimitivesTestService.class,
             EteTestServer.clientUserAgent(),
             EteTestServer.clientConfiguration());
 
@@ -82,13 +86,30 @@ public class AutoDeserializePrimitivesTest {
     public boolean shouldSucceed;
 
     @Test
-    public void runTestCase() {
-        System.out.println(this.endpointName + " " + index + " " + shouldSucceed);
+    public void runTestCase() throws Exception {
+        System.out.println(this.endpointName + " " + shouldSucceed);
+        Method method = testService.getClass().getMethod(endpointName.get(), int.class);
+
+        if (shouldSucceed) {
+
+            Object resultFromServer = method.invoke(testService, index);
+            specVerifier.verifyResponseJsonIsOk(objectMapper.writeValueAsString(resultFromServer));
+
+        } else {
+
+            try {
+                method.invoke(testService, index);
+                failBecauseExceptionWasNotThrown(Exception.class);
+            } catch(Exception e) {
+                // TODO restrict type to the specific deserialization error
+                specVerifier.notifyResponseDeserializedFailed();
+            }
+
+        }
     }
 
     @BeforeClass
     public static void regenerateCode() throws IOException {
-        ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper();
         ConjureDefinition definition = objectMapper
                 .readValue(new File("src/test/resources/verifier-spec.json"), ConjureDefinition.class);
         File outputDir = new File("src/verifierSpec/java");

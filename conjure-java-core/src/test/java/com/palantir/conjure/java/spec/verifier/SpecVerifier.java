@@ -27,4 +27,8 @@ public final class SpecVerifier {
         // TODO send JSON to the server & check whether it is still alive?
         System.out.println("verifyResponseJsonIsOk:" + json);
     }
+
+    public void notifyResponseDeserializedFailed() {
+        // TODO send this back to the master spec verifier
+    }
 }
