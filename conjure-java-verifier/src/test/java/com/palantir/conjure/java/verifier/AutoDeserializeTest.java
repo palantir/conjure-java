@@ -14,48 +14,57 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.spec.verifier;
+package com.palantir.conjure.java.verifier;
 
 import static org.assertj.core.api.Fail.failBecauseExceptionWasNotThrown;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.palantir.conjure.java.EteTestServer;
-import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.java.types.ObjectGenerator;
-import com.palantir.conjure.spec.ConjureDefinition;
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.verifier.AutoDeserializeService;
 import com.palantir.conjure.verifier.EndpointName;
 import com.palantir.conjure.verifier.TestCasesYml;
+import com.palantir.remoting.api.config.ssl.SslConfiguration;
+import com.palantir.remoting3.clients.ClientConfigurations;
+import com.palantir.remoting3.clients.UserAgent;
+import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
 public class AutoDeserializeTest {
+    private static final SslConfiguration TRUST_STORE_CONFIGURATION =
+            new SslConfiguration.Builder().trustStorePath(Paths.get("var/security/truststore.jks")).build();
+    private static final SSLSocketFactory SSL_SOCKET_FACTORY =
+            SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION);
+    private static final X509TrustManager TRUST_MANAGER =
+            SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(EteTestServer.class);
+//    @ClassRule
+//    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(EteTestServer.class);
     private static final SpecVerifier specVerifier = new SpecVerifier();
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private final AutoDeserializeService testService = JaxRsClient.create(
+    private static final AutoDeserializeService testService = JaxRsClient.create(
             AutoDeserializeService.class,
-            EteTestServer.clientUserAgent(),
-            EteTestServer.clientConfiguration());
+            UserAgent.of(UserAgent.Agent.of("test", "develop")),
+            ClientConfigurations.of(
+                ImmutableList.of("http://localhost:8080/test-example/api"),
+                SSL_SOCKET_FACTORY,
+                TRUST_MANAGER));
 
     @Parameterized.Parameters(name = "{0} (should succeed {2}): {1}")
     public static Collection<Object[]> data() throws IOException {
@@ -68,7 +77,7 @@ public class AutoDeserializeTest {
         testCases.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
-            IntStream.range(0, positiveSize )
+            IntStream.range(0, positiveSize)
                     .forEach(i -> objects.add(new Object[]{endpointName, i, true}));
 
             IntStream.range(positiveSize, positiveSize + negativeSize)
@@ -107,18 +116,6 @@ public class AutoDeserializeTest {
                 specVerifier.notifyResponseDeserializedFailed();
             }
 
-        }
-    }
-
-    @BeforeClass
-    public static void regenerateCode() throws IOException {
-        ConjureDefinition definition = objectMapper
-                .readValue(new File("src/test/resources/verifier-spec.json"), ConjureDefinition.class);
-        File outputDir = new File("src/verifierSpec/java");
-
-        if (Boolean.FALSE) {
-            new ObjectGenerator().emit(definition, outputDir);
-            new JerseyServiceGenerator().emit(definition, outputDir);
         }
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.spec.verifier;
+package com.palantir.conjure.java.verifier;
 
 
 /**
