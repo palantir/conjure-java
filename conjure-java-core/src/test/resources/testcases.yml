@@ -1,0 +1,61 @@
+# serialization of requests
+
+getString: []
+
+getStringAuth:
+  - auth: Bearer abcd123
+
+getStringCookie:
+  - cookie: testCookie abcd123
+
+echoHeaderParam:
+  - header-params: { "some-header": "abcd123" }
+
+echoPathParam:
+  - path-params:
+      content: "abcd123"
+  - path-params:
+      content: "!@#$%^&*(),./?"
+
+echoQueryParam:
+  - path-params:
+      query: "abcd123"
+  - path-params:
+      query: "!@#$%^&*(),./?"
+
+echoOptionalQueryParam:
+  - path-params:
+      query: null
+
+echoOptionalQueryParam:
+  - path-params:
+      query: "null"
+
+simpleBody:
+  - body:
+      type: "foo"
+      foo: "bar"
+
+sendBinaryNonBody: []
+
+getObject: []
+
+getPrimitivesObject: []
+
+getOptionalObject: []
+
+getUnions: []
+
+getEnums: []
+
+getAlias: []
+
+getBinary: []
+
+echoBinaryAlias:
+  - body: "<andjksahdlkasjd>"
+
+sendBinary:
+  - body: "<some base64 string>"
+
+getExtraFields: [] # client should just not fail when we send back extra cruft
