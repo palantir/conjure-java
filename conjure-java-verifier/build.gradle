@@ -15,16 +15,16 @@
  */
 
 sourceSets {
-    generated
+    spec
     test {
-        compileClasspath += generated.output
-        runtimeClasspath += generated.output
+        compileClasspath += spec.output
+        runtimeClasspath += spec.output
     }
 }
 
 idea {
     module {
-        sourceDirs += sourceSets.generated.java.srcDirs
+        sourceDirs += sourceSets.spec.java.srcDirs
     }
 }
 
@@ -36,7 +36,7 @@ dependencies {
     testCompile 'com.palantir.remoting3:jaxrs-clients'
     testCompile 'io.dropwizard:dropwizard-testing'
 
-    generatedCompile project(':conjure-lib')
+    specCompile project(':conjure-lib')
 }
 
 task copyJavaExecutable(type: Sync, dependsOn: ':conjure-java:distTar') {
@@ -48,7 +48,7 @@ task generateVerifierObjectBindings(type: Exec, dependsOn: copyJavaExecutable) {
     commandLine "${-> copyJavaExecutable.outputs.files.singleFile.listFiles()[0]}/bin/conjure-java",
             'generate',
             'src/test/resources/verifier-spec.json',
-            'src/generated/java',
+            'src/spec/java',
             '--objects'
 }
 
@@ -56,7 +56,7 @@ task generateVerifierServerBindings(type: Exec, dependsOn: copyJavaExecutable) {
     commandLine "${-> copyJavaExecutable.outputs.files.singleFile.listFiles()[0]}/bin/conjure-java",
             'generate',
             'src/test/resources/verifier-spec.json',
-            'src/generated/java',
+            'src/spec/java',
             '--jersey'
 }
 
