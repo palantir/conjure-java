@@ -299,11 +299,11 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         ParameterSpec.Builder paramSpec = ParameterSpec.builder(tokenClassName, paramName);
         if (withAnnotations) {
+            paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
+                    .addMember("value", "$S", tokenName).build());
             if (featureFlags.contains(FeatureFlags.RequireAuthParamsAndBodyParamsAreNotNull)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }
-            paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
-                    .addMember("value", "$S", tokenName).build());
         }
         return Optional.of(paramSpec.build());
     }

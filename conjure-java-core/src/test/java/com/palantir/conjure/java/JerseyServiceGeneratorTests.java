@@ -19,6 +19,7 @@ package com.palantir.conjure.java;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -50,6 +51,26 @@ public final class JerseyServiceGeneratorTests {
     @Test
     public void testServiceGeneration_cookieService() throws IOException {
         testServiceGeneration("cookie-service");
+    }
+
+    @Test
+    public void testServiceGeneration_exampleService_requireNotNullAuthHeadersAndRequestBodies() throws IOException {
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-service-with-not-null.yml")));
+        List<Path> files = new JerseyServiceGenerator(
+                ImmutableSet.of(FeatureFlags.RequireAuthParamsAndBodyParamsAreNotNull)).emit(def, folder.getRoot());
+
+        for (Path file : files) {
+            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+                Path output = Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey");
+                Files.delete(output);
+                Files.copy(file, output);
+            }
+
+            assertThat(TestUtils.readFromFile(file)).isEqualTo(
+                    TestUtils.readFromFile(Paths.get(
+                            "src/test/resources/test/api/" + file.getFileName() + ".jersey_require_not_null")));
+        }
     }
 
     @Test
