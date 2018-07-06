@@ -47,8 +47,9 @@ import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
 public class AutoDeserializeTest {
-    private static final SslConfiguration TRUST_STORE_CONFIGURATION =
-            new SslConfiguration.Builder().trustStorePath(Paths.get("var/security/truststore.jks")).build();
+    private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
+            .trustStorePath(Paths.get("../conjure-java-core/var/security/truststore.jks"))
+            .build();
     private static final SSLSocketFactory SSL_SOCKET_FACTORY =
             SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION);
     private static final X509TrustManager TRUST_MANAGER =
@@ -102,20 +103,16 @@ public class AutoDeserializeTest {
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
 
         if (shouldSucceed) {
-
             Object resultFromServer = method.invoke(testService, index);
             specVerifier.verifyResponseJsonIsOk(objectMapper.writeValueAsString(resultFromServer));
-
         } else {
-
             try {
                 method.invoke(testService, index);
                 failBecauseExceptionWasNotThrown(Exception.class);
-            } catch(Exception e) {
-                // TODO restrict type to the specific deserialization error
+            } catch (Exception e) {
+                // TODO(forozco): restrict type to the specific deserialization error
                 specVerifier.notifyResponseDeserializedFailed();
             }
-
         }
     }
 }

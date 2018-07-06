@@ -24,11 +24,11 @@ public final class SpecVerifier {
 
 
     public void verifyResponseJsonIsOk(String json) {
-        // TODO send JSON to the server & check whether it is still alive?
+        // TODO(forozco): send JSON to the server & check whether it is still alive?
         System.out.println("verifyResponseJsonIsOk:" + json);
     }
 
     public void notifyResponseDeserializedFailed() {
-        // TODO send this back to the master spec verifier
+        // TODO(forozco): send this back to the master spec verifier
     }
 }

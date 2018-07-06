@@ -566,15 +566,6 @@
       } ]
     }
   }, {
-    "type" : "union",
-    "union" : {
-      "typeName" : {
-        "name" : "EmptyUnionExample",
-        "package" : "com.palantir.conjure.verifier"
-      },
-      "union" : [ ]
-    }
-  }, {
     "type" : "alias",
     "alias" : {
       "typeName" : {
