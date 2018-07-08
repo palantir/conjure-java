@@ -14,9 +14,9 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
 ## Example generated objects
 
-Conjure-Java objects are immutable once created.
+Conjure-java objects are always immutable and thread-safe. JSON serialization is handled using [Jackson](https://github.com/FasterXML/jackson) annotations.
 
-- Conjure object: [ManyFieldExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/ManyFieldExample.java).
+- **Conjure object: [ManyFieldExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/ManyFieldExample.java)**
 
   Objects can only be instantiated using the builder pattern, or by deserializing from JSON. Fields can never be null, instead, Java 8 Optionals are used to represent values that may or may not be present.
 
@@ -33,9 +33,11 @@ Conjure-Java objects are immutable once created.
     ManyFieldExample fromJson = mapper.readValue("{\"string\":\"foo\", ...}", ManyFieldExample.class);
     ```
 
-- Conjure alias: [StringAliasExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/StringAliasExample.java)
-- Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)
 - Conjure union: [UnionTypeExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/UnionTypeExample.java)
+
+- Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)
+
+- Conjure alias: [StringAliasExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/StringAliasExample.java)
 
 ## Example Jersey interfaces
 
@@ -54,10 +56,10 @@ As an alternative to the JAX-RS interfaces above, conjure-java can generate equi
 
 - Example retrofit2 interface: [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
 
-```java
+    ```java
     @GET("./base/binary")
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
-```
+    ```
 
 You can also supply the `--retrofitCompletableFutures` flag if you prefer Java 8 CompletableFutures instead of OkHttp's Call.
