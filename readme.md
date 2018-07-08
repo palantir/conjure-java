@@ -12,3 +12,10 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
         --jersey     Generate jax-rs annotated interfaces for client or server-usage
         --retrofit   Generate retrofit interfaces for streaming/async clients
 
+## Example generated objects
+
+- Conjure object: [ManyFieldExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/ManyFieldExample.java)
+- Conjure alias: [StringAliasExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/StringAliasExample.java)
+- Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)
+- Conjure union: [UnionTypeExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/UnionTypeExample.java)
+
