@@ -19,3 +19,10 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 - Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)
 - Conjure union: [UnionTypeExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/UnionTypeExample.java)
 
+## Example Jersey interfaces
+
+- [EteService](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteService.java)
+
+## Example Retrofit interfaces
+
+- [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
