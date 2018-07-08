@@ -21,8 +21,25 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
 ## Example Jersey interfaces
 
-- [EteService](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteService.java)
+Conjure-java generates Java interfaces with [JAX-RS](http://jax-rs-spec.java.net/) annotations, so they can be used on the client side or on the server-side.
+
+- Example jersey interface: [EteService](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteService.java)
+
+For **client-side usage**, use [http-remoting](https://github.com/palantir/http-remoting#jaxrs-clients) which configures Feign with sensible defaults.
+
+For **server-side usage**, you need a [Jersey](https://jersey.github.io/)-compatible server. We recommend Dropwizard (which is based on Jetty), but Grizzly, Tomcat, etc should also work fine!  Use [http-remoting's jersey-servers](https://github.com/palantir/http-remoting#jersey-servers) to configure Jackson and Exception mappers appropriately.
+
 
 ## Example Retrofit interfaces
 
-- [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
+As an alternative to the JAX-RS interfaces above, conjure-java can generate equivalent interfaces with [Retrofit2](http://square.github.io/retrofit/) annotations. These clients are useful if you to to stream binary data or make non-blocking async calls:
+
+- Example retrofit2 interface: [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
+
+```java
+    @GET("./base/binary")
+    @Streaming
+    Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
+```
+
+You can also supply the `--retrofitCompletableFutures` flag if you prefer Java 8 CompletableFutures instead of OkHttp's Call.
