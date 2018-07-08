@@ -1,11 +1,13 @@
-# Conjure-Java ![Bintray](https://img.shields.io/bintray/v/palantir/releases/conjure-java.svg)
+# Conjure-Java ![Bintray](https://img.shields.io/bintray/v/palantir/releases/conjure-java.svg) [![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg)](https://opensource.org/licenses/Apache-2.0)
+
+
 
 
 _CLI to generate Java POJOs and interfaces from [Conjure API definitions](https://github.com/palantir/conjure)._
 
 ## Usage
 
-The recommended way to use conjure-java is via a build tool like [gradle-conjure](https://github.com/palantir/gradle-conjure). If you want to use it without gradle-conjure, there is also a standalone executable CLI which conforms to [RFC 002](https://github.com/palantir/conjure/blob/develop/rfc/002-contract-for-conjure-generators.md),  published on [bintray](https://bintray.com/palantir/releases/conjure-java).
+The recommended way to use conjure-java is via a build tool like [gradle-conjure](https://github.com/palantir/gradle-conjure). However, if you don't want to use gradle-conjure, there is also a executable which conforms to [RFC 002](https://github.com/palantir/conjure/blob/develop/rfc/002-contract-for-conjure-generators.md),  published on [bintray](https://bintray.com/palantir/releases/conjure-java).
 
     Usage: conjure-java generate <input> <output> [...options]
 
