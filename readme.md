@@ -14,11 +14,11 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
 ## Example generated objects
 
-Conjure-java objects are always immutable and thread-safe. JSON serialization is handled using [Jackson](https://github.com/FasterXML/jackson) annotations.
+Conjure-java objects are always immutable and thread-safe.  Fields are never null; instead, Java 8 Optionals are used. JSON serialization is handled using [Jackson](https://github.com/FasterXML/jackson) annotations.
 
 - **Conjure object: [ManyFieldExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/ManyFieldExample.java)**
 
-  Objects can only be instantiated using the builder pattern, or by deserializing from JSON. Fields can never be null, instead, Java 8 Optionals are used to represent values that may or may not be present.
+  Objects can only be instantiated using the builder pattern, or by deserializing from JSON.
 
     ```java
     ManyFieldExample example = ManyFieldExample.builder()
@@ -33,7 +33,27 @@ Conjure-java objects are always immutable and thread-safe. JSON serialization is
     ManyFieldExample fromJson = mapper.readValue("{\"string\":\"foo\", ...}", ManyFieldExample.class);
     ```
 
-- Conjure union: [UnionTypeExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/UnionTypeExample.java)
+- **Conjure union: [UnionTypeExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/UnionTypeExample.java)**
+
+    Union types can be one of a few variants. To interact with a union value, users should use the `.accept` method and define a Visitor that handles each of the possible variants, including the possibility of an unknown variant.
+
+    ```java
+    Foo output = unionTypeExample.accept(new Visitor<Foo>() {
+
+        public Foo visitStringExample(StringExample value) {
+            // your logic here!
+        }
+
+        public Foo visitSet(Set<String> value) {}
+
+        // ...
+
+        public Foo visitUnknown(String unknownType) {}
+
+    });
+    ```
+
+    Visitors may seem clunky in Java, but they have the upside of compile-time assurance that you've handled all the possible variants.  If you upgrade an API dependency and the API author added a new variant, the Java compiler will force you to explicitly deal with this new variant.  We intentionally avoid `switch` statements and `instanceof` checks for this exact reason.
 
 - Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)
 
