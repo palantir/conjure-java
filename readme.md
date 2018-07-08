@@ -1,6 +1,7 @@
-# Conjure-Java
+# Conjure-Java ![Bintray](https://img.shields.io/bintray/v/palantir/releases/conjure-java.svg)
 
-_Generate Java POJOs and interfaces from [Conjure API definitions](https://github.com/palantir/conjure)._
+
+_CLI to generate Java POJOs and interfaces from [Conjure API definitions](https://github.com/palantir/conjure)._
 
 ## Usage
 
