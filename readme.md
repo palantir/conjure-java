@@ -14,7 +14,25 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
 ## Example generated objects
 
-- Conjure object: [ManyFieldExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/ManyFieldExample.java)
+Conjure-Java objects are immutable once created.
+
+- Conjure object: [ManyFieldExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/ManyFieldExample.java).
+
+  Objects can only be instantiated using the builder pattern, or by deserializing from JSON. Fields can never be null, instead, Java 8 Optionals are used to represent values that may or may not be present.
+
+    ```java
+    ManyFieldExample example = ManyFieldExample.builder()
+                .string("foo")
+                .integer(123)
+                .optionalItem("bar")
+                .addAllItems(iterable)
+                .build();
+
+    // or using Jackson (via com.palantir.remoting3:jackson-support)
+    ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+    ManyFieldExample fromJson = mapper.readValue("{\"string\":\"foo\", ...}", ManyFieldExample.class);
+    ```
+
 - Conjure alias: [StringAliasExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/StringAliasExample.java)
 - Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)
 - Conjure union: [UnionTypeExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/UnionTypeExample.java)
