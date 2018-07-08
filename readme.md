@@ -58,7 +58,17 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
     Visitors may seem clunky in Java, but they have the upside of compile-time assurance that you've handled all the possible variants.  If you upgrade an API dependency and the API author added a new variant, the Java compiler will force you to explicitly deal with this new variant.  We intentionally avoid `switch` statements and `instanceof` checks for this exact reason.
 
-- Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)
+- **Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)**
+
+  Enums are subtly different from regular Java enums because they tolerate deserializing unknown values.  This is important because it ensures server authors can add new variants to an enum without causing runtime errors for consumers that use older API jars.
+
+  ```java
+  EnumExample one = EnumExample.ONE;
+  System.out.println(one); // prints: 'ONE'
+
+  EnumExample fromJson = mapper.readValue("\"XYZ\"", EnumExample.class);
+  System.out.println(fromJson); // prints: 'XYZ'
+  ```
 
 - Conjure alias: [StringAliasExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/StringAliasExample.java)
 
