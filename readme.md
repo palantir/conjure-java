@@ -70,7 +70,14 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
   System.out.println(fromJson); // prints: 'XYZ'
   ```
 
-- Conjure alias: [StringAliasExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/StringAliasExample.java)
+- **Conjure alias: [StringAliasExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/StringAliasExample.java)**
+
+  Aliases have exactly the same JSON representation as their inner type, so they are useful for making error-prone function signatures more more bulletproof:
+
+  ```diff
+  -doSomething(String, String, String);
+  +doSomething(ProductId, UserId, EmailAddress);
+  ```
 
 ## Example Jersey interfaces
 
