@@ -37,6 +37,7 @@ dependencies {
     testCompile 'io.dropwizard:dropwizard-testing'
 
     specCompile project(':conjure-lib')
+    specCompile project(':conjure-java-core')
 }
 
 task copyJavaExecutable(type: Sync, dependsOn: ':conjure-java:distTar') {
@@ -47,7 +48,7 @@ task copyJavaExecutable(type: Sync, dependsOn: ':conjure-java:distTar') {
 task generateVerifierObjectBindings(type: Exec, dependsOn: copyJavaExecutable) {
     commandLine "${-> copyJavaExecutable.outputs.files.singleFile.listFiles()[0]}/bin/conjure-java",
             'generate',
-            'src/test/resources/verifier-spec.json',
+            'src/test/resources/api.json',
             'src/spec/java',
             '--objects'
 }
@@ -55,9 +56,9 @@ task generateVerifierObjectBindings(type: Exec, dependsOn: copyJavaExecutable) {
 task generateVerifierServerBindings(type: Exec, dependsOn: copyJavaExecutable) {
     commandLine "${-> copyJavaExecutable.outputs.files.singleFile.listFiles()[0]}/bin/conjure-java",
             'generate',
-            'src/test/resources/verifier-spec.json',
+            'src/test/resources/api.json',
             'src/spec/java',
             '--jersey'
 }
 
-compileTestJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings
+compileTestJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings, compileSpecJava

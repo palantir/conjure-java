@@ -18,13 +18,13 @@ package com.palantir.conjure.java.verifier;
 
 import static org.assertj.core.api.Fail.failBecauseExceptionWasNotThrown;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.ImmutableList;
-import com.palantir.conjure.verifier.AutoDeserializeService;
-import com.palantir.conjure.verifier.EndpointName;
-import com.palantir.conjure.verifier.TestCasesYml;
+import com.palantir.conjure.compliance.AutoDeserializeService;
+import com.palantir.conjure.compliance.EndpointName;
+import com.palantir.conjure.compliance.TestCases;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting3.clients.ClientConfigurations;
 import com.palantir.remoting3.clients.UserAgent;
@@ -55,27 +55,25 @@ public class AutoDeserializeTest {
     private static final X509TrustManager TRUST_MANAGER =
             SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
 
-//    @ClassRule
-//    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(EteTestServer.class);
     private static final SpecVerifier specVerifier = new SpecVerifier();
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
     private static final AutoDeserializeService testService = JaxRsClient.create(
             AutoDeserializeService.class,
             UserAgent.of(UserAgent.Agent.of("test", "develop")),
             ClientConfigurations.of(
-                ImmutableList.of("http://localhost:8080/test-example/api"),
+                ImmutableList.of("http://localhost:8000/"),
                 SSL_SOCKET_FACTORY,
                 TRUST_MANAGER));
 
     @Parameterized.Parameters(name = "{0} (should succeed {2}): {1}")
     public static Collection<Object[]> data() throws IOException {
-        TestCasesYml testCases = new ObjectMapper(new YAMLFactory())
+        TestCases testCases = new ObjectMapper(new JsonFactory())
                 .registerModule(new Jdk8Module())
-                .readValue(new File("src/test/resources/testcases.yml"), TestCasesYml.class);
+                .readValue(new File("src/test/resources/testcases.yml"), TestCases.class);
 
         List<Object[]> objects = new ArrayList<>();
 
-        testCases.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
+        testCases.getClient().getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
             IntStream.range(0, positiveSize)
