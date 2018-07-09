@@ -23,10 +23,10 @@ import javax.annotation.Generated;
 /** A type which can either be a StringExample, a set of strings, or an integer. */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionTypeExample {
-    @JsonUnwrapped private final _Union_ union;
+    @JsonUnwrapped private final Union_ union;
 
     @JsonCreator
-    private UnionTypeExample(_Union_ union) {
+    private UnionTypeExample(Union_ union) {
         Objects.requireNonNull(union, "union must not be null");
         this.union = union;
     }
@@ -73,33 +73,33 @@ public final class UnionTypeExample {
     /** Docs for when UnionTypeExample is of type StringExample. */
     public static UnionTypeExample stringExample(StringExample value) {
         return new UnionTypeExample(
-                _Union_.builder().type("stringExample").stringExample(value).build());
+                Union_.builder().type("stringExample").stringExample(value).build());
     }
 
     public static UnionTypeExample set(Set<String> value) {
-        return new UnionTypeExample(_Union_.builder().type("set").set(value).build());
+        return new UnionTypeExample(Union_.builder().type("set").set(value).build());
     }
 
     public static UnionTypeExample thisFieldIsAnInteger(int value) {
         return new UnionTypeExample(
-                _Union_.builder().type("thisFieldIsAnInteger").thisFieldIsAnInteger(value).build());
+                Union_.builder().type("thisFieldIsAnInteger").thisFieldIsAnInteger(value).build());
     }
 
     public static UnionTypeExample alsoAnInteger(int value) {
         return new UnionTypeExample(
-                _Union_.builder().type("alsoAnInteger").alsoAnInteger(value).build());
+                Union_.builder().type("alsoAnInteger").alsoAnInteger(value).build());
     }
 
     public static UnionTypeExample if_(int value) {
-        return new UnionTypeExample(_Union_.builder().type("if").if_(value).build());
+        return new UnionTypeExample(Union_.builder().type("if").if_(value).build());
     }
 
     public static UnionTypeExample new_(int value) {
-        return new UnionTypeExample(_Union_.builder().type("new").new_(value).build());
+        return new UnionTypeExample(Union_.builder().type("new").new_(value).build());
     }
 
     public static UnionTypeExample interface_(int value) {
-        return new UnionTypeExample(_Union_.builder().type("interface").interface_(value).build());
+        return new UnionTypeExample(Union_.builder().type("interface").interface_(value).build());
     }
 
     public interface Visitor<T> {
@@ -120,10 +120,10 @@ public final class UnionTypeExample {
         T visitUnknown(String unknownType);
     }
 
-    @JsonDeserialize(builder = _Union_.Builder.class)
+    @JsonDeserialize(builder = Union_.Builder.class)
     @Generated("com.palantir.conjure.java.types.BeanGenerator")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    private static final class _Union_ {
+    private static final class Union_ {
         private final String type;
 
         private final Optional<StringExample> stringExample;
@@ -144,7 +144,7 @@ public final class UnionTypeExample {
 
         private volatile int memoizedHashCode;
 
-        private _Union_(
+        private Union_(
                 String type,
                 Optional<StringExample> stringExample,
                 Optional<Set<String>> set,
@@ -221,10 +221,10 @@ public final class UnionTypeExample {
 
         @Override
         public boolean equals(Object other) {
-            return this == other || (other instanceof _Union_ && equalTo((_Union_) other));
+            return this == other || (other instanceof Union_ && equalTo((Union_) other));
         }
 
-        private boolean equalTo(_Union_ other) {
+        private boolean equalTo(Union_ other) {
             return this.type.equals(other.type)
                     && this.stringExample.equals(other.stringExample)
                     && this.set.equals(other.set)
@@ -256,7 +256,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("_Union_")
+            return new StringBuilder("Union_")
                     .append("{")
                     .append("type")
                     .append(": ")
@@ -357,7 +357,7 @@ public final class UnionTypeExample {
 
             private Builder() {}
 
-            public Builder from(_Union_ other) {
+            public Builder from(Union_ other) {
                 type(other.getType());
                 stringExample(other.getStringExample());
                 set(other.getSet());
@@ -459,8 +459,8 @@ public final class UnionTypeExample {
                 return this;
             }
 
-            public _Union_ build() {
-                return new _Union_(
+            public Union_ build() {
+                return new Union_(
                         type,
                         stringExample,
                         set,

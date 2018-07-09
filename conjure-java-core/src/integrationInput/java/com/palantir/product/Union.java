@@ -21,10 +21,10 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class Union {
-    @JsonUnwrapped private final _Union_ union;
+    @JsonUnwrapped private final Union_ union;
 
     @JsonCreator
-    private Union(_Union_ union) {
+    private Union(Union_ union) {
         Objects.requireNonNull(union, "union must not be null");
         this.union = union;
     }
@@ -58,11 +58,11 @@ public final class Union {
     }
 
     public static Union foo(String value) {
-        return new Union(_Union_.builder().type("foo").foo(value).build());
+        return new Union(Union_.builder().type("foo").foo(value).build());
     }
 
     public static Union bar(int value) {
-        return new Union(_Union_.builder().type("bar").bar(value).build());
+        return new Union(Union_.builder().type("bar").bar(value).build());
     }
 
     public interface Visitor<T> {
@@ -73,10 +73,10 @@ public final class Union {
         T visitUnknown(String unknownType);
     }
 
-    @JsonDeserialize(builder = _Union_.Builder.class)
+    @JsonDeserialize(builder = Union_.Builder.class)
     @Generated("com.palantir.conjure.java.types.BeanGenerator")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    private static final class _Union_ {
+    private static final class Union_ {
         private final String type;
 
         private final Optional<String> foo;
@@ -87,7 +87,7 @@ public final class Union {
 
         private volatile int memoizedHashCode;
 
-        private _Union_(
+        private Union_(
                 String type,
                 Optional<String> foo,
                 OptionalInt bar,
@@ -121,10 +121,10 @@ public final class Union {
 
         @Override
         public boolean equals(Object other) {
-            return this == other || (other instanceof _Union_ && equalTo((_Union_) other));
+            return this == other || (other instanceof Union_ && equalTo((Union_) other));
         }
 
-        private boolean equalTo(_Union_ other) {
+        private boolean equalTo(Union_ other) {
             return this.type.equals(other.type)
                     && this.foo.equals(other.foo)
                     && this.bar.equals(other.bar)
@@ -141,7 +141,7 @@ public final class Union {
 
         @Override
         public String toString() {
-            return new StringBuilder("_Union_")
+            return new StringBuilder("Union_")
                     .append("{")
                     .append("type")
                     .append(": ")
@@ -198,7 +198,7 @@ public final class Union {
 
             private Builder() {}
 
-            public Builder from(_Union_ other) {
+            public Builder from(Union_ other) {
                 type(other.getType());
                 foo(other.getFoo());
                 bar(other.getBar());
@@ -233,8 +233,8 @@ public final class Union {
                 return this;
             }
 
-            public _Union_ build() {
-                return new _Union_(type, foo, bar, __unknownProperties);
+            public Union_ build() {
+                return new Union_(type, foo, bar, __unknownProperties);
             }
 
             @JsonAnySetter
