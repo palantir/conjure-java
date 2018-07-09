@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.verifier;
+package com.palantir.conjure.java.compliance;
 
 import static org.assertj.core.api.Fail.failBecauseExceptionWasNotThrown;
 
@@ -22,10 +22,12 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.compliance.AutoDeserializeConfirmService;
 import com.palantir.conjure.compliance.AutoDeserializeService;
 import com.palantir.conjure.compliance.EndpointName;
 import com.palantir.conjure.compliance.TestCases;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
+import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.ClientConfigurations;
 import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.config.ssl.SslSocketFactories;
@@ -54,22 +56,24 @@ public class AutoDeserializeTest {
             SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION);
     private static final X509TrustManager TRUST_MANAGER =
             SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
+    private static final UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("test", "develop"));
+    private static final ClientConfiguration clientConfiguration = ClientConfigurations.of(
+            ImmutableList.of("http://localhost:8000/"),
+            SSL_SOCKET_FACTORY,
+            TRUST_MANAGER);
 
     private static final SpecVerifier specVerifier = new SpecVerifier();
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
     private static final AutoDeserializeService testService = JaxRsClient.create(
-            AutoDeserializeService.class,
-            UserAgent.of(UserAgent.Agent.of("test", "develop")),
-            ClientConfigurations.of(
-                ImmutableList.of("http://localhost:8000/"),
-                SSL_SOCKET_FACTORY,
-                TRUST_MANAGER));
+            AutoDeserializeService.class, userAgent, clientConfiguration);
+    private static final AutoDeserializeConfirmService confirmService = JaxRsClient.create(
+            AutoDeserializeConfirmService.class, userAgent, clientConfiguration);
 
     @Parameterized.Parameters(name = "{0} (should succeed {2}): {1}")
     public static Collection<Object[]> data() throws IOException {
         TestCases testCases = new ObjectMapper(new JsonFactory())
                 .registerModule(new Jdk8Module())
-                .readValue(new File("src/test/resources/testcases.yml"), TestCases.class);
+                .readValue(new File("src/test/resources/test-cases.json"), TestCases.class);
 
         List<Object[]> objects = new ArrayList<>();
 
@@ -102,15 +106,12 @@ public class AutoDeserializeTest {
 
         if (shouldSucceed) {
             Object resultFromServer = method.invoke(testService, index);
-            specVerifier.verifyResponseJsonIsOk(objectMapper.writeValueAsString(resultFromServer));
+            confirmService.confirm(endpointName.get(), index, resultFromServer);
         } else {
             try {
                 method.invoke(testService, index);
                 failBecauseExceptionWasNotThrown(Exception.class);
-            } catch (Exception e) {
-                // TODO(forozco): restrict type to the specific deserialization error
-                specVerifier.notifyResponseDeserializedFailed();
-            }
+            } catch (Exception e) {}
         }
     }
 }

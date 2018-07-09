@@ -25,6 +25,7 @@ sourceSets {
 idea {
     module {
         sourceDirs += sourceSets.spec.java.srcDirs
+        testSourceDirs += sourceSets.spec.java.srcDirs
     }
 }
 

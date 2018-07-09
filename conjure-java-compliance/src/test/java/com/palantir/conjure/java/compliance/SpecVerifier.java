@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.verifier;
+package com.palantir.conjure.java.compliance;
 
 
 /**
- * This is a stateful verifier which will validate a request and then validate the response;
+ * This is a stateful compliance which will validate a request and then validate the response;
  */
 public final class SpecVerifier {
 
@@ -29,6 +29,6 @@ public final class SpecVerifier {
     }
 
     public void notifyResponseDeserializedFailed() {
-        // TODO(forozco): send this back to the master spec verifier
+        // TODO(forozco): send this back to the master spec compliance
     }
 }
