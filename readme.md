@@ -104,6 +104,6 @@ As an alternative to the JAX-RS interfaces above, conjure-java can generate equi
 
 You can also supply the `--retrofitCompletableFutures` flag if you prefer Java 8 CompletableFutures instead of OkHttp's Call.
 
-## Local development
+## Contributing
 
-Check out the [Contributing document][./CONTRIBUTING.md].
+For instructions on how to set up your local development environment, check out the [Contributing document][./CONTRIBUTING.md].
