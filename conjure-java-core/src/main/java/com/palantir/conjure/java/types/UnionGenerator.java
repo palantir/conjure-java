@@ -52,6 +52,7 @@ import org.apache.commons.lang3.StringUtils;
 public final class UnionGenerator {
 
     private static final String UNION_FIELD_NAME = "union";
+    private static final String INNER_UNION_TYPE_NAME = "Union_";
     private static final String TYPE_FIELD_NAME = "type";
     private static final String VALUE_PARAM = "value";
     private static final String VISIT_METHOD_NAME = "visit";
@@ -107,7 +108,7 @@ public final class UnionGenerator {
             ClassName unionClass) {
         return BeanGenerator.generateBeanTypeSpec(typeMapper, ObjectDefinition.builder()
                 .typeName(com.palantir.conjure.spec.TypeName.of(
-                        "Union", typePackage + "." + unionClass.simpleName()))
+                        INNER_UNION_TYPE_NAME, typePackage + "." + unionClass.simpleName()))
                 .fields(FieldDefinition.builder()
                         .fieldName(FieldName.of("type"))
                         .type(Type.primitive(PrimitiveType.STRING))
@@ -129,7 +130,11 @@ public final class UnionGenerator {
 
     private static List<FieldSpec> generateFields(ClassName unionClass) {
         return ImmutableList.of(
-                FieldSpec.builder(unionClass.nestedClass("Union"), UNION_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                FieldSpec.builder(
+                        unionClass.nestedClass(INNER_UNION_TYPE_NAME),
+                        UNION_FIELD_NAME,
+                        Modifier.PRIVATE,
+                        Modifier.FINAL)
                         .addAnnotation(JsonUnwrapped.class)
                         .build());
     }
@@ -138,7 +143,8 @@ public final class UnionGenerator {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addAnnotation(AnnotationSpec.builder(JsonCreator.class).build())
-                .addParameter(ParameterSpec.builder(unionClass.nestedClass("Union"), UNION_FIELD_NAME).build())
+                .addParameter(ParameterSpec.builder(
+                        unionClass.nestedClass(INNER_UNION_TYPE_NAME), UNION_FIELD_NAME).build())
                 .addStatement(Expressions.requireNonNull(UNION_FIELD_NAME, "union must not be null"))
                 .addStatement("this.$1L = $1L", UNION_FIELD_NAME)
                 .build();
@@ -156,7 +162,11 @@ public final class UnionGenerator {
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(memberType, VALUE_PARAM)
                     .addStatement("return new $1T($2T.builder().type($3S).$4N($5N).build())",
-                            unionClass, unionClass.nestedClass("Union"), memberName, safeName, VALUE_PARAM)
+                            unionClass,
+                            unionClass.nestedClass(INNER_UNION_TYPE_NAME),
+                            memberName,
+                            safeName,
+                            VALUE_PARAM)
                     .returns(unionClass);
             memberTypeDef.getDocs()
                     .ifPresent(docs -> builder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
