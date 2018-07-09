@@ -126,6 +126,12 @@ public interface TestService {
     @Path("catalog/integer")
     int testInteger(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
+    @POST
+    @Path("catalog/optional")
+    Optional<String> testPostOptional(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            Optional<String> maybeString);
+
     @Deprecated
     default int testQueryParams(
             AuthHeader authHeader,

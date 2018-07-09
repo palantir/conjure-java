@@ -323,14 +323,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "HeaderParam"))
                     .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
-            /* no annotations for body parameters */
             if (def.getType().accept(TypeVisitor.IS_OPTIONAL)
                     || !featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 return Optional.empty();
             }
             annotationSpecBuilder = AnnotationSpec
                     .builder(ClassName.get("javax.validation.constraints", "NotNull"));
-            // Add test for optional
         } else {
             throw new IllegalStateException("Unrecognized argument type: " + def.getParamType());
         }
