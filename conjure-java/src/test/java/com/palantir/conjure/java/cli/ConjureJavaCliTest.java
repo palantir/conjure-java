@@ -94,7 +94,7 @@ public final class ConjureJavaCliTest {
         String[] args = {};
         assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Usage: conjure-java generate <target> <output> [...options]");
+                .hasMessage("Usage: conjure-java generate <input> <output> [...options]");
     }
 
     @Test
