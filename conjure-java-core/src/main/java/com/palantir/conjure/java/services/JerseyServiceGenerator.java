@@ -218,7 +218,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
 
         // replace extraArgs with default values when invoking the complete method
-        StringBuilder sb = new StringBuilder("return $N(");
+        StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
         List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
             Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
             if (maybeArgDef.isPresent()) {

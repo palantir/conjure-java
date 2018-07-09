@@ -49,12 +49,14 @@ public final class ConjureJavaCli {
     static CliConfiguration parseCliConfiguration(String[] args) {
         CommandLineParser parser = new BasicParser();
         Options options = new Options();
-        options.addOption(new Option(CliConfiguration.OBJECTS_OPTION, "Generate java objects"));
-        options.addOption(new Option(CliConfiguration.JERSEY_OPTION, "Generate jersey services"));
-        options.addOption(new Option(CliConfiguration.RETROFIT_OPTION, "Generate retrofit services"));
-        options.addOption(new Option(
-                CliConfiguration.RETROFIT_COMPLETABLE_FUTURES,
-                "Generate retrofit services which return completableFutures"));
+        options.addOption(new Option(CliConfiguration.OBJECTS_OPTION,
+                "Generate POJOs for Conjure type definitions"));
+        options.addOption(new Option(CliConfiguration.JERSEY_OPTION,
+                "Generate jax-rs annotated interfaces for client or server-usage"));
+        options.addOption(new Option(CliConfiguration.RETROFIT_OPTION,
+                "Generate retrofit interfaces for streaming/async clients"));
+        options.addOption(new Option(CliConfiguration.RETROFIT_COMPLETABLE_FUTURES,
+                "Generate retrofit services which return Java8 CompletableFuture instead of OkHttp Call"));
         options.addOption(new Option(
                 CliConfiguration.REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS,
                 "Generate @NotNull annotations for AuthHeaders and request body params"));
@@ -64,7 +66,7 @@ public final class ConjureJavaCli {
             String[] parsedArgs = cmd.getArgs();
 
             Preconditions.checkArgument(parsedArgs.length == 3 && GENERATE_COMMAND.equals(args[0]),
-                    "Usage: conjure-java %s <target> <output> [...options]", GENERATE_COMMAND);
+                    "Usage: conjure-java %s <input> <output> [...options]", GENERATE_COMMAND);
 
             return CliConfiguration.of(parsedArgs[1], parsedArgs[2], cmd.getOptions());
         } catch (ParseException e) {
