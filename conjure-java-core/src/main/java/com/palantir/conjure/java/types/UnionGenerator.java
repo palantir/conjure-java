@@ -52,7 +52,7 @@ import org.apache.commons.lang3.StringUtils;
 public final class UnionGenerator {
 
     private static final String UNION_FIELD_NAME = "union";
-    private static final String INNER_UNION_TYPE_NAME = "Inner_Union";
+    private static final String INNER_UNION_TYPE_NAME = "_Union_";
     private static final String TYPE_FIELD_NAME = "type";
     private static final String VALUE_PARAM = "value";
     private static final String VISIT_METHOD_NAME = "visit";
