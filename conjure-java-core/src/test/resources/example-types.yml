@@ -156,3 +156,7 @@ types:
             type: string
           memoizedHashCode:
             type: integer
+      Union:
+        union:
+          foo: string
+          bar: integer
