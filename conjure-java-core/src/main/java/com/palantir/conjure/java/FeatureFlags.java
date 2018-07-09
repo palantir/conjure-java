@@ -31,5 +31,5 @@ public enum FeatureFlags {
      * Instructs the {@link JerseyServiceGenerator} to add {@link NotNull}
      * annotations to all auth parameters, as well as all non-optional body params on service endpoints.
      */
-    RequireAuthParamsAndBodyParamsAreNotNull,
+    RequireNotNullAuthAndBodyParams,
 }

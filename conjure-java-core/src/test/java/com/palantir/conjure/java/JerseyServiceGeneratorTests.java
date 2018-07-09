@@ -58,7 +58,7 @@ public final class JerseyServiceGeneratorTests {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-service-with-not-null.yml")));
         List<Path> files = new JerseyServiceGenerator(
-                ImmutableSet.of(FeatureFlags.RequireAuthParamsAndBodyParamsAreNotNull)).emit(def, folder.getRoot());
+                ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams)).emit(def, folder.getRoot());
 
         for (Path file : files) {
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {

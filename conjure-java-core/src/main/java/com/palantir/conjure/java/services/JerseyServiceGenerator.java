@@ -301,7 +301,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         if (withAnnotations) {
             paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
                     .addMember("value", "$S", tokenName).build());
-            if (featureFlags.contains(FeatureFlags.RequireAuthParamsAndBodyParamsAreNotNull)) {
+            if (featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }
         }
@@ -325,7 +325,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
             /* no annotations for body parameters */
             if (def.getType().accept(TypeVisitor.IS_OPTIONAL)
-                    || !featureFlags.contains(FeatureFlags.RequireAuthParamsAndBodyParamsAreNotNull)) {
+                    || !featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 return Optional.empty();
             }
             annotationSpecBuilder = AnnotationSpec

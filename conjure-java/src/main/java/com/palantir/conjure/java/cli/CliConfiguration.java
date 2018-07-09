@@ -93,7 +93,7 @@ public abstract class CliConfiguration {
                     flagsBuilder.add(FeatureFlags.RetrofitCompletableFutures);
                     break;
                 case REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS:
-                    flagsBuilder.add(FeatureFlags.RequireAuthParamsAndBodyParamsAreNotNull);
+                    flagsBuilder.add(FeatureFlags.RequireNotNullAuthAndBodyParams);
                     break;
                 default:
                     break;

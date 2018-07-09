@@ -55,6 +55,9 @@ public final class ConjureJavaCli {
         options.addOption(new Option(
                 CliConfiguration.RETROFIT_COMPLETABLE_FUTURES,
                 "Generate retrofit services which return completableFutures"));
+        options.addOption(new Option(
+                CliConfiguration.REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS,
+                "Generate @NotNull annotations for AuthHeaders and request body params"));
 
         try {
             CommandLine cmd = parser.parse(options, args, false);
