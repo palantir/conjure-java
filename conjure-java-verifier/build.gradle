@@ -18,6 +18,11 @@ sourceSets {
     spec
 }
 
+configurations {
+    testCases
+    verificationApi
+}
+
 idea {
     module {
         sourceDirs += sourceSets.spec.java.srcDirs
@@ -34,6 +39,9 @@ dependencies {
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile sourceSets.spec.output
 
+    testCases 'com.palantir.conjure.verification:test-cases'
+    verificationApi 'com.palantir.conjure.verification:verification-api'
+
     specCompile project(':conjure-lib')
     specCompile project(':conjure-java-core')
 }
@@ -46,7 +54,7 @@ task copyJavaExecutable(type: Sync, dependsOn: ':conjure-java:distTar') {
 task generateVerifierObjectBindings(type: Exec, dependsOn: copyJavaExecutable) {
     commandLine "${-> copyJavaExecutable.outputs.files.singleFile.listFiles()[0]}/bin/conjure-java",
             'generate',
-            'src/test/resources/api.json',
+            "${-> configurations.verificationApi.singleFile}",
             'src/spec/java',
             '--objects'
 }
@@ -54,7 +62,7 @@ task generateVerifierObjectBindings(type: Exec, dependsOn: copyJavaExecutable) {
 task generateVerifierServerBindings(type: Exec, dependsOn: copyJavaExecutable) {
     commandLine "${-> copyJavaExecutable.outputs.files.singleFile.listFiles()[0]}/bin/conjure-java",
             'generate',
-            'src/test/resources/api.json',
+            "${-> configurations.verificationApi.singleFile}",
             'src/spec/java',
             '--jersey'
 }
