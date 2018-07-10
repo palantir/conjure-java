@@ -58,7 +58,7 @@ public class AutoDeserializeTest {
     private static AutoDeserializeConfirmService confirmService;
 
     @BeforeClass
-    public void before() throws Exception {
+    public static void before() throws Exception {
         testService = JaxRsClient.create(AutoDeserializeService.class, userAgent, server.getClientConfiguration());
         confirmService =
                 JaxRsClient.create(AutoDeserializeConfirmService.class, userAgent, server.getClientConfiguration());
