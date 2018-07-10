@@ -46,16 +46,12 @@ import javax.net.ssl.X509TrustManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
 public class AutoDeserializeTest {
-    private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
-            .trustStorePath(Paths.get("../conjure-java-core/var/security/truststore.jks"))
-            .build();
-    private static final SSLSocketFactory SSL_SOCKET_FACTORY =
-            SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION);
-    private static final X509TrustManager TRUST_MANAGER =
-            SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
+    private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
     private static final UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("test", "develop"));
     private static final ClientConfiguration clientConfiguration = ClientConfigurations.of(
             ImmutableList.of("http://localhost:8000/"),
@@ -105,8 +101,14 @@ public class AutoDeserializeTest {
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
 
         if (shouldSucceed) {
-            Object resultFromServer = method.invoke(testService, index);
-            confirmService.confirm(endpointName.get(), index, resultFromServer);
+            try {
+                Object resultFromServer = method.invoke(testService, index);
+                log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
+                confirmService.confirm(endpointName.get(), index, resultFromServer);
+            } catch (RemoteException e) {
+                log.error("Caught exception with params: {}", e.getError().parameters());
+                throw e;
+            }
         } else {
             try {
                 method.invoke(testService, index);
