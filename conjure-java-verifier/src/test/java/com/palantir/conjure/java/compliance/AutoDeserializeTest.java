@@ -73,7 +73,7 @@ public class AutoDeserializeTest {
     public static Collection<Object[]> data() throws IOException {
         TestCases testCases = new ObjectMapper(new JsonFactory())
                 .registerModule(new Jdk8Module())
-                .readValue(new File("src/test/resources/test-cases.json"), TestCases.class);
+                .readValue(new File("build/test-cases/test-cases.json"), TestCases.class);
 
         List<Object[]> objects = new ArrayList<>();
 

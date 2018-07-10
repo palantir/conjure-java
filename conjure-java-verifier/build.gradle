@@ -66,4 +66,9 @@ task generateVerifierServerBindings(type: Exec, dependsOn: copyJavaExecutable) {
             '--jersey'
 }
 
-compileTestJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings, compileSpecJava
+task copyTestCases(type: Sync) {
+    from configurations.testCases
+    into "$buildDir/test-cases"
+}
+
+compileTestJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings, compileSpecJava, copyTestCases
