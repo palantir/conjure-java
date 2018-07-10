@@ -170,6 +170,27 @@ services:
             param-type: query
         returns: integer
 
+      testNoResponseQueryParams:
+        http: POST /test-no-response-query-params
+        args:
+          query: string
+          something:
+            type: ResourceIdentifier
+            param-id: different
+            param-type: query
+          optionalMiddle:
+            type: optional<ResourceIdentifier>
+            param-type: query
+          implicit:
+            type: ResourceIdentifier
+            param-type: query
+          setEnd:
+            type: set<string>
+            param-type: query
+          optionalEnd:
+            type: optional<ResourceIdentifier>
+            param-type: query
+
       testBoolean:
         http: GET /boolean
         returns: boolean
