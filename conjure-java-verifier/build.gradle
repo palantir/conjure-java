@@ -87,4 +87,5 @@ task copyTestCases(type: Sync) {
     rename { "test-cases.json" }
 }
 
-testClasses.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings, compileSpecJava, copyTestCases, unpackVerificationServer
+specClasses.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings
+testClasses.dependsOn copyTestCases, unpackVerificationServer
