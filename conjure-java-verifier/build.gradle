@@ -46,6 +46,8 @@ dependencies {
 
     specCompile project(':conjure-lib')
     specCompile project(':conjure-java-core')
+
+    processor 'org.immutables:value'
 }
 
 task copyJavaExecutable(type: Sync, dependsOn: ':conjure-java:distTar') {
