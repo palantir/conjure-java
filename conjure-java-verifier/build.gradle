@@ -69,6 +69,7 @@ task generateVerifierServerBindings(type: Exec, dependsOn: copyJavaExecutable) {
 task copyTestCases(type: Sync) {
     from configurations.testCases
     into "$buildDir/test-cases"
+    rename { "test-cases.json" }
 }
 
 compileTestJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings, compileSpecJava, copyTestCases
