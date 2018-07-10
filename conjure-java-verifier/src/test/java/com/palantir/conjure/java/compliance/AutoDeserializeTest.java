@@ -111,7 +111,9 @@ public class AutoDeserializeTest {
             try {
                 method.invoke(testService, index);
                 failBecauseExceptionWasNotThrown(Exception.class);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                // ignore
+            }
         }
     }
 }
