@@ -50,6 +50,10 @@ dependencies {
     processor 'org.immutables:value'
 }
 
+tasks.compileTestJava {
+    options.compilerArgs += ['-Xep:Slf4jLogsafeArgs:OFF']
+}
+
 task copyJavaExecutable(type: Sync, dependsOn: ':conjure-java:distTar') {
     from tarTree(project(':conjure-java').tasks.distTar.outputs.files.singleFile)
     into "${project.buildDir}/conjure-java"
