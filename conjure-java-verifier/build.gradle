@@ -16,10 +16,6 @@
 
 sourceSets {
     spec
-    test {
-        compileClasspath += spec.output
-        runtimeClasspath += spec.output
-    }
 }
 
 idea {
@@ -36,6 +32,7 @@ dependencies {
     testCompile 'org.mockito:mockito-core'
     testCompile 'com.palantir.remoting3:jaxrs-clients'
     testCompile 'io.dropwizard:dropwizard-testing'
+    testCompile sourceSets.spec.output
 
     specCompile project(':conjure-lib')
     specCompile project(':conjure-java-core')
