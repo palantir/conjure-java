@@ -16,11 +16,7 @@
 
 sourceSets {
     integrationInput
-    verifierSpec
     test {
-        compileClasspath += verifierSpec.output
-        runtimeClasspath += verifierSpec.output
-
         compileClasspath += integrationInput.output
         runtimeClasspath += integrationInput.output
     }
@@ -28,7 +24,6 @@ sourceSets {
 
 idea {
     module {
-        sourceDirs += sourceSets.verifierSpec.java.srcDirs
         testSourceDirs += sourceSets.integrationInput.java.srcDirs
     }
 }
@@ -60,8 +55,6 @@ dependencies {
     testCompile 'com.palantir.remoting3:jaxrs-clients'
     testCompile 'com.palantir.remoting3:retrofit2-clients'
     testCompile 'io.dropwizard:dropwizard-testing'
-
-    verifierSpecCompile project(':conjure-lib')
 
     integrationInputCompile project(':conjure-lib')
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
