@@ -21,6 +21,7 @@ sourceSets {
 configurations {
     testCases
     verificationApi
+    verificationServer
 }
 
 idea {
@@ -40,6 +41,8 @@ dependencies {
 
     testCases 'com.palantir.conjure.verification:test-cases'
     verificationApi 'com.palantir.conjure.verification:verification-api'
+    // TODO(dsanduleac): change the name once publishing becomes OS-specific
+    verificationServer 'com.palantir.conjure.verification:conjure-verification'
 
     specCompile project(':conjure-lib')
     specCompile project(':conjure-java-core')
@@ -66,10 +69,16 @@ task generateVerifierServerBindings(type: Exec, dependsOn: copyJavaExecutable) {
             '--jersey'
 }
 
+task unpackVerificationServer(type: Sync) {
+    from { tarTree(configurations.verificationServer.singleFile) }
+    into "${buildDir}/verification-server"
+    rename { "server" }
+}
+
 task copyTestCases(type: Sync) {
     from configurations.testCases
     into "$buildDir/test-cases"
     rename { "test-cases.json" }
 }
 
-compileTestJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings, compileSpecJava, copyTestCases
+compileTestJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings, compileSpecJava, copyTestCases, unpackVerificationServer

@@ -21,28 +21,23 @@ import static org.assertj.core.api.Fail.failBecauseExceptionWasNotThrown;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
 import com.palantir.conjure.verification.EndpointName;
 import com.palantir.conjure.verification.TestCases;
-import com.palantir.remoting.api.config.ssl.SslConfiguration;
-import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.clients.ClientConfigurations;
+import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.clients.UserAgent;
-import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -53,17 +48,21 @@ import org.slf4j.LoggerFactory;
 public class AutoDeserializeTest {
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
     private static final UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("test", "develop"));
-    private static final ClientConfiguration clientConfiguration = ClientConfigurations.of(
-            ImmutableList.of("http://localhost:8000/"),
-            SSL_SOCKET_FACTORY,
-            TRUST_MANAGER);
+
+    @ClassRule
+    public static final ServerRule server = new ServerRule();
 
     private static final SpecVerifier specVerifier = new SpecVerifier();
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private static final AutoDeserializeService testService = JaxRsClient.create(
-            AutoDeserializeService.class, userAgent, clientConfiguration);
-    private static final AutoDeserializeConfirmService confirmService = JaxRsClient.create(
-            AutoDeserializeConfirmService.class, userAgent, clientConfiguration);
+    private static AutoDeserializeService testService;
+    private static AutoDeserializeConfirmService confirmService;
+
+    @BeforeClass
+    public void before() throws Exception {
+        testService = JaxRsClient.create(AutoDeserializeService.class, userAgent, server.getClientConfiguration());
+        confirmService =
+                JaxRsClient.create(AutoDeserializeConfirmService.class, userAgent, server.getClientConfiguration());
+    }
 
     @Parameterized.Parameters(name = "{0} (should succeed {2}): {1}")
     public static Collection<Object[]> data() throws IOException {
