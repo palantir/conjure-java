@@ -76,7 +76,7 @@ public final class DoubleExample {
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             this.doubleValue = doubleValue;
-            _doubleValueInitialized = true;
+            this._doubleValueInitialized = true;
             return this;
         }
 

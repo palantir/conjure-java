@@ -255,7 +255,7 @@ public final class ManyFieldExample {
         @JsonSetter("integer")
         public Builder integer(int integer) {
             this.integer = integer;
-            _integerInitialized = true;
+            this._integerInitialized = true;
             return this;
         }
 
@@ -263,7 +263,7 @@ public final class ManyFieldExample {
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             this.doubleValue = doubleValue;
-            _doubleValueInitialized = true;
+            this._doubleValueInitialized = true;
             return this;
         }
 

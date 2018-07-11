@@ -77,7 +77,7 @@ public final class BooleanExample {
         @JsonSetter("coin")
         public Builder coin(boolean coin) {
             this.coin = coin;
-            _coinInitialized = true;
+            this._coinInitialized = true;
             return this;
         }
 

@@ -199,7 +199,7 @@ public final class BeanBuilderGenerator {
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
         if (enriched.isPrimitive()) {
-            setterBuilder.addCode("$L = true;", deriveFieldInitializedName(enriched));
+            setterBuilder.addCode("this.$L = true;", deriveFieldInitializedName(enriched));
         }
 
         return setterBuilder

@@ -77,7 +77,7 @@ public final class IntegerExample {
         @JsonSetter("integer")
         public Builder integer(int integer) {
             this.integer = integer;
-            _integerInitialized = true;
+            this._integerInitialized = true;
             return this;
         }
 
