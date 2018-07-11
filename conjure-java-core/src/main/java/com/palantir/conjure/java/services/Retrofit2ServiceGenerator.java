@@ -19,10 +19,12 @@ package com.palantir.conjure.java.services;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.types.Parameters;
 import com.palantir.conjure.java.types.Retrofit2MethodTypeClassNameVisitor;
 import com.palantir.conjure.java.types.Retrofit2ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
@@ -48,12 +50,16 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -98,6 +104,12 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, methodTypeMapper))
                 .collect(Collectors.toList()));
 
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+                .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper,
+                        methodTypeMapper))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
                 .indent("    ")
                 .build();
@@ -119,7 +131,6 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
             TypeMapper methodTypeMapper) {
-        Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
         HttpPath endpointPathWithoutRegex = replaceEncodedPathArgs(endpointDef.getHttpPath());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -145,16 +156,114 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), ClassName.get(Void.class)));
         }
 
-        getAuthParameter(endpointDef.getAuth()).ifPresent(methodBuilder::addParameter);
-
-        methodBuilder.addParameters(endpointDef.getArgs().stream()
-                .map(arg -> createEndpointParameter(methodTypeMapper, encodedPathArgs, arg))
-                .collect(Collectors.toList()));
+        methodBuilder.addParameters(createServiceMethodParameters(endpointDef, methodTypeMapper, true));
 
         return methodBuilder.build();
     }
 
-    private Set<ArgumentName> extractEncodedPathArgs(HttpPath path) {
+    /** Provides a linear expansion of optional query arguments to improve Java back-compat. */
+    private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper methodTypeMapper) {
+
+        List<ArgumentDefinition> args = Lists.newArrayList();
+        List<ArgumentDefinition> queryArgs = Lists.newArrayList();
+
+        for (ArgumentDefinition arg : endpointDef.getArgs()) {
+            if (!arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
+                    || !arg.getType().accept(Parameters.TYPE_DEFAULTABLE_PREDICATE)) {
+                args.add(arg);
+            } else {
+                queryArgs.add(arg);
+            }
+        }
+
+        List<MethodSpec> alternateMethods = Lists.newArrayList();
+        for (int i = 0; i < queryArgs.size(); i++) {
+            alternateMethods.add(createCompatibilityBackfillMethod(
+                    endpointDef,
+                    returnTypeMapper,
+                    methodTypeMapper,
+                    queryArgs.subList(i, queryArgs.size())));
+        }
+
+        return alternateMethods;
+    }
+
+    private MethodSpec createCompatibilityBackfillMethod(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper methodTypeMapper,
+            List<ArgumentDefinition> extraArgs) {
+        // ensure the correct ordering of parameters by creating the complete sorted parameter list
+        List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
+        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
+                extraArgs.stream()
+                        .filter(arg -> arg.getArgName().get().equals(param.name))
+                        .findFirst())
+                .collect(Collectors.toList());
+
+        // omit extraArgs from the back fill method signature
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+                .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
+                .addAnnotation(Deprecated.class)
+                .addParameters(IntStream.range(0, sortedParams.size())
+                        .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
+                        .mapToObj(sortedParams::get)
+                        .collect(Collectors.toList()));
+
+        endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
+
+        // replace extraArgs with default values when invoking the complete method
+        StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
+        List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
+            Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
+            if (maybeArgDef.isPresent()) {
+                sb.append("$L, ");
+                return maybeArgDef.get().getType().accept(Parameters.TYPE_DEFAULT_VALUE_OPTIONALS_NULL);
+            } else {
+                sb.append("$N, ");
+                return sortedParams.get(i);
+            }
+        }).collect(Collectors.toList());
+        // trim the end
+        sb.setLength(sb.length() - 2);
+        sb.append(")");
+
+        ImmutableList<Object> methodCallArgs = ImmutableList.builder()
+                .add(endpointDef.getEndpointName().get())
+                .addAll(values)
+                .build();
+
+        methodBuilder.addStatement(sb.toString(), methodCallArgs.toArray(new Object[0]));
+
+        return methodBuilder.build();
+    }
+
+    private static List<ParameterSpec> createServiceMethodParameters(
+            EndpointDefinition endpointDef,
+            TypeMapper typeMapper,
+            boolean withAnnotations) {
+        Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
+
+        List<ParameterSpec> parameterSpecs = new ArrayList<>();
+
+        Optional<AuthType> auth = endpointDef.getAuth();
+        getAuthParameter(auth, withAnnotations).ifPresent(parameterSpecs::add);
+
+        List<ArgumentDefinition> sortedArgList = new ArrayList<>(endpointDef.getArgs());
+        sortedArgList.sort(Comparator.comparing(o ->
+                o.getParamType().accept(Parameters.PARAM_SORT_ORDER) + o.getType().accept(Parameters.TYPE_SORT_ORDER)));
+
+        sortedArgList.forEach(def -> {
+            parameterSpecs.add(createEndpointParameter(typeMapper, encodedPathArgs, def, withAnnotations));
+        });
+
+        return parameterSpecs;
+    }
+
+    private static Set<ArgumentName> extractEncodedPathArgs(HttpPath path) {
         Pattern pathArg = Pattern.compile("\\{([^\\}]+)\\}");
         Matcher matcher = pathArg.matcher(path.toString());
         ImmutableSet.Builder<ArgumentName> encodedArgs = ImmutableSet.builder();
@@ -183,53 +292,61 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         return HttpPath.of("/" + Joiner.on("/").join(newSegments));
     }
 
-    private ParameterSpec createEndpointParameter(
+    private static ParameterSpec createEndpointParameter(
             TypeMapper methodTypeMapper,
             Set<ArgumentName> encodedPathArgs,
-            ArgumentDefinition def) {
+            ArgumentDefinition def,
+            boolean withAnnotations) {
         ParameterSpec.Builder param = ParameterSpec.builder(
                 methodTypeMapper.getClassName(def.getType()),
                 def.getArgName().get());
-        ParameterType paramType = def.getParamType();
-        if (paramType.accept(ParameterTypeVisitor.IS_PATH)) {
-            AnnotationSpec.Builder builder = AnnotationSpec.builder(ClassName.get("retrofit2.http", "Path"))
-                    .addMember("value", "$S", def.getArgName().get());
-            if (encodedPathArgs.contains(def.getArgName())) {
-                builder.addMember("encoded", "$L", true);
+
+        if (withAnnotations) {
+            ParameterType paramType = def.getParamType();
+            if (paramType.accept(ParameterTypeVisitor.IS_PATH)) {
+                AnnotationSpec.Builder builder = AnnotationSpec.builder(ClassName.get("retrofit2.http", "Path"))
+                        .addMember("value", "$S", def.getArgName().get());
+                if (encodedPathArgs.contains(def.getArgName())) {
+                    builder.addMember("encoded", "$L", true);
+                }
+                param.addAnnotation(builder.build());
+            } else if (paramType.accept(ParameterTypeVisitor.IS_QUERY)) {
+                ParameterId paramId = paramType.accept(ParameterTypeVisitor.QUERY).getParamId();
+                param.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Query"))
+                        .addMember("value", "$S", paramId.get())
+                        .build());
+            } else if (paramType.accept(ParameterTypeVisitor.IS_HEADER)) {
+                ParameterId paramId = paramType.accept(ParameterTypeVisitor.HEADER).getParamId();
+                param.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Header"))
+                        .addMember("value", "$S", paramId.get())
+                        .build());
+            } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
+                param.addAnnotation(ClassName.get("retrofit2.http", "Body"));
+            } else {
+                throw new IllegalStateException("Unrecognized argument type: " + def.getParamType());
             }
-            param.addAnnotation(builder.build());
-        } else if (paramType.accept(ParameterTypeVisitor.IS_QUERY)) {
-            ParameterId paramId = paramType.accept(ParameterTypeVisitor.QUERY).getParamId();
-            param.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Query"))
-                    .addMember("value", "$S", paramId.get())
-                    .build());
-        } else if (paramType.accept(ParameterTypeVisitor.IS_HEADER)) {
-            ParameterId paramId = paramType.accept(ParameterTypeVisitor.HEADER).getParamId();
-            param.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Header"))
-                    .addMember("value", "$S", paramId.get())
-                    .build());
-        } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
-            param.addAnnotation(ClassName.get("retrofit2.http", "Body"));
-        } else {
-            throw new IllegalStateException("Unrecognized argument type: " + def.getParamType());
         }
 
         return param.build();
     }
 
-    private Optional<ParameterSpec> getAuthParameter(Optional<AuthType> auth) {
+    private static Optional<ParameterSpec> getAuthParameter(Optional<AuthType> auth, boolean withAnnotations) {
         if (!auth.isPresent()) {
             return Optional.empty();
         }
 
         AuthType authType = auth.get();
         if (authType.accept(AuthTypeVisitor.IS_HEADER)) {
-            return Optional.of(
-                    ParameterSpec.builder(ClassName.get("com.palantir.tokens.auth", "AuthHeader"), "authHeader")
-                            .addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Header"))
-                                    .addMember("value", "$S", AUTH_HEADER_NAME)
-                                    .build())
-                            .build());
+            ParameterSpec.Builder builder = ParameterSpec.builder(
+                    ClassName.get("com.palantir.tokens.auth", "AuthHeader"), "authHeader");
+
+            if (withAnnotations) {
+                builder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Header"))
+                        .addMember("value", "$S", AUTH_HEADER_NAME)
+                        .build());
+            }
+
+            return Optional.of(builder.build());
         } else if (authType.accept(AuthTypeVisitor.IS_COOKIE)) {
             // TODO(melliot): generate required retrofit logic to support this
             log.error("Retrofit does not support Cookie arguments");
