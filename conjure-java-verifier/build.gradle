@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import static org.apache.tools.ant.taskdefs.condition.Os.*
+
+ext {
+    osClassifier = isFamily(FAMILY_MAC) ? "osx" : "linux"
+}
+
 sourceSets {
     spec
 }
@@ -41,8 +47,7 @@ dependencies {
 
     testCases 'com.palantir.conjure.verification:test-cases'
     verificationApi 'com.palantir.conjure.verification:verification-api'
-    // TODO(dsanduleac): change the name once publishing becomes OS-specific
-    verificationServer 'com.palantir.conjure.verification:conjure-verification'
+    verificationServer "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
     specCompile project(':conjure-lib')
     specCompile project(':conjure-java-core')
