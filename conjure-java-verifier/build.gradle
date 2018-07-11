@@ -33,6 +33,7 @@ configurations {
 idea {
     module {
         sourceDirs += sourceSets.spec.java.srcDirs
+        scopes.COMPILE.plus += [configurations.specCompile]
     }
 }
 
@@ -91,6 +92,9 @@ task copyTestCases(type: Sync) {
     into "$buildDir/test-cases"
     rename { "test-cases.json" }
 }
+
+tasks.idea.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings
+tasks.idea.dependsOn copyTestCases, unpackVerificationServer
 
 compileSpecJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings
 compileTestJava.dependsOn copyTestCases, unpackVerificationServer
