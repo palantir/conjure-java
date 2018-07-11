@@ -112,6 +112,7 @@ public class AutoDeserializeTest {
 
         // jackson magical casting
         ignores.put(EndpointName.of("receiveStringExample"), "{\"value\":8}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"1523040070\"}");
 
 
         boolean testIsDisabled = ignores.containsEntry(endpointName, jsonString);
