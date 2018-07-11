@@ -20,9 +20,12 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.palantir.conjure.verification.EndpointName;
 import com.palantir.conjure.verification.SingleHeaderService;
+import com.palantir.conjure.verification.SinglePathParamService;
+import com.palantir.conjure.verification.SingleQueryParamService;
 import com.palantir.conjure.verification.TestCases;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.clients.UserAgent;
@@ -47,26 +50,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
-public class SingleHeaderServiceTest {
-
-    private static final Logger log = LoggerFactory.getLogger(SingleHeaderServiceTest.class);
+public class SingleParamServiceTests {
+    private static final Logger log = LoggerFactory.getLogger(SingleParamServiceTests.class);
     private static final UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("test", "develop"));
 
     @ClassRule
     public static final ServerRule server = new ServerRule();
 
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private static SingleHeaderService testService;
-
-    private static Method[] methods;
+    private static SinglePathParamService singlePathParamService;
+    private static SingleHeaderService singleHeaderService;
+    private static SingleQueryParamService singleQueryParamService;
+    private static ImmutableMap<String, Object> servicesMaps;
 
     @BeforeClass
     public static void before() {
-        testService = JaxRsClient.create(SingleHeaderService.class, userAgent, server.getClientConfiguration());
-        methods = testService.getClass().getMethods();
+        singlePathParamService = JaxRsClient.create(SinglePathParamService.class, userAgent, server.getClientConfiguration());
+        singleHeaderService = JaxRsClient.create(SingleHeaderService.class, userAgent, server.getClientConfiguration());
+        singleQueryParamService = JaxRsClient.create(SingleQueryParamService.class, userAgent, server.getClientConfiguration());
+        servicesMaps = ImmutableMap.of(
+                "singlePathParamService", singlePathParamService,
+                "singleHeaderService", singleHeaderService,
+                "singleQueryParamService", singleQueryParamService);
     }
 
-    @Parameterized.Parameters(name = "{0}({2})")
+    @Parameterized.Parameters(name = "{0}/{1}({3})")
     public static Collection<Object[]> data() throws IOException {
         TestCases testCases = new ObjectMapper(new JsonFactory())
                 .registerModule(new Jdk8Module())
@@ -76,44 +84,81 @@ public class SingleHeaderServiceTest {
         testCases.getClient().getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
             IntStream.range(0, size)
-                    .forEach(i -> objects.add(new Object[] {endpointName, i, singleHeaderTestCases.get(i)}));
+                    .forEach(i -> objects.add(
+                            new Object[] {"singleHeaderService", endpointName, i, singleHeaderTestCases.get(i)}));
+
+        });
+
+        testCases.getClient().getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
+            int size = singleHeaderTestCases.size();
+            IntStream.range(0, size)
+                    .forEach(i -> objects.add(
+                            new Object[] {"singlePathParamService", endpointName, i, singleHeaderTestCases.get(i)}));
+
+        });
+
+        testCases.getClient().getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
+            int size = singleQueryTestCases.size();
+            IntStream.range(0, size)
+                    .forEach(i -> objects.add(
+                            new Object[] {"singleQueryParamService", endpointName, i, singleQueryTestCases.get(i)}));
 
         });
 
         return objects;
     }
 
+
     @Parameterized.Parameter(0)
-    public EndpointName endpointName;
+    public String serviceName;
 
     @Parameterized.Parameter(1)
-    public int index;
+    public EndpointName endpointName;
 
     @Parameterized.Parameter(2)
+    public int index;
+
+    @Parameterized.Parameter(3)
     public String jsonString;
 
     @Test
     public void runTestCase() throws Exception {
-        System.out.println(String.format("Invoking %s(%s)", endpointName, jsonString));
+        System.out.println(String.format("Invoking %s %s(%s)", serviceName, endpointName, jsonString));
 
         Multimap<EndpointName, String> ignores = HashMultimap.create();
         // server limitation
         ignores.put(EndpointName.of("headerDouble"), "10");
         ignores.put(EndpointName.of("headerDouble"), "10.0");
         ignores.put(EndpointName.of("headerOptionalString"), "null");
+        ignores.put(EndpointName.of("pathParamDouble"), "10");
+        ignores.put(EndpointName.of("pathParamDouble"), "10.0");
+        ignores.put(EndpointName.of("pathParamString"), "\"\"");
+        ignores.put(EndpointName.of("pathParamAliasString"), "\"\"");
+        ignores.put(EndpointName.of("queryParamDouble"), "10");
+        ignores.put(EndpointName.of("queryParamDouble"), "10.0");
 
         boolean isRemoved = ignores.remove(endpointName, jsonString);
         Assume.assumeFalse(isRemoved);
 
-        for (Method method : methods)  {
+        Object service = servicesMaps.get(serviceName);
+        for (Method method : servicesMaps.get(serviceName).getClass().getMethods())  {
             String name = method.getName();
             if (endpointName.get().equals(name)) {
                 try {
+                    // HACKHACK, index parameter order is different for different services.
                     Type type = method.getGenericParameterTypes()[0];
-                    Class<?> cls = ClassUtils.getClass(type.getTypeName());
-                    method.invoke(
-                            testService, objectMapper.readValue(jsonString, cls), index);
-                    log.info("Successfully post headers to endpoint {} and index {}", endpointName, index);
+                    if  (type.getTypeName() != "int")  {
+                        Class<?> cls = ClassUtils.getClass(type.getTypeName());
+                        method.invoke(
+                                service, objectMapper.readValue(jsonString, cls), index);
+                    } else {
+                        type =  method.getGenericParameterTypes()[1];
+                        Class<?> cls = ClassUtils.getClass(type.getTypeName());
+                        method.invoke(
+                                service, index, objectMapper.readValue(jsonString, cls));
+                    }
+
+                    log.info("Successfully post qparam to endpoint {} and index {}", endpointName, index);
                 } catch (RemoteException e) {
                     log.error("Caught exception with params: {}", e.getError().parameters());
                     throw e;
