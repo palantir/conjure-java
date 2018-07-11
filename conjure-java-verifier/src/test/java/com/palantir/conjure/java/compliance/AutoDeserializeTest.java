@@ -159,11 +159,6 @@ public class AutoDeserializeTest {
         ignores.put(EndpointName.of("receiveReferenceAliasExample"), "null");
         ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "null");
 
-        // TODO(dfox): conjure-java should not coerce primitives from absent JSON
-        ignores.put(EndpointName.of("receiveBooleanExample"), "{}");
-        ignores.put(EndpointName.of("receiveDoubleExample"), "{}");
-        ignores.put(EndpointName.of("receiveIntegerExample"), "{}");
-
         // TODO(dfox): can we configure jackson to reject this?
         ignores.put(EndpointName.of("receiveSetStringExample"), "{\"value\":[\"a\",\"a\"]}");
 
