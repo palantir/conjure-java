@@ -18,24 +18,21 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ServerRule extends ExternalResource {
-    private static final Logger log = LoggerFactory.getLogger(ServerRule.class);
 
+    private static final Logger log = LoggerFactory.getLogger(ServerRule.class);
     private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
             .trustStorePath(Paths.get("../conjure-java-core/var/security/truststore.jks"))
             .build();
-    private static final SSLSocketFactory SSL_SOCKET_FACTORY =
-            SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION);
-    private static final X509TrustManager TRUST_MANAGER =
-            SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
-    private static final ClientConfiguration clientConfiguration =
-            ClientConfigurations.of(ImmutableList.of("http://localhost:8000/"), SSL_SOCKET_FACTORY, TRUST_MANAGER);
+    private static final ClientConfiguration clientConfiguration = ClientConfigurations.of(
+            ImmutableList.of("http://localhost:8000/"),
+            SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
+            SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION));
+
     private Process process;
 
     public ClientConfiguration getClientConfiguration() {
@@ -52,9 +49,17 @@ public final class ServerRule extends ExternalResource {
                 new ProcessBuilder("build/verification-server/server", "build/test-cases/test-cases.json")
                         .redirectErrorStream(true)
                         .redirectOutput(Redirect.PIPE);
+
         // TODO(dsanduleac): set these as defaults
         processBuilder.environment().put("RUST_LOG", "conjure_verification_server=info,conjure_verification_http=info");
 
+        process = processBuilder.start();
+
+        log.info("Waiting for server to start up");
+        blockUntilServerStarted();
+    }
+
+    private void blockUntilServerStarted() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(),
@@ -76,9 +81,8 @@ public final class ServerRule extends ExternalResource {
             }
         });
         thread.setDaemon(true);
-        process = processBuilder.start();
         thread.start();
-        log.info("Waiting for server to start up");
+
         latch.await(10, TimeUnit.SECONDS);
     }
 
