@@ -351,6 +351,29 @@ public final class ManyFieldExample {
             return this;
         }
 
+        private void validateFields() {
+            List<String> missingFields = null;
+            missingFields = addFieldIfMissing(missingFields, _integerInitialized, "integer");
+            missingFields =
+                    addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
+            if (missingFields != null) {
+                throw new IllegalArgumentException(
+                        "Some required fields have not been set: " + missingFields);
+            }
+        }
+
+        private static List<String> addFieldIfMissing(
+                List<String> prev, boolean initialized, String fieldName) {
+            List<String> missingFields = prev;
+            if (!initialized) {
+                if (missingFields == null) {
+                    missingFields = new ArrayList<>(2);
+                }
+                missingFields.add(fieldName);
+            }
+            return missingFields;
+        }
+
         public ManyFieldExample build() {
             return new ManyFieldExample(
                     string, integer, doubleValue, optionalItem, items, set, map, alias);

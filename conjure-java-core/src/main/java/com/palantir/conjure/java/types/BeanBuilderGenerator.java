@@ -41,12 +41,14 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -95,6 +97,7 @@ public final class BeanBuilderGenerator {
                 .addMethod(createConstructor())
                 .addMethod(createFromObject(enrichedFields))
                 .addMethods(createSetters(enrichedFields))
+                .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
                 .addMethod(createBuild(poetFields))
                 .addAnnotation(
                         AnnotationSpec.builder(JsonIgnoreProperties.class)
@@ -116,6 +119,61 @@ public final class BeanBuilderGenerator {
         }
 
         return builder.build();
+    }
+
+    private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {
+        List<EnrichedField> primitives = enrichedFields.stream().filter(EnrichedField::isPrimitive).collect(toList());
+
+        if (primitives.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return ImmutableList.of(
+                createValidateFieldsMethod(primitives),
+                createAddFieldIfMissing(primitives.size()));
+    }
+
+    private static MethodSpec createValidateFieldsMethod(List<EnrichedField> primitives) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("validateFields")
+                .addModifiers(Modifier.PRIVATE);
+
+        builder.addStatement("$T missingFields = null", ParameterizedTypeName.get(List.class, String.class));
+        for (EnrichedField field : primitives) {
+            String name = deriveFieldInitializedName(field);
+            builder.addStatement("missingFields = addFieldIfMissing(missingFields, $N, $S)",
+                    name, field.fieldName().get());
+        }
+
+        builder.beginControlFlow("if (missingFields != null)")
+                .addStatement("throw new $T(\"Some required fields have not been set: \" + missingFields)",
+                        IllegalArgumentException.class)
+                .endControlFlow();
+
+        return builder.build();
+    }
+
+    private static MethodSpec createAddFieldIfMissing(int fieldCount) {
+        ParameterizedTypeName listOfStringType = ParameterizedTypeName.get(List.class, String.class);
+        ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev").build();
+        ParameterSpec fieldValueParam =
+                ParameterSpec.builder(TypeName.BOOLEAN, "initialized").build();
+        ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
+
+        return MethodSpec.methodBuilder("addFieldIfMissing")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .returns(listOfStringType)
+                .addParameter(listParam)
+                .addParameter(fieldValueParam)
+                .addParameter(fieldNameParam)
+                .addStatement("$T missingFields = $N", listOfStringType, listParam)
+                .beginControlFlow("if (!$N)", fieldValueParam)
+                .beginControlFlow("if (missingFields == null)")
+                .addStatement("missingFields = new $T<>($L)", ArrayList.class, fieldCount)
+                .endControlFlow()
+                .addStatement("missingFields.add($N)", fieldNameParam)
+                .endControlFlow()
+                .addStatement("return missingFields")
+                .build();
     }
 
     private Collection<FieldSpec> primitivesInitializedFields(Collection<EnrichedField> enrichedFields) {

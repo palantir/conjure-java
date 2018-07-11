@@ -175,6 +175,29 @@ public final class ReservedKeyExample {
             return this;
         }
 
+        private void validateFields() {
+            List<String> missingFields = null;
+            missingFields =
+                    addFieldIfMissing(
+                            missingFields, _memoizedHashCodeInitialized, "memoizedHashCode");
+            if (missingFields != null) {
+                throw new IllegalArgumentException(
+                        "Some required fields have not been set: " + missingFields);
+            }
+        }
+
+        private static List<String> addFieldIfMissing(
+                List<String> prev, boolean initialized, String fieldName) {
+            List<String> missingFields = prev;
+            if (!initialized) {
+                if (missingFields == null) {
+                    missingFields = new ArrayList<>(1);
+                }
+                missingFields.add(fieldName);
+            }
+            return missingFields;
+        }
+
         public ReservedKeyExample build() {
             return new ReservedKeyExample(
                     package_, interface_, fieldNameWithDashes, memoizedHashCode_);

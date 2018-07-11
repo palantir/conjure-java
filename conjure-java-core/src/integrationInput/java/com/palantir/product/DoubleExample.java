@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
 
@@ -78,6 +80,28 @@ public final class DoubleExample {
             this.doubleValue = doubleValue;
             this._doubleValueInitialized = true;
             return this;
+        }
+
+        private void validateFields() {
+            List<String> missingFields = null;
+            missingFields =
+                    addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
+            if (missingFields != null) {
+                throw new IllegalArgumentException(
+                        "Some required fields have not been set: " + missingFields);
+            }
+        }
+
+        private static List<String> addFieldIfMissing(
+                List<String> prev, boolean initialized, String fieldName) {
+            List<String> missingFields = prev;
+            if (!initialized) {
+                if (missingFields == null) {
+                    missingFields = new ArrayList<>(1);
+                }
+                missingFields.add(fieldName);
+            }
+            return missingFields;
         }
 
         public DoubleExample build() {
