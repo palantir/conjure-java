@@ -154,7 +154,8 @@ public final class Parameters {
      * <p>
      * This is required by retrofit on service methods, for example.
      */
-    public static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE_OPTIONALS_NULL = new TypeVisitor.Default<CodeBlock>() {
+    public static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE_OPTIONALS_NULL
+            = new TypeVisitor.Default<CodeBlock>() {
         @Override
         public CodeBlock visitOptional(OptionalType value) {
             return CodeBlock.of("null", Optional.class);
