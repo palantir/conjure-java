@@ -4,14 +4,19 @@
 
 package com.palantir.conjure.java.compliance;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.verification.TestCases;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.ClientConfigurations;
 import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.charset.StandardCharsets;
@@ -22,9 +27,12 @@ import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ServerRule extends ExternalResource {
+/**
+ * Spins up the 'verification-server' executable which will bind to port 8000, and tears it down at the end of the test.
+ */
+public final class VerificationServerRule extends ExternalResource {
 
-    private static final Logger log = LoggerFactory.getLogger(ServerRule.class);
+    private static final Logger log = LoggerFactory.getLogger(VerificationServerRule.class);
     private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
             .trustStorePath(Paths.get("../conjure-java-core/var/security/truststore.jks"))
             .build();
@@ -56,13 +64,13 @@ public final class ServerRule extends ExternalResource {
         process = processBuilder.start();
 
         log.info("Waiting for server to start up");
-        blockUntilServerStarted();
+        blockUntilServerStarted(process.getInputStream());
     }
 
-    private void blockUntilServerStarted() throws InterruptedException {
+    private static void blockUntilServerStarted(InputStream inputStream) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(),
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
                     StandardCharsets.UTF_8))) {
                 while (true) {
                     String line = reader.readLine();
@@ -93,6 +101,16 @@ public final class ServerRule extends ExternalResource {
             process.waitFor(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public TestCases getTestCases() {
+        try {
+            return new ObjectMapper().registerModule(new Jdk8Module())
+                    .readValue(new File("build/test-cases/test-cases.json"), TestCases.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to read test-cases.json, you may need to run ./gradlew copyTestCases",
+                    e);
         }
     }
 }

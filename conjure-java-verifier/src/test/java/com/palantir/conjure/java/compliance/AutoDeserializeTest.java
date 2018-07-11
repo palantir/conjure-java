@@ -16,18 +16,14 @@
 
 package com.palantir.conjure.java.compliance;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
+import com.palantir.conjure.verification.ClientTestCases;
 import com.palantir.conjure.verification.EndpointName;
-import com.palantir.conjure.verification.TestCases;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -47,36 +43,13 @@ import org.slf4j.LoggerFactory;
 public class AutoDeserializeTest {
 
     @ClassRule
-    public static final ServerRule server = new ServerRule();
+    public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
     private static AutoDeserializeService testService = JaxRsClient.create(
             AutoDeserializeService.class, server.getUserAgent(), server.getClientConfiguration());
     private static AutoDeserializeConfirmService confirmService = JaxRsClient.create(
             AutoDeserializeConfirmService.class, server.getUserAgent(), server.getClientConfiguration());
-
-    @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
-    public static Collection<Object[]> data() throws IOException {
-        TestCases testCases = new ObjectMapper(new JsonFactory())
-                .registerModule(new Jdk8Module())
-                .readValue(new File("build/test-cases/test-cases.json"), TestCases.class);
-
-        List<Object[]> objects = new ArrayList<>();
-
-        testCases.getClient().getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
-            int positiveSize = positiveAndNegativeTestCases.getPositive().size();
-            int negativeSize = positiveAndNegativeTestCases.getNegative().size();
-            IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[] {endpointName, i, true,
-                                                            positiveAndNegativeTestCases.getPositive().get(i)}));
-
-            IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[] {endpointName, positiveSize + i, false,
-                                                            positiveAndNegativeTestCases.getNegative().get(i)}));
-        });
-
-        return objects;
-    }
 
     @Parameterized.Parameter(0)
     public EndpointName endpointName;
@@ -89,6 +62,26 @@ public class AutoDeserializeTest {
 
     @Parameterized.Parameter(3)
     public String jsonString;
+
+    @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
+    public static Collection<Object[]> data() throws IOException {
+        ClientTestCases testCases = server.getTestCases().getClient();
+
+        List<Object[]> objects = new ArrayList<>();
+        testCases.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
+            int positiveSize = positiveAndNegativeTestCases.getPositive().size();
+            int negativeSize = positiveAndNegativeTestCases.getNegative().size();
+
+            IntStream.range(0, positiveSize).forEach(i -> objects.add(new Object[] {
+                    endpointName, i, true,
+                    positiveAndNegativeTestCases.getPositive().get(i)}));
+
+            IntStream.range(0, negativeSize).forEach(i -> objects.add(new Object[] {
+                    endpointName, positiveSize + i, false,
+                    positiveAndNegativeTestCases.getNegative().get(i)}));
+        });
+        return objects;
+    }
 
     @Test
     public void runTestCase() throws Exception {

@@ -16,21 +16,18 @@
 
 package com.palantir.conjure.java.compliance;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
+import com.palantir.conjure.verification.ClientTestCases;
 import com.palantir.conjure.verification.EndpointName;
 import com.palantir.conjure.verification.SingleHeaderService;
 import com.palantir.conjure.verification.SinglePathParamService;
 import com.palantir.conjure.verification.SingleQueryParamService;
-import com.palantir.conjure.verification.TestCases;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -51,7 +48,7 @@ import org.slf4j.LoggerFactory;
 public class SingleParamServiceTests {
 
     @ClassRule
-    public static final ServerRule server = new ServerRule();
+    public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(SingleParamServiceTests.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
@@ -62,40 +59,6 @@ public class SingleParamServiceTests {
                     SingleHeaderService.class, server.getUserAgent(), server.getClientConfiguration()),
             "singleQueryParamService", JaxRsClient.create(
                     SingleQueryParamService.class, server.getUserAgent(), server.getClientConfiguration()));
-
-    @Parameterized.Parameters(name = "{0}/{1}({3})")
-    public static Collection<Object[]> data() throws IOException {
-        TestCases testCases = new ObjectMapper(new JsonFactory())
-                .registerModule(new Jdk8Module())
-                .readValue(new File("build/test-cases/test-cases.json"), TestCases.class);
-
-        List<Object[]> objects = new ArrayList<>();
-        testCases.getClient().getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
-            int size = singleHeaderTestCases.size();
-            IntStream.range(0, size)
-                    .forEach(i -> objects.add(
-                            new Object[] {"singleHeaderService", endpointName, i, singleHeaderTestCases.get(i)}));
-
-        });
-
-        testCases.getClient().getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
-            int size = singleHeaderTestCases.size();
-            IntStream.range(0, size)
-                    .forEach(i -> objects.add(
-                            new Object[] {"singlePathParamService", endpointName, i, singleHeaderTestCases.get(i)}));
-
-        });
-
-        testCases.getClient().getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
-            int size = singleQueryTestCases.size();
-            IntStream.range(0, size)
-                    .forEach(i -> objects.add(
-                            new Object[] {"singleQueryParamService", endpointName, i, singleQueryTestCases.get(i)}));
-
-        });
-
-        return objects;
-    }
 
     @Parameterized.Parameter(0)
     public String serviceName;
@@ -108,6 +71,38 @@ public class SingleParamServiceTests {
 
     @Parameterized.Parameter(3)
     public String jsonString;
+
+    @Parameterized.Parameters(name = "{0}/{1}({3})")
+    public static Collection<Object[]> data() throws IOException {
+        ClientTestCases testCases = server.getTestCases().getClient();
+
+        List<Object[]> objects = new ArrayList<>();
+        testCases.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
+            int size = singleHeaderTestCases.size();
+            IntStream.range(0, size)
+                    .forEach(i -> objects.add(
+                            new Object[] {"singleHeaderService", endpointName, i, singleHeaderTestCases.get(i)}));
+
+        });
+
+        testCases.getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
+            int size = singleHeaderTestCases.size();
+            IntStream.range(0, size)
+                    .forEach(i -> objects.add(
+                            new Object[] {"singlePathParamService", endpointName, i, singleHeaderTestCases.get(i)}));
+
+        });
+
+        testCases.getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
+            int size = singleQueryTestCases.size();
+            IntStream.range(0, size)
+                    .forEach(i -> objects.add(
+                            new Object[] {"singleQueryParamService", endpointName, i, singleQueryTestCases.get(i)}));
+
+        });
+
+        return objects;
+    }
 
     @Test
     public void runTestCase() throws Exception {
