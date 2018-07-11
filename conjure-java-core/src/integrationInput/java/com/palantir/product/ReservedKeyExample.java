@@ -136,6 +136,8 @@ public final class ReservedKeyExample {
 
         private int memoizedHashCode_;
 
+        private boolean _memoizedHashCodeInitialized = false;
+
         private Builder() {}
 
         public Builder from(ReservedKeyExample other) {
@@ -169,10 +171,35 @@ public final class ReservedKeyExample {
         @JsonSetter("memoizedHashCode")
         public Builder memoizedHashCode_(int memoizedHashCode_) {
             this.memoizedHashCode_ = memoizedHashCode_;
+            this._memoizedHashCodeInitialized = true;
             return this;
         }
 
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
+            List<String> missingFields = null;
+            missingFields =
+                    addFieldIfMissing(
+                            missingFields, _memoizedHashCodeInitialized, "memoizedHashCode");
+            if (missingFields != null) {
+                throw new IllegalArgumentException(
+                        "Some required fields have not been set: " + missingFields);
+            }
+        }
+
+        private static List<String> addFieldIfMissing(
+                List<String> prev, boolean initialized, String fieldName) {
+            List<String> missingFields = prev;
+            if (!initialized) {
+                if (missingFields == null) {
+                    missingFields = new ArrayList<>(1);
+                }
+                missingFields.add(fieldName);
+            }
+            return missingFields;
+        }
+
         public ReservedKeyExample build() {
+            validatePrimitiveFieldsHaveBeenInitialized();
             return new ReservedKeyExample(
                     package_, interface_, fieldNameWithDashes, memoizedHashCode_);
         }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
 
@@ -64,6 +66,8 @@ public final class DoubleExample {
     public static final class Builder {
         private double doubleValue;
 
+        private boolean _doubleValueInitialized = false;
+
         private Builder() {}
 
         public Builder from(DoubleExample other) {
@@ -74,10 +78,34 @@ public final class DoubleExample {
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             this.doubleValue = doubleValue;
+            this._doubleValueInitialized = true;
             return this;
         }
 
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
+            List<String> missingFields = null;
+            missingFields =
+                    addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
+            if (missingFields != null) {
+                throw new IllegalArgumentException(
+                        "Some required fields have not been set: " + missingFields);
+            }
+        }
+
+        private static List<String> addFieldIfMissing(
+                List<String> prev, boolean initialized, String fieldName) {
+            List<String> missingFields = prev;
+            if (!initialized) {
+                if (missingFields == null) {
+                    missingFields = new ArrayList<>(1);
+                }
+                missingFields.add(fieldName);
+            }
+            return missingFields;
+        }
+
         public DoubleExample build() {
+            validatePrimitiveFieldsHaveBeenInitialized();
             return new DoubleExample(doubleValue);
         }
     }

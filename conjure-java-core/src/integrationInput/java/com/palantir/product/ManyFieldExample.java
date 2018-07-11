@@ -226,6 +226,10 @@ public final class ManyFieldExample {
 
         private StringAliasExample alias;
 
+        private boolean _integerInitialized = false;
+
+        private boolean _doubleValueInitialized = false;
+
         private Builder() {}
 
         public Builder from(ManyFieldExample other) {
@@ -251,6 +255,7 @@ public final class ManyFieldExample {
         @JsonSetter("integer")
         public Builder integer(int integer) {
             this.integer = integer;
+            this._integerInitialized = true;
             return this;
         }
 
@@ -258,6 +263,7 @@ public final class ManyFieldExample {
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             this.doubleValue = doubleValue;
+            this._doubleValueInitialized = true;
             return this;
         }
 
@@ -345,7 +351,31 @@ public final class ManyFieldExample {
             return this;
         }
 
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
+            List<String> missingFields = null;
+            missingFields = addFieldIfMissing(missingFields, _integerInitialized, "integer");
+            missingFields =
+                    addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
+            if (missingFields != null) {
+                throw new IllegalArgumentException(
+                        "Some required fields have not been set: " + missingFields);
+            }
+        }
+
+        private static List<String> addFieldIfMissing(
+                List<String> prev, boolean initialized, String fieldName) {
+            List<String> missingFields = prev;
+            if (!initialized) {
+                if (missingFields == null) {
+                    missingFields = new ArrayList<>(2);
+                }
+                missingFields.add(fieldName);
+            }
+            return missingFields;
+        }
+
         public ManyFieldExample build() {
+            validatePrimitiveFieldsHaveBeenInitialized();
             return new ManyFieldExample(
                     string, integer, doubleValue, optionalItem, items, set, map, alias);
         }
