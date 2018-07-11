@@ -121,6 +121,7 @@ public class AutoDeserializeTest {
 
         // verification-server is overly strict, these are perfectly fine
         ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":13}");
+        ignores.put(EndpointName.of("receiveDoubleAliasExample"), "10");
         ignores.put(EndpointName.of("receiveMapExample"), "{}");
         ignores.put(EndpointName.of("receiveOptionalExample"), "{}");
         ignores.put(EndpointName.of("receiveListExample"), "{}");
