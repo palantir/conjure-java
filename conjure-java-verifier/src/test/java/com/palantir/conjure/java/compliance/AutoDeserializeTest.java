@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java.compliance;
 
-import static org.assertj.core.api.Fail.failBecauseExceptionWasNotThrown;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
