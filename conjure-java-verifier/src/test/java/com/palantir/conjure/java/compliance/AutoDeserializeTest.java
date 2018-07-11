@@ -23,7 +23,6 @@ import com.palantir.conjure.verification.AutoDeserializeService;
 import com.palantir.conjure.verification.ClientTestCases;
 import com.palantir.conjure.verification.EndpointName;
 import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting3.jaxrs.JaxRsClient;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -46,10 +45,9 @@ public class AutoDeserializeTest {
     public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
-    private static AutoDeserializeService testService = JaxRsClient.create(
-            AutoDeserializeService.class, server.getUserAgent(), server.getClientConfiguration());
-    private static AutoDeserializeConfirmService confirmService = JaxRsClient.create(
-            AutoDeserializeConfirmService.class, server.getUserAgent(), server.getClientConfiguration());
+    private static AutoDeserializeService testService = VerificationClients.autoDeserializeService(server);
+    private static AutoDeserializeConfirmService confirmService = VerificationClients.confirmService(server);
+    private static Multimap<EndpointName, String> ignoredTests = ignoredTests();
 
     @Parameterized.Parameter(0)
     public EndpointName endpointName;
@@ -85,12 +83,41 @@ public class AutoDeserializeTest {
 
     @Test
     public void runTestCase() throws Exception {
+        boolean testIsDisabled = ignoredTests.remove(endpointName, jsonString);
+        Assume.assumeFalse(testIsDisabled);
+
+        Method method = testService.getClass().getMethod(endpointName.get(), int.class);
         System.out.println(String.format("Invoking %s(%s), expected %s",
                 endpointName,
                 jsonString,
                 shouldSucceed ? "success" : "failure"));
-        Method method = testService.getClass().getMethod(endpointName.get(), int.class);
 
+        if (shouldSucceed) {
+            expectSuccess(method);
+        } else {
+            expectFailure(method);
+        }
+    }
+
+    private void expectSuccess(Method method) throws Exception {
+        try {
+            Object resultFromServer = method.invoke(testService, index);
+            log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
+            confirmService.confirm(endpointName.get(), index, resultFromServer);
+        } catch (RemoteException e) {
+            log.error("Caught exception with params: {}", e.getError().parameters());
+            throw e;
+        }
+    }
+
+    private void expectFailure(Method method) {
+        Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+            Object result = method.invoke(testService, index);
+            log.error("Result should have caused an exception but deserialized to: {}", result);
+        });
+    }
+
+    private static Multimap<EndpointName, String> ignoredTests() {
         Multimap<EndpointName, String> ignores = HashMultimap.create();
         // jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
         ignores.put(EndpointName.of("receiveBooleanExample"), "{\"value\":0}");
@@ -144,24 +171,6 @@ public class AutoDeserializeTest {
         // TODO(dfox): can we configure jackson to reject this?
         ignores.put(EndpointName.of("receiveSetStringExample"), "{\"value\":[\"a\",\"a\"]}");
 
-        boolean testIsDisabled = ignores.remove(endpointName, jsonString);
-        Assume.assumeFalse(testIsDisabled);
-
-
-        if (shouldSucceed) {
-            try {
-                Object resultFromServer = method.invoke(testService, index);
-                log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
-                confirmService.confirm(endpointName.get(), index, resultFromServer);
-            } catch (RemoteException e) {
-                log.error("Caught exception with params: {}", e.getError().parameters());
-                throw e;
-            }
-        } else {
-            Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
-                Object result = method.invoke(testService, index);
-                log.error("Result should have caused an exception but deserialized to: {}", result);
-            });
-        }
+        return ignores;
     }
 }
