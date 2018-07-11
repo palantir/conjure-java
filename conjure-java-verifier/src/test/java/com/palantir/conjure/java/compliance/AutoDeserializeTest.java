@@ -126,12 +126,12 @@ public class AutoDeserializeTest {
         ignores.put(EndpointName.of("receiveOptionalExample"), "{}");
         ignores.put(EndpointName.of("receiveListExample"), "{}");
         ignores.put(EndpointName.of("receiveSetExample"), "{}");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T03:04:05.000Z");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T03:04:05.000000Z");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T03:04:05.000000000Z");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T04:04:05.000000000+01:00");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T05:04:05.000000000+02:00");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000Z\"");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000000Z\"");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000000000Z\"");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T04:04:05.000000000+01:00\"");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T05:04:05.000000000+02:00\"");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000Z\"}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000Z\"}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000000Z\"}");
