@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.types;
 
+import static java.util.stream.Collectors.toList;
+
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -39,18 +41,19 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -90,10 +93,12 @@ public final class BeanBuilderGenerator {
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addFields(poetFields)
+                .addFields(primitivesInitializedFields(enrichedFields))
                 .addMethod(createConstructor())
                 .addMethod(createFromObject(enrichedFields))
                 .addMethods(createSetters(enrichedFields))
-                .addMethod(createBuild(poetFields))
+                .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
+                .addMethod(createBuild(enrichedFields, poetFields))
                 .addAnnotation(
                         AnnotationSpec.builder(JsonIgnoreProperties.class)
                                 .addMember("ignoreUnknown", "$L", true)
@@ -116,10 +121,79 @@ public final class BeanBuilderGenerator {
         return builder.build();
     }
 
+    private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {
+        List<EnrichedField> primitives = enrichedFields.stream().filter(EnrichedField::isPrimitive).collect(toList());
+
+        if (primitives.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return ImmutableList.of(
+                createValidateFieldsMethod(primitives),
+                createAddFieldIfMissing(primitives.size()));
+    }
+
+    private static MethodSpec createValidateFieldsMethod(List<EnrichedField> primitives) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("validatePrimitiveFieldsHaveBeenInitialized")
+                .addModifiers(Modifier.PRIVATE);
+
+        builder.addStatement("$T missingFields = null", ParameterizedTypeName.get(List.class, String.class));
+        for (EnrichedField field : primitives) {
+            String name = deriveFieldInitializedName(field);
+            builder.addStatement("missingFields = addFieldIfMissing(missingFields, $N, $S)",
+                    name, field.fieldName().get());
+        }
+
+        builder.beginControlFlow("if (missingFields != null)")
+                .addStatement("throw new $T(\"Some required fields have not been set: \" + missingFields)",
+                        IllegalArgumentException.class)
+                .endControlFlow();
+
+        return builder.build();
+    }
+
+    private static MethodSpec createAddFieldIfMissing(int fieldCount) {
+        ParameterizedTypeName listOfStringType = ParameterizedTypeName.get(List.class, String.class);
+        ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev").build();
+        ParameterSpec fieldValueParam =
+                ParameterSpec.builder(TypeName.BOOLEAN, "initialized").build();
+        ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
+
+        return MethodSpec.methodBuilder("addFieldIfMissing")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .returns(listOfStringType)
+                .addParameter(listParam)
+                .addParameter(fieldValueParam)
+                .addParameter(fieldNameParam)
+                .addStatement("$T missingFields = $N", listOfStringType, listParam)
+                .beginControlFlow("if (!$N)", fieldValueParam)
+                .beginControlFlow("if (missingFields == null)")
+                .addStatement("missingFields = new $T<>($L)", ArrayList.class, fieldCount)
+                .endControlFlow()
+                .addStatement("missingFields.add($N)", fieldNameParam)
+                .endControlFlow()
+                .addStatement("return missingFields")
+                .build();
+    }
+
+    private Collection<FieldSpec> primitivesInitializedFields(Collection<EnrichedField> enrichedFields) {
+        return enrichedFields.stream()
+                .filter(EnrichedField::isPrimitive)
+                .map(field -> FieldSpec.builder(
+                        TypeName.BOOLEAN,
+                        deriveFieldInitializedName(field),
+                        Modifier.PRIVATE).initializer("false").build())
+                .collect(toList());
+    }
+
+    private static String deriveFieldInitializedName(EnrichedField field) {
+        return "_" + field.conjureDef().getFieldName() + "Initialized";
+    }
+
     private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
         return fields.stream()
                 .map(e -> createField(e.getFieldName(), e))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private static MethodSpec createConstructor() {
@@ -178,9 +252,15 @@ public final class BeanBuilderGenerator {
                 .addMember("value", "$S", enriched.fieldName().get())
                 .build();
         boolean shouldClearFirst = true;
-        return publicSetter(enriched)
+        MethodSpec.Builder setterBuilder = publicSetter(enriched)
                 .addParameter(widenToIterableIfPossible(field.type, type), field.name)
-                .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
+                .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
+
+        if (enriched.isPrimitive()) {
+            setterBuilder.addCode("this.$L = true;", deriveFieldInitializedName(enriched));
+        }
+
+        return setterBuilder
                 .addStatement("return this")
                 .addAnnotation(jsonSetterAnnotation)
                 .build();
@@ -340,10 +420,16 @@ public final class BeanBuilderGenerator {
                 .returns(builderClass);
     }
 
-    private MethodSpec createBuild(Collection<FieldSpec> fields) {
-        return MethodSpec.methodBuilder("build")
+    private MethodSpec createBuild(Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields) {
+        MethodSpec.Builder method = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
-                .returns(objectClass)
+                .returns(objectClass);
+
+        if (enrichedFields.stream().filter(EnrichedField::isPrimitive).count() != 0) {
+            method.addStatement("validatePrimitiveFieldsHaveBeenInitialized()");
+        }
+
+        return method
                 .addStatement("return new $L", Expressions.constructorCall(objectClass,
                         !captureUnknownFields ? fields
                                 : ImmutableList.builder().addAll(fields).add(UNKNOWN_PROPS_FIELD).build()))
