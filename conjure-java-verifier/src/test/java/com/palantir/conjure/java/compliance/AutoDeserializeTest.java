@@ -156,7 +156,7 @@ public class AutoDeserializeTest {
         ignores.put(EndpointName.of("receiveDateTimeExample"),
                 "{\"value\":\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"}");
 
-        // TODO(dfox): make http-remoting reject null bodies
+        // TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
         ignores.put(EndpointName.of("receiveStringAliasExample"), "null");
         ignores.put(EndpointName.of("receiveDoubleAliasExample"), "null");
         ignores.put(EndpointName.of("receiveIntegerAliasExample"), "null");
