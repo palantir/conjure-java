@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
+import org.assertj.core.api.Assertions;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -109,12 +110,7 @@ public class AutoDeserializeTest {
                 throw e;
             }
         } else {
-            try {
-                method.invoke(testService, index);
-                failBecauseExceptionWasNotThrown(Exception.class);
-            } catch (Exception e) {
-                // ignore
-            }
+            Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> method.invoke(testService, index));
         }
     }
 }
