@@ -18,22 +18,36 @@ package com.palantir.conjure.java.compliance;
 
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
+import com.palantir.conjure.verification.SingleHeaderService;
+import com.palantir.conjure.verification.SinglePathParamService;
+import com.palantir.conjure.verification.SingleQueryParamService;
+import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 
 public final class VerificationClients {
     private VerificationClients() {}
 
     public static AutoDeserializeService autoDeserializeService(VerificationServerRule server) {
-        return JaxRsClient.create(
-                AutoDeserializeService.class,
-                server.getUserAgent(),
-                server.getClientConfiguration());
+        return JaxRsClient.create(AutoDeserializeService.class, getUserAgent(), server.getClientConfiguration());
     }
 
     public static AutoDeserializeConfirmService confirmService(VerificationServerRule server) {
-        return JaxRsClient.create(
-                AutoDeserializeConfirmService.class,
-                server.getUserAgent(),
-                server.getClientConfiguration());
+        return JaxRsClient.create(AutoDeserializeConfirmService.class, getUserAgent(), server.getClientConfiguration());
+    }
+
+    public static SinglePathParamService singlePathParamService(VerificationServerRule server) {
+        return JaxRsClient.create(SinglePathParamService.class, getUserAgent(), server.getClientConfiguration());
+    }
+
+    public static SingleHeaderService singleHeaderService(VerificationServerRule server) {
+        return JaxRsClient.create(SingleHeaderService.class, getUserAgent(), server.getClientConfiguration());
+    }
+
+    public static SingleQueryParamService singleQueryParamService(VerificationServerRule server) {
+        return JaxRsClient.create(SingleQueryParamService.class, getUserAgent(), server.getClientConfiguration());
+    }
+
+    private static  UserAgent getUserAgent() {
+        return UserAgent.of(UserAgent.Agent.of("test", "develop"));
     }
 }

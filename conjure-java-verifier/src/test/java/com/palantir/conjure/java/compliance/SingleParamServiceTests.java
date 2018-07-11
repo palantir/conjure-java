@@ -22,12 +22,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.palantir.conjure.verification.ClientTestCases;
 import com.palantir.conjure.verification.EndpointName;
-import com.palantir.conjure.verification.SingleHeaderService;
-import com.palantir.conjure.verification.SinglePathParamService;
-import com.palantir.conjure.verification.SingleQueryParamService;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
-import com.palantir.remoting3.jaxrs.JaxRsClient;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -51,14 +47,12 @@ public class SingleParamServiceTests {
     public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(SingleParamServiceTests.class);
+    private static final Multimap<EndpointName, String> ignoredTests = ignoredTests();
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
     private static ImmutableMap<String, Object> servicesMaps = ImmutableMap.of(
-            "singlePathParamService", JaxRsClient.create(
-                    SinglePathParamService.class, server.getUserAgent(), server.getClientConfiguration()),
-            "singleHeaderService", JaxRsClient.create(
-                    SingleHeaderService.class, server.getUserAgent(), server.getClientConfiguration()),
-            "singleQueryParamService", JaxRsClient.create(
-                    SingleQueryParamService.class, server.getUserAgent(), server.getClientConfiguration()));
+            "singlePathParamService", VerificationClients.singlePathParamService(server),
+            "singleHeaderService", VerificationClients.singleHeaderService(server),
+            "singleQueryParamService", VerificationClients.singleQueryParamService(server));
 
     @Parameterized.Parameter(0)
     public String serviceName;
@@ -106,25 +100,10 @@ public class SingleParamServiceTests {
 
     @Test
     public void runTestCase() throws Exception {
+        boolean testIsDisabled = ignoredTests.remove(endpointName, jsonString);
+        Assume.assumeFalse(testIsDisabled);
+
         System.out.println(String.format("Invoking %s %s(%s)", serviceName, endpointName, jsonString));
-
-        Multimap<EndpointName, String> ignores = HashMultimap.create();
-
-        // server limitation
-        ignores.put(EndpointName.of("headerDouble"), "10");
-        ignores.put(EndpointName.of("headerDouble"), "10.0");
-        ignores.put(EndpointName.of("headerOptionalString"), "null");
-
-        ignores.put(EndpointName.of("pathParamDouble"), "10");
-        ignores.put(EndpointName.of("pathParamDouble"), "10.0");
-        ignores.put(EndpointName.of("pathParamString"), "\"\"");
-        ignores.put(EndpointName.of("pathParamAliasString"), "\"\"");
-
-        ignores.put(EndpointName.of("queryParamDouble"), "10");
-        ignores.put(EndpointName.of("queryParamDouble"), "10.0");
-
-        boolean isRemoved = ignores.remove(endpointName, jsonString);
-        Assume.assumeFalse(isRemoved);
 
         Object service = servicesMaps.get(serviceName);
         for (Method method : servicesMaps.get(serviceName).getClass().getMethods()) {
@@ -151,5 +130,24 @@ public class SingleParamServiceTests {
                 }
             }
         }
+    }
+
+    private static Multimap<EndpointName, String> ignoredTests() {
+        Multimap<EndpointName, String> ignores = HashMultimap.create();
+
+        // server limitation
+        ignores.put(EndpointName.of("headerDouble"), "10");
+        ignores.put(EndpointName.of("headerDouble"), "10.0");
+        ignores.put(EndpointName.of("headerOptionalString"), "null");
+
+        ignores.put(EndpointName.of("pathParamDouble"), "10");
+        ignores.put(EndpointName.of("pathParamDouble"), "10.0");
+        ignores.put(EndpointName.of("pathParamString"), "\"\"");
+        ignores.put(EndpointName.of("pathParamAliasString"), "\"\"");
+
+        ignores.put(EndpointName.of("queryParamDouble"), "10");
+        ignores.put(EndpointName.of("queryParamDouble"), "10.0");
+
+        return ignores;
     }
 }

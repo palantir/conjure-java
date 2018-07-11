@@ -11,7 +11,6 @@ import com.palantir.conjure.verification.TestCases;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.ClientConfigurations;
-import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,10 +44,6 @@ public final class VerificationServerRule extends ExternalResource {
 
     public ClientConfiguration getClientConfiguration() {
         return clientConfiguration;
-    }
-
-    public UserAgent getUserAgent() {
-        return UserAgent.of(UserAgent.Agent.of("test", "develop"));
     }
 
     @Override

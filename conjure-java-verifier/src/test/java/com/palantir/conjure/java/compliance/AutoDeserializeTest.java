@@ -45,9 +45,9 @@ public class AutoDeserializeTest {
     public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
-    private static AutoDeserializeService testService = VerificationClients.autoDeserializeService(server);
-    private static AutoDeserializeConfirmService confirmService = VerificationClients.confirmService(server);
-    private static Multimap<EndpointName, String> ignoredTests = ignoredTests();
+    private static final Multimap<EndpointName, String> ignoredTests = ignoredTests();
+    private static final AutoDeserializeService testService = VerificationClients.autoDeserializeService(server);
+    private static final AutoDeserializeConfirmService confirmService = VerificationClients.confirmService(server);
 
     @Parameterized.Parameter(0)
     public EndpointName endpointName;
