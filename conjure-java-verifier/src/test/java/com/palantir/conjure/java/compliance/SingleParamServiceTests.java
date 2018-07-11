@@ -148,13 +148,13 @@ public class SingleParamServiceTests {
             if (endpointName.get().equals(name)) {
                 try {
                     // HACKHACK, index parameter order is different for different services.
-                    Type type = method.getGenericParameterTypes()[0];
-                    if (type.getTypeName() != "int") {
+                    if ("singleHeaderService".equals(serviceName)) {
+                        Type type = method.getGenericParameterTypes()[0];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
                         method.invoke(
                                 service, objectMapper.readValue(jsonString, cls), index);
                     } else {
-                        type = method.getGenericParameterTypes()[1];
+                        Type type = method.getGenericParameterTypes()[1];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
                         method.invoke(
                                 service, index, objectMapper.readValue(jsonString, cls));
