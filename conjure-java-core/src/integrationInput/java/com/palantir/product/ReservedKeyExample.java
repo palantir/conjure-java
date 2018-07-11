@@ -136,7 +136,7 @@ public final class ReservedKeyExample {
 
         private int memoizedHashCode_;
 
-        private boolean _memoizedHashCodeInitialized;
+        private boolean _memoizedHashCodeInitialized = false;
 
         private Builder() {}
 

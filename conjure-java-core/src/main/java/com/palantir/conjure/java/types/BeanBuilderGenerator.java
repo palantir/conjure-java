@@ -124,7 +124,7 @@ public final class BeanBuilderGenerator {
                 .map(field -> FieldSpec.builder(
                         TypeName.BOOLEAN,
                         deriveFieldInitializedName(field),
-                        Modifier.PRIVATE).build())
+                        Modifier.PRIVATE).initializer("false").build())
                 .collect(toList());
     }
 

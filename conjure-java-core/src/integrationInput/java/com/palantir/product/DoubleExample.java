@@ -64,7 +64,7 @@ public final class DoubleExample {
     public static final class Builder {
         private double doubleValue;
 
-        private boolean _doubleValueInitialized;
+        private boolean _doubleValueInitialized = false;
 
         private Builder() {}
 

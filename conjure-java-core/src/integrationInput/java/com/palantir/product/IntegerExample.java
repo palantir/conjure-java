@@ -65,7 +65,7 @@ public final class IntegerExample {
     public static final class Builder {
         private int integer;
 
-        private boolean _integerInitialized;
+        private boolean _integerInitialized = false;
 
         private Builder() {}
 

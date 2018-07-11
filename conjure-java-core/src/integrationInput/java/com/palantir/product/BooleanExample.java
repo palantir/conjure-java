@@ -65,7 +65,7 @@ public final class BooleanExample {
     public static final class Builder {
         private boolean coin;
 
-        private boolean _coinInitialized;
+        private boolean _coinInitialized = false;
 
         private Builder() {}
 

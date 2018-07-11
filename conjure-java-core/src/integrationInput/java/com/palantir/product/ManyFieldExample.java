@@ -226,9 +226,9 @@ public final class ManyFieldExample {
 
         private StringAliasExample alias;
 
-        private boolean _integerInitialized;
+        private boolean _integerInitialized = false;
 
-        private boolean _doubleValueInitialized;
+        private boolean _doubleValueInitialized = false;
 
         private Builder() {}
 
