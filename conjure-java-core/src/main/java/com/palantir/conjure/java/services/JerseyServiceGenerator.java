@@ -23,36 +23,27 @@ import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.JerseyMethodTypeClassNameVisitor;
 import com.palantir.conjure.java.types.JerseyReturnTypeClassNameVisitor;
+import com.palantir.conjure.java.types.Parameters;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
-import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
-import com.palantir.conjure.spec.HeaderParameterType;
-import com.palantir.conjure.spec.ListType;
-import com.palantir.conjure.spec.MapType;
-import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
-import com.palantir.conjure.spec.PathParameterType;
-import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -168,7 +159,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {
             if (!arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
-                    || !arg.getType().accept(TYPE_DEFAULTABLE_PREDICATE)) {
+                    || !arg.getType().accept(Parameters.TYPE_DEFAULTABLE_PREDICATE)) {
                 args.add(arg);
             } else {
                 queryArgs.add(arg);
@@ -217,7 +208,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
             if (maybeArgDef.isPresent()) {
                 sb.append("$L, ");
-                return maybeArgDef.get().getType().accept(TYPE_DEFAULT_VALUE);
+                return maybeArgDef.get().getType().accept(Parameters.TYPE_DEFAULT_VALUE);
             } else {
                 sb.append("$N, ");
                 return sortedParams.get(i);
@@ -248,7 +239,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         List<ArgumentDefinition> sortedArgList = new ArrayList<>(endpointDef.getArgs());
         sortedArgList.sort(Comparator.comparing(o ->
-                o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER)));
+                o.getParamType().accept(Parameters.PARAM_SORT_ORDER) + o.getType().accept(Parameters.TYPE_SORT_ORDER)));
 
         sortedArgList.forEach(def -> {
             parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations));
@@ -349,117 +340,4 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         }
     }
 
-    /** Produces an ordering for ParamaterType of Header, Path, Query, Body. */
-    private static final ParameterType.Visitor<Integer> PARAM_SORT_ORDER = new ParameterType.Visitor<Integer>() {
-        @Override
-        public Integer visitBody(BodyParameterType value) {
-            return 30;
-        }
-
-        @Override
-        public Integer visitHeader(HeaderParameterType value) {
-            return 0;
-        }
-
-        @Override
-        public Integer visitPath(PathParameterType value) {
-            return 10;
-        }
-
-        @Override
-        public Integer visitQuery(QueryParameterType value) {
-            return 20;
-        }
-
-        @Override
-        public Integer visitUnknown(String unknownType) {
-            return -1;
-        }
-    };
-
-    /**
-     * Produces a type sort ordering for use with {@link #PARAM_SORT_ORDER} such that types with known defaults come
-     * after types without known defaults.
-     */
-    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new TypeVisitor.Default<Integer>() {
-        @Override
-        public Integer visitOptional(OptionalType value) {
-            return 1;
-        }
-
-        @Override
-        public Integer visitList(ListType value) {
-            return 1;
-        }
-
-        @Override
-        public Integer visitSet(SetType value) {
-            return 1;
-        }
-
-        @Override
-        public Integer visitMap(MapType value) {
-            return 1;
-        }
-
-        @Override
-        public Integer visitDefault() {
-            return 0;
-        }
-    };
-
-    /** Indicates whether a particular type has a defaultable value. */
-    private static final Type.Visitor<Boolean> TYPE_DEFAULTABLE_PREDICATE = new TypeVisitor.Default<Boolean>() {
-        @Override
-        public Boolean visitOptional(OptionalType value) {
-            return true;
-        }
-
-        @Override
-        public Boolean visitList(ListType value) {
-            return true;
-        }
-
-        @Override
-        public Boolean visitSet(SetType value) {
-            return true;
-        }
-
-        @Override
-        public Boolean visitMap(MapType value) {
-            return true;
-        }
-
-        @Override
-        public Boolean visitDefault() {
-            return false;
-        }
-    };
-
-    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new TypeVisitor.Default<CodeBlock>() {
-        @Override
-        public CodeBlock visitOptional(OptionalType value) {
-            return CodeBlock.of("$T.empty()", Optional.class);
-        }
-
-        @Override
-        public CodeBlock visitList(ListType value) {
-            return CodeBlock.of("$T.emptyList()", Collections.class);
-        }
-
-        @Override
-        public CodeBlock visitSet(SetType value) {
-            return CodeBlock.of("$T.emptySet()", Collections.class);
-        }
-
-        @Override
-        public CodeBlock visitMap(MapType value) {
-            return CodeBlock.of("$T.emptyMap()", Collections.class);
-        }
-
-        @Override
-        public CodeBlock visitDefault() {
-            throw new IllegalArgumentException("Cannot backfill non-defaultable parameter type.");
-        }
-    };
 }
