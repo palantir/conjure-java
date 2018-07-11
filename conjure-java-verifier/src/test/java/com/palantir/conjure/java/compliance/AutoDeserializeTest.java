@@ -114,7 +114,9 @@ public class AutoDeserializeTest {
         ignores.put(EndpointName.of("receiveStringExample"), "{\"value\":8}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"1523040070\"}"); // jackson is coercing this to an actual datetime object
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":1523040070}");// jackson is coercing this to an actual datetime object
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "1523040070");// jackson is coercing this to an actual datetime object
         ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":\"1.23\"}"); // jackson is turning this into 1.23L
+        ignores.put(EndpointName.of("receiveIntegerExample"), "{\"value\":\"12\"}");
         ignores.put(EndpointName.of("receiveIntegerExample"), "{\"value\":1.23}"); // jackson is coercing this to '1'
 
         // verification-server is overly strict, these are perfectly fine
@@ -123,6 +125,35 @@ public class AutoDeserializeTest {
         ignores.put(EndpointName.of("receiveOptionalExample"), "{}");
         ignores.put(EndpointName.of("receiveListExample"), "{}");
         ignores.put(EndpointName.of("receiveSetExample"), "{}");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T03:04:05.000Z");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T03:04:05.000000Z");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T03:04:05.000000000Z");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T04:04:05.000000000+01:00");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T05:04:05.000000000+02:00");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000Z\"}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000Z\"}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000000Z\"}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000000000Z\"}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T04:04:05.000000000+01:00\"}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T05:04:05.000000000+02:00\"}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"}");
+
+        // TODO(dfox): make http-remoting reject null bodies
+        ignores.put(EndpointName.of("receiveStringAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveDoubleAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveIntegerAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveBooleanAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveSafeLongAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveRidAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveBearerTokenAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveUuidAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveReferenceAliasExample"), "null");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "null");
+
+        // TODO(dfox): conjure-java should not coerce primitives from absent JSON
+        ignores.put(EndpointName.of("receiveDoubleExample"), "{}");
+        ignores.put(EndpointName.of("receiveIntegerExample"), "{}");
 
 
         boolean testIsDisabled = ignores.remove(endpointName, jsonString);
