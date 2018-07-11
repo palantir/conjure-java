@@ -113,15 +113,19 @@ public class AutoDeserializeTest {
         // jackson magical casting
         ignores.put(EndpointName.of("receiveStringExample"), "{\"value\":8}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"1523040070\"}"); // jackson is coercing this to an actual datetime object
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\": 1523040070}");// jackson is coercing this to an actual datetime object
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":1523040070}");// jackson is coercing this to an actual datetime object
         ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":\"1.23\"}"); // jackson is turning this into 1.23L
         ignores.put(EndpointName.of("receiveIntegerExample"), "{\"value\":1.23}"); // jackson is coercing this to '1'
 
-        ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":13}"); // bug with the verification-server
-        ignores.put(EndpointName.of("receiveMapExample"), "{}"); // bug with the verification-server
+        // verification-server is overly strict, these are perfectly fine
+        ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":13}");
+        ignores.put(EndpointName.of("receiveMapExample"), "{}");
+        ignores.put(EndpointName.of("receiveOptionalExample"), "{}");
+        ignores.put(EndpointName.of("receiveListExample"), "{}");
+        ignores.put(EndpointName.of("receiveSetExample"), "{}");
 
 
-        boolean testIsDisabled = ignores.containsEntry(endpointName, jsonString);
+        boolean testIsDisabled = ignores.remove(endpointName, jsonString);
         Assume.assumeFalse(testIsDisabled);
 
 
