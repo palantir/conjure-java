@@ -91,7 +91,7 @@ public final class BeanGenerator {
         }
 
         Collection<EnrichedField> nonPrimitiveEnrichedFields = fields.stream()
-                .filter(f -> !f.poetSpec().type.isPrimitive())
+                .filter(field -> !field.isPrimitive())
                 .collect(Collectors.toList());
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(typeDef.getTypeName().getName())
@@ -348,6 +348,11 @@ public final class BeanGenerator {
 
         @Value.Parameter
         FieldSpec poetSpec();
+
+        @Value.Derived
+        default boolean isPrimitive() {
+            return poetSpec().type.isPrimitive();
+        }
 
         static EnrichedField of(FieldName fieldName, FieldDefinition conjureDef, FieldSpec poetSpec) {
             return ImmutableEnrichedField.of(fieldName, conjureDef, poetSpec);
