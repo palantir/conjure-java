@@ -125,7 +125,8 @@ public class AutoDeserializeTest {
         ignores.put(EndpointName.of("receiveMapExample"), "{}");
         ignores.put(EndpointName.of("receiveOptionalExample"), "{}");
         ignores.put(EndpointName.of("receiveListExample"), "{}");
-        ignores.put(EndpointName.of("receiveSetExample"), "{}");
+        ignores.put(EndpointName.of("receiveSetStringExample"), "{}");
+        ignores.put(EndpointName.of("receiveSetDoubleExample"), "{}");
         ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000Z\"");
         ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000000Z\"");
         ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000000000Z\"");
@@ -157,6 +158,8 @@ public class AutoDeserializeTest {
         ignores.put(EndpointName.of("receiveDoubleExample"), "{}");
         ignores.put(EndpointName.of("receiveIntegerExample"), "{}");
 
+        // TODO(dfox): can we configure jackson to reject this?
+        ignores.put(EndpointName.of("receiveSetStringExample"), "{\"value\":[\"a\",\"a\"]}");
 
         boolean testIsDisabled = ignores.remove(endpointName, jsonString);
         Assume.assumeFalse(testIsDisabled);
