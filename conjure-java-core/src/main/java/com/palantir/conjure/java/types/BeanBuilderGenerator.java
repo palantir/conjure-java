@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.types;
 
+import static java.util.stream.Collectors.toList;
+
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -50,7 +52,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -90,6 +91,7 @@ public final class BeanBuilderGenerator {
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addFields(poetFields)
+                .addFields(primitivesInitializedFields(enrichedFields))
                 .addMethod(createConstructor())
                 .addMethod(createFromObject(enrichedFields))
                 .addMethods(createSetters(enrichedFields))
@@ -116,10 +118,24 @@ public final class BeanBuilderGenerator {
         return builder.build();
     }
 
+    private Collection<FieldSpec> primitivesInitializedFields(Collection<EnrichedField> enrichedFields) {
+        return enrichedFields.stream()
+                .filter(EnrichedField::isPrimitive)
+                .map(field -> FieldSpec.builder(
+                        TypeName.BOOLEAN,
+                        deriveFieldInitializedName(field),
+                        Modifier.PRIVATE).build())
+                .collect(toList());
+    }
+
+    private static String deriveFieldInitializedName(EnrichedField field) {
+        return "_" + field.conjureDef().getFieldName() + "Initialized";
+    }
+
     private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
         return fields.stream()
                 .map(e -> createField(e.getFieldName(), e))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private static MethodSpec createConstructor() {
@@ -178,9 +194,15 @@ public final class BeanBuilderGenerator {
                 .addMember("value", "$S", enriched.fieldName().get())
                 .build();
         boolean shouldClearFirst = true;
-        return publicSetter(enriched)
+        MethodSpec.Builder setterBuilder = publicSetter(enriched)
                 .addParameter(widenToIterableIfPossible(field.type, type), field.name)
-                .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
+                .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
+
+        if (enriched.isPrimitive()) {
+            setterBuilder.addCode("$L = true;", deriveFieldInitializedName(enriched));
+        }
+
+        return setterBuilder
                 .addStatement("return this")
                 .addAnnotation(jsonSetterAnnotation)
                 .build();

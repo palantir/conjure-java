@@ -136,6 +136,8 @@ public final class ReservedKeyExample {
 
         private int memoizedHashCode_;
 
+        private boolean _memoizedHashCodeInitialized;
+
         private Builder() {}
 
         public Builder from(ReservedKeyExample other) {
@@ -169,6 +171,7 @@ public final class ReservedKeyExample {
         @JsonSetter("memoizedHashCode")
         public Builder memoizedHashCode_(int memoizedHashCode_) {
             this.memoizedHashCode_ = memoizedHashCode_;
+            _memoizedHashCodeInitialized = true;
             return this;
         }
 

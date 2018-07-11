@@ -65,6 +65,8 @@ public final class IntegerExample {
     public static final class Builder {
         private int integer;
 
+        private boolean _integerInitialized;
+
         private Builder() {}
 
         public Builder from(IntegerExample other) {
@@ -75,6 +77,7 @@ public final class IntegerExample {
         @JsonSetter("integer")
         public Builder integer(int integer) {
             this.integer = integer;
+            _integerInitialized = true;
             return this;
         }
 

@@ -64,6 +64,8 @@ public final class DoubleExample {
     public static final class Builder {
         private double doubleValue;
 
+        private boolean _doubleValueInitialized;
+
         private Builder() {}
 
         public Builder from(DoubleExample other) {
@@ -74,6 +76,7 @@ public final class DoubleExample {
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             this.doubleValue = doubleValue;
+            _doubleValueInitialized = true;
             return this;
         }
 

@@ -226,6 +226,10 @@ public final class ManyFieldExample {
 
         private StringAliasExample alias;
 
+        private boolean _integerInitialized;
+
+        private boolean _doubleValueInitialized;
+
         private Builder() {}
 
         public Builder from(ManyFieldExample other) {
@@ -251,6 +255,7 @@ public final class ManyFieldExample {
         @JsonSetter("integer")
         public Builder integer(int integer) {
             this.integer = integer;
+            _integerInitialized = true;
             return this;
         }
 
@@ -258,6 +263,7 @@ public final class ManyFieldExample {
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             this.doubleValue = doubleValue;
+            _doubleValueInitialized = true;
             return this;
         }
 

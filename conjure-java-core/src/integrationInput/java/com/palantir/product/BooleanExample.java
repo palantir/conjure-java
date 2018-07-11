@@ -65,6 +65,8 @@ public final class BooleanExample {
     public static final class Builder {
         private boolean coin;
 
+        private boolean _coinInitialized;
+
         private Builder() {}
 
         public Builder from(BooleanExample other) {
@@ -75,6 +77,7 @@ public final class BooleanExample {
         @JsonSetter("coin")
         public Builder coin(boolean coin) {
             this.coin = coin;
+            _coinInitialized = true;
             return this;
         }
 
