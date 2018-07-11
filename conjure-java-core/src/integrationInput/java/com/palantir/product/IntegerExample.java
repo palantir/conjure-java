@@ -105,6 +105,7 @@ public final class IntegerExample {
         }
 
         public IntegerExample build() {
+            validateFields();
             return new IntegerExample(integer);
         }
     }

@@ -105,6 +105,7 @@ public final class BooleanExample {
         }
 
         public BooleanExample build() {
+            validateFields();
             return new BooleanExample(coin);
         }
     }

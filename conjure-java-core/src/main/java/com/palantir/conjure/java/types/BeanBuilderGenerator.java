@@ -98,7 +98,7 @@ public final class BeanBuilderGenerator {
                 .addMethod(createFromObject(enrichedFields))
                 .addMethods(createSetters(enrichedFields))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
-                .addMethod(createBuild(poetFields))
+                .addMethod(createBuild(enrichedFields, poetFields))
                 .addAnnotation(
                         AnnotationSpec.builder(JsonIgnoreProperties.class)
                                 .addMember("ignoreUnknown", "$L", true)
@@ -420,10 +420,16 @@ public final class BeanBuilderGenerator {
                 .returns(builderClass);
     }
 
-    private MethodSpec createBuild(Collection<FieldSpec> fields) {
-        return MethodSpec.methodBuilder("build")
+    private MethodSpec createBuild(Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields) {
+        MethodSpec.Builder method = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
-                .returns(objectClass)
+                .returns(objectClass);
+
+        if (enrichedFields.stream().filter(EnrichedField::isPrimitive).count() != 0) {
+            method.addStatement("validateFields()");
+        }
+
+        return method
                 .addStatement("return new $L", Expressions.constructorCall(objectClass,
                         !captureUnknownFields ? fields
                                 : ImmutableList.builder().addAll(fields).add(UNKNOWN_PROPS_FIELD).build()))

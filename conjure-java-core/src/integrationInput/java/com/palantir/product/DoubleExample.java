@@ -105,6 +105,7 @@ public final class DoubleExample {
         }
 
         public DoubleExample build() {
+            validateFields();
             return new DoubleExample(doubleValue);
         }
     }

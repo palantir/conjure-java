@@ -375,6 +375,7 @@ public final class ManyFieldExample {
         }
 
         public ManyFieldExample build() {
+            validateFields();
             return new ManyFieldExample(
                     string, integer, doubleValue, optionalItem, items, set, map, alias);
         }

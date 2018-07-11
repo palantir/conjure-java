@@ -199,6 +199,7 @@ public final class ReservedKeyExample {
         }
 
         public ReservedKeyExample build() {
+            validateFields();
             return new ReservedKeyExample(
                     package_, interface_, fieldNameWithDashes, memoizedHashCode_);
         }
