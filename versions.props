@@ -1,4 +1,4 @@
-com.fasterxml.jackson.*:jackson-* = 2.7.4
+com.fasterxml.jackson.*:jackson-* = 2.9.6
 com.fasterxml.jackson.datatype:jackson-datatype-jdk7 = 2.6.7
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.errorprone:error_prone_annotations = 2.3.1
@@ -8,7 +8,7 @@ com.netflix.nebula:nebula-test = 6.7.0
 com.palantir.conjure:* = 0.1.1
 com.palantir.baseline:* = 0.20.1
 com.palantir.remoting-*:* = 1.8.0
-com.palantir.remoting3:* = 3.22.0
+com.palantir.remoting3:* = 3.37.0
 com.palantir.ri:resource-identifier = 1.0.1
 com.palantir.safe-logging:safe-logging = 1.4.0
 com.palantir.syntactic-paths:syntactic-paths = 0.6.1
