@@ -28,7 +28,6 @@ import com.palantir.conjure.verification.SinglePathParamService;
 import com.palantir.conjure.verification.SingleQueryParamService;
 import com.palantir.conjure.verification.TestCases;
 import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import java.io.File;
@@ -41,7 +40,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.ClassUtils;
 import org.junit.Assume;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,28 +49,19 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
 public class SingleParamServiceTests {
-    private static final Logger log = LoggerFactory.getLogger(SingleParamServiceTests.class);
-    private static final UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("test", "develop"));
 
     @ClassRule
     public static final ServerRule server = new ServerRule();
 
+    private static final Logger log = LoggerFactory.getLogger(SingleParamServiceTests.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private static ImmutableMap<String, Object> servicesMaps;
-
-    @BeforeClass
-    public static void before() {
-        SinglePathParamService singlePathParamService = JaxRsClient.create(
-                SinglePathParamService.class, userAgent, server.getClientConfiguration());
-        SingleHeaderService singleHeaderService = JaxRsClient.create(
-                SingleHeaderService.class, userAgent, server.getClientConfiguration());
-        SingleQueryParamService singleQueryParamService = JaxRsClient.create(SingleQueryParamService.class, userAgent,
-                server.getClientConfiguration());
-        servicesMaps = ImmutableMap.of(
-                "singlePathParamService", singlePathParamService,
-                "singleHeaderService", singleHeaderService,
-                "singleQueryParamService", singleQueryParamService);
-    }
+    private static ImmutableMap<String, Object> servicesMaps = ImmutableMap.of(
+            "singlePathParamService", JaxRsClient.create(
+                    SinglePathParamService.class, server.getUserAgent(), server.getClientConfiguration()),
+            "singleHeaderService", JaxRsClient.create(
+                    SingleHeaderService.class, server.getUserAgent(), server.getClientConfiguration()),
+            "singleQueryParamService", JaxRsClient.create(
+                    SingleQueryParamService.class, server.getUserAgent(), server.getClientConfiguration()));
 
     @Parameterized.Parameters(name = "{0}/{1}({3})")
     public static Collection<Object[]> data() throws IOException {
@@ -108,7 +97,6 @@ public class SingleParamServiceTests {
         return objects;
     }
 
-
     @Parameterized.Parameter(0)
     public String serviceName;
 
@@ -126,6 +114,7 @@ public class SingleParamServiceTests {
         System.out.println(String.format("Invoking %s %s(%s)", serviceName, endpointName, jsonString));
 
         Multimap<EndpointName, String> ignores = HashMultimap.create();
+
         // server limitation
         ignores.put(EndpointName.of("headerDouble"), "10");
         ignores.put(EndpointName.of("headerDouble"), "10.0");

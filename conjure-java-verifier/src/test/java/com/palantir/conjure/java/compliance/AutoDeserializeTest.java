@@ -26,8 +26,6 @@ import com.palantir.conjure.verification.AutoDeserializeService;
 import com.palantir.conjure.verification.EndpointName;
 import com.palantir.conjure.verification.TestCases;
 import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting3.clients.UserAgent;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +36,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,23 +45,15 @@ import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
 public class AutoDeserializeTest {
-    private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
-    private static final UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("test", "develop"));
 
     @ClassRule
     public static final ServerRule server = new ServerRule();
 
-    private static final SpecVerifier specVerifier = new SpecVerifier();
-    private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private static AutoDeserializeService testService;
-    private static AutoDeserializeConfirmService confirmService;
-
-    @BeforeClass
-    public static void before() throws Exception {
-        testService = JaxRsClient.create(AutoDeserializeService.class, userAgent, server.getClientConfiguration());
-        confirmService =
-                JaxRsClient.create(AutoDeserializeConfirmService.class, userAgent, server.getClientConfiguration());
-    }
+    private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
+    private static AutoDeserializeService testService = JaxRsClient.create(
+            AutoDeserializeService.class, server.getUserAgent(), server.getClientConfiguration());
+    private static AutoDeserializeConfirmService confirmService = JaxRsClient.create(
+            AutoDeserializeConfirmService.class, server.getUserAgent(), server.getClientConfiguration());
 
     @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
     public static Collection<Object[]> data() throws IOException {
