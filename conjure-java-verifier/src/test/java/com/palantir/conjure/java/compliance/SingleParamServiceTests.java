@@ -58,16 +58,16 @@ public class SingleParamServiceTests {
     public static final ServerRule server = new ServerRule();
 
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private static SinglePathParamService singlePathParamService;
-    private static SingleHeaderService singleHeaderService;
-    private static SingleQueryParamService singleQueryParamService;
     private static ImmutableMap<String, Object> servicesMaps;
 
     @BeforeClass
     public static void before() {
-        singlePathParamService = JaxRsClient.create(SinglePathParamService.class, userAgent, server.getClientConfiguration());
-        singleHeaderService = JaxRsClient.create(SingleHeaderService.class, userAgent, server.getClientConfiguration());
-        singleQueryParamService = JaxRsClient.create(SingleQueryParamService.class, userAgent, server.getClientConfiguration());
+        SinglePathParamService singlePathParamService = JaxRsClient.create(
+                SinglePathParamService.class, userAgent, server.getClientConfiguration());
+        SingleHeaderService singleHeaderService = JaxRsClient.create(
+                SingleHeaderService.class, userAgent, server.getClientConfiguration());
+        SingleQueryParamService singleQueryParamService = JaxRsClient.create(SingleQueryParamService.class, userAgent,
+                server.getClientConfiguration());
         servicesMaps = ImmutableMap.of(
                 "singlePathParamService", singlePathParamService,
                 "singleHeaderService", singleHeaderService,
@@ -130,10 +130,12 @@ public class SingleParamServiceTests {
         ignores.put(EndpointName.of("headerDouble"), "10");
         ignores.put(EndpointName.of("headerDouble"), "10.0");
         ignores.put(EndpointName.of("headerOptionalString"), "null");
+
         ignores.put(EndpointName.of("pathParamDouble"), "10");
         ignores.put(EndpointName.of("pathParamDouble"), "10.0");
         ignores.put(EndpointName.of("pathParamString"), "\"\"");
         ignores.put(EndpointName.of("pathParamAliasString"), "\"\"");
+
         ignores.put(EndpointName.of("queryParamDouble"), "10");
         ignores.put(EndpointName.of("queryParamDouble"), "10.0");
 
@@ -141,24 +143,24 @@ public class SingleParamServiceTests {
         Assume.assumeFalse(isRemoved);
 
         Object service = servicesMaps.get(serviceName);
-        for (Method method : servicesMaps.get(serviceName).getClass().getMethods())  {
+        for (Method method : servicesMaps.get(serviceName).getClass().getMethods()) {
             String name = method.getName();
             if (endpointName.get().equals(name)) {
                 try {
                     // HACKHACK, index parameter order is different for different services.
                     Type type = method.getGenericParameterTypes()[0];
-                    if  (type.getTypeName() != "int")  {
+                    if (type.getTypeName() != "int") {
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
                         method.invoke(
                                 service, objectMapper.readValue(jsonString, cls), index);
                     } else {
-                        type =  method.getGenericParameterTypes()[1];
+                        type = method.getGenericParameterTypes()[1];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
                         method.invoke(
                                 service, index, objectMapper.readValue(jsonString, cls));
                     }
 
-                    log.info("Successfully post qparam to endpoint {} and index {}", endpointName, index);
+                    log.info("Successfully post param to endpoint {} and index {}", endpointName, index);
                 } catch (RemoteException e) {
                     log.error("Caught exception with params: {}", e.getError().parameters());
                     throw e;
