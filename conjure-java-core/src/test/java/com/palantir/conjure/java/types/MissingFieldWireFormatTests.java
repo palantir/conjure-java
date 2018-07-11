@@ -25,7 +25,6 @@ import com.palantir.product.SetExample;
 import com.palantir.product.StringExample;
 import com.palantir.product.UuidExample;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class MissingFieldWireFormatTests {
@@ -39,7 +38,6 @@ public class MissingFieldWireFormatTests {
                 .hasMessage("Some required fields have not been set: [string]");
     }
 
-    @Ignore // integer and double primitives do not throw if fields unset
     @Test
     public void missing_integer_field_should_throw() throws Exception {
         assertThatThrownBy(() -> mapper.readValue("{}", IntegerExample.class))
@@ -75,7 +73,6 @@ public class MissingFieldWireFormatTests {
                 .hasMessage("Some required fields have not been set: [datetime]");
     }
 
-    @Ignore // integer and double primitives do not throw if fields unset
     @Test
     public void missing_double_field_should_throw() throws Exception {
         assertThatThrownBy(() -> mapper.readValue("{}", DoubleExample.class))
@@ -109,7 +106,6 @@ public class MissingFieldWireFormatTests {
                 .hasMessage("Some required fields have not been set: [enum]");
     }
 
-    @Ignore // integer and double primitives do not throw if fields unset
     @Test
     public void missing_boolean_field_should_throw() throws Exception {
         assertThatThrownBy(() -> mapper.readValue("{}", BooleanExample.class))
