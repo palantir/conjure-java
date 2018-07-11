@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
 import com.palantir.conjure.verification.EndpointName;
@@ -77,10 +78,12 @@ public class AutoDeserializeTest {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
             IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[]{endpointName, i, true, positiveAndNegativeTestCases.getPositive().get(i)}));
+                    .forEach(i -> objects.add(new Object[] {endpointName, i, true,
+                                                            positiveAndNegativeTestCases.getPositive().get(i)}));
 
             IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[]{endpointName, positiveSize + i, false, positiveAndNegativeTestCases.getNegative().get(i)}));
+                    .forEach(i -> objects.add(new Object[] {endpointName, positiveSize + i, false,
+                                                            positiveAndNegativeTestCases.getNegative().get(i)}));
         });
 
         return objects;
@@ -106,18 +109,19 @@ public class AutoDeserializeTest {
                 shouldSucceed ? "success" : "failure"));
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
 
-        HashMultimap<EndpointName, String> ignores = HashMultimap.create();
-        ignores.put(EndpointName.of("receiveBooleanExample"), "{\"value\":0}"); // jackson is casting 0 -> false and 1 -> true (.disable(MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
-        ignores.put(EndpointName.of("receiveBooleanExample"), "{\"value\":\"true\"}"); // jackson is casting 0 -> false and 1 -> true
+        Multimap<EndpointName, String> ignores = HashMultimap.create();
+        // jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
+        ignores.put(EndpointName.of("receiveBooleanExample"), "{\"value\":0}");
+        ignores.put(EndpointName.of("receiveBooleanExample"), "{\"value\":\"true\"}");
 
-        // jackson magical casting
+        // jackson coerces things to other types
         ignores.put(EndpointName.of("receiveStringExample"), "{\"value\":8}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"1523040070\"}"); // jackson is coercing this to an actual datetime object
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":1523040070}");// jackson is coercing this to an actual datetime object
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "1523040070");// jackson is coercing this to an actual datetime object
-        ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":\"1.23\"}"); // jackson is turning this into 1.23L
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"1523040070\"}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":1523040070}");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "1523040070");
+        ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":\"1.23\"}");
         ignores.put(EndpointName.of("receiveIntegerExample"), "{\"value\":\"12\"}");
-        ignores.put(EndpointName.of("receiveIntegerExample"), "{\"value\":1.23}"); // jackson is coercing this to '1'
+        ignores.put(EndpointName.of("receiveIntegerExample"), "{\"value\":1.23}");
 
         // verification-server is overly strict, these are perfectly fine
         ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":13}");
@@ -132,14 +136,16 @@ public class AutoDeserializeTest {
         ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000000000Z\"");
         ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T04:04:05.000000000+01:00\"");
         ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T05:04:05.000000000+02:00\"");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"");
+        ignores.put(EndpointName.of("receiveDateTimeAliasExample"),
+                "\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000Z\"}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000Z\"}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000000Z\"}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000000000Z\"}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T04:04:05.000000000+01:00\"}");
         ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T05:04:05.000000000+02:00\"}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"}");
+        ignores.put(EndpointName.of("receiveDateTimeExample"),
+                "{\"value\":\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"}");
 
         // TODO(dfox): make http-remoting reject null bodies
         ignores.put(EndpointName.of("receiveStringAliasExample"), "null");
