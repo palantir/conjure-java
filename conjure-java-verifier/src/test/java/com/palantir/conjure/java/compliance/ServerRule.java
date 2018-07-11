@@ -59,7 +59,7 @@ public final class ServerRule extends ExternalResource {
                     if (line == null) {
                         break;
                     }
-                    // TODO(dsanduleac) - super hacky
+                    // TODO(dsanduleac): super hacky
                     // should have logic to derive port from the server's output in a structured way
                     if (line.contains("Listening on")) {
                         latch.countDown();
