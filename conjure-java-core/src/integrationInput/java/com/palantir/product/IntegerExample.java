@@ -83,7 +83,7 @@ public final class IntegerExample {
             return this;
         }
 
-        private void validateFields() {
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(missingFields, _integerInitialized, "integer");
             if (missingFields != null) {
@@ -105,7 +105,7 @@ public final class IntegerExample {
         }
 
         public IntegerExample build() {
-            validateFields();
+            validatePrimitiveFieldsHaveBeenInitialized();
             return new IntegerExample(integer);
         }
     }

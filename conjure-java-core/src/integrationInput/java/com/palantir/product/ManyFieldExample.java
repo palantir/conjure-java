@@ -351,7 +351,7 @@ public final class ManyFieldExample {
             return this;
         }
 
-        private void validateFields() {
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(missingFields, _integerInitialized, "integer");
             missingFields =
@@ -375,7 +375,7 @@ public final class ManyFieldExample {
         }
 
         public ManyFieldExample build() {
-            validateFields();
+            validatePrimitiveFieldsHaveBeenInitialized();
             return new ManyFieldExample(
                     string, integer, doubleValue, optionalItem, items, set, map, alias);
         }

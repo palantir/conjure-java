@@ -82,7 +82,7 @@ public final class DoubleExample {
             return this;
         }
 
-        private void validateFields() {
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields =
                     addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
@@ -105,7 +105,7 @@ public final class DoubleExample {
         }
 
         public DoubleExample build() {
-            validateFields();
+            validatePrimitiveFieldsHaveBeenInitialized();
             return new DoubleExample(doubleValue);
         }
     }

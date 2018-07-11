@@ -175,7 +175,7 @@ public final class ReservedKeyExample {
             return this;
         }
 
-        private void validateFields() {
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields =
                     addFieldIfMissing(
@@ -199,7 +199,7 @@ public final class ReservedKeyExample {
         }
 
         public ReservedKeyExample build() {
-            validateFields();
+            validatePrimitiveFieldsHaveBeenInitialized();
             return new ReservedKeyExample(
                     package_, interface_, fieldNameWithDashes, memoizedHashCode_);
         }

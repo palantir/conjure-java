@@ -134,7 +134,7 @@ public final class BeanBuilderGenerator {
     }
 
     private static MethodSpec createValidateFieldsMethod(List<EnrichedField> primitives) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("validateFields")
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("validatePrimitiveFieldsHaveBeenInitialized")
                 .addModifiers(Modifier.PRIVATE);
 
         builder.addStatement("$T missingFields = null", ParameterizedTypeName.get(List.class, String.class));
@@ -426,7 +426,7 @@ public final class BeanBuilderGenerator {
                 .returns(objectClass);
 
         if (enrichedFields.stream().filter(EnrichedField::isPrimitive).count() != 0) {
-            method.addStatement("validateFields()");
+            method.addStatement("validatePrimitiveFieldsHaveBeenInitialized()");
         }
 
         return method

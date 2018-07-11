@@ -83,7 +83,7 @@ public final class BooleanExample {
             return this;
         }
 
-        private void validateFields() {
+        private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(missingFields, _coinInitialized, "coin");
             if (missingFields != null) {
@@ -105,7 +105,7 @@ public final class BooleanExample {
         }
 
         public BooleanExample build() {
-            validateFields();
+            validatePrimitiveFieldsHaveBeenInitialized();
             return new BooleanExample(coin);
         }
     }
