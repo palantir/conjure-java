@@ -108,7 +108,10 @@ public class AutoDeserializeTest {
                 throw e;
             }
         } else {
-            Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> method.invoke(testService, index));
+            Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+                Object result = method.invoke(testService, index);
+                log.error("Result should have caused an exception but deserialized to: {}", result);
+            });
         }
     }
 }
