@@ -3,7 +3,7 @@ client:
 
     receiveBooleanExample:
       - "{\"value\":0}" # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
-      - "value\":\"true\"}" # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
+      - "{\"value\":\"true\"}" # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
 
     receiveStringExample:
       - "{\"value\":8}" # jackson coerces things to other types

@@ -61,7 +61,7 @@ public class Cases {
         }
     }
 
-    public static boolean shouldSkip(EndpointName endpointName, String json) {
+    public static boolean shouldIgnore(EndpointName endpointName, String json) {
         return setContains(IGNORED_TEST_CASES.getAutoDeserialize().get(endpointName), json)
                 || setContains(IGNORED_TEST_CASES.getSingleHeaderService().get(endpointName), json)
                 || setContains(IGNORED_TEST_CASES.getSinglePathParamService().get(endpointName), json)
