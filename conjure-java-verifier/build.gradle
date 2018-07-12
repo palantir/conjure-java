@@ -22,8 +22,16 @@ ext {
 
 // We locally-codegen verification-api.conjure.json into these source-sets
 sourceSets {
-    specObjects
-    specJersey
+    generatedObjects
+    generatedJersey
+}
+
+idea {
+    module {
+        sourceDirs += sourceSets.generatedObjects.java.srcDirs
+        sourceDirs += sourceSets.generatedJersey.java.srcDirs
+        scopes.COMPILE.plus += [configurations.generatedObjectsCompile, configurations.generatedJerseyCompile]
+    }
 }
 
 configurations {
@@ -32,25 +40,17 @@ configurations {
     verificationServer
 }
 
-idea {
-    module {
-        sourceDirs += sourceSets.specObjects.java.srcDirs
-        sourceDirs += sourceSets.specJersey.java.srcDirs
-        scopes.COMPILE.plus += [configurations.specObjectsCompile, configurations.specJerseyCompile]
-    }
-}
-
 dependencies {
     testCases 'com.palantir.conjure.verification:test-cases'
     verificationApi 'com.palantir.conjure.verification:verification-api'
     verificationServer "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
-    specObjectsCompile project(':conjure-java-core')
-    specObjectsCompile project(':conjure-lib')
+    generatedObjectsCompile project(':conjure-java-core')
+    generatedObjectsCompile project(':conjure-lib')
 
-    specJerseyCompile project(':conjure-java-core')
-    specJerseyCompile project(':conjure-lib')
-    specJerseyCompile sourceSets.specObjects.output
+    generatedJerseyCompile project(':conjure-java-core')
+    generatedJerseyCompile project(':conjure-lib')
+    generatedJerseyCompile sourceSets.generatedObjects.output
 
     testCompile project(':conjure-java-core')
     testCompile 'junit:junit'
@@ -58,8 +58,8 @@ dependencies {
     testCompile 'org.mockito:mockito-core'
     testCompile 'com.palantir.remoting3:jaxrs-clients'
     testCompile 'io.dropwizard:dropwizard-testing'
-    testCompile sourceSets.specObjects.output
-    testCompile sourceSets.specJersey.output
+    testCompile sourceSets.generatedObjects.output
+    testCompile sourceSets.generatedJersey.output
 
     processor 'org.immutables:value'
 }
@@ -83,24 +83,28 @@ task copyTestCases(type: Sync) {
 task conjureJavaObjects(type: JavaExec) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/specObjects/java', '--objects'
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects'
 
     inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.files "src/specObjects/java"
-    doFirst { delete "src/specObjects/java/*" }
+    outputs.files "src/generatedObjects/java"
+    doFirst { delete "src/generatedObjects/java/*" }
 }
-compileSpecObjectsJava.dependsOn conjureJavaObjects
 
 task conjureJavaJersey(type: JavaExec) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/specJersey/java', '--jersey'
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jersey'
 
     inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.files "src/specJersey/java"
-    doFirst { delete "src/specJersey/java/*" }
+    outputs.files "src/generatedJersey/java"
+    doFirst { delete "src/generatedJersey/java/*" }
 }
-compileSpecJerseyJava.dependsOn conjureJavaJersey
+
+compileGeneratedObjectsJava.dependsOn conjureJavaObjects
+compileGeneratedObjectsJava.dependsOn conjureJavaJersey
 
 tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerificationServer, copyTestCases
 test.dependsOn unpackVerificationServer, copyTestCases
+
+checkstyleGeneratedObjects.enabled = false
+checkstyleGeneratedJersey.enabled = false
