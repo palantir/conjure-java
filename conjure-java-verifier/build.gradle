@@ -21,7 +21,9 @@ ext {
 }
 
 sourceSets {
-    spec
+    // local codegen for verification-api.conjure.json
+    specObjects
+    specJersey
 }
 
 configurations {
@@ -32,26 +34,32 @@ configurations {
 
 idea {
     module {
-        sourceDirs += sourceSets.spec.java.srcDirs
-        scopes.COMPILE.plus += [configurations.specCompile]
+        sourceDirs += sourceSets.specObjects.java.srcDirs
+        sourceDirs += sourceSets.specJersey.java.srcDirs
+        scopes.COMPILE.plus += [configurations.specObjectsCompile, configurations.specJerseyCompile]
     }
 }
 
 dependencies {
+    testCases 'com.palantir.conjure.verification:test-cases'
+    verificationApi 'com.palantir.conjure.verification:verification-api'
+    verificationServer "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
+
+    specObjectsCompile project(':conjure-java-core')
+    specObjectsCompile project(':conjure-lib')
+
+    specJerseyCompile project(':conjure-java-core')
+    specJerseyCompile project(':conjure-lib')
+    specJerseyCompile sourceSets.specObjects.output
+
     testCompile project(':conjure-java-core')
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
     testCompile 'com.palantir.remoting3:jaxrs-clients'
     testCompile 'io.dropwizard:dropwizard-testing'
-    testCompile sourceSets.spec.output
-
-    testCases 'com.palantir.conjure.verification:test-cases'
-    verificationApi 'com.palantir.conjure.verification:verification-api'
-    verificationServer "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
-
-    specCompile project(':conjure-lib')
-    specCompile project(':conjure-java-core')
+    testCompile sourceSets.specObjects.output
+    testCompile sourceSets.specJersey.output
 
     processor 'org.immutables:value'
 }
@@ -75,16 +83,18 @@ task copyTestCases(type: Sync) {
 task conjureJavaObjects(type: JavaExec, dependsOn: copyTestCases) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/spec/java', '--objects'
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/specObjects/java', '--objects'
     inputs.file copyTestCases.outputs.files.singleFile
 }
+compileSpecObjectsJava.dependsOn conjureJavaObjects
 
 task conjureJavaJersey(type: JavaExec, dependsOn: copyTestCases) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/spec/java', '--jersey'
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/specJersey/java', '--jersey'
     inputs.file copyTestCases.outputs.files.singleFile
 }
+compileSpecJerseyJava.dependsOn conjureJavaJersey
 
-tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerificationServer
-compileSpecJava.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerificationServer
+tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerificationServer, copyTestCases
+test.dependsOn unpackVerificationServer, copyTestCases
