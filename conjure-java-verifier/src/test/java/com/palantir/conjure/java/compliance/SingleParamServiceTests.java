@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
-import com.palantir.conjure.verification.ClientTestCases;
 import com.palantir.conjure.verification.EndpointName;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
@@ -68,10 +67,9 @@ public class SingleParamServiceTests {
 
     @Parameterized.Parameters(name = "{0}/{1}({3})")
     public static Collection<Object[]> data() throws IOException {
-        ClientTestCases testCases = server.getTestCases().getClient();
 
         List<Object[]> objects = new ArrayList<>();
-        testCases.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
+        Cases.TEST_CASES.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
             IntStream.range(0, size)
                     .forEach(i -> objects.add(
@@ -79,7 +77,7 @@ public class SingleParamServiceTests {
 
         });
 
-        testCases.getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
+        Cases.TEST_CASES.getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
             IntStream.range(0, size)
                     .forEach(i -> objects.add(
@@ -87,7 +85,7 @@ public class SingleParamServiceTests {
 
         });
 
-        testCases.getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
+        Cases.TEST_CASES.getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
             int size = singleQueryTestCases.size();
             IntStream.range(0, size)
                     .forEach(i -> objects.add(

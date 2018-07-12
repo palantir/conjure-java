@@ -20,7 +20,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
-import com.palantir.conjure.verification.ClientTestCases;
 import com.palantir.conjure.verification.EndpointName;
 import com.palantir.remoting.api.errors.RemoteException;
 import java.io.IOException;
@@ -63,10 +62,9 @@ public class AutoDeserializeTest {
 
     @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
     public static Collection<Object[]> data() throws IOException {
-        ClientTestCases testCases = server.getTestCases().getClient();
 
         List<Object[]> objects = new ArrayList<>();
-        testCases.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
+        Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 

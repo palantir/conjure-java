@@ -4,16 +4,12 @@
 
 package com.palantir.conjure.java.compliance;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.ImmutableList;
-import com.palantir.conjure.verification.TestCases;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.ClientConfigurations;
 import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -96,16 +92,6 @@ public final class VerificationServerRule extends ExternalResource {
             process.waitFor(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public TestCases getTestCases() {
-        try {
-            return new ObjectMapper().registerModule(new Jdk8Module())
-                    .readValue(new File("build/test-cases/test-cases.json"), TestCases.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to read test-cases.json, you may need to run ./gradlew copyTestCases",
-                    e);
         }
     }
 }
