@@ -60,27 +60,6 @@ tasks.compileTestJava {
     options.compilerArgs += ['-Xep:Slf4jLogsafeArgs:OFF']
 }
 
-task copyJavaExecutable(type: Sync, dependsOn: ':conjure-java:distTar') {
-    from tarTree(project(':conjure-java').tasks.distTar.outputs.files.singleFile)
-    into "${project.buildDir}/conjure-java"
-}
-
-task generateVerifierObjectBindings(type: Exec, dependsOn: copyJavaExecutable) {
-    commandLine "${-> copyJavaExecutable.outputs.files.singleFile.listFiles()[0]}/bin/conjure-java",
-            'generate',
-            "${-> configurations.verificationApi.singleFile}",
-            'src/spec/java',
-            '--objects'
-}
-
-task generateVerifierServerBindings(type: Exec, dependsOn: copyJavaExecutable) {
-    commandLine "${-> copyJavaExecutable.outputs.files.singleFile.listFiles()[0]}/bin/conjure-java",
-            'generate',
-            "${-> configurations.verificationApi.singleFile}",
-            'src/spec/java',
-            '--jersey'
-}
-
 task unpackVerificationServer(type: Sync) {
     from { tarTree(configurations.verificationServer.singleFile) }
     into "${buildDir}/verification-server"
@@ -93,8 +72,19 @@ task copyTestCases(type: Sync) {
     rename { "test-cases.json" }
 }
 
-tasks.idea.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings
-tasks.idea.dependsOn copyTestCases, unpackVerificationServer
+task conjureJavaObjects(type: JavaExec, dependsOn: copyTestCases) {
+    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/spec/java', '--objects'
+    inputs.file copyTestCases.outputs.files.singleFile
+}
 
-compileSpecJava.dependsOn generateVerifierObjectBindings, generateVerifierServerBindings
-compileTestJava.dependsOn copyTestCases, unpackVerificationServer
+task conjureJavaJersey(type: JavaExec, dependsOn: copyTestCases) {
+    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/spec/java', '--jersey'
+    inputs.file copyTestCases.outputs.files.singleFile
+}
+
+tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerificationServer
+compileSpecJava.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerificationServer
