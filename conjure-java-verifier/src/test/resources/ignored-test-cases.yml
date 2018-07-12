@@ -1,54 +1,66 @@
 client:
   autoDeserialize:
-    // jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
-        receiveBooleanExample:
-          - "{\"value\":0}"
-          - "value\":\"true\"}");
 
-        // jackson coerces things to other types
-        ignores.put(EndpointName.of("receiveStringExample"), "{\"value\":8}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"1523040070\"}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":1523040070}");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "1523040070");
-        ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":\"1.23\"}");
-        ignores.put(EndpointName.of("receiveIntegerExample"), "{\"value\":\"12\"}");
-        ignores.put(EndpointName.of("receiveIntegerExample"), "{\"value\":1.23}");
+    receiveBooleanExample:
+      - "{\"value\":0}" # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
+      - "value\":\"true\"}" # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
 
-        // verification-server is overly strict, these are perfectly fine
-        ignores.put(EndpointName.of("receiveDoubleExample"), "{\"value\":13}");
-        ignores.put(EndpointName.of("receiveDoubleAliasExample"), "10");
-        ignores.put(EndpointName.of("receiveMapExample"), "{}");
-        ignores.put(EndpointName.of("receiveOptionalExample"), "{}");
-        ignores.put(EndpointName.of("receiveListExample"), "{}");
-        ignores.put(EndpointName.of("receiveSetStringExample"), "{}");
-        ignores.put(EndpointName.of("receiveSetDoubleExample"), "{}");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000Z\"");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000000Z\"");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T03:04:05.000000000Z\"");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T04:04:05.000000000+01:00\"");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "\"2017-01-02T05:04:05.000000000+02:00\"");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"),
-                "\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000Z\"}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000Z\"}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000000Z\"}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T03:04:05.000000000Z\"}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T04:04:05.000000000+01:00\"}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"), "{\"value\":\"2017-01-02T05:04:05.000000000+02:00\"}");
-        ignores.put(EndpointName.of("receiveDateTimeExample"),
-                "{\"value\":\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"}");
+    receiveStringExample:
+      - "{\"value\":8}" # jackson coerces things to other types
+    receiveIntegerExample:
+      - "{\"value\":\"12\"}" # jackson coerces things to other types
+      - "{\"value\":1.23}" # jackson coerces things to other types
 
-        // TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-        ignores.put(EndpointName.of("receiveStringAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveDoubleAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveIntegerAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveBooleanAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveSafeLongAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveRidAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveBearerTokenAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveUuidAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveReferenceAliasExample"), "null");
-        ignores.put(EndpointName.of("receiveDateTimeAliasExample"), "null");
+    receiveDoubleExample:
+      - "{\"value\":\"1.23\"}" # jackson coerces things to other types
+      - "{\"value\":13}" # verification-server is overly strict, these are perfectly fine
+    receiveDoubleAliasExample:
+      - "10" # verification-server is overly strict, these are perfectly fine
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+    receiveMapExample:
+      - "{}" # verification-server is overly strict, these are perfectly fine
+    receiveOptionalExample:
+      - "{}" # verification-server is overly strict, these are perfectly fine
+    receiveListExample:
+      - "{}" # verification-server is overly strict, these are perfectly fine
+    receiveSetStringExample:
+      - "{}" # verification-server is overly strict, these are perfectly fine
+      - "{\"value\":[\"a\",\"a\"]}" # verification-server is overly strict, these are perfectly fine
+    receiveSetDoubleExample:
+      - "{}" # verification-server is overly strict, these are perfectly fine
+    receiveDateTimeAliasExample:
+      - "1523040070" # jackson coerces things to other types
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+      - "\"2017-01-02T03:04:05.000Z\"" # verification-server is overly strict, these are perfectly fine
+      - "\"2017-01-02T03:04:05.000000Z\"" # verification-server is overly strict, these are perfectly fine
+      - "\"2017-01-02T03:04:05.000000000Z\"" # verification-server is overly strict, these are perfectly fine
+      - "\"2017-01-02T04:04:05.000000000+01:00\"" # verification-server is overly strict, these are perfectly fine
+      - "\"2017-01-02T05:04:05.000000000+02:00\"" # verification-server is overly strict, these are perfectly fine
+      - "\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"" # verification-server is overly strict, these are perfectly fine
+    receiveDateTimeExample:
+      - "{\"value\":\"1523040070\"}" # jackson coerces things to other types
+      - "{\"value\":1523040070}" # jackson coerces things to other types
+      - "{\"value\":\"2017-01-02T03:04:05.000Z\"}" # verification-server is overly strict, these are perfectly fine
+      - "{\"value\":\"2017-01-02T03:04:05.000Z\"}" # verification-server is overly strict, these are perfectly fine
+      - "{\"value\":\"2017-01-02T03:04:05.000000Z\"}" # verification-server is overly strict, these are perfectly fine
+      - "{\"value\":\"2017-01-02T03:04:05.000000000Z\"}" # verification-server is overly strict, these are perfectly fine
+      - "{\"value\":\"2017-01-02T04:04:05.000000000+01:00\"}" # verification-server is overly strict, these are perfectly fine
+      - "{\"value\":\"2017-01-02T05:04:05.000000000+02:00\"}" # verification-server is overly strict, these are perfectly fine
+      - "{\"value\":\"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]\"}" # verification-server is overly strict, these are perfectly fine
 
-        // TODO(dfox): can we configure jackson to reject this?
-        ignores.put(EndpointName.of("receiveSetStringExample"), "{\"value\":[\"a\",\"a\"]}");
+    receiveStringAliasExample:
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+    receiveIntegerAliasExample:
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+    receiveBooleanAliasExample:
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+    receiveSafeLongAliasExample:
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+    receiveRidAliasExample:
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+    receiveBearerTokenAliasExample:
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+    receiveUuidAliasExample:
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+    receiveReferenceAliasExample:
+      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
