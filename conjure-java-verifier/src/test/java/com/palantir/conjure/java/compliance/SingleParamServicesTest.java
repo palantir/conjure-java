@@ -17,9 +17,7 @@
 package com.palantir.conjure.java.compliance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
 import com.palantir.conjure.verification.EndpointName;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
@@ -40,13 +38,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
-public class SingleParamServiceTests {
+public class SingleParamServicesTest {
 
     @ClassRule
     public static final VerificationServerRule server = new VerificationServerRule();
 
-    private static final Logger log = LoggerFactory.getLogger(SingleParamServiceTests.class);
-    private static final Multimap<EndpointName, String> ignoredTests = ignoredTests();
+    private static final Logger log = LoggerFactory.getLogger(SingleParamServicesTest.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
     private static ImmutableMap<String, Object> servicesMaps = ImmutableMap.of(
             "singlePathParamService", VerificationClients.singlePathParamService(server),
@@ -98,8 +95,7 @@ public class SingleParamServiceTests {
 
     @Test
     public void runTestCase() throws Exception {
-        boolean testIsDisabled = ignoredTests.remove(endpointName, jsonString);
-        Assume.assumeFalse(testIsDisabled);
+        Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         System.out.println(String.format("Invoking %s %s(%s)", serviceName, endpointName, jsonString));
 
@@ -128,24 +124,5 @@ public class SingleParamServiceTests {
                 }
             }
         }
-    }
-
-    private static Multimap<EndpointName, String> ignoredTests() {
-        Multimap<EndpointName, String> ignores = HashMultimap.create();
-
-        // server limitation
-        ignores.put(EndpointName.of("headerDouble"), "10");
-        ignores.put(EndpointName.of("headerDouble"), "10.0");
-        ignores.put(EndpointName.of("headerOptionalString"), "null");
-
-        ignores.put(EndpointName.of("pathParamDouble"), "10");
-        ignores.put(EndpointName.of("pathParamDouble"), "10.0");
-        ignores.put(EndpointName.of("pathParamString"), "\"\"");
-        ignores.put(EndpointName.of("pathParamAliasString"), "\"\"");
-
-        ignores.put(EndpointName.of("queryParamDouble"), "10");
-        ignores.put(EndpointName.of("queryParamDouble"), "10.0");
-
-        return ignores;
     }
 }

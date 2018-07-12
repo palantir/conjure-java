@@ -28,11 +28,11 @@ import java.io.IOException;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-public class Cases {
+public final class Cases {
 
-    public static ClientTestCases TEST_CASES = deserializeTestCases(
+    public static final ClientTestCases TEST_CASES = deserializeTestCases(
             new File("build/test-cases/test-cases.json"));
-    private static IgnoredClientTestCases IGNORED_TEST_CASES = deserializeIgnoredClientTestCases(
+    private static final IgnoredClientTestCases IGNORED_TEST_CASES = deserializeIgnoredClientTestCases(
             new File("src/test/resources/ignored-test-cases.yml"));
 
     private Cases() {}

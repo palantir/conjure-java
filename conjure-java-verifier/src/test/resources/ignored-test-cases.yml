@@ -64,3 +64,24 @@ client:
       - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
     receiveReferenceAliasExample:
       - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
+
+  singleHeaderService:
+    headerDouble:
+      - "10"
+      - "10.0"
+    headerOptionalString:
+      - "null"
+
+  singlePathParamService:
+    pathParamDouble:
+      - "10"
+      - "10.0"
+    pathParamString:
+      - "\"\""
+    pathParamAliasString:
+      - "\"\""
+
+  singleQueryParamService:
+    queryParamDouble:
+      - "10"
+      - "10.0"
