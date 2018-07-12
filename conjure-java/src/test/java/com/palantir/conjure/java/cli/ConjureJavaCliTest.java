@@ -64,13 +64,16 @@ public final class ConjureJavaCliTest {
                 targetFile.getAbsolutePath(),
                 folder.getRoot().getAbsolutePath(),
                 "--objects",
-                "--retrofitCompletableFutures"
+                "--retrofitCompletableFutures",
+                "--jerseyBinaryAsResponse"
         };
         CliConfiguration expectedConfiguration = CliConfiguration.builder()
                 .target(targetFile)
                 .outputDirectory(folder.getRoot())
                 .generateObjects(true)
-                .featureFlags(ImmutableSet.of(FeatureFlags.RetrofitCompletableFutures))
+                .featureFlags(ImmutableSet.of(
+                        FeatureFlags.RetrofitCompletableFutures,
+                        FeatureFlags.JerseyBinaryAsResponse))
                 .build();
         assertThat(ConjureJavaCli.parseCliConfiguration(args)).isEqualTo(expectedConfiguration);
     }

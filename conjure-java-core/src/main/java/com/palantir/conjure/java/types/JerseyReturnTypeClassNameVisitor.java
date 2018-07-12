@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -26,13 +27,18 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.util.List;
+import java.util.Set;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 public final class JerseyReturnTypeClassNameVisitor implements ClassNameVisitor {
 
     private final DefaultClassNameVisitor delegate;
+    private final boolean binaryAsResponse;
 
-    public JerseyReturnTypeClassNameVisitor(List<TypeDefinition> types) {
+    public JerseyReturnTypeClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlags> featureFlags) {
         this.delegate = new DefaultClassNameVisitor(types);
+        this.binaryAsResponse = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse);
     }
 
     @Override
@@ -53,7 +59,11 @@ public final class JerseyReturnTypeClassNameVisitor implements ClassNameVisitor 
     @Override
     public TypeName visitPrimitive(PrimitiveType type) {
         if (type.get() == PrimitiveType.Value.BINARY) {
-            return ClassName.get(javax.ws.rs.core.StreamingOutput.class);
+            if (binaryAsResponse) {
+                return ClassName.get(Response.class);
+            } else {
+                return ClassName.get(StreamingOutput.class);
+            }
         }
         return delegate.visitPrimitive(type);
     }

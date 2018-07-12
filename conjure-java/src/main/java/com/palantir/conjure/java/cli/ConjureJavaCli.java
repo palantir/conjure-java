@@ -75,7 +75,7 @@ public final class ConjureJavaCli {
         try {
             ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.target(), ConjureDefinition.class);
             TypeGenerator typeGenerator = new ObjectGenerator();
-            ServiceGenerator jerseyGenerator = new JerseyServiceGenerator();
+            ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.featureFlags());
             ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.featureFlags());
 
             if (config.generateObjects()) {
