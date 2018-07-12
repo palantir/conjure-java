@@ -20,8 +20,8 @@ ext {
     osClassifier = isFamily(FAMILY_MAC) ? "osx" : "linux"
 }
 
+// We locally-codegen verification-api.conjure.json into these source-sets
 sourceSets {
-    // local codegen for verification-api.conjure.json
     specObjects
     specJersey
 }
@@ -80,19 +80,25 @@ task copyTestCases(type: Sync) {
     rename { "test-cases.json" }
 }
 
-task conjureJavaObjects(type: JavaExec, dependsOn: copyTestCases) {
+task conjureJavaObjects(type: JavaExec) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
     args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/specObjects/java', '--objects'
-    inputs.file copyTestCases.outputs.files.singleFile
+
+    inputs.file "${-> configurations.verificationApi.singleFile}"
+    outputs.files "src/specObjects/java"
+    doFirst { delete "src/specObjects/java/*" }
 }
 compileSpecObjectsJava.dependsOn conjureJavaObjects
 
-task conjureJavaJersey(type: JavaExec, dependsOn: copyTestCases) {
+task conjureJavaJersey(type: JavaExec) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
     args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/specJersey/java', '--jersey'
-    inputs.file copyTestCases.outputs.files.singleFile
+
+    inputs.file "${-> configurations.verificationApi.singleFile}"
+    outputs.files "src/specJersey/java"
+    doFirst { delete "src/specJersey/java/*" }
 }
 compileSpecJerseyJava.dependsOn conjureJavaJersey
 
