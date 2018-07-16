@@ -2,4 +2,5 @@ rootProject.name = 'conjure-java'
 
 include 'conjure-java'
 include 'conjure-java-core'
+include 'conjure-java-verifier'
 include 'conjure-lib'

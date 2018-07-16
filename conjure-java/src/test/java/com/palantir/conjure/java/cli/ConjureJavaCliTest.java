@@ -65,6 +65,7 @@ public final class ConjureJavaCliTest {
                 folder.getRoot().getAbsolutePath(),
                 "--objects",
                 "--retrofitCompletableFutures",
+                "--jerseyBinaryAsResponse",
                 "--requireNotNullAuthAndBodyParams"
         };
         CliConfiguration expectedConfiguration = CliConfiguration.builder()
@@ -73,6 +74,7 @@ public final class ConjureJavaCliTest {
                 .generateObjects(true)
                 .featureFlags(ImmutableSet.of(
                         FeatureFlags.RetrofitCompletableFutures,
+                        FeatureFlags.JerseyBinaryAsResponse,
                         FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .build();
         assertThat(ConjureJavaCli.parseCliConfiguration(args)).isEqualTo(expectedConfiguration);

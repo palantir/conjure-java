@@ -26,7 +26,6 @@ import com.palantir.product.SetExample;
 import com.palantir.product.StringExample;
 import com.palantir.product.UuidExample;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class NullFieldWireFormatTests {
@@ -40,12 +39,11 @@ public class NullFieldWireFormatTests {
                 .hasMessageContaining("string cannot be null");
     }
 
-    @Ignore // not implemented
     @Test
     public void null_integer_field_should_throw() throws Exception {
         assertThatThrownBy(() -> mapper.readValue("{\"integer\":null}", IntegerExample.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("integer cannot be null");
+                .hasMessageContaining("Cannot map `null` into type int");
     }
 
     @Test
@@ -76,12 +74,11 @@ public class NullFieldWireFormatTests {
                 .hasMessageContaining("datetime cannot be null");
     }
 
-    @Ignore // not implemented
     @Test
     public void null_double_field_should_throw() throws Exception {
         assertThatThrownBy(() -> mapper.readValue("{\"double\":null}", DoubleExample.class))
-                .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("double cannot be null");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Some required fields have not been set: [doubleValue]");
     }
 
     @Test
@@ -110,12 +107,12 @@ public class NullFieldWireFormatTests {
                 .hasMessageContaining("enum cannot be null");
     }
 
-    @Ignore // not implemented
     @Test
     public void null_boolean_field_should_throw() throws Exception {
+        BooleanExample booleanExample = mapper.readValue("{\"coin\":null}", BooleanExample.class);
         assertThatThrownBy(() -> mapper.readValue("{\"coin\":null}", BooleanExample.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("coin cannot be null");
+                .hasMessageContaining("Cannot map `null` into type boolean");
     }
 
     @Test

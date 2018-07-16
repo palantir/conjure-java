@@ -67,17 +67,21 @@ import org.apache.commons.lang3.StringUtils;
 public final class JerseyServiceGenerator implements ServiceGenerator {
     private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
 
-    private final Set<FeatureFlags> featureFlags;
+    private final Set<FeatureFlags> experimentalFeatures;
+
+    public JerseyServiceGenerator() {
+        this(ImmutableSet.of());
+    }
 
     public JerseyServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
-        this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
+        this.experimentalFeatures = ImmutableSet.copyOf(experimentalFeatures);
     }
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                types -> new JerseyReturnTypeClassNameVisitor(types));
+                types -> new JerseyReturnTypeClassNameVisitor(types, experimentalFeatures));
         TypeMapper methodTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(), JerseyMethodTypeClassNameVisitor::new);
         return conjureDefinition.getServices().stream()
@@ -301,7 +305,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         if (withAnnotations) {
             paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
                     .addMember("value", "$S", tokenName).build());
-            if (featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+            if (experimentalFeatures.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }
         }
@@ -324,7 +328,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                     .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
             if (def.getType().accept(TypeVisitor.IS_OPTIONAL)
-                    || !featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+                    || !experimentalFeatures.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 return Optional.empty();
             }
             annotationSpecBuilder = AnnotationSpec
