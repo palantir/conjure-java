@@ -328,7 +328,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 return Optional.empty();
             }
             annotationSpecBuilder = AnnotationSpec
-                    .builder(ClassName.get("javax.validation.constraints", "NotNull"));
+                    .builder(NOT_NULL);
         } else {
             throw new IllegalStateException("Unrecognized argument type: " + def.getParamType());
         }
