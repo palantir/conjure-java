@@ -109,7 +109,6 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_boolean_field_should_throw() throws Exception {
-        BooleanExample booleanExample = mapper.readValue("{\"coin\":null}", BooleanExample.class);
         assertThatThrownBy(() -> mapper.readValue("{\"coin\":null}", BooleanExample.class))
                 .isInstanceOf(JsonMappingException.class)
                 .hasMessageContaining("Cannot map `null` into type boolean");
