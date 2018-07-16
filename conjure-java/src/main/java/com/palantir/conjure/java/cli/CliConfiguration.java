@@ -30,6 +30,7 @@ public abstract class CliConfiguration {
     public static final String JERSEY_OPTION = "jersey";
     public static final String RETROFIT_OPTION = "retrofit";
     public static final String RETROFIT_COMPLETABLE_FUTURES = "retrofitCompletableFutures";
+    public static final String JERSEY_BINARY_AS_RESPONSE = "jerseyBinaryAsResponse";
 
     abstract File target();
 
@@ -90,6 +91,9 @@ public abstract class CliConfiguration {
                     break;
                 case RETROFIT_COMPLETABLE_FUTURES:
                     flagsBuilder.add(FeatureFlags.RetrofitCompletableFutures);
+                    break;
+                case JERSEY_BINARY_AS_RESPONSE:
+                    flagsBuilder.add(FeatureFlags.JerseyBinaryAsResponse);
                     break;
                 default:
                     break;

@@ -57,6 +57,8 @@ public final class ConjureJavaCli {
                 "Generate retrofit interfaces for streaming/async clients"));
         options.addOption(new Option(CliConfiguration.RETROFIT_COMPLETABLE_FUTURES,
                 "Generate retrofit services which return Java8 CompletableFuture instead of OkHttp Call"));
+        options.addOption(new Option(CliConfiguration.JERSEY_BINARY_AS_RESPONSE,
+                "Generate jersey interfaces which return Response instead of StreamingOutput"));
 
         try {
             CommandLine cmd = parser.parse(options, args, false);
@@ -75,7 +77,7 @@ public final class ConjureJavaCli {
         try {
             ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.target(), ConjureDefinition.class);
             TypeGenerator typeGenerator = new ObjectGenerator();
-            ServiceGenerator jerseyGenerator = new JerseyServiceGenerator();
+            ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.featureFlags());
             ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.featureFlags());
 
             if (config.generateObjects()) {

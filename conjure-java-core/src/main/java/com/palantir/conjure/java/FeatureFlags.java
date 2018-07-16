@@ -16,7 +16,9 @@
 
 package com.palantir.conjure.java;
 
+import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
+import javax.ws.rs.core.Response;
 
 public enum FeatureFlags {
     /**
@@ -25,4 +27,9 @@ public enum FeatureFlags {
      */
     RetrofitCompletableFutures,
 
+    /**
+     * Instructs the {@link JerseyServiceGenerator} to generate binary response endpoints with the {@link Response}
+     * type.
+     */
+    JerseyBinaryAsResponse,
 }

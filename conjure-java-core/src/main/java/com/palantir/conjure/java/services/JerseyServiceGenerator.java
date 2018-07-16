@@ -19,8 +19,10 @@ package com.palantir.conjure.java.services;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.JerseyMethodTypeClassNameVisitor;
 import com.palantir.conjure.java.types.JerseyReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
@@ -65,13 +67,21 @@ import org.apache.commons.lang3.StringUtils;
 public final class JerseyServiceGenerator implements ServiceGenerator {
 
 
-    public JerseyServiceGenerator() {}
+    private final Set<FeatureFlags> experimentalFeatures;
+
+    public JerseyServiceGenerator() {
+        this(ImmutableSet.of());
+    }
+
+    public JerseyServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
+        this.experimentalFeatures = ImmutableSet.copyOf(experimentalFeatures);
+    }
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                types -> new JerseyReturnTypeClassNameVisitor(types));
+                types -> new JerseyReturnTypeClassNameVisitor(types, experimentalFeatures));
         TypeMapper methodTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(), JerseyMethodTypeClassNameVisitor::new);
         return conjureDefinition.getServices().stream()

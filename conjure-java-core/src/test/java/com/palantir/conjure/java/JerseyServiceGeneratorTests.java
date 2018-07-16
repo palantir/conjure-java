@@ -19,6 +19,7 @@ package com.palantir.conjure.java;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -84,6 +85,27 @@ public final class JerseyServiceGeneratorTests {
             assertThat(TestUtils.readFromFile(file)).isEqualTo(
                     TestUtils.readFromFile(
                             Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey.binary")));
+        }
+    }
+
+    @Test
+    public void testBinaryReturnResponse() throws IOException {
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-binary.yml")));
+        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.JerseyBinaryAsResponse))
+                .emit(def, folder.getRoot());
+
+        for (Path file : files) {
+            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+                Path output = Paths.get(
+                        "src/test/resources/test/api/" + file.getFileName() + ".jersey.binary_as_response");
+                Files.delete(output);
+                Files.copy(file, output);
+            }
+
+            assertThat(TestUtils.readFromFile(file)).isEqualTo(
+                    TestUtils.readFromFile(Paths.get(
+                            "src/test/resources/test/api/" + file.getFileName() + ".jersey.binary_as_response")));
         }
     }
 
