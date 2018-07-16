@@ -60,7 +60,7 @@ public final class WireFormatTests {
     public void testOptionalSerialization() throws Exception {
         assertThat(mapper.writeValueAsString(OptionalExample.of("a"))).isEqualTo("{\"item\":\"a\"}");
     }
-    
+
     @Test
     public void deserializing_double_nan_fields_should_throw_an_error() {
         assertThatThrownBy(() -> mapper.readValue("{\"doubleValue\":\"NaN\"}", DoubleExample.class))
@@ -257,6 +257,7 @@ public final class WireFormatTests {
         assertThat(mapper.readValue("{\"datetime\":\"2017-01-02T03:04:05.000000Z\"}", DateTimeExample.class))
                 .isEqualTo(secondsOnly);
     }
+
     @Test
     public void testDateTimeType_equality() throws Exception {
         ZonedDateTime aa = ZonedDateTime.parse("2017-01-02T03:04:05.000000006Z");

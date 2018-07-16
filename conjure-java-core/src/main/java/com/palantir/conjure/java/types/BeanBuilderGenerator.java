@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.types;
 
-import static com.squareup.javapoet.TypeName.DOUBLE;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -321,7 +320,7 @@ public final class BeanBuilderGenerator {
                             ByteBuffer.class)
                     .addStatement("this.$1N.rewind()", spec.name)
                     .build();
-        } else if (Objects.equals(spec.type, DOUBLE)) {
+        } else if (Objects.equals(spec.type, TypeName.DOUBLE)) {
             // ban `NaN` and `Infinity` for double
             CodeBlock.Builder codeBlockBuilder = CodeBlock.builder();
             codeBlockBuilder
