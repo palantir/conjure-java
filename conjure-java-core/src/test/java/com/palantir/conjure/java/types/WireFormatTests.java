@@ -5,7 +5,9 @@
 package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.product.BinaryAliasExample;
@@ -58,17 +60,12 @@ public final class WireFormatTests {
     public void testOptionalSerialization() throws Exception {
         assertThat(mapper.writeValueAsString(OptionalExample.of("a"))).isEqualTo("{\"item\":\"a\"}");
     }
-
+    
     @Test
-    public void double_nan_fields_should_be_serialized_as_a_string() throws Exception {
-        assertThat(mapper.writeValueAsString(DoubleExample.of(Double.NaN)))
-                .isEqualTo("{\"doubleValue\":\"NaN\"}");
-    }
-
-    @Test
-    public void double_nan_fields_should_deserialize_from_a_string() throws Exception {
-        DoubleExample deserialized = mapper.readValue("{\"doubleValue\":\"NaN\"}", DoubleExample.class);
-        assertThat(deserialized.getDoubleValue()).isNaN();
+    public void deserializing_double_nan_fields_should_throw_an_error() {
+        assertThatThrownBy(() -> mapper.readValue("{\"doubleValue\":\"NaN\"}", DoubleExample.class))
+                .isExactlyInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("NaN or Infinity for double type, doubleValue, is not allowed.");
     }
 
     @Test
