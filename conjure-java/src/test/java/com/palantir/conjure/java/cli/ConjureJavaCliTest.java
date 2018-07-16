@@ -71,7 +71,9 @@ public final class ConjureJavaCliTest {
                 .target(targetFile)
                 .outputDirectory(folder.getRoot())
                 .generateObjects(true)
-                .featureFlags(ImmutableSet.of(FeatureFlags.RetrofitCompletableFutures, FeatureFlags.RequireNotNullAuthAndBodyParams))
+                .featureFlags(ImmutableSet.of(
+                        FeatureFlags.RetrofitCompletableFutures,
+                        FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .build();
         assertThat(ConjureJavaCli.parseCliConfiguration(args)).isEqualTo(expectedConfiguration);
     }
