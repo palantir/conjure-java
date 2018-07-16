@@ -95,6 +95,7 @@ public abstract class CliConfiguration {
                     break;
                 case JERSEY_BINARY_AS_RESPONSE:
                     flagsBuilder.add(FeatureFlags.JerseyBinaryAsResponse);
+                    break;
                 case REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS:
                     flagsBuilder.add(FeatureFlags.RequireNotNullAuthAndBodyParams);
                     break;
