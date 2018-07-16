@@ -230,6 +230,14 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void testDateTime_with_explicit_zoneId_is_iso_compliant() throws Exception {
+        DateTimeExample deserialized = DateTimeExample.of(
+                ZonedDateTime.of(2017, 1, 2, 3, 4, 5, 0, ZoneId.of("Europe/Berlin")));
+        assertThat(mapper.writeValueAsString(deserialized))
+                .isEqualTo("{\"datetime\":\"2017-01-02T03:04:05+01:00\"}");
+    }
+
+    @Test
     public void testDateTimeType_acceptFormats() throws Exception {
         DateTimeExample reference = DateTimeExample.of(ZonedDateTime.parse("2017-01-02T03:04:05.000000006Z"));
 
