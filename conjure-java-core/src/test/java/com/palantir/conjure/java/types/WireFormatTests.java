@@ -273,27 +273,16 @@ public final class WireFormatTests {
         ZonedDateTime aa = ZonedDateTime.parse("2017-01-02T03:04:05.000000006Z");
         ZonedDateTime bb = ZonedDateTime.parse("2017-01-02T03:04:05.000000006+00:00");
         ZonedDateTime cc = ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00");
-        ZonedDateTime dd = ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00[Europe/Berlin]");
 
         assertThat(aa.isEqual(bb)).isTrue();
         assertThat(aa.isEqual(cc)).isTrue();
-        assertThat(aa.isEqual(dd)).isTrue();
         assertThat(bb.isEqual(cc)).isTrue();
-        assertThat(bb.isEqual(dd)).isTrue();
-        assertThat(cc.isEqual(dd)).isTrue();
 
         DateTimeExample one = DateTimeExample.of(ZonedDateTime.parse("2017-01-02T03:04:05.000000006Z"));
         DateTimeExample two = DateTimeExample.of(ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00"));
-        DateTimeExample three = DateTimeExample.of(
-                ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00[Europe/Berlin]"));
 
         assertThat(one).isEqualTo(two);
-        assertThat(one).isEqualTo(three);
-        assertThat(two).isEqualTo(three);
-
         assertThat(one.hashCode()).isEqualTo(two.hashCode());
-        assertThat(one.hashCode()).isEqualTo(three.hashCode());
-        assertThat(two.hashCode()).isEqualTo(three.hashCode());
     }
 
     @Test
