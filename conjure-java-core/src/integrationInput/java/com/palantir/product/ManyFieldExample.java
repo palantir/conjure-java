@@ -262,6 +262,10 @@ public final class ManyFieldExample {
         /** docs for doubleValue field */
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
+            if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
+                throw new IllegalArgumentException(
+                        "NaN or Infinity for double type, doubleValue, is not allowed.");
+            }
             this.doubleValue = doubleValue;
             this._doubleValueInitialized = true;
             return this;

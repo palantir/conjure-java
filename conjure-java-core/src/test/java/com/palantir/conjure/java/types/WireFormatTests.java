@@ -5,7 +5,9 @@
 package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.product.BinaryAliasExample;
@@ -60,15 +62,10 @@ public final class WireFormatTests {
     }
 
     @Test
-    public void double_nan_fields_should_be_serialized_as_a_string() throws Exception {
-        assertThat(mapper.writeValueAsString(DoubleExample.of(Double.NaN)))
-                .isEqualTo("{\"doubleValue\":\"NaN\"}");
-    }
-
-    @Test
-    public void double_nan_fields_should_deserialize_from_a_string() throws Exception {
-        DoubleExample deserialized = mapper.readValue("{\"doubleValue\":\"NaN\"}", DoubleExample.class);
-        assertThat(deserialized.getDoubleValue()).isNaN();
+    public void deserializing_double_nan_fields_should_throw_an_error() {
+        assertThatThrownBy(() -> mapper.readValue("{\"doubleValue\":\"NaN\"}", DoubleExample.class))
+                .isExactlyInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("NaN or Infinity for double type, doubleValue, is not allowed.");
     }
 
     @Test
@@ -260,6 +257,7 @@ public final class WireFormatTests {
         assertThat(mapper.readValue("{\"datetime\":\"2017-01-02T03:04:05.000000Z\"}", DateTimeExample.class))
                 .isEqualTo(secondsOnly);
     }
+
     @Test
     public void testDateTimeType_equality() throws Exception {
         ZonedDateTime aa = ZonedDateTime.parse("2017-01-02T03:04:05.000000006Z");

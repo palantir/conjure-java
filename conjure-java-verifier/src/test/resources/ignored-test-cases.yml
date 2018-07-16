@@ -14,6 +14,7 @@ client:
     receiveDoubleExample:
       - "{\"value\":\"1.23\"}" # jackson coerces things to other types
       - "{\"value\":13}" # verification-server is overly strict, these are perfectly fine
+      - "{\"value\":\"NaN\"}" # `NaN` or infinity is banned
     receiveDoubleAliasExample:
       - "10" # verification-server is overly strict, these are perfectly fine
       - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies

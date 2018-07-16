@@ -53,6 +53,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -319,6 +320,19 @@ public final class BeanBuilderGenerator {
                             ByteBuffer.class)
                     .addStatement("this.$1N.rewind()", spec.name)
                     .build();
+        } else if (Objects.equals(spec.type, TypeName.DOUBLE)) {
+            // ban `NaN` and `Infinity` for double
+            CodeBlock.Builder codeBlockBuilder = CodeBlock.builder();
+            codeBlockBuilder
+                    .beginControlFlow(
+                            "if ($1T.isNaN($2N) || $1T.isInfinite($2N))",
+                            Double.class, spec.name)
+                    .addStatement("throw new $T(\"NaN or Infinity for double type, $N, is not allowed.\")",
+                            IllegalArgumentException.class, spec.name)
+                    .endControlFlow();
+
+            codeBlockBuilder.add(CodeBlocks.statement("this.$N = $N", spec.name, spec.name));
+            return codeBlockBuilder.build();
         } else {
             CodeBlock nullCheckedValue = spec.type.isPrimitive()
                     ? CodeBlock.of("$N", spec.name) // primitive types can't be null, so no need for requireNonNull!
