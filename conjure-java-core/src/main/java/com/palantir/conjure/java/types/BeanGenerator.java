@@ -301,9 +301,7 @@ public final class BeanGenerator {
 
         @Value.Derived
         default String getterName() {
-            String lowerCamelCaseName = CaseConverter.toCase(
-                    fieldName().get(), CaseConverter.Case.LOWER_CAMEL_CASE);
-            return "get" + StringUtils.capitalize(lowerCamelCaseName);
+            return asGetterName(fieldName().get());
         }
 
         @Value.Parameter
