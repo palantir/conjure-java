@@ -16,9 +16,6 @@
 
 package com.palantir.conjure.java.types;
 
-import static java.util.stream.Collectors.toList;
-
-import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.collect.ImmutableList;
@@ -52,40 +49,34 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
 public final class BeanBuilderGenerator {
-    private static final TypeName MAP_STRING_OBJ = ParameterizedTypeName.get(Map.class, String.class, Object.class);
-    private static final String UNKNOWN_PROPS_FIELD = "__unknownProperties";
-
     private final TypeMapper typeMapper;
     private final ClassName builderClass;
     private final ClassName objectClass;
-    private final boolean captureUnknownFields;
 
-    private BeanBuilderGenerator(
-            TypeMapper typeMapper, ClassName builderClass, ClassName objectClass, boolean captureUnknownFields) {
+    private BeanBuilderGenerator(TypeMapper typeMapper, ClassName builderClass, ClassName objectClass) {
         this.typeMapper = typeMapper;
         this.builderClass = builderClass;
         this.objectClass = objectClass;
-        this.captureUnknownFields = captureUnknownFields;
     }
 
     public static TypeSpec generate(
             TypeMapper typeMapper,
             ClassName objectClass,
             ClassName builderClass,
-            ObjectDefinition typeDef,
-            boolean captureUnknownFields) {
+            ObjectDefinition typeDef) {
 
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, captureUnknownFields)
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass)
                 .generate(typeDef);
     }
 
     private TypeSpec generate(ObjectDefinition typeDef) {
+
         Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
 
@@ -104,25 +95,13 @@ public final class BeanBuilderGenerator {
                                 .addMember("ignoreUnknown", "$L", true)
                                 .build());
 
-        if (captureUnknownFields) {
-            builder.addField(FieldSpec.builder(MAP_STRING_OBJ, UNKNOWN_PROPS_FIELD)
-                    .initializer("new $T<>()", LinkedHashMap.class)
-                    .build());
-
-            builder.addMethod(MethodSpec.methodBuilder("setUnknownProperties")
-                    .addModifiers(Modifier.PRIVATE)
-                    .addAnnotation(JsonAnySetter.class)
-                    .addParameter(ClassName.get(String.class), "key")
-                    .addParameter(ClassName.get(Object.class), "value")
-                    .addStatement("$L.put(key, value)", UNKNOWN_PROPS_FIELD)
-                    .build());
-        }
-
         return builder.build();
     }
 
     private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {
-        List<EnrichedField> primitives = enrichedFields.stream().filter(EnrichedField::isPrimitive).collect(toList());
+        List<EnrichedField> primitives = enrichedFields.stream()
+                .filter(EnrichedField::isPrimitive)
+                .collect(Collectors.toList());
 
         if (primitives.isEmpty()) {
             return Collections.emptyList();
@@ -183,7 +162,7 @@ public final class BeanBuilderGenerator {
                         TypeName.BOOLEAN,
                         deriveFieldInitializedName(field),
                         Modifier.PRIVATE).initializer("false").build())
-                .collect(toList());
+                .collect(Collectors.toList());
     }
 
     private static String deriveFieldInitializedName(EnrichedField field) {
@@ -193,7 +172,7 @@ public final class BeanBuilderGenerator {
     private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
         return fields.stream()
                 .map(e -> createField(e.getFieldName(), e))
-                .collect(toList());
+                .collect(Collectors.toList());
     }
 
     private static MethodSpec createConstructor() {
@@ -430,9 +409,7 @@ public final class BeanBuilderGenerator {
         }
 
         return method
-                .addStatement("return new $L", Expressions.constructorCall(objectClass,
-                        !captureUnknownFields ? fields
-                                : ImmutableList.builder().addAll(fields).add(UNKNOWN_PROPS_FIELD).build()))
+                .addStatement("return new $L", Expressions.constructorCall(objectClass, fields))
                 .build();
     }
 
