@@ -20,11 +20,9 @@ client:
     receiveDateTimeAliasExample:
       - '"1523040070"' # jackson coerces things to other types
       - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-      - '"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"' # java should deserialize this as OffsetDateTime
     receiveDateTimeExample:
       - "{\"value\":\"1523040070\"}" # jackson coerces things to other types
       - "{\"value\":1523040070}" # jackson coerces things to other types
-      - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}' # java should deserialize this as OffsetDateTime
 
     receiveStringAliasExample:
       - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
