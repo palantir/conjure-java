@@ -75,9 +75,13 @@ task unpackVerificationServer(type: Sync) {
 }
 
 task copyTestCases(type: Sync) {
-    from configurations.testCases
+    from configurations.testCases, {
+        rename { "test-cases.json" }
+    }
+    from configurations.verificationApi, {
+        rename { "verification-api.json" }
+    }
     into "$buildDir/test-cases"
-    rename { "test-cases.json" }
 }
 
 task conjureJavaObjects(type: JavaExec) {
