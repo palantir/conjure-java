@@ -56,6 +56,11 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void testOptionalSerialization() throws Exception {
+        assertThat(mapper.writeValueAsString(OptionalExample.of("a"))).isEqualTo("{\"item\":\"a\"}");
+    }
+
+    @Test
     public void double_nan_fields_should_be_serialized_as_a_string() throws Exception {
         assertThat(mapper.writeValueAsString(DoubleExample.of(Double.NaN)))
                 .isEqualTo("{\"doubleValue\":\"NaN\"}");
