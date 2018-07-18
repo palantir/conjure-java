@@ -23,9 +23,9 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -76,8 +76,8 @@ public final class EteResource implements EteService {
     }
 
     @Override
-    public ZonedDateTime datetime(AuthHeader authHeader) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(1234L), ZoneId.from(ZoneOffset.UTC));
+    public OffsetDateTime datetime(AuthHeader authHeader) {
+        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(1234L), ZoneId.from(ZoneOffset.UTC));
     }
 
     @Override
