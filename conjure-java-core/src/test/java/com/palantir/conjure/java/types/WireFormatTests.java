@@ -230,7 +230,7 @@ public final class WireFormatTests {
     public void testDateTime_roundTrip() throws Exception {
         String serialized = "{\"datetime\":\"2017-01-02T03:04:05.000000006Z\"}";
         DateTimeExample deserialized = DateTimeExample.of(
-                OffsetDateTime.of(2017, 1, 2, 3, 4, 5, 6, ZoneOffset.of("UTC")));
+                OffsetDateTime.of(2017, 1, 2, 3, 4, 5, 6, ZoneOffset.of("Z")));
         assertThat(mapper.writeValueAsString(deserialized)).isEqualTo(serialized);
         assertThat(mapper.readValue(serialized, DateTimeExample.class)).isEqualTo(deserialized);
     }
@@ -238,7 +238,7 @@ public final class WireFormatTests {
     @Test
     public void testDateTime_with_explicit_zoneId_is_iso_compliant() throws Exception {
         DateTimeExample deserialized = DateTimeExample.of(
-                OffsetDateTime.of(2017, 1, 2, 3, 4, 5, 0, ZoneOffset.of("UTC")));
+                OffsetDateTime.of(2017, 1, 2, 3, 4, 5, 0, ZoneOffset.of("+1")));
         assertThat(mapper.writeValueAsString(deserialized))
                 .isEqualTo("{\"datetime\":\"2017-01-02T03:04:05+01:00\"}");
     }
@@ -254,10 +254,6 @@ public final class WireFormatTests {
                 .isEqualTo(reference);
 
         assertThat(mapper.readValue("{\"datetime\":\"2017-01-02T04:04:05.000000006+01:00\"}", DateTimeExample.class))
-                .isEqualTo(reference);
-
-        assertThat(mapper.readValue(
-                "{\"datetime\":\"2017-01-02T04:04:05.000000006+01:00[Europe/Berlin]\"}", DateTimeExample.class))
                 .isEqualTo(reference);
 
         DateTimeExample secondsOnly = DateTimeExample.of(OffsetDateTime.parse("2017-01-02T03:04:05.000000000Z"));
