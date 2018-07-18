@@ -160,3 +160,6 @@ types:
         union:
           foo: string
           bar: integer
+      SingleUnion:
+        union:
+          foo: string

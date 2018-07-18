@@ -34,7 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public final class JerseyServiceGeneratorTests {
+public final class JerseyServiceGeneratorTests extends TestBase {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
@@ -82,9 +82,8 @@ public final class JerseyServiceGeneratorTests {
                 Files.copy(file, output);
             }
 
-            assertThat(TestUtils.readFromFile(file)).isEqualTo(
-                    TestUtils.readFromFile(
-                            Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey.binary")));
+            assertThat(readFromFile(file)).isEqualTo(
+                    readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey.binary")));
         }
     }
 
@@ -103,8 +102,8 @@ public final class JerseyServiceGeneratorTests {
                 Files.copy(file, output);
             }
 
-            assertThat(TestUtils.readFromFile(file)).isEqualTo(
-                    TestUtils.readFromFile(Paths.get(
+            assertThat(readFromFile(file)).isEqualTo(
+                    readFromFile(Paths.get(
                             "src/test/resources/test/api/" + file.getFileName() + ".jersey.binary_as_response")));
         }
     }
@@ -121,8 +120,8 @@ public final class JerseyServiceGeneratorTests {
                 Files.copy(file, output);
             }
 
-            assertThat(TestUtils.readFromFile(file)).isEqualTo(
-                    TestUtils.readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey")));
+            assertThat(readFromFile(file)).isEqualTo(
+                    readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey")));
         }
     }
 
