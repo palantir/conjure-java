@@ -44,10 +44,12 @@ public final class VerificationServerRule extends ExternalResource {
 
     @Override
     public void before() throws Exception {
-        ProcessBuilder processBuilder =
-                new ProcessBuilder("build/verification-server/server", "build/test-cases/test-cases.json")
-                        .redirectErrorStream(true)
-                        .redirectOutput(Redirect.PIPE);
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "build/verification-server/server",
+                "build/test-cases/test-cases.json",
+                "build/test-cases/verification-api.json")
+                .redirectErrorStream(true)
+                .redirectOutput(Redirect.PIPE);
 
         // TODO(dsanduleac): set these as defaults
         processBuilder.environment().put("RUST_LOG", "conjure_verification_server=info,conjure_verification_http=info");
