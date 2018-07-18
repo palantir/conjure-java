@@ -3,6 +3,15 @@ types:
   definitions:
     default-package: com.palantir.product
     objects:
+      BlaBla:
+        fields:
+          blaBla1:
+            type: string
+            docs: |
+              Blabablabl
+      BlaBla1:
+        union:
+          blaBla: BlaBla
       StringExample:
         fields:
           string: string
