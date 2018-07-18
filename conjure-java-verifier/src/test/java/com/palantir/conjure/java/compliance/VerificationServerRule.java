@@ -31,8 +31,9 @@ public final class VerificationServerRule extends ExternalResource {
     private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
             .trustStorePath(Paths.get("../conjure-java-core/var/security/truststore.jks"))
             .build();
+    private static final int PORT = 16298;
     private static final ClientConfiguration clientConfiguration = ClientConfigurations.of(
-            ImmutableList.of("http://localhost:8000/"),
+            ImmutableList.of("http://localhost:" + PORT + "/"),
             SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
             SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION));
 
@@ -51,6 +52,7 @@ public final class VerificationServerRule extends ExternalResource {
                 .redirectErrorStream(true)
                 .redirectOutput(Redirect.PIPE);
 
+        processBuilder.environment().put("PORT", String.valueOf(PORT));
         // TODO(dsanduleac): set these as defaults
         processBuilder.environment().put("RUST_LOG", "conjure_verification_server=info,conjure_verification_http=info");
 
