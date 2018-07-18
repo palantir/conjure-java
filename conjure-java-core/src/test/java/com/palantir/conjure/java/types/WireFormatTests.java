@@ -29,7 +29,6 @@ import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.Rule;
@@ -272,9 +271,9 @@ public final class WireFormatTests {
     }
     @Test
     public void testDateTimeType_equality() throws Exception {
-        ZonedDateTime aa = ZonedDateTime.parse("2017-01-02T03:04:05.000000006Z");
-        ZonedDateTime bb = ZonedDateTime.parse("2017-01-02T03:04:05.000000006+00:00");
-        ZonedDateTime cc = ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00");
+        OffsetDateTime aa = OffsetDateTime.parse("2017-01-02T03:04:05.000000006Z");
+        OffsetDateTime bb = OffsetDateTime.parse("2017-01-02T03:04:05.000000006+00:00");
+        OffsetDateTime cc = OffsetDateTime.parse("2017-01-02T04:04:05.000000006+01:00");
 
         assertThat(aa.isEqual(bb)).isTrue();
         assertThat(aa.isEqual(cc)).isTrue();
