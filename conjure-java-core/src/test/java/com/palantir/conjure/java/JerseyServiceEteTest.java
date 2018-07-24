@@ -55,7 +55,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public final class JerseyServiceEteTest {
+public final class JerseyServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     @ClassRule
@@ -175,7 +175,7 @@ public final class JerseyServiceEteTest {
                 Files.copy(file, output);
             }
 
-            assertThat(TestUtils.readFromFile(file)).isEqualTo(TestUtils.readFromFile(output));
+            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
         }
     }
 

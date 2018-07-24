@@ -8,7 +8,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.defs.Conjure;
-import com.palantir.conjure.java.TestUtils;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +76,7 @@ public final class ObjectGeneratorTests {
                 Files.deleteIfExists(expectedFile);
                 Files.copy(file, expectedFile);
             }
-            assertThat(TestUtils.readFromFile(file)).isEqualTo(TestUtils.readFromFile(expectedFile));
+            assertThat(file).hasSameContentAs(expectedFile);
         }
     }
 

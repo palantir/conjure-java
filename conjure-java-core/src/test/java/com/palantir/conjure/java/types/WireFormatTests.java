@@ -6,6 +6,7 @@ package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.product.BinaryAliasExample;
@@ -198,6 +199,10 @@ public final class WireFormatTests {
         assertThat(mapper.readValue(serializedUnionTypeSet, UnionTypeExample.class)).isEqualTo(unionTypeSet);
         assertThat(mapper.readValue(serializedUnionTypeInt, UnionTypeExample.class)).isEqualTo(unionTypeInt);
 
+        assertThat(unionTypeStringExample).isEqualTo(stringExample);
+        assertThat(unionTypeSet).isEqualTo(ImmutableSet.of("item"));
+        assertThat(unionTypeInt).isEqualTo(5);
+
         // visitor
         UnionTypeExample.Visitor<Integer> visitor = new TestVisitor();
         assertThat(unionTypeStringExample.accept(visitor)).isEqualTo("foo".length());
@@ -216,7 +221,7 @@ public final class WireFormatTests {
     @Test
     public void testUnionType_noType() throws Exception {
         String noType = "{\"typ\":\"unknown\",\"value\":5}";
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(JsonMappingException.class);
         mapper.readValue(noType, UnionTypeExample.class);
     }
 
@@ -227,6 +232,14 @@ public final class WireFormatTests {
                 ZonedDateTime.of(2017, 1, 2, 3, 4, 5, 6, ZoneId.of("UTC")));
         assertThat(mapper.writeValueAsString(deserialized)).isEqualTo(serialized);
         assertThat(mapper.readValue(serialized, DateTimeExample.class)).isEqualTo(deserialized);
+    }
+
+    @Test
+    public void testDateTime_with_explicit_zoneId_is_iso_compliant() throws Exception {
+        DateTimeExample deserialized = DateTimeExample.of(
+                ZonedDateTime.of(2017, 1, 2, 3, 4, 5, 0, ZoneId.of("Europe/Berlin")));
+        assertThat(mapper.writeValueAsString(deserialized))
+                .isEqualTo("{\"datetime\":\"2017-01-02T03:04:05+01:00\"}");
     }
 
     @Test
@@ -265,27 +278,16 @@ public final class WireFormatTests {
         ZonedDateTime aa = ZonedDateTime.parse("2017-01-02T03:04:05.000000006Z");
         ZonedDateTime bb = ZonedDateTime.parse("2017-01-02T03:04:05.000000006+00:00");
         ZonedDateTime cc = ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00");
-        ZonedDateTime dd = ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00[Europe/Berlin]");
 
         assertThat(aa.isEqual(bb)).isTrue();
         assertThat(aa.isEqual(cc)).isTrue();
-        assertThat(aa.isEqual(dd)).isTrue();
         assertThat(bb.isEqual(cc)).isTrue();
-        assertThat(bb.isEqual(dd)).isTrue();
-        assertThat(cc.isEqual(dd)).isTrue();
 
         DateTimeExample one = DateTimeExample.of(ZonedDateTime.parse("2017-01-02T03:04:05.000000006Z"));
         DateTimeExample two = DateTimeExample.of(ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00"));
-        DateTimeExample three = DateTimeExample.of(
-                ZonedDateTime.parse("2017-01-02T04:04:05.000000006+01:00[Europe/Berlin]"));
 
         assertThat(one).isEqualTo(two);
-        assertThat(one).isEqualTo(three);
-        assertThat(two).isEqualTo(three);
-
         assertThat(one.hashCode()).isEqualTo(two.hashCode());
-        assertThat(one.hashCode()).isEqualTo(three.hashCode());
-        assertThat(two.hashCode()).isEqualTo(three.hashCode());
     }
 
     @Test

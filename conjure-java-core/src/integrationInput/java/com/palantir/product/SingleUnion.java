@@ -15,11 +15,11 @@ import java.util.Objects;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
-public final class Union {
+public final class SingleUnion {
     private final Base value;
 
     @JsonCreator
-    private Union(Base value) {
+    private SingleUnion(Base value) {
         this.value = value;
     }
 
@@ -28,19 +28,13 @@ public final class Union {
         return value;
     }
 
-    public static Union foo(String value) {
-        return new Union(new FooWrapper(value));
-    }
-
-    public static Union bar(int value) {
-        return new Union(new BarWrapper(value));
+    public static SingleUnion foo(String value) {
+        return new SingleUnion(new FooWrapper(value));
     }
 
     public <T> T accept(Visitor<T> visitor) {
         if (value instanceof FooWrapper) {
             return visitor.visitFoo(((FooWrapper) value).value);
-        } else if (value instanceof BarWrapper) {
-            return visitor.visitBar(((BarWrapper) value).value);
         } else if (value instanceof UnknownWrapper) {
             return visitor.visitUnknown(((UnknownWrapper) value).getType());
         }
@@ -51,16 +45,13 @@ public final class Union {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof Union && equalTo((Union) other))
+                || (other instanceof SingleUnion && equalTo((SingleUnion) other))
                 || (other instanceof String
                         && value instanceof FooWrapper
-                        && Objects.equals(((FooWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof BarWrapper
-                        && Objects.equals(((BarWrapper) value).value, other));
+                        && Objects.equals(((FooWrapper) value).value, other));
     }
 
-    private boolean equalTo(Union other) {
+    private boolean equalTo(SingleUnion other) {
         return this.value.equals(other.value);
     }
 
@@ -71,7 +62,7 @@ public final class Union {
 
     @Override
     public String toString() {
-        return new StringBuilder("Union")
+        return new StringBuilder("SingleUnion")
                 .append("{")
                 .append("value")
                 .append(": ")
@@ -83,8 +74,6 @@ public final class Union {
     public interface Visitor<T> {
         T visitFoo(String value);
 
-        T visitBar(int value);
-
         T visitUnknown(String unknownType);
     }
 
@@ -94,7 +83,7 @@ public final class Union {
         visible = true,
         defaultImpl = UnknownWrapper.class
     )
-    @JsonSubTypes({@JsonSubTypes.Type(FooWrapper.class), @JsonSubTypes.Type(BarWrapper.class)})
+    @JsonSubTypes(@JsonSubTypes.Type(FooWrapper.class))
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {}
 
@@ -130,47 +119,6 @@ public final class Union {
         @Override
         public String toString() {
             return new StringBuilder("FooWrapper")
-                    .append("{")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    @JsonTypeName("bar")
-    private static class BarWrapper implements Base {
-        private final int value;
-
-        @JsonCreator
-        private BarWrapper(@JsonProperty("bar") int value) {
-            Objects.requireNonNull(value, "bar cannot be null");
-            this.value = value;
-        }
-
-        @JsonProperty("bar")
-        private int getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof BarWrapper && equalTo((BarWrapper) other));
-        }
-
-        private boolean equalTo(BarWrapper other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(value);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder("BarWrapper")
                     .append("{")
                     .append("value")
                     .append(": ")
