@@ -59,6 +59,7 @@ dependencies {
 
     integrationInputCompile project(':conjure-lib')
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
+    integrationInputCompile 'javax.validation:validation-api'
 
     processor 'org.immutables:value'
 }

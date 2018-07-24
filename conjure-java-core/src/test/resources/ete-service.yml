@@ -1,3 +1,9 @@
+types:
+  imports:
+    StringAliasExample:
+      external:
+        java: com.palantir.product.StringAliasExample
+
 services:
   EmptyPathService:
     name: EmptyPathService
@@ -60,3 +66,9 @@ services:
       binary:
         http: GET /binary
         returns: binary
+
+      notNullBody:
+        http: POST /notNullBody
+        args:
+          notNullBody: StringAliasExample
+        returns: StringAliasExample

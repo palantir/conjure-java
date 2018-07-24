@@ -8,9 +8,11 @@ import java.lang.String;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -23,46 +25,52 @@ import javax.ws.rs.core.StreamingOutput;
 public interface EteService {
     @GET
     @Path("base/string")
-    String string(@HeaderParam("Authorization") AuthHeader authHeader);
+    String string(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/integer")
-    int integer(@HeaderParam("Authorization") AuthHeader authHeader);
+    int integer(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/double")
-    double double_(@HeaderParam("Authorization") AuthHeader authHeader);
+    double double_(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/boolean")
-    boolean boolean_(@HeaderParam("Authorization") AuthHeader authHeader);
+    boolean boolean_(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/safelong")
-    SafeLong safelong(@HeaderParam("Authorization") AuthHeader authHeader);
+    SafeLong safelong(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/rid")
-    ResourceIdentifier rid(@HeaderParam("Authorization") AuthHeader authHeader);
+    ResourceIdentifier rid(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/bearertoken")
-    BearerToken bearertoken(@HeaderParam("Authorization") AuthHeader authHeader);
+    BearerToken bearertoken(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/optionalString")
-    Optional<String> optionalString(@HeaderParam("Authorization") AuthHeader authHeader);
+    Optional<String> optionalString(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/optionalEmpty")
-    Optional<String> optionalEmpty(@HeaderParam("Authorization") AuthHeader authHeader);
+    Optional<String> optionalEmpty(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/datetime")
-    ZonedDateTime datetime(@HeaderParam("Authorization") AuthHeader authHeader);
+    ZonedDateTime datetime(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/binary")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    StreamingOutput binary(@HeaderParam("Authorization") AuthHeader authHeader);
+    StreamingOutput binary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
+    @POST
+    @Path("base/notNullBody")
+    StringAliasExample notNullBody(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @NotNull StringAliasExample notNullBody);
 }

@@ -18,20 +18,28 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EteService;
+import com.palantir.product.StringAliasExample;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,7 +47,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.BeforeClass;
@@ -49,6 +56,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 public final class JerseyServiceEteTest {
+    private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     @ClassRule
     public static final TemporaryFolder folder = new TemporaryFolder();
@@ -126,11 +134,39 @@ public final class JerseyServiceEteTest {
                 .isEqualTo(ZonedDateTime.ofInstant(Instant.ofEpochMilli(1234), ZoneId.from(ZoneOffset.UTC)));
     }
 
+    @Test
+    public void java_url_client_receives_ok_with_complete_request() throws IOException {
+        HttpURLConnection httpUrlConnection = preparePostRequest();
+        httpUrlConnection.setRequestProperty("Authorization", "Bearer authheader");
+        sendPostRequestData(
+                httpUrlConnection,
+                CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
+        assertThat(httpUrlConnection.getResponseCode()).isEqualTo(200);
+    }
+
+    @Test
+    public void java_url_client_receives_bad_request_without_authheader() throws IOException {
+        HttpURLConnection httpUrlConnection = preparePostRequest();
+        sendPostRequestData(
+                httpUrlConnection,
+                CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
+        assertThat(httpUrlConnection.getResponseCode()).isEqualTo(400);
+    }
+
+    @Test
+    public void java_url_client_receives_unprocessable_entity_with_null_body() throws IOException {
+        HttpURLConnection httpUrlConnection = preparePostRequest();
+        httpUrlConnection.setRequestProperty("Authorization", "Bearer authheader");
+        sendPostRequestData(httpUrlConnection, "");
+        assertThat(httpUrlConnection.getResponseCode()).isEqualTo(422);
+    }
+
     @BeforeClass
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/ete-service.yml")));
-        List<Path> files = new JerseyServiceGenerator(Collections.emptySet()).emit(def, folder.getRoot());
+        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
+                .emit(def, folder.getRoot());
 
         for (Path file : files) {
             Path output = Paths.get("src/integrationInput/java/com/palantir/product/" + file.getFileName());
@@ -141,5 +177,21 @@ public final class JerseyServiceEteTest {
 
             assertThat(TestUtils.readFromFile(file)).isEqualTo(TestUtils.readFromFile(output));
         }
+    }
+
+    private static HttpURLConnection preparePostRequest() throws IOException {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/notNullBody");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+        con.setRequestProperty("Content-Type", "application/json");
+        return con;
+    }
+
+    private static void sendPostRequestData(HttpURLConnection connection, String data) throws IOException {
+        DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+        out.write(data.getBytes(StandardCharsets.UTF_8));
+        out.flush();
+        out.close();
     }
 }
