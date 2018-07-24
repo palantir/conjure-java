@@ -116,4 +116,8 @@ public interface TestServiceRetrofit {
 
     @GET("./catalog/integer")
     Call<Integer> testInteger(@Header("Authorization") AuthHeader authHeader);
+
+    @POST("./catalog/optional")
+    Call<Optional<String>> testPostOptional(
+            @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
 }

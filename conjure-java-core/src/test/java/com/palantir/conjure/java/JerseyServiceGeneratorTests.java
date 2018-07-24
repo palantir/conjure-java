@@ -56,7 +56,7 @@ public final class JerseyServiceGeneratorTests {
     @Test
     public void testServiceGeneration_exampleService_requireNotNullAuthHeadersAndRequestBodies() throws IOException {
         ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/example-service-with-not-null.yml")));
+                ImmutableList.of(new File("src/test/resources/example-service.yml")));
         List<Path> files = new JerseyServiceGenerator(
                 ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams)).emit(def, folder.getRoot());
 

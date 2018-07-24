@@ -202,3 +202,9 @@ services:
       testInteger:
         http: GET /integer
         returns: integer
+
+      testPostOptional:
+        http: POST /optional
+        args:
+          maybeString: optional<string>
+        returns: optional<string>
