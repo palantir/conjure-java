@@ -43,6 +43,15 @@ types:
           fileSystemId: string
           path: string
 
+      AliasedBinary:
+        alias: binary
+
+      NestedAliasedBinary:
+        alias: AliasedBinary
+
+      AliasedString:
+        alias: string
+
 services:
   TestService:
     name: Test Service
@@ -89,6 +98,15 @@ services:
              - Safe
         returns: binary
 
+      getAliasedRawData:
+        http: GET /datasets/{datasetRid}/raw-aliased
+        args:
+          datasetRid:
+            type: ResourceIdentifier
+            markers:
+             - Safe
+        returns: NestedAliasedBinary
+
       maybeGetRawData:
         http: GET /datasets/{datasetRid}/raw-maybe
         args:
@@ -97,6 +115,15 @@ services:
             markers:
              - Safe
         returns: optional<binary>
+
+      getAliasedString:
+        http: GET /datasets/{datasetRid}/string-aliased
+        args:
+          datasetRid:
+            type: ResourceIdentifier
+            markers:
+             - Safe
+        returns: AliasedString
 
       uploadRawData:
         http: POST /datasets/upload-raw

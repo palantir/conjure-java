@@ -17,26 +17,36 @@
 package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
+import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.visitor.TypeDefinitionVisitor;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 public final class JerseyReturnTypeClassNameVisitor implements ClassNameVisitor {
 
-    private final DefaultClassNameVisitor delegate;
     private final boolean binaryAsResponse;
+    private final DefaultClassNameVisitor delegate;
+    private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
 
     public JerseyReturnTypeClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlags> featureFlags) {
+        this.types = types.stream().collect(
+                Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
         this.delegate = new DefaultClassNameVisitor(types);
         this.binaryAsResponse = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse);
     }
@@ -70,7 +80,7 @@ public final class JerseyReturnTypeClassNameVisitor implements ClassNameVisitor 
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
-        return delegate.visitReference(type);
+        return resolveReferenceType(type);
     }
 
     @Override
@@ -81,5 +91,33 @@ public final class JerseyReturnTypeClassNameVisitor implements ClassNameVisitor 
     @Override
     public TypeName visitSet(SetType type) {
         return delegate.visitSet(type);
+    }
+
+    private TypeName resolveReferenceType(com.palantir.conjure.spec.TypeName type) {
+        if (!types.containsKey(type)) {
+            throw new IllegalStateException("Unknown LocalReferenceType type: " + type);
+        }
+
+        TypeDefinition def = types.get(type);
+        // recursively examine nested local references to see if the leaf node is a binary type. If so resolve it
+        // to the binary type, otherwise return immediate reference type name.
+        while (def.accept(TypeDefinitionVisitor.IS_ALIAS)) {
+            AliasDefinition aliasDefinition = def.accept(TypeDefinitionVisitor.ALIAS);
+            Type conjureType = aliasDefinition.getAlias();
+
+            if (conjureType.accept(TypeVisitor.IS_REFERENCE)) {
+                def = types.get(conjureType.accept(TypeVisitor.REFERENCE));
+            } else if (conjureType.accept(TypeVisitor.IS_BINARY)) {
+                if (binaryAsResponse) {
+                    return ClassName.get(Response.class);
+                } else {
+                    return ClassName.get(StreamingOutput.class);
+                }
+            } else {
+                break;
+            }
+        }
+
+        return ClassName.get(type.getPackage(), type.getName());
     }
 }
