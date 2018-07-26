@@ -1,5 +1,6 @@
 package com.palantir.another;
 
+import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
@@ -59,8 +60,20 @@ public interface TestService {
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @GET
+    @Path("catalog/datasets/{datasetRid}/raw-aliased")
+    StreamingOutput getAliasedRawData(
+            @HeaderParam("Authorization") AuthHeader authHeader,
+            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+
+    @GET
     @Path("catalog/datasets/{datasetRid}/raw-maybe")
     Optional<ByteBuffer> maybeGetRawData(
+            @HeaderParam("Authorization") AuthHeader authHeader,
+            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+
+    @GET
+    @Path("catalog/datasets/{datasetRid}/string-aliased")
+    AliasedString getAliasedString(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
