@@ -16,8 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import static com.palantir.conjure.java.util.BinaryReturnTypeResolver.resolveReturnReferenceType;
-
+import com.palantir.conjure.java.util.BinaryReturnTypeResolver;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -63,7 +62,7 @@ public final class Retrofit2ReturnTypeClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitPrimitive(PrimitiveType type) {
-        if (type.get() == PrimitiveType.Value.BINARY)  {
+        if (type.get() == PrimitiveType.Value.BINARY) {
             return RESPONSE_BODY_TYPE;
         } else {
             return delegate.visitPrimitive(type);
@@ -72,7 +71,7 @@ public final class Retrofit2ReturnTypeClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
-        return resolveReturnReferenceType(types, type, () -> RESPONSE_BODY_TYPE);
+        return BinaryReturnTypeResolver.resolveReturnReferenceType(types, type, () -> RESPONSE_BODY_TYPE);
     }
 
     @Override

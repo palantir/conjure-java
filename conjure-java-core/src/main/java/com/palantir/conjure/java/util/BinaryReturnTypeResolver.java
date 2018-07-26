@@ -28,15 +28,17 @@ import java.util.function.Supplier;
 
 public final class BinaryReturnTypeResolver {
 
+    private BinaryReturnTypeResolver() {}
+
     /**
-     * Recursively examines nested local alias references to see if the leaf node is of a binary type. If so, this method
-     * resolves it to a binary type supplied by the {@code binaryTypeSupplier}, otherwise it returns the immediate
-     * local reference {@code {@link TypeName}}.
+     * Recursively examines nested local alias references to see if the leaf node is of a binary type. If so,
+     * this method resolves it to a binary type supplied by the {@code binaryTypeSupplier}, otherwise it returns the
+     * immediate local reference {@code {@link TypeName}}.
      *
-     * @param types - a map of name to conjure definition used.
+     * @param types - a map of name to conjure definition
      * @param type - the given type to be resolved
-     * @param binaryTypeSupplier  - supplier of the return binary type if the leaf node is of a binary type.
-     * @return resolved return reference type.
+     * @param binaryTypeSupplier - supplier of the return binary type if the leaf node is of a binary type
+     * @return resolved return reference type
      */
     public static TypeName resolveReturnReferenceType(
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
