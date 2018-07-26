@@ -2,21 +2,21 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class DateTimeAliasExample {
-    private final ZonedDateTime value;
+    private final OffsetDateTime value;
 
-    private DateTimeAliasExample(ZonedDateTime value) {
+    private DateTimeAliasExample(OffsetDateTime value) {
         Objects.requireNonNull(value, "value cannot be null");
         this.value = value;
     }
 
     @JsonValue
-    public ZonedDateTime get() {
+    public OffsetDateTime get() {
         return value;
     }
 
@@ -38,11 +38,11 @@ public final class DateTimeAliasExample {
     }
 
     public static DateTimeAliasExample valueOf(String value) {
-        return new DateTimeAliasExample(ZonedDateTime.parse(value));
+        return new DateTimeAliasExample(OffsetDateTime.parse(value));
     }
 
     @JsonCreator
-    public static DateTimeAliasExample of(ZonedDateTime value) {
+    public static DateTimeAliasExample of(OffsetDateTime value) {
         return new DateTimeAliasExample(value);
     }
 }
