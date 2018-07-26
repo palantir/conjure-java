@@ -78,13 +78,8 @@ public final class JerseyReturnTypeClassNameVisitor implements ClassNameVisitor 
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
-        return BinaryReturnTypeResolver.resolveReturnReferenceType(types, type,  () -> {
-            if (binaryAsResponse) {
-                return ClassName.get(Response.class);
-            } else {
-                return ClassName.get(StreamingOutput.class);
-            }
-        });
+        return BinaryReturnTypeResolver.resolveReturnReferenceType(types, type,
+                binaryAsResponse ? ClassName.get(Response.class) : ClassName.get(StreamingOutput.class));
     }
 
     @Override

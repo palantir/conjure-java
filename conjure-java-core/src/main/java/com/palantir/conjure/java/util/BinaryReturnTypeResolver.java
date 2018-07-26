@@ -24,7 +24,6 @@ import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public final class BinaryReturnTypeResolver {
 
@@ -32,18 +31,18 @@ public final class BinaryReturnTypeResolver {
 
     /**
      * Recursively examines nested local alias references to see if the leaf node is of a binary type. If so,
-     * this method resolves it to a binary type supplied by the {@code binaryTypeSupplier}, otherwise it returns the
+     * this method resolves it to a binary type supplied by the {@code binaryTypeName}, otherwise it returns the
      * immediate local reference {@code {@link TypeName}}.
      *
      * @param types - a map of name to conjure definition
      * @param type - the given type to be resolved
-     * @param binaryTypeSupplier - supplier of the return binary type if the leaf node is of a binary type
+     * @param binaryTypeName - the return binary type name if the leaf node is of a binary type
      * @return resolved return reference type
      */
     public static TypeName resolveReturnReferenceType(
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
             com.palantir.conjure.spec.TypeName type,
-            Supplier<TypeName> binaryTypeSupplier) {
+            TypeName binaryTypeName) {
 
         if (!types.containsKey(type)) {
             throw new IllegalStateException("Unknown LocalReferenceType type: " + type);
@@ -56,7 +55,7 @@ public final class BinaryReturnTypeResolver {
             if (conjureType.accept(TypeVisitor.IS_REFERENCE)) {
                 def = types.get(conjureType.accept(TypeVisitor.REFERENCE));
             } else if (conjureType.accept(TypeVisitor.IS_BINARY)) {
-                return binaryTypeSupplier.get();
+                return binaryTypeName;
             } else {
                 break;
             }

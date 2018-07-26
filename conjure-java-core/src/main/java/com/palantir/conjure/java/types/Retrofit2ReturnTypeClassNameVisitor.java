@@ -71,7 +71,7 @@ public final class Retrofit2ReturnTypeClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
-        return BinaryReturnTypeResolver.resolveReturnReferenceType(types, type, () -> RESPONSE_BODY_TYPE);
+        return BinaryReturnTypeResolver.resolveReturnReferenceType(types, type, RESPONSE_BODY_TYPE);
     }
 
     @Override
