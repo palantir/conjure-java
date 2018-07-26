@@ -16,17 +16,16 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.spec.AliasDefinition;
+import static com.palantir.conjure.java.util.BinaryReturnTypeResolver.resolveReturnReferenceType;
+
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
-import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
-import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.util.List;
@@ -73,7 +72,7 @@ public final class Retrofit2ReturnTypeClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
-        return resolveReferenceType(type);
+        return resolveReturnReferenceType(types, type, () -> RESPONSE_BODY_TYPE);
     }
 
     @Override
@@ -86,27 +85,4 @@ public final class Retrofit2ReturnTypeClassNameVisitor implements ClassNameVisit
         return delegate.visitSet(type);
     }
 
-    private TypeName resolveReferenceType(com.palantir.conjure.spec.TypeName type) {
-        if (!types.containsKey(type)) {
-            throw new IllegalStateException("Unknown LocalReferenceType type: " + type);
-        }
-
-        TypeDefinition def = types.get(type);
-        // recursively examine nested local references to see if the leaf node is a binary type. If so resolve it
-        // to the binary type, otherwise return immediate reference type name.
-        while (def.accept(TypeDefinitionVisitor.IS_ALIAS)) {
-            AliasDefinition aliasDefinition = def.accept(TypeDefinitionVisitor.ALIAS);
-            Type conjureType = aliasDefinition.getAlias();
-
-            if (conjureType.accept(TypeVisitor.IS_REFERENCE)) {
-                def = types.get(conjureType.accept(TypeVisitor.REFERENCE));
-            } else if (conjureType.accept(TypeVisitor.IS_BINARY)) {
-                return RESPONSE_BODY_TYPE;
-            } else {
-                break;
-            }
-        }
-
-        return ClassName.get(type.getPackage(), type.getName());
-    }
 }
