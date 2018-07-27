@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,17 +13,17 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = DateTimeExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class DateTimeExample {
-    private final ZonedDateTime datetime;
+    private final OffsetDateTime datetime;
 
     private volatile int memoizedHashCode;
 
-    private DateTimeExample(ZonedDateTime datetime) {
+    private DateTimeExample(OffsetDateTime datetime) {
         validateFields(datetime);
         this.datetime = datetime;
     }
 
     @JsonProperty("datetime")
-    public ZonedDateTime getDatetime() {
+    public OffsetDateTime getDatetime() {
         return this.datetime;
     }
 
@@ -56,11 +56,11 @@ public final class DateTimeExample {
                 .toString();
     }
 
-    public static DateTimeExample of(ZonedDateTime datetime) {
+    public static DateTimeExample of(OffsetDateTime datetime) {
         return builder().datetime(datetime).build();
     }
 
-    private static void validateFields(ZonedDateTime datetime) {
+    private static void validateFields(OffsetDateTime datetime) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, datetime, "datetime");
         if (missingFields != null) {
@@ -88,7 +88,7 @@ public final class DateTimeExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private ZonedDateTime datetime;
+        private OffsetDateTime datetime;
 
         private Builder() {}
 
@@ -98,7 +98,7 @@ public final class DateTimeExample {
         }
 
         @JsonSetter("datetime")
-        public Builder datetime(ZonedDateTime datetime) {
+        public Builder datetime(OffsetDateTime datetime) {
             this.datetime = Objects.requireNonNull(datetime, "datetime cannot be null");
             return this;
         }

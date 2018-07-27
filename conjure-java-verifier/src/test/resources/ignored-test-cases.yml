@@ -13,35 +13,14 @@ client:
 
     receiveDoubleExample:
       - "{\"value\":\"1.23\"}" # jackson coerces things to other types
-    receiveDoubleAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
     receiveSetStringExample:
       - "{\"value\":[\"a\",\"a\"]}" # client turns this into a set of ["a"] without error
     receiveDateTimeAliasExample:
       - '"1523040070"' # jackson coerces things to other types
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
       - '"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"' # java should deserialize this as OffsetDateTime
     receiveDateTimeExample:
       - "{\"value\":\"1523040070\"}" # jackson coerces things to other types
       - "{\"value\":1523040070}" # jackson coerces things to other types
-      - '{"value":"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"}' # java should deserialize this as OffsetDateTime
-
-    receiveStringAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-    receiveIntegerAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-    receiveBooleanAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-    receiveSafeLongAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-    receiveRidAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-    receiveBearerTokenAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-    receiveUuidAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
-    receiveReferenceAliasExample:
-      - "null" # TODO(dfox): palantir/http-remoting#758 - make http-remoting reject null bodies
 
   singleHeaderService:
     headerOptionalString:

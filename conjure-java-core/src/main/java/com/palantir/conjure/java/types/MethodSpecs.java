@@ -25,7 +25,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -136,7 +136,7 @@ public final class MethodSpecs {
 
         if (field.type.isPrimitive()) {
             return CodeBlock.of("$L == $L", thisField, otherField);
-        } else if (field.type.equals(ClassName.get(ZonedDateTime.class))) {
+        } else if (field.type.equals(ClassName.get(OffsetDateTime.class))) {
             return CodeBlock.of("$L.isEqual($L)", thisField, otherField);
         }
 
@@ -144,7 +144,7 @@ public final class MethodSpecs {
     }
 
     private static CodeBlock createHashInput(FieldSpec field) {
-        if (field.type.equals(ClassName.get(ZonedDateTime.class))) {
+        if (field.type.equals(ClassName.get(OffsetDateTime.class))) {
             return CodeBlock.of("$N.toInstant()", field);
         }
 

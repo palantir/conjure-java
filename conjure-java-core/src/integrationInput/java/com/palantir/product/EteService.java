@@ -5,7 +5,7 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.lang.String;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
@@ -61,7 +61,7 @@ public interface EteService {
 
     @GET
     @Path("base/datetime")
-    ZonedDateTime datetime(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+    OffsetDateTime datetime(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("base/binary")

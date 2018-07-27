@@ -8,7 +8,7 @@ import java.lang.Boolean;
 import java.lang.Double;
 import java.lang.Integer;
 import java.lang.String;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
 import okhttp3.ResponseBody;
@@ -49,7 +49,7 @@ public interface EteServiceRetrofit {
     Call<Optional<String>> optionalEmpty(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/datetime")
-    Call<ZonedDateTime> datetime(@Header("Authorization") AuthHeader authHeader);
+    Call<OffsetDateTime> datetime(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/binary")
     @Streaming

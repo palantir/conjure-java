@@ -32,7 +32,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import java.nio.ByteBuffer;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -108,7 +108,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
             case STRING:
                 return ClassName.get(String.class);
             case DATETIME:
-                return ClassName.get(ZonedDateTime.class);
+                return ClassName.get(OffsetDateTime.class);
             case INTEGER:
                 return TypeName.INT;
             case DOUBLE:

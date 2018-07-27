@@ -44,9 +44,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.BeforeClass;
@@ -131,7 +131,7 @@ public final class JerseyServiceEteTest extends TestBase {
     @Test
     public void http_remoting_client_can_retrieve_a_date_time_from_witchcraft() throws Exception {
         assertThat(client.datetime(AuthHeader.valueOf("authHeader")))
-                .isEqualTo(ZonedDateTime.ofInstant(Instant.ofEpochMilli(1234), ZoneId.from(ZoneOffset.UTC)));
+                .isEqualTo(OffsetDateTime.ofInstant(Instant.ofEpochMilli(1234), ZoneId.from(ZoneOffset.UTC)));
     }
 
     @Test
