@@ -59,6 +59,9 @@ public final class ConjureJavaCli {
                 "Generate retrofit services which return Java8 CompletableFuture instead of OkHttp Call"));
         options.addOption(new Option(CliConfiguration.JERSEY_BINARY_AS_RESPONSE,
                 "Generate jersey interfaces which return Response instead of StreamingOutput"));
+        options.addOption(new Option(
+                CliConfiguration.REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS,
+                "Generate @NotNull annotations for AuthHeaders and request body params"));
 
         try {
             CommandLine cmd = parser.parse(options, args, false);

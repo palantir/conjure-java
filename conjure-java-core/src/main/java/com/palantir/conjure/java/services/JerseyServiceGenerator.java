@@ -65,7 +65,7 @@ import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
 public final class JerseyServiceGenerator implements ServiceGenerator {
-
+    private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
 
     private final Set<FeatureFlags> experimentalFeatures;
 
@@ -247,7 +247,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         return methodBuilder.build();
     }
 
-    private static List<ParameterSpec> createServiceMethodParameters(
+    private List<ParameterSpec> createServiceMethodParameters(
             EndpointDefinition endpointDef,
             TypeMapper typeMapper,
             boolean withAnnotations) {
@@ -266,7 +266,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         return ImmutableList.copyOf(parameterSpecs);
     }
 
-    private static ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
+    private ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
             boolean withAnnotations) {
         ParameterSpec.Builder param = ParameterSpec.builder(
                 typeMapper.getClassName(def.getType()), def.getArgName().get());
@@ -277,7 +277,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         return param.build();
     }
 
-    private static Optional<ParameterSpec> createAuthParameter(Optional<AuthType> auth, boolean withAnnotations) {
+    private Optional<ParameterSpec> createAuthParameter(Optional<AuthType> auth, boolean withAnnotations) {
         if (!auth.isPresent()) {
             return Optional.empty();
         }
@@ -305,11 +305,14 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         if (withAnnotations) {
             paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
                     .addMember("value", "$S", tokenName).build());
+            if (experimentalFeatures.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+                paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
+            }
         }
         return Optional.of(paramSpec.build());
     }
 
-    private static Optional<AnnotationSpec> getParamTypeAnnotation(ArgumentDefinition def) {
+    private Optional<AnnotationSpec> getParamTypeAnnotation(ArgumentDefinition def) {
         AnnotationSpec.Builder annotationSpecBuilder;
         ParameterType paramType = def.getParamType();
         if (paramType.accept(ParameterTypeVisitor.IS_PATH)) {
@@ -324,8 +327,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "HeaderParam"))
                     .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
-            /* no annotations for body parameters */
-            return Optional.empty();
+            if (def.getType().accept(TypeVisitor.IS_OPTIONAL)
+                    || !experimentalFeatures.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+                return Optional.empty();
+            }
+            annotationSpecBuilder = AnnotationSpec
+                    .builder(NOT_NULL);
         } else {
             throw new IllegalStateException("Unrecognized argument type: " + def.getParamType());
         }

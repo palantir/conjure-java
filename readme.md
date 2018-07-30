@@ -11,9 +11,16 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
     Usage: conjure-java generate <input> <output> [...options]
 
-        --objects    [boolean] Generate POJOs for Conjure type definitions
-        --jersey     [boolean] Generate jax-rs annotated interfaces for client or server-usage
-        --retrofit   [boolean] Generate retrofit interfaces for streaming/async clients
+        --objects       [boolean] Generate POJOs for Conjure type definitions
+        --jersey        [boolean] Generate jax-rs annotated interfaces for client or server-usage
+        --retrofit      [boolean] Generate retrofit interfaces for streaming/async clients
+        --featureFlag   [string] Enable the specified feature flag during code generation
+        
+### Feature Flags
+
+Conjure-java supports feature flags to enable additional opt-in features. To enable features provided by a feature
+flag, simply supply the feature flag as an additional parameter when executing conjure-java. Available feature flags
+can be found in the [FeatureFlags](./conjure-java-core/src/main/java/com/palantir/conjure/java/FeatureFlags.java) class.
 
 ## Example generated objects
 

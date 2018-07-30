@@ -127,4 +127,8 @@ public interface TestServiceRetrofit {
 
     @GET("./catalog/integer")
     CompletableFuture<Integer> testInteger(@Header("Authorization") AuthHeader authHeader);
+
+    @POST("./catalog/optional")
+    CompletableFuture<Optional<String>> testPostOptional(
+            @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
 }

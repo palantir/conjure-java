@@ -13,8 +13,10 @@ import java.util.Optional;
 import javax.annotation.Generated;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.POST;
 import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
@@ -52,4 +54,8 @@ public interface EteServiceRetrofit {
     @GET("./base/binary")
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
+
+    @POST("./base/notNullBody")
+    Call<StringAliasExample> notNullBody(
+            @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
 }

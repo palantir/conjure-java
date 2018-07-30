@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.product.EteService;
+import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -83,5 +84,10 @@ public final class EteResource implements EteService {
     @Override
     public StreamingOutput binary(AuthHeader authHeader) {
         return (outputStream) -> outputStream.write("Hello, world!".getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Override
+    public StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody) {
+        return notNullBody;
     }
 }

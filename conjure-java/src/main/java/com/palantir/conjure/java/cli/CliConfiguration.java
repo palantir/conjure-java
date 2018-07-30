@@ -31,6 +31,7 @@ public abstract class CliConfiguration {
     public static final String RETROFIT_OPTION = "retrofit";
     public static final String RETROFIT_COMPLETABLE_FUTURES = "retrofitCompletableFutures";
     public static final String JERSEY_BINARY_AS_RESPONSE = "jerseyBinaryAsResponse";
+    public static final String REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS = "requireNotNullAuthAndBodyParams";
 
     abstract File target();
 
@@ -94,6 +95,9 @@ public abstract class CliConfiguration {
                     break;
                 case JERSEY_BINARY_AS_RESPONSE:
                     flagsBuilder.add(FeatureFlags.JerseyBinaryAsResponse);
+                    break;
+                case REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS:
+                    flagsBuilder.add(FeatureFlags.RequireNotNullAuthAndBodyParams);
                     break;
                 default:
                     break;

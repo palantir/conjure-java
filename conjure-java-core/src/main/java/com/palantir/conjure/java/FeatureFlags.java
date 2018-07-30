@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
 public enum FeatureFlags {
@@ -32,4 +33,10 @@ public enum FeatureFlags {
      * type.
      */
     JerseyBinaryAsResponse,
+
+    /**
+     * Instructs the {@link JerseyServiceGenerator} to add {@link NotNull}
+     * annotations to all auth parameters, as well as all non-optional body params on service endpoints.
+     */
+    RequireNotNullAuthAndBodyParams,
 }

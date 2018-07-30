@@ -42,6 +42,7 @@ dependencies {
     compile 'com.palantir.syntactic-paths:syntactic-paths'
     compile 'com.google.guava:guava'
     compile 'com.squareup:javapoet'
+    compile 'javax.validation:validation-api'
     compile 'org.apache.commons:commons-lang3'
     compile 'org.slf4j:slf4j-api'
 
@@ -58,6 +59,7 @@ dependencies {
 
     integrationInputCompile project(':conjure-lib')
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
+    integrationInputCompile 'javax.validation:validation-api'
 
     processor 'org.immutables:value'
 }
