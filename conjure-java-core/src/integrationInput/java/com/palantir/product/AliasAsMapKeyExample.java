@@ -40,13 +40,13 @@ public final class AliasAsMapKeyExample {
             Map<DateTimeAliasExample, ManyFieldExample> datetimes,
             Map<UuidAliasExample, ManyFieldExample> uuids) {
         validateFields(strings, rids, bearertokens, integers, safelongs, datetimes, uuids);
-        this.strings = Collections.unmodifiableMap(strings);
-        this.rids = Collections.unmodifiableMap(rids);
-        this.bearertokens = Collections.unmodifiableMap(bearertokens);
-        this.integers = Collections.unmodifiableMap(integers);
-        this.safelongs = Collections.unmodifiableMap(safelongs);
-        this.datetimes = Collections.unmodifiableMap(datetimes);
-        this.uuids = Collections.unmodifiableMap(uuids);
+        this.strings = Collections.unmodifiableMap(new LinkedHashMap<>(strings));
+        this.rids = Collections.unmodifiableMap(new LinkedHashMap<>(rids));
+        this.bearertokens = Collections.unmodifiableMap(new LinkedHashMap<>(bearertokens));
+        this.integers = Collections.unmodifiableMap(new LinkedHashMap<>(integers));
+        this.safelongs = Collections.unmodifiableMap(new LinkedHashMap<>(safelongs));
+        this.datetimes = Collections.unmodifiableMap(new LinkedHashMap<>(datetimes));
+        this.uuids = Collections.unmodifiableMap(new LinkedHashMap<>(uuids));
     }
 
     @JsonProperty("strings")

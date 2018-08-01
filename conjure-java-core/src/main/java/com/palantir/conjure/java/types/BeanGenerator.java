@@ -40,6 +40,8 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
@@ -159,11 +161,11 @@ public final class BeanGenerator {
             // is private and necessarily called from the builder, which does its own defensive copying.
             if (field.conjureDef().getType().accept(TypeVisitor.IS_LIST)) {
                 // TODO(melliot): contribute a fix to JavaPoet that parses $T correctly for a JavaPoet FieldSpec
-                body.addStatement("this.$1N = $2T.unmodifiableList($1N)", spec, Collections.class);
+                body.addStatement("this.$1N = $2T.unmodifiableList(new $3T<>($1N))", spec, Collections.class, ArrayList.class);
             } else if (field.conjureDef().getType().accept(TypeVisitor.IS_SET)) {
-                body.addStatement("this.$1N = $2T.unmodifiableSet($1N)", spec, Collections.class);
+                body.addStatement("this.$1N = $2T.unmodifiableSet(new $3T<>($1N))", spec, Collections.class, LinkedHashSet.class);
             } else if (field.conjureDef().getType().accept(TypeVisitor.IS_MAP)) {
-                body.addStatement("this.$1N = $2T.unmodifiableMap($1N)", spec, Collections.class);
+                body.addStatement("this.$1N = $2T.unmodifiableMap(new $3T<>($1N))", spec, Collections.class, LinkedHashMap.class);
             } else {
                 body.addStatement("this.$1N = $1N", spec);
             }

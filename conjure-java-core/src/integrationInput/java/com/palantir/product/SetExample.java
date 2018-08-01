@@ -24,8 +24,8 @@ public final class SetExample {
 
     private SetExample(Set<String> items, Set<Double> doubleItems) {
         validateFields(items, doubleItems);
-        this.items = Collections.unmodifiableSet(items);
-        this.doubleItems = Collections.unmodifiableSet(doubleItems);
+        this.items = Collections.unmodifiableSet(new LinkedHashSet<>(items));
+        this.doubleItems = Collections.unmodifiableSet(new LinkedHashSet<>(doubleItems));
     }
 
     @JsonProperty("items")

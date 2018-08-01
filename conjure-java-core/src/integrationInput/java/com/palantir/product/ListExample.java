@@ -25,9 +25,9 @@ public final class ListExample {
     private ListExample(
             List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
         validateFields(items, primitiveItems, doubleItems);
-        this.items = Collections.unmodifiableList(items);
-        this.primitiveItems = Collections.unmodifiableList(primitiveItems);
-        this.doubleItems = Collections.unmodifiableList(doubleItems);
+        this.items = Collections.unmodifiableList(new ArrayList<>(items));
+        this.primitiveItems = Collections.unmodifiableList(new ArrayList<>(primitiveItems));
+        this.doubleItems = Collections.unmodifiableList(new ArrayList<>(doubleItems));
     }
 
     @JsonProperty("items")
