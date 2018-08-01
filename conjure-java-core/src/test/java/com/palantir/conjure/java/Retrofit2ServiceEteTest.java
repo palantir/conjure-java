@@ -67,57 +67,57 @@ public final class Retrofit2ServiceEteTest extends TestBase {
 
     @Ignore // string returns in Jersey should use a mandated wrapper alias type
     @Test
-    public void retrofit2_can_retrieve_a_string_from_witchcraft() throws Exception {
+    public void retrofit2_can_retrieve_a_string_from_a_server() throws Exception {
         assertThat(client.string(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo("Hello, world!");
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_a_double_from_witchcraft() throws Exception {
+    public void retrofit2_client_can_retrieve_a_double_from_a_server() throws Exception {
         assertThat(client.double_(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo(1 / 3d);
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_a_boolean_from_witchcraft() throws Exception {
+    public void retrofit2_client_can_retrieve_a_boolean_from_a_server() throws Exception {
         assertThat(client.boolean_(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo(true);
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_a_safelong_from_witchcraft() throws Exception {
+    public void retrofit2_client_can_retrieve_a_safelong_from_a_server() throws Exception {
         assertThat(client.safelong(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo(SafeLong.of(12345));
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_an_rid_from_witchcraft() throws Exception {
+    public void retrofit2_client_can_retrieve_an_rid_from_a_server() throws Exception {
         assertThat(client.rid(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo(ResourceIdentifier.of("ri.foundry.main.dataset.1234"));
     }
 
     @Ignore // string returns in Jersey should use a mandated wrapper alias type
     @Test
-    public void retrofit2_client_can_retrieve_an_optional_string_from_witchcraft() throws Exception {
+    public void retrofit2_client_can_retrieve_an_optional_string_from_a_server() throws Exception {
         assertThat(client.optionalString(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo(Optional.of("foo"));
     }
 
     @Ignore // https://github.com/palantir/http-remoting/issues/668
     @Test
-    public void retrofit2_client_can_retrieve_an_optional_empty_from_witchcraft() throws Exception {
+    public void retrofit2_client_can_retrieve_an_optional_empty_from_a_server() throws Exception {
         assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo(Optional.empty());
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_a_date_time_from_witchcraft() throws Exception {
+    public void retrofit2_client_can_retrieve_a_date_time_from_a_server() throws Exception {
         assertThat(client.datetime(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo(OffsetDateTime.ofInstant(Instant.ofEpochMilli(1234), ZoneId.from(ZoneOffset.UTC)));
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_binary_data_from_witchcraft() throws Exception {
+    public void retrofit2_client_can_retrieve_binary_data_from_a_server() throws Exception {
         assertThat(client.binary(AuthHeader.valueOf("authHeader")).execute().body().string())
                 .isEqualTo("Hello, world!");
     }

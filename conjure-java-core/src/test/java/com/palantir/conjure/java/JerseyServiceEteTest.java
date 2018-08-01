@@ -85,51 +85,51 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @Ignore // string returns in Jersey should use a mandated wrapper alias type
     @Test
-    public void http_remoting_client_can_retrieve_a_string_from_witchcraft() throws Exception {
+    public void http_remoting_client_can_retrieve_a_string_from_a_server() throws Exception {
         assertThat(client.string(AuthHeader.valueOf("authHeader")))
                 .isEqualTo("Hello, world!");
     }
 
     @Test
-    public void http_remoting_client_can_retrieve_a_double_from_witchcraft() throws Exception {
+    public void http_remoting_client_can_retrieve_a_double_from_a_server() throws Exception {
         assertThat(client.double_(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(1 / 3d);
     }
 
     @Test
-    public void http_remoting_client_can_retrieve_a_boolean_from_witchcraft() throws Exception {
+    public void http_remoting_client_can_retrieve_a_boolean_from_a_server() throws Exception {
         assertThat(client.boolean_(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(true);
     }
 
     @Test
-    public void http_remoting_client_can_retrieve_a_safelong_from_witchcraft() throws Exception {
+    public void http_remoting_client_can_retrieve_a_safelong_from_a_server() throws Exception {
         assertThat(client.safelong(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(SafeLong.of(12345));
     }
 
     @Test
-    public void http_remoting_client_can_retrieve_an_rid_from_witchcraft() throws Exception {
+    public void http_remoting_client_can_retrieve_an_rid_from_a_server() throws Exception {
         assertThat(client.rid(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(ResourceIdentifier.of("ri.foundry.main.dataset.1234"));
     }
 
     @Ignore // string returns in Jersey should use a mandated wrapper alias type
     @Test
-    public void http_remoting_client_can_retrieve_an_optional_string_from_witchcraft() throws Exception {
+    public void http_remoting_client_can_retrieve_an_optional_string_from_a_server() throws Exception {
         assertThat(client.optionalString(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(Optional.of("foo"));
     }
 
     @Ignore // Dropwizard returns 404 for empty optional
     @Test
-    public void jaxrs_client_can_retrieve_an_optional_empty_from_witchcraft() throws Exception {
+    public void jaxrs_client_can_retrieve_an_optional_empty_from_a_server() throws Exception {
         assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(Optional.empty());
     }
 
     @Test
-    public void http_remoting_client_can_retrieve_a_date_time_from_witchcraft() throws Exception {
+    public void http_remoting_client_can_retrieve_a_date_time_from_a_server() throws Exception {
         assertThat(client.datetime(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(OffsetDateTime.ofInstant(Instant.ofEpochMilli(1234), ZoneId.from(ZoneOffset.UTC)));
     }
