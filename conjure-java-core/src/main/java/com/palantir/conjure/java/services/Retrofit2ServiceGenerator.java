@@ -125,6 +125,9 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(AnnotationSpec.builder(httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
                         .addMember("value", "$S", "." + endpointPathWithoutRegex)
+                        .build())
+                .addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Headers"))
+                        .addMember("value", "$S", "hr-path-template: " + endpointPathWithoutRegex)
                         .build());
 
         if (endpointDef.getReturns().map(type -> type.accept(TypeVisitor.IS_BINARY)).orElse(false)) {

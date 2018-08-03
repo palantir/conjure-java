@@ -25,6 +25,7 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EteServiceRetrofit;
+import com.palantir.product.StringAliasExample;
 import com.palantir.remoting3.retrofit2.Retrofit2Client;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
