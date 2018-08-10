@@ -113,4 +113,4 @@ You can also supply the `--retrofitCompletableFutures` flag if you prefer Java 8
 
 ## Contributing
 
-For instructions on how to set up your local development environment, check out the [Contributing document][./CONTRIBUTING.md].
+For instructions on how to set up your local development environment, check out the [Contributing document](./CONTRIBUTING.md).
