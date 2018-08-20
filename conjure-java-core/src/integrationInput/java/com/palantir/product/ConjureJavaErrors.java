@@ -1,7 +1,7 @@
 package com.palantir.product;
 
-import com.palantir.remoting.api.errors.ErrorType;
-import com.palantir.remoting.api.errors.ServiceException;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")

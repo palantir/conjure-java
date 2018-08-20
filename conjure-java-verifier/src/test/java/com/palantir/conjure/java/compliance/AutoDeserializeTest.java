@@ -16,10 +16,10 @@
 
 package com.palantir.conjure.java.compliance;
 
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
 import com.palantir.conjure.verification.EndpointName;
-import com.palantir.remoting.api.errors.RemoteException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
