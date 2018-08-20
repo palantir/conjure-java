@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java;
 
+import static com.palantir.conjure.java.EteTestServer.clientConfiguration;
+import static com.palantir.conjure.java.EteTestServer.clientUserAgent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -70,16 +73,18 @@ public final class JerseyServiceEteTest extends TestBase {
     public JerseyServiceEteTest() {
         client = JaxRsClient.create(
                 EteService.class,
-                EteTestServer.clientUserAgent(),
-                EteTestServer.clientConfiguration());
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
     }
 
     @Test
     public void jaxrs_client_can_make_a_call_to_an_empty_path() throws Exception {
         EmptyPathService emptyPathClient = JaxRsClient.create(
                 EmptyPathService.class,
-                EteTestServer.clientUserAgent(),
-                EteTestServer.clientConfiguration());
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
         assertThat(emptyPathClient.emptyPath()).isEqualTo(true);
     }
 

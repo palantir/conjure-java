@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java;
 
+import static com.palantir.conjure.java.EteTestServer.clientConfiguration;
+import static com.palantir.conjure.java.EteTestServer.clientUserAgent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
@@ -23,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EteServiceRetrofit;
@@ -61,8 +64,9 @@ public final class Retrofit2ServiceEteTest extends TestBase {
     public Retrofit2ServiceEteTest() {
         client = Retrofit2Client.create(
                 EteServiceRetrofit.class,
-                EteTestServer.clientUserAgent(),
-                EteTestServer.clientConfiguration());
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
     }
 
     @Ignore // string returns in Jersey should use a mandated wrapper alias type
