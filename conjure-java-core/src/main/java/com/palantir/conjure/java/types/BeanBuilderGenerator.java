@@ -277,8 +277,13 @@ public final class BeanBuilderGenerator {
                 // we can't widen primitive optionals
                 return current;
             }
-            TypeName innerType = typeMapper.getClassName(type.accept(TypeVisitor.OPTIONAL).getItemType()).box();
-            return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerType));
+            Type innerType = type.accept(TypeVisitor.OPTIONAL).getItemType();
+            if (!innerType.accept(TypeVisitor.IS_ANY)) {
+                // we don't currently want to widen non-Object optionals
+                return current;
+            }
+            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
+            return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerTypeName));
         }
 
         return current;

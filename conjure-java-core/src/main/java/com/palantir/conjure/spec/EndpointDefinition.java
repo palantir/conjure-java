@@ -279,8 +279,8 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("auth")
-        public Builder auth(Optional<? extends AuthType> auth) {
-            this.auth = (Optional<AuthType>) Objects.requireNonNull(auth, "auth cannot be null");
+        public Builder auth(Optional<AuthType> auth) {
+            this.auth = Objects.requireNonNull(auth, "auth cannot be null");
             return this;
         }
 
@@ -309,9 +309,8 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("returns")
-        public Builder returns(Optional<? extends Type> returns) {
-            this.returns =
-                    (Optional<Type>) Objects.requireNonNull(returns, "returns cannot be null");
+        public Builder returns(Optional<Type> returns) {
+            this.returns = Objects.requireNonNull(returns, "returns cannot be null");
             return this;
         }
 
@@ -321,9 +320,8 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("docs")
-        public Builder docs(Optional<? extends Documentation> docs) {
-            this.docs =
-                    (Optional<Documentation>) Objects.requireNonNull(docs, "docs cannot be null");
+        public Builder docs(Optional<Documentation> docs) {
+            this.docs = Objects.requireNonNull(docs, "docs cannot be null");
             return this;
         }
 
@@ -333,10 +331,8 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("deprecated")
-        public Builder deprecated(Optional<? extends Documentation> deprecated) {
-            this.deprecated =
-                    (Optional<Documentation>)
-                            Objects.requireNonNull(deprecated, "deprecated cannot be null");
+        public Builder deprecated(Optional<Documentation> deprecated) {
+            this.deprecated =    Objects.requireNonNull(deprecated, "deprecated cannot be null");
             return this;
         }
 

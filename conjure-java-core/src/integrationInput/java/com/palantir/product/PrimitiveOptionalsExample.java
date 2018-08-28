@@ -250,10 +250,8 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter("safelong")
-        public Builder safelong(Optional<? extends SafeLong> safelong) {
-            this.safelong =
-                    (Optional<SafeLong>)
-                            Objects.requireNonNull(safelong, "safelong cannot be null");
+        public Builder safelong(Optional<SafeLong> safelong) {
+            this.safelong = Objects.requireNonNull(safelong, "safelong cannot be null");
             return this;
         }
 
@@ -264,10 +262,8 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter("rid")
-        public Builder rid(Optional<? extends ResourceIdentifier> rid) {
-            this.rid =
-                    (Optional<ResourceIdentifier>)
-                            Objects.requireNonNull(rid, "rid cannot be null");
+        public Builder rid(Optional<ResourceIdentifier> rid) {
+            this.rid = Objects.requireNonNull(rid, "rid cannot be null");
             return this;
         }
 
@@ -277,10 +273,8 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter("bearertoken")
-        public Builder bearertoken(Optional<? extends BearerToken> bearertoken) {
-            this.bearertoken =
-                    (Optional<BearerToken>)
-                            Objects.requireNonNull(bearertoken, "bearertoken cannot be null");
+        public Builder bearertoken(Optional<BearerToken> bearertoken) {
+            this.bearertoken = Objects.requireNonNull(bearertoken, "bearertoken cannot be null");
             return this;
         }
 
@@ -291,8 +285,8 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter("uuid")
-        public Builder uuid(Optional<? extends UUID> uuid) {
-            this.uuid = (Optional<UUID>) Objects.requireNonNull(uuid, "uuid cannot be null");
+        public Builder uuid(Optional<UUID> uuid) {
+            this.uuid = Objects.requireNonNull(uuid, "uuid cannot be null");
             return this;
         }
 
