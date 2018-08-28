@@ -1,15 +1,5 @@
 types:
   imports:
-    ResourceIdentifier:
-      base-type: string
-      external:
-        java: com.palantir.ri.ResourceIdentifier
-
-    AuthHeader:
-      base-type: string
-      external:
-        java: com.palantir.tokens.auth.AuthHeader
-
     Safe:
       external:
         java: com.palantir.redaction.Safe
@@ -35,7 +25,7 @@ types:
         fields:
           fileSystemId: string
           rid:
-            type: ResourceIdentifier
+            type: rid
             docs: Uniquely identifies this dataset.
 
       CreateDatasetRequest:
@@ -84,7 +74,7 @@ services:
         http: GET /datasets/{datasetRid}
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             markers:
              - Safe
         returns: optional<Dataset>
@@ -93,7 +83,7 @@ services:
         http: GET /datasets/{datasetRid}/raw
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             markers:
              - Safe
         returns: binary
@@ -102,7 +92,7 @@ services:
         http: GET /datasets/{datasetRid}/raw-aliased
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             markers:
              - Safe
         returns: NestedAliasedBinary
@@ -111,7 +101,7 @@ services:
         http: GET /datasets/{datasetRid}/raw-maybe
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             markers:
              - Safe
         returns: optional<binary>
@@ -120,7 +110,7 @@ services:
         http: GET /datasets/{datasetRid}/string-aliased
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             markers:
              - Safe
         returns: AliasedString
@@ -136,7 +126,7 @@ services:
         http: GET /datasets/{datasetRid}/branches
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             docs: |
               A valid dataset resource identifier.
             markers:
@@ -146,7 +136,7 @@ services:
         http: GET /datasets/{datasetRid}/branchesDeprecated
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             docs: |
               A valid dataset resource identifier.
             markers:
@@ -160,7 +150,7 @@ services:
         http: GET /datasets/{datasetRid}/branches/{branch:.+}/resolve
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             markers:
              - Safe
           branch: string
@@ -170,7 +160,7 @@ services:
         http: GET /datasets/{datasetRid}/testParam
         args:
           datasetRid:
-            type: ResourceIdentifier
+            type: rid
             param-id: datasetRid
             param-type: path
         returns: optional<string>
@@ -180,20 +170,20 @@ services:
         args:
           query: string
           something:
-            type: ResourceIdentifier
+            type: rid
             param-id: different
             param-type: query
           optionalMiddle:
-            type: optional<ResourceIdentifier>
+            type: optional<rid>
             param-type: query
           implicit:
-            type: ResourceIdentifier
+            type: rid
             param-type: query
           setEnd:
             type: set<string>
             param-type: query
           optionalEnd:
-            type: optional<ResourceIdentifier>
+            type: optional<rid>
             param-type: query
         returns: integer
 
@@ -202,20 +192,20 @@ services:
         args:
           query: string
           something:
-            type: ResourceIdentifier
+            type: rid
             param-id: different
             param-type: query
           optionalMiddle:
-            type: optional<ResourceIdentifier>
+            type: optional<rid>
             param-type: query
           implicit:
-            type: ResourceIdentifier
+            type: rid
             param-type: query
           setEnd:
             type: set<string>
             param-type: query
           optionalEnd:
-            type: optional<ResourceIdentifier>
+            type: optional<rid>
             param-type: query
 
       testBoolean:
