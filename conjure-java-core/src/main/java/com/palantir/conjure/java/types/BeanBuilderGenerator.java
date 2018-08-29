@@ -273,15 +273,10 @@ public final class BeanBuilderGenerator {
 
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
-            if (isPrimitiveOptional(optionalType)) {
-                // we can't widen primitive optionals
+            if (!isWidenableOptional(optionalType)) {
                 return current;
             }
             Type innerType = type.accept(TypeVisitor.OPTIONAL).getItemType();
-            if (!innerType.accept(TypeVisitor.IS_ANY)) {
-                // we don't currently want to widen non-Object optionals
-                return current;
-            }
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
             return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerTypeName));
         }
@@ -319,16 +314,15 @@ public final class BeanBuilderGenerator {
             CodeBlock nullCheckedValue = Expressions.requireNonNull(
                     spec.name, enriched.fieldName().get() + " cannot be null");
 
-            if (isPrimitiveOptional(optionalType)) {
-                // no need to null-check primitives
-                return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
-            } else {
+            if (isWidenableOptional(optionalType)) {
                 // covariant optionals need to be narrowed to invariant type before assignment
                 Type innerType = optionalType.getItemType();
                 return CodeBlock.builder()
                         .addStatement("this.$1N = ($3T<$4T>) $2L",
                                 spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType))
                         .build();
+            } else {
+                return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
             }
         } else {
             CodeBlock nullCheckedValue = spec.type.isPrimitive()
@@ -406,6 +400,13 @@ public final class BeanBuilderGenerator {
         }
         return false;
     }
+
+
+    // Check if the optionalType should be widened in assignments from `Optional<T>` to `Optional<? extends T>`
+    private boolean isWidenableOptional(OptionalType optionalType) {
+        return optionalType.getItemType().accept(TypeVisitor.IS_ANY);
+    }
+
 
     private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {
         FieldSpec field = enriched.poetSpec();
