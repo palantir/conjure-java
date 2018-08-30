@@ -79,7 +79,7 @@ task extractConjureCompiler(type: ExtractExecutableTask) {
 
 task compileIr(dependsOn: 'extractConjureCompiler') {
     def inputFiles = sourceSets.test.resources.matching { include '*.yml' }
-    def outputDir = file("$buildDir/ir")
+    ext.outputDir = file("$buildDir/ir")
     inputs.files inputFiles
     outputs.dir outputDir
 
@@ -98,6 +98,16 @@ task compileIr(dependsOn: 'extractConjureCompiler') {
                 logger.info("Running compiler with args: {}", args)
                 execSpec.commandLine(args.toArray())
             }
+        }
+    }
+}
+
+tasks.processTestResources.dependsOn 'compileIr'
+
+sourceSets {
+    test {
+        resources {
+            srcDir tasks.compileIr.outputDir
         }
     }
 }
