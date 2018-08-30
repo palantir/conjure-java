@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+import com.palantir.gradle.conjure.ExtractExecutableTask
+
 sourceSets {
     integrationInput
     test {
         compileClasspath += integrationInput.output
         runtimeClasspath += integrationInput.output
     }
+}
+
+configurations {
+    conjureCompiler
 }
 
 idea {
@@ -46,9 +52,8 @@ dependencies {
     compile 'org.apache.commons:commons-lang3'
     compile 'org.slf4j:slf4j-api'
 
-    testCompile('com.palantir.conjure:conjure-core') {
-        exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'
-    }
+    conjureCompiler 'com.palantir.conjure:conjure'
+
     testCompile 'com.palantir.remoting3:jackson-support'
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
@@ -64,4 +69,35 @@ dependencies {
     integrationInputCompile 'javax.validation:validation-api'
 
     processor 'org.immutables:value'
+}
+
+task extractConjureCompiler(type: ExtractExecutableTask) {
+    archive = configurations.conjureCompiler
+    outputDirectory = file("$buildDir/conjure-compiler")
+    executableName = "conjure"
+}
+
+task compileIr(dependsOn: 'extractConjureCompiler') {
+    def inputFiles = sourceSets.test.resources.matching { include '*.yml' }
+    def outputDir = file("$buildDir/ir")
+    inputs.files inputFiles
+    outputs.dir outputDir
+
+    doLast {
+        inputFiles.forEach { f ->
+            def outputFileName = f.name.take(f.name.lastIndexOf(".")) + ".conjure.json"
+            def outputFile = file("$outputDir/$outputFileName")
+
+            exec { execSpec ->
+                def args = [
+                        extractConjureCompiler.executable.absolutePath,
+                        "compile",
+                        f.absolutePath, // turns out, the input can be a file too
+                        outputFile.absolutePath,
+                ]
+                logger.info("Running compiler with args: {}", args)
+                execSpec.commandLine(args.toArray())
+            }
+        }
+    }
 }
