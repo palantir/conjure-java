@@ -6,8 +6,6 @@ package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.ImmutableList;
-import com.palantir.conjure.java.Retrofit2ServiceEteTest;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.File;
