@@ -163,8 +163,9 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/ete-service.yml")));
+        ConjureDefinition def = CLIENT_OBJECT_MAPPER.readValue(
+                JerseyServiceEteTest.class.getResource("/ete-service.conjure.json"),
+                ConjureDefinition.class);
         List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .emit(def, folder.getRoot());
 
