@@ -38,6 +38,7 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.PathParameterType;
+import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
@@ -58,6 +59,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -456,6 +459,18 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new TypeVisitor.Default<CodeBlock>() {
         @Override
         public CodeBlock visitOptional(OptionalType value) {
+            if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+                PrimitiveType primitiveType = value.getItemType().accept(TypeVisitor.PRIMITIVE);
+                // special handling for primitive optionals with Java 8
+                switch (primitiveType.get()) {
+                    case DOUBLE:
+                        return CodeBlock.of("$T.empty()", OptionalDouble.class);
+                    case INTEGER:
+                        return CodeBlock.of("$T.empty()", OptionalInt.class);
+                    default:
+                        // not other optional types
+                }
+            }
             return CodeBlock.of("$T.empty()", Optional.class);
         }
 
