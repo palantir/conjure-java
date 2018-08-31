@@ -15,6 +15,8 @@ import java.lang.Void;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.annotation.Generated;
@@ -131,4 +133,10 @@ public interface TestServiceRetrofit {
     @POST("./catalog/optional")
     CompletableFuture<Optional<String>> testPostOptional(
             @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
+
+    @GET("./catalog/optional-integer-double")
+    CompletableFuture<Void> testOptionalIntegerAndDouble(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("maybeInteger") OptionalInt maybeInteger,
+            @Query("maybeDouble") OptionalDouble maybeDouble);
 }
