@@ -225,3 +225,13 @@ services:
         args:
           maybeString: optional<string>
         returns: optional<string>
+
+      testOptionalIntegerAndDouble:
+        http: GET /optional-integer-double
+        args:
+          maybeInteger:
+            type: optional<integer>
+            param-type: query
+          maybeDouble:
+            type: optional<double>
+            param-type: query
