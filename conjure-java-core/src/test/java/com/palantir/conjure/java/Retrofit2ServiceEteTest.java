@@ -18,19 +18,17 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EteServiceRetrofit;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.retrofit2.Retrofit2Client;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -124,8 +122,10 @@ public final class Retrofit2ServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/ete-service.yml")));
+        ConjureDefinition def = ObjectMappers.newClientObjectMapper().readValue(
+                Retrofit2ServiceEteTest.class.getClassLoader().getResourceAsStream("ete-service.conjure.json"),
+                ConjureDefinition.class);
+
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder.getRoot());
 
         for (Path file : files) {
