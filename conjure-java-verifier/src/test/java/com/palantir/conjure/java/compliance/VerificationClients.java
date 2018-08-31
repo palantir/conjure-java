@@ -16,38 +16,58 @@
 
 package com.palantir.conjure.java.compliance;
 
+import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
 import com.palantir.conjure.verification.SingleHeaderService;
 import com.palantir.conjure.verification.SinglePathParamService;
 import com.palantir.conjure.verification.SingleQueryParamService;
-import com.palantir.remoting3.clients.UserAgent;
-import com.palantir.remoting3.jaxrs.JaxRsClient;
 
 public final class VerificationClients {
     private VerificationClients() {}
 
     public static AutoDeserializeService autoDeserializeService(VerificationServerRule server) {
-        return JaxRsClient.create(AutoDeserializeService.class, getUserAgent(), server.getClientConfiguration());
+        return JaxRsClient.create(
+                AutoDeserializeService.class,
+                getUserAgent(),
+                new HostMetricsRegistry(),
+                server.getClientConfiguration());
     }
 
     public static AutoDeserializeConfirmService confirmService(VerificationServerRule server) {
-        return JaxRsClient.create(AutoDeserializeConfirmService.class, getUserAgent(), server.getClientConfiguration());
+        return JaxRsClient.create(
+                AutoDeserializeConfirmService.class,
+                getUserAgent(),
+                new HostMetricsRegistry(),
+                server.getClientConfiguration());
     }
 
     public static SinglePathParamService singlePathParamService(VerificationServerRule server) {
-        return JaxRsClient.create(SinglePathParamService.class, getUserAgent(), server.getClientConfiguration());
+        return JaxRsClient.create(
+                SinglePathParamService.class,
+                getUserAgent(),
+                new HostMetricsRegistry(),
+                server.getClientConfiguration());
     }
 
     public static SingleHeaderService singleHeaderService(VerificationServerRule server) {
-        return JaxRsClient.create(SingleHeaderService.class, getUserAgent(), server.getClientConfiguration());
+        return JaxRsClient.create(
+                SingleHeaderService.class,
+                getUserAgent(),
+                new HostMetricsRegistry(),
+                server.getClientConfiguration());
     }
 
     public static SingleQueryParamService singleQueryParamService(VerificationServerRule server) {
-        return JaxRsClient.create(SingleQueryParamService.class, getUserAgent(), server.getClientConfiguration());
+        return JaxRsClient.create(SingleQueryParamService.class,
+                getUserAgent(),
+                new HostMetricsRegistry(),
+                server.getClientConfiguration());
     }
 
-    private static  UserAgent getUserAgent() {
+    private static UserAgent getUserAgent() {
         return UserAgent.of(UserAgent.Agent.of("test", "develop"));
     }
 }

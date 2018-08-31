@@ -5,10 +5,10 @@
 package com.palantir.conjure.java.compliance;
 
 import com.google.common.collect.ImmutableList;
-import com.palantir.remoting.api.config.ssl.SslConfiguration;
-import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.clients.ClientConfigurations;
-import com.palantir.remoting3.config.ssl.SslSocketFactories;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfigurations;
+import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

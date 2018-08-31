@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.product.AnyExample;
 import com.palantir.product.BearerTokenExample;
 import com.palantir.product.BinaryExample;
@@ -25,7 +26,6 @@ import com.palantir.product.SafeLongExample;
 import com.palantir.product.SetExample;
 import com.palantir.product.StringExample;
 import com.palantir.product.UuidExample;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import org.junit.Test;
 
 public class NullFieldWireFormatTests {

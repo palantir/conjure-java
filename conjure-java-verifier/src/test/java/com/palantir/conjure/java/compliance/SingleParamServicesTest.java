@@ -18,9 +18,9 @@ package com.palantir.conjure.java.compliance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.verification.EndpointName;
-import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

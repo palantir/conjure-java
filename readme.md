@@ -38,7 +38,7 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
                 .addAllItems(iterable)
                 .build();
 
-    // or using Jackson (via com.palantir.remoting3:jackson-support)
+    // or using Jackson (via com.palantir.conjure.java.runtime:conjure-jackson-serialization)
     ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
     ManyFieldExample fromJson = mapper.readValue("{\"string\":\"foo\", ...}", ManyFieldExample.class);
     ```

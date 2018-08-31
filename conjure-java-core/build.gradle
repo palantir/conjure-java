@@ -34,7 +34,7 @@ dependencies {
     compile project(':conjure-lib')
     compile 'com.palantir.ri:resource-identifier'
     compile 'com.palantir.tokens:auth-tokens'
-    compile 'com.palantir.remoting-api:errors'
+    compile 'com.palantir.conjure.java.api:errors'
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
@@ -49,18 +49,18 @@ dependencies {
     testCompile('com.palantir.conjure:conjure-core') {
         exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'
     }
-    testCompile 'com.palantir.remoting3:jackson-support'
+    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
-    testCompile 'com.palantir.remoting3:jaxrs-clients'
-    testCompile 'com.palantir.remoting3:retrofit2-clients'
+    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    testCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
     testCompile 'io.dropwizard:dropwizard-testing'
 
     integrationInputCompile project(':conjure-lib')
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
     integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
-    integrationInputCompile 'com.palantir.remoting-api:errors'
+    integrationInputCompile 'com.palantir.conjure.java.api:errors'
     integrationInputCompile 'javax.validation:validation-api'
 
     processor 'org.immutables:value'
