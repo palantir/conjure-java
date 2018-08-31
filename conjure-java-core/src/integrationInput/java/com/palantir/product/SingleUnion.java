@@ -44,11 +44,7 @@ public final class SingleUnion {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof SingleUnion && equalTo((SingleUnion) other))
-                || (other instanceof String
-                        && value instanceof FooWrapper
-                        && Objects.equals(((FooWrapper) value).value, other));
+        return this == other || (other instanceof SingleUnion && equalTo((SingleUnion) other));
     }
 
     private boolean equalTo(SingleUnion other) {

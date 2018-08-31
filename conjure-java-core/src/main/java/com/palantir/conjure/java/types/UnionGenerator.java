@@ -46,7 +46,6 @@ import com.squareup.javapoet.TypeVariableName;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
@@ -183,9 +182,6 @@ public final class UnionGenerator {
         ParameterSpec other = ParameterSpec.builder(TypeName.OBJECT, "other").build();
         CodeBlock.Builder codeBuilder = CodeBlock.builder()
                 .add("return this == $1N || ($1N instanceof $2T && equalTo(($2T) $1N))", other, unionClass);
-        memberTypes.forEach((memberName, memberType) -> codeBuilder.add(
-                "\n|| ($1N instanceof $2T && $3L instanceof $4T && $5T.equals((($4T) $3L).$3L, $1N))", other,
-                rawBoxedType(memberType), VALUE_FIELD_NAME, wrapperClass(unionClass, memberName), Objects.class));
 
         return MethodSpec.methodBuilder("equals")
                 .addModifiers(Modifier.PUBLIC)

@@ -84,28 +84,7 @@ public final class UnionTypeExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof UnionTypeExample && equalTo((UnionTypeExample) other))
-                || (other instanceof StringExample
-                        && value instanceof StringExampleWrapper
-                        && Objects.equals(((StringExampleWrapper) value).value, other))
-                || (other instanceof Set
-                        && value instanceof SetWrapper
-                        && Objects.equals(((SetWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof ThisFieldIsAnIntegerWrapper
-                        && Objects.equals(((ThisFieldIsAnIntegerWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof AlsoAnIntegerWrapper
-                        && Objects.equals(((AlsoAnIntegerWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof IfWrapper
-                        && Objects.equals(((IfWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof NewWrapper
-                        && Objects.equals(((NewWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof InterfaceWrapper
-                        && Objects.equals(((InterfaceWrapper) value).value, other));
+                || (other instanceof UnionTypeExample && equalTo((UnionTypeExample) other));
     }
 
     private boolean equalTo(UnionTypeExample other) {
