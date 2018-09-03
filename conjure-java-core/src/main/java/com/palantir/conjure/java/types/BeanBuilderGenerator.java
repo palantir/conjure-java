@@ -31,6 +31,7 @@ import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
+import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
@@ -262,13 +263,22 @@ public final class BeanBuilderGenerator {
 
     private TypeName widenParameterIfPossible(TypeName current, Type type) {
         if (type.accept(TypeVisitor.IS_LIST)) {
-            TypeName typeName = typeMapper.getClassName(type.accept(TypeVisitor.LIST).getItemType()).box();
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), WildcardTypeName.subtypeOf(typeName));
+            Type innerType = type.accept(TypeVisitor.LIST).getItemType();
+            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
+            if (isWidenableIterable(innerType)) {
+                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
+            }
+            return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
-            TypeName typeName = typeMapper.getClassName(type.accept(TypeVisitor.SET).getItemType()).box();
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), WildcardTypeName.subtypeOf(typeName));
+            Type innerType = type.accept(TypeVisitor.SET).getItemType();
+            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
+            if (isWidenableIterable(innerType)) {
+                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
+            }
+
+            return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
         }
 
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
@@ -405,6 +415,33 @@ public final class BeanBuilderGenerator {
     // Check if the optionalType should be widened in assignments from `Optional<T>` to `Optional<? extends T>`
     private boolean isWidenableOptional(OptionalType optionalType) {
         return optionalType.getItemType().accept(TypeVisitor.IS_ANY);
+    }
+
+    // we want to widen iterables of anything that's not a primitive, a conjure reference or an optional
+    // since we know all of those are final.
+    private boolean isWidenableIterable(Type containedType) {
+        return containedType.accept(new TypeVisitor.Default<Boolean>() {
+            @Override
+            public Boolean visitPrimitive(PrimitiveType value) {
+                return value.get() == PrimitiveType.Value.ANY;
+            }
+
+            @Override
+            public Boolean visitOptional(OptionalType value) {
+                return false;
+            }
+
+            @Override
+            public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
+                return false;
+            }
+
+            // collections, external references
+            @Override
+            public Boolean visitDefault() {
+                return true;
+            }
+        });
     }
 
 

@@ -1,5 +1,10 @@
 # don't forget to update conjure-python/src/test/resources/types/example-types.yml
 types:
+  imports:
+    ExampleExternalReference:
+      base-type: string
+      external:
+        java: test.api.ExampleExternalReference
   definitions:
     default-package: com.palantir.product
     objects:
@@ -41,6 +46,7 @@ types:
       CovariantListExample:
         fields:
           items: list<any>
+          externalItems: list<ExampleExternalReference>
       SetExample:
         fields:
           items: set<string>

@@ -116,14 +116,14 @@ public final class SetExample {
         }
 
         @JsonSetter("items")
-        public Builder items(Iterable<? extends String> items) {
+        public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
                     this.items, Objects.requireNonNull(items, "items cannot be null"));
             return this;
         }
 
-        public Builder addAllItems(Iterable<? extends String> items) {
+        public Builder addAllItems(Iterable<String> items) {
             ConjureCollections.addAll(
                     this.items, Objects.requireNonNull(items, "items cannot be null"));
             return this;
@@ -135,7 +135,7 @@ public final class SetExample {
         }
 
         @JsonSetter("doubleItems")
-        public Builder doubleItems(Iterable<? extends Double> doubleItems) {
+        public Builder doubleItems(Iterable<Double> doubleItems) {
             this.doubleItems.clear();
             ConjureCollections.addAll(
                     this.doubleItems,
@@ -143,7 +143,7 @@ public final class SetExample {
             return this;
         }
 
-        public Builder addAllDoubleItems(Iterable<? extends Double> doubleItems) {
+        public Builder addAllDoubleItems(Iterable<Double> doubleItems) {
             ConjureCollections.addAll(
                     this.doubleItems,
                     Objects.requireNonNull(doubleItems, "doubleItems cannot be null"));
