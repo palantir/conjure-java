@@ -50,14 +50,7 @@ public final class Union {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof Union && equalTo((Union) other))
-                || (other instanceof String
-                        && value instanceof FooWrapper
-                        && Objects.equals(((FooWrapper) value).value, other))
-                || (other instanceof Integer
-                        && value instanceof BarWrapper
-                        && Objects.equals(((BarWrapper) value).value, other));
+        return this == other || (other instanceof Union && equalTo((Union) other));
     }
 
     private boolean equalTo(Union other) {

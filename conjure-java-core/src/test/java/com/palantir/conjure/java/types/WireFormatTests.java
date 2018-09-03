@@ -199,10 +199,6 @@ public final class WireFormatTests {
         assertThat(mapper.readValue(serializedUnionTypeSet, UnionTypeExample.class)).isEqualTo(unionTypeSet);
         assertThat(mapper.readValue(serializedUnionTypeInt, UnionTypeExample.class)).isEqualTo(unionTypeInt);
 
-        assertThat(unionTypeStringExample).isEqualTo(stringExample);
-        assertThat(unionTypeSet).isEqualTo(ImmutableSet.of("item"));
-        assertThat(unionTypeInt).isEqualTo(5);
-
         // visitor
         UnionTypeExample.Visitor<Integer> visitor = new TestVisitor();
         assertThat(unionTypeStringExample.accept(visitor)).isEqualTo("foo".length());
