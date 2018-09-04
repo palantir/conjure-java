@@ -290,14 +290,14 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("args")
-        public Builder args(Iterable<? extends ArgumentDefinition> args) {
+        public Builder args(Iterable<ArgumentDefinition> args) {
             this.args.clear();
             ConjureCollections.addAll(
                     this.args, Objects.requireNonNull(args, "args cannot be null"));
             return this;
         }
 
-        public Builder addAllArgs(Iterable<? extends ArgumentDefinition> args) {
+        public Builder addAllArgs(Iterable<ArgumentDefinition> args) {
             ConjureCollections.addAll(
                     this.args, Objects.requireNonNull(args, "args cannot be null"));
             return this;
@@ -332,7 +332,7 @@ public final class EndpointDefinition {
 
         @JsonSetter("deprecated")
         public Builder deprecated(Optional<Documentation> deprecated) {
-            this.deprecated =    Objects.requireNonNull(deprecated, "deprecated cannot be null");
+            this.deprecated = Objects.requireNonNull(deprecated, "deprecated cannot be null");
             return this;
         }
 
@@ -343,14 +343,14 @@ public final class EndpointDefinition {
         }
 
         @JsonSetter("markers")
-        public Builder markers(Iterable<? extends Type> markers) {
+        public Builder markers(Iterable<Type> markers) {
             this.markers.clear();
             ConjureCollections.addAll(
                     this.markers, Objects.requireNonNull(markers, "markers cannot be null"));
             return this;
         }
 
-        public Builder addAllMarkers(Iterable<? extends Type> markers) {
+        public Builder addAllMarkers(Iterable<Type> markers) {
             ConjureCollections.addAll(
                     this.markers, Objects.requireNonNull(markers, "markers cannot be null"));
             return this;

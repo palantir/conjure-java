@@ -222,14 +222,14 @@ public final class ErrorDefinition {
         }
 
         @JsonSetter("safeArgs")
-        public Builder safeArgs(Iterable<? extends FieldDefinition> safeArgs) {
+        public Builder safeArgs(Iterable<FieldDefinition> safeArgs) {
             this.safeArgs.clear();
             ConjureCollections.addAll(
                     this.safeArgs, Objects.requireNonNull(safeArgs, "safeArgs cannot be null"));
             return this;
         }
 
-        public Builder addAllSafeArgs(Iterable<? extends FieldDefinition> safeArgs) {
+        public Builder addAllSafeArgs(Iterable<FieldDefinition> safeArgs) {
             ConjureCollections.addAll(
                     this.safeArgs, Objects.requireNonNull(safeArgs, "safeArgs cannot be null"));
             return this;
@@ -241,7 +241,7 @@ public final class ErrorDefinition {
         }
 
         @JsonSetter("unsafeArgs")
-        public Builder unsafeArgs(Iterable<? extends FieldDefinition> unsafeArgs) {
+        public Builder unsafeArgs(Iterable<FieldDefinition> unsafeArgs) {
             this.unsafeArgs.clear();
             ConjureCollections.addAll(
                     this.unsafeArgs,
@@ -249,7 +249,7 @@ public final class ErrorDefinition {
             return this;
         }
 
-        public Builder addAllUnsafeArgs(Iterable<? extends FieldDefinition> unsafeArgs) {
+        public Builder addAllUnsafeArgs(Iterable<FieldDefinition> unsafeArgs) {
             ConjureCollections.addAll(
                     this.unsafeArgs,
                     Objects.requireNonNull(unsafeArgs, "unsafeArgs cannot be null"));

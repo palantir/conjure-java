@@ -203,14 +203,14 @@ public final class ArgumentDefinition {
         }
 
         @JsonSetter("markers")
-        public Builder markers(Iterable<? extends Type> markers) {
+        public Builder markers(Iterable<Type> markers) {
             this.markers.clear();
             ConjureCollections.addAll(
                     this.markers, Objects.requireNonNull(markers, "markers cannot be null"));
             return this;
         }
 
-        public Builder addAllMarkers(Iterable<? extends Type> markers) {
+        public Builder addAllMarkers(Iterable<Type> markers) {
             ConjureCollections.addAll(
                     this.markers, Objects.requireNonNull(markers, "markers cannot be null"));
             return this;

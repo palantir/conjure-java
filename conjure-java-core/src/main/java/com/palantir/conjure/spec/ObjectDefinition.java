@@ -143,14 +143,14 @@ public final class ObjectDefinition {
         }
 
         @JsonSetter("fields")
-        public Builder fields(Iterable<? extends FieldDefinition> fields) {
+        public Builder fields(Iterable<FieldDefinition> fields) {
             this.fields.clear();
             ConjureCollections.addAll(
                     this.fields, Objects.requireNonNull(fields, "fields cannot be null"));
             return this;
         }
 
-        public Builder addAllFields(Iterable<? extends FieldDefinition> fields) {
+        public Builder addAllFields(Iterable<FieldDefinition> fields) {
             ConjureCollections.addAll(
                     this.fields, Objects.requireNonNull(fields, "fields cannot be null"));
             return this;

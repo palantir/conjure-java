@@ -151,14 +151,14 @@ public final class ServiceDefinition {
         }
 
         @JsonSetter("endpoints")
-        public Builder endpoints(Iterable<? extends EndpointDefinition> endpoints) {
+        public Builder endpoints(Iterable<EndpointDefinition> endpoints) {
             this.endpoints.clear();
             ConjureCollections.addAll(
                     this.endpoints, Objects.requireNonNull(endpoints, "endpoints cannot be null"));
             return this;
         }
 
-        public Builder addAllEndpoints(Iterable<? extends EndpointDefinition> endpoints) {
+        public Builder addAllEndpoints(Iterable<EndpointDefinition> endpoints) {
             ConjureCollections.addAll(
                     this.endpoints, Objects.requireNonNull(endpoints, "endpoints cannot be null"));
             return this;

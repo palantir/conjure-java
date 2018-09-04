@@ -158,14 +158,14 @@ public final class ConjureDefinition {
         }
 
         @JsonSetter("errors")
-        public Builder errors(Iterable<? extends ErrorDefinition> errors) {
+        public Builder errors(Iterable<ErrorDefinition> errors) {
             this.errors.clear();
             ConjureCollections.addAll(
                     this.errors, Objects.requireNonNull(errors, "errors cannot be null"));
             return this;
         }
 
-        public Builder addAllErrors(Iterable<? extends ErrorDefinition> errors) {
+        public Builder addAllErrors(Iterable<ErrorDefinition> errors) {
             ConjureCollections.addAll(
                     this.errors, Objects.requireNonNull(errors, "errors cannot be null"));
             return this;
@@ -177,14 +177,14 @@ public final class ConjureDefinition {
         }
 
         @JsonSetter("types")
-        public Builder types(Iterable<? extends TypeDefinition> types) {
+        public Builder types(Iterable<TypeDefinition> types) {
             this.types.clear();
             ConjureCollections.addAll(
                     this.types, Objects.requireNonNull(types, "types cannot be null"));
             return this;
         }
 
-        public Builder addAllTypes(Iterable<? extends TypeDefinition> types) {
+        public Builder addAllTypes(Iterable<TypeDefinition> types) {
             ConjureCollections.addAll(
                     this.types, Objects.requireNonNull(types, "types cannot be null"));
             return this;
@@ -196,14 +196,14 @@ public final class ConjureDefinition {
         }
 
         @JsonSetter("services")
-        public Builder services(Iterable<? extends ServiceDefinition> services) {
+        public Builder services(Iterable<ServiceDefinition> services) {
             this.services.clear();
             ConjureCollections.addAll(
                     this.services, Objects.requireNonNull(services, "services cannot be null"));
             return this;
         }
 
-        public Builder addAllServices(Iterable<? extends ServiceDefinition> services) {
+        public Builder addAllServices(Iterable<ServiceDefinition> services) {
             ConjureCollections.addAll(
                     this.services, Objects.requireNonNull(services, "services cannot be null"));
             return this;
