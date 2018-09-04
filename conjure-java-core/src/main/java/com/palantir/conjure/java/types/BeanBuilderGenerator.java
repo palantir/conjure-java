@@ -265,7 +265,7 @@ public final class BeanBuilderGenerator {
         if (type.accept(TypeVisitor.IS_LIST)) {
             Type innerType = type.accept(TypeVisitor.LIST).getItemType();
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
-            if (isWidenableIterable(innerType)) {
+            if (isWidenableContainedType(innerType)) {
                 innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
             return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
@@ -274,7 +274,7 @@ public final class BeanBuilderGenerator {
         if (type.accept(TypeVisitor.IS_SET)) {
             Type innerType = type.accept(TypeVisitor.SET).getItemType();
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
-            if (isWidenableIterable(innerType)) {
+            if (isWidenableContainedType(innerType)) {
                 innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
 
@@ -282,11 +282,10 @@ public final class BeanBuilderGenerator {
         }
 
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
-            OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
-            if (!isWidenableOptional(optionalType)) {
+            Type innerType = type.accept(TypeVisitor.OPTIONAL).getItemType();
+            if (!isWidenableContainedType(innerType)) {
                 return current;
             }
-            Type innerType = type.accept(TypeVisitor.OPTIONAL).getItemType();
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
             return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerTypeName));
         }
@@ -324,7 +323,7 @@ public final class BeanBuilderGenerator {
             CodeBlock nullCheckedValue = Expressions.requireNonNull(
                     spec.name, enriched.fieldName().get() + " cannot be null");
 
-            if (isWidenableOptional(optionalType)) {
+            if (isWidenableContainedType(optionalType.getItemType())) {
                 // covariant optionals need to be narrowed to invariant type before assignment
                 Type innerType = optionalType.getItemType();
                 return CodeBlock.builder()
@@ -411,15 +410,9 @@ public final class BeanBuilderGenerator {
         return false;
     }
 
-
-    // Check if the optionalType should be widened in assignments from `Optional<T>` to `Optional<? extends T>`
-    private boolean isWidenableOptional(OptionalType optionalType) {
-        return optionalType.getItemType().accept(TypeVisitor.IS_ANY);
-    }
-
-    // we want to widen iterables of anything that's not a primitive, a conjure reference or an optional
+    // we want to widen containers of anything that's not a primitive, a conjure reference or an optional
     // since we know all of those are final.
-    private boolean isWidenableIterable(Type containedType) {
+    private boolean isWidenableContainedType(Type containedType) {
         return containedType.accept(new TypeVisitor.Default<Boolean>() {
             @Override
             public Boolean visitPrimitive(PrimitiveType value) {
