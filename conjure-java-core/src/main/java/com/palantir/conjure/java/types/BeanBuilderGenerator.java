@@ -31,6 +31,7 @@ import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
+import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
@@ -42,6 +43,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -232,7 +234,7 @@ public final class BeanBuilderGenerator {
                 .build();
         boolean shouldClearFirst = true;
         MethodSpec.Builder setterBuilder = publicSetter(enriched)
-                .addParameter(widenToIterableIfPossible(field.type, type), field.name)
+                .addParameter(widenParameterIfPossible(field.type, type), field.name)
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
         if (enriched.isPrimitive()) {
@@ -253,27 +255,45 @@ public final class BeanBuilderGenerator {
                 .addJavadoc(enriched.conjureDef().getDocs().map(Documentation::get).orElse(""))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
-                .addParameter(widenToIterableIfPossible(field.type, type), field.name)
+                .addParameter(widenParameterIfPossible(field.type, type), field.name)
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
                 .addStatement("return this")
                 .build();
     }
 
-    private TypeName widenToIterableIfPossible(TypeName current, Type type) {
+    private TypeName widenParameterIfPossible(TypeName current, Type type) {
         if (type.accept(TypeVisitor.IS_LIST)) {
-            TypeName typeName = typeMapper.getClassName(type.accept(TypeVisitor.LIST).getItemType()).box();
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), typeName);
+            Type innerType = type.accept(TypeVisitor.LIST).getItemType();
+            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
+            if (isWidenableContainedType(innerType)) {
+                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
+            }
+            return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
-            TypeName typeName = typeMapper.getClassName(type.accept(TypeVisitor.SET).getItemType()).box();
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), typeName);
+            Type innerType = type.accept(TypeVisitor.SET).getItemType();
+            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
+            if (isWidenableContainedType(innerType)) {
+                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
+            }
+
+            return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
+        }
+
+        if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+            Type innerType = type.accept(TypeVisitor.OPTIONAL).getItemType();
+            if (!isWidenableContainedType(innerType)) {
+                return current;
+            }
+            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
+            return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerTypeName));
         }
 
         return current;
     }
 
-    private static CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
+    private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             CodeBlock addStatement = CodeBlocks.statement(
@@ -298,6 +318,21 @@ public final class BeanBuilderGenerator {
                             ByteBuffer.class)
                     .addStatement("this.$1N.rewind()", spec.name)
                     .build();
+        } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+            OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
+            CodeBlock nullCheckedValue = Expressions.requireNonNull(
+                    spec.name, enriched.fieldName().get() + " cannot be null");
+
+            if (isWidenableContainedType(optionalType.getItemType())) {
+                // covariant optionals need to be narrowed to invariant type before assignment
+                Type innerType = optionalType.getItemType();
+                return CodeBlock.builder()
+                        .addStatement("this.$1N = ($3T<$4T>) $2L",
+                                spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType))
+                        .build();
+            } else {
+                return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
+            }
         } else {
             CodeBlock nullCheckedValue = spec.type.isPrimitive()
                     ? CodeBlock.of("$N", spec.name) // primitive types can't be null, so no need for requireNonNull!
@@ -348,30 +383,60 @@ public final class BeanBuilderGenerator {
     @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private CodeBlock optionalAssignmentStatement(EnrichedField enriched, OptionalType type) {
         FieldSpec spec = enriched.poetSpec();
-        if (type.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+        if (isPrimitiveOptional(type)) {
+            return CodeBlocks.statement("this.$1N = $2T.of($1N)",
+                    enriched.poetSpec().name, asRawType(typeMapper.getClassName(Type.optional(type))));
+        } else {
+            return CodeBlocks.statement("this.$1N = $2T.of($3L)",
+                    spec.name, Optional.class,
+                    Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
+        }
+    }
 
-            switch (type.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
+    /**
+     * Check if the optionalType contains a primitive boolean, double or integer.
+     */
+    private boolean isPrimitiveOptional(OptionalType optionalType) {
+        if (optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+            switch (optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
                 case INTEGER:
                 case DOUBLE:
                 case BOOLEAN:
-                    return CodeBlocks.statement("this.$1N = $2T.of($1N)",
-                            enriched.poetSpec().name, asRawType(typeMapper.getClassName(Type.optional(type))));
-                case SAFELONG:
-                case STRING:
-                case RID:
-                case BEARERTOKEN:
-                case UUID:
-                case ANY:
-                case DATETIME:
-                case BINARY:
+                    return true;
                 default:
                     // not special
             }
         }
-        return CodeBlocks.statement("this.$1N = $2T.of($3L)",
-                spec.name, Optional.class, Expressions.requireNonNull(
-                        spec.name, enriched.fieldName().get() + " cannot be null"));
+        return false;
     }
+
+    // we want to widen containers of anything that's not a primitive, a conjure reference or an optional
+    // since we know all of those are final.
+    private boolean isWidenableContainedType(Type containedType) {
+        return containedType.accept(new TypeVisitor.Default<Boolean>() {
+            @Override
+            public Boolean visitPrimitive(PrimitiveType value) {
+                return value.get() == PrimitiveType.Value.ANY;
+            }
+
+            @Override
+            public Boolean visitOptional(OptionalType value) {
+                return false;
+            }
+
+            @Override
+            public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
+                return false;
+            }
+
+            // collections, external references
+            @Override
+            public Boolean visitDefault() {
+                return true;
+            }
+        });
+    }
+
 
     private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {
         FieldSpec field = enriched.poetSpec();
