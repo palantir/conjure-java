@@ -154,6 +154,7 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
 
     @GET("./catalog/optional-integer-double")
+    @Headers("hr-path-template: /catalog/optional-integer-double")
     CompletableFuture<Void> testOptionalIntegerAndDouble(
             @Header("Authorization") AuthHeader authHeader,
             @Query("maybeInteger") OptionalInt maybeInteger,
