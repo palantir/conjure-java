@@ -166,6 +166,8 @@ types:
             type: string
           field-name-with-dashes:
             type: string
+          primitve-field-name-with-dashes:
+            type: integer
           memoizedHashCode:
             type: integer
       Union:

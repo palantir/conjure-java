@@ -168,7 +168,7 @@ public final class BeanBuilderGenerator {
     }
 
     private static String deriveFieldInitializedName(EnrichedField field) {
-        return "_" + field.conjureDef().getFieldName() + "Initialized";
+        return "_" + JavaNameSanitizer.sanitize(field.conjureDef().getFieldName()) + "Initialized";
     }
 
     private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
