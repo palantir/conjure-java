@@ -48,11 +48,11 @@ public final class DateTimeExample {
     @Override
     public String toString() {
         return new StringBuilder("DateTimeExample")
-                .append("{")
+                .append('{')
                 .append("datetime")
                 .append(": ")
                 .append(datetime)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

@@ -67,7 +67,7 @@ public final class ListExample {
     @Override
     public String toString() {
         return new StringBuilder("ListExample")
-                .append("{")
+                .append('{')
                 .append("items")
                 .append(": ")
                 .append(items)
@@ -79,7 +79,7 @@ public final class ListExample {
                 .append("doubleItems")
                 .append(": ")
                 .append(doubleItems)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

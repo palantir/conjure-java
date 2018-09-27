@@ -47,11 +47,11 @@ public final class UuidExample {
     @Override
     public String toString() {
         return new StringBuilder("UuidExample")
-                .append("{")
+                .append('{')
                 .append("uuid")
                 .append(": ")
                 .append(uuid)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

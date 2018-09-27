@@ -48,11 +48,11 @@ public final class OptionalExample {
     @Override
     public String toString() {
         return new StringBuilder("OptionalExample")
-                .append("{")
+                .append('{')
                 .append("item")
                 .append(": ")
                 .append(item)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

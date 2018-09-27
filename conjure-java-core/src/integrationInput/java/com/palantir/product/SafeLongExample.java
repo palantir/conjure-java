@@ -48,11 +48,11 @@ public final class SafeLongExample {
     @Override
     public String toString() {
         return new StringBuilder("SafeLongExample")
-                .append("{")
+                .append('{')
                 .append("safeLongValue")
                 .append(": ")
                 .append(safeLongValue)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

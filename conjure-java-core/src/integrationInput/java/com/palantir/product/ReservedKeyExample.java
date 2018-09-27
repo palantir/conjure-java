@@ -94,7 +94,7 @@ public final class ReservedKeyExample {
     @Override
     public String toString() {
         return new StringBuilder("ReservedKeyExample")
-                .append("{")
+                .append('{')
                 .append("package")
                 .append(": ")
                 .append(package_)
@@ -114,7 +114,7 @@ public final class ReservedKeyExample {
                 .append("memoizedHashCode")
                 .append(": ")
                 .append(memoizedHashCode_)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

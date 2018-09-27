@@ -49,11 +49,11 @@ public final class MapExample {
     @Override
     public String toString() {
         return new StringBuilder("MapExample")
-                .append("{")
+                .append('{')
                 .append("items")
                 .append(": ")
                 .append(items)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

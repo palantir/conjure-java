@@ -58,7 +58,7 @@ public final class SetExample {
     @Override
     public String toString() {
         return new StringBuilder("SetExample")
-                .append("{")
+                .append('{')
                 .append("items")
                 .append(": ")
                 .append(items)
@@ -66,7 +66,7 @@ public final class SetExample {
                 .append("doubleItems")
                 .append(": ")
                 .append(doubleItems)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

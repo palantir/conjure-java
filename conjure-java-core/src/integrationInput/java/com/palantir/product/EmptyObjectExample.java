@@ -13,7 +13,7 @@ public final class EmptyObjectExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("EmptyObjectExample").append("{").append("}").toString();
+        return new StringBuilder("EmptyObjectExample").append('{').append('}').toString();
     }
 
     @JsonCreator
