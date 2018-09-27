@@ -80,6 +80,27 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
     }
 
     @Test
+    public void testCompositionListenableFuture() throws IOException {
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-service.yml")));
+
+        List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitListenableFutures))
+                .emit(def, folder.getRoot());
+
+        for (Path file : files) {
+            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+                Path output = Paths.get("src/test/resources/test/api/"
+                        + file.getFileName() + ".retrofit_completable_future");
+                Files.deleteIfExists(output);
+                Files.copy(file, output);
+            }
+
+            assertThat(readFromFile(file)).isEqualTo(
+                    readFromResource("/test/api/" + file.getFileName() + ".retrofit_listenable_future"));
+        }
+    }
+
+    @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(
                 ImmutableList.of(
