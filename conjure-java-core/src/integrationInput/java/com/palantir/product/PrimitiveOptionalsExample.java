@@ -116,7 +116,7 @@ public final class PrimitiveOptionalsExample {
     @Override
     public String toString() {
         return new StringBuilder("PrimitiveOptionalsExample")
-                .append("{")
+                .append('{')
                 .append("num")
                 .append(": ")
                 .append(num)
@@ -144,7 +144,7 @@ public final class PrimitiveOptionalsExample {
                 .append("uuid")
                 .append(": ")
                 .append(uuid)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

@@ -46,11 +46,11 @@ public final class BooleanExample {
     @Override
     public String toString() {
         return new StringBuilder("BooleanExample")
-                .append("{")
+                .append('{')
                 .append("coin")
                 .append(": ")
                 .append(coin)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

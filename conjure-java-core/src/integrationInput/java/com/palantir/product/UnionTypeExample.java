@@ -99,11 +99,11 @@ public final class UnionTypeExample {
     @Override
     public String toString() {
         return new StringBuilder("UnionTypeExample")
-                .append("{")
+                .append('{')
                 .append("value")
                 .append(": ")
                 .append(value)
-                .append("}")
+                .append('}')
                 .toString();
     }
 
@@ -177,11 +177,11 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return new StringBuilder("StringExampleWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -218,11 +218,11 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return new StringBuilder("SetWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -261,11 +261,11 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return new StringBuilder("ThisFieldIsAnIntegerWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -304,11 +304,11 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return new StringBuilder("AlsoAnIntegerWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -345,11 +345,11 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return new StringBuilder("IfWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -386,11 +386,11 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return new StringBuilder("NewWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -428,11 +428,11 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return new StringBuilder("InterfaceWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -493,7 +493,7 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return new StringBuilder("UnknownWrapper")
-                    .append("{")
+                    .append('{')
                     .append("type")
                     .append(": ")
                     .append(type)
@@ -501,7 +501,7 @@ public final class UnionTypeExample {
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }

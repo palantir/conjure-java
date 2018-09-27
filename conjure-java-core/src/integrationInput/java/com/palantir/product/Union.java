@@ -65,11 +65,11 @@ public final class Union {
     @Override
     public String toString() {
         return new StringBuilder("Union")
-                .append("{")
+                .append('{')
                 .append("value")
                 .append(": ")
                 .append(value)
-                .append("}")
+                .append('}')
                 .toString();
     }
 
@@ -123,11 +123,11 @@ public final class Union {
         @Override
         public String toString() {
             return new StringBuilder("FooWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -164,11 +164,11 @@ public final class Union {
         @Override
         public String toString() {
             return new StringBuilder("BarWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -229,7 +229,7 @@ public final class Union {
         @Override
         public String toString() {
             return new StringBuilder("UnknownWrapper")
-                    .append("{")
+                    .append('{')
                     .append("type")
                     .append(": ")
                     .append(type)
@@ -237,7 +237,7 @@ public final class Union {
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }

@@ -59,11 +59,11 @@ public final class SingleUnion {
     @Override
     public String toString() {
         return new StringBuilder("SingleUnion")
-                .append("{")
+                .append('{')
                 .append("value")
                 .append(": ")
                 .append(value)
-                .append("}")
+                .append('}')
                 .toString();
     }
 
@@ -115,11 +115,11 @@ public final class SingleUnion {
         @Override
         public String toString() {
             return new StringBuilder("FooWrapper")
-                    .append("{")
+                    .append('{')
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }
@@ -180,7 +180,7 @@ public final class SingleUnion {
         @Override
         public String toString() {
             return new StringBuilder("UnknownWrapper")
-                    .append("{")
+                    .append('{')
                     .append("type")
                     .append(": ")
                     .append(type)
@@ -188,7 +188,7 @@ public final class SingleUnion {
                     .append("value")
                     .append(": ")
                     .append(value)
-                    .append("}")
+                    .append('}')
                     .toString();
         }
     }

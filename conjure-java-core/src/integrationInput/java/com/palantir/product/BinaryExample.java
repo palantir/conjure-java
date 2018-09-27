@@ -47,11 +47,11 @@ public final class BinaryExample {
     @Override
     public String toString() {
         return new StringBuilder("BinaryExample")
-                .append("{")
+                .append('{')
                 .append("binary")
                 .append(": ")
                 .append(binary)
-                .append("}")
+                .append('}')
                 .toString();
     }
 
