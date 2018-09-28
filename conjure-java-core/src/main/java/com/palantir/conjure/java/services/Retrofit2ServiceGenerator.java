@@ -75,7 +75,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
         checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
                         || !featureFlags.contains(FeatureFlags.RetrofitCompletableFutures),
-                "Cannot return both listenable and completable futures.");
+                "Cannot enable both the RetrofitListenableFutures and RetrofitCompletableFutures "
+                        + "Conjure experimental features. Please remove one.");
     }
 
     @Override

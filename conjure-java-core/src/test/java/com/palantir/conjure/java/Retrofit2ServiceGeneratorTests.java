@@ -90,7 +90,7 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
         for (Path file : files) {
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
                 Path output = Paths.get("src/test/resources/test/api/"
-                        + file.getFileName() + ".retrofit_completable_future");
+                        + file.getFileName() + ".retrofit_listenable_future");
                 Files.deleteIfExists(output);
                 Files.copy(file, output);
             }
