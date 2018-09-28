@@ -47,11 +47,11 @@ public final class EnumFieldExample {
     @Override
     public String toString() {
         return new StringBuilder("EnumFieldExample")
-                .append("{")
+                .append('{')
                 .append("enum")
                 .append(": ")
                 .append(enum_)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

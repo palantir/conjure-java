@@ -47,11 +47,11 @@ public final class RidExample {
     @Override
     public String toString() {
         return new StringBuilder("RidExample")
-                .append("{")
+                .append('{')
                 .append("ridValue")
                 .append(": ")
                 .append(ridValue)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

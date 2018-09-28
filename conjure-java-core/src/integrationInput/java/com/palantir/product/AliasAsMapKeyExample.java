@@ -113,7 +113,7 @@ public final class AliasAsMapKeyExample {
     @Override
     public String toString() {
         return new StringBuilder("AliasAsMapKeyExample")
-                .append("{")
+                .append('{')
                 .append("strings")
                 .append(": ")
                 .append(strings)
@@ -141,7 +141,7 @@ public final class AliasAsMapKeyExample {
                 .append("uuids")
                 .append(": ")
                 .append(uuids)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

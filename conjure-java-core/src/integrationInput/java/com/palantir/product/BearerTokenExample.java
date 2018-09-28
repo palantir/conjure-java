@@ -48,11 +48,11 @@ public final class BearerTokenExample {
     @Override
     public String toString() {
         return new StringBuilder("BearerTokenExample")
-                .append("{")
+                .append('{')
                 .append("bearerTokenValue")
                 .append(": ")
                 .append(bearerTokenValue)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

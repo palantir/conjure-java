@@ -49,11 +49,11 @@ public final class CovariantOptionalExample {
     @Override
     public String toString() {
         return new StringBuilder("CovariantOptionalExample")
-                .append("{")
+                .append('{')
                 .append("item")
                 .append(": ")
                 .append(item)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

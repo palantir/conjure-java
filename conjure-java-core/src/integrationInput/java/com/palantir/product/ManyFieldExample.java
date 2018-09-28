@@ -135,7 +135,7 @@ public final class ManyFieldExample {
     @Override
     public String toString() {
         return new StringBuilder("ManyFieldExample")
-                .append("{")
+                .append('{')
                 .append("string")
                 .append(": ")
                 .append(string)
@@ -167,7 +167,7 @@ public final class ManyFieldExample {
                 .append("alias")
                 .append(": ")
                 .append(alias)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

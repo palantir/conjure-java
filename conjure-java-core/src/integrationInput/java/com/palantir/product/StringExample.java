@@ -46,11 +46,11 @@ public final class StringExample {
     @Override
     public String toString() {
         return new StringBuilder("StringExample")
-                .append("{")
+                .append('{')
                 .append("string")
                 .append(": ")
                 .append(string)
-                .append("}")
+                .append('}')
                 .toString();
     }
 

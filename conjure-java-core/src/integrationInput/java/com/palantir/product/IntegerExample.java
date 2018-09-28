@@ -46,11 +46,11 @@ public final class IntegerExample {
     @Override
     public String toString() {
         return new StringBuilder("IntegerExample")
-                .append("{")
+                .append('{')
                 .append("integer")
                 .append(": ")
                 .append(integer)
-                .append("}")
+                .append('}')
                 .toString();
     }
 
