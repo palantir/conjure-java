@@ -21,6 +21,7 @@ mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
 dependencies {
     compile project(':conjure-java-core')
     compile 'commons-cli:commons-cli'
+    runtime 'org.slf4j:slf4j-simple'
 
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
