@@ -62,6 +62,8 @@ import org.slf4j.LoggerFactory;
 public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private static final ClassName COMPLETABLE_FUTURE_TYPE = ClassName.get("java.util.concurrent", "CompletableFuture");
+    private static final ClassName LISTENABLE_FUTURE_TYPE = ClassName.get(
+            "com.google.common.util.concurrent", "ListenableFuture");
     private static final ClassName CALL_TYPE = ClassName.get("retrofit2", "Call");
     private static final String AUTH_HEADER_NAME = "Authorization";
 
@@ -71,6 +73,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
+        checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
+                        || !featureFlags.contains(FeatureFlags.RetrofitCompletableFutures),
+                "Cannot enable both the RetrofitListenableFutures and RetrofitCompletableFutures "
+                        + "Conjure experimental features. Please remove one.");
     }
 
     @Override
@@ -110,6 +116,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     private ClassName getReturnType() {
         if (featureFlags.contains(FeatureFlags.RetrofitCompletableFutures)) {
             return COMPLETABLE_FUTURE_TYPE;
+        } else if (featureFlags.contains(FeatureFlags.RetrofitListenableFutures)) {
+            return LISTENABLE_FUTURE_TYPE;
         } else {
             return CALL_TYPE;
         }

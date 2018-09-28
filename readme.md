@@ -109,7 +109,7 @@ As an alternative to the JAX-RS interfaces above, conjure-java can generate equi
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
     ```
 
-You can also supply the `--retrofitCompletableFutures` flag if you prefer Java 8 CompletableFutures instead of OkHttp's Call.
+You can also supply the `--retrofitListenableFutures` flag if you prefer Guava ListenableFutures instead of Retrofit's Call.
 
 ## Contributing
 
