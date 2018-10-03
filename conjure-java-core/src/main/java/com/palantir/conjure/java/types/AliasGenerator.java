@@ -135,11 +135,9 @@ public final class AliasGenerator {
                     conjureType.accept(TypeVisitor.PRIMITIVE), thisClass, aliasTypeName));
         } else if (conjureType.accept(TypeVisitor.IS_REFERENCE)) {
             // delegate to aliased type's valueOf factory method
-            Optional<AliasDefinition> aliasTypeDef = typeMapper.getTypes().stream()
+            Optional<AliasDefinition> aliasTypeDef = typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
-                    .filter(type -> Objects.equals(type.accept(TypeDefinitionVisitor.TYPE_NAME),
-                            conjureType.accept(TypeVisitor.REFERENCE)))
-                    .map(type -> type.accept(TypeDefinitionVisitor.ALIAS)).findAny();
+                    .map(type -> type.accept(TypeDefinitionVisitor.ALIAS));
 
             return aliasTypeDef.map(type -> {
                 ClassName className = ClassName.get(type.getTypeName().getPackage(), type.getTypeName().getName());
