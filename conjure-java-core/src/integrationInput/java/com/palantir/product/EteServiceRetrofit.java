@@ -18,6 +18,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
@@ -71,4 +72,16 @@ public interface EteServiceRetrofit {
     @Headers("hr-path-template: /base/notNullBody")
     Call<StringAliasExample> notNullBody(
             @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
+
+    @GET("./base/optionalAliasOne")
+    @Headers("hr-path-template: /base/optionalAliasOne")
+    Call<StringAliasExample> optionalAliasOne(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") Optional<StringAliasExample> queryParamName);
+
+    @GET("./base/aliasTwo")
+    @Headers("hr-path-template: /base/aliasTwo")
+    Call<NestedStringAliasExample> aliasTwo(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") NestedStringAliasExample queryParamName);
 }

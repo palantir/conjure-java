@@ -3,6 +3,9 @@ types:
     StringAliasExample:
       external:
         java: com.palantir.product.StringAliasExample
+    NestedStringAliasExample:
+      external:
+        java: com.palantir.product.NestedStringAliasExample
 
 services:
   EmptyPathService:
@@ -72,3 +75,19 @@ services:
         args:
           notNullBody: StringAliasExample
         returns: StringAliasExample
+
+      optionalAliasOne:
+        http: GET /optionalAliasOne
+        args:
+          queryParamName:
+            param-type: query
+            type: optional<StringAliasExample>
+        returns: StringAliasExample
+
+      aliasTwo:
+        http: GET /aliasTwo
+        args:
+          queryParamName:
+            param-type: query
+            type: NestedStringAliasExample
+        returns: NestedStringAliasExample

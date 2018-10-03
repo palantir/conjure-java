@@ -4,6 +4,7 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import java.lang.Deprecated;
 import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -73,4 +75,21 @@ public interface EteService {
     StringAliasExample notNullBody(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @NotNull StringAliasExample notNullBody);
+
+    @GET
+    @Path("base/optionalAliasOne")
+    StringAliasExample optionalAliasOne(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("queryParamName") Optional<StringAliasExample> queryParamName);
+
+    @GET
+    @Path("base/aliasTwo")
+    NestedStringAliasExample aliasTwo(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("queryParamName") NestedStringAliasExample queryParamName);
+
+    @Deprecated
+    default StringAliasExample optionalAliasOne(AuthHeader authHeader) {
+        return optionalAliasOne(authHeader, Optional.empty());
+    }
 }

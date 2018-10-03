@@ -37,6 +37,10 @@ public final class TypeMapper {
         this.classNameVisitorFactory = classNameVisitorFactory;
     }
 
+    public List<TypeDefinition> getTypes() {
+        return types;
+    }
+
     public TypeName getClassName(Type type) {
         return type.accept(classNameVisitorFactory.create(types));
     }

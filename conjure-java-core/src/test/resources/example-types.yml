@@ -77,6 +77,8 @@ types:
           uuid: uuid
       StringAliasExample:
         alias: string
+      NestedStringAliasExample:
+        alias: StringAliasExample
       DoubleAliasExample:
         alias: double
       IntegerAliasExample:
