@@ -59,10 +59,11 @@ dependencies {
     testCompile 'io.dropwizard:dropwizard-testing'
 
     integrationInputCompile project(':conjure-lib')
-    integrationInputCompile 'com.squareup.retrofit2:retrofit'
-    integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
     integrationInputCompile 'com.palantir.conjure.java.api:errors'
+    integrationInputCompile 'com.squareup.retrofit2:retrofit'
+    integrationInputCompile 'javax.annotation:javax.annotation-api'
     integrationInputCompile 'javax.validation:validation-api'
+    integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
 
     processor 'org.immutables:value'
 }
