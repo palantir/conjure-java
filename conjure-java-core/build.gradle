@@ -32,16 +32,17 @@ tasks.checkstyleIntegrationInput.enabled = false
 
 dependencies {
     compile project(':conjure-lib')
-    compile 'com.palantir.ri:resource-identifier'
-    compile 'com.palantir.tokens:auth-tokens'
-    compile 'com.palantir.conjure.java.api:errors'
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
     compile 'com.google.googlejavaformat:google-java-format'
-    compile 'com.palantir.syntactic-paths:syntactic-paths'
     compile 'com.google.guava:guava'
+    compile 'com.palantir.conjure.java.api:errors'
+    compile 'com.palantir.ri:resource-identifier'
+    compile 'com.palantir.syntactic-paths:syntactic-paths'
+    compile 'com.palantir.tokens:auth-tokens'
     compile 'com.squareup:javapoet'
+    compile 'javax.annotation:javax.annotation-api'
     compile 'javax.validation:validation-api'
     compile 'org.apache.commons:commons-lang3'
     compile 'org.slf4j:slf4j-api'
