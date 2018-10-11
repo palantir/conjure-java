@@ -20,7 +20,6 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
 import com.palantir.conjure.verification.EndpointName;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +57,7 @@ public class AutoDeserializeTest {
     public String jsonString;
 
     @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
-    public static Collection<Object[]> data() throws IOException {
+    public static Collection<Object[]> data() {
 
         List<Object[]> objects = new ArrayList<>();
         Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
@@ -99,7 +98,7 @@ public class AutoDeserializeTest {
             log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
             confirmService.confirm(endpointName.get(), index, resultFromServer);
         } catch (RemoteException e) {
-            log.error("Caught exception with params: {}", e.getError().parameters());
+            log.error("Caught exception with params: {}", e.getError().parameters(), e);
             throw e;
         }
     }

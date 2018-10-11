@@ -64,8 +64,10 @@ dependencies {
     processor 'org.immutables:value'
 }
 
-tasks.compileTestJava {
-    options.compilerArgs += ['-Xep:Slf4jLogsafeArgs:OFF']
+tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureEach {
+    options.errorprone {
+        check('Slf4jLogsafeArgs', net.ltgt.gradle.errorprone.CheckSeverity.OFF)
+    }
 }
 
 task unpackVerificationServer(type: Sync) {
