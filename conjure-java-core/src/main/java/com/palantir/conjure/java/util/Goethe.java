@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.util;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
 import com.google.googlejavaformat.java.Formatter;
@@ -62,7 +63,7 @@ public final class Goethe {
                 "path %s exists but is not a directory.", baseDir);
         Path outputDirectory = baseDir;
         if (!file.packageName.isEmpty()) {
-            for (String packageComponent : file.packageName.split("\\.")) {
+            for (String packageComponent : Splitter.on(".").split(file.packageName)) {
                 outputDirectory = outputDirectory.resolve(packageComponent);
             }
             Files.createDirectories(outputDirectory);

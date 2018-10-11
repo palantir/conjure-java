@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.verification.EndpointName;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -63,7 +62,7 @@ public class SingleParamServicesTest {
     public String jsonString;
 
     @Parameterized.Parameters(name = "{0}/{1}({3})")
-    public static Collection<Object[]> data() throws IOException {
+    public static Collection<Object[]> data() {
 
         List<Object[]> objects = new ArrayList<>();
         Cases.TEST_CASES.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
@@ -119,7 +118,7 @@ public class SingleParamServicesTest {
 
                     log.info("Successfully post param to endpoint {} and index {}", endpointName, index);
                 } catch (RemoteException e) {
-                    log.error("Caught exception with params: {}", e.getError().parameters());
+                    log.error("Caught exception with params: {}", e.getError().parameters(), e);
                     throw e;
                 }
             }

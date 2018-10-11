@@ -83,7 +83,7 @@ public final class EteResource implements EteService {
 
     @Override
     public StreamingOutput binary(AuthHeader authHeader) {
-        return (outputStream) -> outputStream.write("Hello, world!".getBytes(StandardCharsets.UTF_8));
+        return outputStream -> outputStream.write("Hello, world!".getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

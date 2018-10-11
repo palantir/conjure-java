@@ -49,8 +49,7 @@ public final class Type {
     }
 
     /**
-     * The name and package of a custom Conjure type. The custom type must be defined in the "types"
-     * section.
+     * The name and package of a custom Conjure type. The custom type must be defined in the "types" section.
      */
     public static Type reference(TypeName value) {
         return new Type(new ReferenceWrapper(value));
@@ -87,26 +86,26 @@ public final class Type {
         return this == other
                 || (other instanceof Type && equalTo((Type) other))
                 || (other instanceof PrimitiveType
-                        && value instanceof PrimitiveWrapper
-                        && Objects.equals(((PrimitiveWrapper) value).value, other))
+                && value instanceof PrimitiveWrapper
+                && Objects.equals(((PrimitiveWrapper) value).value, other))
                 || (other instanceof OptionalType
-                        && value instanceof OptionalWrapper
-                        && Objects.equals(((OptionalWrapper) value).value, other))
+                && value instanceof OptionalWrapper
+                && Objects.equals(((OptionalWrapper) value).value, other))
                 || (other instanceof ListType
-                        && value instanceof ListWrapper
-                        && Objects.equals(((ListWrapper) value).value, other))
+                && value instanceof ListWrapper
+                && Objects.equals(((ListWrapper) value).value, other))
                 || (other instanceof SetType
-                        && value instanceof SetWrapper
-                        && Objects.equals(((SetWrapper) value).value, other))
+                && value instanceof SetWrapper
+                && Objects.equals(((SetWrapper) value).value, other))
                 || (other instanceof MapType
-                        && value instanceof MapWrapper
-                        && Objects.equals(((MapWrapper) value).value, other))
+                && value instanceof MapWrapper
+                && Objects.equals(((MapWrapper) value).value, other))
                 || (other instanceof TypeName
-                        && value instanceof ReferenceWrapper
-                        && Objects.equals(((ReferenceWrapper) value).value, other))
+                && value instanceof ReferenceWrapper
+                && Objects.equals(((ReferenceWrapper) value).value, other))
                 || (other instanceof ExternalReference
-                        && value instanceof ExternalWrapper
-                        && Objects.equals(((ExternalWrapper) value).value, other));
+                && value instanceof ExternalWrapper
+                && Objects.equals(((ExternalWrapper) value).value, other));
     }
 
     private boolean equalTo(Type other) {
@@ -148,19 +147,19 @@ public final class Type {
     }
 
     @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        property = "type",
-        visible = true,
-        defaultImpl = UnknownWrapper.class
+            use = JsonTypeInfo.Id.NAME,
+            property = "type",
+            visible = true,
+            defaultImpl = UnknownWrapper.class
     )
     @JsonSubTypes({
-        @JsonSubTypes.Type(PrimitiveWrapper.class),
-        @JsonSubTypes.Type(OptionalWrapper.class),
-        @JsonSubTypes.Type(ListWrapper.class),
-        @JsonSubTypes.Type(SetWrapper.class),
-        @JsonSubTypes.Type(MapWrapper.class),
-        @JsonSubTypes.Type(ReferenceWrapper.class),
-        @JsonSubTypes.Type(ExternalWrapper.class)
+            @JsonSubTypes.Type(PrimitiveWrapper.class),
+            @JsonSubTypes.Type(OptionalWrapper.class),
+            @JsonSubTypes.Type(ListWrapper.class),
+            @JsonSubTypes.Type(SetWrapper.class),
+            @JsonSubTypes.Type(MapWrapper.class),
+            @JsonSubTypes.Type(ReferenceWrapper.class),
+            @JsonSubTypes.Type(ExternalWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {}
@@ -457,10 +456,10 @@ public final class Type {
     }
 
     @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "type",
+            visible = true
     )
     private static class UnknownWrapper implements Base {
         private final String type;
