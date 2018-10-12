@@ -6,6 +6,7 @@ package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
@@ -26,6 +27,7 @@ import com.palantir.product.StringAliasExample;
 import com.palantir.product.StringExample;
 import com.palantir.product.UnionTypeExample;
 import com.palantir.product.UuidExample;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -48,6 +50,12 @@ public final class WireFormatTests {
         assertThat(mapper.readValue("{\"items\": [\"a\", \"b\"]}", ListExample.class).getItems()).contains("a", "b");
         assertThat(mapper.readValue("{\"items\": {\"a\": \"b\"}}", MapExample.class).getItems())
                 .containsEntry("a", "b");
+    }
+
+    @Test
+    public void double_alias_should_deserialize_nan() throws IOException {
+        assertThat(mapper.readValue("\"NaN\"", DoubleAliasExample.class).get())
+                .isNaN();
     }
 
     @Test
