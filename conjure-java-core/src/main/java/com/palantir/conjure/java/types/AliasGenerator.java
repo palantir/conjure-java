@@ -133,7 +133,7 @@ public final class AliasGenerator {
                 && !conjureType.accept(TypeVisitor.IS_BINARY)) {
             return Optional.of(valueOfFactoryMethodForPrimitive(
                     conjureType.accept(TypeVisitor.PRIMITIVE), thisClass, aliasTypeName));
-        } else if (conjureType.accept(TypeVisitor.IS_REFERENCE)) {
+        } else if (conjureType.accept(TypeVisitor.IS_INTERNAL_REFERENCE)) {
             // delegate to aliased type's valueOf factory method
             Optional<AliasDefinition> aliasTypeDef = typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
