@@ -109,6 +109,37 @@ public final class AliasGenerator {
                     .returns(thisClass)
                     .addCode(codeBlock)
                     .build());
+
+            CodeBlock doubleFromStringCodeBlock = CodeBlock.builder()
+                    .beginControlFlow("switch (value)")
+                    .add("case \"NaN\":\n")
+                    .indent()
+                    .addStatement("return $T.of($T.NaN)", thisClass, Double.class)
+                    .unindent()
+                    .add("case \"Infinity\":\n")
+                    .indent()
+                    .addStatement("return $T.of($T.POSITIVE_INFINITY)", thisClass, Double.class)
+                    .unindent()
+                    .add("case \"-Infinity\":\n")
+                    .indent()
+                    .addStatement("return $T.of($T.NEGATIVE_INFINITY)", thisClass, Double.class)
+                    .unindent()
+                    .add("default:\n")
+                    .indent()
+                    .addStatement(
+                            "throw new $T(\"Cannot deserialize string into double: \" + value)",
+                            IllegalArgumentException.class)
+                    .unindent()
+                    .endControlFlow()
+                    .build();
+
+            spec.addMethod(MethodSpec.methodBuilder("of")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addAnnotation(JsonCreator.class)
+                    .addParameter(ClassName.get(String.class), "value")
+                    .returns(thisClass)
+                    .addCode(doubleFromStringCodeBlock)
+                    .build());
         }
 
         typeDef.getDocs().ifPresent(docs -> spec.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
