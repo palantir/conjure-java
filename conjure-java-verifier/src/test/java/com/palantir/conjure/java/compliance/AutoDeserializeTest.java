@@ -96,7 +96,7 @@ public class AutoDeserializeTest {
         try {
             Object resultFromServer = method.invoke(testService, index);
             log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
-            confirmService.confirm(endpointName.get(), index, resultFromServer);
+            confirmService.confirm(endpointName, index, resultFromServer);
         } catch (RemoteException e) {
             log.error("Caught exception with params: {}", e.getError().parameters(), e);
             throw e;
