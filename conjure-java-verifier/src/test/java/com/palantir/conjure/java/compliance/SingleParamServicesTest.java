@@ -101,6 +101,12 @@ public class SingleParamServicesTest {
         Object service = servicesMaps.get(serviceName);
         for (Method method : servicesMaps.get(serviceName).getClass().getMethods()) {
             String name = method.getName();
+
+            if (method.getParameterCount() == 1) {
+                // conjure-java generates `default` methods for optional query params, we don't want to call these
+                continue;
+            }
+
             if (endpointName.get().equals(name)) {
                 try {
                     // HACKHACK, index parameter order is different for different services.
