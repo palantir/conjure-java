@@ -26,6 +26,7 @@ import com.palantir.product.StringAliasExample;
 import com.palantir.product.StringExample;
 import com.palantir.product.UnionTypeExample;
 import com.palantir.product.UuidExample;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -48,6 +49,21 @@ public final class WireFormatTests {
         assertThat(mapper.readValue("{\"items\": [\"a\", \"b\"]}", ListExample.class).getItems()).contains("a", "b");
         assertThat(mapper.readValue("{\"items\": {\"a\": \"b\"}}", MapExample.class).getItems())
                 .containsEntry("a", "b");
+    }
+
+    @Test
+    public void double_alias_should_deserialize_nan() throws IOException {
+        assertThat(mapper.readValue("\"NaN\"", DoubleAliasExample.class).get())
+                .isNaN();
+    }
+
+    @Test
+    public void double_alias_should_deserialize_infinity() throws IOException {
+        assertThat(mapper.readValue("\"Infinity\"", DoubleAliasExample.class).get())
+                .isEqualTo(Double.POSITIVE_INFINITY);
+
+        assertThat(mapper.readValue("\"-Infinity\"", DoubleAliasExample.class).get())
+                .isEqualTo(Double.NEGATIVE_INFINITY);
     }
 
     @Test
