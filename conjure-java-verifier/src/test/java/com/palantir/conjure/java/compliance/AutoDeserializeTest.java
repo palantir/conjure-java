@@ -80,7 +80,8 @@ public class AutoDeserializeTest {
         Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format("Invoking %s(%s), expected %s",
+        System.out.println(String.format("Test case %s: Invoking %s(%s), expected %s",
+                index,
                 endpointName,
                 jsonString,
                 shouldSucceed ? "success" : "failure"));
