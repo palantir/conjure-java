@@ -92,7 +92,7 @@ task conjureJavaObjects(type: JavaExec) {
     args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects'
 
     inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.files "src/generatedObjects/java"
+    outputs.dir "src/generatedObjects/java"
     doFirst { delete "src/generatedObjects/java/*" }
 }
 
@@ -102,7 +102,7 @@ task conjureJavaJersey(type: JavaExec) {
     args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jersey'
 
     inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.files "src/generatedJersey/java"
+    outputs.dir "src/generatedJersey/java"
     doFirst { delete "src/generatedJersey/java/*" }
 }
 
