@@ -59,6 +59,15 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void double_alias_should_deserialize_infinity() throws IOException {
+        assertThat(mapper.readValue("\"Infinity\"", DoubleAliasExample.class).get())
+                .isEqualTo(Double.POSITIVE_INFINITY);
+
+        assertThat(mapper.readValue("\"-Infinity\"", DoubleAliasExample.class).get())
+                .isEqualTo(Double.NEGATIVE_INFINITY);
+    }
+
+    @Test
     public void testPresentOptionalDeserializesWithElement() throws Exception {
         assertThat(mapper.readValue("{\"item\": \"a\"}", OptionalExample.class).getItem()).contains("a");
     }
