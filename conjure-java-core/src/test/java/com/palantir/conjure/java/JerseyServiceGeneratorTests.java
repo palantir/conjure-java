@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java;
 
+import static com.palantir.conjure.java.FeatureFlags.RequireNotNullAuthAndBodyParams;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
@@ -58,7 +59,7 @@ public final class JerseyServiceGeneratorTests extends TestBase {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-service.yml")));
         List<Path> files = new JerseyServiceGenerator(
-                ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams)).emit(def, folder.getRoot());
+                ImmutableSet.of(RequireNotNullAuthAndBodyParams)).emit(def, folder.getRoot());
 
         for (Path file : files) {
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
@@ -132,7 +133,8 @@ public final class JerseyServiceGeneratorTests extends TestBase {
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        List<Path> files = new JerseyServiceGenerator(Collections.emptySet()).emit(def, folder.getRoot());
+        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(RequireNotNullAuthAndBodyParams)).emit(def,
+                folder.getRoot());
 
         for (Path file : files) {
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {

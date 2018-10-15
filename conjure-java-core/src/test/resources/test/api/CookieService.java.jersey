@@ -2,6 +2,7 @@ package test.api;
 
 import com.palantir.tokens.auth.BearerToken;
 import javax.annotation.Generated;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
@@ -16,5 +17,5 @@ import javax.ws.rs.core.MediaType;
 public interface CookieService {
     @GET
     @Path("cookies")
-    void eatCookies(@CookieParam("PALANTIR_TOKEN") BearerToken token);
+    void eatCookies(@CookieParam("PALANTIR_TOKEN") @NotNull BearerToken token);
 }

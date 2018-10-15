@@ -22,6 +22,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -41,6 +42,7 @@ public final class AliasGenerator {
     public static JavaFile generateAliasType(
             TypeMapper typeMapper,
             AliasDefinition typeDef) {
+
         TypeName aliasTypeName = typeMapper.getClassName(typeDef.getAlias());
 
         String typePackage = typeDef.getTypeName().getPackage();
@@ -78,7 +80,7 @@ public final class AliasGenerator {
                         .build());
 
         Optional<CodeBlock> maybeValueOfFactoryMethod = valueOfFactoryMethod(
-                typeDef.getAlias(), thisClass, aliasTypeName);
+                typeDef.getAlias(), thisClass, aliasTypeName, typeMapper);
         if (maybeValueOfFactoryMethod.isPresent()) {
             spec.addMethod(MethodSpec.methodBuilder("valueOf")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -153,15 +155,28 @@ public final class AliasGenerator {
     private static Optional<CodeBlock> valueOfFactoryMethod(
             Type conjureType,
             ClassName thisClass,
-            TypeName aliasTypeName) {
+            TypeName aliasTypeName,
+            TypeMapper typeMapper) {
+
         // doesn't support valueOf factories for ANY and BINARY types
         if (conjureType.accept(TypeVisitor.IS_PRIMITIVE)
                 && !conjureType.accept(TypeVisitor.IS_ANY)
                 && !conjureType.accept(TypeVisitor.IS_BINARY)) {
             return Optional.of(valueOfFactoryMethodForPrimitive(
                     conjureType.accept(TypeVisitor.PRIMITIVE), thisClass, aliasTypeName));
+        } else if (conjureType.accept(TypeVisitor.IS_INTERNAL_REFERENCE)) {
+            // delegate to aliased type's valueOf factory method
+            Optional<AliasDefinition> aliasTypeDef = typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
+                    .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
+                    .map(type -> type.accept(TypeDefinitionVisitor.ALIAS));
+
+            return aliasTypeDef.map(type -> {
+                ClassName className = ClassName.get(type.getTypeName().getPackage(), type.getTypeName().getName());
+                return CodeBlock.builder()
+                        .addStatement("return new $T($T.valueOf(value))", thisClass, className).build();
+            });
         }
-        // TODO(dholanda): delegate to aliased type's valueOf factory method if it exists
+
         return Optional.empty();
     }
 

@@ -18,6 +18,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -39,55 +40,57 @@ public interface TestService {
     @GET
     @Path("catalog/fileSystems")
     Map<String, BackingFileSystem> getFileSystems(
-            @HeaderParam("Authorization") AuthHeader authHeader);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @POST
     @Path("catalog/datasets")
     Dataset createDataset(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Test-Header") String testHeaderArg,
-            CreateDatasetRequest request);
+            @NotNull CreateDatasetRequest request);
 
     @GET
     @Path("catalog/datasets/{datasetRid}")
     Optional<Dataset> getDataset(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput getRawData(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-aliased")
     StreamingOutput getAliasedRawData(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-maybe")
     Optional<ByteBuffer> maybeGetRawData(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/string-aliased")
     AliasedString getAliasedString(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @POST
     @Path("catalog/datasets/upload-raw")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    void uploadRawData(@HeaderParam("Authorization") AuthHeader authHeader, InputStream input);
+    void uploadRawData(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @NotNull InputStream input);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/branches")
     Set<String> getBranches(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     /**
@@ -99,65 +102,66 @@ public interface TestService {
     @Path("catalog/datasets/{datasetRid}/branchesDeprecated")
     @Deprecated
     Set<String> getBranchesDeprecated(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
     Optional<String> resolveBranch(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid,
             @PathParam("branch") String branch);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/testParam")
     Optional<String> testParam(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
     @POST
     @Path("catalog/test-query-params")
     int testQueryParams(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("different") ResourceIdentifier something,
             @QueryParam("implicit") ResourceIdentifier implicit,
             @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @QueryParam("setEnd") Set<String> setEnd,
             @QueryParam("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
-            String query);
+            @NotNull String query);
 
     @POST
     @Path("catalog/test-no-response-query-params")
     void testNoResponseQueryParams(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("different") ResourceIdentifier something,
             @QueryParam("implicit") ResourceIdentifier implicit,
             @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @QueryParam("setEnd") Set<String> setEnd,
             @QueryParam("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
-            String query);
+            @NotNull String query);
 
     @GET
     @Path("catalog/boolean")
-    boolean testBoolean(@HeaderParam("Authorization") AuthHeader authHeader);
+    boolean testBoolean(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("catalog/double")
-    double testDouble(@HeaderParam("Authorization") AuthHeader authHeader);
+    double testDouble(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("catalog/integer")
-    int testInteger(@HeaderParam("Authorization") AuthHeader authHeader);
+    int testInteger(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @POST
     @Path("catalog/optional")
     Optional<String> testPostOptional(
-            @HeaderParam("Authorization") AuthHeader authHeader, Optional<String> maybeString);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            Optional<String> maybeString);
 
     @GET
     @Path("catalog/optional-integer-double")
     void testOptionalIntegerAndDouble(
-            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("maybeInteger") OptionalInt maybeInteger,
             @QueryParam("maybeDouble") OptionalDouble maybeDouble);
 

@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.product.EteService;
+import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -28,6 +29,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.StreamingOutput;
 
 public final class EteResource implements EteService {
@@ -89,5 +91,16 @@ public final class EteResource implements EteService {
     @Override
     public StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody) {
         return notNullBody;
+    }
+
+    @Override
+    public StringAliasExample optionalAliasOne(@NotNull AuthHeader authHeader,
+            Optional<StringAliasExample> queryParamName) {
+        return queryParamName.orElse(StringAliasExample.of("foo"));
+    }
+
+    @Override
+    public NestedStringAliasExample aliasTwo(@NotNull AuthHeader authHeader, NestedStringAliasExample queryParamName) {
+        return queryParamName;
     }
 }

@@ -42,7 +42,7 @@ public final class TypeVisitor {
     public static final IsSetTypeVisitor IS_SET = new IsSetTypeVisitor();
     public static final IsMapTypeVisitor IS_MAP = new IsMapTypeVisitor();
     public static final IsReferenceTypeVisitor IS_REFERENCE = new IsReferenceTypeVisitor();
-
+    public static final IsInternalReferenceTypeVisitor IS_INTERNAL_REFERENCE = new IsInternalReferenceTypeVisitor();
     public static final IsPrimitiveOrReferenceType IS_PRIMITIVE_OR_REFERENCE = new IsPrimitiveOrReferenceType();
     public static final IsBinaryType IS_BINARY = new IsBinaryType();
     public static final IsAnyType IS_ANY = new IsAnyType();
@@ -134,6 +134,13 @@ public final class TypeVisitor {
 
         @Override
         public Boolean visitExternal(ExternalReference value) {
+            return true;
+        }
+    }
+
+    private static class IsInternalReferenceTypeVisitor extends IsTypeVisitor {
+        @Override
+        public Boolean visitReference(TypeName value) {
             return true;
         }
     }
