@@ -20,7 +20,7 @@ public final class DoubleExample {
         this.doubleValue = doubleValue;
     }
 
-    @JsonProperty("doubleValue")
+    @JsonProperty(value = "doubleValue", required = true)
     public double getDoubleValue() {
         return this.doubleValue;
     }

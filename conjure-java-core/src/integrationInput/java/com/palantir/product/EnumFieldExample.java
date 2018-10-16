@@ -21,7 +21,7 @@ public final class EnumFieldExample {
         this.enum_ = enum_;
     }
 
-    @JsonProperty("enum")
+    @JsonProperty(value = "enum", required = true)
     public EnumExample getEnum() {
         return this.enum_;
     }

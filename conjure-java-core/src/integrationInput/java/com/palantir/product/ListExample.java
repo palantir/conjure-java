@@ -30,17 +30,17 @@ public final class ListExample {
         this.doubleItems = Collections.unmodifiableList(doubleItems);
     }
 
-    @JsonProperty("items")
+    @JsonProperty(value = "items", required = true)
     public List<String> getItems() {
         return this.items;
     }
 
-    @JsonProperty("primitiveItems")
+    @JsonProperty(value = "primitiveItems", required = true)
     public List<Integer> getPrimitiveItems() {
         return this.primitiveItems;
     }
 
-    @JsonProperty("doubleItems")
+    @JsonProperty(value = "doubleItems", required = true)
     public List<Double> getDoubleItems() {
         return this.doubleItems;
     }

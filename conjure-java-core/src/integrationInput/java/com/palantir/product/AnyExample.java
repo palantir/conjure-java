@@ -21,7 +21,7 @@ public final class AnyExample {
         this.any = any;
     }
 
-    @JsonProperty("any")
+    @JsonProperty(value = "any", required = true)
     public Object getAny() {
         return this.any;
     }

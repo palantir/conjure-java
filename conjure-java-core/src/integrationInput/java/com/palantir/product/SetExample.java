@@ -28,12 +28,12 @@ public final class SetExample {
         this.doubleItems = Collections.unmodifiableSet(doubleItems);
     }
 
-    @JsonProperty("items")
+    @JsonProperty(value = "items", required = true)
     public Set<String> getItems() {
         return this.items;
     }
 
-    @JsonProperty("doubleItems")
+    @JsonProperty(value = "doubleItems", required = true)
     public Set<Double> getDoubleItems() {
         return this.doubleItems;
     }

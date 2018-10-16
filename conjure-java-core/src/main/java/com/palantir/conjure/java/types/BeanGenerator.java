@@ -185,6 +185,7 @@ public final class BeanGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
+                        .addMember("required", "$L", isRequiredField(field))
                         .build())
                 .returns(field.poetSpec().type);
 
@@ -289,6 +290,15 @@ public final class BeanGenerator {
             return false;
         }
         return ((ParameterizedTypeName) spec.type).rawType.simpleName().equals("Optional");
+    }
+
+    private static boolean isRequiredField(EnrichedField field) {
+        if (!(field.poetSpec().type instanceof ParameterizedTypeName)) {
+            // spec isn't a wrapper class, check for OptionalInt or OptionalDouble
+            return !field.poetSpec().type.toString().equals("java.util.OptionalInt")
+                    && !field.poetSpec().type.toString().equals("java.util.OptionalDouble");
+        }
+        return !((ParameterizedTypeName) field.poetSpec().type).rawType.simpleName().equals("Optional");
     }
 
     /**

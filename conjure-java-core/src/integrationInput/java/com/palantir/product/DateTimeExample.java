@@ -22,7 +22,7 @@ public final class DateTimeExample {
         this.datetime = datetime;
     }
 
-    @JsonProperty("datetime")
+    @JsonProperty(value = "datetime", required = true)
     public OffsetDateTime getDatetime() {
         return this.datetime;
     }

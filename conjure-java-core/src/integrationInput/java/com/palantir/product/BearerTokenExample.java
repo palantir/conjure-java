@@ -22,7 +22,7 @@ public final class BearerTokenExample {
         this.bearerTokenValue = bearerTokenValue;
     }
 
-    @JsonProperty("bearerTokenValue")
+    @JsonProperty(value = "bearerTokenValue", required = true)
     public BearerToken getBearerTokenValue() {
         return this.bearerTokenValue;
     }

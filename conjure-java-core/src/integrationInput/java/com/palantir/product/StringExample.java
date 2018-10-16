@@ -21,7 +21,7 @@ public final class StringExample {
         this.string = string;
     }
 
-    @JsonProperty("string")
+    @JsonProperty(value = "string", required = true)
     public String getString() {
         return this.string;
     }
