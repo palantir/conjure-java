@@ -22,7 +22,7 @@ public final class UuidExample {
         this.uuid = uuid;
     }
 
-    @JsonProperty("uuid")
+    @JsonProperty(value = "uuid", required = true)
     public UUID getUuid() {
         return this.uuid;
     }

@@ -22,7 +22,7 @@ public final class CovariantOptionalExample {
         this.item = item;
     }
 
-    @JsonProperty("item")
+    @JsonProperty(value = "item", required = false)
     public Optional<Object> getItem() {
         return this.item;
     }

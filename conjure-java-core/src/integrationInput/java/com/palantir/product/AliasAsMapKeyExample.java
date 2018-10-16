@@ -49,37 +49,37 @@ public final class AliasAsMapKeyExample {
         this.uuids = Collections.unmodifiableMap(uuids);
     }
 
-    @JsonProperty("strings")
+    @JsonProperty(value = "strings", required = true)
     public Map<StringAliasExample, ManyFieldExample> getStrings() {
         return this.strings;
     }
 
-    @JsonProperty("rids")
+    @JsonProperty(value = "rids", required = true)
     public Map<RidAliasExample, ManyFieldExample> getRids() {
         return this.rids;
     }
 
-    @JsonProperty("bearertokens")
+    @JsonProperty(value = "bearertokens", required = true)
     public Map<BearerTokenAliasExample, ManyFieldExample> getBearertokens() {
         return this.bearertokens;
     }
 
-    @JsonProperty("integers")
+    @JsonProperty(value = "integers", required = true)
     public Map<IntegerAliasExample, ManyFieldExample> getIntegers() {
         return this.integers;
     }
 
-    @JsonProperty("safelongs")
+    @JsonProperty(value = "safelongs", required = true)
     public Map<SafeLongAliasExample, ManyFieldExample> getSafelongs() {
         return this.safelongs;
     }
 
-    @JsonProperty("datetimes")
+    @JsonProperty(value = "datetimes", required = true)
     public Map<DateTimeAliasExample, ManyFieldExample> getDatetimes() {
         return this.datetimes;
     }
 
-    @JsonProperty("uuids")
+    @JsonProperty(value = "uuids", required = true)
     public Map<UuidAliasExample, ManyFieldExample> getUuids() {
         return this.uuids;
     }

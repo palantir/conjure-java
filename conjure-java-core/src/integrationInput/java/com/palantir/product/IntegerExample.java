@@ -20,7 +20,7 @@ public final class IntegerExample {
         this.integer = integer;
     }
 
-    @JsonProperty("integer")
+    @JsonProperty(value = "integer", required = true)
     public int getInteger() {
         return this.integer;
     }

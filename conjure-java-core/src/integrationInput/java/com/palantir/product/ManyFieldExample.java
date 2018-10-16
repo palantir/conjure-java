@@ -58,49 +58,49 @@ public final class ManyFieldExample {
     }
 
     /** docs for string field */
-    @JsonProperty("string")
+    @JsonProperty(value = "string", required = true)
     public String getString() {
         return this.string;
     }
 
     /** docs for integer field */
-    @JsonProperty("integer")
+    @JsonProperty(value = "integer", required = true)
     public int getInteger() {
         return this.integer;
     }
 
     /** docs for doubleValue field */
-    @JsonProperty("doubleValue")
+    @JsonProperty(value = "doubleValue", required = true)
     public double getDoubleValue() {
         return this.doubleValue;
     }
 
     /** docs for optionalItem field */
-    @JsonProperty("optionalItem")
+    @JsonProperty(value = "optionalItem", required = false)
     public Optional<String> getOptionalItem() {
         return this.optionalItem;
     }
 
     /** docs for items field */
-    @JsonProperty("items")
+    @JsonProperty(value = "items", required = true)
     public List<String> getItems() {
         return this.items;
     }
 
     /** docs for set field */
-    @JsonProperty("set")
+    @JsonProperty(value = "set", required = true)
     public Set<String> getSet() {
         return this.set;
     }
 
     /** docs for map field */
-    @JsonProperty("map")
+    @JsonProperty(value = "map", required = true)
     public Map<String, String> getMap() {
         return this.map;
     }
 
     /** docs for alias field */
-    @JsonProperty("alias")
+    @JsonProperty(value = "alias", required = true)
     public StringAliasExample getAlias() {
         return this.alias;
     }

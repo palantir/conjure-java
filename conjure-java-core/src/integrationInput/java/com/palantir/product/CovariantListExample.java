@@ -27,12 +27,12 @@ public final class CovariantListExample {
         this.externalItems = Collections.unmodifiableList(externalItems);
     }
 
-    @JsonProperty("items")
+    @JsonProperty(value = "items", required = true)
     public List<Object> getItems() {
         return this.items;
     }
 
-    @JsonProperty("externalItems")
+    @JsonProperty(value = "externalItems", required = true)
     public List<ExampleExternalReference> getExternalItems() {
         return this.externalItems;
     }

@@ -22,7 +22,7 @@ public final class SafeLongExample {
         this.safeLongValue = safeLongValue;
     }
 
-    @JsonProperty("safeLongValue")
+    @JsonProperty(value = "safeLongValue", required = true)
     public SafeLong getSafeLongValue() {
         return this.safeLongValue;
     }

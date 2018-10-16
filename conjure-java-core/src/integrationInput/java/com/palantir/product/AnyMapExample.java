@@ -24,7 +24,7 @@ public final class AnyMapExample {
         this.items = Collections.unmodifiableMap(items);
     }
 
-    @JsonProperty("items")
+    @JsonProperty(value = "items", required = true)
     public Map<String, Object> getItems() {
         return this.items;
     }

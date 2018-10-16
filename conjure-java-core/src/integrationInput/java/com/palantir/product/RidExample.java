@@ -22,7 +22,7 @@ public final class RidExample {
         this.ridValue = ridValue;
     }
 
-    @JsonProperty("ridValue")
+    @JsonProperty(value = "ridValue", required = true)
     public ResourceIdentifier getRidValue() {
         return this.ridValue;
     }

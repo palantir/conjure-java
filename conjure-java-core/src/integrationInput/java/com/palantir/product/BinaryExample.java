@@ -22,7 +22,7 @@ public final class BinaryExample {
         this.binary = binary;
     }
 
-    @JsonProperty("binary")
+    @JsonProperty(value = "binary", required = true)
     public ByteBuffer getBinary() {
         return this.binary.asReadOnlyBuffer();
     }

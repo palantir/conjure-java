@@ -53,37 +53,37 @@ public final class PrimitiveOptionalsExample {
         this.uuid = uuid;
     }
 
-    @JsonProperty("num")
+    @JsonProperty(value = "num", required = false)
     public OptionalDouble getNum() {
         return this.num;
     }
 
-    @JsonProperty("bool")
+    @JsonProperty(value = "bool", required = false)
     public Optional<Boolean> getBool() {
         return this.bool;
     }
 
-    @JsonProperty("integer")
+    @JsonProperty(value = "integer", required = false)
     public OptionalInt getInteger() {
         return this.integer;
     }
 
-    @JsonProperty("safelong")
+    @JsonProperty(value = "safelong", required = false)
     public Optional<SafeLong> getSafelong() {
         return this.safelong;
     }
 
-    @JsonProperty("rid")
+    @JsonProperty(value = "rid", required = false)
     public Optional<ResourceIdentifier> getRid() {
         return this.rid;
     }
 
-    @JsonProperty("bearertoken")
+    @JsonProperty(value = "bearertoken", required = false)
     public Optional<BearerToken> getBearertoken() {
         return this.bearertoken;
     }
 
-    @JsonProperty("uuid")
+    @JsonProperty(value = "uuid", required = false)
     public Optional<UUID> getUuid() {
         return this.uuid;
     }

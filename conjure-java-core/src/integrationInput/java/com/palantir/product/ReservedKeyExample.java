@@ -38,27 +38,27 @@ public final class ReservedKeyExample {
         this.memoizedHashCode_ = memoizedHashCode_;
     }
 
-    @JsonProperty("package")
+    @JsonProperty(value = "package", required = true)
     public String getPackage() {
         return this.package_;
     }
 
-    @JsonProperty("interface")
+    @JsonProperty(value = "interface", required = true)
     public String getInterface() {
         return this.interface_;
     }
 
-    @JsonProperty("field-name-with-dashes")
+    @JsonProperty(value = "field-name-with-dashes", required = true)
     public String getFieldNameWithDashes() {
         return this.fieldNameWithDashes;
     }
 
-    @JsonProperty("primitve-field-name-with-dashes")
+    @JsonProperty(value = "primitve-field-name-with-dashes", required = true)
     public int getPrimitveFieldNameWithDashes() {
         return this.primitveFieldNameWithDashes;
     }
 
-    @JsonProperty("memoizedHashCode")
+    @JsonProperty(value = "memoizedHashCode", required = true)
     public int getMemoizedHashCode() {
         return this.memoizedHashCode_;
     }
