@@ -185,6 +185,7 @@ public final class BeanGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
+                        .addMember("required", "$L", !isOptional(field.poetSpec()))
                         .build())
                 .returns(field.poetSpec().type);
 
