@@ -27,6 +27,8 @@ import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ObjectDefinition;
+import com.palantir.conjure.spec.OptionalType;
+import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -41,9 +43,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.nullness.Opt;
 import org.immutables.value.Value;
 
 public final class BeanGenerator {
@@ -185,7 +189,7 @@ public final class BeanGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
-                        .addMember("required", "$L", !isOptional(field.poetSpec()))
+                        .addMember("required", "$L", !isOptionalField(field))
                         .build())
                 .returns(field.poetSpec().type);
 
@@ -290,6 +294,15 @@ public final class BeanGenerator {
             return false;
         }
         return ((ParameterizedTypeName) spec.type).rawType.simpleName().equals("Optional");
+    }
+
+    private static boolean isOptionalField(EnrichedField field) {
+        if (!(field.poetSpec().type instanceof ParameterizedTypeName)) {
+            // spec isn't a wrapper class, check for OptionalInt or OptionalDouble
+            return field.poetSpec().type.toString().equals("java.util.OptionalInt")
+                    || field.poetSpec().type.toString().equals("java.util.OptionalDouble");
+        }
+        return ((ParameterizedTypeName) field.poetSpec().type).rawType.simpleName().equals("Optional");
     }
 
     /**
