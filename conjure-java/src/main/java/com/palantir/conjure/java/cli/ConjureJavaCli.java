@@ -16,85 +16,20 @@
 
 package com.palantir.conjure.java.cli;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.google.common.base.Preconditions;
-import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
-import com.palantir.conjure.java.services.ServiceGenerator;
-import com.palantir.conjure.java.types.ObjectGenerator;
-import com.palantir.conjure.java.types.TypeGenerator;
-import com.palantir.conjure.spec.ConjureDefinition;
-import java.io.IOException;
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import picocli.CommandLine;
 
-public final class ConjureJavaCli {
-    public static final String GENERATE_COMMAND = "generate";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new Jdk8Module())
-            .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
-
-    private ConjureJavaCli() {}
-
+@CommandLine.Command(
+        name = "conjure-java",
+        description = "CLI to generate Java POJOs and interfaces from Conjure API definitions.",
+        mixinStandardHelpOptions = true,
+        subcommands = { GenerateCommand.class})
+public final class ConjureJavaCli implements Runnable {
     public static void main(String[] args) {
-        generate(parseCliConfiguration(args));
+        CommandLine.run(new ConjureJavaCli(), args);
     }
 
-    static CliConfiguration parseCliConfiguration(String[] args) {
-        CommandLineParser parser = new BasicParser();
-        Options options = new Options();
-        options.addOption(new Option(CliConfiguration.OBJECTS_OPTION,
-                "Generate POJOs for Conjure type definitions"));
-        options.addOption(new Option(CliConfiguration.JERSEY_OPTION,
-                "Generate jax-rs annotated interfaces for client or server-usage"));
-        options.addOption(new Option(CliConfiguration.RETROFIT_OPTION,
-                "Generate retrofit interfaces for streaming/async clients"));
-        options.addOption(new Option(CliConfiguration.RETROFIT_COMPLETABLE_FUTURES,
-                "Generate retrofit services which return Java8 CompletableFuture instead of OkHttp Call"));
-        options.addOption(new Option(CliConfiguration.JERSEY_BINARY_AS_RESPONSE,
-                "Generate jersey interfaces which return Response instead of StreamingOutput"));
-        options.addOption(new Option(
-                CliConfiguration.REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS,
-                "Generate @NotNull annotations for AuthHeaders and request body params"));
-
-        try {
-            CommandLine cmd = parser.parse(options, args, false);
-            String[] parsedArgs = cmd.getArgs();
-
-            Preconditions.checkArgument(parsedArgs.length == 3 && GENERATE_COMMAND.equals(args[0]),
-                    "Usage: conjure-java %s <input> <output> [...options]", GENERATE_COMMAND);
-
-            return CliConfiguration.of(parsedArgs[1], parsedArgs[2], cmd.getOptions());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    public void run() {
+        CommandLine.usage(this, System.out);
     }
-
-    static void generate(CliConfiguration config) {
-        try {
-            ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.target(), ConjureDefinition.class);
-            TypeGenerator typeGenerator = new ObjectGenerator();
-            ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.featureFlags());
-            ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.featureFlags());
-
-            if (config.generateObjects()) {
-                typeGenerator.emit(conjureDefinition, config.outputDirectory());
-            }
-            if (config.generateJersey()) {
-                jerseyGenerator.emit(conjureDefinition, config.outputDirectory());
-            }
-            if (config.generateRetrofit()) {
-                retrofitGenerator.emit(conjureDefinition, config.outputDirectory());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error parsing definition", e);
-        }
-    }
-
 }

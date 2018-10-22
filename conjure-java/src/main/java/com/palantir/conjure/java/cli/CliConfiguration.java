@@ -21,20 +21,11 @@ import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.FeatureFlags;
 import java.io.File;
 import java.util.Set;
-import org.apache.commons.cli.Option;
 import org.immutables.value.Value;
 
 @Value.Immutable
 public abstract class CliConfiguration {
-    public static final String OBJECTS_OPTION = "objects";
-    public static final String JERSEY_OPTION = "jersey";
-    public static final String RETROFIT_OPTION = "retrofit";
-    public static final String RETROFIT_COMPLETABLE_FUTURES = "retrofitCompletableFutures";
-    public static final String RETROFIT_LISTENABLE_FUTURES = "retrofitListenableFutures";
-    public static final String JERSEY_BINARY_AS_RESPONSE = "jerseyBinaryAsResponse";
-    public static final String REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS = "requireNotNullAuthAndBodyParams";
-
-    abstract File target();
+    abstract File input();
 
     abstract File outputDirectory();
 
@@ -65,7 +56,7 @@ public abstract class CliConfiguration {
 
     @Value.Check
     final void check() {
-        Preconditions.checkArgument(target().isFile(), "Target must exist and be a file");
+        Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
         Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
         Preconditions.checkArgument(generateObjects() ^ generateJersey() ^ generateRetrofit(),
                 "Must specify exactly one project to generate");
@@ -75,42 +66,39 @@ public abstract class CliConfiguration {
         return new Builder();
     }
 
-    static CliConfiguration of(String target, String outputDirectory, Option[] options) {
-        Builder builder = new Builder()
-                .target(new File(target))
-                .outputDirectory(new File(outputDirectory));
-        ImmutableSet.Builder<FeatureFlags> flagsBuilder = ImmutableSet.builder();
-        for (Option option : options) {
-            switch (option.getOpt()) {
-                case OBJECTS_OPTION:
-                    builder.generateObjects(true);
-                    break;
-                case JERSEY_OPTION:
-                    builder.generateJersey(true);
-                    break;
-                case RETROFIT_OPTION:
-                    builder.generateRetrofit(true);
-                    break;
-                case RETROFIT_COMPLETABLE_FUTURES:
-                    flagsBuilder.add(FeatureFlags.RetrofitCompletableFutures);
-                    break;
-                case RETROFIT_LISTENABLE_FUTURES:
-                    flagsBuilder.add(FeatureFlags.RetrofitListenableFutures);
-                    break;
-                case JERSEY_BINARY_AS_RESPONSE:
-                    flagsBuilder.add(FeatureFlags.JerseyBinaryAsResponse);
-                    break;
-                case REQUIRE_NOT_NULL_AUTH_AND_BODY_PARAMS:
-                    flagsBuilder.add(FeatureFlags.RequireNotNullAuthAndBodyParams);
-                    break;
-                default:
-                    break;
+    public static final class Builder extends ImmutableCliConfiguration.Builder {
+
+        Builder retrofitCompletableFutures(boolean flag) {
+            if (flag) {
+                addFeatureFlags(FeatureFlags.RetrofitCompletableFutures);
             }
+            return this;
         }
 
-        builder.featureFlags(flagsBuilder.build());
-        return builder.build();
-    }
+        Builder retrofitListenableFutures(boolean flag) {
+            if (flag) {
+                addFeatureFlags(FeatureFlags.RetrofitListenableFutures);
+            }
+            return this;
+        }
 
-    public static final class Builder extends ImmutableCliConfiguration.Builder {}
+        Builder jerseyBinaryAsResponse(boolean flag) {
+            if (flag) {
+                addFeatureFlags(FeatureFlags.JerseyBinaryAsResponse);
+            }
+            return this;
+        }
+
+        Builder notNullAuthAndBody(boolean flag) {
+            if (flag) {
+                addFeatureFlags(FeatureFlags.RequireNotNullAuthAndBodyParams);
+            }
+            return this;
+        }
+
+        @Override
+        public ImmutableCliConfiguration build() {
+            return super.build();
+        }
+    }
 }

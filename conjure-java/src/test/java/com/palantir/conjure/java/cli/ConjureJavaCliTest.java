@@ -28,6 +28,7 @@ import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import picocli.CommandLine;
 
 public final class ConjureJavaCliTest {
 
@@ -44,23 +45,24 @@ public final class ConjureJavaCliTest {
     @Test
     public void correctlyParseArguments() {
         String[] args = {
-                ConjureJavaCli.GENERATE_COMMAND,
+                "generate",
                 targetFile.getAbsolutePath(),
                 folder.getRoot().getAbsolutePath(),
                 "--objects"
         };
         CliConfiguration expectedConfiguration = CliConfiguration.builder()
-                .target(targetFile)
+                .input(targetFile)
                 .outputDirectory(folder.getRoot())
                 .generateObjects(true)
                 .build();
-        assertThat(ConjureJavaCli.parseCliConfiguration(args)).isEqualTo(expectedConfiguration);
+        GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
     @Test
     public void parseFeatureFlags() {
         String[] args = {
-                ConjureJavaCli.GENERATE_COMMAND,
+                "generate",
                 targetFile.getAbsolutePath(),
                 folder.getRoot().getAbsolutePath(),
                 "--objects",
@@ -69,7 +71,7 @@ public final class ConjureJavaCliTest {
                 "--requireNotNullAuthAndBodyParams"
         };
         CliConfiguration expectedConfiguration = CliConfiguration.builder()
-                .target(targetFile)
+                .input(targetFile)
                 .outputDirectory(folder.getRoot())
                 .generateObjects(true)
                 .featureFlags(ImmutableSet.of(
@@ -77,95 +79,85 @@ public final class ConjureJavaCliTest {
                         FeatureFlags.JerseyBinaryAsResponse,
                         FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .build();
-        assertThat(ConjureJavaCli.parseCliConfiguration(args)).isEqualTo(expectedConfiguration);
+        GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
     @Test
-    public void throwsWhenUnexpectedFeature() {
+    public void doesNotThrowWhenUnexpectedFeature() {
         String[] args = {
-                ConjureJavaCli.GENERATE_COMMAND,
+                "generate",
                 targetFile.getAbsolutePath(),
                 folder.getRoot().getAbsolutePath(),
                 "--objects",
                 "--foo"
         };
-        assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Unrecognized option: --foo");
-    }
-
-    @Test
-    public void throwsWhenMissingArguments() {
-        String[] args = {};
-        assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Usage: conjure-java generate <input> <output> [...options]");
+        CliConfiguration expectedConfiguration = CliConfiguration.builder()
+                .input(targetFile)
+                .outputDirectory(folder.getRoot())
+                .generateObjects(true)
+                .build();
+        GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
     @Test
     public void throwsWhenTargetDoesNotExist() {
-        String[] args = {ConjureJavaCli.GENERATE_COMMAND, "foo", "bar"};
-        assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Target must exist and be a file");
+        String[] args = {"generate", "foo", "bar"};
+        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+                .isInstanceOf(CommandLine.ExecutionException.class)
+                .hasMessageContaining("Target must exist and be a file");
     }
 
     @Test
     public void throwsWhenOutputDoesNotExist() {
-        String[] args = {ConjureJavaCli.GENERATE_COMMAND, targetFile.getAbsolutePath(), "bar"};
-        assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Output must exist and be a directory");
+        String[] args = {"generate", targetFile.getAbsolutePath(), "bar"};
+        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+                .isInstanceOf(CommandLine.ExecutionException.class)
+                .hasMessageContaining("Output must exist and be a directory");
     }
 
     @Test
     public void throwsWhenMissingGeneratorFlags() {
-        String[] args = {
-                ConjureJavaCli.GENERATE_COMMAND,
-                targetFile.getAbsolutePath(),
-                folder.getRoot().getAbsolutePath()
-        };
-        assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Must specify exactly one project to generate");
+        String[] args = { "generate", targetFile.getAbsolutePath(), folder.getRoot().getAbsolutePath() };
+        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+                .isInstanceOf(CommandLine.ExecutionException.class)
+                .hasMessageContaining("Must specify exactly one project to generate");
     }
 
     @Test
     public void throwsWhenTooManyGeneratorFlags() {
         String[] args = {
-                ConjureJavaCli.GENERATE_COMMAND,
+                "generate",
                 targetFile.getAbsolutePath(),
                 folder.getRoot().getAbsolutePath(),
                 "--objects",
                 "--jersey"
         };
-        assertThatThrownBy(() -> ConjureJavaCli.parseCliConfiguration(args))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Must specify exactly one project to generate");
+        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+                .isInstanceOf(CommandLine.ExecutionException.class)
+                .hasMessageContaining("Must specify exactly one project to generate");
     }
 
     @Test
     public void generatesCode() throws Exception {
         File outputDirectory = folder.newFolder();
-        CliConfiguration configuration = CliConfiguration.builder()
-                .target(new File("src/test/resources/conjure-api.json"))
-                .outputDirectory(outputDirectory)
-                .generateObjects(true)
-                .build();
-        ConjureJavaCli.generate(configuration);
+        String[] args = {
+                "generate",
+                "src/test/resources/conjure-api.json",
+                outputDirectory.getAbsolutePath(),
+                "--objects"
+        };
+        CommandLine.run(new ConjureJavaCli(), args);
         assertThat(
                 new File(outputDirectory, "com/palantir/conjure/spec/ConjureDefinition.java").isFile()).isTrue();
     }
 
     @Test
     public void throwsWhenInvalidDefinition() throws Exception {
-        CliConfiguration configuration = CliConfiguration.builder()
-                .target(targetFile)
-                .outputDirectory(folder.newFolder())
-                .generateObjects(true)
-                .build();
-        assertThatThrownBy(() -> ConjureJavaCli.generate(configuration))
-                .isInstanceOf(RuntimeException.class)
+        String[] args = { "generate", targetFile.getAbsolutePath(), folder.newFolder().getAbsolutePath(), "--objects" };
+        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+                .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Error parsing definition");
     }
 
@@ -174,10 +166,10 @@ public final class ConjureJavaCliTest {
     public void regenerateVendoredCode() throws Exception {
         File outputDirectory = new File("../conjure-java-core/src/main/java");
         CliConfiguration configuration = CliConfiguration.builder()
-                .target(new File("src/test/resources/conjure-api.json"))
+                .input(new File("src/test/resources/conjure-api.json"))
                 .outputDirectory(outputDirectory)
                 .generateObjects(true)
                 .build();
-        ConjureJavaCli.generate(configuration);
+//        ConjureJavaCli.generate(configuration);
     }
 }
