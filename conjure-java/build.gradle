@@ -20,7 +20,7 @@ mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
 
 dependencies {
     compile project(':conjure-java-core')
-    compile 'commons-cli:commons-cli'
+    compile 'info.picocli:picocli'
     runtime 'org.slf4j:slf4j-simple'
 
     testCompile 'junit:junit'
