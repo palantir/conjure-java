@@ -24,7 +24,6 @@ import com.palantir.conjure.java.FeatureFlags;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -55,7 +54,7 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(folder.getRoot())
                 .generateObjects(true)
                 .build();
-        GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
@@ -79,7 +78,7 @@ public final class ConjureJavaCliTest {
                         FeatureFlags.JerseyBinaryAsResponse,
                         FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .build();
-        GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
@@ -97,7 +96,7 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(folder.getRoot())
                 .generateObjects(true)
                 .build();
-        GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
@@ -159,17 +158,5 @@ public final class ConjureJavaCliTest {
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Error parsing definition");
-    }
-
-    @Ignore
-    @Test
-    public void regenerateVendoredCode() throws Exception {
-        File outputDirectory = new File("../conjure-java-core/src/main/java");
-        CliConfiguration configuration = CliConfiguration.builder()
-                .input(new File("src/test/resources/conjure-api.json"))
-                .outputDirectory(outputDirectory)
-                .generateObjects(true)
-                .build();
-//        ConjureJavaCli.generate(configuration);
     }
 }

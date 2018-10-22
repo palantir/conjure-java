@@ -67,38 +67,20 @@ public abstract class CliConfiguration {
     }
 
     public static final class Builder extends ImmutableCliConfiguration.Builder {
-
         Builder retrofitCompletableFutures(boolean flag) {
-            if (flag) {
-                addFeatureFlags(FeatureFlags.RetrofitCompletableFutures);
-            }
-            return this;
+            return flag ? addFeatureFlags(FeatureFlags.RetrofitCompletableFutures) : this;
         }
 
         Builder retrofitListenableFutures(boolean flag) {
-            if (flag) {
-                addFeatureFlags(FeatureFlags.RetrofitListenableFutures);
-            }
-            return this;
+            return flag ? addFeatureFlags(FeatureFlags.RetrofitListenableFutures) : this;
         }
 
         Builder jerseyBinaryAsResponse(boolean flag) {
-            if (flag) {
-                addFeatureFlags(FeatureFlags.JerseyBinaryAsResponse);
-            }
-            return this;
+            return flag ? addFeatureFlags(FeatureFlags.JerseyBinaryAsResponse) : this;
         }
 
         Builder notNullAuthAndBody(boolean flag) {
-            if (flag) {
-                addFeatureFlags(FeatureFlags.RequireNotNullAuthAndBodyParams);
-            }
-            return this;
-        }
-
-        @Override
-        public ImmutableCliConfiguration build() {
-            return super.build();
+            return flag ? addFeatureFlags(FeatureFlags.RequireNotNullAuthAndBodyParams) : this;
         }
     }
 }
