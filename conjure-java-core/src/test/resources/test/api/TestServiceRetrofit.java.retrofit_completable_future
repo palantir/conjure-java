@@ -36,44 +36,56 @@ import retrofit2.http.Streaming;
 public interface TestServiceRetrofit {
     /** Returns a mapping from file system id to backing file system configuration. */
     @GET("./catalog/fileSystems")
-    @Headers("hr-path-template: /catalog/fileSystems")
+    @Headers({"hr-path-template: /catalog/fileSystems", "Accept: application/json"})
     CompletableFuture<Map<String, BackingFileSystem>> getFileSystems(
             @Header("Authorization") AuthHeader authHeader);
 
     @POST("./catalog/datasets")
-    @Headers("hr-path-template: /catalog/datasets")
+    @Headers({"hr-path-template: /catalog/datasets", "Accept: application/json"})
     CompletableFuture<Dataset> createDataset(
             @Header("Authorization") AuthHeader authHeader,
             @Body CreateDatasetRequest request,
             @Header("Test-Header") String testHeaderArg);
 
     @GET("./catalog/datasets/{datasetRid}")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}")
+    @Headers({"hr-path-template: /catalog/datasets/{datasetRid}", "Accept: application/json"})
     CompletableFuture<Optional<Dataset>> getDataset(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/raw")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}/raw")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/raw",
+        "Accept: application/octet-stream"
+    })
     @Streaming
     CompletableFuture<ResponseBody> getRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/raw-aliased")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}/raw-aliased")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/raw-aliased",
+        "Accept: application/json"
+    })
     CompletableFuture<ResponseBody> getAliasedRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/raw-maybe")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}/raw-maybe")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/raw-maybe",
+        "Accept: application/json"
+    })
     CompletableFuture<Optional<ByteBuffer>> maybeGetRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/string-aliased")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}/string-aliased")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/string-aliased",
+        "Accept: application/json"
+    })
     CompletableFuture<AliasedString> getAliasedString(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
@@ -84,7 +96,10 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
 
     @GET("./catalog/datasets/{datasetRid}/branches")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}/branches")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/branches",
+        "Accept: application/json"
+    })
     CompletableFuture<Set<String>> getBranches(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
@@ -95,27 +110,36 @@ public interface TestServiceRetrofit {
      * @deprecated use getBranches instead
      */
     @GET("./catalog/datasets/{datasetRid}/branchesDeprecated")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}/branchesDeprecated")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/branchesDeprecated",
+        "Accept: application/json"
+    })
     @Deprecated
     CompletableFuture<Set<String>> getBranchesDeprecated(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/branches/{branch}/resolve")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}/branches/{branch}/resolve")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/branches/{branch}/resolve",
+        "Accept: application/json"
+    })
     CompletableFuture<Optional<String>> resolveBranch(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
             @Path(value = "branch", encoded = true) String branch);
 
     @GET("./catalog/datasets/{datasetRid}/testParam")
-    @Headers("hr-path-template: /catalog/datasets/{datasetRid}/testParam")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/testParam",
+        "Accept: application/json"
+    })
     CompletableFuture<Optional<String>> testParam(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @POST("./catalog/test-query-params")
-    @Headers("hr-path-template: /catalog/test-query-params")
+    @Headers({"hr-path-template: /catalog/test-query-params", "Accept: application/json"})
     CompletableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Body String query,
@@ -137,19 +161,19 @@ public interface TestServiceRetrofit {
             @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
 
     @GET("./catalog/boolean")
-    @Headers("hr-path-template: /catalog/boolean")
+    @Headers({"hr-path-template: /catalog/boolean", "Accept: application/json"})
     CompletableFuture<Boolean> testBoolean(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./catalog/double")
-    @Headers("hr-path-template: /catalog/double")
+    @Headers({"hr-path-template: /catalog/double", "Accept: application/json"})
     CompletableFuture<Double> testDouble(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./catalog/integer")
-    @Headers("hr-path-template: /catalog/integer")
+    @Headers({"hr-path-template: /catalog/integer", "Accept: application/json"})
     CompletableFuture<Integer> testInteger(@Header("Authorization") AuthHeader authHeader);
 
     @POST("./catalog/optional")
-    @Headers("hr-path-template: /catalog/optional")
+    @Headers({"hr-path-template: /catalog/optional", "Accept: application/json"})
     CompletableFuture<Optional<String>> testPostOptional(
             @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
 
