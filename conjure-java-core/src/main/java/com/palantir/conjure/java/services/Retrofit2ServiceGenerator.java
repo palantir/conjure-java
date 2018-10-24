@@ -55,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
+import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,9 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             "com.google.common.util.concurrent", "ListenableFuture");
     private static final ClassName CALL_TYPE = ClassName.get("retrofit2", "Call");
     private static final String AUTH_HEADER_NAME = "Authorization";
+
+    private static final String JSON_MEDIA_TYPE = MediaType.APPLICATION_JSON;
+    private static final String OCTET_STREAM_MEDIA_TYPE = MediaType.APPLICATION_OCTET_STREAM;
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
 
@@ -133,10 +137,17 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(AnnotationSpec.builder(httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
                         .addMember("value", "$S", "." + endpointPathWithoutRegex)
-                        .build())
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Headers"))
-                        .addMember("value", "$S", "hr-path-template: " + endpointPathWithoutRegex)
                         .build());
+
+        AnnotationSpec.Builder headersBuilder = AnnotationSpec.builder(ClassName.get("retrofit2.http", "Headers"))
+                .addMember("value", "$S", "hr-path-template: " + endpointPathWithoutRegex);
+        endpointDef.getReturns().ifPresent(type -> {
+            String mediaType = type.accept(TypeVisitor.IS_BINARY)
+                    ? MediaType.APPLICATION_OCTET_STREAM
+                    : MediaType.APPLICATION_JSON;
+            headersBuilder.addMember("value", "$S", "Accept: " + mediaType);
+        });
+        methodBuilder.addAnnotation(headersBuilder.build());
 
         if (endpointDef.getReturns().map(type -> type.accept(TypeVisitor.IS_BINARY)).orElse(false)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming")).build());

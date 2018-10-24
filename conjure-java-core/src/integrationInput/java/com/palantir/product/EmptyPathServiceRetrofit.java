@@ -9,6 +9,6 @@ import retrofit2.http.Headers;
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
 public interface EmptyPathServiceRetrofit {
     @GET("./")
-    @Headers("hr-path-template: /")
+    @Headers({"hr-path-template: /", "Accept: application/json"})
     Call<Boolean> emptyPath();
 }
