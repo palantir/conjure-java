@@ -43,8 +43,8 @@ configurations {
 }
 
 dependencies {
-    testCases 'com.palantir.conjure.verification:test-cases'
-    verificationApi 'com.palantir.conjure.verification:verification-api'
+    testCases 'com.palantir.conjure.verification:verification-server-test-cases'
+    verificationApi 'com.palantir.conjure.verification:verification-server-api'
     verificationServer "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
     generatedObjectsCompile project(':conjure-java-core')
