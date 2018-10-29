@@ -42,11 +42,11 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
     ```java
     ManyFieldExample example = ManyFieldExample.builder()
-                .string("foo")
-                .integer(123)
-                .optionalItem("bar")
-                .addAllItems(iterable)
-                .build();
+            .string("foo")
+            .integer(123)
+            .optionalItem("bar")
+            .addAllItems(iterable)
+            .build();
 
     // or using Jackson (via com.palantir.conjure.java.runtime:conjure-jackson-serialization)
     ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
@@ -100,26 +100,86 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
 Conjure-java generates Java interfaces with [JAX-RS](http://jax-rs-spec.java.net/) annotations, so they can be used on the client side or on the server-side.
 
-- Example jersey interface: [EteService](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteService.java)
+Example jersey interface: [EteService](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteService.java)
 
-For **client-side usage**, use [http-remoting](https://github.com/palantir/http-remoting#jaxrs-clients) which configures Feign with sensible defaults.
+```java
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Path("/")
+@Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+public interface EteService {
+    @GET
+    @Path("base/string")
+    String string(@HeaderParam("Authorization") AuthHeader authHeader);
+}
+```
 
-For **server-side usage**, you need a [Jersey](https://jersey.github.io/)-compatible server. We recommend Dropwizard (which is based on Jetty), but Grizzly, Tomcat, etc should also work fine!  Use [http-remoting's jersey-servers](https://github.com/palantir/http-remoting#jersey-servers) to configure Jackson and Exception mappers appropriately.
+### Jersey clients
 
+Use [conjure-java-runtime's `JaxRsClient`](https://github.com/palantir/conjure-java-runtime#conjure-java-jaxrs-client) which configures Feign with sensible defaults:
+
+```java
+RecipeBookService recipes = JaxRsClient.create(
+        RecipeBookService.class,
+        userAgent,
+        hostMetrics,
+        clientConfiguration);
+
+List<Recipe> results = recipes.getRecipes();
+```
+
+### Jersey servers
+
+You need a [Jersey](https://jersey.github.io/)-compatible server. We recommend Dropwizard (which is based on Jetty), but Grizzly, Tomcat, etc should also work fine.  Use [conjure-java-runtime's `ConjureJerseyFeature`](https://github.com/palantir/conjure-java-runtime#conjure-java-jersey-server) to configure Jackson and Exception mappers appropriately.  Then, you just need to implement the interface:
+
+```java
+public final class RecipeBookResource implements RecipeBookService {
+
+    @Override
+    public List<Recipe> getRecipes() {
+        // ...
+    }
+}
+```
+
+Then in your server main method, [register your resource](https://www.dropwizard.io/1.3.5/docs/getting-started.html#registering-a-resource). For example, using Dropwizard:
+
+```diff
+ public void run(YourConfiguration configuration, Environment environment) {
+     // ...
++    environment.jersey().register(new RecipeBookResource());
+ }
+```
 
 ## Example Retrofit interfaces
 
 As an alternative to the JAX-RS interfaces above, conjure-java can generate equivalent interfaces with [Retrofit2](http://square.github.io/retrofit/) annotations. These clients are useful if you want to stream binary data or make non-blocking async calls:
 
-- Example retrofit2 interface: [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
+Example retrofit2 interface: [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
 
-    ```java
+```java
+public interface EteServiceRetrofit {
+
     @GET("./base/binary")
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
-    ```
+}
+```
 
-You can also supply the `--retrofitListenableFutures` flag if you prefer Guava ListenableFutures instead of Retrofit's Call.
+### Retrofit clients
+
+Use [conjure-java-runtime's `Retrofit2Client`](https://github.com/palantir/conjure-java-runtime#conjure-java-retrofit2-client) which configures Retrofit with sensible defaults:
+
+
+```
+RecipeBookServiceRetrofit recipes = Retrofit2Client.create(
+            RecipeBookServiceRetrofit.class,
+            userAgent,
+            hostMetrics,
+            clientConfiguration);
+
+Call<List<Recipe>> asyncResults = recipes.getRecipes();
+```
 
 ## Contributing
 
