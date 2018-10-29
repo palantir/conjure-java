@@ -171,7 +171,7 @@ public interface EteServiceRetrofit {
 Use [conjure-java-runtime's `Retrofit2Client`](https://github.com/palantir/conjure-java-runtime#conjure-java-retrofit2-client) which configures Retrofit with sensible defaults:
 
 
-```
+```java
 RecipeBookServiceRetrofit recipes = Retrofit2Client.create(
             RecipeBookServiceRetrofit.class,
             userAgent,
