@@ -1,0 +1,89 @@
+/*
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import static org.apache.tools.ant.taskdefs.condition.Os.*
+
+ext {
+    osClassifier = isFamily(FAMILY_MAC) ? "osx" : "linux"
+}
+
+// We locally-codegen verification-api.conjure.json into these source-sets
+sourceSets {
+    generatedObjects
+    generatedJersey
+}
+
+idea {
+    module {
+        sourceDirs += sourceSets.generatedObjects.java.srcDirs
+        sourceDirs += sourceSets.generatedJersey.java.srcDirs
+        generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
+        generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
+        scopes.COMPILE.plus += [configurations.generatedObjectsCompile, configurations.generatedJerseyCompile]
+    }
+}
+
+configurations {
+    testCases
+    verificationApi
+    verifier
+}
+
+
+task unpackVerifier(type: Sync) {
+    from { tarTree(configurations.verifier.singleFile) }
+    into "${buildDir}/verification"
+    rename { "verifier" }
+}
+
+task copyTestCases(type: Sync) {
+    from configurations.testCases, {
+        rename { "test-cases.json" }
+    }
+    from configurations.verificationApi, {
+        rename { "verification-api.json" }
+    }
+    into "$buildDir/test-cases"
+}
+
+task conjureJavaObjects(type: JavaExec) {
+    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects'
+
+    inputs.file "${-> configurations.verificationApi.singleFile}"
+    outputs.dir "src/generatedObjects/java"
+    doFirst { delete "src/generatedObjects/java/*" }
+}
+
+task conjureJavaJersey(type: JavaExec) {
+    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jersey'
+
+    inputs.file "${-> configurations.verificationApi.singleFile}"
+    outputs.dir "src/generatedJersey/java"
+    doFirst { delete "src/generatedJersey/java/*" }
+}
+
+compileGeneratedObjectsJava.dependsOn conjureJavaObjects
+compileGeneratedObjectsJava.dependsOn conjureJavaJersey
+
+tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerifier, copyTestCases
+test.dependsOn unpackVerifier, copyTestCases
+
+checkstyleGeneratedObjects.enabled = false
+checkstyleGeneratedJersey.enabled = false
