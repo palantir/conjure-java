@@ -38,7 +38,7 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
 
 - **Conjure object: [ManyFieldExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/ManyFieldExample.java)**
 
-  Objects can only be instantiated using the builder pattern, or by deserializing from JSON.
+  Objects can only be instantiated using the builder pattern:
 
     ```java
     ManyFieldExample example = ManyFieldExample.builder()
@@ -47,8 +47,11 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
             .optionalItem("bar")
             .addAllItems(iterable)
             .build();
+    ```
 
-    // or using Jackson (via com.palantir.conjure.java.runtime:conjure-jackson-serialization)
+    Or using Jackson via [`conjure-jackson-serialization`](https://github.com/palantir/conjure-java-runtime):
+
+    ```java
     ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
     ManyFieldExample fromJson = mapper.readValue("{\"string\":\"foo\", ...}", ManyFieldExample.class);
     ```
@@ -151,11 +154,11 @@ Then in your server main method, [register your resource](https://www.dropwizard
  }
 ```
 
-## Example Retrofit interfaces
+## Example Retrofit2 interfaces
 
 As an alternative to the JAX-RS interfaces above, conjure-java can generate equivalent interfaces with [Retrofit2](http://square.github.io/retrofit/) annotations. These clients are useful if you want to stream binary data or make non-blocking async calls:
 
-Example retrofit2 interface: [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
+Example Retrofit2 interface: [EteServiceRetrofit](./conjure-java-core/src/integrationInput/java/com/palantir/product/EteServiceRetrofit.java)
 
 ```java
 public interface EteServiceRetrofit {
@@ -166,9 +169,9 @@ public interface EteServiceRetrofit {
 }
 ```
 
-### Retrofit clients
+### Retrofit2 clients
 
-Use [conjure-java-runtime's `Retrofit2Client`](https://github.com/palantir/conjure-java-runtime#conjure-java-retrofit2-client) which configures Retrofit with sensible defaults:
+Use [conjure-java-runtime's `Retrofit2Client`](https://github.com/palantir/conjure-java-runtime#conjure-java-retrofit2-client) which configures Retrofit2 with sensible defaults:
 
 
 ```java
