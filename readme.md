@@ -9,13 +9,23 @@ _CLI to generate Java POJOs and interfaces from [Conjure API definitions](https:
 
 The recommended way to use conjure-java is via a build tool like [gradle-conjure](https://github.com/palantir/gradle-conjure). However, if you don't want to use gradle-conjure, there is also an executable which conforms to [RFC 002](https://github.com/palantir/conjure/blob/develop/rfc/002-contract-for-conjure-generators.md),  published on [bintray](https://bintray.com/palantir/releases/conjure-java).
 
-    Usage: conjure-java generate <input> <output> [...options]
+    Usage: conjure-java generate [...options] <input> <output>
 
-        --objects       [boolean] Generate POJOs for Conjure type definitions
-        --jersey        [boolean] Generate jax-rs annotated interfaces for client or server-usage
-        --retrofit      [boolean] Generate retrofit interfaces for streaming/async clients
-        --featureFlag   [string] Enable the specified feature flag during code generation
-        
+    Generate Java bindings for a Conjure API
+        <input>      Path to the input IR file
+        <output>     Output directory for generated source
+
+    Options:
+        --objects    Generate POJOs for Conjure type definitions
+        --jersey     Generate jax-rs annotated interfaces for client or server-usage
+        --retrofit   Generate retrofit interfaces for streaming/async clients
+        --requireNotNullAuthAndBodyParams
+                     Generate @NotNull annotations for AuthHeaders and request body params
+        --retrofitCompletableFutures
+                     Generate retrofit services which return Java8 CompletableFuture instead of OkHttp Call (deprecated)
+        --retrofitListenableFutures
+                     Generate retrofit services which return Guava ListenableFuture instead of OkHttp Call
+
 ### Feature Flags
 
 Conjure-java supports feature flags to enable additional opt-in features. To enable features provided by a feature
