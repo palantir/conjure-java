@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.palantir.conjure.verification.client.EndpointName;
-import com.palantir.conjure.verification.client.IgnoredClientTestCases;
+import com.palantir.conjure.verification.client.IgnoredServerTestCases;
 import com.palantir.conjure.verification.client.IgnoredTestCases;
 import com.palantir.conjure.verification.client.ServerTestCases;
 import java.io.File;
@@ -32,7 +32,7 @@ public final class Cases {
 
     public static final ServerTestCases TEST_CASES = deserializeTestCases(
             new File("build/test-cases/test-cases.json"));
-    private static final IgnoredClientTestCases IGNORED_TEST_CASES = deserializeIgnoredClientTestCases(
+    private static final IgnoredServerTestCases IGNORED_TEST_CASES = deserializeIgnoredServerTestCases(
             new File("src/test/resources/ignored-test-cases.yml"));
 
     private Cases() {}
@@ -49,11 +49,11 @@ public final class Cases {
         }
     }
 
-    private static IgnoredClientTestCases deserializeIgnoredClientTestCases(File file) {
+    private static IgnoredServerTestCases deserializeIgnoredServerTestCases(File file) {
         try {
             return new ObjectMapper(new YAMLFactory())
                     .registerModule(new Jdk8Module())
-                    .readValue(file, IgnoredTestCases.class).getClient();
+                    .readValue(file, IgnoredTestCases.class).getServer();
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Unable to read %s", file),

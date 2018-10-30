@@ -58,7 +58,7 @@ public final class VerificationClientRule extends ExternalResource {
     @Override
     public void before() throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder(
-                "build/verification-client/client",
+                "build/verification/verifier",
                 "build/test-cases/test-cases.json",
                 "build/test-cases/verification-api.json")
                 .redirectErrorStream(true)
