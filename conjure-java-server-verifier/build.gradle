@@ -17,9 +17,9 @@
 apply from: "${rootDir}/gradle/verifier.gradle"
 
 dependencies {
-    testCases 'com.palantir.conjure.verification:verification-server-test-cases'
-    verificationApi 'com.palantir.conjure.verification:verification-server-api'
-    verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
+    testCases 'com.palantir.conjure.verification:verification-client-test-cases'
+    verificationApi 'com.palantir.conjure.verification:verification-client-api'
+    verifier "com.palantir.conjure.verification:verification-client::${osClassifier}@tgz"
 
     generatedObjectsCompile project(':conjure-java-core')
     generatedObjectsCompile project(':conjure-lib')
@@ -33,6 +33,8 @@ dependencies {
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
+    testCompile 'com.palantir.websecurity:dropwizard-web-security'
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
@@ -45,4 +47,5 @@ tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureE
         check('Slf4jLogsafeArgs', net.ltgt.gradle.errorprone.CheckSeverity.OFF)
     }
 }
+
 

@@ -1,0 +1,12 @@
+server:
+  applicationContextPath: /test
+  applicationConnectors:
+    - type: http
+      port: 12345
+  adminConnectors: []
+  rootPath: /api/*
+webSecurity:
+  cors:
+    allowedHeaders: "*"
+    allowedMethods: "DELETE,GET,HEAD,POST,PUT"
+    allowedOrigins: "*"
