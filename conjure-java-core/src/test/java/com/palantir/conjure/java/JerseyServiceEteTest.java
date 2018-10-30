@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Resources;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -66,7 +67,7 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> RULE =
-            new DropwizardAppRule<>(EteTestServer.class);
+            new DropwizardAppRule<>(EteTestServer.class, Resources.getResource("config.yml").getPath());
 
     private final EteService client;
 
@@ -185,7 +186,7 @@ public final class JerseyServiceEteTest extends TestBase {
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/notNullBody");
+        URL url = new URL("http://0.0.0.0:16938/test-example/api/base/notNullBody");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setDoOutput(true);

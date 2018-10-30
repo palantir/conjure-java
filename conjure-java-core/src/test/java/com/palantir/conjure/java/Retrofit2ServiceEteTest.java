@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Resources;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -57,7 +58,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> RULE =
-            new DropwizardAppRule<>(EteTestServer.class);
+            new DropwizardAppRule<>(EteTestServer.class, Resources.getResource("config.yml").getPath());
 
     private final EteServiceRetrofit client;
 

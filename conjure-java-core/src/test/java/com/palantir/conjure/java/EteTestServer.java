@@ -47,7 +47,7 @@ public final class EteTestServer extends Application<Configuration> {
 
     public static ClientConfiguration clientConfiguration() {
         return ClientConfigurations.of(
-                ImmutableList.of("http://localhost:8080/test-example/api"),
+                ImmutableList.of("http://localhost:16938/test-example/api"),
                 SSL_SOCKET_FACTORY,
                 TRUST_MANAGER);
     }
