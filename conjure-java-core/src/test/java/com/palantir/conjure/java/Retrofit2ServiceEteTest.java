@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Resources;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -33,6 +32,7 @@ import com.palantir.product.EteServiceRetrofit;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
+import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.File;
 import java.io.IOException;
@@ -52,13 +52,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 public final class Retrofit2ServiceEteTest extends TestBase {
+    private static final String PORT = "16939";
 
     @ClassRule
     public static final TemporaryFolder folder = new TemporaryFolder();
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE =
-            new DropwizardAppRule<>(EteTestServer.class, Resources.getResource("config.yml").getPath());
+    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(
+            EteTestServer.class, null, ConfigOverride.config("server.applicationConnectors[0].port", PORT));
 
     private final EteServiceRetrofit client;
 
@@ -67,7 +68,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
                 EteServiceRetrofit.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
-                clientConfiguration());
+                clientConfiguration(PORT));
     }
 
     @Ignore // string returns in Jersey should use a mandated wrapper alias type

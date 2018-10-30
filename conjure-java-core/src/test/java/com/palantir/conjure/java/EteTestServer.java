@@ -45,9 +45,9 @@ public final class EteTestServer extends Application<Configuration> {
     private static final X509TrustManager TRUST_MANAGER =
             SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
 
-    public static ClientConfiguration clientConfiguration() {
+    public static ClientConfiguration clientConfiguration(String port) {
         return ClientConfigurations.of(
-                ImmutableList.of("http://localhost:16938/test-example/api"),
+                ImmutableList.of(String.format("http://localhost:%s/test-example/api", port)),
                 SSL_SOCKET_FACTORY,
                 TRUST_MANAGER);
     }

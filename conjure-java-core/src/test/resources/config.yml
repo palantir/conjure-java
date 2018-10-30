@@ -1,6 +1,0 @@
-server:
-  applicationContextPath: /test-example
-  applicationConnectors:
-    - type: http
-      port: 16938
-  rootPath: /api/*

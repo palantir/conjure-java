@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Resources;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -37,6 +36,7 @@ import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
+import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -61,13 +61,14 @@ import org.junit.rules.TemporaryFolder;
 
 public final class JerseyServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final String PORT = "16938";
 
     @ClassRule
     public static final TemporaryFolder folder = new TemporaryFolder();
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE =
-            new DropwizardAppRule<>(EteTestServer.class, Resources.getResource("config.yml").getPath());
+    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(
+            EteTestServer.class, null, ConfigOverride.config("server.applicationConnectors[0].port", PORT));
 
     private final EteService client;
 
@@ -76,7 +77,7 @@ public final class JerseyServiceEteTest extends TestBase {
                 EteService.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
-                clientConfiguration());
+                clientConfiguration(PORT));
     }
 
     @Test
@@ -85,7 +86,7 @@ public final class JerseyServiceEteTest extends TestBase {
                 EmptyPathService.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
-                clientConfiguration());
+                clientConfiguration(PORT));
         assertThat(emptyPathClient.emptyPath()).isEqualTo(true);
     }
 
