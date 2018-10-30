@@ -32,7 +32,6 @@ import com.palantir.product.EteServiceRetrofit;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.File;
 import java.io.IOException;
@@ -52,14 +51,13 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 public final class Retrofit2ServiceEteTest extends TestBase {
-    private static final String PORT = "16939";
 
     @ClassRule
     public static final TemporaryFolder folder = new TemporaryFolder();
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(
-            EteTestServer.class, null, ConfigOverride.config("server.applicationConnectors[0].port", PORT));
+    public static final DropwizardAppRule<Configuration> RULE =
+            new DropwizardAppRule<>(EteTestServer.class);
 
     private final EteServiceRetrofit client;
 
@@ -68,7 +66,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
                 EteServiceRetrofit.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
-                clientConfiguration(PORT));
+                clientConfiguration());
     }
 
     @Ignore // string returns in Jersey should use a mandated wrapper alias type

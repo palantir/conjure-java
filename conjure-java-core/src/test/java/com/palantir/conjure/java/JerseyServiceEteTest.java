@@ -36,7 +36,6 @@ import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -61,14 +60,13 @@ import org.junit.rules.TemporaryFolder;
 
 public final class JerseyServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
-    private static final String PORT = "16938";
 
     @ClassRule
     public static final TemporaryFolder folder = new TemporaryFolder();
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE = new DropwizardAppRule<>(
-            EteTestServer.class, null, ConfigOverride.config("server.applicationConnectors[0].port", PORT));
+    public static final DropwizardAppRule<Configuration> RULE =
+            new DropwizardAppRule<>(EteTestServer.class);
 
     private final EteService client;
 
@@ -77,7 +75,7 @@ public final class JerseyServiceEteTest extends TestBase {
                 EteService.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
-                clientConfiguration(PORT));
+                clientConfiguration());
     }
 
     @Test
@@ -86,7 +84,7 @@ public final class JerseyServiceEteTest extends TestBase {
                 EmptyPathService.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
-                clientConfiguration(PORT));
+                clientConfiguration());
         assertThat(emptyPathClient.emptyPath()).isEqualTo(true);
     }
 
@@ -187,7 +185,7 @@ public final class JerseyServiceEteTest extends TestBase {
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {
-        URL url = new URL("http://0.0.0.0:16938/test-example/api/base/notNullBody");
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/notNullBody");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setDoOutput(true);
