@@ -2,7 +2,7 @@ server:
   applicationContextPath: /test
   applicationConnectors:
     - type: http
-      port: 8345
+      port: 8346
   rootPath: /api/*
 webSecurity:
   cors:
