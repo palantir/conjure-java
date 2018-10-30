@@ -44,7 +44,7 @@ public class AutoDeserializeTest {
     @ClassRule
     public static final DropwizardAppRule<ServerUnderTestConfiguration> serverUnderTestRule = new DropwizardAppRule<>(
             ServerUnderTestApplication.class,
-            Resources.getResource("config.yml").getPath());
+            Resources.getResource("/config.yml").getPath());
 
     @ClassRule
     public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
