@@ -91,7 +91,7 @@ public interface TestServiceRetrofit {
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @POST("./catalog/datasets/upload-raw")
-    @Headers("hr-path-template: /catalog/datasets/upload-raw")
+    @Headers({"hr-path-template: /catalog/datasets/upload-raw", "Accept: application/json"})
     Call<Void> uploadRawData(
             @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
 
@@ -150,7 +150,10 @@ public interface TestServiceRetrofit {
             @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
 
     @POST("./catalog/test-no-response-query-params")
-    @Headers("hr-path-template: /catalog/test-no-response-query-params")
+    @Headers({
+        "hr-path-template: /catalog/test-no-response-query-params",
+        "Accept: application/json"
+    })
     Call<Void> testNoResponseQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Body String query,
@@ -178,7 +181,7 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
 
     @GET("./catalog/optional-integer-double")
-    @Headers("hr-path-template: /catalog/optional-integer-double")
+    @Headers({"hr-path-template: /catalog/optional-integer-double", "Accept: application/json"})
     Call<Void> testOptionalIntegerAndDouble(
             @Header("Authorization") AuthHeader authHeader,
             @Query("maybeInteger") OptionalInt maybeInteger,
