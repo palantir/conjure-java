@@ -1,9 +1,10 @@
 # Conjure-Java ![Bintray](https://img.shields.io/bintray/v/palantir/releases/conjure-java.svg) [![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg)](https://opensource.org/licenses/Apache-2.0)
 
-
-
-
 _CLI to generate Java POJOs and interfaces from [Conjure API definitions](https://github.com/palantir/conjure)._
+
+Note that all Java APIs in this repository (including `conjure-java-core`) are considered "internal" in the sense that
+they may change at any time and without prior warning or deprecation notice. These packages are published for
+convenience, but users must assume responsibility for adapting their code when dependencies change.
 
 ## Usage
 
