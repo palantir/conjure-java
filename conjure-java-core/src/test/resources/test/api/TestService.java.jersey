@@ -87,6 +87,12 @@ public interface TestService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @NotNull InputStream input);
 
+    @POST
+    @Path("catalog/datasets/upload-raw-aliased")
+    void uploadAliasedRawData(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @NotNull InputStream input);
+
     @GET
     @Path("catalog/datasets/{datasetRid}/branches")
     Set<String> getBranches(

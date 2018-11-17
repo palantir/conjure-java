@@ -66,8 +66,9 @@ public interface TestServiceRetrofit {
     @GET("./catalog/datasets/{datasetRid}/raw-aliased")
     @Headers({
         "hr-path-template: /catalog/datasets/{datasetRid}/raw-aliased",
-        "Accept: application/json"
+        "Accept: application/octet-stream"
     })
+    @Streaming
     CompletableFuture<ResponseBody> getAliasedRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
@@ -93,6 +94,11 @@ public interface TestServiceRetrofit {
     @POST("./catalog/datasets/upload-raw")
     @Headers({"hr-path-template: /catalog/datasets/upload-raw", "Accept: application/json"})
     CompletableFuture<Void> uploadRawData(
+            @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
+
+    @POST("./catalog/datasets/upload-raw-aliased")
+    @Headers({"hr-path-template: /catalog/datasets/upload-raw-aliased", "Accept: application/json"})
+    CompletableFuture<Void> uploadAliasedRawData(
             @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
 
     @GET("./catalog/datasets/{datasetRid}/branches")

@@ -37,8 +37,7 @@ public final class TypeMapper {
         this(types, DefaultClassNameVisitor::new);
     }
 
-    public TypeMapper(List<TypeDefinition> types,
-            Factory classNameVisitorFactory) {
+    public TypeMapper(List<TypeDefinition> types, Factory classNameVisitorFactory) {
         this.types = types.stream().collect(
                 Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
         this.classNameVisitorFactory = classNameVisitorFactory;

@@ -22,19 +22,36 @@ import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
+import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public final class Retrofit2MethodTypeClassNameVisitor implements ClassNameVisitor {
-
-    private static final ClassName REQUEST_BODY_TYPE = ClassName.get("okhttp3", "RequestBody");
+public final class BinaryResolvingClassNameVisitor implements ClassNameVisitor {
 
     private final DefaultClassNameVisitor delegate;
+    private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
+    private final ClassName binaryClassName;
 
-    public Retrofit2MethodTypeClassNameVisitor(List<TypeDefinition> types) {
+    public static Factory createFactory(Class<?> binaryClass) {
+        return createFactory(ClassName.get(binaryClass));
+    }
+
+    public static Factory createFactory(ClassName binaryClassName) {
+        return types -> new BinaryResolvingClassNameVisitor(types, binaryClassName);
+    }
+
+    private BinaryResolvingClassNameVisitor(List<TypeDefinition> types, ClassName binaryClassName) {
         this.delegate = new DefaultClassNameVisitor(types);
+        this.types = types.stream().collect(Collectors.toMap(
+                t -> t.accept(TypeDefinitionVisitor.TYPE_NAME),
+                Function.identity()));
+        this.binaryClassName = binaryClassName;
     }
 
     @Override
@@ -55,7 +72,7 @@ public final class Retrofit2MethodTypeClassNameVisitor implements ClassNameVisit
     @Override
     public TypeName visitPrimitive(PrimitiveType type) {
         if (type.get() == PrimitiveType.Value.BINARY) {
-            return REQUEST_BODY_TYPE;
+            return binaryClassName;
         } else {
             return delegate.visitPrimitive(type);
         }
@@ -63,6 +80,19 @@ public final class Retrofit2MethodTypeClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
+        if (!types.containsKey(type)) {
+            throw new IllegalStateException("Unknown LocalReferenceType type: " + type);
+        }
+
+        TypeDefinition def = types.get(type);
+        if (def.accept(TypeDefinitionVisitor.IS_ALIAS)) {
+            Type aliasType = def.accept(TypeDefinitionVisitor.ALIAS).getAlias();
+            TypeName aliasClassName = aliasType.accept(this);
+            if (aliasClassName.equals(binaryClassName)) {
+                return binaryClassName;
+            }
+        }
+
         return delegate.visitReference(type);
     }
 
@@ -75,5 +105,4 @@ public final class Retrofit2MethodTypeClassNameVisitor implements ClassNameVisit
     public TypeName visitSet(SetType type) {
         return delegate.visitSet(type);
     }
-
 }
