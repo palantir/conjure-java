@@ -1,4 +1,6 @@
 auto-label:
   names:
-    roomba/latest-gradle-wrapper: [ "merge when ready" ]
-    roomba/latest-baseline: [ "merge when ready" ]
+    versions-props/upgrade-all: [ "merge when ready" ]
+    excavator/manage-circleci: [ "merge when ready" ]
+  tags:
+    roomba: [ "merge when ready" ]
