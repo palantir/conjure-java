@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.types;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
