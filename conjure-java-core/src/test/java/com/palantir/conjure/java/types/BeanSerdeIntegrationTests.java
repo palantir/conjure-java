@@ -30,7 +30,7 @@ public final class BeanSerdeIntegrationTests {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private static final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+    private static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
 
     @Test
     public void testSetExampleSerde() throws Exception {

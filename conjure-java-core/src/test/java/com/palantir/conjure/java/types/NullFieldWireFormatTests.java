@@ -76,7 +76,7 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_double_field_should_throw() throws Exception {
-        assertThatThrownBy(() -> mapper.readValue("{\"double\":null}", DoubleExample.class))
+        assertThatThrownBy(() -> mapper.readValue("{}", DoubleExample.class))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Some required fields have not been set: [doubleValue]");
     }
@@ -95,9 +95,9 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_collection_fields_should_deserialize_as_empty() throws Exception {
-        assertThat(mapper.readValue("{\"foo\":null}", SetExample.class).getItems()).isEmpty();
-        assertThat(mapper.readValue("{\"foo\":null}", ListExample.class).getItems()).isEmpty();
-        assertThat(mapper.readValue("{\"foo\":null}", MapExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{}", SetExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{}", ListExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{}", MapExample.class).getItems()).isEmpty();
     }
 
     @Test
