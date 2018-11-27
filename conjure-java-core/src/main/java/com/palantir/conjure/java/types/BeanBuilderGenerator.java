@@ -91,11 +91,7 @@ public final class BeanBuilderGenerator {
                 .addMethod(createFromObject(enrichedFields))
                 .addMethods(createSetters(enrichedFields))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
-                .addMethod(createBuild(enrichedFields, poetFields))
-                .addAnnotation(
-                        AnnotationSpec.builder(JsonIgnoreProperties.class)
-                                .addMember("ignoreUnknown", "$L", true)
-                                .build());
+                .addMethod(createBuild(enrichedFields, poetFields));
 
         return builder.build();
     }

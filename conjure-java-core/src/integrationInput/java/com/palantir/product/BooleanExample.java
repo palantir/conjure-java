@@ -1,6 +1,5 @@
 package com.palantir.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -63,7 +62,6 @@ public final class BooleanExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private boolean coin;
 
