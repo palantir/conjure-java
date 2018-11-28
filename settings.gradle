@@ -1,4 +1,3 @@
-enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'conjure-java'
 
 include 'conjure-java'
