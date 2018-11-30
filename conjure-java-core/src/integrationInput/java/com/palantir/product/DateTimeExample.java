@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public final class DateTimeExample {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, datetime, "datetime");
         if (missingFields != null) {
-            throw new IllegalArgumentException(
+            throw new SafeIllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
         }
     }

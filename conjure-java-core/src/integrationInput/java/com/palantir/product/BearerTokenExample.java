@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public final class BearerTokenExample {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, bearerTokenValue, "bearerTokenValue");
         if (missingFields != null) {
-            throw new IllegalArgumentException(
+            throw new SafeIllegalArgumentException(
                     "Some required fields have not been set: " + missingFields);
         }
     }
