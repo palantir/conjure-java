@@ -34,6 +34,8 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -126,8 +128,9 @@ public final class BeanBuilderGenerator {
         }
 
         builder.beginControlFlow("if (missingFields != null)")
-                .addStatement("throw new $T(\"Some required fields have not been set: \" + missingFields)",
-                        IllegalArgumentException.class)
+                .addStatement("throw new $T(\"Some required fields have not been set\","
+                                + " $T.of(\"missingFields\", missingFields))",
+                        SafeIllegalArgumentException.class, SafeArg.class)
                 .endControlFlow();
 
         return builder.build();
