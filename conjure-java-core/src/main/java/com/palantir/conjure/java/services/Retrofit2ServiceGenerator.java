@@ -47,6 +47,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.List;
 import java.util.Optional;
@@ -68,8 +69,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     private static final ClassName CALL_TYPE = ClassName.get("retrofit2", "Call");
     private static final String AUTH_HEADER_NAME = "Authorization";
 
-    private static final String JSON_MEDIA_TYPE = MediaType.APPLICATION_JSON;
-    private static final String OCTET_STREAM_MEDIA_TYPE = MediaType.APPLICATION_OCTET_STREAM;
+    private static final ClassName BINARY_RETURN_TYPE = ClassName.get("okhttp3", "ResponseBody");
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
 
@@ -131,25 +131,23 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
             TypeMapper methodTypeMapper) {
+        TypeName returnType = endpointDef.getReturns()
+                .map(returnTypeMapper::getClassName)
+                .orElse(ClassName.VOID);
+
         Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
         HttpPath endpointPathWithoutRegex = replaceEncodedPathArgs(endpointDef.getHttpPath());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(AnnotationSpec.builder(httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
                         .addMember("value", "$S", "." + endpointPathWithoutRegex)
+                        .build())
+                .addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Headers"))
+                        .addMember("value", "$S", "hr-path-template: " + endpointPathWithoutRegex)
+                        .addMember("value", "$S", "Accept: " + getReturnMediaType(returnType))
                         .build());
 
-        AnnotationSpec.Builder headersBuilder = AnnotationSpec.builder(ClassName.get("retrofit2.http", "Headers"))
-                .addMember("value", "$S", "hr-path-template: " + endpointPathWithoutRegex);
-        endpointDef.getReturns().ifPresent(type -> {
-            String mediaType = type.accept(TypeVisitor.IS_BINARY)
-                    ? MediaType.APPLICATION_OCTET_STREAM
-                    : MediaType.APPLICATION_JSON;
-            headersBuilder.addMember("value", "$S", "Accept: " + mediaType);
-        });
-        methodBuilder.addAnnotation(headersBuilder.build());
-
-        if (endpointDef.getReturns().map(type -> type.accept(TypeVisitor.IS_BINARY)).orElse(false)) {
+        if (returnType.equals(BINARY_RETURN_TYPE)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming")).build());
         }
 
@@ -159,13 +157,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(
                 content -> methodBuilder.addJavadoc("$L", content));
 
-        if (endpointDef.getReturns().isPresent()) {
-            methodBuilder.returns(
-                    ParameterizedTypeName.get(getReturnType(),
-                            returnTypeMapper.getClassName(endpointDef.getReturns().get()).box()));
-        } else {
-            methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), ClassName.get(Void.class)));
-        }
+        methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box()));
 
         getAuthParameter(endpointDef.getAuth()).ifPresent(methodBuilder::addParameter);
 
@@ -258,6 +250,12 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         }
 
         throw new IllegalStateException("Unrecognized auth type: " + auth.get());
+    }
+
+    private static String getReturnMediaType(TypeName returnType) {
+        return returnType.equals(BINARY_RETURN_TYPE)
+                ? MediaType.APPLICATION_OCTET_STREAM
+                : MediaType.APPLICATION_JSON;
     }
 
     private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
