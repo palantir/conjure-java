@@ -23,8 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
-import com.palantir.conjure.java.types.JerseyMethodTypeClassNameVisitor;
-import com.palantir.conjure.java.types.JerseyReturnTypeClassNameVisitor;
+import com.palantir.conjure.java.types.BinaryResolvingClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -53,6 +52,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -65,9 +65,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.lang.model.element.Modifier;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.lang3.StringUtils;
 
 public final class JerseyServiceGenerator implements ServiceGenerator {
+
     private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
 
     private final Set<FeatureFlags> experimentalFeatures;
@@ -82,11 +85,15 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
+        Class<?> binaryReturnType = experimentalFeatures.contains(FeatureFlags.JerseyBinaryAsResponse)
+                ? Response.class
+                : StreamingOutput.class;
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                types -> new JerseyReturnTypeClassNameVisitor(types, experimentalFeatures));
+                BinaryResolvingClassNameVisitor.createFactory(binaryReturnType));
         TypeMapper methodTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(), JerseyMethodTypeClassNameVisitor::new);
+                conjureDefinition.getTypes(),
+                BinaryResolvingClassNameVisitor.createFactory(InputStream.class));
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, methodTypeMapper))
                 .collect(Collectors.toSet());

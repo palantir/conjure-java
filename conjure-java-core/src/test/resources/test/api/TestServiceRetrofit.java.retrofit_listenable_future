@@ -3,7 +3,6 @@ package com.palantir.another;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
-import com.palantir.product.NestedAliasedBinary;
 import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
@@ -100,7 +99,7 @@ public interface TestServiceRetrofit {
     @POST("./catalog/datasets/upload-raw-aliased")
     @Headers({"hr-path-template: /catalog/datasets/upload-raw-aliased", "Accept: application/json"})
     ListenableFuture<Void> uploadAliasedRawData(
-            @Header("Authorization") AuthHeader authHeader, @Body NestedAliasedBinary input);
+            @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
 
     @GET("./catalog/datasets/{datasetRid}/branches")
     @Headers({
