@@ -122,6 +122,13 @@ services:
             type: binary
             param-type: body
 
+      uploadAliasedRawData:
+        http: POST /datasets/upload-raw-aliased
+        args:
+          input:
+            type: NestedAliasedBinary
+            param-type: body
+
       getBranches:
         http: GET /datasets/{datasetRid}/branches
         args:

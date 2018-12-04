@@ -2,6 +2,7 @@ package com.palantir.another;
 
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
+import com.palantir.product.NestedAliasedBinary;
 import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.redaction.Safe;
@@ -86,6 +87,12 @@ public interface TestService {
     void uploadRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @NotNull InputStream input);
+
+    @POST
+    @Path("catalog/datasets/upload-raw-aliased")
+    void uploadAliasedRawData(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @NotNull NestedAliasedBinary input);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/branches")
