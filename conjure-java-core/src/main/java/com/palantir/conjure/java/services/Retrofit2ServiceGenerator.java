@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
-import com.palantir.conjure.java.types.Retrofit2MethodTypeClassNameVisitor;
-import com.palantir.conjure.java.types.Retrofit2ReturnTypeClassNameVisitor;
+import com.palantir.conjure.java.types.MethodTypeClassNameVisitor;
+import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
@@ -69,6 +69,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     private static final ClassName CALL_TYPE = ClassName.get("retrofit2", "Call");
     private static final String AUTH_HEADER_NAME = "Authorization";
 
+    private static final ClassName BINARY_METHOD_TYPE = ClassName.get("okhttp3", "RequestBody");
     private static final ClassName BINARY_RETURN_TYPE = ClassName.get("okhttp3", "ResponseBody");
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
@@ -85,10 +86,12 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        TypeMapper returnTypeMapper =
-                new TypeMapper(conjureDefinition.getTypes(), Retrofit2ReturnTypeClassNameVisitor::new);
-        TypeMapper methodTypeMapper =
-                new TypeMapper(conjureDefinition.getTypes(), Retrofit2MethodTypeClassNameVisitor::new);
+        TypeMapper returnTypeMapper = new TypeMapper(
+                conjureDefinition.getTypes(),
+                ReturnTypeClassNameVisitor.createFactory(BINARY_RETURN_TYPE));
+        TypeMapper methodTypeMapper = new TypeMapper(
+                conjureDefinition.getTypes(),
+                MethodTypeClassNameVisitor.createFactory(BINARY_METHOD_TYPE));
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, methodTypeMapper))
                 .collect(Collectors.toSet());
