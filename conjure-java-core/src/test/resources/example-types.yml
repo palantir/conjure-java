@@ -179,3 +179,9 @@ types:
       SingleUnion:
         union:
           foo: string
+      AliasOne:
+        alias: string
+      AliasTwo:
+        alias: optional<AliasOne>
+      AliasThree:
+        alias: AliasTwo
