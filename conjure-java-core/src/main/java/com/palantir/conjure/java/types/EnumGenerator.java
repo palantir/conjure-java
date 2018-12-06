@@ -166,8 +166,8 @@ public final class EnumGenerator {
     }
 
     private static List<MethodSpec> createVisitorMethodSpecs(List<EnumValueDefinition> enumValueDefinitions) {
-        return enumValueDefinitions.stream().map(def ->
-            MethodSpec.methodBuilder(VISIT_METHOD_NAME + StringUtils.capitalize(def.getValue().toLowerCase(Locale.ROOT)))
+        return enumValueDefinitions.stream().map(value ->
+            MethodSpec.methodBuilder(createVisitMethodName(value))
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .returns(TYPE_VARIABLE)
                     .build())
@@ -180,13 +180,11 @@ public final class EnumGenerator {
 
         CodeBlock.Builder parser = CodeBlock.builder()
                 .beginControlFlow("switch (this.get())");
-        values.forEach(value -> {
-            String methodName = VISIT_METHOD_NAME + StringUtils.capitalize(value.getValue().toLowerCase(Locale.ROOT));
-            parser.add("case $L:\n", value.getValue())
+        values.forEach(value ->
+                parser.add("case $L:\n", value.getValue())
                     .indent()
-                    .addStatement("return visitor.$L()", methodName)
-                    .unindent();
-        });
+                    .addStatement("return visitor.$L()", createVisitMethodName(value))
+                    .unindent());
         parser.add("default:\n")
                 .indent()
                 .addStatement("return visitor.visitUnknown(this.toString())")
@@ -202,10 +200,14 @@ public final class EnumGenerator {
                 .build();
     }
 
+    private static String createVisitMethodName(EnumValueDefinition value) {
+        return VISIT_METHOD_NAME + StringUtils.capitalize(value.getValue().toLowerCase(Locale.ROOT));
+    }
+
     private static MethodSpec createConstructor(ClassName enumClass) {
         // Note: We generate a two arg constructor that handles both known
-        // and unknown variants instead of using separate contructors to avoid
-        // jackson's behavior of preferring single string contructors for key
+        // and unknown variants instead of using separate constructors to avoid
+        // jackson's behavior of preferring single string constructors for key
         // deserializers over static factories.
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
