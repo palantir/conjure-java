@@ -28,32 +28,44 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
 public final class EnumGenerator {
 
+    private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
+    private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
+    private static final String VISIT_METHOD_NAME = "visit";
+
     private EnumGenerator() {}
 
     public static JavaFile generateEnumType(EnumDefinition typeDef) {
         String typePackage = typeDef.getTypeName().getPackage();
-        ClassName thisClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
-        ClassName enumClass = ClassName.get(typePackage, typeDef.getTypeName().getName(), "Value");
 
-        return JavaFile.builder(typePackage, createSafeEnum(typeDef, thisClass, enumClass))
+        return JavaFile.builder(typePackage, createSafeEnum(typeDef))
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
     }
 
-    private static TypeSpec createSafeEnum(EnumDefinition typeDef, ClassName thisClass, ClassName enumClass) {
+    private static TypeSpec createSafeEnum(EnumDefinition typeDef) {
+        String typePackage = typeDef.getTypeName().getPackage();
+        ClassName thisClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
+        ClassName enumClass = ClassName.get(typePackage, typeDef.getTypeName().getName(), "Value");
+        ClassName visitorClass = ClassName.get(typePackage, thisClass.simpleName(), "Visitor");
+
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addType(createEnum(enumClass, typeDef.getValues(), true))
+                .addType(createVisitor(visitorClass, typeDef.getValues(), true))
                 .addField(enumClass, "value", Modifier.PRIVATE, Modifier.FINAL)
                 .addField(ClassName.get(String.class), "string", Modifier.PRIVATE, Modifier.FINAL)
                 .addFields(createConstants(typeDef.getValues(), thisClass, enumClass))
@@ -63,6 +75,7 @@ public final class EnumGenerator {
                         .returns(enumClass)
                         .addStatement("return this.value")
                         .build())
+                .addMethod(createAcceptVisitor(visitorClass, typeDef.getValues()))
                 .addMethod(MethodSpec.methodBuilder("toString")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
@@ -131,6 +144,62 @@ public final class EnumGenerator {
                     .build());
         }
         return enumBuilder.build();
+    }
+
+    private static TypeSpec createVisitor(
+            ClassName visitorClass,
+            List<EnumValueDefinition> values,
+            boolean withUnknown) {
+        TypeSpec.Builder builder = TypeSpec.interfaceBuilder(visitorClass)
+                .addModifiers(Modifier.PUBLIC)
+                .addTypeVariable(TYPE_VARIABLE)
+                .addMethods(createVisitorMethodSpecs(values));
+
+        if (withUnknown) {
+            builder = builder.addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                    .addParameter(String.class, "unknownValue")
+                    .returns(TYPE_VARIABLE)
+                    .build());
+        }
+        return builder.build();
+    }
+
+    private static List<MethodSpec> createVisitorMethodSpecs(List<EnumValueDefinition> enumValueDefinitions) {
+        return enumValueDefinitions.stream().map(def ->
+            MethodSpec.methodBuilder(VISIT_METHOD_NAME + StringUtils.capitalize(def.getValue().toLowerCase(Locale.ROOT)))
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                    .returns(TYPE_VARIABLE)
+                    .build())
+                .collect(Collectors.toList());
+    }
+
+    private static MethodSpec createAcceptVisitor(ClassName visitorClass, List<EnumValueDefinition> values) {
+        ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
+        ParameterSpec param = ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
+
+        CodeBlock.Builder parser = CodeBlock.builder()
+                .beginControlFlow("switch (this.get())");
+        values.forEach(value -> {
+            String methodName = VISIT_METHOD_NAME + StringUtils.capitalize(value.getValue().toLowerCase(Locale.ROOT));
+            parser.add("case $L:\n", value.getValue())
+                    .indent()
+                    .addStatement("return visitor.$L()", methodName)
+                    .unindent();
+        });
+        parser.add("default:\n")
+                .indent()
+                .addStatement("return visitor.visitUnknown(this.toString())")
+                .unindent()
+                .endControlFlow();
+
+        return MethodSpec.methodBuilder("accept")
+                .addModifiers(Modifier.PUBLIC)
+                .addTypeVariable(TYPE_VARIABLE)
+                .returns(TYPE_VARIABLE)
+                .addParameter(param)
+                .addCode(parser.build())
+                .build();
     }
 
     private static MethodSpec createConstructor(ClassName enumClass) {

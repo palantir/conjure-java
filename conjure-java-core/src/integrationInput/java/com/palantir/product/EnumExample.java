@@ -38,6 +38,17 @@ public final class EnumExample {
         return this.value;
     }
 
+    public <T> T accept(Visitor<T> visitor) {
+        switch (this.get()) {
+            case ONE:
+                return visitor.visitOne();
+            case TWO:
+                return visitor.visitTwo();
+            default:
+                return visitor.visitUnknown(this.toString());
+        }
+    }
+
     @Override
     @JsonValue
     public String toString() {
@@ -77,5 +88,13 @@ public final class EnumExample {
         TWO,
 
         UNKNOWN
+    }
+
+    public interface Visitor<T> {
+        T visitOne();
+
+        T visitTwo();
+
+        T visitUnknown(String unknownValue);
     }
 }
