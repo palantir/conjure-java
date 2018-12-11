@@ -28,3 +28,21 @@ dependencies {
 
     processor 'org.immutables:value'
 }
+
+// Need to publish a source jar to be accepted on JCenter
+// see https://www.jfrog.com/confluence/display/BT/Central+Repositories#CentralRepositories-IncludingyourPackageinJCenter
+task sourceJar(type: Jar) {
+    dependsOn 'classes'
+    from project.sourceSets.main.allSource
+    classifier 'sources'
+    extension 'jar'
+    group 'build'
+}
+
+publishing {
+    publications {
+        dist {
+            artifact sourceJar
+        }
+    }
+}
