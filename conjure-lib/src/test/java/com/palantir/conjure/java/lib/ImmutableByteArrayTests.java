@@ -26,7 +26,7 @@ public final class ImmutableByteArrayTests {
     @Test
     public void testConstructionCopiesInputArray() {
         byte[] input = new byte[]{0};
-        ImmutableByteArray immutable = new ImmutableByteArray(input);
+        ImmutableByteArray immutable = ImmutableByteArray.from(input);
 
         assertThat(immutable.getBytes()[0]).isEqualTo((byte) 0);
 
@@ -38,34 +38,47 @@ public final class ImmutableByteArrayTests {
     @Test
     public void testConstructionCopiesArrayWithRange() {
         byte[] input = new byte[]{0,1,2};
-        ImmutableByteArray immutable = new ImmutableByteArray(input, 1, 2);
+        ImmutableByteArray immutable = ImmutableByteArray.from(input, 1, 2);
         assertThat(immutable.getBytes()).isEqualTo(new byte[]{1,2});
     }
 
     @Test
     public void testConstructionCopiesArray_badOffset() {
         byte[] input = new byte[0];
-        assertThatThrownBy(() -> new ImmutableByteArray(input, 1, 0))
+        assertThatThrownBy(() -> ImmutableByteArray.from(input, 1, 0))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testConstructionCopiesArray_badLength() {
         byte[] input = new byte[0];
-        assertThatThrownBy(() -> new ImmutableByteArray(input, 0, 1))
+        assertThatThrownBy(() -> ImmutableByteArray.from(input, 0, 1))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testConstructionCopiesArray_badRange() {
         byte[] input = new byte[10];
-        assertThatThrownBy(() -> new ImmutableByteArray(input, 5, 10))
+        assertThatThrownBy(() -> ImmutableByteArray.from(input, 5, 10))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
+    public void testConstructionCopiesByteBuffer() {
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[]{(byte)0,(byte)1,(byte)2});
+        ImmutableByteArray immutable = ImmutableByteArray.from(buffer);
+
+        assertThat(immutable.getByteBuffer()).isEqualTo(buffer.asReadOnlyBuffer());
+
+        buffer.put((byte) 1);
+        buffer.rewind();
+
+        assertThat(immutable.getByteBuffer()).isNotEqualTo(buffer.asReadOnlyBuffer());
+    }
+
+    @Test
     public void testGetBytes_returnsNewByteArray() {
-        ImmutableByteArray immutable = new ImmutableByteArray(new byte[]{0});
+        ImmutableByteArray immutable = ImmutableByteArray.from(new byte[]{0});
 
         byte[] output = immutable.getBytes();
         assertThat(output[0]).isEqualTo((byte) 0);
@@ -76,7 +89,7 @@ public final class ImmutableByteArrayTests {
 
     @Test
     public void testGetByteBuffer_returnsReadOnlyByteBuffer() {
-        ImmutableByteArray immutable = new ImmutableByteArray(new byte[] {0});
+        ImmutableByteArray immutable = ImmutableByteArray.from(new byte[] {0});
 
         ByteBuffer output = immutable.getByteBuffer();
         assertThat(output.isReadOnly()).isTrue();
@@ -84,7 +97,7 @@ public final class ImmutableByteArrayTests {
 
     @Test
     public void testGetByteBuffer_returnsNewByteBuffer() {
-        ImmutableByteArray immutable = new ImmutableByteArray(new byte[] {0});
+        ImmutableByteArray immutable = ImmutableByteArray.from(new byte[] {0});
 
         ByteBuffer output = immutable.getByteBuffer();
         assertThat(output.get()).isEqualTo((byte) 0);
@@ -95,14 +108,14 @@ public final class ImmutableByteArrayTests {
 
     @Test
     public void testGetSize() {
-        assertThat(new ImmutableByteArray(new byte[0]).size()).isEqualTo(0);
-        assertThat(new ImmutableByteArray(new byte[10]).size()).isEqualTo(10);
+        assertThat(ImmutableByteArray.from(new byte[0]).size()).isEqualTo(0);
+        assertThat(ImmutableByteArray.from(new byte[10]).size()).isEqualTo(10);
     }
 
     @Test
     public void testCopy() {
         byte[] input = new byte[]{0,1,2};
-        ImmutableByteArray immutable = new ImmutableByteArray(input);
+        ImmutableByteArray immutable = ImmutableByteArray.from(input);
 
         byte[] test = new byte[input.length];
         immutable.copy(test, 0, test.length);
@@ -113,7 +126,7 @@ public final class ImmutableByteArrayTests {
     @Test
     public void testCopy_badOffset() {
         byte[] input = new byte[0];
-        ImmutableByteArray immutable = new ImmutableByteArray(input);
+        ImmutableByteArray immutable = ImmutableByteArray.from(input);
 
         byte[] test = new byte[0];
         assertThatThrownBy(() -> immutable.copy(test, 1, test.length))
@@ -123,7 +136,7 @@ public final class ImmutableByteArrayTests {
     @Test
     public void testCopy_badLength() {
         byte[] input = new byte[0];
-        ImmutableByteArray immutable = new ImmutableByteArray(input);
+        ImmutableByteArray immutable = ImmutableByteArray.from(input);
 
         byte[] test = new byte[0];
         assertThatThrownBy(() -> immutable.copy(test, 0, 1))
@@ -133,7 +146,7 @@ public final class ImmutableByteArrayTests {
     @Test
     public void testCopy_badRange() {
         byte[] input = new byte[10];
-        ImmutableByteArray immutable = new ImmutableByteArray(input);
+        ImmutableByteArray immutable = ImmutableByteArray.from(input);
 
         byte[] test = new byte[5];
         assertThatThrownBy(() -> immutable.copy(test, 0, 10))

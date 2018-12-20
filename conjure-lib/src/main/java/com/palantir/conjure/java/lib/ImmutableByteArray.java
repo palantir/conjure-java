@@ -22,22 +22,15 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 
 /** An immutable {@code byte[]} wrapper. */
 public final class ImmutableByteArray {
     private final byte[] safe;
 
-    /** Constructs a new {@link ImmutableByteArray} from the provided array. */
-    @JsonCreator
-    public ImmutableByteArray(byte[] array) {
-        this(array, 0, array.length);
-    }
-
-    /** Constructs a new {@link ImmutableByteArray} read from provided offset for the provided length. */
-    public ImmutableByteArray(byte[] array, int offset, int length) {
-        safe = new byte[length];
-
-        System.arraycopy(array, offset, safe, 0, length);
+    /** Constructs a new {@link ImmutableByteArray} assuming the provided array is not held by any other class. */
+    private ImmutableByteArray(byte[] array) {
+        safe = array;
     }
 
     /** Returns a new read-only {@link ByteBuffer} backed by this byte array. */
@@ -77,5 +70,29 @@ public final class ImmutableByteArray {
     public boolean equals(Object obj) {
         return this == obj ||
                 (obj instanceof ImmutableByteArray && Arrays.equals(safe, ((ImmutableByteArray) obj).safe));
+    }
+
+    /** Constructs a new {@link ImmutableByteArray} from the provided array. */
+    @JsonCreator
+    public static ImmutableByteArray from(byte[] array) {
+        return from(array, 0, array.length);
+    }
+
+    /** Constructs a new {@link ImmutableByteArray} read from provided offset for the provided length. */
+    public static ImmutableByteArray from(byte[] array, int offset, int length) {
+        byte[] safe = new byte[length];
+        System.arraycopy(array, offset, safe, 0, length);
+
+        return new ImmutableByteArray(safe);
+    }
+
+    /** Constructs a new {@link ImmutableByteArray} read from the provided {@link ByteBuffer} */
+    public static ImmutableByteArray from(ByteBuffer buffer) {
+        ByteBuffer local = buffer.duplicate();
+
+        byte[] safe = new byte[local.remaining()];
+        local.get(safe);
+
+        return new ImmutableByteArray(safe);
     }
 }
