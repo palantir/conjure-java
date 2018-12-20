@@ -1,3 +1,4 @@
+ch.qos.logback:* = 1.2.3
 com.fasterxml.jackson.*:jackson-* = 2.9.7
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.errorprone:error_prone_annotations = 2.3.2
@@ -9,7 +10,8 @@ com.palantir.conjure.verification:* = 0.16.2
 com.palantir.conjure:* = 4.2.2
 com.palantir.ri:resource-identifier = 1.0.1
 com.palantir.syntactic-paths:syntactic-paths = 0.6.1
-com.palantir.tokens:* = 3.0.1
+com.palantir.tokens:* = 3.3.0
+com.palantir.tracing:tracing = 2.0.1
 com.palantir.websecurity:dropwizard-web-security = 1.1.0
 com.squareup.okhttp3:* = 3.10.0
 com.squareup.retrofit2:* = 2.4.0

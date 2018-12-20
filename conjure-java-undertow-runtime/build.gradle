@@ -17,12 +17,20 @@
 apply from: "$rootDir/gradle/publish-jar.gradle"
 
 dependencies {
-    api project(':conjure-lib')
-    // Generated code depends on Undertow APIs
-    api 'io.undertow:undertow-core'
-    implementation 'com.palantir.safe-logging:preconditions'
+    api project(':conjure-undertow-lib')
+
     implementation 'com.google.guava:guava'
+    implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.tracing:tracing'
     implementation 'org.slf4j:slf4j-api'
+
+    testImplementation 'com.squareup.okhttp3:okhttp'
+    // Required for tests using the slf4j MDC which is not implemented in slf4j-simple
+    testImplementation 'ch.qos.logback:logback-classic'
+    testImplementation 'junit:junit'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
 
     processor 'org.immutables:value'
 }
