@@ -86,7 +86,7 @@ public final class ImmutableByteArray {
         return new ImmutableByteArray(safe);
     }
 
-    /** Constructs a new {@link ImmutableByteArray} read from the provided {@link ByteBuffer} */
+    /** Constructs a new {@link ImmutableByteArray} read from the provided {@link ByteBuffer}. */
     public static ImmutableByteArray from(ByteBuffer buffer) {
         ByteBuffer local = buffer.duplicate();
 
