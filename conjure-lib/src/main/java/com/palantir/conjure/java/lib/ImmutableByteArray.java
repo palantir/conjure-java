@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 
 /** An immutable {@code byte[]} wrapper. */
 public final class ImmutableByteArray {
@@ -68,8 +67,8 @@ public final class ImmutableByteArray {
 
     @Override
     public boolean equals(Object obj) {
-        return this == obj ||
-                (obj instanceof ImmutableByteArray && Arrays.equals(safe, ((ImmutableByteArray) obj).safe));
+        return this == obj
+                || (obj instanceof ImmutableByteArray && Arrays.equals(safe, ((ImmutableByteArray) obj).safe));
     }
 
     /** Constructs a new {@link ImmutableByteArray} from the provided array. */

@@ -37,9 +37,9 @@ public final class ImmutableByteArrayTests {
 
     @Test
     public void testConstructionCopiesArrayWithRange() {
-        byte[] input = new byte[]{0,1,2};
+        byte[] input = new byte[]{0, 1, 2};
         ImmutableByteArray immutable = ImmutableByteArray.from(input, 1, 2);
-        assertThat(immutable.getBytes()).isEqualTo(new byte[]{1,2});
+        assertThat(immutable.getBytes()).isEqualTo(new byte[]{1, 2});
     }
 
     @Test
@@ -65,7 +65,7 @@ public final class ImmutableByteArrayTests {
 
     @Test
     public void testConstructionCopiesByteBuffer() {
-        ByteBuffer buffer = ByteBuffer.wrap(new byte[]{(byte)0,(byte)1,(byte)2});
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[]{0, 1, 2});
         ImmutableByteArray immutable = ImmutableByteArray.from(buffer);
 
         assertThat(immutable.getByteBuffer()).isEqualTo(buffer.asReadOnlyBuffer());
@@ -78,7 +78,7 @@ public final class ImmutableByteArrayTests {
 
     @Test
     public void testGetBytes_returnsNewByteArray() {
-        ImmutableByteArray immutable = ImmutableByteArray.from(new byte[]{0});
+        ImmutableByteArray immutable = ImmutableByteArray.from(new byte[] {0});
 
         byte[] output = immutable.getBytes();
         assertThat(output[0]).isEqualTo((byte) 0);
@@ -114,7 +114,7 @@ public final class ImmutableByteArrayTests {
 
     @Test
     public void testCopy() {
-        byte[] input = new byte[]{0,1,2};
+        byte[] input = new byte[]{0, 1, 2};
         ImmutableByteArray immutable = ImmutableByteArray.from(input);
 
         byte[] test = new byte[input.length];
