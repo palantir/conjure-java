@@ -28,6 +28,10 @@ dependencies {
     generatedJerseyCompile project(':conjure-lib')
     generatedJerseyCompile sourceSets.generatedObjects.output
 
+    generatedUndertowCompile project(':conjure-java-core')
+    generatedUndertowCompile project(':conjure-undertow-lib')
+    generatedUndertowCompile sourceSets.generatedObjects.output
+
     testCompile project(':conjure-java-core')
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'

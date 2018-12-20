@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.ServiceGenerator;
+import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.types.TypeGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -75,6 +76,11 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate jax-rs annotated interfaces for client or server-usage")
         private boolean generateJersey;
 
+        @CommandLine.Option(names = "--undertow",
+                defaultValue = "false",
+                description = "Generate undertow service interfaces and endpoint wrappers for server usage")
+        private boolean generateUndertow;
+
         @CommandLine.Option(names = "--retrofit",
                 defaultValue = "false",
                 description = "Generate retrofit interfaces for streaming/async clients")
@@ -111,6 +117,7 @@ public final class ConjureJavaCli implements Runnable {
                 TypeGenerator typeGenerator = new ObjectGenerator();
                 ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.featureFlags());
                 ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.featureFlags());
+                ServiceGenerator undertowGenerator = new UndertowServiceGenerator();
 
                 if (config.generateObjects()) {
                     typeGenerator.emit(conjureDefinition, config.outputDirectory());
@@ -120,6 +127,9 @@ public final class ConjureJavaCli implements Runnable {
                 }
                 if (config.generateRetrofit()) {
                     retrofitGenerator.emit(conjureDefinition, config.outputDirectory());
+                }
+                if (config.generateUndertow()) {
+                    undertowGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
             } catch (IOException e) {
                 throw new RuntimeException("Error parsing definition", e);
@@ -134,6 +144,7 @@ public final class ConjureJavaCli implements Runnable {
                     .generateJersey(generateJersey)
                     .generateObjects(generateObjects)
                     .generateRetrofit(generateRetrofit)
+                    .generateUndertow(generateUndertow)
                     .retrofitCompletableFutures(retrofitCompletableFutures)
                     .retrofitListenableFutures(retrofitListenableFutures)
                     .jerseyBinaryAsResponse(jerseyBinaryAsReponse)
