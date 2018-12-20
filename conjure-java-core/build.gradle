@@ -31,7 +31,7 @@ idea {
 tasks.checkstyleIntegrationInput.enabled = false
 
 dependencies {
-    compile project(':conjure-lib')
+    compile project(':conjure-undertow-lib')
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
