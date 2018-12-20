@@ -31,6 +31,7 @@ import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.TypeName;
 import java.util.List;
+import java.util.Optional;
 
 final class UndertowTypeFunctions {
 
@@ -81,10 +82,10 @@ final class UndertowTypeFunctions {
                     public com.palantir.conjure.spec.TypeName visitReference(com.palantir.conjure.spec.TypeName value) {
                         return value;
                     }
-                }), typeDefinitions);
+                }), typeDefinitions).get();
     }
 
-    static Type getAliasedType(com.palantir.conjure.spec.TypeName typeName,
+    static Optional<Type> getAliasedType(com.palantir.conjure.spec.TypeName typeName,
             List<TypeDefinition> typeDefinitions) {
         // return type definition for the provided alias type
         TypeDefinition typeDefinition = typeDefinitions.stream().filter(typeDef -> {
@@ -93,8 +94,11 @@ final class UndertowTypeFunctions {
             return currClassName.equals(typeName.getPackage() + "." + typeName.getName());
         }).findFirst().get();
 
-        AliasDefinition aliasDefinition = typeDefinition.accept(TypeDefinitionVisitor.ALIAS);
-        return aliasDefinition.getAlias();
+        if (typeDefinition.accept(TypeDefinitionVisitor.IS_ALIAS)) {
+            AliasDefinition aliasDefinition = typeDefinition.accept(TypeDefinitionVisitor.ALIAS);
+            return Optional.of(aliasDefinition.getAlias());
+        }
+        return Optional.empty();
     }
 
     private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME =
@@ -151,7 +155,9 @@ final class UndertowTypeFunctions {
 
             @Override
             public Type visitReference(com.palantir.conjure.spec.TypeName value) {
-                return toConjureTypeWithoutAliases(getAliasedType(value, typeDefinitions), typeDefinitions);
+                return getAliasedType(value, typeDefinitions)
+                        .map(aliasedType -> toConjureTypeWithoutAliases(aliasedType, typeDefinitions))
+                        .orElse(in);
             }
 
             @Override
