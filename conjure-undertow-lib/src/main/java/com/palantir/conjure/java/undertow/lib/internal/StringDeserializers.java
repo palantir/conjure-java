@@ -4,6 +4,8 @@
 
 package com.palantir.conjure.java.undertow.lib.internal;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -12,9 +14,12 @@ import com.palantir.tokens.auth.BearerToken;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.UUID;
 
 // TODO(nmiyake): figure out exception handling. Currently, throws empty IllegalArgumentException on any failure.
@@ -47,6 +52,28 @@ public final class StringDeserializers {
             return Optional.empty();
         }
         return Optional.of(deserializeBearerToken(Iterables.getOnlyElement(in)));
+    }
+
+    public static List<BearerToken> deserializeBearerTokenList(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<BearerToken> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeBearerToken(item));
+        }
+        return builder.build();
+    }
+
+    public static Set<BearerToken> deserializeBearerTokenSet(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<BearerToken> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeBearerToken(item));
+        }
+        return builder.build();
     }
 
     public static ByteBuffer deserializeBinary(String in) {
@@ -95,6 +122,28 @@ public final class StringDeserializers {
         return Optional.of(deserializeBoolean(Iterables.getOnlyElement(in)));
     }
 
+    public static List<Boolean> deserializeBooleanList(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<Boolean> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeBoolean(item));
+        }
+        return builder.build();
+    }
+
+    public static Set<Boolean> deserializeBooleanSet(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<Boolean> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeBoolean(item));
+        }
+        return builder.build();
+    }
+
     public static OffsetDateTime deserializeDateTime(String in) {
         try {
             return OffsetDateTime.parse(in);
@@ -116,6 +165,28 @@ public final class StringDeserializers {
             return Optional.empty();
         }
         return Optional.of(deserializeDateTime(Iterables.getOnlyElement(in)));
+    }
+
+    public static List<OffsetDateTime> deserializeDateTimeList(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<OffsetDateTime> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeDateTime(item));
+        }
+        return builder.build();
+    }
+
+    public static Set<OffsetDateTime> deserializeDateTimeSet(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<OffsetDateTime> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeDateTime(item));
+        }
+        return builder.build();
     }
 
     public static double deserializeDouble(String in) {
@@ -141,6 +212,28 @@ public final class StringDeserializers {
         return OptionalDouble.of(deserializeDouble(Iterables.getOnlyElement(in)));
     }
 
+    public static List<Double> deserializeDoubleList(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<Double> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeDouble(item));
+        }
+        return builder.build();
+    }
+
+    public static Set<Double> deserializeDoubleSet(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<Double> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeDouble(item));
+        }
+        return builder.build();
+    }
+
     public static int deserializeInteger(String in) {
         try {
             return Integer.parseInt(in);
@@ -162,6 +255,28 @@ public final class StringDeserializers {
             return OptionalInt.empty();
         }
         return OptionalInt.of(deserializeInteger(Iterables.getOnlyElement(in)));
+    }
+
+    public static List<Integer> deserializeIntegerList(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<Integer> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeInteger(item));
+        }
+        return builder.build();
+    }
+
+    public static Set<Integer> deserializeIntegerSet(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<Integer> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeInteger(item));
+        }
+        return builder.build();
     }
 
     public static ResourceIdentifier deserializeRid(String in) {
@@ -187,6 +302,28 @@ public final class StringDeserializers {
         return Optional.of(deserializeRid(Iterables.getOnlyElement(in)));
     }
 
+    public static List<ResourceIdentifier> deserializeRidList(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<ResourceIdentifier> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeRid(item));
+        }
+        return builder.build();
+    }
+
+    public static Set<ResourceIdentifier> deserializeRidSet(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<ResourceIdentifier> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeRid(item));
+        }
+        return builder.build();
+    }
+
     public static SafeLong deserializeSafeLong(String in) {
         try {
             return SafeLong.valueOf(in);
@@ -210,6 +347,28 @@ public final class StringDeserializers {
         return Optional.of(deserializeSafeLong(Iterables.getOnlyElement(in)));
     }
 
+    public static List<SafeLong> deserializeSafeLongList(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<SafeLong> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeSafeLong(item));
+        }
+        return builder.build();
+    }
+
+    public static Set<SafeLong> deserializeSafeLongSet(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<SafeLong> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeSafeLong(item));
+        }
+        return builder.build();
+    }
+
     public static String deserializeString(String in) {
         return in;
     }
@@ -227,6 +386,14 @@ public final class StringDeserializers {
             return Optional.empty();
         }
         return Optional.of(deserializeString(Iterables.getOnlyElement(in)));
+    }
+
+    public static List<String> deserializeStringList(Iterable<String> in) {
+        return in == null ? Collections.emptyList() : ImmutableList.copyOf(in);
+    }
+
+    public static Set<String> deserializeStringSet(Iterable<String> in) {
+        return in == null ? Collections.emptySet() : ImmutableSet.copyOf(in);
     }
 
     public static UUID deserializeUuid(String in) {
@@ -250,5 +417,27 @@ public final class StringDeserializers {
             return Optional.empty();
         }
         return Optional.of(deserializeUuid(Iterables.getOnlyElement(in)));
+    }
+
+    public static List<UUID> deserializeUuidList(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<UUID> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeUuid(item));
+        }
+        return builder.build();
+    }
+
+    public static Set<UUID> deserializeUuidSet(Iterable<String> in) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<UUID> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeUuid(item));
+        }
+        return builder.build();
     }
 }

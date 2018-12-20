@@ -571,6 +571,14 @@ final class UndertowServiceHandlerGenerator {
             PrimitiveType innerPrimitiveType = type.accept(UndertowTypeFunctions.OPTIONAL_VISITOR).getItemType().accept(
                     UndertowTypeFunctions.PRIMITIVE_VISITOR);
             return "deserializeOptional" + UndertowTypeFunctions.primitiveTypeName(innerPrimitiveType);
+        } else if (type.accept(TypeVisitor.IS_LIST)
+                && type.accept(TypeVisitor.LIST).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+            Type subtype = type.accept(TypeVisitor.LIST).getItemType();
+            return deserializeFunctionName(subtype) + "List";
+        } else if (type.accept(TypeVisitor.IS_SET)
+                && type.accept(TypeVisitor.SET).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+            Type subtype = type.accept(TypeVisitor.SET).getItemType();
+            return deserializeFunctionName(subtype) + "Set";
         } else {
             throw new IllegalStateException("unknown type: " + type);
         }
