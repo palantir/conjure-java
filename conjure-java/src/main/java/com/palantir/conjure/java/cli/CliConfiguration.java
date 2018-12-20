@@ -88,5 +88,9 @@ public abstract class CliConfiguration {
         Builder notNullAuthAndBody(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.RequireNotNullAuthAndBodyParams) : this;
         }
+
+        Builder undertowServicePrefix(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.UndertowServicePrefix) : this;
+        }
     }
 }

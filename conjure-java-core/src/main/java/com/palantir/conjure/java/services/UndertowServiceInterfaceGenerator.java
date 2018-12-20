@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -34,15 +35,24 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
 final class UndertowServiceInterfaceGenerator {
 
+    private final Set<FeatureFlags> experimentalFeatures;
+
+    UndertowServiceInterfaceGenerator(Set<FeatureFlags> experimentalFeatures) {
+        this.experimentalFeatures = experimentalFeatures;
+    }
+
     public JavaFile generateServiceInterface(
             ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
-        TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceDefinition.getServiceName().getName())
+        TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
+                (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
+                        + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(
                         ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceInterfaceGenerator.class));

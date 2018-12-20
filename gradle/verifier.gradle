@@ -88,7 +88,8 @@ task conjureJavaJersey(type: JavaExec) {
 task conjureJavaUndertow(type: JavaExec) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedUndertow/java', '--undertow'
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedUndertow/java', '--undertow',
+            '--undertowServicePrefixes'
 
     inputs.file "${-> configurations.verificationApi.singleFile}"
     outputs.dir "src/generatedUndertow/java"

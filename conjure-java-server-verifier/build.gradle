@@ -33,6 +33,7 @@ dependencies {
     generatedUndertowCompile sourceSets.generatedObjects.output
 
     testCompile project(':conjure-java-core')
+    testCompile project(':conjure-java-undertow-runtime')
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
@@ -42,6 +43,7 @@ dependencies {
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
+    testCompile sourceSets.generatedUndertow.output
 
     processor 'org.immutables:value'
 }

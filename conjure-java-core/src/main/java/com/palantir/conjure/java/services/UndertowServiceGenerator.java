@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.BodyParameterType;
@@ -42,6 +43,12 @@ import java.util.stream.Collectors;
 
 public final class UndertowServiceGenerator implements ServiceGenerator {
 
+    private final Set<FeatureFlags> experimentalFeatures;
+
+    public UndertowServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
+        this.experimentalFeatures = experimentalFeatures;
+    }
+
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         return conjureDefinition.getServices().stream()
@@ -54,9 +61,9 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
     private List<JavaFile> generateService(ServiceDefinition serviceDefinition, List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper, TypeMapper returnTypeMapper) {
         return ImmutableList.of(
-                new UndertowServiceInterfaceGenerator()
+                new UndertowServiceInterfaceGenerator(experimentalFeatures)
                         .generateServiceInterface(serviceDefinition, typeMapper, returnTypeMapper),
-                new UndertowServiceHandlerGenerator()
+                new UndertowServiceHandlerGenerator(experimentalFeatures)
                         .generateServiceHandler(serviceDefinition, typeDefinitions, typeMapper, returnTypeMapper)
         );
     }

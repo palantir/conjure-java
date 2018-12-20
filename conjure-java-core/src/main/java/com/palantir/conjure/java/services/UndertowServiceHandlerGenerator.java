@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -62,6 +63,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,13 +81,21 @@ final class UndertowServiceHandlerGenerator {
 
     private static final String COOKIE_TOKEN_VAR_NAME = "cookieToken";
 
+    private final Set<FeatureFlags> experimentalFeatures;
+
+    UndertowServiceHandlerGenerator(Set<FeatureFlags> experimentalFeatures) {
+        this.experimentalFeatures = experimentalFeatures;
+    }
+
     public JavaFile generateServiceHandler(ServiceDefinition serviceDefinition, List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper, TypeMapper returnTypeMapper) {
 
+        String serviceName = serviceDefinition.getServiceName().getName();
         // class name
         ClassName serviceClass = ClassName.get(serviceDefinition.getServiceName().getPackage(),
-                serviceDefinition.getServiceName().getName());
-        TypeSpec.Builder routableBuilder = TypeSpec.classBuilder(serviceClass.simpleName() + "Routable")
+                (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
+                        + serviceDefinition.getServiceName().getName());
+        TypeSpec.Builder routableBuilder = TypeSpec.classBuilder(serviceName + "Routable")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(Routable.class);
 
@@ -132,7 +142,7 @@ final class UndertowServiceHandlerGenerator {
                 serviceDefinition.getServiceName().getName() + "Endpoint");
 
         ClassName routableName = ClassName.get(serviceDefinition.getServiceName().getPackage(),
-                routableFactoryType.simpleName(), serviceClass.simpleName() + "Routable");
+                routableFactoryType.simpleName(), serviceName + "Routable");
         TypeSpec routableFactory = TypeSpec.classBuilder(routableFactoryType.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceHandlerGenerator.class))
                 .addSuperinterface(Endpoint.class)
