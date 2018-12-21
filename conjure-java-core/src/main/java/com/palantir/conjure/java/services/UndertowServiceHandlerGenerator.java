@@ -516,7 +516,7 @@ final class UndertowServiceHandlerGenerator {
      */
     private static CodeBlock createIsOptionalPresentCall(Type inType, String varName,
             List<TypeDefinition> typeDefinitions) {
-        if (UndertowTypeFunctions.isOptionalType(inType)) {
+        if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // current type is optional type: call isPresent
             return CodeBlock.of("$1N.isPresent()", varName);
         } else if (UndertowTypeFunctions.isAliasType(inType)) {
@@ -544,7 +544,7 @@ final class UndertowServiceHandlerGenerator {
     private static CodeBlock createConstructorForTypeWithReference(Type inType, String decodedVarName,
             List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
         // "in" must be 1 of 2 types: optional<alias that resolves to a primitive> or alias
-        if (UndertowTypeFunctions.isOptionalType(inType)) {
+        if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // optional<alias that resolves to a primitive>
             Type typeOfOptional = inType.accept(TypeVisitor.OPTIONAL).getItemType();
             return CodeBlock.of("$1T.ofNullable($2N.isPresent() ? $3L : null)", Optional.class, decodedVarName,
@@ -560,13 +560,13 @@ final class UndertowServiceHandlerGenerator {
             //   * optional<alias that resolves to a primitive>
             //   * alias that follows one of these rules (recursive definition)
             Type aliasedType = UndertowTypeFunctions.getAliasedType(inType, typeDefinitions);
-            if (UndertowTypeFunctions.isPrimitiveType(aliasedType)) {
+            if (aliasedType.accept(TypeVisitor.IS_PRIMITIVE)) {
                 // primitive
                 ofContent = CodeBlock.of("$1N", decodedVarName);
-            } else if (UndertowTypeFunctions.isOptionalType(aliasedType)) {
+            } else if (aliasedType.accept(TypeVisitor.IS_OPTIONAL)) {
                 // optional<primitive> or optional<alias that resolves to primitive>
                 Type optionalType = aliasedType.accept(TypeVisitor.OPTIONAL).getItemType();
-                if (UndertowTypeFunctions.isPrimitiveType(optionalType)) {
+                if (optionalType.accept(TypeVisitor.IS_PRIMITIVE)) {
                     // optional<primitive>
 
                     // can use decoded var directly because it will already be the proper type (OptionalInt,

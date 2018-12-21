@@ -35,24 +35,6 @@ import java.util.Optional;
 
 final class UndertowTypeFunctions {
 
-    static boolean isPrimitiveType(Type type) {
-        return type.accept(new IsTypeVisitor() {
-            @Override
-            public Boolean visitPrimitive(PrimitiveType value) {
-                return true;
-            }
-        });
-    }
-
-    static boolean isOptionalType(Type type) {
-        return type.accept(new IsTypeVisitor() {
-            @Override
-            public Boolean visitOptional(OptionalType value) {
-                return true;
-            }
-        });
-    }
-
     static boolean isAliasType(Type type) {
         return type.accept(new IsTypeVisitor() {
             @Override
