@@ -67,5 +67,6 @@ dependencies {
     integrationInputCompile 'javax.validation:validation-api'
     integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
 
-    processor 'org.immutables:value'
+    annotationProcessor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
 }
