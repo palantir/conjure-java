@@ -475,6 +475,29 @@ final class UndertowServiceHandlerGenerator {
 
     private CodeBlock decodePlainParameterCodeBlock(Type type, TypeMapper typeMapper, String resultVarName,
             String paramsVarName, String paramId) {
+        if (type.accept(TypeVisitor.IS_EXTERNAL)) {
+            return CodeBlocks.statement(
+                    "$1T $2N = $3T.valueOf($4T.deserializeString($5N.get($6S)))",
+                    typeMapper.getClassName(type),
+                    resultVarName,
+                    typeMapper.getClassName(type),
+                    StringDeserializers.class,
+                    paramsVarName,
+                    paramId
+            );
+        }
+        if (type.accept(TypeVisitor.IS_OPTIONAL)
+                && type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_EXTERNAL)) {
+            return CodeBlocks.statement(
+                    "$1T $2N = $4T.deserializeOptionalString($5N.get($6S)).map($3T::valueOf)",
+                    typeMapper.getClassName(type),
+                    resultVarName,
+                    typeMapper.getClassName(type.accept(TypeVisitor.OPTIONAL).getItemType()),
+                    StringDeserializers.class,
+                    paramsVarName,
+                    paramId
+            );
+        }
         return CodeBlocks.statement(
                 "$1T $2N = $3T.$4L($5N.get($6S))",
                 typeMapper.getClassName(type),
@@ -567,7 +590,8 @@ final class UndertowServiceHandlerGenerator {
         if (type.accept(TypeVisitor.IS_PRIMITIVE)) {
             return "deserialize" + UndertowTypeFunctions.primitiveTypeName(
                     type.accept(UndertowTypeFunctions.PRIMITIVE_VISITOR));
-        } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+        } else if (type.accept(TypeVisitor.IS_OPTIONAL)
+                && type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
             PrimitiveType innerPrimitiveType = type.accept(UndertowTypeFunctions.OPTIONAL_VISITOR).getItemType().accept(
                     UndertowTypeFunctions.PRIMITIVE_VISITOR);
             return "deserializeOptional" + UndertowTypeFunctions.primitiveTypeName(innerPrimitiveType);

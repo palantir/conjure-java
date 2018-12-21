@@ -46,6 +46,7 @@ public final class TypeVisitor {
     public static final IsPrimitiveOrReferenceType IS_PRIMITIVE_OR_REFERENCE = new IsPrimitiveOrReferenceType();
     public static final IsBinaryType IS_BINARY = new IsBinaryType();
     public static final IsAnyType IS_ANY = new IsAnyType();
+    public static final IsExternalType IS_EXTERNAL = new IsExternalType();
 
     public interface Default<T> extends Type.Visitor<T> {
         @Override
@@ -173,6 +174,13 @@ public final class TypeVisitor {
         @Override
         public Boolean visitPrimitive(PrimitiveType value) {
             return value.get() == PrimitiveType.Value.ANY;
+        }
+    }
+
+    private static class IsExternalType extends IsTypeVisitor {
+        @Override
+        public Boolean visitExternal(ExternalReference value) {
+            return true;
         }
     }
 

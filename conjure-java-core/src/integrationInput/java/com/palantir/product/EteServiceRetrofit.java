@@ -73,6 +73,12 @@ public interface EteServiceRetrofit {
     Call<StringAliasExample> notNullBody(
             @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
 
+    @GET("./base/aliasOne")
+    @Headers({"hr-path-template: /base/aliasOne", "Accept: application/json"})
+    Call<StringAliasExample> aliasOne(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") StringAliasExample queryParamName);
+
     @GET("./base/optionalAliasOne")
     @Headers({"hr-path-template: /base/optionalAliasOne", "Accept: application/json"})
     Call<StringAliasExample> optionalAliasOne(
