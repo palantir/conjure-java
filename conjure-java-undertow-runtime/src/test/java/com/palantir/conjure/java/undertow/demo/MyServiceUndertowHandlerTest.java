@@ -22,14 +22,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.Routable;
 import com.palantir.conjure.java.undertow.lib.Serializer;
-import com.palantir.conjure.java.undertow.runtime.ConjureRoutingRegistry;
+import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.Serializers;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.tracing.Tracers;
 import com.palantir.tracing.api.TraceHttpHeaders;
-import io.undertow.Handlers;
 import io.undertow.Undertow;
-import io.undertow.server.RoutingHandler;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -57,16 +55,15 @@ public final class MyServiceUndertowHandlerTest {
 
     @Before
     public void before() {
-        Routable handler = new MyServiceUndertowHandler(
+        Routable routable = new MyServiceUndertowHandler(
                 new MyServiceImpl(),
                 serializer
         );
-        RoutingHandler routingHandler = Handlers.routing();
-
-        handler.register(new ConjureRoutingRegistry(routingHandler));
+        ConjureHandler handler = new ConjureHandler();
+        routable.register(handler);
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(routingHandler)
+                .setHandler(handler)
                 .build();
         server.start();
     }

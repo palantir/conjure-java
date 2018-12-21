@@ -19,15 +19,13 @@ package com.palantir.conjure.java.verification.server.undertest;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
-import com.palantir.conjure.java.undertow.runtime.ConjureRoutingRegistry;
+import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.Serializers;
 import com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoint;
 import com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
-import io.undertow.server.RoutingHandler;
 import org.junit.rules.ExternalResource;
 
 public final class UndertowServerUnderTestRule extends ExternalResource {
@@ -42,19 +40,17 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
                 UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
         Endpoint endpoint = AutoDeserializeServiceEndpoint.of(service);
 
-        RoutingHandler routingHandler = Handlers.routing();
-
-        RoutingRegistry routingRegistry = new ConjureRoutingRegistry(routingHandler);
+        ConjureHandler handler = new ConjureHandler();
         SerializerRegistry serializers = new SerializerRegistry(Serializers.json(), Serializers.cbor());
         HandlerContext context = HandlerContext.builder()
                 .serializerRegistry(serializers)
                 .build();
 
-        endpoint.create(context).register(routingRegistry);
+        endpoint.create(context).register(handler);
 
         server = Undertow.builder()
                 .addHttpListener(PORT, "0.0.0.0")
-                .setHandler(Handlers.path().addPrefixPath("/test/api", routingHandler))
+                .setHandler(Handlers.path().addPrefixPath("/test/api", handler))
                 .build();
         server.start();
     }
