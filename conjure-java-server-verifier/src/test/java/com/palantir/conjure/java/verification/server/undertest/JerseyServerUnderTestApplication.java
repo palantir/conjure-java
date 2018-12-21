@@ -17,8 +17,6 @@
 package com.palantir.conjure.java.verification.server.undertest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
-import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
@@ -29,13 +27,11 @@ import io.dropwizard.jackson.DiscoverableSubtypeResolver;
 import io.dropwizard.jackson.FuzzyEnumModule;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 
-public final class ServerUnderTestApplication extends Application<ServerUnderTestConfiguration> {
+public final class JerseyServerUnderTestApplication extends Application<JerseyServerUnderTestConfiguration> {
 
     @Override
-    public void initialize(Bootstrap<ServerUnderTestConfiguration> bootstrap) {
+    public void initialize(Bootstrap<JerseyServerUnderTestConfiguration> bootstrap) {
         ObjectMapper remotingObjectMapper = ObjectMappers.newServerObjectMapper()
                 // needs discoverable subtype resolver for DW polymorphic configuration mechanism
                 .setSubtypeResolver(new DiscoverableSubtypeResolver())
@@ -45,24 +41,11 @@ public final class ServerUnderTestApplication extends Application<ServerUnderTes
     }
 
     @Override
-    public void run(ServerUnderTestConfiguration configuration, Environment environment) {
+    public void run(JerseyServerUnderTestConfiguration configuration, Environment environment) {
         environment.jersey().register(
                 Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
 
         // must register ConjureJerseyFeature to map conjure error types.
         environment.jersey().register(ConjureJerseyFeature.INSTANCE);
     }
-
-    /**
-     * Simple {@link InvocationHandler} implementing all methods of {@link AutoDeserializeService} by returning the
-     * single parameter.
-     */
-    static class EchoResourceInvocationHandler extends AbstractInvocationHandler {
-        @Override
-        protected Object handleInvocation(Object proxy, Method method, Object[] args) {
-            Preconditions.checkArgument(args.length == 1, "Expected single argument. Method: %s", method);
-            return args[0];
-        }
-    }
-
 }

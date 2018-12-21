@@ -17,6 +17,7 @@
 package com.palantir.conjure.java;
 
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.product.EteService;
 import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.StringAliasExample;
@@ -32,7 +33,8 @@ import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.StreamingOutput;
 
-public final class EteResource implements EteService {
+@SuppressWarnings("checkstyle:designforextension")
+public class EteResource implements EteService {
     @Override
     public String string(AuthHeader authHeader) {
         return "Hello, world!";
@@ -84,13 +86,18 @@ public final class EteResource implements EteService {
     }
 
     @Override
-    public StreamingOutput binary(AuthHeader authHeader) {
+    public Streaming binary(AuthHeader authHeader) {
         return outputStream -> outputStream.write("Hello, world!".getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
     public StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody) {
         return notNullBody;
+    }
+
+    @Override
+    public StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName) {
+        return queryParamName;
     }
 
     @Override
@@ -103,4 +110,6 @@ public final class EteResource implements EteService {
     public NestedStringAliasExample aliasTwo(@NotNull AuthHeader authHeader, NestedStringAliasExample queryParamName) {
         return queryParamName;
     }
+
+    interface Streaming extends StreamingOutput, BinaryResponseBody {}
 }

@@ -49,4 +49,9 @@ public enum FeatureFlags {
      * annotations to all auth parameters, as well as all non-optional body params on service endpoints.
      */
     RequireNotNullAuthAndBodyParams,
+
+    /**
+     * Undertow generated service interfaces are generated with an "Undertow" prefix.
+     */
+    UndertowServicePrefix,
 }
