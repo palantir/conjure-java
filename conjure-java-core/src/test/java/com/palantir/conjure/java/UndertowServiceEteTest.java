@@ -30,11 +30,9 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
-import com.palantir.conjure.java.undertow.runtime.ConjureRoutingRegistry;
+import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.Serializers;
-import com.palantir.conjure.java.undertow.runtime.Undertow1460Handler;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoint;
@@ -45,7 +43,6 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
-import io.undertow.server.RoutingHandler;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -93,15 +90,13 @@ public final class UndertowServiceEteTest extends TestBase {
                 .serializerRegistry(serializers)
                 .build();
 
-        RoutingHandler handler = Handlers.routing();
-
-        RoutingRegistry routingRegistry = new ConjureRoutingRegistry(handler);
-        EteServiceEndpoint.of(new UndertowEteResource()).create(context).register(routingRegistry);
-        EmptyPathServiceEndpoint.of(() -> true).create(context).register(routingRegistry);
+        ConjureHandler handler = new ConjureHandler();
+        EteServiceEndpoint.of(new UndertowEteResource()).create(context).register(handler);
+        EmptyPathServiceEndpoint.of(() -> true).create(context).register(handler);
 
         server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
-                .setHandler(Handlers.path().addPrefixPath("/test-example/api", new Undertow1460Handler(handler)))
+                .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
                 .build();
         server.start();
     }

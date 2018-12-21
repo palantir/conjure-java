@@ -18,17 +18,21 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
+import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.util.function.BiFunction;
 
 /**
- * Default Conjure implementation of a {@link RoutingRegistry} that wraps and delegates to a {@link RoutingHandler}.
+ * Default Conjure implementation of a {@link RoutingRegistry}
+ * which can be registered as an Undertow {@link HttpHandler}.
  */
-public final class ConjureRoutingRegistry implements RoutingRegistry {
+public final class ConjureHandler implements HttpHandler, RoutingRegistry {
 
     private static final ImmutableList<BiFunction<String, HttpHandler, HttpHandler>> WRAPPERS =
             ImmutableList.<BiFunction<String, HttpHandler, HttpHandler>>of(
@@ -46,32 +50,43 @@ public final class ConjureRoutingRegistry implements RoutingRegistry {
     ).reverse();
 
     private final RoutingHandler routingHandler;
+    private final HttpHandler delegate;
 
-    public ConjureRoutingRegistry(RoutingHandler routingHandler) {
-        this.routingHandler = routingHandler;
+    public ConjureHandler(HttpHandler fallback) {
+        this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
+        this.delegate = new Undertow1460Handler(routingHandler);
+    }
+
+    public ConjureHandler() {
+        this(ResponseCodeHandler.HANDLE_404);
     }
 
     @Override
-    public ConjureRoutingRegistry get(String template, HttpHandler handler) {
+    public void handleRequest(HttpServerExchange exchange) throws Exception {
+        delegate.handleRequest(exchange);
+    }
+
+    @Override
+    public ConjureHandler get(String template, HttpHandler handler) {
         return register(Methods.GET, template, handler);
     }
 
     @Override
-    public ConjureRoutingRegistry post(String template, HttpHandler handler) {
+    public ConjureHandler post(String template, HttpHandler handler) {
         return register(Methods.POST, template, handler);
     }
 
     @Override
-    public ConjureRoutingRegistry put(String template, HttpHandler handler) {
+    public ConjureHandler put(String template, HttpHandler handler) {
         return register(Methods.PUT, template, handler);
     }
 
     @Override
-    public ConjureRoutingRegistry delete(String template, HttpHandler handler) {
+    public ConjureHandler delete(String template, HttpHandler handler) {
         return register(Methods.DELETE, template, handler);
     }
 
-    private ConjureRoutingRegistry register(HttpString method, String template, HttpHandler handler) {
+    private ConjureHandler register(HttpString method, String template, HttpHandler handler) {
         HttpHandler current = handler;
         String endpoint = method + " " + template;
         for (BiFunction<String, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
