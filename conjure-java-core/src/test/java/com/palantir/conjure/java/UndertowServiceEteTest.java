@@ -34,6 +34,7 @@ import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.runtime.ConjureRoutingRegistry;
 import com.palantir.conjure.java.undertow.runtime.Serializers;
+import com.palantir.conjure.java.undertow.runtime.Undertow1460Handler;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoint;
@@ -95,12 +96,12 @@ public final class UndertowServiceEteTest extends TestBase {
         RoutingHandler handler = Handlers.routing();
 
         RoutingRegistry routingRegistry = new ConjureRoutingRegistry(handler);
-        EteServiceEndpoint.of(new EteResource()).create(context).register(routingRegistry);
+        EteServiceEndpoint.of(new UndertowEteResource()).create(context).register(routingRegistry);
         EmptyPathServiceEndpoint.of(() -> true).create(context).register(routingRegistry);
 
         server = Undertow.builder()
                 .addHttpListener(8080, "localhost")
-                .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
+                .setHandler(Handlers.path().addPrefixPath("/test-example/api", new Undertow1460Handler(handler)))
                 .build();
         server.start();
     }
@@ -113,7 +114,6 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    @Ignore // UNDERTOW-1460 fixed in undertow-core 2.0.17.Final
     public void jaxrs_client_can_make_a_call_to_an_empty_path() throws Exception {
         EmptyPathService emptyPathClient = JaxRsClient.create(
                 EmptyPathService.class,

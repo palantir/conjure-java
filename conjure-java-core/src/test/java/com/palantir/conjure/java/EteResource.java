@@ -21,7 +21,6 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.product.EteService;
 import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.StringAliasExample;
-import com.palantir.product.UndertowEteService;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -34,7 +33,8 @@ import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.StreamingOutput;
 
-public final class EteResource implements EteService, UndertowEteService {
+@SuppressWarnings("checkstyle:designforextension")
+public class EteResource implements EteService {
     @Override
     public String string(AuthHeader authHeader) {
         return "Hello, world!";
