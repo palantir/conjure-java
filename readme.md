@@ -189,18 +189,20 @@ Call<List<Recipe>> asyncResults = recipes.getRecipes();
 _This feature is experimental and subject to change._
 
 ```java
-RoutingHandler handler = Handlers.routing();
-RecipeBookServiceEndpoint.of(new RecipeBookResource())
-    .create(HandlerContext.builder()
-        .serializerRegistry(new SerializerRegistry(Serializers.json()))
-        .build())
-    .register(new ConjureRoutingRegistry(handler));
+public static void main(String[] args) {
+    RoutingHandler handler = Handlers.routing();
+    RecipeBookServiceEndpoint.of(new RecipeBookResource())
+        .create(HandlerContext.builder()
+            .serializerRegistry(new SerializerRegistry(Serializers.json()))
+            .build())
+        .register(new ConjureRoutingRegistry(handler));
 
-Undertow server = Undertow.builder()
-        .addHttpListener(8080, "0.0.0.0")
-        .setHandler(handler)
-        .build();
-server.start();
+    Undertow server = Undertow.builder()
+            .addHttpListener(8080, "0.0.0.0")
+            .setHandler(handler)
+            .build();
+    server.start();
+}
 ```
 
 ## Contributing
