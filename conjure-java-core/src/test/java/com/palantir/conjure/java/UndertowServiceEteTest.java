@@ -100,7 +100,7 @@ public final class UndertowServiceEteTest extends TestBase {
         EmptyPathServiceEndpoint.of(() -> true).create(context).register(routingRegistry);
 
         server = Undertow.builder()
-                .addHttpListener(8080, "localhost")
+                .addHttpListener(8080, "0.0.0.0")
                 .setHandler(Handlers.path().addPrefixPath("/test-example/api", new Undertow1460Handler(handler)))
                 .build();
         server.start();
