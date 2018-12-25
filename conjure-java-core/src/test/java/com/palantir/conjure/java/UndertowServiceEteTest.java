@@ -28,6 +28,7 @@ import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -77,7 +78,6 @@ import okhttp3.ResponseBody;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import retrofit2.Response;
@@ -224,12 +224,16 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    @Ignore // Results in 500 response code
     public void java_url_client_receives_unprocessable_entity_with_null_body() throws IOException {
         HttpURLConnection httpUrlConnection = preparePostRequest();
         httpUrlConnection.setRequestProperty("Authorization", "Bearer authheader");
         sendPostRequestData(httpUrlConnection, "");
         assertThat(httpUrlConnection.getResponseCode()).isEqualTo(422);
+        try (InputStream responseBody = httpUrlConnection.getErrorStream()) {
+            SerializableError error = CLIENT_OBJECT_MAPPER.readValue(responseBody, SerializableError.class);
+            assertThat(error.errorCode()).isEqualTo("INVALID_ARGUMENT");
+            assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+        }
     }
 
     @Test

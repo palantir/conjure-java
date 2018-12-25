@@ -57,7 +57,7 @@ public class SerializerRegistryTest {
         exchange.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/unknown");
         ConjureSerializerRegistry serializers = new ConjureSerializerRegistry(new StubSerializer("application/json"));
         assertThatThrownBy(() -> serializers.getRequestDeserializer(exchange))
-                .isInstanceOf(SafeIllegalArgumentException.class)
+                .isInstanceOf(FrameworkException.class)
                 .hasMessageContaining("Unsupported Content-Type");
     }
 
