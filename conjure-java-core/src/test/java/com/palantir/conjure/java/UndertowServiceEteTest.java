@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -46,6 +47,8 @@ import io.undertow.Undertow;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -192,6 +195,27 @@ public final class UndertowServiceEteTest extends TestBase {
         httpUrlConnection.setRequestProperty("Authorization", "Bearer authheader");
         sendPostRequestData(httpUrlConnection, "");
         assertThat(httpUrlConnection.getResponseCode()).isEqualTo(422);
+    }
+
+    @Test
+    public void testCborContent() throws Exception {
+        ObjectMapper cborMapper = ObjectMappers.newCborClientObjectMapper();
+        // postString method
+        HttpURLConnection connection = (HttpURLConnection)
+                new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Authorization", AuthHeader.valueOf("authHeader").toString());
+        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/cbor");
+        connection.setRequestProperty(HttpHeaders.ACCEPT, "application/cbor");
+        connection.setDoOutput(true);
+        try (OutputStream requestBody = connection.getOutputStream()) {
+            cborMapper.writeValue(requestBody, "Hello, World!");
+        }
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/cbor");
+        try (InputStream responseBody = connection.getInputStream()) {
+            assertThat(cborMapper.readValue(responseBody, String.class)).isEqualTo("Hello, World!");
+        }
     }
 
     @BeforeClass
