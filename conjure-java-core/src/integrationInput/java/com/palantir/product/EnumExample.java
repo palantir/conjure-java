@@ -70,6 +70,17 @@ public final class EnumExample {
         }
     }
 
+    public <T> T accept(Visitor<T> visitor) {
+        switch (value) {
+            case ONE:
+                return visitor.visitOne();
+            case TWO:
+                return visitor.visitTwo();
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public enum Value {
         ONE,
@@ -77,5 +88,14 @@ public final class EnumExample {
         TWO,
 
         UNKNOWN
+    }
+
+    @Generated("com.palantir.conjure.java.types.EnumGenerator")
+    public interface Visitor<T> {
+        T visitOne();
+
+        T visitTwo();
+
+        T visitUnknown(String unknownValue);
     }
 }
