@@ -30,9 +30,8 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.java.undertow.runtime.Serializers;
+import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoint;
@@ -85,9 +84,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void before() {
-        SerializerRegistry serializers = new SerializerRegistry(Serializers.json(), Serializers.cbor());
         HandlerContext context = HandlerContext.builder()
-                .serializerRegistry(serializers)
+                .serializerRegistry(ConjureSerializerRegistry.getDefault())
                 .build();
 
         ConjureHandler handler = new ConjureHandler();

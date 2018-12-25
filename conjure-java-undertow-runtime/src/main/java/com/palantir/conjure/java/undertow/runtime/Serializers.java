@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.google.common.base.Suppliers;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
