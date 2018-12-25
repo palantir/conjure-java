@@ -179,7 +179,7 @@ public final class EnumGenerator {
         CodeBlock.Builder switchBlock = CodeBlock.builder();
         switchBlock.beginControlFlow("switch (value)");
         for (EnumValueDefinition value : values) {
-            switchBlock.add("case $L:\n", value.getValue())
+            switchBlock.add("case $N:\n", value.getValue())
                     .addStatement("return visitor.$L()", getVisitorMethodName(value));
         }
         switchBlock.add("default:\n")
