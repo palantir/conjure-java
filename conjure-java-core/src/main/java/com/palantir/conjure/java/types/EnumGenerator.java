@@ -165,10 +165,12 @@ public final class EnumGenerator {
     private static List<MethodSpec> generateMemberVisitMethods(Iterable<EnumValueDefinition> values) {
         ImmutableList.Builder<MethodSpec> methods = ImmutableList.builder();
         for (EnumValueDefinition value : values) {
-            methods.add(MethodSpec.methodBuilder(getVisitorMethodName(value))
+            MethodSpec.Builder methodSpecBuilder = MethodSpec.methodBuilder(getVisitorMethodName(value))
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .returns(TYPE_VARIABLE)
-                    .build());
+                    .returns(TYPE_VARIABLE);
+            value.getDocs().ifPresent(docs ->
+                    methodSpecBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+            methods.add(methodSpecBuilder.build());
         }
         return methods.build();
     }

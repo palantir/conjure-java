@@ -7,7 +7,7 @@ import java.util.Objects;
 import javax.annotation.Generated;
 
 /**
- * This enumerates the numbers 1:2.
+ * This enumerates the numbers 1:2 also 100.
  *
  * <p>This class is used instead of a native enum to support unknown values. Rather than throw an
  * exception, the {@link EnumExample#valueOf} method defaults to a new instantiation of {@link
@@ -24,6 +24,9 @@ public final class EnumExample {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
     public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
+
+    /** Value of 100. */
+    public static final EnumExample ONE_HUNDRED = new EnumExample(Value.ONE_HUNDRED, "ONE_HUNDRED");
 
     private final Value value;
 
@@ -65,6 +68,8 @@ public final class EnumExample {
                 return ONE;
             case "TWO":
                 return TWO;
+            case "ONE_HUNDRED":
+                return ONE_HUNDRED;
             default:
                 return new EnumExample(Value.UNKNOWN, upperCasedValue);
         }
@@ -76,6 +81,8 @@ public final class EnumExample {
                 return visitor.visitOne();
             case TWO:
                 return visitor.visitTwo();
+            case ONE_HUNDRED:
+                return visitor.visitOneHundred();
             default:
                 return visitor.visitUnknown(string);
         }
@@ -87,6 +94,9 @@ public final class EnumExample {
 
         TWO,
 
+        /** Value of 100. */
+        ONE_HUNDRED,
+
         UNKNOWN
     }
 
@@ -95,6 +105,9 @@ public final class EnumExample {
         T visitOne();
 
         T visitTwo();
+
+        /** Value of 100. */
+        T visitOneHundred();
 
         T visitUnknown(String unknownValue);
     }
