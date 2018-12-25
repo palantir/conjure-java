@@ -128,8 +128,9 @@ public final class Retrofit2ServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void beforeClass() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/ete-service.yml")));
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(
+                new File("src/test/resources/ete-service.yml"),
+                new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder.getRoot());
 
         for (Path file : files) {
