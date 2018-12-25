@@ -47,6 +47,7 @@ import com.palantir.product.EteBinaryServiceRetrofit;
 import com.palantir.product.EteService;
 import com.palantir.product.EteServiceEndpoint;
 import com.palantir.product.EteServiceRetrofit;
+import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -264,6 +265,42 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void testAliasQueryParameter() {
+        NestedStringAliasExample expected = NestedStringAliasExample.of(StringAliasExample.of("value"));
+        assertThat(client.aliasTwo(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testExternalImportBody() {
+        StringAliasExample expected = StringAliasExample.of("value");
+        assertThat(client.notNullBodyExternalImport(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testExternalImportOptionalQueryParameter() {
+        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
+        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testExternalImportOptionalEmptyQueryParameter() {
+        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
+                .isEqualTo(Optional.empty());
+    }
+
+    @Test
+    public void testExternalImportOptionalBody() {
+        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
+        assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testExternalImportOptionalEmptyBody() {
+        assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
+                .isEqualTo(Optional.empty());
+    }
+
+    @Test
     public void testUnknownContentType() {
         assertThatThrownBy(() -> binaryClient.postBinary(AuthHeader.valueOf("authHeader"),
                 RequestBody.create(MediaType.parse("application/unsupported"), new byte[] {1, 2, 3})).execute())
@@ -291,7 +328,6 @@ public final class UndertowServiceEteTest extends TestBase {
         assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
         assertThat(new String(ByteStreams.toByteArray(con.getInputStream()), StandardCharsets.UTF_8))
                 .isEqualTo("Hello World!");
-
     }
 
     @BeforeClass
