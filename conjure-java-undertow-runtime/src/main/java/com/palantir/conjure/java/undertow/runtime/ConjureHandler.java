@@ -42,9 +42,9 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
             // will not propagate to the wrapped service.
             (endpoint, handler) -> new BlockingHandler(handler),
-            // Bearer token and trace handler must execute prior to the exception
+            // Logging context and trace handler must execute prior to the exception
             // to provide user and trace information on exceptions.
-            (endpoint, handler) -> new BearerTokenLoggingHandler(handler),
+            (endpoint, handler) -> new LoggingContextHandler(handler),
             TraceHandler::new,
             (endpoint, handler) -> new ConjureExceptionHandler(handler)
     ).reverse();
