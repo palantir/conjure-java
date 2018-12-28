@@ -1,3 +1,4 @@
+// This file is managed by the excavator 'consistent-publish-scripts' check, changes will be overwritten.
 apply plugin: 'application'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'

@@ -184,6 +184,30 @@ RecipeBookServiceRetrofit recipes = Retrofit2Client.create(
 Call<List<Recipe>> asyncResults = recipes.getRecipes();
 ```
 
+## Undertow Handlers
+
+_This feature is experimental and subject to change._
+
+```java
+public static void main(String[] args) {
+    ConjureHandler handler = new ConjureHandler();
+    RecipeBookServiceEndpoint.of(new RecipeBookResource())
+        .create(HandlerContext.builder()
+            .serializerRegistry(new SerializerRegistry(Serializers.json()))
+            .build())
+        .register(handler);
+
+    Undertow server = Undertow.builder()
+            .addHttpListener(8080, "0.0.0.0")
+            .setHandler(handler)
+            .build();
+    server.start();
+}
+```
+
 ## Contributing
 
 For instructions on how to set up your local development environment, check out the [Contributing document](./CONTRIBUTING.md).
+
+## License
+This project is made available under the [Apache 2.0 License](/LICENSE).

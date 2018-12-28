@@ -1,8 +1,9 @@
-enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'conjure-java'
 
 include 'conjure-java'
 include 'conjure-java-core'
 include 'conjure-java-client-verifier'
 include 'conjure-java-server-verifier'
+include 'conjure-java-undertow-runtime'
 include 'conjure-lib'
+include 'conjure-undertow-lib'

@@ -1,3 +1,29 @@
 server:
-  autoDeserialize: {}
-
+  autoDeserialize:
+    getMapBinaryAliasExample:
+      - '{}'
+      - '{"SGVsbG8sIFdvcmxk": true}'
+    getRawOptionalExample:
+      - 'null'
+    getOptionalBearerTokenAliasExample:
+      - 'null'
+    getOptionalBinaryAliasExample:
+      - 'null'
+    getOptionalBooleanAliasExample:
+      - 'null'
+    getOptionalDateTimeAliasExample:
+      - 'null'
+    getOptionalDoubleAliasExample:
+      - 'null'
+    getOptionalIntegerAliasExample:
+      - 'null'
+    getOptionalRidAliasExample:
+      - 'null'
+    getOptionalSafeLongAliasExample:
+      - 'null'
+    getOptionalStringAliasExample:
+      - 'null'
+    getOptionalUuidAliasExample:
+      - 'null'
+    getOptionalAnyAliasExample:
+      - 'null'

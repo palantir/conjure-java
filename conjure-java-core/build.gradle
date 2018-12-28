@@ -31,7 +31,7 @@ idea {
 tasks.checkstyleIntegrationInput.enabled = false
 
 dependencies {
-    compile project(':conjure-lib')
+    compile project(':conjure-undertow-lib')
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
@@ -50,6 +50,7 @@ dependencies {
     testCompile('com.palantir.conjure:conjure-core') {
         exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'
     }
+    testCompile project(':conjure-java-undertow-runtime')
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
@@ -59,6 +60,7 @@ dependencies {
     testCompile 'io.dropwizard:dropwizard-testing'
 
     integrationInputCompile project(':conjure-lib')
+    integrationInputCompile project(':conjure-undertow-lib')
     integrationInputCompile 'com.palantir.conjure.java.api:errors'
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
     integrationInputCompile 'javax.annotation:javax.annotation-api'

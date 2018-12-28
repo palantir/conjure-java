@@ -21,6 +21,7 @@ dependencies {
     compile 'com.palantir.ri:resource-identifier'
     compile 'com.palantir.tokens:auth-tokens'
     compile 'com.palantir.conjure.java.api:errors'
+    compile 'javax.annotation:javax.annotation-api'
 
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'

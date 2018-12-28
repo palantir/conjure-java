@@ -77,6 +77,12 @@ public interface EteService {
             @NotNull StringAliasExample notNullBody);
 
     @GET
+    @Path("base/aliasOne")
+    StringAliasExample aliasOne(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("queryParamName") StringAliasExample queryParamName);
+
+    @GET
     @Path("base/optionalAliasOne")
     StringAliasExample optionalAliasOne(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,

@@ -17,8 +17,10 @@
 package com.palantir.conjure.java.verification.server.undertest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
+import com.palantir.conjure.verification.client.AutoDeserializeService;
 import com.palantir.websecurity.WebSecurityBundle;
 import io.dropwizard.Application;
 import io.dropwizard.jackson.DiscoverableSubtypeResolver;
@@ -26,10 +28,10 @@ import io.dropwizard.jackson.FuzzyEnumModule;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public final class ServerUnderTestApplication extends Application<ServerUnderTestConfiguration> {
+public final class JerseyServerUnderTestApplication extends Application<JerseyServerUnderTestConfiguration> {
 
     @Override
-    public void initialize(Bootstrap<ServerUnderTestConfiguration> bootstrap) {
+    public void initialize(Bootstrap<JerseyServerUnderTestConfiguration> bootstrap) {
         ObjectMapper remotingObjectMapper = ObjectMappers.newServerObjectMapper()
                 // needs discoverable subtype resolver for DW polymorphic configuration mechanism
                 .setSubtypeResolver(new DiscoverableSubtypeResolver())
@@ -39,8 +41,9 @@ public final class ServerUnderTestApplication extends Application<ServerUnderTes
     }
 
     @Override
-    public void run(ServerUnderTestConfiguration configuration, Environment environment) {
-        environment.jersey().register(new AutoDeserializeResource());
+    public void run(JerseyServerUnderTestConfiguration configuration, Environment environment) {
+        environment.jersey().register(
+                Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
 
         // must register ConjureJerseyFeature to map conjure error types.
         environment.jersey().register(ConjureJerseyFeature.INSTANCE);

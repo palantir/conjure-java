@@ -76,6 +76,14 @@ services:
           notNullBody: StringAliasExample
         returns: StringAliasExample
 
+      aliasOne:
+        http: GET /aliasOne
+        args:
+          queryParamName:
+            param-type: query
+            type: StringAliasExample
+        returns: StringAliasExample
+
       optionalAliasOne:
         http: GET /optionalAliasOne
         args:

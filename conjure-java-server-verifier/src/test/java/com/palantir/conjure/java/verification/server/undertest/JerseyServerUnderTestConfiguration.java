@@ -22,7 +22,7 @@ import com.palantir.websecurity.WebSecurityConfiguration;
 import io.dropwizard.Configuration;
 import javax.validation.Valid;
 
-public final class ServerUnderTestConfiguration extends Configuration implements WebSecurityConfigurable {
+public final class JerseyServerUnderTestConfiguration extends Configuration implements WebSecurityConfigurable {
 
     @JsonProperty("webSecurity")
     @Valid
