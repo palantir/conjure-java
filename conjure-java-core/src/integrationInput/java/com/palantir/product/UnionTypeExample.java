@@ -126,11 +126,10 @@ public final class UnionTypeExample {
     }
 
     @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        property = "type",
-        visible = true,
-        defaultImpl = UnknownWrapper.class
-    )
+            use = JsonTypeInfo.Id.NAME,
+            property = "type",
+            visible = true,
+            defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
         @JsonSubTypes.Type(StringExampleWrapper.class),
         @JsonSubTypes.Type(SetWrapper.class),
@@ -438,11 +437,10 @@ public final class UnionTypeExample {
     }
 
     @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type",
-        visible = true
-    )
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "type",
+            visible = true)
     private static class UnknownWrapper implements Base {
         private final String type;
 
