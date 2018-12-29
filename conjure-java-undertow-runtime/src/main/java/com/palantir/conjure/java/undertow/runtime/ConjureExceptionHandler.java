@@ -22,11 +22,14 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.logsafe.SafeArg;
+import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
+import java.io.OutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xnio.IoUtils;
 
 /**
  * Delegates to the given {@link HttpHandler}, and catches&forwards all {@link Throwable}s. Any exception thrown in
@@ -107,15 +110,38 @@ final class ConjureExceptionHandler implements HttpHandler {
             }
 
             // Do not attempt to write the failure if data has already been written
-            if (!exchange.isResponseStarted()) {
+            if (!isResponseStarted(exchange)) {
                 exchange.setStatusCode(statusCode);
                 try {
                     serializers.serialize(error, exchange);
                 } catch (IOException | RuntimeException e) {
                     log.info("Failed to write error response", e);
                 }
+            } else {
+                // This prevents the server from sending the final null chunk, alerting
+                // clients that the response was terminated prior to receiving full contents.
+                // Note that in the case of http/2 this does not close a connection, which
+                // would break other active requests, only resets the stream.
+                log.warn("Closing the connection to alert the client of an error");
+                IoUtils.safeClose(exchange.getConnection());
             }
         }
+    }
+
+    private static boolean isResponseStarted(HttpServerExchange exchange) {
+        if (exchange.isResponseStarted()) {
+            return true;
+        }
+        // The blocking exchange output stream may have un-committed data buffered.
+        // In a future optimization we can clear the buffer and produce a
+        // SerializableError response.
+        if (exchange.isBlocking()) {
+            OutputStream outputStream = exchange.getOutputStream();
+            if (outputStream instanceof UndertowOutputStream) {
+                return ((UndertowOutputStream) outputStream).getBytesWritten() > 0;
+            }
+        }
+        return false;
     }
 
     private static void log(ServiceException exception) {

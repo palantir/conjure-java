@@ -23,6 +23,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.Random;
 
 final class UndertowBinaryResource implements UndertowEteBinaryService {
     @Override
@@ -38,5 +39,15 @@ final class UndertowBinaryResource implements UndertowEteBinaryService {
     @Override
     public Optional<BinaryResponseBody> getOptionalBinaryEmpty(AuthHeader authHeader) {
         return Optional.empty();
+    }
+
+    @Override
+    public BinaryResponseBody getBinaryFailure(AuthHeader authHeader, int numBytes) {
+        return responseBody -> {
+            byte[] data = new byte[numBytes];
+            new Random().nextBytes(data);
+            responseBody.write(data);
+            throw new RuntimeException("failure");
+        };
     }
 }

@@ -330,6 +330,23 @@ public final class UndertowServiceEteTest extends TestBase {
                 .isEqualTo("Hello World!");
     }
 
+    @Test
+    public void testBinaryServerSideFailureAfterManyBytesSent() throws Exception {
+        Response<ResponseBody> response = binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"),
+                // Write more bytes than one buffer
+                20000).execute();
+        try (ResponseBody body = response.body()) {
+            assertThatThrownBy(() -> ByteStreams.copy(body.byteStream(), ByteStreams.nullOutputStream()))
+                    .isInstanceOf(IOException.class);
+        }
+    }
+
+    @Test
+    public void testBinaryServerSideFailureAfterFewBytesSent() {
+        assertThatThrownBy(() -> binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1).execute())
+                .isInstanceOf(IOException.class);
+    }
+
     @BeforeClass
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
