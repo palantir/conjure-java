@@ -65,6 +65,7 @@ final class UndertowServiceInterfaceGenerator {
                 .collect(Collectors.toList()));
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
+                .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
     }

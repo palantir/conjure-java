@@ -109,6 +109,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .collect(Collectors.toList()));
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
+                .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
     }

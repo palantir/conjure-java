@@ -121,6 +121,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 .collect(Collectors.toList()));
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
+                .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
     }
