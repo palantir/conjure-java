@@ -23,11 +23,11 @@ import io.undertow.server.HttpServerExchange;
  * Workaround for UNDERTOW-1460, this class can be removed once 1.4.17.Final is released.
  * @see <a href="https://issues.jboss.org/browse/UNDERTOW-1460">UNDERTOW-1460</a>
  */
-public final class Undertow1460Handler implements HttpHandler {
+final class Undertow1460Handler implements HttpHandler {
 
     private final HttpHandler delegate;
 
-    public Undertow1460Handler(HttpHandler delegate) {
+    Undertow1460Handler(HttpHandler delegate) {
         this.delegate = delegate;
     }
 

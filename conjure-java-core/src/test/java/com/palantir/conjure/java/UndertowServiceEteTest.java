@@ -19,36 +19,45 @@ package com.palantir.conjure.java;
 import static com.palantir.conjure.java.EteTestServer.clientConfiguration;
 import static com.palantir.conjure.java.EteTestServer.clientUserAgent;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.ByteStreams;
+import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.defs.Conjure;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
+import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
-import com.palantir.conjure.java.undertow.runtime.ConjureRoutingRegistry;
+import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.Serializers;
-import com.palantir.conjure.java.undertow.runtime.Undertow1460Handler;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoint;
+import com.palantir.product.EteBinaryServiceEndpoint;
+import com.palantir.product.EteBinaryServiceRetrofit;
 import com.palantir.product.EteService;
 import com.palantir.product.EteServiceEndpoint;
+import com.palantir.product.EteServiceRetrofit;
+import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
-import io.undertow.server.RoutingHandler;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -61,12 +70,16 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import retrofit2.Response;
 
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
@@ -78,9 +91,23 @@ public final class UndertowServiceEteTest extends TestBase {
 
     private final EteService client;
 
+    private final EteServiceRetrofit retrofitClient;
+
+    private final EteBinaryServiceRetrofit binaryClient;
+
     public UndertowServiceEteTest() {
         client = JaxRsClient.create(
                 EteService.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
+        retrofitClient = Retrofit2Client.create(
+                EteServiceRetrofit.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
+        binaryClient = Retrofit2Client.create(
+                EteBinaryServiceRetrofit.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
                 clientConfiguration());
@@ -93,15 +120,15 @@ public final class UndertowServiceEteTest extends TestBase {
                 .serializerRegistry(serializers)
                 .build();
 
-        RoutingHandler handler = Handlers.routing();
-
-        RoutingRegistry routingRegistry = new ConjureRoutingRegistry(handler);
-        EteServiceEndpoint.of(new UndertowEteResource()).create(context).register(routingRegistry);
-        EmptyPathServiceEndpoint.of(() -> true).create(context).register(routingRegistry);
-
+        ConjureHandler handler = new ConjureHandler();
+        List<Endpoint> endpoints = ImmutableList.of(
+                EteServiceEndpoint.of(new UndertowEteResource()),
+                EmptyPathServiceEndpoint.of(() -> true),
+                EteBinaryServiceEndpoint.of(new UndertowBinaryResource()));
+        endpoints.forEach(endpoint -> endpoint.create(context).register(handler));
         server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
-                .setHandler(Handlers.path().addPrefixPath("/test-example/api", new Undertow1460Handler(handler)))
+                .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
                 .build();
         server.start();
     }
@@ -166,6 +193,11 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void optional_empty_from_a_server_has_empty_status() throws Exception {
+        assertThat(retrofitClient.optionalEmpty(AuthHeader.valueOf("authHeader")).execute().code()).isEqualTo(204);
+    }
+
+    @Test
     public void client_can_retrieve_a_date_time_from_a_server() throws Exception {
         assertThat(client.datetime(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(OffsetDateTime.ofInstant(Instant.ofEpochMilli(1234), ZoneId.from(ZoneOffset.UTC)));
@@ -199,10 +231,110 @@ public final class UndertowServiceEteTest extends TestBase {
         assertThat(httpUrlConnection.getResponseCode()).isEqualTo(422);
     }
 
+    @Test
+    public void testCborContent() throws Exception {
+        ObjectMapper cborMapper = ObjectMappers.newCborClientObjectMapper();
+        // postString method
+        HttpURLConnection connection = (HttpURLConnection)
+                new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/cbor");
+        connection.setRequestProperty(HttpHeaders.ACCEPT, "application/cbor");
+        connection.setDoOutput(true);
+        try (OutputStream requestBody = connection.getOutputStream()) {
+            cborMapper.writeValue(requestBody, "Hello, World!");
+        }
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/cbor");
+        try (InputStream responseBody = connection.getInputStream()) {
+            assertThat(cborMapper.readValue(responseBody, String.class)).isEqualTo("Hello, World!");
+        }
+    }
+
+    @Test
+    public void testBinaryPost() throws Exception {
+        byte[] expected = "Hello, World".getBytes(StandardCharsets.UTF_8);
+        Response<ResponseBody> response = binaryClient.postBinary(AuthHeader.valueOf("authHeader"),
+                RequestBody.create(MediaType.parse("application/octet-stream"), expected)).execute();
+        try (ResponseBody body = response.body()) {
+            assertThat(response.isSuccessful()).isTrue();
+            assertThat(body.contentType()).isEqualTo(MediaType.parse("application/octet-stream"));
+            assertThat(body.bytes()).isEqualTo(expected);
+        }
+    }
+
+    @Test
+    public void testAliasQueryParameter() {
+        NestedStringAliasExample expected = NestedStringAliasExample.of(StringAliasExample.of("value"));
+        assertThat(client.aliasTwo(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testExternalImportBody() {
+        StringAliasExample expected = StringAliasExample.of("value");
+        assertThat(client.notNullBodyExternalImport(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testExternalImportOptionalQueryParameter() {
+        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
+        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testExternalImportOptionalEmptyQueryParameter() {
+        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
+                .isEqualTo(Optional.empty());
+    }
+
+    @Test
+    public void testExternalImportOptionalBody() {
+        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
+        assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testExternalImportOptionalEmptyBody() {
+        assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
+                .isEqualTo(Optional.empty());
+    }
+
+    @Test
+    public void testUnknownContentType() {
+        assertThatThrownBy(() -> binaryClient.postBinary(AuthHeader.valueOf("authHeader"),
+                RequestBody.create(MediaType.parse("application/unsupported"), new byte[] {1, 2, 3})).execute())
+                .isInstanceOf(RemoteException.class)
+                .hasMessageContaining("INVALID_ARGUMENT");
+    }
+
+    @Test
+    public void testBinaryOptionalEmptyResponse() throws Exception {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/binary/optional/empty");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        con.setRequestMethod("GET");
+        assertThat(con.getResponseCode()).isEqualTo(204);
+        assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).isNull();
+    }
+
+    @Test
+    public void testBinaryOptionalPresentResponse() throws Exception {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/binary/optional/present");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        con.setRequestMethod("GET");
+        assertThat(con.getResponseCode()).isEqualTo(200);
+        assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
+        assertThat(new String(ByteStreams.toByteArray(con.getInputStream()), StandardCharsets.UTF_8))
+                .isEqualTo("Hello World!");
+    }
+
     @BeforeClass
     public static void beforeClass() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/ete-service.yml")));
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(
+                new File("src/test/resources/ete-service.yml"),
+                new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
                 .emit(def, folder.getRoot());
 

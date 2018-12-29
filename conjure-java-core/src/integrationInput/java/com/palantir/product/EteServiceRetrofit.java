@@ -90,4 +90,21 @@ public interface EteServiceRetrofit {
     Call<NestedStringAliasExample> aliasTwo(
             @Header("Authorization") AuthHeader authHeader,
             @Query("queryParamName") NestedStringAliasExample queryParamName);
+
+    @POST("./base/external/notNullBody")
+    @Headers({"hr-path-template: /base/external/notNullBody", "Accept: application/json"})
+    Call<StringAliasExample> notNullBodyExternalImport(
+            @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
+
+    @POST("./base/external/optional-body")
+    @Headers({"hr-path-template: /base/external/optional-body", "Accept: application/json"})
+    Call<Optional<StringAliasExample>> optionalBodyExternalImport(
+            @Header("Authorization") AuthHeader authHeader,
+            @Body Optional<StringAliasExample> body);
+
+    @POST("./base/external/optional-query")
+    @Headers({"hr-path-template: /base/external/optional-query", "Accept: application/json"})
+    Call<Optional<StringAliasExample>> optionalQueryExternalImport(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("query") Optional<StringAliasExample> query);
 }

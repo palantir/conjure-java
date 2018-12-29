@@ -20,11 +20,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
-import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.RoutingHandler;
 import java.io.IOException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -60,13 +57,11 @@ public final class ConjureHandlerTest {
                 innerObserver.control();
             }
         };
-        RoutingHandler routingHandler = Handlers.routing();
-
-        RoutingRegistry routingRegistry = new ConjureRoutingRegistry(routingHandler);
-        routingRegistry.get("/test", httpHandler);
+        ConjureHandler handler = new ConjureHandler();
+        handler.get("/test", httpHandler);
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(routingHandler)
+                .setHandler(handler)
                 .build();
         server.start();
     }

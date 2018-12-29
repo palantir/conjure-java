@@ -190,12 +190,12 @@ _This feature is experimental and subject to change._
 
 ```java
 public static void main(String[] args) {
-    RoutingHandler handler = Handlers.routing();
+    ConjureHandler handler = new ConjureHandler();
     RecipeBookServiceEndpoint.of(new RecipeBookResource())
         .create(HandlerContext.builder()
             .serializerRegistry(new SerializerRegistry(Serializers.json()))
             .build())
-        .register(new ConjureRoutingRegistry(handler));
+        .register(handler);
 
     Undertow server = Undertow.builder()
             .addHttpListener(8080, "0.0.0.0")

@@ -1,0 +1,18 @@
+services:
+  EteBinaryService:
+    default-auth: header
+    base-path: /binary
+    package: com.palantir.product
+    name: Ete Binary Endpoints
+    endpoints:
+      postBinary:
+        http: POST /
+        args:
+          body: binary
+        returns: binary
+      getOptionalBinaryPresent:
+        http: GET /optional/present
+        returns: optional<binary>
+      getOptionalBinaryEmpty:
+        http: GET /optional/empty
+        returns: optional<binary>
