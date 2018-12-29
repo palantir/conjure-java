@@ -43,4 +43,13 @@ public interface UndertowEteService {
 
     NestedStringAliasExample aliasTwo(
             AuthHeader authHeader, NestedStringAliasExample queryParamName);
+
+    StringAliasExample notNullBodyExternalImport(
+            AuthHeader authHeader, StringAliasExample notNullBody);
+
+    Optional<StringAliasExample> optionalBodyExternalImport(
+            AuthHeader authHeader, Optional<StringAliasExample> body);
+
+    Optional<StringAliasExample> optionalQueryExternalImport(
+            AuthHeader authHeader, Optional<StringAliasExample> query);
 }
