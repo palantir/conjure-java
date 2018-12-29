@@ -177,14 +177,11 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             TypeMapper returnTypeMapper,
             TypeMapper methodTypeMapper) {
 
-        List<ArgumentDefinition> args = Lists.newArrayList();
         List<ArgumentDefinition> queryArgs = Lists.newArrayList();
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {
-            if (!arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
-                    || !arg.getType().accept(TYPE_DEFAULTABLE_PREDICATE)) {
-                args.add(arg);
-            } else {
+            if (arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
+                    && arg.getType().accept(TYPE_DEFAULTABLE_PREDICATE)) {
                 queryArgs.add(arg);
             }
         }
@@ -365,9 +362,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 return ClassName.get("javax.ws.rs", "PUT");
             case "POST":
                 return ClassName.get("javax.ws.rs", "POST");
-            default:
-                throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
         }
+        throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
 
     /** Produces an ordering for ParamaterType of Header, Path, Query, Body. */

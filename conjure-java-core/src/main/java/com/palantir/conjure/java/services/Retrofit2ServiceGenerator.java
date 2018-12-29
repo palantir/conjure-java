@@ -280,9 +280,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 return ClassName.get("retrofit2.http", "PUT");
             case "POST":
                 return ClassName.get("retrofit2.http", "POST");
-            default:
-                throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
         }
+        throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
 
 }
