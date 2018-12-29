@@ -111,5 +111,22 @@ public class EteResource implements EteService {
         return queryParamName;
     }
 
+    @Override
+    public StringAliasExample notNullBodyExternalImport(AuthHeader authHeader, StringAliasExample notNullBody) {
+        return notNullBody;
+    }
+
+    @Override
+    public Optional<StringAliasExample> optionalBodyExternalImport(AuthHeader authHeader,
+            Optional<StringAliasExample> body) {
+        return body;
+    }
+
+    @Override
+    public Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader,
+            Optional<StringAliasExample> query) {
+        return query;
+    }
+
     interface Streaming extends StreamingOutput, BinaryResponseBody {}
 }

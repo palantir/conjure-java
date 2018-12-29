@@ -32,5 +32,6 @@ dependencies {
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.mockito:mockito-core'
 
-    processor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
+    testCompileOnly 'org.immutables:value::annotations'
 }
