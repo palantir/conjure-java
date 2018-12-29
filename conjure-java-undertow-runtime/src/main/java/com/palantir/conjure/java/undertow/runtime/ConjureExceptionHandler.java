@@ -135,11 +135,9 @@ final class ConjureExceptionHandler implements HttpHandler {
         // The blocking exchange output stream may have un-committed data buffered.
         // In a future optimization we can clear the buffer and produce a
         // SerializableError response.
-        if (exchange.isBlocking()) {
-            OutputStream outputStream = exchange.getOutputStream();
-            if (outputStream instanceof UndertowOutputStream) {
-                return ((UndertowOutputStream) outputStream).getBytesWritten() > 0;
-            }
+        OutputStream outputStream = exchange.getOutputStream();
+        if (outputStream instanceof UndertowOutputStream) {
+            return ((UndertowOutputStream) outputStream).getBytesWritten() > 0;
         }
         return false;
     }
