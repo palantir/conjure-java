@@ -17,8 +17,6 @@ import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
-import java.lang.Override;
-import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.Deque;
 import java.util.Map;
