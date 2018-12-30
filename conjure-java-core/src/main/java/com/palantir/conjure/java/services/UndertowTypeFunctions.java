@@ -86,7 +86,6 @@ final class UndertowTypeFunctions {
     private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME =
             new ImmutableMap.Builder<PrimitiveType.Value, String>()
                     .put(PrimitiveType.Value.BEARERTOKEN, "BearerToken")
-                    .put(PrimitiveType.Value.BINARY, "Binary")
                     .put(PrimitiveType.Value.BOOLEAN, "Boolean")
                     .put(PrimitiveType.Value.DATETIME, "DateTime")
                     .put(PrimitiveType.Value.DOUBLE, "Double")

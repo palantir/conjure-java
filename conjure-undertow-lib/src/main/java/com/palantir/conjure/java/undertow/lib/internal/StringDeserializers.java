@@ -23,8 +23,6 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -40,8 +38,6 @@ import java.util.UUID;
 public final class StringDeserializers {
 
     private StringDeserializers() {}
-
-    // TODO(nmiyake): verify that "any" is not supported
 
     public static BearerToken deserializeBearerToken(String in) {
         try {
@@ -86,29 +82,6 @@ public final class StringDeserializers {
             builder.add(deserializeBearerToken(item));
         }
         return builder.build();
-    }
-
-    public static ByteBuffer deserializeBinary(String in) {
-        try {
-            return ByteBuffer.wrap(in.getBytes(StandardCharsets.UTF_8));
-        } catch (RuntimeException ex) {
-            throw new SafeIllegalArgumentException("failed to deserialize binary", ex);
-        }
-    }
-
-    public static ByteBuffer deserializeBinary(Iterable<String> in) {
-        return deserializeBinary(Iterables.getOnlyElement(in));
-    }
-
-    public static Optional<ByteBuffer> deserializeOptionalBinary(String in) {
-        return Optional.of(deserializeBinary(in));
-    }
-
-    public static Optional<ByteBuffer> deserializeOptionalBinary(Iterable<String> in) {
-        if (in == null || Iterables.isEmpty(in)) {
-            return Optional.empty();
-        }
-        return Optional.of(deserializeBinary(Iterables.getOnlyElement(in)));
     }
 
     public static boolean deserializeBoolean(String in) {
