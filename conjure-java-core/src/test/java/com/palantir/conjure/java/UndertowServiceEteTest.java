@@ -330,6 +330,21 @@ public final class UndertowServiceEteTest extends TestBase {
                 .isEqualTo("Hello World!");
     }
 
+    @Test
+    public void testVoidMethod() {
+        client.noReturn(AuthHeader.valueOf("authHeader"));
+    }
+
+    @Test
+    public void testVoidMethodRespondsNoContent() throws Exception {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/no-return");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        assertThat(con.getResponseCode()).isEqualTo(204);
+        assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).isNull();
+    }
+
     @BeforeClass
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(

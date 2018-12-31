@@ -204,6 +204,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 AuthHeader authHeader = Auth.header(exchange);
                 InputStream input = BinarySerializers.deserializeInputStream(exchange);
                 delegate.uploadRawData(authHeader, input);
+                exchange.setStatusCode(204);
             }
         }
 
@@ -216,6 +217,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 AuthHeader authHeader = Auth.header(exchange);
                 NestedAliasedBinary input = serializers.deserialize(inputType, exchange);
                 delegate.uploadAliasedRawData(authHeader, input);
+                exchange.setStatusCode(204);
             }
         }
 
@@ -339,6 +341,7 @@ public final class TestServiceEndpoint implements Endpoint {
                         setEnd,
                         optionalEnd,
                         query);
+                exchange.setStatusCode(204);
             }
         }
 
@@ -398,6 +401,7 @@ public final class TestServiceEndpoint implements Endpoint {
                         StringDeserializers.deserializeOptionalDouble(
                                 queryParams.get("maybeDouble"));
                 delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
+                exchange.setStatusCode(204);
             }
         }
     }

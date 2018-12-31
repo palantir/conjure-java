@@ -8,6 +8,7 @@ import java.lang.Boolean;
 import java.lang.Double;
 import java.lang.Integer;
 import java.lang.String;
+import java.lang.Void;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -107,4 +108,8 @@ public interface EteServiceRetrofit {
     Call<Optional<StringAliasExample>> optionalQueryExternalImport(
             @Header("Authorization") AuthHeader authHeader,
             @Query("query") Optional<StringAliasExample> query);
+
+    @POST("./base/no-return")
+    @Headers({"hr-path-template: /base/no-return", "Accept: application/json"})
+    Call<Void> noReturn(@Header("Authorization") AuthHeader authHeader);
 }

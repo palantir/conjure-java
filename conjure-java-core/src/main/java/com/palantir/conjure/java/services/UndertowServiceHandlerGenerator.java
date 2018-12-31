@@ -303,8 +303,9 @@ final class UndertowServiceHandlerGenerator {
             code.addStatement("$1N.$2L($3L)",
                     DELEGATE_VAR_NAME,
                     endpointDefinition.getEndpointName(),
-                    String.join(", ", methodArgs)
-            );
+                    String.join(", ", methodArgs));
+            // Set 204 response code for void methods
+            code.addStatement("$1N.setStatusCode(204)", EXCHANGE_VAR_NAME);
         }
         return code.build();
     }

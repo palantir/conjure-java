@@ -72,9 +72,8 @@ public final class EteServiceEndpoint implements Endpoint {
                     .get("/base/aliasTwo", new AliasTwoHandler())
                     .post("/base/external/notNullBody", new NotNullBodyExternalImportHandler())
                     .post("/base/external/optional-body", new OptionalBodyExternalImportHandler())
-                    .post(
-                            "/base/external/optional-query",
-                            new OptionalQueryExternalImportHandler());
+                    .post("/base/external/optional-query", new OptionalQueryExternalImportHandler())
+                    .post("/base/no-return", new NoReturnHandler());
         }
 
         private class StringHandler implements HttpHandler {
@@ -289,6 +288,15 @@ public final class EteServiceEndpoint implements Endpoint {
                 } else {
                     exchange.setStatusCode(204);
                 }
+            }
+        }
+
+        private class NoReturnHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                delegate.noReturn(authHeader);
+                exchange.setStatusCode(204);
             }
         }
     }

@@ -52,4 +52,6 @@ public interface UndertowEteService {
 
     Optional<StringAliasExample> optionalQueryExternalImport(
             AuthHeader authHeader, Optional<StringAliasExample> query);
+
+    void noReturn(AuthHeader authHeader);
 }
