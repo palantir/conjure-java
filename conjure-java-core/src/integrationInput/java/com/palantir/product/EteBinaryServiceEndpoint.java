@@ -12,6 +12,7 @@ import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Override;
@@ -74,7 +75,7 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     BinarySerializers.serialize(result.get(), exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -87,7 +88,7 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     BinarySerializers.serialize(result.get(), exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }

@@ -16,6 +16,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.lang.Override;
 import java.lang.String;
@@ -147,7 +148,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -160,7 +161,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -268,7 +269,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -286,7 +287,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -296,7 +297,7 @@ public final class EteServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 delegate.noReturn(authHeader);
-                exchange.setStatusCode(204);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
         }
     }
