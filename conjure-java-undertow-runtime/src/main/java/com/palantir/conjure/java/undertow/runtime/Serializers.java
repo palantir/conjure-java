@@ -27,6 +27,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIoException;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -48,7 +49,7 @@ public final class Serializers {
         }
 
         @Override
-        public final void serialize(Object value, OutputStream output) throws IOException {
+        public void serialize(Object value, OutputStream output) throws IOException {
             Preconditions.checkNotNull(value, "cannot serialize null value");
             mapper.writeValue(output, value);
         }
@@ -69,11 +70,8 @@ public final class Serializers {
         }
     }
 
-    private static final Supplier<Serializer> jsonInstance = Suppliers.memoize(() -> new AbstractJacksonSerializer(
-            // TODO(rfink): Remove http-remoting dependency
-            ObjectMappers.newServerObjectMapper()
-                    // See documentation on Serializer#serialize: Implementations must not close the stream.
-                    .disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {
+    private static final Supplier<Serializer> jsonInstance = Suppliers.memoize(() ->
+            new AbstractJacksonSerializer(configure(ObjectMappers.newServerObjectMapper())) {
 
         private static final String CONTENT_TYPE = "application/json";
 
@@ -91,11 +89,8 @@ public final class Serializers {
         }
     });
 
-    private static final Supplier<Serializer> cborInstance = Suppliers.memoize(() -> new AbstractJacksonSerializer(
-            // TODO(rfink): Remove http-remoting dependency
-            ObjectMappers.newCborServerObjectMapper()
-                    // See documentation on Serializer#serialize: Implementations must not close the stream.
-                    .disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {
+    private static final Supplier<Serializer> cborInstance = Suppliers.memoize(() ->
+            new AbstractJacksonSerializer(configure(ObjectMappers.newCborServerObjectMapper())) {
 
         private static final String CONTENT_TYPE = "application/cbor";
 
@@ -108,6 +103,11 @@ public final class Serializers {
         public boolean supportsContentType(String contentType) {
             return contentType != null && contentType.startsWith(CONTENT_TYPE);
         }
+
+        @Override
+        public void serialize(Object value, OutputStream output) throws IOException {
+            super.serialize(value, new ShieldingOutputStream(output));
+        }
     });
 
     /** Returns a serializer for the Conjure JSON wire format. */
@@ -118,5 +118,32 @@ public final class Serializers {
     /** Returns a serializer for the Conjure CBOR wire format. */
     public static Serializer cbor() {
         return cborInstance.get();
+    }
+
+    private static ObjectMapper configure(ObjectMapper mapper) {
+        // See documentation on Serializer#serialize: Implementations must not close the stream.
+        return mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+                // Avoid flushing, allowing us to set content-length if the length is below the buffer size.
+                .disable(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM);
+    }
+
+    /**
+     * Work around a CBORGenerator bug.
+     * For more information: https://github.com/FasterXML/jackson-dataformats-binary/issues/155
+     */
+    private static final class ShieldingOutputStream extends FilterOutputStream {
+        ShieldingOutputStream(OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void flush() {
+            // nop
+        }
+
+        @Override
+        public void close() {
+            // nop
+        }
     }
 }
