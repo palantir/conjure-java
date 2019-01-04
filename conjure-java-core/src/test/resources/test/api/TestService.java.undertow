@@ -9,8 +9,6 @@ import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
-import java.lang.Deprecated;
-import java.lang.String;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;

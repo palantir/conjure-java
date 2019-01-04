@@ -8,7 +8,6 @@ import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
-import java.lang.Override;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
