@@ -16,14 +16,11 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import io.undertow.server.ConduitWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.ConduitFactory;
 import io.undertow.util.HeaderMap;
 import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
-import org.xnio.conduits.StreamSinkConduit;
 
 /**
  * Applies security headers. These headers include:
@@ -84,32 +81,19 @@ final class WebSecurityHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        exchange.addResponseWrapper(Listener.INSTANCE);
-        next.handleRequest(exchange);
-    }
-
-    private enum Listener implements ConduitWrapper<StreamSinkConduit> {
-        INSTANCE;
-
-        @Override
-        public StreamSinkConduit wrap(ConduitFactory<StreamSinkConduit> factory, HttpServerExchange exchange) {
-            HeaderMap headers = exchange.getResponseHeaders();
-            headers.put(Headers.CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY);
-            headers.put(Headers.REFERRER_POLICY, REFERRER_POLICY);
-
-            String userAgent = exchange.getRequestHeaders().getFirst(Headers.USER_AGENT);
-            if (userAgent != null) {
-                // send the CSP header so that IE10 and IE11 recognise it
-                if (userAgent.contains(USER_AGENT_IE_10) || userAgent.contains(USER_AGENT_IE_11)) {
-                    headers.put(HEADER_IE_X_CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY);
-                }
+        HeaderMap headers = exchange.getResponseHeaders();
+        headers.put(Headers.CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY);
+        headers.put(Headers.REFERRER_POLICY, REFERRER_POLICY);
+        headers.put(Headers.X_CONTENT_TYPE_OPTIONS, CONTENT_TYPE_OPTIONS);
+        headers.put(Headers.X_FRAME_OPTIONS, FRAME_OPTIONS);
+        headers.put(Headers.X_XSS_PROTECTION, XSS_PROTECTION);
+        String userAgent = exchange.getRequestHeaders().getFirst(Headers.USER_AGENT);
+        if (userAgent != null) {
+            // send the CSP header so that IE10 and IE11 recognise it
+            if (userAgent.contains(USER_AGENT_IE_10) || userAgent.contains(USER_AGENT_IE_11)) {
+                headers.put(HEADER_IE_X_CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY);
             }
-
-            headers.put(Headers.X_CONTENT_TYPE_OPTIONS, CONTENT_TYPE_OPTIONS);
-            headers.put(Headers.X_FRAME_OPTIONS, FRAME_OPTIONS);
-            headers.put(Headers.X_XSS_PROTECTION, XSS_PROTECTION);
-
-            return factory.create();
         }
+        next.handleRequest(exchange);
     }
 }

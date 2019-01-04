@@ -16,13 +16,9 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import io.undertow.server.ConduitWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.ConduitFactory;
-import io.undertow.util.HeaderMap;
 import io.undertow.util.Headers;
-import org.xnio.conduits.StreamSinkConduit;
 
 /**
  * Adds HTTP response headers to GET requests to disable caching.
@@ -43,20 +39,7 @@ final class NoCachingResponseHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        exchange.addResponseWrapper(Listener.INSTANCE);
+        exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, DO_NOT_CACHE);
         next.handleRequest(exchange);
-    }
-
-    private enum Listener implements ConduitWrapper<StreamSinkConduit> {
-        INSTANCE;
-
-        @Override
-        public StreamSinkConduit wrap(ConduitFactory<StreamSinkConduit> factory, HttpServerExchange exchange) {
-            HeaderMap responseHeaders = exchange.getResponseHeaders();
-            if (!responseHeaders.contains(Headers.CACHE_CONTROL)) {
-                responseHeaders.put(Headers.CACHE_CONTROL, DO_NOT_CACHE);
-            }
-            return factory.create();
-        }
     }
 }
