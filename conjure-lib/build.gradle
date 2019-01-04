@@ -22,6 +22,7 @@ dependencies {
     compile 'com.palantir.tokens:auth-tokens'
     compile 'com.palantir.conjure.java.api:errors'
     compile 'javax.annotation:javax.annotation-api'
+    compile 'javax.ws.rs:javax.ws.rs-api'
 
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'

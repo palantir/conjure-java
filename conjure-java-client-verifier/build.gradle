@@ -36,7 +36,9 @@ dependencies {
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
+    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
