@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import com.palantir.logsafe.Preconditions;
 import io.undertow.server.ConduitWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -39,7 +38,7 @@ final class NoCachingResponseHandler implements HttpHandler {
     private final HttpHandler next;
 
     NoCachingResponseHandler(HttpHandler next) {
-        this.next = Preconditions.checkNotNull(next, "Delegate HttpHandler is required");
+        this.next = next;
     }
 
     @Override

@@ -38,7 +38,7 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             ImmutableList.<BiFunction<EndpointDetails, HttpHandler, HttpHandler>>of(
             // no-cache and web-security handlers add listeners for the response to be committed,
             // they can be executed on the IO thread.
-            (endpoint, handler) -> Methods.GET.equals(endpoint.getMethod())
+            (endpoint, handler) -> Methods.GET.equals(endpoint.method)
                     // Only applies to GET methods
                     ? new NoCachingResponseHandler(handler) : handler,
             (endpoint, handler) -> new WebSecurityHandler(handler),
@@ -51,7 +51,7 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             // Bearer token and trace handler must execute prior to the exception
             // to provide user and trace information on exceptions.
             (endpoint, handler) -> new BearerTokenLoggingHandler(handler),
-            (endpoint, handler) -> new TraceHandler(endpoint.getMethod() + " " + endpoint.getTemplate(), handler),
+            (endpoint, handler) -> new TraceHandler(endpoint.method + " " + endpoint.template, handler),
             (endpoint, handler) -> new ConjureExceptionHandler(handler)
     ).reverse();
 
@@ -110,14 +110,6 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
         EndpointDetails(HttpString method, String template) {
             this.method = method;
             this.template = template;
-        }
-
-        HttpString getMethod() {
-            return method;
-        }
-
-        String getTemplate() {
-            return template;
         }
 
         @Override

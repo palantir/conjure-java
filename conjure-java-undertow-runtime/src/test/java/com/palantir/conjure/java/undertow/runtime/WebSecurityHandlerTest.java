@@ -61,12 +61,12 @@ public class WebSecurityHandlerTest {
     }
 
     @Test
-    public void testInternetExploder10() throws IOException {
+    public void testInternetExplorer10() throws IOException {
         testFallbackSecurityPolicyHeader("Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)");
     }
 
     @Test
-    public void testInternetExploder11() throws IOException {
+    public void testInternetExplorer11() throws IOException {
         testFallbackSecurityPolicyHeader("Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko");
     }
 
