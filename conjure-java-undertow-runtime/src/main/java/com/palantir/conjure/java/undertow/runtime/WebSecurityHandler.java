@@ -26,36 +26,19 @@ import io.undertow.util.HttpString;
  * Applies security headers. These headers include:
  * <dl>
  *   <dt>Content Security Policy (including support for IE 10 + 11)</dt>
- *   <dd>
- *       <code>
- *           default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'self';
- *       </code>
- *       https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
- *   </dd>
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP</dd>
  *
  *   <dt>Referrer Policy</dt>
- *   <dd>
- *       Value set to <code>strict-origin-when-cross-origin</code>.
- *       https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
- *   </dd>
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy</dd>
  *
  *   <dt>Content Type Options</dt>
- *   <dd>
- *       Value set to <code>nosniff</code>.
- *       https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
- *   </dd>
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options</dd>
  *
  *   <dt>Frame Options</dt>
- *   <dd>
- *       Value set to <code>sameorigin</code>.
- *       https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
- *   </dd>
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options</dd>
  *
  *   <dt>XSS Protection</dt>
- *   <dd>
- *       Value set to <code>1; mode=block</code>.
- *       https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
- *   </dd>
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection</dd>
  * </dl>
  */
 final class WebSecurityHandler implements HttpHandler {
