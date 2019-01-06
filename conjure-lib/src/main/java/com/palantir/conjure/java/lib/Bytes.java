@@ -38,7 +38,7 @@ public final class Bytes {
         return ByteBuffer.wrap(safe).asReadOnlyBuffer();
     }
 
-    /** Returns a copyTo of this byte array. */
+    /** Returns a new byte array containing the same content as this object's underlying {@code byte[]}. */
     public byte[] asNewByteArray() {
         byte[] unsafe = new byte[safe.length];
         System.arraycopy(safe, 0, unsafe, 0, safe.length);
