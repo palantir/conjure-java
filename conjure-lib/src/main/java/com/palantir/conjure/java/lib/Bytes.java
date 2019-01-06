@@ -24,30 +24,30 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /** An immutable {@code byte[]} wrapper. */
-public final class ImmutableByteArray {
+public final class Bytes {
     private final byte[] safe;
 
-    /** Constructs a new {@link ImmutableByteArray} assuming the provided array is not held by any other class. */
-    private ImmutableByteArray(byte[] array) {
+    /** Constructs a new {@link Bytes} assuming the provided array is not held by any other class. */
+    private Bytes(byte[] array) {
         safe = array;
     }
 
     /** Returns a new read-only {@link ByteBuffer} backed by this byte array. */
-    public ByteBuffer getByteBuffer() {
+    @JsonValue
+    public ByteBuffer asReadOnlyByteBuffer() {
         return ByteBuffer.wrap(safe).asReadOnlyBuffer();
     }
 
-    /** Returns a copy of this byte array. */
-    @JsonValue
-    public byte[] getBytes() {
+    /** Returns a copyTo of this byte array. */
+    public byte[] asNewByteArray() {
         byte[] unsafe = new byte[safe.length];
         System.arraycopy(safe, 0, unsafe, 0, safe.length);
         return unsafe;
     }
 
     /** Copies this byte array into the provided byte array beginning at offset and up to the provided length. */
-    public void copy(byte[] array, int offset, int length) {
-        System.arraycopy(safe, 0, array, offset, length);
+    public void copyTo(byte[] destination, int offset, int length) {
+        System.arraycopy(safe, 0, destination, offset, length);
     }
 
     /** Returns a new {@link InputStream} that reads this byte array. */
@@ -68,30 +68,41 @@ public final class ImmutableByteArray {
     @Override
     public boolean equals(Object obj) {
         return this == obj
-                || (obj instanceof ImmutableByteArray && Arrays.equals(safe, ((ImmutableByteArray) obj).safe));
+                || (obj instanceof Bytes && Arrays.equals(safe, ((Bytes) obj).safe));
     }
 
-    /** Constructs a new {@link ImmutableByteArray} from the provided array. */
+    @Override
+    public String toString() {
+        return new StringBuilder(Bytes.class.getSimpleName())
+                .append('{')
+                .append("size: ")
+                .append(safe.length)
+                .append('}')
+                .toString();
+    }
+
+    /** Constructs a new {@link Bytes} from the provided array. */
     @JsonCreator
-    public static ImmutableByteArray from(byte[] array) {
+    public static Bytes from(byte[] array) {
         return from(array, 0, array.length);
     }
 
-    /** Constructs a new {@link ImmutableByteArray} read from provided offset for the provided length. */
-    public static ImmutableByteArray from(byte[] array, int offset, int length) {
+    /** Constructs a new {@link Bytes} read from provided offset for the provided length. */
+    public static Bytes from(byte[] array, int offset, int length) {
         byte[] safe = new byte[length];
         System.arraycopy(array, offset, safe, 0, length);
 
-        return new ImmutableByteArray(safe);
+        return new Bytes(safe);
     }
 
-    /** Constructs a new {@link ImmutableByteArray} read from the provided {@link ByteBuffer}. */
-    public static ImmutableByteArray from(ByteBuffer buffer) {
+    /** Constructs a new {@link Bytes} read from the provided {@link ByteBuffer}. */
+    public static Bytes from(ByteBuffer buffer) {
+        // call duplicate to ensure we don't mutate the provided ByteBuffer while copying
         ByteBuffer local = buffer.duplicate();
 
         byte[] safe = new byte[local.remaining()];
         local.get(safe);
 
-        return new ImmutableByteArray(safe);
+        return new Bytes(safe);
     }
 }

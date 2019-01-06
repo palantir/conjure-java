@@ -22,103 +22,104 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 
-public final class ImmutableByteArrayTests {
+public final class BytesTests {
     @Test
     public void testConstructionCopiesInputArray() {
         byte[] input = new byte[]{0};
-        ImmutableByteArray immutable = ImmutableByteArray.from(input);
+        Bytes immutable = Bytes.from(input);
 
-        assertThat(immutable.getBytes()[0]).isEqualTo((byte) 0);
+        assertThat(immutable.asNewByteArray()[0]).isEqualTo((byte) 0);
 
+        // mutate the input
         input[0] = 1;
 
-        assertThat(immutable.getBytes()[0]).isEqualTo((byte) 0);
+        assertThat(immutable.asNewByteArray()[0]).isEqualTo((byte) 0);
     }
 
     @Test
     public void testConstructionCopiesArrayWithRange() {
-        byte[] input = new byte[]{0, 1, 2};
-        ImmutableByteArray immutable = ImmutableByteArray.from(input, 1, 2);
-        assertThat(immutable.getBytes()).isEqualTo(new byte[]{1, 2});
+        byte[] input = new byte[]{0, 1, 2, 3};
+        Bytes immutable = Bytes.from(input, 1, 2);
+        assertThat(immutable.asNewByteArray()).isEqualTo(new byte[]{1, 2});
     }
 
     @Test
     public void testConstructionCopiesArray_badOffset() {
         byte[] input = new byte[0];
-        assertThatThrownBy(() -> ImmutableByteArray.from(input, 1, 0))
+        assertThatThrownBy(() -> Bytes.from(input, 1, 0))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testConstructionCopiesArray_badLength() {
         byte[] input = new byte[0];
-        assertThatThrownBy(() -> ImmutableByteArray.from(input, 0, 1))
+        assertThatThrownBy(() -> Bytes.from(input, 0, 1))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testConstructionCopiesArray_badRange() {
         byte[] input = new byte[10];
-        assertThatThrownBy(() -> ImmutableByteArray.from(input, 5, 10))
+        assertThatThrownBy(() -> Bytes.from(input, 5, 10))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testConstructionCopiesByteBuffer() {
         ByteBuffer buffer = ByteBuffer.wrap(new byte[]{0, 1, 2});
-        ImmutableByteArray immutable = ImmutableByteArray.from(buffer);
+        Bytes immutable = Bytes.from(buffer);
 
-        assertThat(immutable.getByteBuffer()).isEqualTo(buffer.asReadOnlyBuffer());
+        assertThat(immutable.asReadOnlyByteBuffer()).isEqualTo(buffer.asReadOnlyBuffer());
 
         buffer.put((byte) 1);
         buffer.rewind();
 
-        assertThat(immutable.getByteBuffer()).isNotEqualTo(buffer.asReadOnlyBuffer());
+        assertThat(immutable.asReadOnlyByteBuffer()).isNotEqualTo(buffer.asReadOnlyBuffer());
     }
 
     @Test
     public void testGetBytes_returnsNewByteArray() {
-        ImmutableByteArray immutable = ImmutableByteArray.from(new byte[] {0});
+        Bytes immutable = Bytes.from(new byte[] {0});
 
-        byte[] output = immutable.getBytes();
+        byte[] output = immutable.asNewByteArray();
         assertThat(output[0]).isEqualTo((byte) 0);
         output[0] = 1;
 
-        assertThat(immutable.getBytes()[0]).isEqualTo((byte) 0);
+        assertThat(immutable.asNewByteArray()[0]).isEqualTo((byte) 0);
     }
 
     @Test
     public void testGetByteBuffer_returnsReadOnlyByteBuffer() {
-        ImmutableByteArray immutable = ImmutableByteArray.from(new byte[] {0});
+        Bytes immutable = Bytes.from(new byte[] {0});
 
-        ByteBuffer output = immutable.getByteBuffer();
+        ByteBuffer output = immutable.asReadOnlyByteBuffer();
         assertThat(output.isReadOnly()).isTrue();
     }
 
     @Test
     public void testGetByteBuffer_returnsNewByteBuffer() {
-        ImmutableByteArray immutable = ImmutableByteArray.from(new byte[] {0});
+        Bytes immutable = Bytes.from(new byte[] {0});
 
-        ByteBuffer output = immutable.getByteBuffer();
+        ByteBuffer output = immutable.asReadOnlyByteBuffer();
         assertThat(output.get()).isEqualTo((byte) 0);
         assertThat(output.remaining()).isEqualTo(0);
 
-        assertThat(immutable.getByteBuffer().remaining()).isEqualTo(1);
+        assertThat(immutable.asReadOnlyByteBuffer().remaining()).isEqualTo(1);
     }
 
     @Test
     public void testGetSize() {
-        assertThat(ImmutableByteArray.from(new byte[0]).size()).isEqualTo(0);
-        assertThat(ImmutableByteArray.from(new byte[10]).size()).isEqualTo(10);
+        assertThat(Bytes.from(new byte[0]).size()).isEqualTo(0);
+        assertThat(Bytes.from(new byte[10]).size()).isEqualTo(10);
     }
 
     @Test
     public void testCopy() {
         byte[] input = new byte[]{0, 1, 2};
-        ImmutableByteArray immutable = ImmutableByteArray.from(input);
+        Bytes immutable = Bytes.from(input);
 
         byte[] test = new byte[input.length];
-        immutable.copy(test, 0, test.length);
+        immutable.copyTo(test, 0, test.length);
 
         assertThat(test).isEqualTo(input);
     }
@@ -126,30 +127,30 @@ public final class ImmutableByteArrayTests {
     @Test
     public void testCopy_badOffset() {
         byte[] input = new byte[0];
-        ImmutableByteArray immutable = ImmutableByteArray.from(input);
+        Bytes immutable = Bytes.from(input);
 
         byte[] test = new byte[0];
-        assertThatThrownBy(() -> immutable.copy(test, 1, test.length))
+        assertThatThrownBy(() -> immutable.copyTo(test, 1, test.length))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testCopy_badLength() {
         byte[] input = new byte[0];
-        ImmutableByteArray immutable = ImmutableByteArray.from(input);
+        Bytes immutable = Bytes.from(input);
 
         byte[] test = new byte[0];
-        assertThatThrownBy(() -> immutable.copy(test, 0, 1))
+        assertThatThrownBy(() -> immutable.copyTo(test, 0, 1))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testCopy_badRange() {
         byte[] input = new byte[10];
-        ImmutableByteArray immutable = ImmutableByteArray.from(input);
+        Bytes immutable = Bytes.from(input);
 
         byte[] test = new byte[5];
-        assertThatThrownBy(() -> immutable.copy(test, 0, 10))
+        assertThatThrownBy(() -> immutable.copyTo(test, 0, 10))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 }
