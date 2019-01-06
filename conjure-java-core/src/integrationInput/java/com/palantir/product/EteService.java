@@ -110,6 +110,10 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("query") Optional<StringAliasExample> query);
 
+    @POST
+    @Path("base/no-return")
+    void noReturn(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());

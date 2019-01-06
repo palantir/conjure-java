@@ -16,6 +16,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Deque;
@@ -70,9 +71,8 @@ public final class EteServiceEndpoint implements Endpoint {
                     .get("/base/aliasTwo", new AliasTwoHandler())
                     .post("/base/external/notNullBody", new NotNullBodyExternalImportHandler())
                     .post("/base/external/optional-body", new OptionalBodyExternalImportHandler())
-                    .post(
-                            "/base/external/optional-query",
-                            new OptionalQueryExternalImportHandler());
+                    .post("/base/external/optional-query", new OptionalQueryExternalImportHandler())
+                    .post("/base/no-return", new NoReturnHandler());
         }
 
         private class StringHandler implements HttpHandler {
@@ -146,7 +146,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -159,7 +159,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -267,7 +267,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -285,8 +285,17 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
+            }
+        }
+
+        private class NoReturnHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                delegate.noReturn(authHeader);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
         }
     }

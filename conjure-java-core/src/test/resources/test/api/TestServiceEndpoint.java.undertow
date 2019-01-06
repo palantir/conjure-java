@@ -21,6 +21,7 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderMap;
 import io.undertow.util.PathTemplateMatch;
+import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Deque;
@@ -132,7 +133,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -176,7 +177,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     BinarySerializers.serialize(result.get(), exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -202,6 +203,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 AuthHeader authHeader = Auth.header(exchange);
                 InputStream input = BinarySerializers.deserializeInputStream(exchange);
                 delegate.uploadRawData(authHeader, input);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
         }
 
@@ -214,6 +216,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 AuthHeader authHeader = Auth.header(exchange);
                 NestedAliasedBinary input = serializers.deserialize(inputType, exchange);
                 delegate.uploadAliasedRawData(authHeader, input);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
         }
 
@@ -256,7 +259,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -273,7 +276,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -337,6 +340,7 @@ public final class TestServiceEndpoint implements Endpoint {
                         setEnd,
                         optionalEnd,
                         query);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
         }
 
@@ -379,7 +383,7 @@ public final class TestServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -396,6 +400,7 @@ public final class TestServiceEndpoint implements Endpoint {
                         StringDeserializers.deserializeOptionalDouble(
                                 queryParams.get("maybeDouble"));
                 delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
         }
     }

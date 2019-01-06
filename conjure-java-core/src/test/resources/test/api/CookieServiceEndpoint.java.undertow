@@ -9,6 +9,7 @@ import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import javax.annotation.Generated;
 
@@ -49,6 +50,7 @@ public final class CookieServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 BearerToken cookieToken = Auth.cookie(exchange, "PALANTIR_TOKEN");
                 delegate.eatCookies(cookieToken);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
         }
     }

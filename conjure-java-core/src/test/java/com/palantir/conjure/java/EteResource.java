@@ -128,5 +128,10 @@ public class EteResource implements EteService {
         return query;
     }
 
+    @Override
+    public void noReturn(AuthHeader authHeader) {
+        // nop
+    }
+
     interface Streaming extends StreamingOutput, BinaryResponseBody {}
 }
