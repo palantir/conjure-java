@@ -57,6 +57,7 @@ dependencies {
     testCompile 'org.mockito:mockito-core'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
+    testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'io.dropwizard:dropwizard-testing'
 
     integrationInputCompile project(':conjure-lib')

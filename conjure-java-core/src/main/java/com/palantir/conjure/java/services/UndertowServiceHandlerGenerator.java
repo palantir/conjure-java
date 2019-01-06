@@ -172,6 +172,7 @@ final class UndertowServiceHandlerGenerator {
                 .build();
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), routableFactory)
+                .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
     }

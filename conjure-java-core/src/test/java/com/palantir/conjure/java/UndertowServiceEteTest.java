@@ -242,14 +242,35 @@ public final class UndertowServiceEteTest extends TestBase {
         connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/cbor");
         connection.setRequestProperty(HttpHeaders.ACCEPT, "application/cbor");
         connection.setDoOutput(true);
+        byte[] contents = cborMapper.writeValueAsBytes("Hello, World!");
         try (OutputStream requestBody = connection.getOutputStream()) {
-            cborMapper.writeValue(requestBody, "Hello, World!");
+            requestBody.write(contents);
         }
         assertThat(connection.getResponseCode()).isEqualTo(200);
         assertThat(connection.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/cbor");
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_LENGTH)).isEqualTo(Integer.toString(contents.length));
         try (InputStream responseBody = connection.getInputStream()) {
             assertThat(cborMapper.readValue(responseBody, String.class)).isEqualTo("Hello, World!");
         }
+    }
+
+    @Test
+    public void testContentLengthSet() throws Exception {
+        // postString method
+        HttpURLConnection connection = (HttpURLConnection)
+                new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
+        connection.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
+        connection.setDoOutput(true);
+        byte[] contents = "\"Hello, World!\"".getBytes(StandardCharsets.UTF_8);
+        try (OutputStream requestBody = connection.getOutputStream()) {
+            requestBody.write(contents);
+        }
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_LENGTH)).isEqualTo(Integer.toString(contents.length));
+        connection.getInputStream().close();
     }
 
     @Test

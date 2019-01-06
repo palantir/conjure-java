@@ -20,7 +20,8 @@ dependencies {
     api project(':conjure-lib')
     // Generated code depends on Undertow APIs
     api 'io.undertow:undertow-core'
+    // Generated code uses guava TypeToken
+    api 'com.google.guava:guava'
     implementation 'com.palantir.safe-logging:preconditions'
-    implementation 'com.google.guava:guava'
     implementation 'org.slf4j:slf4j-api'
 }
