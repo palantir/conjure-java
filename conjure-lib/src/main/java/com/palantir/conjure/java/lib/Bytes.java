@@ -73,7 +73,7 @@ public final class Bytes {
 
     @Override
     public String toString() {
-        return new StringBuilder(Bytes.class.getSimpleName())
+        return new StringBuilder("Bytes")
                 .append('{')
                 .append("size: ")
                 .append(safe.length)
