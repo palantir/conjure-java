@@ -16,14 +16,23 @@
 
 package com.palantir.conjure.java.lib;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /** An immutable {@code byte[]} wrapper. */
+@JsonSerialize(using = Bytes.Serializer.class)
+@JsonDeserialize(using = Bytes.Deserializer.class)
 public final class Bytes {
     private final byte[] safe;
 
@@ -33,7 +42,6 @@ public final class Bytes {
     }
 
     /** Returns a new read-only {@link ByteBuffer} backed by this byte array. */
-    @JsonValue
     public ByteBuffer asReadOnlyByteBuffer() {
         return ByteBuffer.wrap(safe).asReadOnlyBuffer();
     }
@@ -82,7 +90,6 @@ public final class Bytes {
     }
 
     /** Constructs a new {@link Bytes} from the provided array. */
-    @JsonCreator
     public static Bytes from(byte[] array) {
         return from(array, 0, array.length);
     }
@@ -104,5 +111,20 @@ public final class Bytes {
         local.get(safe);
 
         return new Bytes(safe);
+    }
+
+    static final class Serializer extends JsonSerializer<Bytes> {
+        @Override
+        public void serialize(Bytes value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeBinary(value.safe);
+        }
+    }
+
+    static final class Deserializer extends JsonDeserializer<Bytes> {
+        @Override
+        public Bytes deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+            // Avoid making a copy of the value from jackson
+            return new Bytes(parser.getBinaryValue());
+        }
     }
 }

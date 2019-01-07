@@ -19,7 +19,10 @@ package com.palantir.conjure.java.lib;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 
 public final class BytesTests {
@@ -152,5 +155,14 @@ public final class BytesTests {
         byte[] test = new byte[5];
         assertThatThrownBy(() -> immutable.copyTo(test, 0, 10))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+    }
+
+    @Test
+    public void testSerializedForm() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        String serialized = mapper.writeValueAsString(Bytes.from("test".getBytes(StandardCharsets.UTF_8)));
+        assertThat(serialized).isEqualTo("\"dGVzdA==\"");
+        assertThat(new String(mapper.readValue(serialized, Bytes.class).asNewByteArray(), StandardCharsets.UTF_8))
+                .isEqualTo("test");
     }
 }
