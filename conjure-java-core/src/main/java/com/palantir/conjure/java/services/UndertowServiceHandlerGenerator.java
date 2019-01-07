@@ -493,7 +493,10 @@ final class UndertowServiceHandlerGenerator {
         }
         Optional<CodeBlock> complexDeserializer = getComplexTypeDeserializer(
                 type, typeMapper, resultVarName, paramsVarName, paramId);
-        return complexDeserializer.orElseGet(() -> CodeBlocks.statement(
+        if (complexDeserializer.isPresent()) {
+            return complexDeserializer.get();
+        }
+        return CodeBlocks.statement(
                 "$1T $2N = $3T.$4L($5N.get($6S))",
                 typeMapper.getClassName(type),
                 resultVarName,
@@ -501,7 +504,7 @@ final class UndertowServiceHandlerGenerator {
                 deserializeFunctionName(type),
                 paramsVarName,
                 paramId
-        ));
+        );
     }
 
     private Optional<CodeBlock> getComplexTypeDeserializer(
