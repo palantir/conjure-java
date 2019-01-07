@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
@@ -31,7 +32,6 @@ import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -118,7 +118,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
             case SAFELONG:
                 return ClassName.get(SafeLong.class);
             case BINARY:
-                return ClassName.get(ByteBuffer.class);
+                return ClassName.get(Bytes.class);
             case ANY:
                 return ClassName.get(Object.class);
             case BOOLEAN:

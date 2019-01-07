@@ -2,21 +2,21 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.nio.ByteBuffer;
+import com.palantir.conjure.java.lib.Bytes;
 import java.util.Objects;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class BinaryAliasExample {
-    private final ByteBuffer value;
+    private final Bytes value;
 
-    private BinaryAliasExample(ByteBuffer value) {
+    private BinaryAliasExample(Bytes value) {
         Objects.requireNonNull(value, "value cannot be null");
         this.value = value;
     }
 
     @JsonValue
-    public ByteBuffer get() {
+    public Bytes get() {
         return value;
     }
 
@@ -38,7 +38,7 @@ public final class BinaryAliasExample {
     }
 
     @JsonCreator
-    public static BinaryAliasExample of(ByteBuffer value) {
+    public static BinaryAliasExample of(Bytes value) {
         return new BinaryAliasExample(value);
     }
 }

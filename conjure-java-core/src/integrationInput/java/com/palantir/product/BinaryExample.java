@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import java.nio.ByteBuffer;
+import com.palantir.conjure.java.lib.Bytes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,18 +15,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = BinaryExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class BinaryExample {
-    private final ByteBuffer binary;
+    private final Bytes binary;
 
     private volatile int memoizedHashCode;
 
-    private BinaryExample(ByteBuffer binary) {
+    private BinaryExample(Bytes binary) {
         validateFields(binary);
         this.binary = binary;
     }
 
     @JsonProperty("binary")
-    public ByteBuffer getBinary() {
-        return this.binary.asReadOnlyBuffer();
+    public Bytes getBinary() {
+        return this.binary;
     }
 
     @Override
@@ -57,11 +57,11 @@ public final class BinaryExample {
                 .toString();
     }
 
-    public static BinaryExample of(ByteBuffer binary) {
+    public static BinaryExample of(Bytes binary) {
         return builder().binary(binary).build();
     }
 
-    private static void validateFields(ByteBuffer binary) {
+    private static void validateFields(Bytes binary) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, binary, "binary");
         if (missingFields != null) {
@@ -90,7 +90,7 @@ public final class BinaryExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private ByteBuffer binary;
+        private Bytes binary;
 
         private Builder() {}
 
@@ -100,10 +100,8 @@ public final class BinaryExample {
         }
 
         @JsonSetter("binary")
-        public Builder binary(ByteBuffer binary) {
-            Objects.requireNonNull(binary, "binary cannot be null");
-            this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
-            this.binary.rewind();
+        public Builder binary(Bytes binary) {
+            this.binary = Objects.requireNonNull(binary, "binary cannot be null");
             return this;
         }
 

@@ -46,7 +46,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -313,15 +312,6 @@ public final class BeanBuilderGenerator {
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
             return shouldClearFirst ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
                     : addStatement;
-        } else if (type.accept(TypeVisitor.IS_BINARY)) {
-            return CodeBlock.builder()
-                    .addStatement("$L", Expressions.requireNonNull(
-                            spec.name, enriched.fieldName().get() + " cannot be null"))
-                    .addStatement("this.$1N = $2T.allocate($1N.remaining()).put($1N.duplicate())",
-                            spec.name,
-                            ByteBuffer.class)
-                    .addStatement("this.$1N.rewind()", spec.name)
-                    .build();
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
             CodeBlock nullCheckedValue = Expressions.requireNonNull(

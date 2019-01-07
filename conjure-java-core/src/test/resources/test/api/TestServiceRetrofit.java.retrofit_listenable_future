@@ -1,6 +1,7 @@
 package com.palantir.another;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.NestedAliasedBinary;
@@ -8,7 +9,6 @@ import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -73,7 +73,7 @@ public interface TestServiceRetrofit {
         "hr-path-template: /catalog/datasets/{datasetRid}/raw-maybe",
         "Accept: application/json"
     })
-    ListenableFuture<Optional<ByteBuffer>> maybeGetRawData(
+    ListenableFuture<Optional<Bytes>> maybeGetRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 

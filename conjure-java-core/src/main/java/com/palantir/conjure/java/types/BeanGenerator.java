@@ -188,13 +188,8 @@ public final class BeanGenerator {
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
                         .build())
-                .returns(field.poetSpec().type);
-
-        if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY)) {
-            getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
-        } else {
-            getterBuilder.addStatement("return this.$N", field.poetSpec().name);
-        }
+                .returns(field.poetSpec().type)
+                .addStatement("return this.$N", field.poetSpec().name);
 
         field.conjureDef().getDocs().ifPresent(docs ->
                 getterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
