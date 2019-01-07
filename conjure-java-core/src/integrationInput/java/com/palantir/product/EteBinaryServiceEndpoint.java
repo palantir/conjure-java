@@ -9,12 +9,15 @@ import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
+import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Deque;
+import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Generated;
 
@@ -51,7 +54,8 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
             routingRegistry
                     .post("/binary", new PostBinaryHandler())
                     .get("/binary/optional/present", new GetOptionalBinaryPresentHandler())
-                    .get("/binary/optional/empty", new GetOptionalBinaryEmptyHandler());
+                    .get("/binary/optional/empty", new GetOptionalBinaryEmptyHandler())
+                    .get("/binary/failure", new GetBinaryFailureHandler());
         }
 
         private class PostBinaryHandler implements HttpHandler {
@@ -89,6 +93,17 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
+            }
+        }
+
+        private class GetBinaryFailureHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+                int numBytes = StringDeserializers.deserializeInteger(queryParams.get("numBytes"));
+                BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
+                BinarySerializers.serialize(result, exchange);
             }
         }
     }
