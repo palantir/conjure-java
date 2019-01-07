@@ -23,7 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
-import com.palantir.conjure.java.types.MethodTypeClassNameVisitor;
+import com.palantir.conjure.java.types.ArgumentTypeClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -75,7 +75,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
 
-    private static final ClassName BINARY_METHOD_TYPE = ClassName.get(InputStream.class);
+    private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get(InputStream.class);
     private static final ClassName BINARY_RETURN_TYPE_RESPONSE = ClassName.get(Response.class);
     private static final ClassName BINARY_RETURN_TYPE_OUTPUT = ClassName.get(StreamingOutput.class);
 
@@ -97,16 +97,16 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
                 ReturnTypeClassNameVisitor.createFactory(binaryReturnType));
-        TypeMapper methodTypeMapper = new TypeMapper(
+        TypeMapper argumentTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                MethodTypeClassNameVisitor.createFactory(BINARY_METHOD_TYPE));
+                ArgumentTypeClassNameVisitor.createFactory(BINARY_ARGUMENT_TYPE));
         return conjureDefinition.getServices().stream()
-                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, methodTypeMapper))
+                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toSet());
     }
 
     private JavaFile generateService(ServiceDefinition serviceDefinition,
-            TypeMapper returnTypeMapper, TypeMapper methodTypeMapper) {
+            TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Consumes"))
@@ -124,12 +124,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, methodTypeMapper))
+                .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toList()));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
                 .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper,
-                        methodTypeMapper))
+                        argumentTypeMapper))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList()));
 
@@ -141,7 +141,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     private MethodSpec generateServiceMethod(
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
-            TypeMapper methodTypeMapper) {
+            TypeMapper argumentTypeMapper) {
         TypeName returnType = endpointDef.getReturns()
                 .map(returnTypeMapper::getClassName)
                 .orElse(ClassName.VOID);
@@ -149,7 +149,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
-                .addParameters(createServiceMethodParameters(endpointDef, methodTypeMapper, true))
+                .addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, true))
                 .returns(returnType);
 
         // @Path("") is invalid in Feign JaxRs and equivalent to absent on an endpoint method
@@ -169,8 +169,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         boolean consumesTypeIsBinary = endpointDef.getArgs().stream()
                 .map(ArgumentDefinition::getType)
-                .map(methodTypeMapper::getClassName)
-                .anyMatch(BINARY_METHOD_TYPE::equals);
+                .map(argumentTypeMapper::getClassName)
+                .anyMatch(BINARY_ARGUMENT_TYPE::equals);
 
         if (consumesTypeIsBinary) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Consumes"))
@@ -191,7 +191,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
-            TypeMapper methodTypeMapper) {
+            TypeMapper argumentTypeMapper) {
 
         List<ArgumentDefinition> args = Lists.newArrayList();
         List<ArgumentDefinition> queryArgs = Lists.newArrayList();
@@ -210,7 +210,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             alternateMethods.add(createCompatibilityBackfillMethod(
                     endpointDef,
                     returnTypeMapper,
-                    methodTypeMapper,
+                    argumentTypeMapper,
                     queryArgs.subList(i, queryArgs.size())));
         }
 
@@ -220,10 +220,10 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     private MethodSpec createCompatibilityBackfillMethod(
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
-            TypeMapper methodTypeMapper,
+            TypeMapper argumentTypeMapper,
             List<ArgumentDefinition> extraArgs) {
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
-        List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, methodTypeMapper, false);
+        List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, argumentTypeMapper, false);
         List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
                 extraArgs.stream()
                         .filter(arg -> arg.getArgName().get().equals(param.name))
