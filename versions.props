@@ -41,5 +41,5 @@ org.mockito:mockito-core = 2.23.4
 org.slf4j:* = 1.7.25
 
 # conflict resolution
-com.palantir.safe-logging:* = 1.7.0
+com.palantir.safe-logging:* = 1.7.1
 org.jboss.logging:jboss-logging = 3.3.2.Final
