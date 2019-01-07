@@ -5,6 +5,7 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;
 import okhttp3.ResponseBody;
@@ -107,4 +108,22 @@ public interface EteServiceRetrofit {
     @POST("./base/no-return")
     @Headers({"hr-path-template: /base/no-return", "Accept: application/json"})
     Call<Void> noReturn(@Header("Authorization") AuthHeader authHeader);
+
+    @GET("./base/enum/query")
+    @Headers({"hr-path-template: /base/enum/query", "Accept: application/json"})
+    Call<SimpleEnum> enumQuery(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") SimpleEnum queryParamName);
+
+    @GET("./base/enum/list/query")
+    @Headers({"hr-path-template: /base/enum/list/query", "Accept: application/json"})
+    Call<List<SimpleEnum>> enumListQuery(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") List<SimpleEnum> queryParamName);
+
+    @GET("./base/enum/optional/query")
+    @Headers({"hr-path-template: /base/enum/optional/query", "Accept: application/json"})
+    Call<Optional<SimpleEnum>> optionalEnumQuery(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") Optional<SimpleEnum> queryParamName);
 }

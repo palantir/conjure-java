@@ -6,6 +6,7 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;
 
@@ -53,4 +54,11 @@ public interface UndertowEteService {
             AuthHeader authHeader, Optional<StringAliasExample> query);
 
     void noReturn(AuthHeader authHeader);
+
+    SimpleEnum enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
+
+    List<SimpleEnum> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
+
+    Optional<SimpleEnum> optionalEnumQuery(
+            AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 }

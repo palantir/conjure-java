@@ -10,6 +10,9 @@ types:
         alias: string
       NestedStringAliasExample:
         alias: StringAliasExample
+      SimpleEnum:
+        values:
+          - VALUE
 
 services:
   EmptyPathService:
@@ -126,3 +129,27 @@ services:
 
       noReturn:
         http: POST /no-return
+
+      enumQuery:
+        http: GET /enum/query
+        args:
+          queryParamName:
+            param-type: query
+            type: SimpleEnum
+        returns: SimpleEnum
+
+      enumListQuery:
+        http: GET /enum/list/query
+        args:
+          queryParamName:
+            param-type: query
+            type: list<SimpleEnum>
+        returns: list<SimpleEnum>
+
+      optionalEnumQuery:
+        http: GET /enum/optional/query
+        args:
+          queryParamName:
+            param-type: query
+            type: optional<SimpleEnum>
+        returns: optional<SimpleEnum>

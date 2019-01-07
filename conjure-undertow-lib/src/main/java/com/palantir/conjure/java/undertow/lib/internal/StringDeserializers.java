@@ -31,6 +31,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 // TODO(nmiyake): figure out exception handling. Currently, throws empty IllegalArgumentException on any failure.
 // Should method signatures be changed to include name of parameter or should exception handling be done in generated
@@ -422,6 +423,40 @@ public final class StringDeserializers {
         ImmutableSet.Builder<UUID> builder = ImmutableSet.builder();
         for (String item : in) {
             builder.add(deserializeUuid(item));
+        }
+        return builder.build();
+    }
+
+    public static <T> T deserializeComplex(String in, Function<String, T> factory) {
+        return factory.apply(deserializeString(in));
+    }
+
+    public static <T> T deserializeComplex(Iterable<String> in, Function<String, T> factory) {
+        return factory.apply(deserializeString(in));
+    }
+
+    public static <T> Optional<T> deserializeOptionalComplex(Iterable<String> in, Function<String, T> factory) {
+        return deserializeOptionalString(in).map(factory);
+    }
+
+    public static <T> List<T> deserializeComplexList(Iterable<String> in, Function<String, T> factory) {
+        if (in == null) {
+            return Collections.emptyList();
+        }
+        ImmutableList.Builder<T> builder = ImmutableList.builder();
+        for (String item : in) {
+            builder.add(deserializeComplex(item, factory));
+        }
+        return builder.build();
+    }
+
+    public static <T> Set<T> deserializeComplexSet(Iterable<String> in, Function<String, T> factory) {
+        if (in == null) {
+            return Collections.emptySet();
+        }
+        ImmutableSet.Builder<T> builder = ImmutableSet.builder();
+        for (String item : in) {
+            builder.add(deserializeComplex(item, factory));
         }
         return builder.build();
     }

@@ -20,6 +20,7 @@ import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -72,7 +73,10 @@ public final class EteServiceEndpoint implements Endpoint {
                     .post("/base/external/notNullBody", new NotNullBodyExternalImportHandler())
                     .post("/base/external/optional-body", new OptionalBodyExternalImportHandler())
                     .post("/base/external/optional-query", new OptionalQueryExternalImportHandler())
-                    .post("/base/no-return", new NoReturnHandler());
+                    .post("/base/no-return", new NoReturnHandler())
+                    .get("/base/enum/query", new EnumQueryHandler())
+                    .get("/base/enum/list/query", new EnumListQueryHandler())
+                    .get("/base/enum/optional/query", new OptionalEnumQueryHandler());
         }
 
         private class StringHandler implements HttpHandler {
@@ -278,8 +282,8 @@ public final class EteServiceEndpoint implements Endpoint {
                 AuthHeader authHeader = Auth.header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
                 Optional<StringAliasExample> query =
-                        StringDeserializers.deserializeOptionalString(queryParams.get("query"))
-                                .map(StringAliasExample::valueOf);
+                        StringDeserializers.deserializeOptionalComplex(
+                                queryParams.get("query"), StringAliasExample::valueOf);
                 Optional<StringAliasExample> result =
                         delegate.optionalQueryExternalImport(authHeader, query);
                 if (result.isPresent()) {
@@ -296,6 +300,50 @@ public final class EteServiceEndpoint implements Endpoint {
                 AuthHeader authHeader = Auth.header(exchange);
                 delegate.noReturn(authHeader);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        private class EnumQueryHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+                SimpleEnum queryParamName =
+                        StringDeserializers.deserializeComplex(
+                                queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
+                serializers.serialize(result, exchange);
+            }
+        }
+
+        private class EnumListQueryHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+                List<SimpleEnum> queryParamName =
+                        StringDeserializers.deserializeComplexList(
+                                queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
+                serializers.serialize(result, exchange);
+            }
+        }
+
+        private class OptionalEnumQueryHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+                Optional<SimpleEnum> queryParamName =
+                        StringDeserializers.deserializeOptionalComplex(
+                                queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                Optional<SimpleEnum> result =
+                        delegate.optionalEnumQuery(authHeader, queryParamName);
+                if (result.isPresent()) {
+                    serializers.serialize(result, exchange);
+                } else {
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
+                }
             }
         }
     }
