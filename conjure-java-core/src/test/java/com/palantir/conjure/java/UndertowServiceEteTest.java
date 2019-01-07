@@ -242,14 +242,35 @@ public final class UndertowServiceEteTest extends TestBase {
         connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/cbor");
         connection.setRequestProperty(HttpHeaders.ACCEPT, "application/cbor");
         connection.setDoOutput(true);
+        byte[] contents = cborMapper.writeValueAsBytes("Hello, World!");
         try (OutputStream requestBody = connection.getOutputStream()) {
-            cborMapper.writeValue(requestBody, "Hello, World!");
+            requestBody.write(contents);
         }
         assertThat(connection.getResponseCode()).isEqualTo(200);
         assertThat(connection.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/cbor");
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_LENGTH)).isEqualTo(Integer.toString(contents.length));
         try (InputStream responseBody = connection.getInputStream()) {
             assertThat(cborMapper.readValue(responseBody, String.class)).isEqualTo("Hello, World!");
         }
+    }
+
+    @Test
+    public void testContentLengthSet() throws Exception {
+        // postString method
+        HttpURLConnection connection = (HttpURLConnection)
+                new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
+        connection.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
+        connection.setDoOutput(true);
+        byte[] contents = "\"Hello, World!\"".getBytes(StandardCharsets.UTF_8);
+        try (OutputStream requestBody = connection.getOutputStream()) {
+            requestBody.write(contents);
+        }
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_LENGTH)).isEqualTo(Integer.toString(contents.length));
+        connection.getInputStream().close();
     }
 
     @Test
@@ -345,6 +366,21 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testBinaryServerSideFailureAfterFewBytesSent() {
         assertThatThrownBy(() -> binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1).execute())
                 .isInstanceOf(IOException.class);
+    }
+
+    @Test
+    public void testVoidMethod() {
+        client.noReturn(AuthHeader.valueOf("authHeader"));
+    }
+
+    @Test
+    public void testVoidMethodRespondsNoContent() throws Exception {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/no-return");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        assertThat(con.getResponseCode()).isEqualTo(204);
+        assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).isNull();
     }
 
     @BeforeClass

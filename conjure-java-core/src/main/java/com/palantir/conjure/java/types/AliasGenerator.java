@@ -210,10 +210,10 @@ public final class AliasGenerator {
                         .addStatement("return new $T($T.parse(value))", thisClass, aliasTypeName).build();
             case BINARY:
             case ANY:
-            default:
-                throw new IllegalStateException(
-                        "Unsupported primitive type: " + primitiveType + "for `valueOf` method.");
+            case UNKNOWN:
         }
+        throw new IllegalStateException(
+                "Unsupported primitive type: " + primitiveType + "for `valueOf` method.");
     }
 
     private static MethodSpec createConstructor(TypeName aliasTypeName) {

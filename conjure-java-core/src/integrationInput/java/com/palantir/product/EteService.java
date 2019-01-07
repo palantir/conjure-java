@@ -4,8 +4,6 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import java.lang.Deprecated;
-import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -111,6 +109,10 @@ public interface EteService {
     Optional<StringAliasExample> optionalQueryExternalImport(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("query") Optional<StringAliasExample> query);
+
+    @POST
+    @Path("base/no-return")
+    void noReturn(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {

@@ -75,6 +75,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
             PrimitiveType primitiveType = type.getItemType().accept(TypeVisitor.PRIMITIVE);
             // special handling for primitive optionals with Java 8
             switch (primitiveType.get()) {
+                case UNKNOWN:
+                    throw new IllegalStateException("Unknown type " + primitiveType);
                 case DOUBLE:
                     return ClassName.get(OptionalDouble.class);
                 case INTEGER:
@@ -88,7 +90,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
                 case UUID:
                 case DATETIME:
                 case BINARY:
-                default:
+                case ANY:
                     // treat normally
             }
         }
@@ -127,9 +129,10 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
                 return ClassName.get(ResourceIdentifier.class);
             case BEARERTOKEN:
                 return ClassName.get(BearerToken.class);
-            default:
-                throw new IllegalStateException("Unknown primitive type: " + type);
+            case UNKNOWN:
+                // fall through
         }
+        throw new IllegalStateException("Unknown primitive type: " + type);
     }
 
     @Override
