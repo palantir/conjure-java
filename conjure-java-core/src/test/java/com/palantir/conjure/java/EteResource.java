@@ -150,5 +150,10 @@ public class EteResource implements EteService {
         return value;
     }
 
+    @Override
+    public SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter) {
+        return headerParameter;
+    }
+
     interface Streaming extends StreamingOutput, BinaryResponseBody {}
 }

@@ -61,4 +61,6 @@ public interface UndertowEteService {
 
     Optional<SimpleEnum> optionalEnumQuery(
             AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
+
+    SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 }

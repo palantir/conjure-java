@@ -153,3 +153,12 @@ services:
             param-type: query
             type: optional<SimpleEnum>
         returns: optional<SimpleEnum>
+
+      enumHeader:
+        http: GET /enum/header
+        args:
+          headerParameter:
+            param-type: header
+            param-id: Custom-Header
+            type: SimpleEnum
+        returns: SimpleEnum

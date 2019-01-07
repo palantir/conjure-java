@@ -134,6 +134,12 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("queryParamName") Optional<SimpleEnum> queryParamName);
 
+    @GET
+    @Path("base/enum/header")
+    SimpleEnum enumHeader(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @HeaderParam("Custom-Header") SimpleEnum headerParameter);
+
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());

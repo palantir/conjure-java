@@ -126,4 +126,10 @@ public interface EteServiceRetrofit {
     Call<Optional<SimpleEnum>> optionalEnumQuery(
             @Header("Authorization") AuthHeader authHeader,
             @Query("queryParamName") Optional<SimpleEnum> queryParamName);
+
+    @GET("./base/enum/header")
+    @Headers({"hr-path-template: /base/enum/header", "Accept: application/json"})
+    Call<SimpleEnum> enumHeader(
+            @Header("Authorization") AuthHeader authHeader,
+            @Header("Custom-Header") SimpleEnum headerParameter);
 }

@@ -391,6 +391,11 @@ public final class UndertowServiceEteTest extends TestBase {
                 .isEqualTo(Collections.singletonList(SimpleEnum.VALUE));
     }
 
+    @Test
+    public void testEnumHeaderParameter() {
+        assertThat(client.enumHeader(AuthHeader.valueOf("authHeader"), SimpleEnum.VALUE)).isEqualTo(SimpleEnum.VALUE);
+    }
+
     @BeforeClass
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(

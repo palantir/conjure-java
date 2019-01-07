@@ -16,6 +16,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderMap;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -76,7 +77,8 @@ public final class EteServiceEndpoint implements Endpoint {
                     .post("/base/no-return", new NoReturnHandler())
                     .get("/base/enum/query", new EnumQueryHandler())
                     .get("/base/enum/list/query", new EnumListQueryHandler())
-                    .get("/base/enum/optional/query", new OptionalEnumQueryHandler());
+                    .get("/base/enum/optional/query", new OptionalEnumQueryHandler())
+                    .get("/base/enum/header", new EnumHeaderHandler());
         }
 
         private class StringHandler implements HttpHandler {
@@ -344,6 +346,19 @@ public final class EteServiceEndpoint implements Endpoint {
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
+            }
+        }
+
+        private class EnumHeaderHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                HeaderMap headerParams = exchange.getRequestHeaders();
+                SimpleEnum headerParameter =
+                        StringDeserializers.deserializeComplex(
+                                headerParams.get("Custom-Header"), SimpleEnum::valueOf);
+                SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
+                serializers.serialize(result, exchange);
             }
         }
     }
