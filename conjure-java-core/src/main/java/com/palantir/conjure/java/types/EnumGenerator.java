@@ -191,8 +191,8 @@ public final class EnumGenerator {
                 .addParameter(ParameterSpec.builder(parameterizedVisitorClass, "visitor").build())
                 .addTypeVariable(TYPE_VARIABLE)
                 .returns(TYPE_VARIABLE)
-                .addCode(switchBlock.build()
-                ).build();
+                .addCode(switchBlock.build())
+                .build();
     }
 
     private static String getVisitorMethodName(EnumValueDefinition definition) {
