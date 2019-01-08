@@ -21,7 +21,8 @@ import io.undertow.server.HttpHandler;
 import java.util.function.BiFunction;
 
 /**
- * Wraps all the {@link HttpHandler} of an {@link Endpoint} with an {@link HandlerWrapper}.
+ * Wraps all the {@link HttpHandler} of an {@link Endpoint} with an HandlerWrapper defined as a function
+ * that takes an {@link EndpointDetails} and a {@link HttpHandler} and return the wrapped (or not) {@link HttpHandler}.
  * Useful when you need to add a custom wrapper to an individual endpoint.
  */
 public final class WrappedEndpoint implements Endpoint {
