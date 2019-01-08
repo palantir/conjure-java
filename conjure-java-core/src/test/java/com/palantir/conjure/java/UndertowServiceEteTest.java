@@ -53,6 +53,7 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.UndertowOptions;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -127,6 +128,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 EteBinaryServiceEndpoint.of(new UndertowBinaryResource()));
         endpoints.forEach(endpoint -> endpoint.create(context).register(handler));
         server = Undertow.builder()
+                .setServerOption(UndertowOptions.DECODE_URL, false)
                 .addHttpListener(8080, "0.0.0.0")
                 .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
                 .build();
@@ -327,6 +329,12 @@ public final class UndertowServiceEteTest extends TestBase {
                 RequestBody.create(MediaType.parse("application/unsupported"), new byte[] {1, 2, 3})).execute())
                 .isInstanceOf(RemoteException.class)
                 .hasMessageContaining("INVALID_ARGUMENT");
+    }
+
+    @Test
+    public void testSlashesInPathParam() {
+        String expected = "foo/bar/baz/%2F";
+        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
     }
 
     @Test

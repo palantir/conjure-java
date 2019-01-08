@@ -24,6 +24,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
+import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.util.function.BiFunction;
@@ -36,6 +37,8 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
 
     private static final ImmutableList<BiFunction<String, HttpHandler, HttpHandler>> WRAPPERS =
             ImmutableList.<BiFunction<String, HttpHandler, HttpHandler>>of(
+            (endpoint, handler) -> new URLDecodingHandler(handler, "UTF-8"),
+            (endpoint, handler) -> new PathParamDecodingHandler(handler),
             // It is vitally important to never run blocking operations on the initial IO thread otherwise
             // the server will not process new requests. all handlers executed after BlockingHandler
             // use the larger task pool which is allowed to block. Any operation which sets thread
