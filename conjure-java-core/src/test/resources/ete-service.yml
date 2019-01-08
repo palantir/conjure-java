@@ -1,11 +1,15 @@
 types:
   imports:
-    StringAliasExample:
+    StringAliasExampleImport:
       external:
         java: com.palantir.product.StringAliasExample
-    NestedStringAliasExample:
-      external:
-        java: com.palantir.product.NestedStringAliasExample
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      StringAliasExample:
+        alias: string
+      NestedStringAliasExample:
+        alias: StringAliasExample
 
 services:
   EmptyPathService:
@@ -99,3 +103,26 @@ services:
             param-type: query
             type: NestedStringAliasExample
         returns: NestedStringAliasExample
+
+      notNullBodyExternalImport:
+        http: POST /external/notNullBody
+        args:
+          notNullBody: StringAliasExampleImport
+        returns: StringAliasExampleImport
+
+      optionalBodyExternalImport:
+        http: POST /external/optional-body
+        args:
+          body: optional<StringAliasExampleImport>
+        returns: optional<StringAliasExampleImport>
+
+      optionalQueryExternalImport:
+        http: POST /external/optional-query
+        args:
+          query:
+            param-type: query
+            type: optional<StringAliasExampleImport>
+        returns: optional<StringAliasExampleImport>
+
+      noReturn:
+        http: POST /no-return

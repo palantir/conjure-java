@@ -5,7 +5,6 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -43,4 +42,15 @@ public interface UndertowEteService {
 
     NestedStringAliasExample aliasTwo(
             AuthHeader authHeader, NestedStringAliasExample queryParamName);
+
+    StringAliasExample notNullBodyExternalImport(
+            AuthHeader authHeader, StringAliasExample notNullBody);
+
+    Optional<StringAliasExample> optionalBodyExternalImport(
+            AuthHeader authHeader, Optional<StringAliasExample> body);
+
+    Optional<StringAliasExample> optionalQueryExternalImport(
+            AuthHeader authHeader, Optional<StringAliasExample> query);
+
+    void noReturn(AuthHeader authHeader);
 }

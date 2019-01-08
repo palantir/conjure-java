@@ -4,8 +4,6 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import java.lang.Deprecated;
-import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -94,8 +92,35 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("queryParamName") NestedStringAliasExample queryParamName);
 
+    @POST
+    @Path("base/external/notNullBody")
+    StringAliasExample notNullBodyExternalImport(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @NotNull StringAliasExample notNullBody);
+
+    @POST
+    @Path("base/external/optional-body")
+    Optional<StringAliasExample> optionalBodyExternalImport(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            Optional<StringAliasExample> body);
+
+    @POST
+    @Path("base/external/optional-query")
+    Optional<StringAliasExample> optionalQueryExternalImport(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("query") Optional<StringAliasExample> query);
+
+    @POST
+    @Path("base/no-return")
+    void noReturn(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader) {
+        return optionalQueryExternalImport(authHeader, Optional.empty());
     }
 }

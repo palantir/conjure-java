@@ -22,8 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -37,11 +35,6 @@ public final class StringDeserializersTest {
     @Test
     public void testDeserializeBearerToken() throws Exception {
         runDeserializerTest("BearerToken", "token", BearerToken.valueOf("token"));
-    }
-
-    @Test
-    public void testDeserializeBinary() throws Exception {
-        runDeserializerTest("Binary", "binary", ByteBuffer.wrap("binary" .getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test

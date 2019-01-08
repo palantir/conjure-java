@@ -16,9 +16,8 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.StatusCodes;
 import java.io.IOException;
-import java.lang.Override;
-import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.Deque;
 import java.util.Map;
@@ -69,7 +68,11 @@ public final class EteServiceEndpoint implements Endpoint {
                     .post("/base/notNullBody", new NotNullBodyHandler())
                     .get("/base/aliasOne", new AliasOneHandler())
                     .get("/base/optionalAliasOne", new OptionalAliasOneHandler())
-                    .get("/base/aliasTwo", new AliasTwoHandler());
+                    .get("/base/aliasTwo", new AliasTwoHandler())
+                    .post("/base/external/notNullBody", new NotNullBodyExternalImportHandler())
+                    .post("/base/external/optional-body", new OptionalBodyExternalImportHandler())
+                    .post("/base/external/optional-query", new OptionalQueryExternalImportHandler())
+                    .post("/base/no-return", new NoReturnHandler());
         }
 
         private class StringHandler implements HttpHandler {
@@ -143,7 +146,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -156,7 +159,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
-                    exchange.setStatusCode(204);
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
         }
@@ -197,10 +200,9 @@ public final class EteServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                StringAliasExample queryParamName =
-                        StringAliasExample.valueOf(
-                                StringDeserializers.deserializeString(
-                                        queryParams.get("queryParamName")));
+                String queryParamNameRaw =
+                        StringDeserializers.deserializeString(queryParams.get("queryParamName"));
+                StringAliasExample queryParamName = StringAliasExample.of(queryParamNameRaw);
                 StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
                 serializers.serialize(result, exchange);
             }
@@ -211,10 +213,14 @@ public final class EteServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                Optional<StringAliasExample> queryParamName =
+                Optional<String> queryParamNameRaw =
                         StringDeserializers.deserializeOptionalString(
-                                        queryParams.get("queryParamName"))
-                                .map(StringAliasExample::valueOf);
+                                queryParams.get("queryParamName"));
+                Optional<StringAliasExample> queryParamName =
+                        Optional.ofNullable(
+                                queryParamNameRaw.isPresent()
+                                        ? StringAliasExample.of(queryParamNameRaw.get())
+                                        : null);
                 StringAliasExample result = delegate.optionalAliasOne(authHeader, queryParamName);
                 serializers.serialize(result, exchange);
             }
@@ -225,12 +231,71 @@ public final class EteServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+                String queryParamNameRaw =
+                        StringDeserializers.deserializeString(queryParams.get("queryParamName"));
                 NestedStringAliasExample queryParamName =
-                        NestedStringAliasExample.valueOf(
-                                StringDeserializers.deserializeString(
-                                        queryParams.get("queryParamName")));
+                        NestedStringAliasExample.of(StringAliasExample.of(queryParamNameRaw));
                 NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
                 serializers.serialize(result, exchange);
+            }
+        }
+
+        private class NotNullBodyExternalImportHandler implements HttpHandler {
+            private final TypeToken<StringAliasExample> notNullBodyType =
+                    new TypeToken<StringAliasExample>() {};
+
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                StringAliasExample notNullBody = serializers.deserialize(notNullBodyType, exchange);
+                StringAliasExample result =
+                        delegate.notNullBodyExternalImport(authHeader, notNullBody);
+                serializers.serialize(result, exchange);
+            }
+        }
+
+        private class OptionalBodyExternalImportHandler implements HttpHandler {
+            private final TypeToken<Optional<StringAliasExample>> bodyType =
+                    new TypeToken<Optional<StringAliasExample>>() {};
+
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                Optional<StringAliasExample> body = serializers.deserialize(bodyType, exchange);
+                Optional<StringAliasExample> result =
+                        delegate.optionalBodyExternalImport(authHeader, body);
+                if (result.isPresent()) {
+                    serializers.serialize(result, exchange);
+                } else {
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
+                }
+            }
+        }
+
+        private class OptionalQueryExternalImportHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+                Optional<StringAliasExample> query =
+                        StringDeserializers.deserializeOptionalString(queryParams.get("query"))
+                                .map(StringAliasExample::valueOf);
+                Optional<StringAliasExample> result =
+                        delegate.optionalQueryExternalImport(authHeader, query);
+                if (result.isPresent()) {
+                    serializers.serialize(result, exchange);
+                } else {
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
+                }
+            }
+        }
+
+        private class NoReturnHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                delegate.noReturn(authHeader);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
         }
     }

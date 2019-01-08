@@ -56,6 +56,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -171,6 +172,7 @@ final class UndertowServiceHandlerGenerator {
                 .build();
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), routableFactory)
+                .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
     }
@@ -201,10 +203,7 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                         .addException(IOException.class)
-                        .addCode(CodeBlock.builder()
-                                .add(endpointInvocation(
-                                        endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper))
-                                .build())
+                        .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper))
                         .build())
                 .build();
     }
@@ -287,7 +286,7 @@ final class UndertowServiceHandlerGenerator {
                                         createIsOptionalPresentCall(returnType, resultVarName, typeDefinitions))
                                 .addStatement(serializer)
                                 .nextControlFlow("else")
-                                .addStatement("$1N.setStatusCode(204)", EXCHANGE_VAR_NAME)
+                                .addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class)
                                 .endControlFlow()
                                 .build());
             } else {
@@ -303,8 +302,10 @@ final class UndertowServiceHandlerGenerator {
             code.addStatement("$1N.$2L($3L)",
                     DELEGATE_VAR_NAME,
                     endpointDefinition.getEndpointName(),
-                    String.join(", ", methodArgs)
-            );
+                    String.join(", ", methodArgs));
+            // Set 204 response code for void methods
+            // Use the constant from undertow for improved source readability, javac will compile it out.
+            code.addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class);
         }
         return code.build();
     }
