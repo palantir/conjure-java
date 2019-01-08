@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/gradle/publish-jar.gradle"
+package com.palantir.conjure.java.undertow.lib;
 
-dependencies {
-    api project(':conjure-lib')
-    // Generated code depends on Undertow APIs
-    api 'io.undertow:undertow-core'
-    // Generated code uses guava TypeToken
-    api 'com.google.guava:guava'
-    implementation 'com.palantir.safe-logging:preconditions'
-    implementation 'org.slf4j:slf4j-api'
+import com.palantir.tokens.auth.ImmutablesStyle;
+import io.undertow.util.HttpString;
+import org.immutables.value.Value;
 
-    annotationProcessor 'org.immutables:value'
-    compileOnly 'org.immutables:value::annotations'
+@Value.Immutable
+@ImmutablesStyle
+public interface EndpointDetails {
+
+    HttpString method();
+    String template();
+
+    static EndpointDetails of(HttpString method, String template) {
+        return ImmutableEndpointDetails.builder().build();
+    }
 }
