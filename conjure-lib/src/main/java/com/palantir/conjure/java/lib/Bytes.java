@@ -82,7 +82,6 @@ public final class Bytes {
     }
 
     /** Constructs a new {@link Bytes} from the provided array. */
-    @JsonCreator
     public static Bytes from(byte[] array) {
         return from(array, 0, array.length);
     }
@@ -96,6 +95,7 @@ public final class Bytes {
     }
 
     /** Constructs a new {@link Bytes} read from the provided {@link ByteBuffer}. */
+    @JsonCreator
     public static Bytes from(ByteBuffer buffer) {
         // call duplicate to ensure we don't mutate the provided ByteBuffer while copying
         ByteBuffer local = buffer.duplicate();
