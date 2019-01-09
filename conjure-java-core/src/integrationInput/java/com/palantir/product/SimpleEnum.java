@@ -63,10 +63,26 @@ public final class SimpleEnum {
         }
     }
 
+    public <T> T accept(Visitor<T> visitor) {
+        switch (value) {
+            case VALUE:
+                return visitor.visitValue();
+            default:
+                return visitor.visitUnknown(string);
+        }
+    }
+
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public enum Value {
         VALUE,
 
         UNKNOWN
+    }
+
+    @Generated("com.palantir.conjure.java.types.EnumGenerator")
+    public interface Visitor<T> {
+        T visitValue();
+
+        T visitUnknown(String unknownValue);
     }
 }
