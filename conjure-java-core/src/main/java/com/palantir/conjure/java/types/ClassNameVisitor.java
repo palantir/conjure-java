@@ -16,6 +16,12 @@
 
 package com.palantir.conjure.java.types;
 
+import com.palantir.conjure.spec.ExternalReference;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.MapType;
+import com.palantir.conjure.spec.OptionalType;
+import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.squareup.javapoet.TypeName;
@@ -33,5 +39,48 @@ public interface ClassNameVisitor extends Type.Visitor<TypeName> {
     @Override
     default TypeName visitUnknown(String unknownType) {
         throw new IllegalStateException("Unknown type:" + unknownType);
+    }
+
+    static ClassNameVisitor specializePrimitiveBinary(ClassNameVisitor delegate, TypeName binaryClassName) {
+        return new ClassNameVisitor() {
+            @Override
+            public TypeName visitPrimitive(PrimitiveType value) {
+                if (value.get() == PrimitiveType.Value.BINARY) {
+                    return binaryClassName;
+                } else {
+                    return delegate.visitPrimitive(value);
+                }
+            }
+
+            @Override
+            public TypeName visitOptional(OptionalType value) {
+                return delegate.visitOptional(value);
+            }
+
+            @Override
+            public TypeName visitList(ListType value) {
+                return delegate.visitList(value);
+            }
+
+            @Override
+            public TypeName visitSet(SetType value) {
+                return delegate.visitSet(value);
+            }
+
+            @Override
+            public TypeName visitMap(MapType value) {
+                return delegate.visitMap(value);
+            }
+
+            @Override
+            public TypeName visitReference(com.palantir.conjure.spec.TypeName value) {
+                return delegate.visitReference(value);
+            }
+
+            @Override
+            public TypeName visitExternal(ExternalReference value) {
+                return delegate.visitExternal(value);
+            }
+        };
     }
 }

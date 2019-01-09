@@ -53,8 +53,12 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateService(serviceDef, conjureDefinition.getTypes(),
-                        new TypeMapper(conjureDefinition.getTypes(), UndertowRequestBodyClassNameVisitor::new),
-                        new TypeMapper(conjureDefinition.getTypes(), UndertowReturnValueClassNameVisitor::new))
+                        new TypeMapper(
+                                conjureDefinition.getTypes(),
+                                new UndertowRequestBodyClassNameVisitor(conjureDefinition.getTypes())),
+                        new TypeMapper(
+                                conjureDefinition.getTypes(),
+                                new UndertowReturnValueClassNameVisitor(conjureDefinition.getTypes())))
                         .stream()).collect(Collectors.toSet());
     }
 

@@ -36,7 +36,7 @@ public final class ArgumentTypeClassNameVisitor implements ClassNameVisitor {
         return types -> new ArgumentTypeClassNameVisitor(types, binaryClassName);
     }
 
-    private ArgumentTypeClassNameVisitor(List<TypeDefinition> types, ClassName binaryClassName) {
+    public ArgumentTypeClassNameVisitor(List<TypeDefinition> types, ClassName binaryClassName) {
         this.delegate = new DefaultClassNameVisitor(types);
         this.binaryClassName = binaryClassName;
     }
