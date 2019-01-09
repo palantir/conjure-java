@@ -6,10 +6,6 @@ com.google.googlejavaformat:google-java-format = 1.6
 com.google.guava:guava = 23.6.1-jre
 com.palantir.conjure.java.api:* = 2.2.0
 com.palantir.conjure.java.runtime:* = 4.11.1
-# dependency-upgrader:OFF
-# Regression introduced by https://github.com/palantir/conjure-java-runtime/pull/865
-com.palantir.conjure.java.runtime:conjure-java-jaxrs-client = 4.6.0
-# dependency-upgrader:ON
 com.palantir.conjure.verification:* = 0.16.2
 com.palantir.conjure:* = 4.2.2
 com.palantir.ri:resource-identifier = 1.0.1
