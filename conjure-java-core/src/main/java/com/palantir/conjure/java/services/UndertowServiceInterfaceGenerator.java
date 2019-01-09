@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,7 +56,8 @@ final class UndertowServiceInterfaceGenerator {
                         + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(
-                        ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceInterfaceGenerator.class));
+                        ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceInterfaceGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class);
 
         serviceDefinition.getDocs().ifPresent(docs ->
                 serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));

@@ -64,6 +64,7 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -105,7 +106,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
                         .addMember("value", "$S", "/")
                         .build())
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JerseyServiceGenerator.class));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JerseyServiceGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class);
 
         serviceDefinition.getDocs().ifPresent(docs ->
                 serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));

@@ -32,6 +32,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.Objects;
 import java.util.Optional;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,6 +51,7 @@ public final class AliasGenerator {
 
         TypeSpec.Builder spec = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(aliasTypeName, "value", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(createConstructor(aliasTypeName))

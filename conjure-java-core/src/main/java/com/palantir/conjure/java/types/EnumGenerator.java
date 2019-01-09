@@ -36,6 +36,7 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import java.util.List;
 import java.util.Locale;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -65,6 +66,7 @@ public final class EnumGenerator {
             EnumDefinition typeDef, ClassName thisClass, ClassName enumClass, ClassName visitorClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addType(createEnum(enumClass, typeDef.getValues(), true))
                 .addType(createVisitor(visitorClass, typeDef.getValues()))
@@ -126,6 +128,7 @@ public final class EnumGenerator {
     private static TypeSpec createEnum(ClassName enumClass, Iterable<EnumValueDefinition> values, boolean withUnknown) {
         TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(enumClass.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class)
                 .addModifiers(Modifier.PUBLIC);
         for (EnumValueDefinition value : values) {
             TypeSpec.Builder anonymousClassBuilder = TypeSpec.anonymousClassBuilder("");
@@ -151,6 +154,7 @@ public final class EnumGenerator {
     private static TypeSpec createVisitor(ClassName visitorClass, Iterable<EnumValueDefinition> values) {
         return TypeSpec.interfaceBuilder(visitorClass.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addTypeVariable(TYPE_VARIABLE)
                 .addMethods(generateMemberVisitMethods(values))

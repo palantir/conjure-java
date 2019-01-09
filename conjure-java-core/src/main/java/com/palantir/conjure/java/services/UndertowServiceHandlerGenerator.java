@@ -68,6 +68,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -146,6 +147,7 @@ final class UndertowServiceHandlerGenerator {
                 routableFactoryType.simpleName(), serviceName + "Routable");
         TypeSpec routableFactory = TypeSpec.classBuilder(routableFactoryType.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceHandlerGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class)
                 .addSuperinterface(Endpoint.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())

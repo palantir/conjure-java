@@ -56,6 +56,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -87,6 +88,7 @@ public final class BeanBuilderGenerator {
 
         TypeSpec.Builder builder = TypeSpec.classBuilder("Builder")
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addFields(primitivesInitializedFields(enrichedFields))

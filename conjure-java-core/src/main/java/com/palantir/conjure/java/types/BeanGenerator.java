@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
@@ -112,7 +113,8 @@ public final class BeanGenerator {
                             typeMapper, objectClass, builderClass, typeDef));
         }
 
-        typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
+        typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class);
 
         typeDef.getDocs().ifPresent(docs ->
                 typeBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));

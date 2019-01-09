@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
@@ -98,7 +99,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             TypeMapper returnTypeMapper, TypeMapper methodTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(Retrofit2ServiceGenerator.class));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(Retrofit2ServiceGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class);
 
         serviceDefinition.getDocs().ifPresent(docs -> {
             serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n"));

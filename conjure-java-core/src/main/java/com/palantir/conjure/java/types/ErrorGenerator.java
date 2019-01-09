@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -160,7 +161,8 @@ public final class ErrorGenerator {
                 .addFields(fieldSpecs)
                 .addMethods(methodSpecs)
                 .addMethods(checkMethodSpecs)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class))
+                .addAnnotation(ParametersAreNonnullByDefault.class);
 
         return JavaFile.builder(conjurePackage, typeBuilder.build())
                 .skipJavaLangImports(true)
