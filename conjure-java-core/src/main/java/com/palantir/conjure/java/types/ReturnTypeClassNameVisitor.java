@@ -38,10 +38,6 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
     private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
     private final ClassName binaryClassName;
 
-    public static Factory createFactory(ClassName binaryClassName) {
-        return types -> new ReturnTypeClassNameVisitor(types, binaryClassName);
-    }
-
     public ReturnTypeClassNameVisitor(List<TypeDefinition> types, ClassName binaryClassName) {
         this.delegate = new DefaultClassNameVisitor(types);
         this.types = types.stream().collect(Collectors.toMap(

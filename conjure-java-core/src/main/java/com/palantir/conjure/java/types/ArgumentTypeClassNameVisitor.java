@@ -32,10 +32,6 @@ public final class ArgumentTypeClassNameVisitor implements ClassNameVisitor {
     private final DefaultClassNameVisitor delegate;
     private final ClassName binaryClassName;
 
-    public static Factory createFactory(ClassName binaryClassName) {
-        return types -> new ArgumentTypeClassNameVisitor(types, binaryClassName);
-    }
-
     public ArgumentTypeClassNameVisitor(List<TypeDefinition> types, ClassName binaryClassName) {
         this.delegate = new DefaultClassNameVisitor(types);
         this.binaryClassName = binaryClassName;
