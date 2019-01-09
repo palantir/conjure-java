@@ -76,34 +76,14 @@ public final class UndertowServiceGeneratorTests extends TestBase {
                 ImmutableList.of(new File("src/test/resources/example-binary.yml")));
         List<Path> files = new UndertowServiceGenerator(Collections.emptySet())
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/" + file.getFileName() + ".undertow.binary");
-                Files.delete(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".undertow.binary")));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.binary");
     }
 
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
         List<Path> files = new UndertowServiceGenerator(ImmutableSet.of()).emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/" + file.getFileName() + ".undertow");
-                Files.delete(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".undertow")));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow");
     }
 
 }

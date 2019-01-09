@@ -62,7 +62,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -398,16 +397,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            Path output = Paths.get("src/integrationInput/java/com/palantir/product/" + file.getFileName());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-        }
+        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {

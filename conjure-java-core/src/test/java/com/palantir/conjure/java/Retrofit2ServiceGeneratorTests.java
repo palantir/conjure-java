@@ -46,16 +46,7 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
 
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of())
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/" + file.getFileName() + ".retrofit");
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(readFromResource("/test/api/" + file.getFileName() + ".retrofit"));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit");
     }
 
     @Test
@@ -65,18 +56,7 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
 
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitCompletableFutures))
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/"
-                        + file.getFileName() + ".retrofit_completable_future");
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromResource("/test/api/" + file.getFileName() + ".retrofit_completable_future"));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit_completable_future");
     }
 
     @Test
@@ -86,18 +66,7 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
 
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitListenableFutures))
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/"
-                        + file.getFileName() + ".retrofit_listenable_future");
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromResource("/test/api/" + file.getFileName() + ".retrofit_listenable_future"));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit_listenable_future");
     }
 
     @Test

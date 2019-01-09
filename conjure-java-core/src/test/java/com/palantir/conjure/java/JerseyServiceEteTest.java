@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -172,16 +171,7 @@ public final class JerseyServiceEteTest extends TestBase {
                 ImmutableList.of(new File("src/test/resources/ete-service.yml")));
         List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            Path output = Paths.get("src/integrationInput/java/com/palantir/product/" + file.getFileName());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-        }
+        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {
