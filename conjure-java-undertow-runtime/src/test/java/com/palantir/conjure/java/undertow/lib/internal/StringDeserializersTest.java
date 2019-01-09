@@ -16,10 +16,14 @@
 
 package com.palantir.conjure.java.undertow.lib.internal;
 
+import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
@@ -77,6 +81,25 @@ public final class StringDeserializersTest {
     public void testDeserializeUuid() throws Exception {
         runDeserializerTest("Uuid", "90a8481a-2ef5-4c64-83fc-04a9b369e2b8",
                 UUID.fromString("90a8481a-2ef5-4c64-83fc-04a9b369e2b8"));
+    }
+
+    @Test
+    public void testBearerTokensNotIncludedInThrowable() {
+        assertThatLoggableExceptionThrownBy(() ->
+                StringDeserializers.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasLogMessage("Expected one element")
+                .hasExactlyArgs(SafeArg.of("size", 3));
+    }
+
+    @Test
+    public void testValuesAreLoggedUnsafe() {
+        assertThatLoggableExceptionThrownBy(() ->
+                StringDeserializers.deserializeString(ImmutableList.of("one", "two", "three")))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasLogMessage("Expected one element")
+                .hasExactlyArgs(SafeArg.of("size", 3),
+                        UnsafeArg.of("received", ImmutableList.of("one", "two", "three")));
     }
 
     private static <T> void runDeserializerTest(String typeName, String plainIn, T want) throws Exception {
