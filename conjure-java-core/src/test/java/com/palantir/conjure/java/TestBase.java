@@ -16,12 +16,15 @@
 
 package com.palantir.conjure.java;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.google.common.io.CharStreams;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public abstract class TestBase {
 
@@ -39,6 +42,21 @@ public abstract class TestBase {
                     new InputStreamReader(getClass().getResourceAsStream(path), StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    protected static void validateGeneratorOutput(List<Path> files, Path outputDir) throws IOException {
+        validateGeneratorOutput(files, outputDir, "");
+    }
+
+    protected static void validateGeneratorOutput(List<Path> files, Path outputDir, String suffix) throws IOException {
+        for (Path file : files) {
+            Path output = outputDir.resolve(file.getFileName() + suffix);
+            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+                Files.delete(output);
+                Files.copy(file, output);
+            }
+            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
         }
     }
 }

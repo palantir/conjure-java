@@ -35,7 +35,6 @@ import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -132,15 +131,6 @@ public final class Retrofit2ServiceEteTest extends TestBase {
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            Path output = Paths.get("src/integrationInput/java/com/palantir/product/" + file.getFileName());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-        }
+        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 }
