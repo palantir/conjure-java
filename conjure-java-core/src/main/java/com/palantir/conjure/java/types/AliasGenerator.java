@@ -203,10 +203,13 @@ public final class AliasGenerator {
             }
          */
         // box the aliased type in case it's a primitive
+        // CHECKSTYLE.OFF: ParameterAssignment - make sure we don't use the unboxed value
         aliasedTypeName = aliasedTypeName.box();
+        // CHECKSTYLE.ON: ParameterAssignment
         return TypeSpec.classBuilder(thisClass.simpleName() + "Converter")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Converter.class), aliasedTypeName, thisClass))
+                .addSuperinterface(
+                        ParameterizedTypeName.get(ClassName.get(Converter.class), aliasedTypeName, thisClass))
                 .addMethod(
                         MethodSpec.methodBuilder("convert")
                                 .addAnnotation(Override.class)
@@ -273,57 +276,61 @@ public final class AliasGenerator {
          */
 
         ClassName deserializerName = thisClass.nestedClass(thisClass.simpleName() + "Deserializer");
+        ParameterizedTypeName specificConverter =
+                ParameterizedTypeName.get(
+                        ClassName.get(Converter.class), ClassName.get(Object.class), thisClass);
+
+        MethodSpec defaultConstructor =
+                MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("super(new $L())", converter.name)
+                        .build();
+        MethodSpec delegateConstructor =
+                MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(specificConverter, "converter")
+                        .addParameter(JavaType.class, "delegateType")
+                        .addParameter(JsonDeserializer.class, "delegateDeserializer")
+                        .addStatement("super(converter, delegateType, delegateDeserializer)")
+                        .build();
+        MethodSpec withDelegate =
+                MethodSpec.methodBuilder("withDelegate")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(specificConverter, "converter")
+                        .addParameter(JavaType.class, "delegateType")
+                        .addParameter(
+                                ParameterizedTypeName.get(
+                                        ClassName.get(JsonDeserializer.class),
+                                        WildcardTypeName.subtypeOf(Object.class)),
+                                "delegateDeserializer")
+                        .returns(deserializerName)
+                        .addStatement(
+                                "return new $T(converter, delegateType, delegateDeserializer)",
+                                deserializerName)
+                        .build();
+
+        // the only 'real' change to the StdDelegatingDeserializer - we now delegate null values too!
+        MethodSpec getNullValue = MethodSpec.methodBuilder("getNullValue")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addException(JsonMappingException.class)
+                .addParameter(DeserializationContext.class, "context")
+                .returns(thisClass)
+                .addComment("delegating deserializer does the right thing except for null values, which short-circuit")
+                .addComment("since we may alias things that can deserialize from null, got to ask the delegate how")
+                .addComment("it handles nulls.")
+                .addStatement("return _converter.convert(_delegateDeserializer.getNullValue(context))")
+                .build();
 
         return TypeSpec.classBuilder(deserializerName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .superclass(ParameterizedTypeName.get(ClassName.get(StdDelegatingDeserializer.class), thisClass))
-                .addMethod(
-                        MethodSpec.constructorBuilder()
-                                .addModifiers(Modifier.PUBLIC)
-                                .addStatement("super(new $L())", converter.name)
-                                .build()
-                )
-                .addMethod(
-                        MethodSpec.constructorBuilder()
-                                .addModifiers(Modifier.PUBLIC)
-                                .addParameter(
-                                        ParameterizedTypeName.get(
-                                                ClassName.get(Converter.class), ClassName.get(Object.class), thisClass),
-                                        "converter")
-                                .addParameter(JavaType.class, "delegateType")
-                                .addParameter(JsonDeserializer.class, "delegateDeserializer")
-                                .addStatement("super(converter, delegateType, delegateDeserializer)")
-                                .build()
-                ).addMethod(
-                        MethodSpec.methodBuilder("withDelegate")
-                                .addAnnotation(Override.class)
-                                .addModifiers(Modifier.PUBLIC)
-                                .addParameter(
-                                        ParameterizedTypeName.get(
-                                                ClassName.get(Converter.class), ClassName.get(Object.class), thisClass),
-                                        "converter")
-                                .addParameter(JavaType.class, "delegateType")
-                                .addParameter(ParameterizedTypeName.get(
-                                        ClassName.get(JsonDeserializer.class),
-                                        WildcardTypeName.subtypeOf(Object.class)),
-                                        "delegateDeserializer")
-                                .returns(deserializerName)
-                                .addStatement("return new $T(converter, delegateType, delegateDeserializer)", deserializerName)
-                                .build()
-                )
-                .addMethod(
-                        MethodSpec.methodBuilder("getNullValue")
-                                .addAnnotation(Override.class)
-                                .addModifiers(Modifier.PUBLIC)
-                                .addException(JsonMappingException.class)
-                                .addParameter(DeserializationContext.class, "context")
-                                .returns(thisClass)
-                                .addComment("delegating deserializer does the right thing except for null values, which short-circuit")
-                                .addComment("since we may alias things that can deserialize from null, we need to ask the delegate how")
-                                .addComment("it handles nulls.")
-                                .addStatement("return _converter.convert(_delegateDeserializer.getNullValue(context))")
-                                .build()
-                ).build();
+                .addMethod(defaultConstructor)
+                .addMethod(delegateConstructor)
+                .addMethod(withDelegate)
+                .addMethod(getNullValue)
+                .build();
     }
 
     private static Optional<CodeBlock> valueOfFactoryMethod(
