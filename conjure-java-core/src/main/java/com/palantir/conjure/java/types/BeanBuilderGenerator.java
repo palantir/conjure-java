@@ -50,6 +50,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -396,21 +397,15 @@ public final class BeanBuilderGenerator {
         }
     }
 
+    private static final EnumSet<PrimitiveType.Value> OPTIONAL_PRIMITIVES = EnumSet.of(
+            PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
+
     /**
      * Check if the optionalType contains a primitive boolean, double or integer.
      */
     private boolean isPrimitiveOptional(OptionalType optionalType) {
-        if (optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
-            switch (optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
-                case INTEGER:
-                case DOUBLE:
-                case BOOLEAN:
-                    return true;
-                default:
-                    // not special
-            }
-        }
-        return false;
+        return optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
+                && OPTIONAL_PRIMITIVES.contains(optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
     }
 
     // we want to widen containers of anything that's not a primitive, a conjure reference or an optional

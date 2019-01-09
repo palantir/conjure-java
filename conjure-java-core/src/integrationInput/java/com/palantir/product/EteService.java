@@ -4,8 +4,6 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import java.lang.Deprecated;
-import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -15,6 +13,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -70,11 +69,23 @@ public interface EteService {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput binary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
+    @GET
+    @Path("base/path/{param}")
+    String path(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @PathParam("param") String param);
+
     @POST
     @Path("base/notNullBody")
     StringAliasExample notNullBody(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @NotNull StringAliasExample notNullBody);
+
+    @GET
+    @Path("base/aliasOne")
+    StringAliasExample aliasOne(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("queryParamName") StringAliasExample queryParamName);
 
     @GET
     @Path("base/optionalAliasOne")
@@ -88,8 +99,35 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("queryParamName") NestedStringAliasExample queryParamName);
 
+    @POST
+    @Path("base/external/notNullBody")
+    StringAliasExample notNullBodyExternalImport(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @NotNull StringAliasExample notNullBody);
+
+    @POST
+    @Path("base/external/optional-body")
+    Optional<StringAliasExample> optionalBodyExternalImport(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            Optional<StringAliasExample> body);
+
+    @POST
+    @Path("base/external/optional-query")
+    Optional<StringAliasExample> optionalQueryExternalImport(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("query") Optional<StringAliasExample> query);
+
+    @POST
+    @Path("base/no-return")
+    void noReturn(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader) {
+        return optionalQueryExternalImport(authHeader, Optional.empty());
     }
 }

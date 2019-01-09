@@ -31,7 +31,7 @@ idea {
 tasks.checkstyleIntegrationInput.enabled = false
 
 dependencies {
-    compile project(':conjure-lib')
+    compile project(':conjure-undertow-lib')
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
@@ -51,16 +51,20 @@ dependencies {
     testCompile('com.palantir.conjure:conjure-core') {
         exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'
     }
+    testCompile project(':conjure-java-undertow-runtime')
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
     testCompile 'com.palantir.safe-logging:preconditions-assertj'
+    testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
 
     integrationInputCompile project(':conjure-lib')
+    integrationInputCompile project(':conjure-undertow-lib')
+    integrationInputCompile 'com.google.guava:guava'
     integrationInputCompile 'com.palantir.conjure.java.api:errors'
     integrationInputCompile 'com.palantir.safe-logging:preconditions'
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
@@ -68,5 +72,6 @@ dependencies {
     integrationInputCompile 'javax.validation:validation-api'
     integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
 
-    processor 'org.immutables:value'
+    annotationProcessor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
 }

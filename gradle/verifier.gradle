@@ -24,15 +24,21 @@ ext {
 sourceSets {
     generatedObjects
     generatedJersey
+    generatedUndertow
 }
 
 idea {
     module {
         sourceDirs += sourceSets.generatedObjects.java.srcDirs
         sourceDirs += sourceSets.generatedJersey.java.srcDirs
+        sourceDirs += sourceSets.generatedUndertow.java.srcDirs
         generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
         generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
-        scopes.COMPILE.plus += [configurations.generatedObjectsCompile, configurations.generatedJerseyCompile]
+        generatedSourceDirs += sourceSets.generatedUndertow.java.srcDirs
+        scopes.COMPILE.plus += [
+                configurations.generatedObjectsCompile,
+                configurations.generatedJerseyCompile,
+                configurations.generatedUndertowCompile]
     }
 }
 
@@ -79,11 +85,24 @@ task conjureJavaJersey(type: JavaExec) {
     doFirst { delete "src/generatedJersey/java/*" }
 }
 
+task conjureJavaUndertow(type: JavaExec) {
+    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedUndertow/java', '--undertow',
+            '--undertowServicePrefixes'
+
+    inputs.file "${-> configurations.verificationApi.singleFile}"
+    outputs.dir "src/generatedUndertow/java"
+    doFirst { delete "src/generatedUndertow/java/*" }
+}
+
 compileGeneratedObjectsJava.dependsOn conjureJavaObjects
 compileGeneratedObjectsJava.dependsOn conjureJavaJersey
+compileGeneratedObjectsJava.dependsOn conjureJavaUndertow
 
-tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerifier, copyTestCases
+tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, conjureJavaUndertow, unpackVerifier, copyTestCases
 test.dependsOn unpackVerifier, copyTestCases
 
 checkstyleGeneratedObjects.enabled = false
 checkstyleGeneratedJersey.enabled = false
+checkstyleGeneratedUndertow.enabled = false

@@ -3,16 +3,11 @@ package com.palantir.another;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
+import com.palantir.product.NestedAliasedBinary;
 import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
-import java.lang.Boolean;
-import java.lang.Deprecated;
-import java.lang.Double;
-import java.lang.Integer;
-import java.lang.String;
-import java.lang.Void;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
@@ -66,8 +61,9 @@ public interface TestServiceRetrofit {
     @GET("./catalog/datasets/{datasetRid}/raw-aliased")
     @Headers({
         "hr-path-template: /catalog/datasets/{datasetRid}/raw-aliased",
-        "Accept: application/json"
+        "Accept: application/octet-stream"
     })
+    @Streaming
     ListenableFuture<ResponseBody> getAliasedRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
@@ -91,9 +87,14 @@ public interface TestServiceRetrofit {
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @POST("./catalog/datasets/upload-raw")
-    @Headers("hr-path-template: /catalog/datasets/upload-raw")
+    @Headers({"hr-path-template: /catalog/datasets/upload-raw", "Accept: application/json"})
     ListenableFuture<Void> uploadRawData(
             @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
+
+    @POST("./catalog/datasets/upload-raw-aliased")
+    @Headers({"hr-path-template: /catalog/datasets/upload-raw-aliased", "Accept: application/json"})
+    ListenableFuture<Void> uploadAliasedRawData(
+            @Header("Authorization") AuthHeader authHeader, @Body NestedAliasedBinary input);
 
     @GET("./catalog/datasets/{datasetRid}/branches")
     @Headers({
@@ -150,7 +151,10 @@ public interface TestServiceRetrofit {
             @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
 
     @POST("./catalog/test-no-response-query-params")
-    @Headers("hr-path-template: /catalog/test-no-response-query-params")
+    @Headers({
+        "hr-path-template: /catalog/test-no-response-query-params",
+        "Accept: application/json"
+    })
     ListenableFuture<Void> testNoResponseQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Body String query,
@@ -178,7 +182,7 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
 
     @GET("./catalog/optional-integer-double")
-    @Headers("hr-path-template: /catalog/optional-integer-double")
+    @Headers({"hr-path-template: /catalog/optional-integer-double", "Accept: application/json"})
     ListenableFuture<Void> testOptionalIntegerAndDouble(
             @Header("Authorization") AuthHeader authHeader,
             @Query("maybeInteger") OptionalInt maybeInteger,
