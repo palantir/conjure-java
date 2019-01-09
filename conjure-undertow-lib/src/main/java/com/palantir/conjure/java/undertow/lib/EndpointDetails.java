@@ -28,6 +28,6 @@ public interface EndpointDetails {
     String template();
 
     static EndpointDetails of(HttpString method, String template) {
-        return ImmutableEndpointDetails.builder().build();
+        return ImmutableEndpointDetails.builder().method(method).template(template).build();
     }
 }
