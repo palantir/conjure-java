@@ -23,8 +23,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
-import com.palantir.conjure.java.types.ArgumentTypeClassNameVisitor;
+import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
+import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
@@ -89,9 +90,13 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new ReturnTypeClassNameVisitor(conjureDefinition.getTypes(), BINARY_RETURN_TYPE));
+
         TypeMapper argumentTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new ArgumentTypeClassNameVisitor(conjureDefinition.getTypes(), BINARY_ARGUMENT_TYPE));
+                new SpecializeBinaryClassNameVisitor(
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes()),
+                        BINARY_ARGUMENT_TYPE));
+
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toSet());
