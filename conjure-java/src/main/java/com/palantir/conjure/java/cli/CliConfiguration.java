@@ -49,6 +49,12 @@ public abstract class CliConfiguration {
 
     @Value.Default
     @SuppressWarnings("checkstyle:designforextension")
+    boolean generateUndertow() {
+        return false;
+    }
+
+    @Value.Default
+    @SuppressWarnings("checkstyle:designforextension")
     Set<FeatureFlags> featureFlags() {
         return ImmutableSet.of();
     }
@@ -58,7 +64,7 @@ public abstract class CliConfiguration {
     final void check() {
         Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
         Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
-        Preconditions.checkArgument(generateObjects() ^ generateJersey() ^ generateRetrofit(),
+        Preconditions.checkArgument(generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
                 "Must specify exactly one project to generate");
     }
 
@@ -81,6 +87,10 @@ public abstract class CliConfiguration {
 
         Builder notNullAuthAndBody(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.RequireNotNullAuthAndBodyParams) : this;
+        }
+
+        Builder undertowServicePrefix(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.UndertowServicePrefix) : this;
         }
     }
 }

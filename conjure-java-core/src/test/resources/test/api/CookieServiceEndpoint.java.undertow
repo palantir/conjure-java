@@ -1,0 +1,57 @@
+package test.api;
+
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.HandlerContext;
+import com.palantir.conjure.java.undertow.lib.Routable;
+import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.internal.Auth;
+import com.palantir.tokens.auth.BearerToken;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.StatusCodes;
+import java.io.IOException;
+import javax.annotation.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+public final class CookieServiceEndpoint implements Endpoint {
+    private final CookieService delegate;
+
+    private CookieServiceEndpoint(CookieService delegate) {
+        this.delegate = delegate;
+    }
+
+    public static Endpoint of(CookieService delegate) {
+        return new CookieServiceEndpoint(delegate);
+    }
+
+    @Override
+    public Routable create(HandlerContext context) {
+        return new CookieServiceRoutable(context, delegate);
+    }
+
+    private static final class CookieServiceRoutable implements Routable {
+        private final CookieService delegate;
+
+        private final SerializerRegistry serializers;
+
+        private CookieServiceRoutable(HandlerContext context, CookieService delegate) {
+            this.serializers = context.serializerRegistry();
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void register(RoutingRegistry routingRegistry) {
+            routingRegistry.get("/cookies", new EatCookiesHandler());
+        }
+
+        private class EatCookiesHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                BearerToken cookieToken = Auth.cookie(exchange, "PALANTIR_TOKEN");
+                delegate.eatCookies(cookieToken);
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+    }
+}

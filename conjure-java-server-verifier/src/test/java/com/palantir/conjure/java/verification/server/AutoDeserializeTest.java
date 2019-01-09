@@ -18,8 +18,9 @@ package com.palantir.conjure.java.verification.server;
 
 import com.google.common.io.Resources;
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.java.verification.server.undertest.ServerUnderTestApplication;
-import com.palantir.conjure.java.verification.server.undertest.ServerUnderTestConfiguration;
+import com.palantir.conjure.java.verification.server.undertest.JerseyServerUnderTestApplication;
+import com.palantir.conjure.java.verification.server.undertest.JerseyServerUnderTestConfiguration;
+import com.palantir.conjure.java.verification.server.undertest.UndertowServerUnderTestRule;
 import com.palantir.conjure.verification.client.EndpointName;
 import com.palantir.conjure.verification.client.VerificationClientRequest;
 import com.palantir.conjure.verification.client.VerificationClientService;
@@ -38,13 +39,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
-public class AutoDeserializeTest {
+public final class AutoDeserializeTest {
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
 
     @ClassRule
-    public static final DropwizardAppRule<ServerUnderTestConfiguration> serverUnderTestRule = new DropwizardAppRule<>(
-            ServerUnderTestApplication.class,
-            Resources.getResource("config.yml").getPath());
+    public static final DropwizardAppRule<JerseyServerUnderTestConfiguration> jerseyServerUnderTestRule =
+            new DropwizardAppRule<>(JerseyServerUnderTestApplication.class,
+                    Resources.getResource("config.yml").getPath());
+
+    @ClassRule
+    public static final UndertowServerUnderTestRule undertowServerUnderTestRule = new UndertowServerUnderTestRule();
 
     @ClassRule
     public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
@@ -83,7 +87,16 @@ public class AutoDeserializeTest {
     }
 
     @Test
-    public void runTestCase() throws Exception {
+    public void runJerseyTestCase() throws Exception {
+        runTestCase(jerseyServerUnderTestRule.getLocalPort());
+    }
+
+    @Test
+    public void runUndertowTestCase() throws Exception {
+        runTestCase(undertowServerUnderTestRule.getLocalPort());
+    }
+
+    public void runTestCase(int port) throws Exception {
         Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         System.out.println(String.format("Test case %s: Invoking %s(%s), expected %s",
@@ -93,18 +106,18 @@ public class AutoDeserializeTest {
                 shouldSucceed ? "success" : "failure"));
 
         if (shouldSucceed) {
-            expectSuccess();
+            expectSuccess(port);
         } else {
-            expectFailure();
+            expectFailure(port);
         }
     }
 
-    private void expectSuccess() throws Exception {
+    private void expectSuccess(int port) throws Exception {
         try {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
-                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
+                    .baseUrl(String.format("http://localhost:%d/test/api", port))
                     .build());
         } catch (RemoteException e) {
             log.error("Caught exception with params: {}", e.getError().parameters(), e);
@@ -112,12 +125,12 @@ public class AutoDeserializeTest {
         }
     }
 
-    private void expectFailure() {
+    private void expectFailure(int port) {
         Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
-                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
+                    .baseUrl(String.format("http://localhost:%d/test/api", port))
                     .build());
             log.error("Result should have caused an exception");
         });

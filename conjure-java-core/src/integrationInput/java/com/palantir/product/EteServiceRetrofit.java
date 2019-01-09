@@ -4,10 +4,6 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import java.lang.Boolean;
-import java.lang.Double;
-import java.lang.Integer;
-import java.lang.String;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -18,6 +14,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 
@@ -68,10 +65,20 @@ public interface EteServiceRetrofit {
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
 
+    @GET("./base/path/{param}")
+    @Headers({"hr-path-template: /base/path/{param}", "Accept: application/json"})
+    Call<String> path(@Header("Authorization") AuthHeader authHeader, @Path("param") String param);
+
     @POST("./base/notNullBody")
     @Headers({"hr-path-template: /base/notNullBody", "Accept: application/json"})
     Call<StringAliasExample> notNullBody(
             @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
+
+    @GET("./base/aliasOne")
+    @Headers({"hr-path-template: /base/aliasOne", "Accept: application/json"})
+    Call<StringAliasExample> aliasOne(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") StringAliasExample queryParamName);
 
     @GET("./base/optionalAliasOne")
     @Headers({"hr-path-template: /base/optionalAliasOne", "Accept: application/json"})
@@ -84,4 +91,25 @@ public interface EteServiceRetrofit {
     Call<NestedStringAliasExample> aliasTwo(
             @Header("Authorization") AuthHeader authHeader,
             @Query("queryParamName") NestedStringAliasExample queryParamName);
+
+    @POST("./base/external/notNullBody")
+    @Headers({"hr-path-template: /base/external/notNullBody", "Accept: application/json"})
+    Call<StringAliasExample> notNullBodyExternalImport(
+            @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
+
+    @POST("./base/external/optional-body")
+    @Headers({"hr-path-template: /base/external/optional-body", "Accept: application/json"})
+    Call<Optional<StringAliasExample>> optionalBodyExternalImport(
+            @Header("Authorization") AuthHeader authHeader,
+            @Body Optional<StringAliasExample> body);
+
+    @POST("./base/external/optional-query")
+    @Headers({"hr-path-template: /base/external/optional-query", "Accept: application/json"})
+    Call<Optional<StringAliasExample>> optionalQueryExternalImport(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("query") Optional<StringAliasExample> query);
+
+    @POST("./base/no-return")
+    @Headers({"hr-path-template: /base/no-return", "Accept: application/json"})
+    Call<Void> noReturn(@Header("Authorization") AuthHeader authHeader);
 }

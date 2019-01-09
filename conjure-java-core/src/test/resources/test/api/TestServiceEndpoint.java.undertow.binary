@@ -1,0 +1,55 @@
+package test.api;
+
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.HandlerContext;
+import com.palantir.conjure.java.undertow.lib.Routable;
+import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import java.io.IOException;
+import javax.annotation.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+public final class TestServiceEndpoint implements Endpoint {
+    private final TestService delegate;
+
+    private TestServiceEndpoint(TestService delegate) {
+        this.delegate = delegate;
+    }
+
+    public static Endpoint of(TestService delegate) {
+        return new TestServiceEndpoint(delegate);
+    }
+
+    @Override
+    public Routable create(HandlerContext context) {
+        return new TestServiceRoutable(context, delegate);
+    }
+
+    private static final class TestServiceRoutable implements Routable {
+        private final TestService delegate;
+
+        private final SerializerRegistry serializers;
+
+        private TestServiceRoutable(HandlerContext context, TestService delegate) {
+            this.serializers = context.serializerRegistry();
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void register(RoutingRegistry routingRegistry) {
+            routingRegistry.get("/", new GetBinaryHandler());
+        }
+
+        private class GetBinaryHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                BinaryResponseBody result = delegate.getBinary();
+                BinarySerializers.serialize(result, exchange);
+            }
+        }
+    }
+}

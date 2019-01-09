@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -64,8 +66,9 @@ public final class SafeLongExample {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, safeLongValue, "safeLongValue");
         if (missingFields != null) {
-            throw new IllegalArgumentException(
-                    "Some required fields have not been set: " + missingFields);
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set",
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

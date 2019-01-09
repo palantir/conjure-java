@@ -34,6 +34,8 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -48,6 +50,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -126,8 +129,9 @@ public final class BeanBuilderGenerator {
         }
 
         builder.beginControlFlow("if (missingFields != null)")
-                .addStatement("throw new $T(\"Some required fields have not been set: \" + missingFields)",
-                        IllegalArgumentException.class)
+                .addStatement("throw new $T(\"Some required fields have not been set\","
+                                + " $T.of(\"missingFields\", missingFields))",
+                        SafeIllegalArgumentException.class, SafeArg.class)
                 .endControlFlow();
 
         return builder.build();
@@ -393,21 +397,15 @@ public final class BeanBuilderGenerator {
         }
     }
 
+    private static final EnumSet<PrimitiveType.Value> OPTIONAL_PRIMITIVES = EnumSet.of(
+            PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
+
     /**
      * Check if the optionalType contains a primitive boolean, double or integer.
      */
     private boolean isPrimitiveOptional(OptionalType optionalType) {
-        if (optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
-            switch (optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get()) {
-                case INTEGER:
-                case DOUBLE:
-                case BOOLEAN:
-                    return true;
-                default:
-                    // not special
-            }
-        }
-        return false;
+        return optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
+                && OPTIONAL_PRIMITIVES.contains(optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
     }
 
     // we want to widen containers of anything that's not a primitive, a conjure reference or an optional
