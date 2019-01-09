@@ -15,6 +15,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 
@@ -64,6 +65,10 @@ public interface EteServiceRetrofit {
     @Headers({"hr-path-template: /base/binary", "Accept: application/octet-stream"})
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
+
+    @GET("./base/path/{param}")
+    @Headers({"hr-path-template: /base/path/{param}", "Accept: application/json"})
+    Call<String> path(@Header("Authorization") AuthHeader authHeader, @Path("param") String param);
 
     @POST("./base/notNullBody")
     @Headers({"hr-path-template: /base/notNullBody", "Accept: application/json"})

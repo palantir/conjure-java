@@ -93,6 +93,11 @@ public class EteResource implements EteService {
     }
 
     @Override
+    public String path(AuthHeader authHeader, String param) {
+        return param;
+    }
+
+    @Override
     public StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody) {
         return notNullBody;
     }

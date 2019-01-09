@@ -4,12 +4,16 @@
 
 package com.palantir.conjure.java.types;
 
+import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.product.AnyExample;
 import com.palantir.product.BearerTokenExample;
 import com.palantir.product.BinaryExample;
@@ -76,9 +80,10 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_double_field_should_throw() throws Exception {
-        assertThatThrownBy(() -> mapper.readValue("{\"double\":null}", DoubleExample.class))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Some required fields have not been set: [doubleValue]");
+        assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{\"double\":null}", DoubleExample.class))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("Some required fields have not been set")
+                .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("doubleValue")));
     }
 
     @Test

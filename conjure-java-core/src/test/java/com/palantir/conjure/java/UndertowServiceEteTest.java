@@ -54,6 +54,7 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.UndertowOptions;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +63,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -129,6 +129,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 EteBinaryServiceEndpoint.of(new UndertowBinaryResource()));
         endpoints.forEach(endpoint -> endpoint.create(context).register(handler));
         server = Undertow.builder()
+                .setServerOption(UndertowOptions.DECODE_URL, false)
                 .addHttpListener(8080, "0.0.0.0")
                 .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
                 .build();
@@ -332,6 +333,12 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void testSlashesInPathParam() {
+        String expected = "foo/bar/baz/%2F";
+        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
+    }
+
+    @Test
     public void testBinaryOptionalEmptyResponse() throws Exception {
         URL url = new URL("http://0.0.0.0:8080/test-example/api/binary/optional/empty");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -351,6 +358,23 @@ public final class UndertowServiceEteTest extends TestBase {
         assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
         assertThat(new String(ByteStreams.toByteArray(con.getInputStream()), StandardCharsets.UTF_8))
                 .isEqualTo("Hello World!");
+    }
+
+    @Test
+    public void testBinaryServerSideFailureAfterManyBytesSent() throws Exception {
+        Response<ResponseBody> response = binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"),
+                // Write more bytes than one buffer
+                20000).execute();
+        try (ResponseBody body = response.body()) {
+            assertThatThrownBy(() -> ByteStreams.copy(body.byteStream(), ByteStreams.nullOutputStream()))
+                    .isInstanceOf(IOException.class);
+        }
+    }
+
+    @Test
+    public void testBinaryServerSideFailureAfterFewBytesSent() {
+        assertThatThrownBy(() -> binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1).execute())
+                .isInstanceOf(IOException.class);
     }
 
     @Test
@@ -403,16 +427,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            Path output = Paths.get("src/integrationInput/java/com/palantir/product/" + file.getFileName());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Files.deleteIfExists(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
-        }
+        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {

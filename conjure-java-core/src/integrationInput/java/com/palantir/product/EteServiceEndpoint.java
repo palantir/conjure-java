@@ -17,6 +17,7 @@ import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderMap;
+import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -67,6 +68,7 @@ public final class EteServiceEndpoint implements Endpoint {
                     .get("/base/optionalEmpty", new OptionalEmptyHandler())
                     .get("/base/datetime", new DatetimeHandler())
                     .get("/base/binary", new BinaryHandler())
+                    .get("/base/path/{param}", new PathHandler())
                     .post("/base/notNullBody", new NotNullBodyHandler())
                     .get("/base/aliasOne", new AliasOneHandler())
                     .get("/base/optionalAliasOne", new OptionalAliasOneHandler())
@@ -185,6 +187,18 @@ public final class EteServiceEndpoint implements Endpoint {
                 AuthHeader authHeader = Auth.header(exchange);
                 BinaryResponseBody result = delegate.binary(authHeader);
                 BinarySerializers.serialize(result, exchange);
+            }
+        }
+
+        private class PathHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                Map<String, String> pathParams =
+                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+                String param = StringDeserializers.deserializeString(pathParams.get("param"));
+                String result = delegate.path(authHeader, param);
+                serializers.serialize(result, exchange);
             }
         }
 

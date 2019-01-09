@@ -13,4 +13,7 @@ public interface UndertowEteBinaryService {
     Optional<BinaryResponseBody> getOptionalBinaryPresent(AuthHeader authHeader);
 
     Optional<BinaryResponseBody> getOptionalBinaryEmpty(AuthHeader authHeader);
+
+    /** Throws an exception after partially writing a binary response. */
+    BinaryResponseBody getBinaryFailure(AuthHeader authHeader, int numBytes);
 }

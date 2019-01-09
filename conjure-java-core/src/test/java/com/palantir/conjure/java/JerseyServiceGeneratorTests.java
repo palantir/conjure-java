@@ -60,18 +60,7 @@ public final class JerseyServiceGeneratorTests extends TestBase {
                 ImmutableList.of(new File("src/test/resources/example-service.yml")));
         List<Path> files = new JerseyServiceGenerator(
                 ImmutableSet.of(RequireNotNullAuthAndBodyParams)).emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey");
-                Files.delete(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromFile(Paths.get(
-                            "src/test/resources/test/api/" + file.getFileName() + ".jersey_require_not_null")));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey_require_not_null");
     }
 
     @Test
@@ -96,17 +85,7 @@ public final class JerseyServiceGeneratorTests extends TestBase {
                 ImmutableList.of(new File("src/test/resources/example-binary.yml")));
         List<Path> files = new JerseyServiceGenerator(Collections.emptySet())
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey.binary");
-                Files.delete(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey.binary")));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.binary");
     }
 
     @Test
@@ -115,19 +94,7 @@ public final class JerseyServiceGeneratorTests extends TestBase {
                 ImmutableList.of(new File("src/test/resources/example-binary.yml")));
         List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.JerseyBinaryAsResponse))
                 .emit(def, folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get(
-                        "src/test/resources/test/api/" + file.getFileName() + ".jersey.binary_as_response");
-                Files.delete(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromFile(Paths.get(
-                            "src/test/resources/test/api/" + file.getFileName() + ".jersey.binary_as_response")));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.binary_as_response");
     }
 
     private void testServiceGeneration(String conjureFile) throws IOException {
@@ -135,17 +102,7 @@ public final class JerseyServiceGeneratorTests extends TestBase {
                 ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
         List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(RequireNotNullAuthAndBodyParams)).emit(def,
                 folder.getRoot());
-
-        for (Path file : files) {
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey");
-                Files.delete(output);
-                Files.copy(file, output);
-            }
-
-            assertThat(readFromFile(file)).isEqualTo(
-                    readFromFile(Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey")));
-        }
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey");
     }
 
 }

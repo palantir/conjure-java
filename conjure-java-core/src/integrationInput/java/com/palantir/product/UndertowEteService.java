@@ -34,6 +34,8 @@ public interface UndertowEteService {
 
     BinaryResponseBody binary(AuthHeader authHeader);
 
+    String path(AuthHeader authHeader, String param);
+
     StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody);
 
     StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);

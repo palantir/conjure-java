@@ -23,8 +23,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
-import com.palantir.conjure.java.types.Retrofit2MethodTypeClassNameVisitor;
-import com.palantir.conjure.java.types.Retrofit2ReturnTypeClassNameVisitor;
+import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
+import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
@@ -69,6 +70,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     private static final ClassName CALL_TYPE = ClassName.get("retrofit2", "Call");
     private static final String AUTH_HEADER_NAME = "Authorization";
 
+    private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get("okhttp3", "RequestBody");
     private static final ClassName BINARY_RETURN_TYPE = ClassName.get("okhttp3", "ResponseBody");
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
@@ -85,17 +87,23 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        TypeMapper returnTypeMapper =
-                new TypeMapper(conjureDefinition.getTypes(), Retrofit2ReturnTypeClassNameVisitor::new);
-        TypeMapper methodTypeMapper =
-                new TypeMapper(conjureDefinition.getTypes(), Retrofit2MethodTypeClassNameVisitor::new);
+        TypeMapper returnTypeMapper = new TypeMapper(
+                conjureDefinition.getTypes(),
+                new ReturnTypeClassNameVisitor(conjureDefinition.getTypes(), BINARY_RETURN_TYPE));
+
+        TypeMapper argumentTypeMapper = new TypeMapper(
+                conjureDefinition.getTypes(),
+                new SpecializeBinaryClassNameVisitor(
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes()),
+                        BINARY_ARGUMENT_TYPE));
+
         return conjureDefinition.getServices().stream()
-                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, methodTypeMapper))
+                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toSet());
     }
 
     private JavaFile generateService(ServiceDefinition serviceDefinition,
-            TypeMapper returnTypeMapper, TypeMapper methodTypeMapper) {
+            TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(Retrofit2ServiceGenerator.class));
@@ -105,7 +113,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         });
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, methodTypeMapper))
+                .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toList()));
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
@@ -131,7 +139,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     private MethodSpec generateServiceMethod(
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
-            TypeMapper methodTypeMapper) {
+            TypeMapper argumentTypeMapper) {
         TypeName returnType = endpointDef.getReturns()
                 .map(returnTypeMapper::getClassName)
                 .orElse(ClassName.VOID);
@@ -163,7 +171,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         getAuthParameter(endpointDef.getAuth()).ifPresent(methodBuilder::addParameter);
 
         methodBuilder.addParameters(endpointDef.getArgs().stream()
-                .map(arg -> createEndpointParameter(methodTypeMapper, encodedPathArgs, arg))
+                .map(arg -> createEndpointParameter(argumentTypeMapper, encodedPathArgs, arg))
                 .collect(Collectors.toList()));
 
         return methodBuilder.build();
@@ -199,11 +207,11 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     }
 
     private ParameterSpec createEndpointParameter(
-            TypeMapper methodTypeMapper,
+            TypeMapper argumentTypeMapper,
             Set<ArgumentName> encodedPathArgs,
             ArgumentDefinition def) {
         ParameterSpec.Builder param = ParameterSpec.builder(
-                methodTypeMapper.getClassName(def.getType()),
+                argumentTypeMapper.getClassName(def.getType()),
                 def.getArgName().get());
         ParameterType paramType = def.getParamType();
         if (paramType.accept(ParameterTypeVisitor.IS_PATH)) {
