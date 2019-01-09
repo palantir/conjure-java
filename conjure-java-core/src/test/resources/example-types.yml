@@ -56,10 +56,12 @@ types:
           items: map<string, string>
       EnumExample:
         docs: |
-          This enumerates the numbers 1:2.
+          This enumerates the numbers 1:2 also 100.
         values:
           - ONE
           - TWO
+          - value: ONE_HUNDRED
+            docs: Value of 100.
       EnumFieldExample:
         fields:
           enum: EnumExample
