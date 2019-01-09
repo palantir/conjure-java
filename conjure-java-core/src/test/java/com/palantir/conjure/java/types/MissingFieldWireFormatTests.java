@@ -38,7 +38,7 @@ public class MissingFieldWireFormatTests {
     public void missing_string_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", StringExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("string")));
     }
 
@@ -46,7 +46,7 @@ public class MissingFieldWireFormatTests {
     public void missing_integer_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", IntegerExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("integer")));
     }
 
@@ -54,7 +54,7 @@ public class MissingFieldWireFormatTests {
     public void missing_safelong_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", SafeLongExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("safeLongValue")));
     }
 
@@ -62,7 +62,7 @@ public class MissingFieldWireFormatTests {
     public void missing_rid_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", RidExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("ridValue")));
     }
 
@@ -70,7 +70,7 @@ public class MissingFieldWireFormatTests {
     public void missing_bearertoken_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", BearerTokenExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("bearerTokenValue")));
     }
 
@@ -78,7 +78,7 @@ public class MissingFieldWireFormatTests {
     public void missing_datetime_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", DateTimeExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("datetime")));
     }
 
@@ -86,7 +86,7 @@ public class MissingFieldWireFormatTests {
     public void missing_double_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", DoubleExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("doubleValue")));
     }
 
@@ -94,7 +94,7 @@ public class MissingFieldWireFormatTests {
     public void missing_binary_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", BinaryExample.class).getBinary())
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("binary")));
     }
 
@@ -114,7 +114,7 @@ public class MissingFieldWireFormatTests {
     public void missing_enum_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", EnumFieldExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("enum")));
     }
 
@@ -122,7 +122,7 @@ public class MissingFieldWireFormatTests {
     public void missing_boolean_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", BooleanExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("coin")));
     }
 
@@ -130,7 +130,7 @@ public class MissingFieldWireFormatTests {
     public void missing_any_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", AnyExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("any")));
     }
 
@@ -138,7 +138,7 @@ public class MissingFieldWireFormatTests {
     public void missing_uuid_field_should_throw() throws Exception {
         assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", UuidExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("Some required fields have not been set")
+                .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("uuid")));
     }
 }

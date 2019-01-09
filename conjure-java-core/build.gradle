@@ -39,7 +39,6 @@ dependencies {
     compile 'com.google.guava:guava'
     compile 'com.palantir.conjure.java.api:errors'
     compile 'com.palantir.ri:resource-identifier'
-    compile 'com.palantir.safe-logging:preconditions'
     compile 'com.palantir.syntactic-paths:syntactic-paths'
     compile 'com.palantir.tokens:auth-tokens'
     compile 'com.squareup:javapoet'
@@ -66,7 +65,6 @@ dependencies {
     integrationInputCompile project(':conjure-undertow-lib')
     integrationInputCompile 'com.google.guava:guava'
     integrationInputCompile 'com.palantir.conjure.java.api:errors'
-    integrationInputCompile 'com.palantir.safe-logging:preconditions'
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
     integrationInputCompile 'javax.annotation:javax.annotation-api'
     integrationInputCompile 'javax.validation:validation-api'
