@@ -491,7 +491,7 @@ final class UndertowServiceHandlerGenerator {
                     paramId
             );
         }
-        Optional<CodeBlock> complexDeserializer = getComplexTypeDeserializer(
+        Optional<CodeBlock> complexDeserializer = getComplexTypeStringDeserializer(
                 type, typeMapper, resultVarName, paramsVarName, paramId);
         if (complexDeserializer.isPresent()) {
             return complexDeserializer.get();
@@ -507,7 +507,14 @@ final class UndertowServiceHandlerGenerator {
         );
     }
 
-    private Optional<CodeBlock> getComplexTypeDeserializer(
+    /**
+     * Generates a deserializer block decoding strings using conjure plain encoding from header, query, and path
+     * parameters to complex types.
+     *
+     * We consider complex types to be anything that is neither a primitive nor contained primitive,
+     * For example enum types and external imports.
+     */
+    private Optional<CodeBlock> getComplexTypeStringDeserializer(
             Type type, TypeMapper typeMapper, String resultVarName, String paramsVarName, String paramId) {
         return type.accept(new TypeVisitor.Default<Optional<String>>() {
             @Override
@@ -555,7 +562,15 @@ final class UndertowServiceHandlerGenerator {
                 typeMapper.getClassName(getComplexType(type))));
     }
 
+    /**
+     * Gets the complex type either matching, or contained by <pre>type</pre>.
+     *
+     * We consider complex types to be anything that is neither a primitive nor contained primitive,
+     * For example enum types and external imports.
+     */
     private Type getComplexType(Type type) {
+        // No need to handle the map type because it is not allowed in string
+        // values like headers, path, or query parameters.
         return type.accept(new TypeVisitor.Default<Optional<Type>>() {
             @Override
             public Optional<Type> visitList(ListType value) {
