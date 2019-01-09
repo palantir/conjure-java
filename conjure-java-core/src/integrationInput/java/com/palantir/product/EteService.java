@@ -7,6 +7,7 @@ import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.StreamingOutput;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+@ParametersAreNonnullByDefault
 public interface EteService {
     @GET
     @Path("base/string")

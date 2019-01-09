@@ -5,8 +5,10 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
+@ParametersAreNonnullByDefault
 public final class ConjureErrors {
     /** Invalid Conjure type definition. */
     public static final ErrorType INVALID_TYPE_DEFINITION =

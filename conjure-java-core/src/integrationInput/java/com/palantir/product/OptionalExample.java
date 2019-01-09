@@ -11,9 +11,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @JsonDeserialize(builder = OptionalExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ParametersAreNonnullByDefault
 public final class OptionalExample {
     private final Optional<String> item;
 
@@ -89,6 +91,7 @@ public final class OptionalExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ParametersAreNonnullByDefault
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private Optional<String> item = Optional.empty();

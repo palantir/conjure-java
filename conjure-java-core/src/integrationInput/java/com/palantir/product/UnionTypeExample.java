@@ -14,9 +14,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /** A type which can either be a StringExample, a set of strings, or an integer. */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
+@ParametersAreNonnullByDefault
 public final class UnionTypeExample {
     private final Base value;
 
@@ -107,6 +109,7 @@ public final class UnionTypeExample {
                 .toString();
     }
 
+    @ParametersAreNonnullByDefault
     public interface Visitor<T> {
         T visitStringExample(StringExample value);
 

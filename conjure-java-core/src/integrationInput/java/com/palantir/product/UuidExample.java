@@ -11,9 +11,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @JsonDeserialize(builder = UuidExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ParametersAreNonnullByDefault
 public final class UuidExample {
     private final UUID uuid;
 
@@ -88,6 +90,7 @@ public final class UuidExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ParametersAreNonnullByDefault
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private UUID uuid;

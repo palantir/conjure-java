@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
+@ParametersAreNonnullByDefault
 public final class BearerTokenAliasExample {
     private final BearerToken value;
 

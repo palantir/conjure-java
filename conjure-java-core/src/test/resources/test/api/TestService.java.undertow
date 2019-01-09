@@ -15,9 +15,11 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /** A Markdown description of the service. */
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ParametersAreNonnullByDefault
 public interface TestService {
     /** Returns a mapping from file system id to backing file system configuration. */
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);

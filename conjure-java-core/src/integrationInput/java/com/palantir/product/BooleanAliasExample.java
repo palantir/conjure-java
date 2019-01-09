@@ -3,8 +3,10 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
+@ParametersAreNonnullByDefault
 public final class BooleanAliasExample {
     private final boolean value;
 

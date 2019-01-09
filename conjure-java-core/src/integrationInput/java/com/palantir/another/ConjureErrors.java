@@ -3,8 +3,10 @@ package com.palantir.another;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
+@ParametersAreNonnullByDefault
 public final class ConjureErrors {
     /** Different package. */
     public static final ErrorType DIFFERENT_PACKAGE =

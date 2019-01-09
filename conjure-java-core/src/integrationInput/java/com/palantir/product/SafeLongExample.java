@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @JsonDeserialize(builder = SafeLongExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ParametersAreNonnullByDefault
 public final class SafeLongExample {
     private final SafeLong safeLongValue;
 
@@ -89,6 +91,7 @@ public final class SafeLongExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ParametersAreNonnullByDefault
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private SafeLong safeLongValue;

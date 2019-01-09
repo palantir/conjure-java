@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @JsonDeserialize(builder = AnyMapExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ParametersAreNonnullByDefault
 public final class AnyMapExample {
     private final Map<String, Object> items;
 
@@ -90,6 +92,7 @@ public final class AnyMapExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ParametersAreNonnullByDefault
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private Map<String, Object> items = new LinkedHashMap<>();

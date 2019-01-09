@@ -2,6 +2,7 @@ package test.api;
 
 import com.palantir.tokens.auth.BearerToken;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+@ParametersAreNonnullByDefault
 public interface CookieService {
     @GET
     @Path("cookies")

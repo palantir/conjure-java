@@ -17,9 +17,11 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.UUID;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @JsonDeserialize(builder = PrimitiveOptionalsExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ParametersAreNonnullByDefault
 public final class PrimitiveOptionalsExample {
     private final OptionalDouble num;
 
@@ -190,6 +192,7 @@ public final class PrimitiveOptionalsExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ParametersAreNonnullByDefault
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private OptionalDouble num = OptionalDouble.empty();

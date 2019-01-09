@@ -7,6 +7,7 @@ import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -19,6 +20,7 @@ import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
+@ParametersAreNonnullByDefault
 public interface EteServiceRetrofit {
     @GET("./base/string")
     @Headers({"hr-path-template: /base/string", "Accept: application/json"})

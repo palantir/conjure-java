@@ -24,8 +24,10 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@ParametersAreNonnullByDefault
 public final class EteServiceEndpoint implements Endpoint {
     private final UndertowEteService delegate;
 

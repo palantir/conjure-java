@@ -9,8 +9,10 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@ParametersAreNonnullByDefault
 public final class EmptyPathServiceEndpoint implements Endpoint {
     private final UndertowEmptyPathService delegate;
 

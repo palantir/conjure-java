@@ -31,8 +31,10 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@ParametersAreNonnullByDefault
 public final class TestServiceEndpoint implements Endpoint {
     private final TestService delegate;
 

@@ -2,8 +2,10 @@ package test.api;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ParametersAreNonnullByDefault
 public interface TestService {
     BinaryResponseBody getBinary();
 }

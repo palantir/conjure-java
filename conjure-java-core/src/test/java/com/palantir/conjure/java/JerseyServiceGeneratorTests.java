@@ -63,7 +63,8 @@ public final class JerseyServiceGeneratorTests extends TestBase {
 
         for (Path file : files) {
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Path output = Paths.get("src/test/resources/test/api/" + file.getFileName() + ".jersey");
+                Path output = Paths.get("src/test/resources/test/api/"
+                        + file.getFileName() + ".jersey_require_not_null");
                 Files.delete(output);
                 Files.copy(file, output);
             }

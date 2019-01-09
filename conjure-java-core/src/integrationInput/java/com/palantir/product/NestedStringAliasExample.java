@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
+@ParametersAreNonnullByDefault
 public final class NestedStringAliasExample {
     private final StringAliasExample value;
 

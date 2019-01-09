@@ -12,10 +12,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 import test.api.ExampleExternalReference;
 
 @JsonDeserialize(builder = CovariantListExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
+@ParametersAreNonnullByDefault
 public final class CovariantListExample {
     private final List<Object> items;
 
@@ -106,6 +108,7 @@ public final class CovariantListExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @ParametersAreNonnullByDefault
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private List<Object> items = new ArrayList<>();

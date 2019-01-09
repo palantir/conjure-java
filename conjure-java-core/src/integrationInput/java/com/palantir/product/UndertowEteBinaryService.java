@@ -5,8 +5,10 @@ import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.util.Optional;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ParametersAreNonnullByDefault
 public interface UndertowEteBinaryService {
     BinaryResponseBody postBinary(AuthHeader authHeader, InputStream body);
 

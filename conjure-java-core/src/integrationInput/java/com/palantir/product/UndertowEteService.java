@@ -8,8 +8,10 @@ import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ParametersAreNonnullByDefault
 public interface UndertowEteService {
     String string(AuthHeader authHeader);
 

@@ -4,6 +4,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -16,6 +17,7 @@ import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
+@ParametersAreNonnullByDefault
 public interface EteBinaryServiceRetrofit {
     @POST("./binary")
     @Headers({"hr-path-template: /binary", "Accept: application/octet-stream"})

@@ -12,8 +12,10 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+@ParametersAreNonnullByDefault
 public final class CookieServiceEndpoint implements Endpoint {
     private final CookieService delegate;
 

@@ -3,8 +3,10 @@ package com.palantir.product;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
+@ParametersAreNonnullByDefault
 public final class ConjureJavaErrors {
     /** Failed to compile Conjure definition to Java code. */
     public static final ErrorType JAVA_COMPILATION_FAILED =

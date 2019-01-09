@@ -13,8 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
+@ParametersAreNonnullByDefault
 public final class SingleUnion {
     private final Base value;
 
@@ -67,6 +69,7 @@ public final class SingleUnion {
                 .toString();
     }
 
+    @ParametersAreNonnullByDefault
     public interface Visitor<T> {
         T visitFoo(String value);
 

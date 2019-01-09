@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Locale;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
  * This enumerates the numbers 1:2 also 100.
@@ -20,6 +21,7 @@ import javax.annotation.Generated;
  * compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
+@ParametersAreNonnullByDefault
 public final class EnumExample {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
@@ -89,6 +91,7 @@ public final class EnumExample {
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
+    @ParametersAreNonnullByDefault
     public enum Value {
         ONE,
 
@@ -101,6 +104,7 @@ public final class EnumExample {
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
+    @ParametersAreNonnullByDefault
     public interface Visitor<T> {
         T visitOne();
 

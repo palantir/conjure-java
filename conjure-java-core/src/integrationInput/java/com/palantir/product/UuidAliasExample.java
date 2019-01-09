@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Generated;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
+@ParametersAreNonnullByDefault
 public final class UuidAliasExample {
     private final UUID value;
 
