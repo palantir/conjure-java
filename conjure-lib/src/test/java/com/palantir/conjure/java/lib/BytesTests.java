@@ -19,7 +19,11 @@ package com.palantir.conjure.java.lib;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 
 public final class BytesTests {
@@ -152,5 +156,23 @@ public final class BytesTests {
         byte[] test = new byte[5];
         assertThatThrownBy(() -> immutable.copyTo(test, 0, 10))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+    }
+
+    @Test
+    public void testSerDe() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        Bytes original = Bytes.from("test".getBytes(StandardCharsets.UTF_8));
+        String base64String = "\"dGVzdA==\"";
+
+        assertThat(mapper.writeValueAsString(original)).isEqualTo(base64String);
+        assertThat(mapper.readValue(base64String, Bytes.class)).isEqualTo(original);
+    }
+
+    @Test
+    public void testSerDe_cannotMapEmptyArray() {
+        ObjectMapper mapper = new ObjectMapper();
+        assertThatThrownBy(() -> mapper.readValue("[]", Bytes.class))
+                .isInstanceOf(JsonParseException.class);
     }
 }
