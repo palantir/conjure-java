@@ -18,18 +18,30 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDelegatingDeserializer;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.databind.util.Converter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
@@ -78,6 +90,8 @@ public final class AliasGenerator {
                         .returns(TypeName.INT)
                         .addCode(primitiveSafeHashCode(aliasTypeName))
                         .build());
+
+        addCustomDeserializer(spec, aliasTypeName, thisClass);
 
         Optional<CodeBlock> maybeValueOfFactoryMethod = valueOfFactoryMethod(
                 typeDef.getAlias(), thisClass, aliasTypeName, typeMapper);
@@ -150,6 +164,166 @@ public final class AliasGenerator {
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    // generate and annotate with a custom `@JsonDeserialize`r that correctly delegates null values
+    private static void addCustomDeserializer(
+            TypeSpec.Builder partial, TypeName aliasedTypeName, ClassName thisClass) {
+        //
+        TypeSpec converter = makeConverter(aliasedTypeName, thisClass);
+        TypeSpec deserializer = makeDeserializer(aliasedTypeName, thisClass, converter);
+        partial.addType(converter);
+        partial.addType(deserializer);
+
+        partial.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                .addMember("using", "$T.class", thisClass.nestedClass(deserializer.name))
+                .build());
+    }
+
+
+    private static TypeSpec makeConverter(TypeName aliasedTypeName, ClassName thisClass) {
+        /*
+            public static final class AliasNameConverter
+                    implements Converter<ContainedType, AliasName> {
+
+                @Override
+                public OptionalBearerTokenAliasExample convert(ContainedType value) {
+                    return of(value);
+                }
+
+                @Override
+                public JavaType getInputType(TypeFactory typeFactory) {
+                    return typeFactory.constructType(new TypeReference<ContainedType>() { });
+                }
+
+                @Override
+                public JavaType getOutputType(TypeFactory typeFactory) {
+                    return typeFactory.constructType(AliasName.class);
+                }
+            }
+         */
+        // box the aliased type in case it's a primitive
+        aliasedTypeName = aliasedTypeName.box();
+        return TypeSpec.classBuilder(thisClass.simpleName() + "Converter")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Converter.class), aliasedTypeName, thisClass))
+                .addMethod(
+                        MethodSpec.methodBuilder("convert")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(aliasedTypeName, "value")
+                                .returns(thisClass)
+                                .addCode("return of(value);")
+                                .build()
+                )
+                .addMethod(
+                        MethodSpec.methodBuilder("getInputType")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(TypeFactory.class, "typeFactory")
+                                .returns(JavaType.class)
+                                .addCode("return typeFactory.constructType(new $T<$T>() { });",
+                                        TypeReference.class, aliasedTypeName)
+                                .build()
+                )
+                .addMethod(
+                        MethodSpec.methodBuilder("getOutputType")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(TypeFactory.class, "typeFactory")
+                                .returns(JavaType.class)
+                                .addCode("return typeFactory.constructType($T.class);", thisClass)
+                                .build()
+                ).build();
+    }
+
+    private static TypeSpec makeDeserializer(TypeName aliasedTypeName, ClassName thisClass, TypeSpec converter) {
+        /*
+            public static final class AliasNameDeserializer
+                    extends StdDelegatingDeserializer<AliasName> {
+                public AliasNameDeserializer() {
+                    super(new AliasNameConverter());
+                }
+
+                public AliasNameDeserializer(
+                        Converter<Object, OptionalBearerTokenAliasExample> converter,
+                        JavaType delegateType,
+                        JsonDeserializer<?> delegateDeserializer) {
+                    super(converter, delegateType, delegateDeserializer);
+                }
+
+                @Override
+                protected AliasNameDeserializer withDelegate(
+                        Converter<Object, AliasName> converter,
+                        JavaType delegateType,
+                        JsonDeserializer<?> delegateDeserializer) {
+                    return new AliasNameDeserializer(converter, delegateType, delegateDeserializer);
+                }
+
+                // delegating deserializer does the right thing except for null values, which short-circuit
+                // since we may alias things that can deserialize from null, we need to ask the delegate how
+                // it handles nulls.
+                @Override
+                public AliasName getNullValue(DeserializationContext context)
+                        throws JsonMappingException {
+                    return _converter.convert(_delegateDeserializer.getNullValue(context));
+                }
+
+            }
+         */
+
+        ClassName deserializerName = thisClass.nestedClass(thisClass.simpleName() + "Deserializer");
+
+        return TypeSpec.classBuilder(deserializerName)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .superclass(ParameterizedTypeName.get(ClassName.get(StdDelegatingDeserializer.class), thisClass))
+                .addMethod(
+                        MethodSpec.constructorBuilder()
+                                .addModifiers(Modifier.PUBLIC)
+                                .addStatement("super(new $L())", converter.name)
+                                .build()
+                )
+                .addMethod(
+                        MethodSpec.constructorBuilder()
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(
+                                        ParameterizedTypeName.get(
+                                                ClassName.get(Converter.class), ClassName.get(Object.class), thisClass),
+                                        "converter")
+                                .addParameter(JavaType.class, "delegateType")
+                                .addParameter(JsonDeserializer.class, "delegateDeserializer")
+                                .addStatement("super(converter, delegateType, delegateDeserializer)")
+                                .build()
+                ).addMethod(
+                        MethodSpec.methodBuilder("withDelegate")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(
+                                        ParameterizedTypeName.get(
+                                                ClassName.get(Converter.class), ClassName.get(Object.class), thisClass),
+                                        "converter")
+                                .addParameter(JavaType.class, "delegateType")
+                                .addParameter(ParameterizedTypeName.get(
+                                        ClassName.get(JsonDeserializer.class),
+                                        WildcardTypeName.subtypeOf(Object.class)),
+                                        "delegateDeserializer")
+                                .returns(deserializerName)
+                                .addStatement("return new $T(converter, delegateType, delegateDeserializer)", deserializerName)
+                                .build()
+                )
+                .addMethod(
+                        MethodSpec.methodBuilder("getNullValue")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addException(JsonMappingException.class)
+                                .addParameter(DeserializationContext.class, "context")
+                                .returns(thisClass)
+                                .addComment("delegating deserializer does the right thing except for null values, which short-circuit")
+                                .addComment("since we may alias things that can deserialize from null, we need to ask the delegate how")
+                                .addComment("it handles nulls.")
+                                .addStatement("return _converter.convert(_delegateDeserializer.getNullValue(context))")
+                                .build()
+                ).build();
     }
 
     private static Optional<CodeBlock> valueOfFactoryMethod(
