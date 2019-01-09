@@ -22,6 +22,5 @@ dependencies {
     api 'io.undertow:undertow-core'
     // Generated code uses guava TypeToken
     api 'com.google.guava:guava'
-    implementation 'com.palantir.safe-logging:preconditions'
     implementation 'org.slf4j:slf4j-api'
 }

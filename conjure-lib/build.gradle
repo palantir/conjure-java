@@ -19,6 +19,7 @@ apply from: "$rootDir/gradle/publish-jar.gradle"
 dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.palantir.ri:resource-identifier'
+    compile 'com.palantir.safe-logging:preconditions'
     compile 'com.palantir.tokens:auth-tokens'
     compile 'com.palantir.conjure.java.api:errors'
     compile 'javax.annotation:javax.annotation-api'
