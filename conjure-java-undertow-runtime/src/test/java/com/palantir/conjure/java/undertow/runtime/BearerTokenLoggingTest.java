@@ -19,8 +19,10 @@ package com.palantir.conjure.java.undertow.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
+import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.Headers;
 import io.undertow.util.Methods;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,7 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.MDC;
 
-public class BearerTokenLoggingHandlerTest {
+public class BearerTokenLoggingTest {
 
     private static final String SESSION_TOKEN = "eyJhbGciOiJFUzI1NiJ9."
             + "eyJleHAiOjE0NTk1NTIzNDksInNpZCI6IlA4WmoxRDVJVGUyNlR0Z"
@@ -69,7 +71,10 @@ public class BearerTokenLoggingHandlerTest {
         delegateRunnable.set(null);
         exchange = HttpServerExchanges.createStub();
         exchange.setRequestMethod(Methods.GET);
-        handler = new BearerTokenLoggingHandler(delegate);
+        handler = new LoggingContextHandler(httpServerExchange -> {
+            Auth.header(httpServerExchange);
+            delegate.handleRequest(httpServerExchange);
+        });
     }
 
     @After
@@ -82,6 +87,7 @@ public class BearerTokenLoggingHandlerTest {
         MDC.put("userId", "foo");
         MDC.put("sessionId", "foo");
         MDC.put("tokenId", "foo");
+        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "hello");
         delegateRunnable.set(this::assertMdcUnset);
         handler.handleRequest(exchange);
         assertMdcUnset();
@@ -90,6 +96,19 @@ public class BearerTokenLoggingHandlerTest {
     @Test
     public void testSessionToken() throws Exception {
         runTest(SESSION_TOKEN, USER_ID, SESSION_ID, null);
+    }
+
+    @Test
+    public void testCookieAuth() throws Exception {
+        handler = new LoggingContextHandler(httpServerExchange -> {
+            Auth.cookie(httpServerExchange, "PALANTIR_TOKEN");
+            assertThat(MDC.get("userId")).isEqualTo(USER_ID);
+            assertThat(MDC.get("sessionId")).isEqualTo(SESSION_ID);
+            assertThat(MDC.get("tokenId")).isNull();
+        });
+        exchange.getRequestCookies().put("PALANTIR_TOKEN", new CookieImpl("PALANTIR_TOKEN", SESSION_TOKEN));
+        handler.handleRequest(exchange);
+        assertMdcUnset();
     }
 
     @Test
