@@ -29,8 +29,7 @@ public interface EteBinaryServiceRetrofit {
 
     @GET("./binary/optional/empty")
     @Headers({"hr-path-template: /binary/optional/empty", "Accept: application/json"})
-    Call<Optional<Bytes>> getOptionalBinaryEmpty(
-            @Header("Authorization") AuthHeader authHeader);
+    Call<Optional<Bytes>> getOptionalBinaryEmpty(@Header("Authorization") AuthHeader authHeader);
 
     /** Throws an exception after partially writing a binary response. */
     @GET("./binary/failure")
