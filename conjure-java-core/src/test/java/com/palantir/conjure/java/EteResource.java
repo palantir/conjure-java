@@ -20,6 +20,7 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.product.EteService;
 import com.palantir.product.NestedStringAliasExample;
+import com.palantir.product.SimpleEnum;
 import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -29,6 +30,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.StreamingOutput;
@@ -136,6 +138,26 @@ public class EteResource implements EteService {
     @Override
     public void noReturn(AuthHeader authHeader) {
         // nop
+    }
+
+    @Override
+    public SimpleEnum enumQuery(AuthHeader authHeader, SimpleEnum value) {
+        return value;
+    }
+
+    @Override
+    public List<SimpleEnum> enumListQuery(AuthHeader authHeader, List<SimpleEnum> value) {
+        return value;
+    }
+
+    @Override
+    public Optional<SimpleEnum> optionalEnumQuery(AuthHeader authHeader, Optional<SimpleEnum> value) {
+        return value;
+    }
+
+    @Override
+    public SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter) {
+        return headerParameter;
     }
 
     interface Streaming extends StreamingOutput, BinaryResponseBody {}

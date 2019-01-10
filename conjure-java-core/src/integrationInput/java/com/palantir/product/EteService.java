@@ -5,6 +5,8 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
@@ -121,6 +123,30 @@ public interface EteService {
     @Path("base/no-return")
     void noReturn(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
+    @GET
+    @Path("base/enum/query")
+    SimpleEnum enumQuery(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("queryParamName") SimpleEnum queryParamName);
+
+    @GET
+    @Path("base/enum/list/query")
+    List<SimpleEnum> enumListQuery(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("queryParamName") List<SimpleEnum> queryParamName);
+
+    @GET
+    @Path("base/enum/optional/query")
+    Optional<SimpleEnum> optionalEnumQuery(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("queryParamName") Optional<SimpleEnum> queryParamName);
+
+    @GET
+    @Path("base/enum/header")
+    SimpleEnum enumHeader(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @HeaderParam("Custom-Header") SimpleEnum headerParameter);
+
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());
@@ -129,5 +155,15 @@ public interface EteService {
     @Deprecated
     default Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader) {
         return optionalQueryExternalImport(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default List<SimpleEnum> enumListQuery(AuthHeader authHeader) {
+        return enumListQuery(authHeader, Collections.emptyList());
+    }
+
+    @Deprecated
+    default Optional<SimpleEnum> optionalEnumQuery(AuthHeader authHeader) {
+        return optionalEnumQuery(authHeader, Optional.empty());
     }
 }

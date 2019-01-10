@@ -35,10 +35,14 @@ import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
@@ -487,17 +491,10 @@ final class UndertowServiceHandlerGenerator {
                     paramId
             );
         }
-        if (type.accept(TypeVisitor.IS_OPTIONAL)
-                && type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_EXTERNAL)) {
-            return CodeBlocks.statement(
-                    "$1T $2N = $4T.deserializeOptionalString($5N.get($6S)).map($3T::valueOf)",
-                    typeMapper.getClassName(type),
-                    resultVarName,
-                    typeMapper.getClassName(type.accept(TypeVisitor.OPTIONAL).getItemType()),
-                    StringDeserializers.class,
-                    paramsVarName,
-                    paramId
-            );
+        Optional<CodeBlock> complexDeserializer = getComplexTypeStringDeserializer(
+                type, typeMapper, resultVarName, paramsVarName, paramId);
+        if (complexDeserializer.isPresent()) {
+            return complexDeserializer.get();
         }
         return CodeBlocks.statement(
                 "$1T $2N = $3T.$4L($5N.get($6S))",
@@ -508,6 +505,93 @@ final class UndertowServiceHandlerGenerator {
                 paramsVarName,
                 paramId
         );
+    }
+
+    /**
+     * Generates a deserializer block decoding strings using conjure plain encoding from header, query, and path
+     * parameters to complex types.
+     *
+     * We consider complex types to be anything that is neither a primitive nor contained primitive,
+     * For example enum types and external imports.
+     */
+    private Optional<CodeBlock> getComplexTypeStringDeserializer(
+            Type type, TypeMapper typeMapper, String resultVarName, String paramsVarName, String paramId) {
+        return type.accept(new TypeVisitor.Default<Optional<String>>() {
+            @Override
+            public Optional<String> visitExternal(ExternalReference value) {
+                return Optional.of("deserializeComplex");
+            }
+
+            @Override
+            public Optional<String> visitReference(com.palantir.conjure.spec.TypeName value) {
+                return Optional.of("deserializeComplex");
+            }
+
+            @Override
+            public Optional<String> visitPrimitive(PrimitiveType value) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<String> visitList(ListType value) {
+                return value.getItemType().accept(this).map(ignored -> "deserializeComplexList");
+            }
+
+            @Override
+            public Optional<String> visitSet(SetType value) {
+                return value.getItemType().accept(this).map(ignored -> "deserializeComplexSet");
+            }
+
+            @Override
+            public Optional<String> visitOptional(OptionalType value) {
+                return value.getItemType().accept(this).map(ignored -> "deserializeOptionalComplex");
+            }
+
+            @Override
+            public Optional<String> visitDefault() {
+                return Optional.empty();
+            }
+        }).map(functionName -> CodeBlocks.statement(
+                "$1T $2N = $3T.$4L($5N.get($6S), $7T::valueOf)",
+                typeMapper.getClassName(type),
+                resultVarName,
+                StringDeserializers.class,
+                functionName,
+                paramsVarName,
+                paramId,
+                typeMapper.getClassName(getComplexType(type))));
+    }
+
+    /**
+     * Gets the complex type either matching, or contained by <pre>type</pre>.
+     *
+     * We consider complex types to be anything that is neither a primitive nor contained primitive,
+     * For example enum types and external imports.
+     */
+    private Type getComplexType(Type type) {
+        // No need to handle the map type because it is not allowed in string
+        // values like headers, path, or query parameters.
+        return type.accept(new TypeVisitor.Default<Optional<Type>>() {
+            @Override
+            public Optional<Type> visitList(ListType value) {
+                return Optional.of(value.getItemType());
+            }
+
+            @Override
+            public Optional<Type> visitSet(SetType value) {
+                return Optional.of(value.getItemType());
+            }
+
+            @Override
+            public Optional<Type> visitOptional(OptionalType value) {
+                return Optional.of(value.getItemType());
+            }
+
+            @Override
+            public Optional<Type> visitDefault() {
+                return Optional.empty();
+            }
+        }).orElse(type);
     }
 
     /**

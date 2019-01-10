@@ -181,3 +181,6 @@ types:
       SingleUnion:
         union:
           foo: string
+      SimpleEnum:
+        values:
+          - VALUE

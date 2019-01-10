@@ -48,6 +48,7 @@ import com.palantir.product.EteService;
 import com.palantir.product.EteServiceEndpoint;
 import com.palantir.product.EteServiceRetrofit;
 import com.palantir.product.NestedStringAliasExample;
+import com.palantir.product.SimpleEnum;
 import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -68,6 +69,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.MediaType;
@@ -388,6 +390,34 @@ public final class UndertowServiceEteTest extends TestBase {
         con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         assertThat(con.getResponseCode()).isEqualTo(204);
         assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).isNull();
+    }
+
+    @Test
+    public void testEnumQueryParameter() {
+        assertThat(client.enumQuery(AuthHeader.valueOf("authHeader"), SimpleEnum.VALUE)).isEqualTo(SimpleEnum.VALUE);
+    }
+
+    @Test
+    public void testOptionalEnumQueryParameterPresent() {
+        assertThat(client.optionalEnumQuery(AuthHeader.valueOf("authHeader"), Optional.of(SimpleEnum.VALUE)))
+                .isEqualTo(Optional.of(SimpleEnum.VALUE));
+    }
+
+    @Test
+    public void testOptionalEnumQueryParameterEmpty() {
+        assertThat(client.optionalEnumQuery(AuthHeader.valueOf("authHeader"), Optional.empty()))
+                .isEqualTo(Optional.empty());
+    }
+
+    @Test
+    public void testEnumQueryParameterList() {
+        assertThat(client.enumListQuery(AuthHeader.valueOf("authHeader"), Collections.singletonList(SimpleEnum.VALUE)))
+                .isEqualTo(Collections.singletonList(SimpleEnum.VALUE));
+    }
+
+    @Test
+    public void testEnumHeaderParameter() {
+        assertThat(client.enumHeader(AuthHeader.valueOf("authHeader"), SimpleEnum.VALUE)).isEqualTo(SimpleEnum.VALUE);
     }
 
     @BeforeClass
