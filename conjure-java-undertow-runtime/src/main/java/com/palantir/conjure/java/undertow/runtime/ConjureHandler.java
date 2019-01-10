@@ -35,12 +35,18 @@ import java.util.function.BiFunction;
  */
 public final class ConjureHandler implements HttpHandler, RoutingRegistry {
 
-    private static final ImmutableList<BiFunction<String, HttpHandler, HttpHandler>> WRAPPERS =
-            ImmutableList.<BiFunction<String, HttpHandler, HttpHandler>>of(
+    private static final ImmutableList<BiFunction<EndpointDetails, HttpHandler, HttpHandler>> WRAPPERS =
+            ImmutableList.<BiFunction<EndpointDetails, HttpHandler, HttpHandler>>of(
             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
             // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
             (endpoint, handler) -> new URLDecodingHandler(handler, "UTF-8"),
             (endpoint, handler) -> new PathParamDecodingHandler(handler),
+            // no-cache and web-security handlers add listeners for the response to be committed,
+            // they can be executed on the IO thread.
+            (endpoint, handler) -> Methods.GET.equals(endpoint.method)
+                    // Only applies to GET methods
+                    ? new NoCachingResponseHandler(handler) : handler,
+            (endpoint, handler) -> new WebSecurityHandler(handler),
             // It is vitally important to never run blocking operations on the initial IO thread otherwise
             // the server will not process new requests. all handlers executed after BlockingHandler
             // use the larger task pool which is allowed to block. Any operation which sets thread
@@ -50,7 +56,7 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             // Logging context and trace handler must execute prior to the exception
             // to provide user and trace information on exceptions.
             (endpoint, handler) -> new LoggingContextHandler(handler),
-            TraceHandler::new,
+            (endpoint, handler) -> new TraceHandler(endpoint.method + " " + endpoint.template, handler),
             (endpoint, handler) -> new ConjureExceptionHandler(handler)
     ).reverse();
 
@@ -93,11 +99,27 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
 
     private ConjureHandler register(HttpString method, String template, HttpHandler handler) {
         HttpHandler current = handler;
-        String endpoint = method + " " + template;
-        for (BiFunction<String, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
+        EndpointDetails endpoint = new EndpointDetails(method, template);
+        for (BiFunction<EndpointDetails, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
             current = wrapper.apply(endpoint, current);
         }
         routingHandler.add(method, template, current);
         return this;
+    }
+
+    private static final class EndpointDetails {
+
+        private final HttpString method;
+        private final String template;
+
+        EndpointDetails(HttpString method, String template) {
+            this.method = method;
+            this.template = template;
+        }
+
+        @Override
+        public String toString() {
+            return "EndpointDetails{method=" + method + ", template='" + template + "'}";
+        }
     }
 }
