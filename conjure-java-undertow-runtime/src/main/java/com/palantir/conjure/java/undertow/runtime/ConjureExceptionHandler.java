@@ -95,7 +95,7 @@ final class ConjureExceptionHandler implements HttpHandler {
                         .build();
 
             } else if (throwable instanceof IllegalArgumentException) {
-                ServiceException exception = new ServiceException(ErrorType.INVALID_ARGUMENT);
+                ServiceException exception = new ServiceException(ErrorType.INVALID_ARGUMENT, throwable);
                 error = SerializableError.forException(exception);
                 statusCode = exception.getErrorType().httpErrorCode();
                 log(exception);
