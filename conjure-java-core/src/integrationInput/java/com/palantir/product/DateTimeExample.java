@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.time.OffsetDateTime;
@@ -102,7 +103,7 @@ public final class DateTimeExample {
 
         @JsonSetter("datetime")
         public Builder datetime(OffsetDateTime datetime) {
-            this.datetime = Objects.requireNonNull(datetime, "datetime cannot be null");
+            this.datetime = Preconditions.checkNotNull(datetime, "datetime cannot be null");
             return this;
         }
 

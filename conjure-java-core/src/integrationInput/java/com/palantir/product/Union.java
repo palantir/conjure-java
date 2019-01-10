@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.logsafe.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -96,7 +97,7 @@ public final class Union {
 
         @JsonCreator
         private FooWrapper(@JsonProperty("foo") String value) {
-            Objects.requireNonNull(value, "foo cannot be null");
+            Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
 
@@ -137,7 +138,7 @@ public final class Union {
 
         @JsonCreator
         private BarWrapper(@JsonProperty("bar") int value) {
-            Objects.requireNonNull(value, "bar cannot be null");
+            Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
 
@@ -188,8 +189,8 @@ public final class Union {
         }
 
         private UnknownWrapper(String type, Map<String, Object> value) {
-            Objects.requireNonNull(type, "type cannot be null");
-            Objects.requireNonNull(value, "value cannot be null");
+            Preconditions.checkNotNull(type, "type cannot be null");
+            Preconditions.checkNotNull(value, "value cannot be null");
             this.type = type;
             this.value = value;
         }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -104,12 +105,12 @@ public final class MapExample {
         @JsonSetter("items")
         public Builder items(Map<String, String> items) {
             this.items.clear();
-            this.items.putAll(Objects.requireNonNull(items, "items cannot be null"));
+            this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder putAllItems(Map<String, String> items) {
-            this.items.putAll(Objects.requireNonNull(items, "items cannot be null"));
+            this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 

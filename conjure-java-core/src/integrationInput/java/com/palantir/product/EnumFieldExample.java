@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -101,7 +102,7 @@ public final class EnumFieldExample {
 
         @JsonSetter("enum")
         public Builder enum_(EnumExample enum_) {
-            this.enum_ = Objects.requireNonNull(enum_, "enum cannot be null");
+            this.enum_ = Preconditions.checkNotNull(enum_, "enum cannot be null");
             return this;
         }
 

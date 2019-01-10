@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -103,7 +104,7 @@ public final class SafeLongExample {
         @JsonSetter("safeLongValue")
         public Builder safeLongValue(SafeLong safeLongValue) {
             this.safeLongValue =
-                    Objects.requireNonNull(safeLongValue, "safeLongValue cannot be null");
+                    Preconditions.checkNotNull(safeLongValue, "safeLongValue cannot be null");
             return this;
         }
 

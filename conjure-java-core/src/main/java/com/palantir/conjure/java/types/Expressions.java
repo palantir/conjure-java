@@ -17,11 +17,11 @@
 package com.palantir.conjure.java.types;
 
 import com.google.common.base.Joiner;
+import com.palantir.logsafe.Preconditions;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -29,7 +29,7 @@ public final class Expressions {
     private Expressions() {}
 
     public static CodeBlock requireNonNull(String fieldName, String message) {
-        return CodeBlock.of("$1T.requireNonNull($2N, $3S)", Objects.class, fieldName, message);
+        return CodeBlock.of("$1T.checkNotNull($2N, $3S)", Preconditions.class, fieldName, message);
     }
 
     public static CodeBlock constructorCall(ClassName clazz, Collection<?> args) {

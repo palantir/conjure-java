@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -145,13 +146,13 @@ public final class ListExample {
         public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
-                    this.items, Objects.requireNonNull(items, "items cannot be null"));
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(Iterable<String> items) {
             ConjureCollections.addAll(
-                    this.items, Objects.requireNonNull(items, "items cannot be null"));
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -165,14 +166,14 @@ public final class ListExample {
             this.primitiveItems.clear();
             ConjureCollections.addAll(
                     this.primitiveItems,
-                    Objects.requireNonNull(primitiveItems, "primitiveItems cannot be null"));
+                    Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
 
         public Builder addAllPrimitiveItems(Iterable<Integer> primitiveItems) {
             ConjureCollections.addAll(
                     this.primitiveItems,
-                    Objects.requireNonNull(primitiveItems, "primitiveItems cannot be null"));
+                    Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
 
@@ -186,14 +187,14 @@ public final class ListExample {
             this.doubleItems.clear();
             ConjureCollections.addAll(
                     this.doubleItems,
-                    Objects.requireNonNull(doubleItems, "doubleItems cannot be null"));
+                    Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 
         public Builder addAllDoubleItems(Iterable<Double> doubleItems) {
             ConjureCollections.addAll(
                     this.doubleItems,
-                    Objects.requireNonNull(doubleItems, "doubleItems cannot be null"));
+                    Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 

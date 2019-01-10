@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -250,7 +251,7 @@ public final class ManyFieldExample {
         /** docs for string field */
         @JsonSetter("string")
         public Builder string(String string) {
-            this.string = Objects.requireNonNull(string, "string cannot be null");
+            this.string = Preconditions.checkNotNull(string, "string cannot be null");
             return this;
         }
 
@@ -273,7 +274,8 @@ public final class ManyFieldExample {
         /** docs for optionalItem field */
         @JsonSetter("optionalItem")
         public Builder optionalItem(Optional<String> optionalItem) {
-            this.optionalItem = Objects.requireNonNull(optionalItem, "optionalItem cannot be null");
+            this.optionalItem =
+                    Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
 
@@ -281,7 +283,8 @@ public final class ManyFieldExample {
         public Builder optionalItem(String optionalItem) {
             this.optionalItem =
                     Optional.of(
-                            Objects.requireNonNull(optionalItem, "optionalItem cannot be null"));
+                            Preconditions.checkNotNull(
+                                    optionalItem, "optionalItem cannot be null"));
             return this;
         }
 
@@ -290,14 +293,14 @@ public final class ManyFieldExample {
         public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
-                    this.items, Objects.requireNonNull(items, "items cannot be null"));
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         /** docs for items field */
         public Builder addAllItems(Iterable<String> items) {
             ConjureCollections.addAll(
-                    this.items, Objects.requireNonNull(items, "items cannot be null"));
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -311,13 +314,15 @@ public final class ManyFieldExample {
         @JsonSetter("set")
         public Builder set(Iterable<String> set) {
             this.set.clear();
-            ConjureCollections.addAll(this.set, Objects.requireNonNull(set, "set cannot be null"));
+            ConjureCollections.addAll(
+                    this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
         /** docs for set field */
         public Builder addAllSet(Iterable<String> set) {
-            ConjureCollections.addAll(this.set, Objects.requireNonNull(set, "set cannot be null"));
+            ConjureCollections.addAll(
+                    this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
@@ -331,13 +336,13 @@ public final class ManyFieldExample {
         @JsonSetter("map")
         public Builder map(Map<String, String> map) {
             this.map.clear();
-            this.map.putAll(Objects.requireNonNull(map, "map cannot be null"));
+            this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
         }
 
         /** docs for map field */
         public Builder putAllMap(Map<String, String> map) {
-            this.map.putAll(Objects.requireNonNull(map, "map cannot be null"));
+            this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
         }
 
@@ -350,7 +355,7 @@ public final class ManyFieldExample {
         /** docs for alias field */
         @JsonSetter("alias")
         public Builder alias(StringAliasExample alias) {
-            this.alias = Objects.requireNonNull(alias, "alias cannot be null");
+            this.alias = Preconditions.checkNotNull(alias, "alias cannot be null");
             return this;
         }
 

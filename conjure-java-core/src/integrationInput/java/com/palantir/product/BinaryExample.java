@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.nio.ByteBuffer;
@@ -101,7 +102,7 @@ public final class BinaryExample {
 
         @JsonSetter("binary")
         public Builder binary(ByteBuffer binary) {
-            Objects.requireNonNull(binary, "binary cannot be null");
+            Preconditions.checkNotNull(binary, "binary cannot be null");
             this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
             this.binary.rewind();
             return this;

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -102,12 +103,12 @@ public final class OptionalExample {
 
         @JsonSetter("item")
         public Builder item(Optional<String> item) {
-            this.item = Objects.requireNonNull(item, "item cannot be null");
+            this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
         public Builder item(String item) {
-            this.item = Optional.of(Objects.requireNonNull(item, "item cannot be null"));
+            this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;
         }
 
