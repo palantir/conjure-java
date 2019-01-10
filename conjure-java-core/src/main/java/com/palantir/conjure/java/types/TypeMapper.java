@@ -16,12 +16,10 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.java.types.ClassNameVisitor.Factory;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.squareup.javapoet.TypeName;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,17 +29,18 @@ import java.util.stream.Collectors;
 public final class TypeMapper {
 
     private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
-    private final Factory classNameVisitorFactory;
+    private final ClassNameVisitor classNameVisitor;
 
     public TypeMapper(List<TypeDefinition> types) {
-        this(types, DefaultClassNameVisitor::new);
+        this(types, new DefaultClassNameVisitor(types));
     }
 
-    public TypeMapper(List<TypeDefinition> types,
-            Factory classNameVisitorFactory) {
-        this.types = types.stream().collect(
-                Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
-        this.classNameVisitorFactory = classNameVisitorFactory;
+    public TypeMapper(List<TypeDefinition> types, ClassNameVisitor classNameVisitor) {
+        this.types = types.stream()
+                .collect(Collectors.toMap(
+                        t -> t.accept(TypeDefinitionVisitor.TYPE_NAME),
+                        Function.identity()));
+        this.classNameVisitor = classNameVisitor;
     }
 
     public Optional<TypeDefinition> getType(com.palantir.conjure.spec.TypeName typeName) {
@@ -49,6 +48,6 @@ public final class TypeMapper {
     }
 
     public TypeName getClassName(Type type) {
-        return type.accept(classNameVisitorFactory.create(new ArrayList<>(types.values())));
+        return type.accept(classNameVisitor);
     }
 }

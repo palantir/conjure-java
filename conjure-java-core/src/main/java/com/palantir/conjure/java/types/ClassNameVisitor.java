@@ -17,18 +17,12 @@
 package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.spec.Type;
-import com.palantir.conjure.spec.TypeDefinition;
 import com.squareup.javapoet.TypeName;
-import java.util.List;
 
 /**
  * Maps a conjure type into the corresponding java type.
  */
 public interface ClassNameVisitor extends Type.Visitor<TypeName> {
-
-    interface Factory {
-        ClassNameVisitor create(List<TypeDefinition> types);
-    }
 
     @Override
     default TypeName visitUnknown(String unknownType) {

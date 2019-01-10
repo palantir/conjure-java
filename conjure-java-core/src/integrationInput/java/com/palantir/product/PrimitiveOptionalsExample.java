@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.ArrayList;
@@ -165,8 +167,9 @@ public final class PrimitiveOptionalsExample {
         missingFields = addFieldIfMissing(missingFields, bearertoken, "bearertoken");
         missingFields = addFieldIfMissing(missingFields, uuid, "uuid");
         if (missingFields != null) {
-            throw new IllegalArgumentException(
-                    "Some required fields have not been set: " + missingFields);
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set",
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

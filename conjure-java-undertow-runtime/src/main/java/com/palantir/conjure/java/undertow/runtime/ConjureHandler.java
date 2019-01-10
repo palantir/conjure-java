@@ -24,6 +24,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
+import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.util.function.BiFunction;
@@ -36,6 +37,10 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
 
     private static final ImmutableList<BiFunction<EndpointDetails, HttpHandler, HttpHandler>> WRAPPERS =
             ImmutableList.<BiFunction<EndpointDetails, HttpHandler, HttpHandler>>of(
+            // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
+            // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
+            (endpoint, handler) -> new URLDecodingHandler(handler, "UTF-8"),
+            (endpoint, handler) -> new PathParamDecodingHandler(handler),
             // no-cache and web-security handlers add listeners for the response to be committed,
             // they can be executed on the IO thread.
             (endpoint, handler) -> Methods.GET.equals(endpoint.method)
@@ -48,9 +53,9 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
             // will not propagate to the wrapped service.
             (endpoint, handler) -> new BlockingHandler(handler),
-            // Bearer token and trace handler must execute prior to the exception
+            // Logging context and trace handler must execute prior to the exception
             // to provide user and trace information on exceptions.
-            (endpoint, handler) -> new BearerTokenLoggingHandler(handler),
+            (endpoint, handler) -> new LoggingContextHandler(handler),
             (endpoint, handler) -> new TraceHandler(endpoint.method + " " + endpoint.template, handler),
             (endpoint, handler) -> new ConjureExceptionHandler(handler)
     ).reverse();

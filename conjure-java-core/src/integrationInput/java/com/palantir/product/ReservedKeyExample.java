@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -126,8 +128,9 @@ public final class ReservedKeyExample {
         missingFields =
                 addFieldIfMissing(missingFields, fieldNameWithDashes, "field-name-with-dashes");
         if (missingFields != null) {
-            throw new IllegalArgumentException(
-                    "Some required fields have not been set: " + missingFields);
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set",
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -220,8 +223,9 @@ public final class ReservedKeyExample {
                     addFieldIfMissing(
                             missingFields, _memoizedHashCode_Initialized, "memoizedHashCode");
             if (missingFields != null) {
-                throw new IllegalArgumentException(
-                        "Some required fields have not been set: " + missingFields);
+                throw new SafeIllegalArgumentException(
+                        "Some required fields have not been set",
+                        SafeArg.of("missingFields", missingFields));
             }
         }
 

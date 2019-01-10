@@ -74,6 +74,12 @@ services:
         http: GET /binary
         returns: binary
 
+      path:
+        http: GET /path/{param}
+        args:
+          param: string
+        returns: string
+
       notNullBody:
         http: POST /notNullBody
         args:
