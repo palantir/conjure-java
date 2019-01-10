@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
@@ -221,7 +222,7 @@ public final class PrimitiveOptionalsExample {
 
         @JsonSetter("num")
         public Builder num(OptionalDouble num) {
-            this.num = Objects.requireNonNull(num, "num cannot be null");
+            this.num = Preconditions.checkNotNull(num, "num cannot be null");
             return this;
         }
 
@@ -232,7 +233,7 @@ public final class PrimitiveOptionalsExample {
 
         @JsonSetter("bool")
         public Builder bool(Optional<Boolean> bool) {
-            this.bool = Objects.requireNonNull(bool, "bool cannot be null");
+            this.bool = Preconditions.checkNotNull(bool, "bool cannot be null");
             return this;
         }
 
@@ -243,7 +244,7 @@ public final class PrimitiveOptionalsExample {
 
         @JsonSetter("integer")
         public Builder integer(OptionalInt integer) {
-            this.integer = Objects.requireNonNull(integer, "integer cannot be null");
+            this.integer = Preconditions.checkNotNull(integer, "integer cannot be null");
             return this;
         }
 
@@ -254,47 +255,49 @@ public final class PrimitiveOptionalsExample {
 
         @JsonSetter("safelong")
         public Builder safelong(Optional<SafeLong> safelong) {
-            this.safelong = Objects.requireNonNull(safelong, "safelong cannot be null");
+            this.safelong = Preconditions.checkNotNull(safelong, "safelong cannot be null");
             return this;
         }
 
         public Builder safelong(SafeLong safelong) {
             this.safelong =
-                    Optional.of(Objects.requireNonNull(safelong, "safelong cannot be null"));
+                    Optional.of(Preconditions.checkNotNull(safelong, "safelong cannot be null"));
             return this;
         }
 
         @JsonSetter("rid")
         public Builder rid(Optional<ResourceIdentifier> rid) {
-            this.rid = Objects.requireNonNull(rid, "rid cannot be null");
+            this.rid = Preconditions.checkNotNull(rid, "rid cannot be null");
             return this;
         }
 
         public Builder rid(ResourceIdentifier rid) {
-            this.rid = Optional.of(Objects.requireNonNull(rid, "rid cannot be null"));
+            this.rid = Optional.of(Preconditions.checkNotNull(rid, "rid cannot be null"));
             return this;
         }
 
         @JsonSetter("bearertoken")
         public Builder bearertoken(Optional<BearerToken> bearertoken) {
-            this.bearertoken = Objects.requireNonNull(bearertoken, "bearertoken cannot be null");
+            this.bearertoken =
+                    Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null");
             return this;
         }
 
         public Builder bearertoken(BearerToken bearertoken) {
             this.bearertoken =
-                    Optional.of(Objects.requireNonNull(bearertoken, "bearertoken cannot be null"));
+                    Optional.of(
+                            Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null"));
             return this;
         }
 
         @JsonSetter("uuid")
         public Builder uuid(Optional<UUID> uuid) {
-            this.uuid = Objects.requireNonNull(uuid, "uuid cannot be null");
+            this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;
         }
 
         public Builder uuid(UUID uuid) {
-            this.uuid = Optional.of(Objects.requireNonNull(uuid, "uuid cannot be null"));
+            this.uuid = Optional.of(Preconditions.checkNotNull(uuid, "uuid cannot be null"));
             return this;
         }
 

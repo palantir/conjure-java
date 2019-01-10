@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
@@ -101,7 +102,7 @@ public final class RidExample {
 
         @JsonSetter("ridValue")
         public Builder ridValue(ResourceIdentifier ridValue) {
-            this.ridValue = Objects.requireNonNull(ridValue, "ridValue cannot be null");
+            this.ridValue = Preconditions.checkNotNull(ridValue, "ridValue cannot be null");
             return this;
         }
 

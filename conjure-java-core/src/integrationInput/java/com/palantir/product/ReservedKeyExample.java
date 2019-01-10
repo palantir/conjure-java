@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -180,20 +181,20 @@ public final class ReservedKeyExample {
 
         @JsonSetter("package")
         public Builder package_(String package_) {
-            this.package_ = Objects.requireNonNull(package_, "package cannot be null");
+            this.package_ = Preconditions.checkNotNull(package_, "package cannot be null");
             return this;
         }
 
         @JsonSetter("interface")
         public Builder interface_(String interface_) {
-            this.interface_ = Objects.requireNonNull(interface_, "interface cannot be null");
+            this.interface_ = Preconditions.checkNotNull(interface_, "interface cannot be null");
             return this;
         }
 
         @JsonSetter("field-name-with-dashes")
         public Builder fieldNameWithDashes(String fieldNameWithDashes) {
             this.fieldNameWithDashes =
-                    Objects.requireNonNull(
+                    Preconditions.checkNotNull(
                             fieldNameWithDashes, "field-name-with-dashes cannot be null");
             return this;
         }

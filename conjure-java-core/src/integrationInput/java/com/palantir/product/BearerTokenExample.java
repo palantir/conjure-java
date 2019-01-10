@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.BearerToken;
@@ -103,7 +104,7 @@ public final class BearerTokenExample {
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(BearerToken bearerTokenValue) {
             this.bearerTokenValue =
-                    Objects.requireNonNull(bearerTokenValue, "bearerTokenValue cannot be null");
+                    Preconditions.checkNotNull(bearerTokenValue, "bearerTokenValue cannot be null");
             return this;
         }
 

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -124,13 +125,13 @@ public final class CovariantListExample {
         public Builder items(Iterable<?> items) {
             this.items.clear();
             ConjureCollections.addAll(
-                    this.items, Objects.requireNonNull(items, "items cannot be null"));
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(Iterable<?> items) {
             ConjureCollections.addAll(
-                    this.items, Objects.requireNonNull(items, "items cannot be null"));
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -144,7 +145,7 @@ public final class CovariantListExample {
             this.externalItems.clear();
             ConjureCollections.addAll(
                     this.externalItems,
-                    Objects.requireNonNull(externalItems, "externalItems cannot be null"));
+                    Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 
@@ -152,7 +153,7 @@ public final class CovariantListExample {
                 Iterable<? extends ExampleExternalReference> externalItems) {
             ConjureCollections.addAll(
                     this.externalItems,
-                    Objects.requireNonNull(externalItems, "externalItems cannot be null"));
+                    Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 
