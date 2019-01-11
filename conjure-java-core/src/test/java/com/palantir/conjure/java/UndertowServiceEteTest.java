@@ -333,9 +333,24 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    public void testSlashesInPathParam() {
+    public void testSlashesInPathParam() throws IOException  {
         String expected = "foo/bar/baz/%2F";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
+        assertThat(retrofitClient.path(AuthHeader.valueOf("bearer"), expected).execute().body()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testPlusInPathParam() throws IOException  {
+        String expected = "foo+bar";
+        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
+        assertThat(retrofitClient.path(AuthHeader.valueOf("bearer"), expected).execute().body()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testSpaceInPathParam() throws IOException {
+        String expected = "foo bar";
+        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
+        assertThat(retrofitClient.path(AuthHeader.valueOf("bearer"), expected).execute().body()).isEqualTo(expected);
     }
 
     @Test
