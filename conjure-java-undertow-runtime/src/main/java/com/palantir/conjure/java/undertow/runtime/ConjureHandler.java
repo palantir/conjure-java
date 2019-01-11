@@ -39,6 +39,7 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             ImmutableList.<BiFunction<EndpointDetails, HttpHandler, HttpHandler>>of(
             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
             // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
+            // When DECODE_URL has not been disabled, the following handlers will no-op
             (endpoint, handler) -> new URLDecodingHandler(handler, "UTF-8"),
             (endpoint, handler) -> new PathParamDecodingHandler(handler),
             // no-cache and web-security handlers add listeners for the response to be committed,
