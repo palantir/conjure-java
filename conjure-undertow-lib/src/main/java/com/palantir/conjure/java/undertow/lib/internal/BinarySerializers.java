@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.lib.internal;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import io.undertow.server.HttpServerExchange;
@@ -29,6 +30,7 @@ public final class BinarySerializers {
     private static final String CONTENT_TYPE = "application/octet-stream";
 
     public static void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
+        Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, CONTENT_TYPE);
         value.write(exchange.getOutputStream());
     }
