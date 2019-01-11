@@ -47,7 +47,7 @@ class PathParamDecodingHandler implements HttpHandler {
                     StringBuilder buffer = new StringBuilder();
                     for (Map.Entry<String, String> entry : parameters.entrySet()) {
                         entry.setValue(URLUtils.decode(
-                                entry.getValue(), "UTF-8", true, true, buffer));
+                                entry.getValue(), "UTF-8", true, false, buffer));
                     }
                 }
             }
