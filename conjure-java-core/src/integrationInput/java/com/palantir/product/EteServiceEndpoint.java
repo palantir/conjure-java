@@ -1,4 +1,4 @@
-"package com.palantir.product;
+package com.palantir.product;
 
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -91,7 +91,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 String result = delegate.string(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -103,7 +103,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 int result = delegate.integer(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -115,7 +115,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 double result = delegate.double_(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -127,7 +127,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 boolean result = delegate.boolean_(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -139,7 +139,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 SafeLong result = delegate.safelong(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -151,7 +151,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 ResourceIdentifier result = delegate.rid(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -163,7 +163,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 BearerToken result = delegate.bearertoken(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -175,7 +175,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 Optional<String> result = delegate.optionalString(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -191,7 +191,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 Optional<String> result = delegate.optionalEmpty(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -207,7 +207,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 OffsetDateTime result = delegate.datetime(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -219,7 +219,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 BinaryResponseBody result = delegate.binary(authHeader);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 BinarySerializers.serialize(result, exchange);
             }
         }
@@ -234,7 +234,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 String result = delegate.path(authHeader, param);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -250,7 +250,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 StringAliasExample result = delegate.notNullBody(authHeader, notNullBody);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -266,7 +266,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -287,7 +287,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 StringAliasExample result = delegate.optionalAliasOne(authHeader, queryParamName);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -304,7 +304,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -321,7 +321,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 StringAliasExample result =
                         delegate.notNullBodyExternalImport(authHeader, notNullBody);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -338,7 +338,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Optional<StringAliasExample> result =
                         delegate.optionalBodyExternalImport(authHeader, body);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -359,7 +359,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Optional<StringAliasExample> result =
                         delegate.optionalQueryExternalImport(authHeader, query);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -388,7 +388,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -404,7 +404,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
@@ -421,7 +421,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Optional<SimpleEnum> result =
                         delegate.optionalEnumQuery(authHeader, queryParamName);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -441,10 +441,9 @@ public final class EteServiceEndpoint implements Endpoint {
                 Long start = System.currentTimeMillis();
                 SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
                 Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_START_TIME_KEY, duration);
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
                 serializers.serialize(result, exchange);
             }
         }
     }
 }
-"

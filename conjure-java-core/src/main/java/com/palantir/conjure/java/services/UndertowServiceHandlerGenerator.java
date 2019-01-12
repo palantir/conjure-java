@@ -281,7 +281,7 @@ final class UndertowServiceHandlerGenerator {
                     EXCHANGE_VAR_NAME,
                     "putAttachment",
                     Metrics.class,
-                    "DELEGATE_START_TIME_KEY",
+                    "DELEGATE_DURATION_KEY",
                     durationVarName);
 
 
