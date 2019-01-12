@@ -140,7 +140,8 @@ final class UndertowServiceHandlerGenerator {
 
         // addEndpointHandlers
         routableBuilder.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
-                e -> generateEndpointHandler(e, typeDefinitions, typeMapper, returnTypeMapper)));
+                e -> generateEndpointHandler(
+                        e, serviceName, typeDefinitions, typeMapper, returnTypeMapper)));
 
         TypeSpec routable = routableBuilder.build();
 
@@ -192,7 +193,9 @@ final class UndertowServiceHandlerGenerator {
         return StringUtils.capitalize(name.get()) + "Handler";
     }
 
-    private TypeSpec generateEndpointHandler(EndpointDefinition endpointDefinition,
+    private TypeSpec generateEndpointHandler(
+            EndpointDefinition endpointDefinition,
+            String serviceName,
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
@@ -208,7 +211,7 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                         .addException(IOException.class)
-                        .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper))
+                        .addCode(endpointInvocation(endpointDefinition, serviceName, typeDefinitions, typeMapper, returnTypeMapper))
                         .build())
                 .build();
     }
@@ -226,7 +229,10 @@ final class UndertowServiceHandlerGenerator {
     private static final String QUERY_PARAMS_VAR_NAME = "queryParams";
     private static final String HEADER_PARAMS_VAR_NAME = "headerParams";
 
-    private CodeBlock endpointInvocation(EndpointDefinition endpointDefinition, List<TypeDefinition> typeDefinitions,
+    private CodeBlock endpointInvocation(
+            EndpointDefinition endpointDefinition,
+            String serviceName,
+            List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper, TypeMapper returnTypeMapper) {
         CodeBlock.Builder code = CodeBlock.builder();
 
@@ -283,6 +289,18 @@ final class UndertowServiceHandlerGenerator {
                     Metrics.class,
                     "DELEGATE_DURATION_KEY",
                     durationVarName);
+            code.addStatement("$1N.$2L($3T.$4L, $5S)",
+                    EXCHANGE_VAR_NAME,
+                    "putAttachment",
+                    Metrics.class,
+                    "SERVICE_NAME_KEY",
+                    serviceName);
+            code.addStatement("$1N.$2L($3T.$4L, $5S)",
+                    EXCHANGE_VAR_NAME,
+                    "putAttachment",
+                    Metrics.class,
+                    "RESOURCE_METHOD_NAME_KEY",
+                    endpointDefinition.getEndpointName().get());
 
 
             // optional<> handling

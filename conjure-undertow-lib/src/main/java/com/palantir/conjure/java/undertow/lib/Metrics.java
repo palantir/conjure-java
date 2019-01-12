@@ -23,4 +23,7 @@ public final class Metrics {
     private Metrics() {}
 
     public static final AttachmentKey<Long> DELEGATE_DURATION_KEY = AttachmentKey.create(Long.class);
+    public static final AttachmentKey<String> RESOURCE_METHOD_NAME_KEY = AttachmentKey.create(String.class);
+    public static final AttachmentKey<String> SERVICE_NAME_KEY = AttachmentKey.create(String.class);
+
 }
