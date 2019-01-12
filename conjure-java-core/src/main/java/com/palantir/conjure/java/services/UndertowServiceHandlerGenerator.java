@@ -265,6 +265,7 @@ final class UndertowServiceHandlerGenerator {
 
         final String resultVarName = "result";
         if (endpointDefinition.getReturns().isPresent()) {
+            code.addStatement("$1T $2N = $3L", Long.class, "start", "System.currentTimeMillis()");
             Type returnType = endpointDefinition.getReturns().get();
             code.addStatement("$1T $2N = $3N.$4L($5L)",
                     returnTypeMapper.getClassName(returnType),
@@ -273,6 +274,14 @@ final class UndertowServiceHandlerGenerator {
                     endpointDefinition.getEndpointName(),
                     String.join(", ", methodArgs)
             );
+            String durationVarName = "duration";
+            code.addStatement("$1T $2N = $3L", Long.class, durationVarName, "System.currentTimeMillis() - start");
+            code.addStatement("$1N.$2L($3L, $4L)",
+                    EXCHANGE_VAR_NAME,
+                    "putAttachment",
+                    "key",
+                    durationVarName);
+
 
             // optional<> handling
             // TODO(ckozak): Support aliased binary types

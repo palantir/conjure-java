@@ -37,6 +37,7 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
 
     private static final ImmutableList<BiFunction<EndpointDetails, HttpHandler, HttpHandler>> WRAPPERS =
             ImmutableList.<BiFunction<EndpointDetails, HttpHandler, HttpHandler>>of(
+            (endpoint, handler) -> new WorkerStartTimeHandler(handler),
             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
             // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
             // When DECODE_URL has not been disabled, the following handlers will no-op
