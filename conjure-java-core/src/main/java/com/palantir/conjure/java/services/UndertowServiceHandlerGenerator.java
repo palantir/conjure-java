@@ -24,6 +24,7 @@ import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
+import com.palantir.conjure.java.undertow.lib.Metrics;
 import com.palantir.conjure.java.undertow.lib.Routable;
 import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
@@ -276,10 +277,11 @@ final class UndertowServiceHandlerGenerator {
             );
             String durationVarName = "duration";
             code.addStatement("$1T $2N = $3L", Long.class, durationVarName, "System.currentTimeMillis() - start");
-            code.addStatement("$1N.$2L($3L, $4L)",
+            code.addStatement("$1N.$2L($3T.$4L, $5L)",
                     EXCHANGE_VAR_NAME,
                     "putAttachment",
-                    "key",
+                    Metrics.class,
+                    "DELEGATE_START_TIME_KEY",
                     durationVarName);
 
 
