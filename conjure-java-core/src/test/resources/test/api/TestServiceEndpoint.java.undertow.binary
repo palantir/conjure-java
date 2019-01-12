@@ -3,6 +3,7 @@ package test.api;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
+import com.palantir.conjure.java.undertow.lib.Metrics;
 import com.palantir.conjure.java.undertow.lib.Routable;
 import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
@@ -47,7 +48,12 @@ public final class TestServiceEndpoint implements Endpoint {
         private class GetBinaryHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
+                Long start = System.currentTimeMillis();
                 BinaryResponseBody result = delegate.getBinary();
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getBinary");
                 BinarySerializers.serialize(result, exchange);
             }
         }

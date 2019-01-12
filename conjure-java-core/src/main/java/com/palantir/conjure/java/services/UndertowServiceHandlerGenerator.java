@@ -211,7 +211,8 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                         .addException(IOException.class)
-                        .addCode(endpointInvocation(endpointDefinition, serviceName, typeDefinitions, typeMapper, returnTypeMapper))
+                        .addCode(endpointInvocation(
+                                endpointDefinition, serviceName, typeDefinitions, typeMapper, returnTypeMapper))
                         .build())
                 .build();
     }

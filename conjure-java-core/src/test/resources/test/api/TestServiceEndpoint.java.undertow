@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
+import com.palantir.conjure.java.undertow.lib.Metrics;
 import com.palantir.conjure.java.undertow.lib.Routable;
 import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
@@ -100,7 +101,12 @@ public final class TestServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
+                Long start = System.currentTimeMillis();
                 Map<String, BackingFileSystem> result = delegate.getFileSystems(authHeader);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getFileSystems");
                 serializers.serialize(result, exchange);
             }
         }
@@ -116,7 +122,12 @@ public final class TestServiceEndpoint implements Endpoint {
                 HeaderMap headerParams = exchange.getRequestHeaders();
                 String testHeaderArg =
                         StringDeserializers.deserializeString(headerParams.get("Test-Header"));
+                Long start = System.currentTimeMillis();
                 Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "createDataset");
                 serializers.serialize(result, exchange);
             }
         }
@@ -129,7 +140,12 @@ public final class TestServiceEndpoint implements Endpoint {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
+                Long start = System.currentTimeMillis();
                 Optional<Dataset> result = delegate.getDataset(authHeader, datasetRid);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getDataset");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -146,7 +162,12 @@ public final class TestServiceEndpoint implements Endpoint {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
+                Long start = System.currentTimeMillis();
                 BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getRawData");
                 BinarySerializers.serialize(result, exchange);
             }
         }
@@ -159,7 +180,12 @@ public final class TestServiceEndpoint implements Endpoint {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
+                Long start = System.currentTimeMillis();
                 NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getAliasedRawData");
                 serializers.serialize(result, exchange);
             }
         }
@@ -172,8 +198,13 @@ public final class TestServiceEndpoint implements Endpoint {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
+                Long start = System.currentTimeMillis();
                 Optional<BinaryResponseBody> result =
                         delegate.maybeGetRawData(authHeader, datasetRid);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "maybeGetRawData");
                 if (result.isPresent()) {
                     BinarySerializers.serialize(result.get(), exchange);
                 } else {
@@ -190,7 +221,12 @@ public final class TestServiceEndpoint implements Endpoint {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
+                Long start = System.currentTimeMillis();
                 AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getAliasedString");
                 serializers.serialize(result, exchange);
             }
         }
@@ -228,7 +264,12 @@ public final class TestServiceEndpoint implements Endpoint {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
+                Long start = System.currentTimeMillis();
                 Set<String> result = delegate.getBranches(authHeader, datasetRid);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getBranches");
                 serializers.serialize(result, exchange);
             }
         }
@@ -241,7 +282,12 @@ public final class TestServiceEndpoint implements Endpoint {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
+                Long start = System.currentTimeMillis();
                 Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getBranchesDeprecated");
                 serializers.serialize(result, exchange);
             }
         }
@@ -255,7 +301,12 @@ public final class TestServiceEndpoint implements Endpoint {
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
                 String branch = StringDeserializers.deserializeString(pathParams.get("branch"));
+                Long start = System.currentTimeMillis();
                 Optional<String> result = delegate.resolveBranch(authHeader, datasetRid, branch);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "resolveBranch");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -272,7 +323,12 @@ public final class TestServiceEndpoint implements Endpoint {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
+                Long start = System.currentTimeMillis();
                 Optional<String> result = delegate.testParam(authHeader, datasetRid);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "testParam");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -300,6 +356,7 @@ public final class TestServiceEndpoint implements Endpoint {
                         StringDeserializers.deserializeStringSet(queryParams.get("setEnd"));
                 Optional<ResourceIdentifier> optionalEnd =
                         StringDeserializers.deserializeOptionalRid(queryParams.get("optionalEnd"));
+                Long start = System.currentTimeMillis();
                 int result =
                         delegate.testQueryParams(
                                 authHeader,
@@ -309,6 +366,10 @@ public final class TestServiceEndpoint implements Endpoint {
                                 setEnd,
                                 optionalEnd,
                                 query);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "testQueryParams");
                 serializers.serialize(result, exchange);
             }
         }
@@ -348,7 +409,12 @@ public final class TestServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
+                Long start = System.currentTimeMillis();
                 boolean result = delegate.testBoolean(authHeader);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "testBoolean");
                 serializers.serialize(result, exchange);
             }
         }
@@ -357,7 +423,12 @@ public final class TestServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
+                Long start = System.currentTimeMillis();
                 double result = delegate.testDouble(authHeader);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "testDouble");
                 serializers.serialize(result, exchange);
             }
         }
@@ -366,7 +437,12 @@ public final class TestServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
+                Long start = System.currentTimeMillis();
                 int result = delegate.testInteger(authHeader);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "testInteger");
                 serializers.serialize(result, exchange);
             }
         }
@@ -379,7 +455,12 @@ public final class TestServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 Optional<String> maybeString = serializers.deserialize(maybeStringType, exchange);
+                Long start = System.currentTimeMillis();
                 Optional<String> result = delegate.testPostOptional(authHeader, maybeString);
+                Long duration = System.currentTimeMillis() - start;
+                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
+                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "TestService");
+                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "testPostOptional");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
