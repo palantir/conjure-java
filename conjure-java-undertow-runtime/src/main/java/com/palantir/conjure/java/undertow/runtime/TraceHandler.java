@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.Tracers;
@@ -54,8 +53,6 @@ final class TraceHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        Preconditions.checkArgument(!exchange.isInIoThread(), "TraceHandler must not be used in IO thread");
-
         String traceId = initializeTrace(exchange);
         // Populate response before calling delegate since delegate might commit the response.
         exchange.getResponseHeaders().put(TRACE_ID, traceId);
