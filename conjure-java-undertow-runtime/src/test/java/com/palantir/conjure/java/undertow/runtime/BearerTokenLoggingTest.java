@@ -146,9 +146,9 @@ public class BearerTokenLoggingTest {
         assertMdcUnset();
         // All tokens provide a user ID. Cases which do not include a user ID should result in an empty value.
         if (userId == null) {
-            assertThat(exchange.getAttachment(Attachments.UNVERIFIED_TOKEN)).isEmpty();
+            assertThat(exchange.getAttachment(Attachments.UNVERIFIED_JWT)).isEmpty();
         } else {
-            assertThat(exchange.getAttachment(Attachments.UNVERIFIED_TOKEN)).isPresent();
+            assertThat(exchange.getAttachment(Attachments.UNVERIFIED_JWT)).isPresent();
         }
         assertThat(invoked).isTrue();
     }

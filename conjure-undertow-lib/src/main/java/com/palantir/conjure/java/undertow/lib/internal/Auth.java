@@ -69,7 +69,7 @@ public final class Auth {
      */
     private static BearerToken setState(HttpServerExchange exchange, BearerToken token) {
         Optional<UnverifiedJsonWebToken> parsedJwt = UnverifiedJsonWebToken.tryParse(token.getToken());
-        exchange.putAttachment(Attachments.UNVERIFIED_TOKEN, parsedJwt);
+        exchange.putAttachment(Attachments.UNVERIFIED_JWT, parsedJwt);
         if (parsedJwt.isPresent()) {
             UnverifiedJsonWebToken jwt = parsedJwt.get();
             MDC.put(USER_ID_KEY, jwt.getUnverifiedUserId());

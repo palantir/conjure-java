@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public final class Attachments {
 
-    public static final AttachmentKey<Optional<UnverifiedJsonWebToken>> UNVERIFIED_TOKEN =
+    public static final AttachmentKey<Optional<UnverifiedJsonWebToken>> UNVERIFIED_JWT =
             AttachmentKey.create(Optional.class);
 
     private Attachments() {}
