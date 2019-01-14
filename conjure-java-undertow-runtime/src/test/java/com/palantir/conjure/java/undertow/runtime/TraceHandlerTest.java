@@ -37,7 +37,6 @@ import io.undertow.util.HttpString;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -81,10 +80,6 @@ public final class TraceHandlerTest {
     public void after() {
         Tracer.unsubscribe("TEST_OBSERVER");
     }
-
-    @Ignore("TODO(rfink): This is pretty hard to mock")
-    @Test
-    public void failsWhenRunOnIoThread() {}
 
     @Test
     public void whenNoTraceIsInHeader_generatesNewTrace() throws Exception {

@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.undertow;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.ServerConnection;
@@ -43,12 +43,12 @@ public final class HttpServerExchanges {
     private static StreamConnection createStreamConnection() {
         StreamConnection streamConnection = mock(StreamConnection.class);
         ConduitStreamSinkChannel sinkChannel = new ConduitStreamSinkChannel(null, mock(StreamSinkConduit.class));
-        when(streamConnection.getSinkChannel()).thenReturn(sinkChannel);
+        lenient().when(streamConnection.getSinkChannel()).thenReturn(sinkChannel);
         ConduitStreamSourceChannel sourceChannel =
                 new ConduitStreamSourceChannel(null, mock(StreamSourceConduit.class));
-        when(streamConnection.getSourceChannel()).thenReturn(sourceChannel);
+        lenient().when(streamConnection.getSourceChannel()).thenReturn(sourceChannel);
         XnioIoThread ioThread = mock(XnioIoThread.class);
-        when(streamConnection.getIoThread()).thenReturn(ioThread);
+        lenient().when(streamConnection.getIoThread()).thenReturn(ioThread);
         return streamConnection;
     }
 
