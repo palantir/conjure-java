@@ -42,7 +42,7 @@ public final class CookieServiceEndpoint implements Endpoint {
 
         @Override
         public void register(RoutingRegistry routingRegistry) {
-            routingRegistry.get("/cookies", new EatCookiesHandler());
+            routingRegistry.get("/cookies", "CookieService", "eatCookies", new EatCookiesHandler());
         }
 
         private class EatCookiesHandler implements HttpHandler {

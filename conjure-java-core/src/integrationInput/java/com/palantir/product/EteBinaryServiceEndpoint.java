@@ -52,10 +52,22 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
         @Override
         public void register(RoutingRegistry routingRegistry) {
             routingRegistry
-                    .post("/binary",  "EteBinaryService", "a", new PostBinaryHandler())
-                    .get("/binary/optional/present", "EteBinaryService", "b", new GetOptionalBinaryPresentHandler())
-                    .get("/binary/optional/empty", "EteBinaryService", "c", new GetOptionalBinaryEmptyHandler())
-                    .get("/binary/failure", "EteBinaryService", "d", new GetBinaryFailureHandler());
+                    .post("/binary", "EteBinaryService", "postBinary", new PostBinaryHandler())
+                    .get(
+                            "/binary/optional/present",
+                            "EteBinaryService",
+                            "getOptionalBinaryPresent",
+                            new GetOptionalBinaryPresentHandler())
+                    .get(
+                            "/binary/optional/empty",
+                            "EteBinaryService",
+                            "getOptionalBinaryEmpty",
+                            new GetOptionalBinaryEmptyHandler())
+                    .get(
+                            "/binary/failure",
+                            "EteBinaryService",
+                            "getBinaryFailure",
+                            new GetBinaryFailureHandler());
         }
 
         private class PostBinaryHandler implements HttpHandler {

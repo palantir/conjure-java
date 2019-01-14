@@ -40,7 +40,7 @@ public final class EmptyPathServiceEndpoint implements Endpoint {
 
         @Override
         public void register(RoutingRegistry routingRegistry) {
-            routingRegistry.get("/", "???", "???", new EmptyPathHandler());
+            routingRegistry.get("/", "EmptyPathService", "emptyPath", new EmptyPathHandler());
         }
 
         private class EmptyPathHandler implements HttpHandler {

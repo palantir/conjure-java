@@ -57,42 +57,73 @@ public final class EteServiceEndpoint implements Endpoint {
         @Override
         public void register(RoutingRegistry routingRegistry) {
             routingRegistry
-                    .get("/base/string", new StringHandler())
-                    .get("/base/integer", new IntegerHandler())
-                    .get("/base/double", new Double_Handler())
-                    .get("/base/boolean", new Boolean_Handler())
-                    .get("/base/safelong", new SafelongHandler())
-                    .get("/base/rid", new RidHandler())
-                    .get("/base/bearertoken", new BearertokenHandler())
-                    .get("/base/optionalString", new OptionalStringHandler())
-                    .get("/base/optionalEmpty", new OptionalEmptyHandler())
-                    .get("/base/datetime", new DatetimeHandler())
-                    .get("/base/binary", new BinaryHandler())
-                    .get("/base/path/{param}", new PathHandler())
-                    .post("/base/notNullBody", new NotNullBodyHandler())
-                    .get("/base/aliasOne", new AliasOneHandler())
-                    .get("/base/optionalAliasOne", new OptionalAliasOneHandler())
-                    .get("/base/aliasTwo", new AliasTwoHandler())
-                    .post("/base/external/notNullBody", new NotNullBodyExternalImportHandler())
-                    .post("/base/external/optional-body", new OptionalBodyExternalImportHandler())
-                    .post("/base/external/optional-query", new OptionalQueryExternalImportHandler())
-                    .post("/base/no-return", new NoReturnHandler())
-                    .get("/base/enum/query", new EnumQueryHandler())
-                    .get("/base/enum/list/query", new EnumListQueryHandler())
-                    .get("/base/enum/optional/query", new OptionalEnumQueryHandler())
-                    .get("/base/enum/header", new EnumHeaderHandler());
+                    .get("/base/string", "EteService", "string", new StringHandler())
+                    .get("/base/integer", "EteService", "integer", new IntegerHandler())
+                    .get("/base/double", "EteService", "double_", new Double_Handler())
+                    .get("/base/boolean", "EteService", "boolean_", new Boolean_Handler())
+                    .get("/base/safelong", "EteService", "safelong", new SafelongHandler())
+                    .get("/base/rid", "EteService", "rid", new RidHandler())
+                    .get("/base/bearertoken", "EteService", "bearertoken", new BearertokenHandler())
+                    .get(
+                            "/base/optionalString",
+                            "EteService",
+                            "optionalString",
+                            new OptionalStringHandler())
+                    .get(
+                            "/base/optionalEmpty",
+                            "EteService",
+                            "optionalEmpty",
+                            new OptionalEmptyHandler())
+                    .get("/base/datetime", "EteService", "datetime", new DatetimeHandler())
+                    .get("/base/binary", "EteService", "binary", new BinaryHandler())
+                    .get("/base/path/{param}", "EteService", "path", new PathHandler())
+                    .post(
+                            "/base/notNullBody",
+                            "EteService",
+                            "notNullBody",
+                            new NotNullBodyHandler())
+                    .get("/base/aliasOne", "EteService", "aliasOne", new AliasOneHandler())
+                    .get(
+                            "/base/optionalAliasOne",
+                            "EteService",
+                            "optionalAliasOne",
+                            new OptionalAliasOneHandler())
+                    .get("/base/aliasTwo", "EteService", "aliasTwo", new AliasTwoHandler())
+                    .post(
+                            "/base/external/notNullBody",
+                            "EteService",
+                            "notNullBodyExternalImport",
+                            new NotNullBodyExternalImportHandler())
+                    .post(
+                            "/base/external/optional-body",
+                            "EteService",
+                            "optionalBodyExternalImport",
+                            new OptionalBodyExternalImportHandler())
+                    .post(
+                            "/base/external/optional-query",
+                            "EteService",
+                            "optionalQueryExternalImport",
+                            new OptionalQueryExternalImportHandler())
+                    .post("/base/no-return", "EteService", "noReturn", new NoReturnHandler())
+                    .get("/base/enum/query", "EteService", "enumQuery", new EnumQueryHandler())
+                    .get(
+                            "/base/enum/list/query",
+                            "EteService",
+                            "enumListQuery",
+                            new EnumListQueryHandler())
+                    .get(
+                            "/base/enum/optional/query",
+                            "EteService",
+                            "optionalEnumQuery",
+                            new OptionalEnumQueryHandler())
+                    .get("/base/enum/header", "EteService", "enumHeader", new EnumHeaderHandler());
         }
 
         private class StringHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 String result = delegate.string(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "string");
                 serializers.serialize(result, exchange);
             }
         }
@@ -101,12 +132,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 int result = delegate.integer(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "integer");
                 serializers.serialize(result, exchange);
             }
         }
@@ -115,12 +141,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 double result = delegate.double_(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "double_");
                 serializers.serialize(result, exchange);
             }
         }
@@ -129,12 +150,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 boolean result = delegate.boolean_(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "boolean_");
                 serializers.serialize(result, exchange);
             }
         }
@@ -143,12 +159,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 SafeLong result = delegate.safelong(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "safelong");
                 serializers.serialize(result, exchange);
             }
         }
@@ -157,12 +168,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 ResourceIdentifier result = delegate.rid(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "rid");
                 serializers.serialize(result, exchange);
             }
         }
@@ -171,12 +177,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 BearerToken result = delegate.bearertoken(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "bearertoken");
                 serializers.serialize(result, exchange);
             }
         }
@@ -185,12 +186,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 Optional<String> result = delegate.optionalString(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "optionalString");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -203,12 +199,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 Optional<String> result = delegate.optionalEmpty(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "optionalEmpty");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -221,12 +212,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 OffsetDateTime result = delegate.datetime(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "datetime");
                 serializers.serialize(result, exchange);
             }
         }
@@ -235,12 +221,7 @@ public final class EteServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 BinaryResponseBody result = delegate.binary(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "binary");
                 BinarySerializers.serialize(result, exchange);
             }
         }
@@ -252,12 +233,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 String param = StringDeserializers.deserializeString(pathParams.get("param"));
-                Long start = System.currentTimeMillis();
                 String result = delegate.path(authHeader, param);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "path");
                 serializers.serialize(result, exchange);
             }
         }
@@ -270,12 +246,7 @@ public final class EteServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 StringAliasExample notNullBody = serializers.deserialize(notNullBodyType, exchange);
-                Long start = System.currentTimeMillis();
                 StringAliasExample result = delegate.notNullBody(authHeader, notNullBody);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "notNullBody");
                 serializers.serialize(result, exchange);
             }
         }
@@ -288,12 +259,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 String queryParamNameRaw =
                         StringDeserializers.deserializeString(queryParams.get("queryParamName"));
                 StringAliasExample queryParamName = StringAliasExample.of(queryParamNameRaw);
-                Long start = System.currentTimeMillis();
                 StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "aliasOne");
                 serializers.serialize(result, exchange);
             }
         }
@@ -311,12 +277,7 @@ public final class EteServiceEndpoint implements Endpoint {
                                 queryParamNameRaw.isPresent()
                                         ? StringAliasExample.of(queryParamNameRaw.get())
                                         : null);
-                Long start = System.currentTimeMillis();
                 StringAliasExample result = delegate.optionalAliasOne(authHeader, queryParamName);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "optionalAliasOne");
                 serializers.serialize(result, exchange);
             }
         }
@@ -330,12 +291,7 @@ public final class EteServiceEndpoint implements Endpoint {
                         StringDeserializers.deserializeString(queryParams.get("queryParamName"));
                 NestedStringAliasExample queryParamName =
                         NestedStringAliasExample.of(StringAliasExample.of(queryParamNameRaw));
-                Long start = System.currentTimeMillis();
                 NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "aliasTwo");
                 serializers.serialize(result, exchange);
             }
         }
@@ -348,14 +304,8 @@ public final class EteServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 StringAliasExample notNullBody = serializers.deserialize(notNullBodyType, exchange);
-                Long start = System.currentTimeMillis();
                 StringAliasExample result =
                         delegate.notNullBodyExternalImport(authHeader, notNullBody);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(
-                        Metrics.RESOURCE_METHOD_NAME_KEY, "notNullBodyExternalImport");
                 serializers.serialize(result, exchange);
             }
         }
@@ -368,14 +318,8 @@ public final class EteServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 Optional<StringAliasExample> body = serializers.deserialize(bodyType, exchange);
-                Long start = System.currentTimeMillis();
                 Optional<StringAliasExample> result =
                         delegate.optionalBodyExternalImport(authHeader, body);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(
-                        Metrics.RESOURCE_METHOD_NAME_KEY, "optionalBodyExternalImport");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -392,14 +336,8 @@ public final class EteServiceEndpoint implements Endpoint {
                 Optional<StringAliasExample> query =
                         StringDeserializers.deserializeOptionalComplex(
                                 queryParams.get("query"), StringAliasExample::valueOf);
-                Long start = System.currentTimeMillis();
                 Optional<StringAliasExample> result =
                         delegate.optionalQueryExternalImport(authHeader, query);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(
-                        Metrics.RESOURCE_METHOD_NAME_KEY, "optionalQueryExternalImport");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -425,12 +363,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 SimpleEnum queryParamName =
                         StringDeserializers.deserializeComplex(
                                 queryParams.get("queryParamName"), SimpleEnum::valueOf);
-                Long start = System.currentTimeMillis();
                 SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "enumQuery");
                 serializers.serialize(result, exchange);
             }
         }
@@ -443,12 +376,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 List<SimpleEnum> queryParamName =
                         StringDeserializers.deserializeComplexList(
                                 queryParams.get("queryParamName"), SimpleEnum::valueOf);
-                Long start = System.currentTimeMillis();
                 List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "enumListQuery");
                 serializers.serialize(result, exchange);
             }
         }
@@ -461,13 +389,8 @@ public final class EteServiceEndpoint implements Endpoint {
                 Optional<SimpleEnum> queryParamName =
                         StringDeserializers.deserializeOptionalComplex(
                                 queryParams.get("queryParamName"), SimpleEnum::valueOf);
-                Long start = System.currentTimeMillis();
                 Optional<SimpleEnum> result =
                         delegate.optionalEnumQuery(authHeader, queryParamName);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "optionalEnumQuery");
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
@@ -484,12 +407,7 @@ public final class EteServiceEndpoint implements Endpoint {
                 SimpleEnum headerParameter =
                         StringDeserializers.deserializeComplex(
                                 headerParams.get("Custom-Header"), SimpleEnum::valueOf);
-                Long start = System.currentTimeMillis();
                 SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "enumHeader");
                 serializers.serialize(result, exchange);
             }
         }
