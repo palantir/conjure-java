@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -42,10 +41,10 @@ public abstract class TestBase {
     protected static void validateGeneratorOutput(List<Path> files, Path outputDir, String suffix) throws IOException {
         for (Path file : files) {
             Path output = outputDir.resolve(file.getFileName() + suffix);
-            // if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
                 Files.delete(output);
                 Files.copy(file, output);
-            // }
+            }
             assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
         }
     }
