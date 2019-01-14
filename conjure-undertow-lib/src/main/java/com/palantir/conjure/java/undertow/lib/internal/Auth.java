@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.lib.internal;
 
+import com.palantir.conjure.java.undertow.lib.Attachments;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -48,7 +49,7 @@ public final class Auth {
         // We do not want credential material logged to disk, even if it's marked unsafe.
         Preconditions.checkArgument(authorization != null && authorization.size() == 1,
                 "One Authorization header value is required");
-        return setState(AuthHeader.valueOf(authorization.get(0)));
+        return setState(exchange, AuthHeader.valueOf(authorization.get(0)));
     }
 
     /**
@@ -56,7 +57,7 @@ public final class Auth {
      * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
      */
     public static BearerToken cookie(HttpServerExchange exchange, String cookieName) {
-        return setState(StringDeserializers.deserializeBearerToken(
+        return setState(exchange, StringDeserializers.deserializeBearerToken(
                 exchange.getRequestCookies().get(cookieName).getValue()));
     }
 
@@ -66,8 +67,9 @@ public final class Auth {
      * user id, session id, and token id extracted from the JWT. This is
      * best-effort and does not throw an exception in case any of these steps fail.
      */
-    private static BearerToken setState(BearerToken token) {
+    private static BearerToken setState(HttpServerExchange exchange, BearerToken token) {
         Optional<UnverifiedJsonWebToken> parsedJwt = UnverifiedJsonWebToken.tryParse(token.getToken());
+        exchange.putAttachment(Attachments.UNVERIFIED_JWT, parsedJwt);
         if (parsedJwt.isPresent()) {
             UnverifiedJsonWebToken jwt = parsedJwt.get();
             MDC.put(USER_ID_KEY, jwt.getUnverifiedUserId());
@@ -77,8 +79,8 @@ public final class Auth {
         return token;
     }
 
-    private static AuthHeader setState(AuthHeader authHeader) {
-        setState(authHeader.getBearerToken());
+    private static AuthHeader setState(HttpServerExchange exchange, AuthHeader authHeader) {
+        setState(exchange, authHeader.getBearerToken());
         return authHeader;
     }
 

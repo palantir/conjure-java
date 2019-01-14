@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
+import com.palantir.conjure.java.undertow.lib.Attachments;
 import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -143,6 +144,12 @@ public class BearerTokenLoggingTest {
         });
         handler.handleRequest(exchange);
         assertMdcUnset();
+        // All tokens provide a user ID. Cases which do not include a user ID should result in an empty value.
+        if (userId == null) {
+            assertThat(exchange.getAttachment(Attachments.UNVERIFIED_JWT)).isEmpty();
+        } else {
+            assertThat(exchange.getAttachment(Attachments.UNVERIFIED_JWT)).isPresent();
+        }
         assertThat(invoked).isTrue();
     }
 
