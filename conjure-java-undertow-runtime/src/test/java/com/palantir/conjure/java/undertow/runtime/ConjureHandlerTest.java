@@ -58,7 +58,7 @@ public final class ConjureHandlerTest {
             }
         };
         ConjureHandler handler = new ConjureHandler();
-        handler.get("/test", httpHandler);
+        handler.get("/test", "Test", "test", httpHandler);
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(handler)

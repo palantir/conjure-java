@@ -24,7 +24,6 @@ import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.Metrics;
 import com.palantir.conjure.java.undertow.lib.Routable;
 import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
@@ -124,9 +123,11 @@ final class UndertowServiceHandlerGenerator {
         // validation as the proper endpoint uniqueness guarantees will be provided by the IR itself.
         CodeBlock routingHandler = CodeBlock.builder()
                 .add(CodeBlocks.of(Iterables.transform(serviceDefinition.getEndpoints(),
-                        e -> CodeBlock.of(".$1L($2S, $3L)",
+                        e -> CodeBlock.of(".$1L($2S, $3S, $4S, $5L)",
                                 e.getHttpMethod().toString().toLowerCase(),
                                 e.getHttpPath(),
+                                serviceName,
+                                e.getEndpointName().get(),
                                 CodeBlock.of("new $1T()",
                                         endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName()))
                         ))))
@@ -141,7 +142,7 @@ final class UndertowServiceHandlerGenerator {
         // addEndpointHandlers
         routableBuilder.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
                 e -> generateEndpointHandler(
-                        e, serviceName, typeDefinitions, typeMapper, returnTypeMapper)));
+                        e, typeDefinitions, typeMapper, returnTypeMapper)));
 
         TypeSpec routable = routableBuilder.build();
 
@@ -195,7 +196,6 @@ final class UndertowServiceHandlerGenerator {
 
     private TypeSpec generateEndpointHandler(
             EndpointDefinition endpointDefinition,
-            String serviceName,
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
@@ -212,7 +212,7 @@ final class UndertowServiceHandlerGenerator {
                         .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                         .addException(IOException.class)
                         .addCode(endpointInvocation(
-                                endpointDefinition, serviceName, typeDefinitions, typeMapper, returnTypeMapper))
+                                endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper))
                         .build())
                 .build();
     }
@@ -232,7 +232,6 @@ final class UndertowServiceHandlerGenerator {
 
     private CodeBlock endpointInvocation(
             EndpointDefinition endpointDefinition,
-            String serviceName,
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper, TypeMapper returnTypeMapper) {
         CodeBlock.Builder code = CodeBlock.builder();
@@ -273,7 +272,6 @@ final class UndertowServiceHandlerGenerator {
 
         final String resultVarName = "result";
         if (endpointDefinition.getReturns().isPresent()) {
-            code.addStatement("$1T $2N = $3L", Long.class, "start", "System.currentTimeMillis()");
             Type returnType = endpointDefinition.getReturns().get();
             code.addStatement("$1T $2N = $3N.$4L($5L)",
                     returnTypeMapper.getClassName(returnType),
@@ -282,27 +280,6 @@ final class UndertowServiceHandlerGenerator {
                     endpointDefinition.getEndpointName(),
                     String.join(", ", methodArgs)
             );
-            String durationVarName = "duration";
-            code.addStatement("$1T $2N = $3L", Long.class, durationVarName, "System.currentTimeMillis() - start");
-            code.addStatement("$1N.$2L($3T.$4L, $5L)",
-                    EXCHANGE_VAR_NAME,
-                    "putAttachment",
-                    Metrics.class,
-                    "DELEGATE_DURATION_KEY",
-                    durationVarName);
-            code.addStatement("$1N.$2L($3T.$4L, $5S)",
-                    EXCHANGE_VAR_NAME,
-                    "putAttachment",
-                    Metrics.class,
-                    "SERVICE_NAME_KEY",
-                    serviceName);
-            code.addStatement("$1N.$2L($3T.$4L, $5S)",
-                    EXCHANGE_VAR_NAME,
-                    "putAttachment",
-                    Metrics.class,
-                    "RESOURCE_METHOD_NAME_KEY",
-                    endpointDefinition.getEndpointName().get());
-
 
             // optional<> handling
             // TODO(ckozak): Support aliased binary types

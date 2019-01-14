@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.Metrics;
 import com.palantir.conjure.java.undertow.lib.Routable;
 import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
@@ -53,10 +52,10 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
         @Override
         public void register(RoutingRegistry routingRegistry) {
             routingRegistry
-                    .post("/binary", new PostBinaryHandler())
-                    .get("/binary/optional/present", new GetOptionalBinaryPresentHandler())
-                    .get("/binary/optional/empty", new GetOptionalBinaryEmptyHandler())
-                    .get("/binary/failure", new GetBinaryFailureHandler());
+                    .post("/binary",  "EteBinaryService", "a", new PostBinaryHandler())
+                    .get("/binary/optional/present", "EteBinaryService", "b", new GetOptionalBinaryPresentHandler())
+                    .get("/binary/optional/empty", "EteBinaryService", "c", new GetOptionalBinaryEmptyHandler())
+                    .get("/binary/failure", "EteBinaryService", "d", new GetBinaryFailureHandler());
         }
 
         private class PostBinaryHandler implements HttpHandler {
@@ -66,12 +65,7 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 InputStream body = BinarySerializers.deserializeInputStream(exchange);
-                Long start = System.currentTimeMillis();
                 BinaryResponseBody result = delegate.postBinary(authHeader, body);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteBinaryService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "postBinary");
                 BinarySerializers.serialize(result, exchange);
             }
         }
@@ -80,13 +74,7 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 Optional<BinaryResponseBody> result = delegate.getOptionalBinaryPresent(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteBinaryService");
-                exchange.putAttachment(
-                        Metrics.RESOURCE_METHOD_NAME_KEY, "getOptionalBinaryPresent");
                 if (result.isPresent()) {
                     BinarySerializers.serialize(result.get(), exchange);
                 } else {
@@ -99,12 +87,7 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
-                Long start = System.currentTimeMillis();
                 Optional<BinaryResponseBody> result = delegate.getOptionalBinaryEmpty(authHeader);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteBinaryService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getOptionalBinaryEmpty");
                 if (result.isPresent()) {
                     BinarySerializers.serialize(result.get(), exchange);
                 } else {
@@ -119,12 +102,7 @@ public final class EteBinaryServiceEndpoint implements Endpoint {
                 AuthHeader authHeader = Auth.header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
                 int numBytes = StringDeserializers.deserializeInteger(queryParams.get("numBytes"));
-                Long start = System.currentTimeMillis();
                 BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EteBinaryService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "getBinaryFailure");
                 BinarySerializers.serialize(result, exchange);
             }
         }

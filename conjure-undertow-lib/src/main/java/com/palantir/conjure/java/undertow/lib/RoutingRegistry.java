@@ -27,11 +27,11 @@ import io.undertow.server.HttpHandler;
  */
 public interface RoutingRegistry {
 
-    RoutingRegistry get(String template, HttpHandler handler);
+    RoutingRegistry get(String template, String serviceName, String endpointName, HttpHandler handler);
 
-    RoutingRegistry post(String template, HttpHandler handler);
+    RoutingRegistry post(String template, String serviceName, String endpointName, HttpHandler handler);
 
-    RoutingRegistry put(String template, HttpHandler handler);
+    RoutingRegistry put(String template, String serviceName, String endpointName, HttpHandler handler);
 
-    RoutingRegistry delete(String template, HttpHandler handler);
+    RoutingRegistry delete(String template, String serviceName, String endpointName, HttpHandler handler);
 }

@@ -46,10 +46,10 @@ public final class MyServiceUndertowHandler implements Routable {
 
     @Override
     public void register(RoutingRegistry routingRegistry) {
-        routingRegistry.get("/inc/{base}/{numHours}", new IncrementTimeHandler())
-                .post("/issunday", new IsSundayHandler())
-                .get("/traceId", new TraceIdHandler())
-                .get("/maybeString/{shouldReturnString}", new MaybeStringHandler());
+        routingRegistry.get("/inc/{base}/{numHours}", "", "", new IncrementTimeHandler())
+                .post("/issunday", "", "", new IsSundayHandler())
+                .get("/traceId", "", "", new TraceIdHandler())
+                .get("/maybeString/{shouldReturnString}", "", "", new MaybeStringHandler());
     }
 
     // TODO(nmiyake): If we decide to go generated handler route, rewrite all of this example code

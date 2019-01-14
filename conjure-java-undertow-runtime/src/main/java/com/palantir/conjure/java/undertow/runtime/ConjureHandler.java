@@ -27,7 +27,6 @@ import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
-import java.util.function.BiFunction;
 
 /**
  * Default Conjure implementation of a {@link RoutingRegistry}
@@ -35,32 +34,42 @@ import java.util.function.BiFunction;
  */
 public final class ConjureHandler implements HttpHandler, RoutingRegistry {
 
-    private static final ImmutableList<BiFunction<EndpointDetails, HttpHandler, HttpHandler>> WRAPPERS =
-            ImmutableList.<BiFunction<EndpointDetails, HttpHandler, HttpHandler>>of(
-            (endpoint, handler) -> new WorkerStartTimeHandler(handler),
-            // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
-            // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
-            // When DECODE_URL has not been disabled, the following handlers will no-op
-            (endpoint, handler) -> new URLDecodingHandler(handler, "UTF-8"),
-            (endpoint, handler) -> new PathParamDecodingHandler(handler),
-            // no-cache and web-security handlers add listeners for the response to be committed,
-            // they can be executed on the IO thread.
-            (endpoint, handler) -> Methods.GET.equals(endpoint.method)
-                    // Only applies to GET methods
-                    ? new NoCachingResponseHandler(handler) : handler,
-            (endpoint, handler) -> new WebSecurityHandler(handler),
-            // It is vitally important to never run blocking operations on the initial IO thread otherwise
-            // the server will not process new requests. all handlers executed after BlockingHandler
-            // use the larger task pool which is allowed to block. Any operation which sets thread
-            // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
-            // will not propagate to the wrapped service.
-            (endpoint, handler) -> new BlockingHandler(handler),
-            // Logging context and trace handler must execute prior to the exception
-            // to provide user and trace information on exceptions.
-            (endpoint, handler) -> new LoggingContextHandler(handler),
-            (endpoint, handler) -> new TraceHandler(endpoint.method + " " + endpoint.template, handler),
-            (endpoint, handler) -> new ConjureExceptionHandler(handler)
-    ).reverse();
+    interface HandlerFactory {
+        HttpHandler makeHandler(
+                HttpString method,
+                String template,
+                String serviceName,
+                String endpointName,
+                HttpHandler handler);
+    }
+
+    private static final ImmutableList<HandlerFactory> WRAPPERS =
+            ImmutableList.<HandlerFactory>of(
+                    // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
+                    // Servers which do not configure DECODE_URL will still work properly except for encoded slash
+                    // values.
+                    // When DECODE_URL has not been disabled, the following handlers will no-op
+                    (method, template, serviceName, endpointName, handler) -> new URLDecodingHandler(handler, "UTF-8"),
+                    (method, template, serviceName, endpointName, handler) -> new PathParamDecodingHandler(handler),
+                    // no-cache and web-security handlers add listeners for the response to be committed,
+                    // they can be executed on the IO thread.
+                    (method, template, serviceName, endpointName, handler) -> Methods.GET.equals(method)
+                            // Only applies to GET methods
+                            ? new NoCachingResponseHandler(handler) : handler,
+                    (method, template, serviceName, endpointName, handler) -> new WebSecurityHandler(handler),
+                    // It is vitally important to never run blocking operations on the initial IO thread otherwise
+                    // the server will not process new requests. all handlers executed after BlockingHandler
+                    // use the larger task pool which is allowed to block. Any operation which sets thread
+                    // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
+                    // will not propagate to the wrapped service.
+                    (method, template, serviceName, endpointName, handler) -> new BlockingHandler(handler),
+                    // Logging context and trace handler must execute prior to the exception
+                    // to provide user and trace information on exceptions.
+                    (method, template, serviceName, endpointName, handler) -> new LoggingContextHandler(handler),
+                    (method, template, serviceName, endpointName, handler) ->
+                            new TraceHandler(method + " " + template, handler),
+                    (method, template, serviceName, endpointName, handler) -> new ConjureExceptionHandler(handler)
+            ).reverse();
 
     private final RoutingHandler routingHandler;
     private final HttpHandler delegate;
@@ -80,48 +89,36 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
     }
 
     @Override
-    public ConjureHandler get(String template, HttpHandler handler) {
-        return register(Methods.GET, template, handler);
+    public ConjureHandler get(String template, String serviceName, String endpointName, HttpHandler handler) {
+        return register(Methods.GET, template, serviceName, endpointName, handler);
     }
 
     @Override
-    public ConjureHandler post(String template, HttpHandler handler) {
-        return register(Methods.POST, template, handler);
+    public ConjureHandler post(String template, String serviceName, String endpointName, HttpHandler handler) {
+        return register(Methods.POST, template, serviceName, endpointName, handler);
     }
 
     @Override
-    public ConjureHandler put(String template, HttpHandler handler) {
-        return register(Methods.PUT, template, handler);
+    public ConjureHandler put(String template, String serviceName, String endpointName, HttpHandler handler) {
+        return register(Methods.PUT, template, serviceName, endpointName, handler);
     }
 
     @Override
-    public ConjureHandler delete(String template, HttpHandler handler) {
-        return register(Methods.DELETE, template, handler);
+    public ConjureHandler delete(String template, String serviceName, String endpointName, HttpHandler handler) {
+        return register(Methods.DELETE, template, serviceName, endpointName, handler);
     }
 
-    private ConjureHandler register(HttpString method, String template, HttpHandler handler) {
+    private ConjureHandler register(
+            HttpString method,
+            String template,
+            String serviceName,
+            String endpointName,
+            HttpHandler handler) {
         HttpHandler current = handler;
-        EndpointDetails endpoint = new EndpointDetails(method, template);
-        for (BiFunction<EndpointDetails, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
-            current = wrapper.apply(endpoint, current);
+        for (HandlerFactory wrapper : WRAPPERS) {
+            current = wrapper.makeHandler(method, template, serviceName, endpointName, current);
         }
         routingHandler.add(method, template, current);
         return this;
-    }
-
-    private static final class EndpointDetails {
-
-        private final HttpString method;
-        private final String template;
-
-        EndpointDetails(HttpString method, String template) {
-            this.method = method;
-            this.template = template;
-        }
-
-        @Override
-        public String toString() {
-            return "EndpointDetails{method=" + method + ", template='" + template + "'}";
-        }
     }
 }

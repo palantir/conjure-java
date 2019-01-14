@@ -2,7 +2,6 @@ package com.palantir.product;
 
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.Metrics;
 import com.palantir.conjure.java.undertow.lib.Routable;
 import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
@@ -41,18 +40,13 @@ public final class EmptyPathServiceEndpoint implements Endpoint {
 
         @Override
         public void register(RoutingRegistry routingRegistry) {
-            routingRegistry.get("/", new EmptyPathHandler());
+            routingRegistry.get("/", "???", "???", new EmptyPathHandler());
         }
 
         private class EmptyPathHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                Long start = System.currentTimeMillis();
                 boolean result = delegate.emptyPath();
-                Long duration = System.currentTimeMillis() - start;
-                exchange.putAttachment(Metrics.DELEGATE_DURATION_KEY, duration);
-                exchange.putAttachment(Metrics.SERVICE_NAME_KEY, "EmptyPathService");
-                exchange.putAttachment(Metrics.RESOURCE_METHOD_NAME_KEY, "emptyPath");
                 serializers.serialize(result, exchange);
             }
         }
