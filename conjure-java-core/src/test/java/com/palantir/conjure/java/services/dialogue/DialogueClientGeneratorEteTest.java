@@ -101,7 +101,6 @@ public final class DialogueClientGeneratorEteTest extends TestBase {
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
         client = DialogueDialogueSampleService.blocking(
                 createChannel(url("localhost", 8080, "/test-example/api"), Duration.ofSeconds(10)));
-
     }
 
 

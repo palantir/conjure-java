@@ -2,7 +2,6 @@ package com.palantir.product;
 
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
-import java.lang.String;
 import javax.annotation.Generated;
 
 /** SampleServiceDocs */

@@ -143,7 +143,10 @@ public final class DialogueClientGenerator implements ServiceGenerator {
                     .map(this::blockingApiMethod)
                     .collect(Collectors.toList()));
 
-            return JavaFile.builder(def.getServiceName().getPackage(), serviceBuilder.build()).build();
+            return JavaFile
+                    .builder(def.getServiceName().getPackage(), serviceBuilder.build())
+                    .skipJavaLangImports(true)
+                    .build();
         }
 
         private MethodSpec blockingApiMethod(EndpointDefinition endpointDef) {
@@ -176,7 +179,9 @@ public final class DialogueClientGenerator implements ServiceGenerator {
                     .map(endpoint -> endpoint(endpoint, className))
                     .collect(Collectors.toList()));
 
-            return JavaFile.builder(def.getServiceName().getPackage(), serviceBuilder.build()).build();
+            return JavaFile.builder(def.getServiceName().getPackage(), serviceBuilder.build())
+                    .skipJavaLangImports(true)
+                    .build();
         }
 
         private static boolean requireBody(com.palantir.conjure.spec.HttpMethod httpMethod) {
