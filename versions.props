@@ -12,6 +12,7 @@ com.palantir.conjure.java.runtime:conjure-java-jaxrs-client = 4.6.0
 # dependency-upgrader:ON
 com.palantir.conjure.verification:* = 0.16.6
 com.palantir.conjure:* = 4.2.2
+com.palantir.dialogue:* = 0.4.0
 com.palantir.ri:resource-identifier = 1.0.1
 com.palantir.syntactic-paths:syntactic-paths = 0.6.1
 com.palantir.tokens:* = 3.4.0
@@ -35,7 +36,7 @@ joda-time:joda-time = 2.10.1
 junit:junit = 4.12
 org.apache.commons:commons-lang3 = 3.8.1
 org.assertj:* = 3.11.1
-org.glassfish.jersey.core:jersey-server = 2.25.1
+org.glassfish.jersey.core:* = 2.25.1
 org.hamcrest:hamcrest-core = 2.1
 org.hibernate:hibernate-validator = 5.4.2.Final
 org.immutables:value = 2.7.5

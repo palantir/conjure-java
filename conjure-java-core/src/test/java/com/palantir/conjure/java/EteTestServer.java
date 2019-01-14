@@ -38,7 +38,7 @@ public final class EteTestServer extends Application<Configuration> {
         environment.jersey().register(new EmptyPathResource());
     }
 
-    private static final SslConfiguration TRUST_STORE_CONFIGURATION =
+    public static final SslConfiguration TRUST_STORE_CONFIGURATION =
             new SslConfiguration.Builder().trustStorePath(Paths.get("var/security/truststore.jks")).build();
     private static final SSLSocketFactory SSL_SOCKET_FACTORY =
             SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION);
