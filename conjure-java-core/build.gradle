@@ -67,6 +67,7 @@ dependencies {
     integrationInputCompile project(':conjure-undertow-lib')
     integrationInputCompile 'com.google.guava:guava'
     integrationInputCompile 'com.palantir.conjure.java.api:errors'
+    integrationInputCompile 'com.palantir.dialogue:dialogue-client'
     integrationInputCompile 'com.squareup.retrofit2:retrofit'
     integrationInputCompile 'javax.annotation:javax.annotation-api'
     integrationInputCompile 'javax.validation:validation-api'
