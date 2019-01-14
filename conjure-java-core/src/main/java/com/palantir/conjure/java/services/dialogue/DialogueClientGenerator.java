@@ -265,12 +265,12 @@ public final class DialogueClientGenerator implements ServiceGenerator {
         private CodeBlock serializerForType(
                 EndpointDefinition def, ClassName parentClassName, TypeName bodyType) {
             if (bodyType.equals(EMPTY_BODY)) {
-                return CodeBlock.builder().add("$T.serializer();", EMPTY_BODY_CLASS).build();
+                return CodeBlock.builder().add("$T.serializer()", EMPTY_BODY_CLASS).build();
             } else if (bodyType.equals(TypeName.get(Void.class))) {
-                return CodeBlock.builder().add("$T.failing();", Serializers.class).build();
+                return CodeBlock.builder().add("$T.failing()", Serializers.class).build();
             } else {
                 return CodeBlock.builder()
-                        .add("$T.jackson($S, $L.$L);",
+                        .add("$T.jackson($S, $L.$L)",
                                 Serializers.class, def.getEndpointName(), parentClassName, MAPPER_FIELD_NAME)
                         .build();
             }
@@ -290,12 +290,12 @@ public final class DialogueClientGenerator implements ServiceGenerator {
             if (type.accept(TypeVisitor.IS_PRIMITIVE)
                     && type.accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.BINARY)) {
                 return CodeBlock.builder()
-                        .add("$T.passthrough();", Deserializers.class)
+                        .add("$T.passthrough()", Deserializers.class)
                         .build();
             }
 
             return CodeBlock.builder()
-                    .add("$T.jackson($S, $L.$L, $L);",
+                    .add("$T.jackson($S, $L.$L, $L)",
                             Deserializers.class,
                             getName,
                             parentClassName,

@@ -205,6 +205,13 @@ public static void main(String[] args) {
 }
 ```
 
+## Dialogue Clients
+
+_This feature is experimental and subject to change._
+
+The `DialogueClientGenerator` class implements experimental support for [dialogue](https://github.com/palantir/dialogue)
+clients. See `DialogueClientGeneratorEteTest` for a usage example.
+
 ## Contributing
 
 For instructions on how to set up your local development environment, check out the [Contributing document](./CONTRIBUTING.md).

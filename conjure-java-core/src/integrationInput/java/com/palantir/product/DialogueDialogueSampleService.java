@@ -38,13 +38,13 @@ public final class DialogueDialogueSampleService {
                                         PathTemplate.Segment.fixed("base"),
                                         PathTemplate.Segment.fixed("string")));
 
-                private final Serializer<Void> serializer = Serializers.failing();;
+                private final Serializer<Void> serializer = Serializers.failing();
 
                 private final Deserializer<String> deserializer =
                         Deserializers.jackson(
                                 "string",
                                 com.palantir.product.DialogueDialogueSampleService.mapper,
-                                new TypeReference<String>() {});;
+                                new TypeReference<String>() {});
 
                 @Override
                 public String renderPath(Map<String, String> params) {
@@ -80,13 +80,13 @@ public final class DialogueDialogueSampleService {
                                         PathTemplate.Segment.fixed("base"),
                                         PathTemplate.Segment.fixed("stringEcho")));
 
-                private final Serializer<Void> serializer = Serializers.failing();;
+                private final Serializer<Void> serializer = Serializers.failing();
 
                 private final Deserializer<String> deserializer =
                         Deserializers.jackson(
                                 "stringEcho",
                                 com.palantir.product.DialogueDialogueSampleService.mapper,
-                                new TypeReference<String>() {});;
+                                new TypeReference<String>() {});
 
                 @Override
                 public String renderPath(Map<String, String> params) {
@@ -122,13 +122,13 @@ public final class DialogueDialogueSampleService {
                                         PathTemplate.Segment.fixed("base"),
                                         PathTemplate.Segment.fixed("integer")));
 
-                private final Serializer<Void> serializer = Serializers.failing();;
+                private final Serializer<Void> serializer = Serializers.failing();
 
                 private final Deserializer<Integer> deserializer =
                         Deserializers.jackson(
                                 "integer",
                                 com.palantir.product.DialogueDialogueSampleService.mapper,
-                                new TypeReference<Integer>() {});;
+                                new TypeReference<Integer>() {});
 
                 @Override
                 public String renderPath(Map<String, String> params) {
@@ -165,13 +165,13 @@ public final class DialogueDialogueSampleService {
                                         PathTemplate.Segment.fixed("integerEcho"),
                                         PathTemplate.Segment.variable("integer")));
 
-                private final Serializer<Void> serializer = Serializers.failing();;
+                private final Serializer<Void> serializer = Serializers.failing();
 
                 private final Deserializer<Integer> deserializer =
                         Deserializers.jackson(
                                 "integerEcho",
                                 com.palantir.product.DialogueDialogueSampleService.mapper,
-                                new TypeReference<Integer>() {});;
+                                new TypeReference<Integer>() {});
 
                 @Override
                 public String renderPath(Map<String, String> params) {
@@ -207,13 +207,13 @@ public final class DialogueDialogueSampleService {
                                         PathTemplate.Segment.fixed("base"),
                                         PathTemplate.Segment.fixed("queryEcho")));
 
-                private final Serializer<Void> serializer = Serializers.failing();;
+                private final Serializer<Void> serializer = Serializers.failing();
 
                 private final Deserializer<String> deserializer =
                         Deserializers.jackson(
                                 "queryEcho",
                                 com.palantir.product.DialogueDialogueSampleService.mapper,
-                                new TypeReference<String>() {});;
+                                new TypeReference<String>() {});
 
                 @Override
                 public String renderPath(Map<String, String> params) {
@@ -249,13 +249,13 @@ public final class DialogueDialogueSampleService {
                                         PathTemplate.Segment.fixed("base"),
                                         PathTemplate.Segment.fixed("complex")));
 
-                private final Serializer<Void> serializer = Serializers.failing();;
+                private final Serializer<Void> serializer = Serializers.failing();
 
                 private final Deserializer<Complex> deserializer =
                         Deserializers.jackson(
                                 "complex",
                                 com.palantir.product.DialogueDialogueSampleService.mapper,
-                                new TypeReference<Complex>() {});;
+                                new TypeReference<Complex>() {});
 
                 @Override
                 public String renderPath(Map<String, String> params) {
@@ -294,13 +294,13 @@ public final class DialogueDialogueSampleService {
                 private final Serializer<Complex> serializer =
                         Serializers.jackson(
                                 "complexEcho",
-                                com.palantir.product.DialogueDialogueSampleService.mapper);;
+                                com.palantir.product.DialogueDialogueSampleService.mapper);
 
                 private final Deserializer<Complex> deserializer =
                         Deserializers.jackson(
                                 "complexEcho",
                                 com.palantir.product.DialogueDialogueSampleService.mapper,
-                                new TypeReference<Complex>() {});;
+                                new TypeReference<Complex>() {});
 
                 @Override
                 public String renderPath(Map<String, String> params) {
@@ -339,9 +339,9 @@ public final class DialogueDialogueSampleService {
                 private final Serializer<String> serializer =
                         Serializers.jackson(
                                 "binaryEcho",
-                                com.palantir.product.DialogueDialogueSampleService.mapper);;
+                                com.palantir.product.DialogueDialogueSampleService.mapper);
 
-                private final Deserializer<InputStream> deserializer = Deserializers.passthrough();;
+                private final Deserializer<InputStream> deserializer = Deserializers.passthrough();
 
                 @Override
                 public String renderPath(Map<String, String> params) {
