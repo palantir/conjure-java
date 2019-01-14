@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -117,7 +118,7 @@ public final class Complex {
 
         @JsonSetter("string")
         public Builder string(String string) {
-            this.string = Objects.requireNonNull(string, "string cannot be null");
+            this.string = Preconditions.checkNotNull(string, "string cannot be null");
             return this;
         }
 

@@ -1,4 +1,4 @@
-package test;
+package com.palantir.product;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +48,7 @@ public final class DialogueDialogueSampleService {
                 private final Deserializer<String> deserializer =
                         Deserializers.jackson(
                                 "string",
-                                test.DialogueDialogueSampleService.mapper,
+                                com.palantir.product.DialogueDialogueSampleService.mapper,
                                 new TypeReference<String>() {});;
 
                 @Override
@@ -90,7 +90,7 @@ public final class DialogueDialogueSampleService {
                 private final Deserializer<String> deserializer =
                         Deserializers.jackson(
                                 "stringEcho",
-                                test.DialogueDialogueSampleService.mapper,
+                                com.palantir.product.DialogueDialogueSampleService.mapper,
                                 new TypeReference<String>() {});;
 
                 @Override
@@ -132,7 +132,7 @@ public final class DialogueDialogueSampleService {
                 private final Deserializer<Integer> deserializer =
                         Deserializers.jackson(
                                 "integer",
-                                test.DialogueDialogueSampleService.mapper,
+                                com.palantir.product.DialogueDialogueSampleService.mapper,
                                 new TypeReference<Integer>() {});;
 
                 @Override
@@ -175,7 +175,7 @@ public final class DialogueDialogueSampleService {
                 private final Deserializer<Integer> deserializer =
                         Deserializers.jackson(
                                 "integerEcho",
-                                test.DialogueDialogueSampleService.mapper,
+                                com.palantir.product.DialogueDialogueSampleService.mapper,
                                 new TypeReference<Integer>() {});;
 
                 @Override
@@ -217,7 +217,7 @@ public final class DialogueDialogueSampleService {
                 private final Deserializer<String> deserializer =
                         Deserializers.jackson(
                                 "queryEcho",
-                                test.DialogueDialogueSampleService.mapper,
+                                com.palantir.product.DialogueDialogueSampleService.mapper,
                                 new TypeReference<String>() {});;
 
                 @Override
@@ -259,7 +259,7 @@ public final class DialogueDialogueSampleService {
                 private final Deserializer<Complex> deserializer =
                         Deserializers.jackson(
                                 "complex",
-                                test.DialogueDialogueSampleService.mapper,
+                                com.palantir.product.DialogueDialogueSampleService.mapper,
                                 new TypeReference<Complex>() {});;
 
                 @Override
@@ -298,12 +298,13 @@ public final class DialogueDialogueSampleService {
 
                 private final Serializer<Complex> serializer =
                         Serializers.jackson(
-                                "complexEcho", test.DialogueDialogueSampleService.mapper);;
+                                "complexEcho",
+                                com.palantir.product.DialogueDialogueSampleService.mapper);;
 
                 private final Deserializer<Complex> deserializer =
                         Deserializers.jackson(
                                 "complexEcho",
-                                test.DialogueDialogueSampleService.mapper,
+                                com.palantir.product.DialogueDialogueSampleService.mapper,
                                 new TypeReference<Complex>() {});;
 
                 @Override
@@ -342,7 +343,8 @@ public final class DialogueDialogueSampleService {
 
                 private final Serializer<String> serializer =
                         Serializers.jackson(
-                                "binaryEcho", test.DialogueDialogueSampleService.mapper);;
+                                "binaryEcho",
+                                com.palantir.product.DialogueDialogueSampleService.mapper);;
 
                 private final Deserializer<InputStream> deserializer = Deserializers.passthrough();;
 
@@ -383,7 +385,9 @@ public final class DialogueDialogueSampleService {
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
                 Request<Void> _request = _request_builder.build();
                 Call<String> _call =
-                        channel.createCall(test.DialogueDialogueSampleService.string, _request);
+                        channel.createCall(
+                                com.palantir.product.DialogueDialogueSampleService.string,
+                                _request);
                 ListenableFuture<String> _response = Calls.toFuture(_call);
                 try {
                     return _response.get();
@@ -400,7 +404,9 @@ public final class DialogueDialogueSampleService {
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
                 Request<Void> _request = _request_builder.build();
                 Call<String> _call =
-                        channel.createCall(test.DialogueDialogueSampleService.stringEcho, _request);
+                        channel.createCall(
+                                com.palantir.product.DialogueDialogueSampleService.stringEcho,
+                                _request);
                 ListenableFuture<String> _response = Calls.toFuture(_call);
                 try {
                     return _response.get();
@@ -415,7 +421,9 @@ public final class DialogueDialogueSampleService {
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
                 Request<Void> _request = _request_builder.build();
                 Call<Integer> _call =
-                        channel.createCall(test.DialogueDialogueSampleService.integer, _request);
+                        channel.createCall(
+                                com.palantir.product.DialogueDialogueSampleService.integer,
+                                _request);
                 ListenableFuture<Integer> _response = Calls.toFuture(_call);
                 try {
                     return _response.get();
@@ -432,7 +440,8 @@ public final class DialogueDialogueSampleService {
                 Request<Void> _request = _request_builder.build();
                 Call<Integer> _call =
                         channel.createCall(
-                                test.DialogueDialogueSampleService.integerEcho, _request);
+                                com.palantir.product.DialogueDialogueSampleService.integerEcho,
+                                _request);
                 ListenableFuture<Integer> _response = Calls.toFuture(_call);
                 try {
                     return _response.get();
@@ -448,7 +457,9 @@ public final class DialogueDialogueSampleService {
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
                 Request<Void> _request = _request_builder.build();
                 Call<String> _call =
-                        channel.createCall(test.DialogueDialogueSampleService.queryEcho, _request);
+                        channel.createCall(
+                                com.palantir.product.DialogueDialogueSampleService.queryEcho,
+                                _request);
                 ListenableFuture<String> _response = Calls.toFuture(_call);
                 try {
                     return _response.get();
@@ -463,7 +474,9 @@ public final class DialogueDialogueSampleService {
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
                 Request<Void> _request = _request_builder.build();
                 Call<Complex> _call =
-                        channel.createCall(test.DialogueDialogueSampleService.complex, _request);
+                        channel.createCall(
+                                com.palantir.product.DialogueDialogueSampleService.complex,
+                                _request);
                 ListenableFuture<Complex> _response = Calls.toFuture(_call);
                 try {
                     return _response.get();
@@ -481,7 +494,8 @@ public final class DialogueDialogueSampleService {
                 Request<Complex> _request = _request_builder.build();
                 Call<Complex> _call =
                         channel.createCall(
-                                test.DialogueDialogueSampleService.complexEcho, _request);
+                                com.palantir.product.DialogueDialogueSampleService.complexEcho,
+                                _request);
                 ListenableFuture<Complex> _response = Calls.toFuture(_call);
                 try {
                     return _response.get();
@@ -498,7 +512,9 @@ public final class DialogueDialogueSampleService {
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
                 Request<String> _request = _request_builder.build();
                 Call<InputStream> _call =
-                        channel.createCall(test.DialogueDialogueSampleService.binaryEcho, _request);
+                        channel.createCall(
+                                com.palantir.product.DialogueDialogueSampleService.binaryEcho,
+                                _request);
                 ListenableFuture<InputStream> _response = Calls.toFuture(_call);
                 try {
                     return _response.get();

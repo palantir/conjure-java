@@ -1,4 +1,4 @@
-package test;
+package com.palantir.product;
 
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
