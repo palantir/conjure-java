@@ -92,6 +92,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.uri.internal.UriTemplateParser;
 
 // TODO(rfink): Add unit tests for misc edge cases, e.g.: docs/no-docs, auth/no-auth, binary return type.
+
+/** Experimental support for Conjure clients using the https://github.com/palantir/dialogue library. */
 public final class DialogueClientGenerator implements ServiceGenerator {
 
     private static final Class<?> EMPTY_BODY_CLASS = EmptyBody.class;
