@@ -55,28 +55,10 @@ final class TraceHandler implements HttpHandler {
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
         Preconditions.checkArgument(!exchange.isInIoThread(), "TraceHandler must not be used in IO thread");
-        HeaderMap headers = exchange.getRequestHeaders();
-        // TODO(rfink): Log/warn if we find multiple headers?
-        String traceId = headers.getFirst(TRACE_ID); // nullable
 
-        // Set up thread-local span that inherits state from HTTP headers
-        if (Strings.isNullOrEmpty(traceId)) {
-            // HTTP request did not indicate a trace; initialize trace state and create a span.
-            Tracer.initTrace(hasSampledHeader(headers), Tracers.randomId());
-            Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
-        } else {
-            Tracer.initTrace(hasSampledHeader(headers), traceId);
-            String spanId = headers.getFirst(SPAN_ID); // nullable
-            if (spanId == null) {
-                Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
-            } else {
-                // caller's span is this span's parent.
-                Tracer.startSpan(operation, spanId, SpanType.SERVER_INCOMING);
-            }
-        }
-
+        String traceId = initializeTrace(exchange);
         // Populate response before calling delegate since delegate might commit the response.
-        exchange.getResponseHeaders().put(TRACE_ID, Tracer.getTraceId());
+        exchange.getResponseHeaders().put(TRACE_ID, traceId);
         try {
             delegate.handleRequest(exchange);
         } finally {
@@ -95,5 +77,41 @@ final class TraceHandler implements HttpHandler {
             // a new Optional wrapper for each invocation.
             return header.equals("1") ? SAMPLED : NOT_SAMPLED;
         }
+    }
+
+    /** Initializes trace state and a root span for this request, returning the traceId. */
+    private String initializeTrace(HttpServerExchange exchange) {
+        HeaderMap headers = exchange.getRequestHeaders();
+        // TODO(rfink): Log/warn if we find multiple headers?
+        String traceId = headers.getFirst(TRACE_ID); // nullable
+
+        // Set up thread-local span that inherits state from HTTP headers
+        if (Strings.isNullOrEmpty(traceId)) {
+            return initializeNewTrace(headers);
+        } else {
+            initializeTraceFromExisting(headers, traceId);
+        }
+        return traceId;
+    }
+
+    /** Initializes trace state given a trace-id header from the client. */
+    private void initializeTraceFromExisting(HeaderMap headers, String traceId) {
+        Tracer.initTrace(hasSampledHeader(headers), traceId);
+        String spanId = headers.getFirst(SPAN_ID); // nullable
+        if (spanId == null) {
+            Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
+        } else {
+            // caller's span is this span's parent.
+            Tracer.startSpan(operation, spanId, SpanType.SERVER_INCOMING);
+        }
+    }
+
+    /** Initializes trace state for a request without tracing headers. */
+    private String initializeNewTrace(HeaderMap headers) {
+        // HTTP request did not indicate a trace; initialize trace state and create a span.
+        String newTraceId = Tracers.randomId();
+        Tracer.initTrace(hasSampledHeader(headers), newTraceId);
+        Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
+        return newTraceId;
     }
 }
