@@ -375,10 +375,10 @@ public final class DialogueDialogueSampleService {
     public static BlockingDialogueSampleService blocking(Channel channel) {
         return new BlockingDialogueSampleService() {
             public String string(AuthHeader authHeader) {
-                Request.Builder<Void> _request_builder =
+                Request.Builder<Void> _requestBuilder =
                         Request.<Void>builder()
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
-                Request<Void> _request = _request_builder.build();
+                Request<Void> _request = _requestBuilder.build();
                 Call<String> _call =
                         channel.createCall(
                                 com.palantir.product.DialogueDialogueSampleService.string,
@@ -393,11 +393,11 @@ public final class DialogueDialogueSampleService {
 
             public String stringEcho(AuthHeader authHeader, String string) {
                 Preconditions.checkNotNull(string, "parameter string must not be null");
-                Request.Builder<Void> _request_builder =
+                Request.Builder<Void> _requestBuilder =
                         Request.<Void>builder()
                                 .putHeaderParams("Header-String", Objects.toString(string))
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
-                Request<Void> _request = _request_builder.build();
+                Request<Void> _request = _requestBuilder.build();
                 Call<String> _call =
                         channel.createCall(
                                 com.palantir.product.DialogueDialogueSampleService.stringEcho,
@@ -411,10 +411,10 @@ public final class DialogueDialogueSampleService {
             }
 
             public int integer(AuthHeader authHeader) {
-                Request.Builder<Void> _request_builder =
+                Request.Builder<Void> _requestBuilder =
                         Request.<Void>builder()
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
-                Request<Void> _request = _request_builder.build();
+                Request<Void> _request = _requestBuilder.build();
                 Call<Integer> _call =
                         channel.createCall(
                                 com.palantir.product.DialogueDialogueSampleService.integer,
@@ -428,11 +428,11 @@ public final class DialogueDialogueSampleService {
             }
 
             public int integerEcho(AuthHeader authHeader, int integer) {
-                Request.Builder<Void> _request_builder =
+                Request.Builder<Void> _requestBuilder =
                         Request.<Void>builder()
                                 .putPathParams("integer", Objects.toString(integer))
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
-                Request<Void> _request = _request_builder.build();
+                Request<Void> _request = _requestBuilder.build();
                 Call<Integer> _call =
                         channel.createCall(
                                 com.palantir.product.DialogueDialogueSampleService.integerEcho,
@@ -446,11 +446,11 @@ public final class DialogueDialogueSampleService {
             }
 
             public String queryEcho(AuthHeader authHeader, int integer) {
-                Request.Builder<Void> _request_builder =
+                Request.Builder<Void> _requestBuilder =
                         Request.<Void>builder()
                                 .putQueryParams("queryParam", Objects.toString(integer))
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
-                Request<Void> _request = _request_builder.build();
+                Request<Void> _request = _requestBuilder.build();
                 Call<String> _call =
                         channel.createCall(
                                 com.palantir.product.DialogueDialogueSampleService.queryEcho,
@@ -464,10 +464,10 @@ public final class DialogueDialogueSampleService {
             }
 
             public Complex complex(AuthHeader authHeader) {
-                Request.Builder<Void> _request_builder =
+                Request.Builder<Void> _requestBuilder =
                         Request.<Void>builder()
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
-                Request<Void> _request = _request_builder.build();
+                Request<Void> _request = _requestBuilder.build();
                 Call<Complex> _call =
                         channel.createCall(
                                 com.palantir.product.DialogueDialogueSampleService.complex,
@@ -482,11 +482,11 @@ public final class DialogueDialogueSampleService {
 
             public Complex complexEcho(AuthHeader authHeader, Complex complex) {
                 Preconditions.checkNotNull(complex, "parameter complex must not be null");
-                Request.Builder<Complex> _request_builder =
+                Request.Builder<Complex> _requestBuilder =
                         Request.<Complex>builder()
                                 .body(complex)
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
-                Request<Complex> _request = _request_builder.build();
+                Request<Complex> _request = _requestBuilder.build();
                 Call<Complex> _call =
                         channel.createCall(
                                 com.palantir.product.DialogueDialogueSampleService.complexEcho,
@@ -501,11 +501,11 @@ public final class DialogueDialogueSampleService {
 
             public InputStream binaryEcho(AuthHeader authHeader, String string) {
                 Preconditions.checkNotNull(string, "parameter string must not be null");
-                Request.Builder<String> _request_builder =
+                Request.Builder<String> _requestBuilder =
                         Request.<String>builder()
                                 .body(string)
                                 .putHeaderParams("Authorization", Objects.toString(authHeader));
-                Request<String> _request = _request_builder.build();
+                Request<String> _request = _requestBuilder.build();
                 Call<InputStream> _call =
                         channel.createCall(
                                 com.palantir.product.DialogueDialogueSampleService.binaryEcho,

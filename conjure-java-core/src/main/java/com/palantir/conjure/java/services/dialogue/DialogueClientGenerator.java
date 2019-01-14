@@ -102,9 +102,9 @@ public final class DialogueClientGenerator implements ServiceGenerator {
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         TypeMapper parameterTypes = new TypeMapper(conjureDefinition.getTypes(),
-                new ClassVisitor(conjureDefinition.getTypes(), ClassVisitor.Mode.PARAMETER));
+                new DialogueTypeNameVisitor(conjureDefinition.getTypes(), DialogueTypeNameVisitor.Mode.PARAMETER));
         TypeMapper returnTypes = new TypeMapper(conjureDefinition.getTypes(),
-                new ClassVisitor(conjureDefinition.getTypes(), ClassVisitor.Mode.RETURN_VALUE));
+                new DialogueTypeNameVisitor(conjureDefinition.getTypes(), DialogueTypeNameVisitor.Mode.RETURN_VALUE));
         TypeAwareGenerator generator = new TypeAwareGenerator(parameterTypes, returnTypes);
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generator.service(serviceDef).stream())
@@ -117,7 +117,7 @@ public final class DialogueClientGenerator implements ServiceGenerator {
         private static final String AUTH_HEADER_PARAM_NAME = "authHeader";
         private static final String MAPPER_FIELD_NAME = "mapper";
         private static final String REQUEST_VAR_NAME = "_request";
-        private static final String REQUEST_VAR_NAME_BUILDER = "_request_builder";
+        private static final String REQUEST_VAR_NAME_BUILDER = "_requestBuilder";
 
         private final TypeMapper parameterTypes;
         private final TypeMapper returnTypes;
@@ -171,7 +171,6 @@ public final class DialogueClientGenerator implements ServiceGenerator {
             serviceBuilder.addMethod(blockingClient(def));
             serviceBuilder.addField(FieldSpec.builder(ObjectMapper.class, "mapper")
                     .initializer("$T.newClientObjectMapper()",
-                            // TODO(rfink): Stop relying on http-remoting.
                             ClassName.get("com.palantir.conjure.java.serialization", "ObjectMappers"))
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                     .build());

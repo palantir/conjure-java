@@ -29,7 +29,8 @@ import com.squareup.javapoet.TypeName;
 import java.io.InputStream;
 import java.util.List;
 
-final class ClassVisitor implements ClassNameVisitor {
+/** Returns Dialogue-specific Java types for given Conjure parameter or return types. */
+final class DialogueTypeNameVisitor implements ClassNameVisitor {
 
     enum Mode {
         RETURN_VALUE,
@@ -39,7 +40,7 @@ final class ClassVisitor implements ClassNameVisitor {
     private final DefaultClassNameVisitor delegate;
     private final Mode mode;
 
-    ClassVisitor(List<TypeDefinition> types, Mode mode) {
+    DialogueTypeNameVisitor(List<TypeDefinition> types, Mode mode) {
         this.delegate = new DefaultClassNameVisitor(types);
         this.mode = mode;
     }
