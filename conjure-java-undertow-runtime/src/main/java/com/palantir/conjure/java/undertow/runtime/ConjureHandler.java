@@ -24,7 +24,6 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
-import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.util.function.BiFunction;
@@ -39,9 +38,8 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             ImmutableList.<BiFunction<EndpointDetails, HttpHandler, HttpHandler>>of(
             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
             // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
-            // When DECODE_URL has not been disabled, the following handlers will no-op
-            (endpoint, handler) -> new URLDecodingHandler(handler, "UTF-8"),
-            (endpoint, handler) -> new PathParamDecodingHandler(handler),
+            // When DECODE_URL has not been disabled, the following handler will no-op
+            (endpoint, handler) -> new ConjureUrlDecodingHandler(handler, "UTF-8"),
             // no-cache and web-security handlers add listeners for the response to be committed,
             // they can be executed on the IO thread.
             (endpoint, handler) -> Methods.GET.equals(endpoint.method)
@@ -62,11 +60,9 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
     ).reverse();
 
     private final RoutingHandler routingHandler;
-    private final HttpHandler delegate;
 
     public ConjureHandler(HttpHandler fallback) {
         this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
-        this.delegate = new Undertow1460Handler(routingHandler);
     }
 
     public ConjureHandler() {
@@ -75,7 +71,7 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        delegate.handleRequest(exchange);
+        routingHandler.handleRequest(exchange);
     }
 
     @Override

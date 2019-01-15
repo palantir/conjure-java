@@ -387,7 +387,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testBinaryServerSideFailureAfterFewBytesSent() {
         assertThatThrownBy(() -> binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1).execute())
-                .isInstanceOf(IOException.class);
+                .isInstanceOf(RemoteException.class);
     }
 
     @Test
