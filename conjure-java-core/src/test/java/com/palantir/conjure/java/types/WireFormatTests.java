@@ -164,15 +164,15 @@ public final class WireFormatTests {
         assertThat(mapper.readValue("\"ONE_HUNDRED\"", EnumExample.class)).isEqualTo(EnumExample.ONE_HUNDRED);
         assertThatExceptionThrownRootCause(() -> mapper.readValue("\"one\"", EnumExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasLogMessage("Enum values must use SCREAMING_SNAKE_CASE")
+                .hasLogMessage("Enum values must use UPPER_SNAKE_CASE")
                 .hasExactlyArgs(UnsafeArg.of("value", "one"));
         assertThatExceptionThrownRootCause(() -> mapper.readValue("\"onE\"", EnumExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasLogMessage("Enum values must use SCREAMING_SNAKE_CASE")
+                .hasLogMessage("Enum values must use UPPER_SNAKE_CASE")
                 .hasExactlyArgs(UnsafeArg.of("value", "onE"));
         assertThatExceptionThrownRootCause(() -> mapper.readValue("\"oNE\"", EnumExample.class))
                 .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasLogMessage("Enum values must use SCREAMING_SNAKE_CASE")
+                .hasLogMessage("Enum values must use UPPER_SNAKE_CASE")
                 .hasExactlyArgs(UnsafeArg.of("value", "oNE"));
     }
 

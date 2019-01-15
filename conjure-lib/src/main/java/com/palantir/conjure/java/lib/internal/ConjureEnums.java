@@ -36,7 +36,7 @@ public final class ConjureEnums {
         int length = value.length();
         for (int index = 0; index < length; index++) {
             if (!isAllowedCharacter(value.charAt(index))) {
-                throw new SafeIllegalArgumentException("Enum values must use SCREAMING_SNAKE_CASE",
+                throw new SafeIllegalArgumentException("Enum values must use UPPER_SNAKE_CASE",
                         UnsafeArg.of("value", value));
             }
         }
