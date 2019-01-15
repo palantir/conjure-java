@@ -18,10 +18,10 @@ package com.palantir.conjure.java.undertow.demo;
 
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
-import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
+import com.palantir.conjure.java.undertow.runtime.Serializer;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Methods;

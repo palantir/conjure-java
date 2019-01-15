@@ -193,7 +193,7 @@ public static void main(String[] args) {
     ConjureHandler handler = new ConjureHandler();
     RecipeBookServiceEndpoint.of(new RecipeBookResource())
         .create(HandlerContext.builder()
-            .serializerRegistry(new SerializerRegistry(Serializers.json()))
+            .serializerRegistry(ConjureSerializerRegistry.getDefault())
             .build())
         .register(handler);
 

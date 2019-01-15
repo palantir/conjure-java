@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib;
+package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.reflect.TypeToken;
 import java.io.IOException;

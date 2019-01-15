@@ -23,6 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.reflect.TypeToken;
+import com.palantir.conjure.java.undertow.runtime.Serializer;
 import com.palantir.conjure.java.undertow.runtime.Serializers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import java.io.ByteArrayInputStream;

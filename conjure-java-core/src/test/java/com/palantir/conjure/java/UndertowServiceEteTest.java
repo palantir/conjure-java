@@ -36,9 +36,8 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.java.undertow.runtime.Serializers;
+import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
@@ -117,9 +116,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void before() {
-        SerializerRegistry serializers = new SerializerRegistry(Serializers.json(), Serializers.cbor());
         ServiceContext context = ServiceContext.builder()
-                .serializerRegistry(serializers)
+                .serializerRegistry(ConjureSerializerRegistry.getDefault())
                 .build();
 
         ConjureHandler handler = new ConjureHandler();
@@ -389,7 +387,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testBinaryServerSideFailureAfterFewBytesSent() {
         assertThatThrownBy(() -> binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1).execute())
-                .isInstanceOf(IOException.class);
+                .isInstanceOf(RemoteException.class);
     }
 
     @Test

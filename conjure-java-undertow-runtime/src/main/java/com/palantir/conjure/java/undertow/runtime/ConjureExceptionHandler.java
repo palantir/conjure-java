@@ -41,7 +41,7 @@ final class ConjureExceptionHandler implements HttpHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptionHandler.class);
     // Exceptions should always be serialized using JSON
-    private static final SerializerRegistry DEFAULT_SERIALIZERS = new SerializerRegistry(Serializers.json());
+    private static final SerializerRegistry DEFAULT_SERIALIZERS = new ConjureSerializerRegistry(Serializers.json());
 
     private final SerializerRegistry serializers;
     private final HttpHandler delegate;
@@ -133,11 +133,10 @@ final class ConjureExceptionHandler implements HttpHandler {
             return true;
         }
         // The blocking exchange output stream may have un-committed data buffered.
-        // In a future optimization we can clear the buffer and produce a
-        // SerializableError response.
+        // In this case we can clear the buffer allowing us to send a serializable error.
         OutputStream outputStream = exchange.getOutputStream();
         if (outputStream instanceof UndertowOutputStream) {
-            return ((UndertowOutputStream) outputStream).getBytesWritten() > 0;
+            ((UndertowOutputStream) outputStream).resetBuffer();
         }
         return false;
     }
