@@ -129,7 +129,8 @@ final class UndertowServiceHandlerGenerator {
                         e -> CodeBlock.of(
                                 ".add($1L, $2L)",
                                 CodeBlock.of(
-                                        "$1T.of($2T.$3L, $4S, $5S, $6S)",
+                                        "$1T.builder()\n.method($2T.$3L)\n.template($4S)\n.serviceName($5S)\n.name($6S)"
+                                                + "\n.build()",
                                         Endpoint.class,
                                         Methods.class,
                                         e.getHttpMethod().toString(),

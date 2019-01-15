@@ -65,135 +65,165 @@ public final class TestServiceEndpoints implements Service {
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/fileSystems",
-                                    "TestService",
-                                    "getFileSystems"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/fileSystems")
+                                    .serviceName("TestService")
+                                    .name("getFileSystems")
+                                    .build(),
                             new GetFileSystemsHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.POST,
-                                    "/catalog/datasets",
-                                    "TestService",
-                                    "createDataset"),
+                            Endpoint.builder()
+                                    .method(Methods.POST)
+                                    .template("/catalog/datasets")
+                                    .serviceName("TestService")
+                                    .name("createDataset")
+                                    .build(),
                             new CreateDatasetHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}",
-                                    "TestService",
-                                    "getDataset"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/datasets/{datasetRid}")
+                                    .serviceName("TestService")
+                                    .name("getDataset")
+                                    .build(),
                             new GetDatasetHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}/raw",
-                                    "TestService",
-                                    "getRawData"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/datasets/{datasetRid}/raw")
+                                    .serviceName("TestService")
+                                    .name("getRawData")
+                                    .build(),
                             new GetRawDataHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}/raw-aliased",
-                                    "TestService",
-                                    "getAliasedRawData"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/datasets/{datasetRid}/raw-aliased")
+                                    .serviceName("TestService")
+                                    .name("getAliasedRawData")
+                                    .build(),
                             new GetAliasedRawDataHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}/raw-maybe",
-                                    "TestService",
-                                    "maybeGetRawData"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/datasets/{datasetRid}/raw-maybe")
+                                    .serviceName("TestService")
+                                    .name("maybeGetRawData")
+                                    .build(),
                             new MaybeGetRawDataHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}/string-aliased",
-                                    "TestService",
-                                    "getAliasedString"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/datasets/{datasetRid}/string-aliased")
+                                    .serviceName("TestService")
+                                    .name("getAliasedString")
+                                    .build(),
                             new GetAliasedStringHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.POST,
-                                    "/catalog/datasets/upload-raw",
-                                    "TestService",
-                                    "uploadRawData"),
+                            Endpoint.builder()
+                                    .method(Methods.POST)
+                                    .template("/catalog/datasets/upload-raw")
+                                    .serviceName("TestService")
+                                    .name("uploadRawData")
+                                    .build(),
                             new UploadRawDataHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.POST,
-                                    "/catalog/datasets/upload-raw-aliased",
-                                    "TestService",
-                                    "uploadAliasedRawData"),
+                            Endpoint.builder()
+                                    .method(Methods.POST)
+                                    .template("/catalog/datasets/upload-raw-aliased")
+                                    .serviceName("TestService")
+                                    .name("uploadAliasedRawData")
+                                    .build(),
                             new UploadAliasedRawDataHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}/branches",
-                                    "TestService",
-                                    "getBranches"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/datasets/{datasetRid}/branches")
+                                    .serviceName("TestService")
+                                    .name("getBranches")
+                                    .build(),
                             new GetBranchesHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}/branchesDeprecated",
-                                    "TestService",
-                                    "getBranchesDeprecated"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/datasets/{datasetRid}/branchesDeprecated")
+                                    .serviceName("TestService")
+                                    .name("getBranchesDeprecated")
+                                    .build(),
                             new GetBranchesDeprecatedHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve",
-                                    "TestService",
-                                    "resolveBranch"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template(
+                                            "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
+                                    .serviceName("TestService")
+                                    .name("resolveBranch")
+                                    .build(),
                             new ResolveBranchHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/datasets/{datasetRid}/testParam",
-                                    "TestService",
-                                    "testParam"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/datasets/{datasetRid}/testParam")
+                                    .serviceName("TestService")
+                                    .name("testParam")
+                                    .build(),
                             new TestParamHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.POST,
-                                    "/catalog/test-query-params",
-                                    "TestService",
-                                    "testQueryParams"),
+                            Endpoint.builder()
+                                    .method(Methods.POST)
+                                    .template("/catalog/test-query-params")
+                                    .serviceName("TestService")
+                                    .name("testQueryParams")
+                                    .build(),
                             new TestQueryParamsHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.POST,
-                                    "/catalog/test-no-response-query-params",
-                                    "TestService",
-                                    "testNoResponseQueryParams"),
+                            Endpoint.builder()
+                                    .method(Methods.POST)
+                                    .template("/catalog/test-no-response-query-params")
+                                    .serviceName("TestService")
+                                    .name("testNoResponseQueryParams")
+                                    .build(),
                             new TestNoResponseQueryParamsHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET, "/catalog/boolean", "TestService", "testBoolean"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/boolean")
+                                    .serviceName("TestService")
+                                    .name("testBoolean")
+                                    .build(),
                             new TestBooleanHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET, "/catalog/double", "TestService", "testDouble"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/double")
+                                    .serviceName("TestService")
+                                    .name("testDouble")
+                                    .build(),
                             new TestDoubleHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET, "/catalog/integer", "TestService", "testInteger"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/integer")
+                                    .serviceName("TestService")
+                                    .name("testInteger")
+                                    .build(),
                             new TestIntegerHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.POST,
-                                    "/catalog/optional",
-                                    "TestService",
-                                    "testPostOptional"),
+                            Endpoint.builder()
+                                    .method(Methods.POST)
+                                    .template("/catalog/optional")
+                                    .serviceName("TestService")
+                                    .name("testPostOptional")
+                                    .build(),
                             new TestPostOptionalHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/catalog/optional-integer-double",
-                                    "TestService",
-                                    "testOptionalIntegerAndDouble"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/catalog/optional-integer-double")
+                                    .serviceName("TestService")
+                                    .name("testOptionalIntegerAndDouble")
+                                    .build(),
                             new TestOptionalIntegerAndDoubleHandler());
         }
 

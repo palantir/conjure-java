@@ -55,28 +55,36 @@ public final class EteBinaryServiceEndpoints implements Service {
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
                     .add(
-                            Endpoint.of(Methods.POST, "/binary", "EteBinaryService", "postBinary"),
+                            Endpoint.builder()
+                                    .method(Methods.POST)
+                                    .template("/binary")
+                                    .serviceName("EteBinaryService")
+                                    .name("postBinary")
+                                    .build(),
                             new PostBinaryHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/binary/optional/present",
-                                    "EteBinaryService",
-                                    "getOptionalBinaryPresent"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/binary/optional/present")
+                                    .serviceName("EteBinaryService")
+                                    .name("getOptionalBinaryPresent")
+                                    .build(),
                             new GetOptionalBinaryPresentHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/binary/optional/empty",
-                                    "EteBinaryService",
-                                    "getOptionalBinaryEmpty"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/binary/optional/empty")
+                                    .serviceName("EteBinaryService")
+                                    .name("getOptionalBinaryEmpty")
+                                    .build(),
                             new GetOptionalBinaryEmptyHandler())
                     .add(
-                            Endpoint.of(
-                                    Methods.GET,
-                                    "/binary/failure",
-                                    "EteBinaryService",
-                                    "getBinaryFailure"),
+                            Endpoint.builder()
+                                    .method(Methods.GET)
+                                    .template("/binary/failure")
+                                    .serviceName("EteBinaryService")
+                                    .name("getBinaryFailure")
+                                    .build(),
                             new GetBinaryFailureHandler());
         }
 

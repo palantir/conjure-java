@@ -45,7 +45,12 @@ public final class CookieServiceEndpoints implements Service {
         @Override
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry.add(
-                    Endpoint.of(Methods.GET, "/cookies", "CookieService", "eatCookies"),
+                    Endpoint.builder()
+                            .method(Methods.GET)
+                            .template("/cookies")
+                            .serviceName("CookieService")
+                            .name("eatCookies")
+                            .build(),
                     new EatCookiesHandler());
         }
 

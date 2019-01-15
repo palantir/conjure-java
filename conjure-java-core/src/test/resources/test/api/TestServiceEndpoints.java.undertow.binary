@@ -44,7 +44,12 @@ public final class TestServiceEndpoints implements Service {
         @Override
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry.add(
-                    Endpoint.of(Methods.GET, "/", "TestService", "getBinary"),
+                    Endpoint.builder()
+                            .method(Methods.GET)
+                            .template("/")
+                            .serviceName("TestService")
+                            .name("getBinary")
+                            .build(),
                     new GetBinaryHandler());
         }
 

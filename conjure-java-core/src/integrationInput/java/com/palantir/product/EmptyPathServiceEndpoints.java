@@ -43,7 +43,12 @@ public final class EmptyPathServiceEndpoints implements Service {
         @Override
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry.add(
-                    Endpoint.of(Methods.GET, "/", "EmptyPathService", "emptyPath"),
+                    Endpoint.builder()
+                            .method(Methods.GET)
+                            .template("/")
+                            .serviceName("EmptyPathService")
+                            .name("emptyPath")
+                            .build(),
                     new EmptyPathHandler());
         }
 
