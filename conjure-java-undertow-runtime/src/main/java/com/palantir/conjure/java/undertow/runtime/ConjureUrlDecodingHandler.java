@@ -73,11 +73,11 @@ final class ConjureUrlDecodingHandler implements HttpHandler {
         if (!exchange.getQueryString().isEmpty()) {
             Map<String, Deque<String>> newParams = new TreeMap<>();
             for (Map.Entry<String, Deque<String>> param : exchange.getQueryParameters().entrySet()) {
-                final Deque<String> newVales = new ArrayDeque<>(param.getValue().size());
+                final Deque<String> newValues = new ArrayDeque<>(param.getValue().size());
                 for (String val : param.getValue()) {
-                    newVales.add(URLUtils.decode(val, charset, true, true, sb));
+                    newValues.add(URLUtils.decode(val, charset, true, true, sb));
                 }
-                newParams.put(URLUtils.decode(param.getKey(), charset, true, true, sb), newVales);
+                newParams.put(URLUtils.decode(param.getKey(), charset, true, true, sb), newValues);
             }
             exchange.getQueryParameters().clear();
             exchange.getQueryParameters().putAll(newParams);
