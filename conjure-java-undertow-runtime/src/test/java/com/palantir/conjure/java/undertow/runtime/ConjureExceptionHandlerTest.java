@@ -22,7 +22,6 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.BlockingHandler;
@@ -47,7 +46,7 @@ public final class ConjureExceptionHandlerTest {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new SerializerRegistry(Serializers.json()), exchange -> {
+                        new ConjureSerializerRegistry(Serializers.json()), exchange -> {
                     throw exception;
                 })))
                 .build();
@@ -115,7 +114,7 @@ public final class ConjureExceptionHandlerTest {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new SerializerRegistry(Serializers.json()), exchange -> {
+                        new ConjureSerializerRegistry(Serializers.json()), exchange -> {
                     throw new Error();
                 })))
                 .build();
