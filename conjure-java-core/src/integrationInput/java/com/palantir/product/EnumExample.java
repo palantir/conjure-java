@@ -2,8 +2,8 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.conjure.java.lib.internal.ConjureEnums;
 import com.palantir.logsafe.Preconditions;
-import java.util.Locale;
 import javax.annotation.Generated;
 
 /**
@@ -62,8 +62,7 @@ public final class EnumExample {
     @JsonCreator
     public static EnumExample valueOf(String value) {
         Preconditions.checkNotNull(value, "value cannot be null");
-        String upperCasedValue = value.toUpperCase(Locale.ROOT);
-        switch (upperCasedValue) {
+        switch (value) {
             case "ONE":
                 return ONE;
             case "TWO":
@@ -71,7 +70,8 @@ public final class EnumExample {
             case "ONE_HUNDRED":
                 return ONE_HUNDRED;
             default:
-                return new EnumExample(Value.UNKNOWN, upperCasedValue);
+                ConjureEnums.validate(value);
+                return new EnumExample(Value.UNKNOWN, value);
         }
     }
 

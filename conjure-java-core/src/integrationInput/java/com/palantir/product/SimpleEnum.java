@@ -2,8 +2,8 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.conjure.java.lib.internal.ConjureEnums;
 import com.palantir.logsafe.Preconditions;
-import java.util.Locale;
 import javax.annotation.Generated;
 
 /**
@@ -54,12 +54,12 @@ public final class SimpleEnum {
     @JsonCreator
     public static SimpleEnum valueOf(String value) {
         Preconditions.checkNotNull(value, "value cannot be null");
-        String upperCasedValue = value.toUpperCase(Locale.ROOT);
-        switch (upperCasedValue) {
+        switch (value) {
             case "VALUE":
                 return VALUE;
             default:
-                return new SimpleEnum(Value.UNKNOWN, upperCasedValue);
+                ConjureEnums.validate(value);
+                return new SimpleEnum(Value.UNKNOWN, value);
         }
     }
 
