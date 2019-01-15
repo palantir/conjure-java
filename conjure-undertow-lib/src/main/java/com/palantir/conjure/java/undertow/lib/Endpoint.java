@@ -34,10 +34,6 @@ public interface Endpoint {
         return builder().method(method).template(template).build();
     }
 
-    static Endpoint of(HttpString method, String template, String serviceName, String name) {
-        return null;
-    }
-
     static Builder builder() {
         return new Builder();
     }
