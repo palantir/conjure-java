@@ -28,6 +28,9 @@ import java.util.TreeMap;
 
 /**
  * Backport of the Undertow URLDecodingHandler proposed for from Undertow 2.0.18.Final.
+ * This may be replaced with the Undertow URLDecodingHandler once
+ * <a href="https://github.com/undertow-io/undertow/pull/710">Undertow pull/710</a> merges.
+ * Fixes matched path parameter decoding which should not allow form encoding.
  */
 final class ConjureUrlDecodingHandler implements HttpHandler {
 
