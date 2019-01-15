@@ -20,8 +20,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
+import io.undertow.util.Methods;
 import java.io.IOException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -58,7 +60,7 @@ public final class ConjureHandlerTest {
             }
         };
         ConjureHandler handler = new ConjureHandler();
-        handler.get("/test", httpHandler);
+        handler.add(Endpoint.of(Methods.GET, "/test"), httpHandler);
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(handler)

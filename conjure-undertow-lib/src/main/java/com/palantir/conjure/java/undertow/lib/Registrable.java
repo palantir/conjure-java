@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/gradle/publish-jar.gradle"
+package com.palantir.conjure.java.undertow.lib;
 
-dependencies {
-    api project(':conjure-lib')
-    // Generated code depends on Undertow APIs
-    api 'io.undertow:undertow-core'
-    // Generated code uses guava TypeToken
-    api 'com.google.guava:guava'
-    implementation 'org.slf4j:slf4j-api'
+import io.undertow.server.RoutingHandler;
 
-    compileOnly 'org.immutables:value::annotations'
-    annotationProcessor 'org.immutables:value'
+/**
+ * Provides registration functionality for Undertow services. A service implementing this interface is given the
+ * opportunity to {@link #register} its (path, implementation handler) pairs with the given
+ * {@link RoutingHandler Undertow router}.
+ */
+public interface Registrable {
+    void register(EndpointRegistry endpointRegistry);
 }

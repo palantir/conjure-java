@@ -16,13 +16,13 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import io.undertow.server.RoutingHandler;
-
 /**
- * Provides registration functionality for Undertow services. A service implementing this interface is given the
- * opportunity to {@link #register} its (path, implementation handler) pairs with the given
- * {@link RoutingHandler Undertow router}.
+ * Creates a {@link Registrable} which may be registered with a web server. The server is responsible
+ * for providing a {@link ServiceContext} allowing API implementors to add APIs using
+ * <code>server.api(MyServiceRoutableFactory.of(myServiceImpl)</code>.
  */
-public interface Routable {
-    void register(RoutingRegistry routingRegistry);
+public interface Service {
+
+    Registrable create(ServiceContext context);
+
 }

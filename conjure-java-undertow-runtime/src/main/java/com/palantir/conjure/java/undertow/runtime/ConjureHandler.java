@@ -17,7 +17,8 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -25,18 +26,17 @@ import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
-import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.util.function.BiFunction;
 
 /**
- * Default Conjure implementation of a {@link RoutingRegistry}
+ * Default Conjure implementation of a {@link EndpointRegistry}
  * which can be registered as an Undertow {@link HttpHandler}.
  */
-public final class ConjureHandler implements HttpHandler, RoutingRegistry {
+public final class ConjureHandler implements HttpHandler, EndpointRegistry {
 
-    private static final ImmutableList<BiFunction<EndpointDetails, HttpHandler, HttpHandler>> WRAPPERS =
-            ImmutableList.<BiFunction<EndpointDetails, HttpHandler, HttpHandler>>of(
+    private static final ImmutableList<BiFunction<Endpoint, HttpHandler, HttpHandler>> WRAPPERS =
+            ImmutableList.<BiFunction<Endpoint, HttpHandler, HttpHandler>>of(
             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
             // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
             // When DECODE_URL has not been disabled, the following handlers will no-op
@@ -44,7 +44,7 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             (endpoint, handler) -> new PathParamDecodingHandler(handler),
             // no-cache and web-security handlers add listeners for the response to be committed,
             // they can be executed on the IO thread.
-            (endpoint, handler) -> Methods.GET.equals(endpoint.method)
+            (endpoint, handler) -> Methods.GET.equals(endpoint.method())
                     // Only applies to GET methods
                     ? new NoCachingResponseHandler(handler) : handler,
             (endpoint, handler) -> new WebSecurityHandler(handler),
@@ -57,7 +57,7 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
             // Logging context and trace handler must execute prior to the exception
             // to provide user and trace information on exceptions.
             (endpoint, handler) -> new LoggingContextHandler(handler),
-            (endpoint, handler) -> new TraceHandler(endpoint.method + " " + endpoint.template, handler),
+            (endpoint, handler) -> new TraceHandler(endpoint.method() + " " + endpoint.template(), handler),
             (endpoint, handler) -> new ConjureExceptionHandler(handler)
     ).reverse();
 
@@ -79,48 +79,13 @@ public final class ConjureHandler implements HttpHandler, RoutingRegistry {
     }
 
     @Override
-    public ConjureHandler get(String template, HttpHandler handler) {
-        return register(Methods.GET, template, handler);
-    }
-
-    @Override
-    public ConjureHandler post(String template, HttpHandler handler) {
-        return register(Methods.POST, template, handler);
-    }
-
-    @Override
-    public ConjureHandler put(String template, HttpHandler handler) {
-        return register(Methods.PUT, template, handler);
-    }
-
-    @Override
-    public ConjureHandler delete(String template, HttpHandler handler) {
-        return register(Methods.DELETE, template, handler);
-    }
-
-    private ConjureHandler register(HttpString method, String template, HttpHandler handler) {
+    public ConjureHandler add(Endpoint endpoint, HttpHandler handler) {
         HttpHandler current = handler;
-        EndpointDetails endpoint = new EndpointDetails(method, template);
-        for (BiFunction<EndpointDetails, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
+        for (BiFunction<Endpoint, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
             current = wrapper.apply(endpoint, current);
         }
-        routingHandler.add(method, template, current);
+        routingHandler.add(endpoint.method(), endpoint.template(), current);
         return this;
     }
 
-    private static final class EndpointDetails {
-
-        private final HttpString method;
-        private final String template;
-
-        EndpointDetails(HttpString method, String template) {
-            this.method = method;
-            this.template = template;
-        }
-
-        @Override
-        public String toString() {
-            return "EndpointDetails{method=" + method + ", template='" + template + "'}";
-        }
-    }
 }

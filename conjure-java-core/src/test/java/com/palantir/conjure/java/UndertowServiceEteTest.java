@@ -34,18 +34,18 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
-import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.HandlerContext;
+import com.palantir.conjure.java.undertow.lib.Service;
+import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.Serializers;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
-import com.palantir.product.EmptyPathServiceEndpoint;
-import com.palantir.product.EteBinaryServiceEndpoint;
+import com.palantir.product.EmptyPathServiceEndpoints;
+import com.palantir.product.EteBinaryServiceEndpoints;
 import com.palantir.product.EteBinaryServiceRetrofit;
 import com.palantir.product.EteService;
-import com.palantir.product.EteServiceEndpoint;
+import com.palantir.product.EteServiceEndpoints;
 import com.palantir.product.EteServiceRetrofit;
 import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.SimpleEnum;
@@ -118,15 +118,15 @@ public final class UndertowServiceEteTest extends TestBase {
     @BeforeClass
     public static void before() {
         SerializerRegistry serializers = new SerializerRegistry(Serializers.json(), Serializers.cbor());
-        HandlerContext context = HandlerContext.builder()
+        ServiceContext context = ServiceContext.builder()
                 .serializerRegistry(serializers)
                 .build();
 
         ConjureHandler handler = new ConjureHandler();
-        List<Endpoint> endpoints = ImmutableList.of(
-                EteServiceEndpoint.of(new UndertowEteResource()),
-                EmptyPathServiceEndpoint.of(() -> true),
-                EteBinaryServiceEndpoint.of(new UndertowBinaryResource()));
+        List<Service> endpoints = ImmutableList.of(
+                EteServiceEndpoints.of(new UndertowEteResource()),
+                EmptyPathServiceEndpoints.of(() -> true),
+                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()));
         endpoints.forEach(endpoint -> endpoint.create(context).register(handler));
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)

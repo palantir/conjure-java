@@ -23,10 +23,11 @@ import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.Routable;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.Service;
+import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
 import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
@@ -60,6 +61,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,64 +102,73 @@ final class UndertowServiceHandlerGenerator {
         ClassName serviceClass = ClassName.get(serviceDefinition.getServiceName().getPackage(),
                 (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
-        TypeSpec.Builder routableBuilder = TypeSpec.classBuilder(serviceName + "Routable")
+        TypeSpec.Builder registrableBuilder = TypeSpec.classBuilder(serviceName + "Registrable")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                .addSuperinterface(Routable.class);
+                .addSuperinterface(Registrable.class);
 
         // addFields
-        routableBuilder.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
-        routableBuilder.addField(ClassName.get(SerializerRegistry.class), SERIALIZER_REGISTRY_VAR_NAME,
+        registrableBuilder.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
+        registrableBuilder.addField(ClassName.get(SerializerRegistry.class), SERIALIZER_REGISTRY_VAR_NAME,
                 Modifier.PRIVATE, Modifier.FINAL);
         // addConstructor
-        routableBuilder.addMethod(MethodSpec.constructorBuilder()
+        registrableBuilder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
-                .addParameter(HandlerContext.class, CONTEXT_VAR_NAME)
+                .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
                 .addParameter(serviceClass, DELEGATE_VAR_NAME)
                 .addStatement("this.$1N = $2N.serializerRegistry()", SERIALIZER_REGISTRY_VAR_NAME, CONTEXT_VAR_NAME)
                 .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
                 .build());
 
-        // implement Routable#register interface
+        // implement Registrable#add interface
         // TODO(nmiyake): check for path disjointness per https://palantir.quip.com/5VxNAIyYYvnZ. Eventually, this
         // should be enforced at the IR level -- once that is done, the generator will not need to perform any
         // validation as the proper endpoint uniqueness guarantees will be provided by the IR itself.
         CodeBlock routingHandler = CodeBlock.builder()
-                .add(CodeBlocks.of(Iterables.transform(serviceDefinition.getEndpoints(),
-                        e -> CodeBlock.of(".$1L($2S, $3L)",
-                                e.getHttpMethod().toString().toLowerCase(),
-                                e.getHttpPath(),
-                                CodeBlock.of("new $1T()",
+                .add(CodeBlocks.of(Iterables.transform(
+                        serviceDefinition.getEndpoints(),
+                        e -> CodeBlock.of(
+                                ".add($1L, $2L)",
+                                CodeBlock.of(
+                                        "$1T.of($2T.$3L, $4S, $5S, $6S)",
+                                        Endpoint.class,
+                                        Methods.class,
+                                        e.getHttpMethod().toString(),
+                                        e.getHttpPath(),
+                                        serviceName,
+                                        e.getEndpointName().get()),
+                                CodeBlock.of(
+                                        "new $1T()",
                                         endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName()))
                         ))))
                 .build();
-        routableBuilder.addMethod(MethodSpec.methodBuilder("register")
+        registrableBuilder.addMethod(MethodSpec.methodBuilder("register")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(RoutingRegistry.class, "routingRegistry")
-                .addStatement("$1L$2L", "routingRegistry", routingHandler)
+                .addParameter(EndpointRegistry.class, "endpointRegistry")
+                .addStatement("$1L$2L", "endpointRegistry", routingHandler)
                 .build());
 
         // addEndpointHandlers
-        routableBuilder.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
+        registrableBuilder.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
                 e -> generateEndpointHandler(e, typeDefinitions, typeMapper, returnTypeMapper)));
 
-        TypeSpec routable = routableBuilder.build();
+        TypeSpec routable = registrableBuilder.build();
 
-        ClassName routableFactoryType = ClassName.get(serviceDefinition.getServiceName().getPackage(),
-                serviceDefinition.getServiceName().getName() + "Endpoint");
+        ClassName registrableFactoryType = ClassName.get(serviceDefinition.getServiceName().getPackage(),
+                serviceDefinition.getServiceName().getName() + "Endpoints");
 
-        ClassName routableName = ClassName.get(serviceDefinition.getServiceName().getPackage(),
-                routableFactoryType.simpleName(), serviceName + "Routable");
-        TypeSpec routableFactory = TypeSpec.classBuilder(routableFactoryType.simpleName())
+        ClassName registrableName = ClassName.get(serviceDefinition.getServiceName().getPackage(),
+                registrableFactoryType.simpleName(), serviceName + "Registrable");
+        TypeSpec registrableFactory = TypeSpec.classBuilder(registrableFactoryType.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceHandlerGenerator.class))
-                .addSuperinterface(Endpoint.class)
+                .addSuperinterface(Service.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
                 .addMethod(MethodSpec.methodBuilder("of")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .addParameter(serviceClass, DELEGATE_VAR_NAME)
-                        .addStatement("return new $T($N)", routableFactoryType, DELEGATE_VAR_NAME)
-                        .returns(Endpoint.class)
+                        .addStatement("return new $T($N)", registrableFactoryType, DELEGATE_VAR_NAME)
+                        .returns(Service.class)
                         .build())
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)
@@ -167,15 +178,15 @@ final class UndertowServiceHandlerGenerator {
                 .addMethod(MethodSpec.methodBuilder("create")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(HandlerContext.class, CONTEXT_VAR_NAME)
-                        .returns(Routable.class)
-                        .addStatement("return new $1T($2N, $3N)", routableName, CONTEXT_VAR_NAME, DELEGATE_VAR_NAME)
+                        .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
+                        .returns(Registrable.class)
+                        .addStatement("return new $1T($2N, $3N)", registrableName, CONTEXT_VAR_NAME, DELEGATE_VAR_NAME)
                         .build())
 
                 .addType(routable)
                 .build();
 
-        return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), routableFactory)
+        return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), registrableFactory)
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
@@ -183,7 +194,7 @@ final class UndertowServiceHandlerGenerator {
 
     private TypeName endpointToHandlerType(com.palantir.conjure.spec.TypeName serviceName, EndpointName name) {
         return ClassName.get(serviceName.getPackage(),
-                serviceName.getName() + "Endpoint", serviceName.getName() + "Routable",
+                serviceName.getName() + "Endpoints", serviceName.getName() + "Registrable",
                 endpointToHandlerClassName(name));
     }
 

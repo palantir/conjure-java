@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,33 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-/**
- * Creates a {@link Routable} which may be registered with a web server. The server is responsible
- * for providing a {@link HandlerContext} allowing API implementors to register APIs using
- * <code>server.api(MyServiceRoutableFactory.of(myServiceImpl)</code>.
- */
+import com.palantir.tokens.auth.ImmutablesStyle;
+import io.undertow.util.HttpString;
+import java.util.Optional;
+import org.immutables.value.Value;
+
+@Value.Immutable(builder = false)
+@ImmutablesStyle
 public interface Endpoint {
 
-    Routable create(HandlerContext context);
+    @Value.Parameter
+    HttpString method();
+
+    @Value.Parameter
+    String template();
+
+    @Value.Parameter
+    Optional<String> serviceName();
+
+    @Value.Parameter
+    Optional<String> name();
+
+    static Endpoint of(HttpString method, String template) {
+        return ImmutableEndpoint.of(method, template, Optional.empty(), Optional.empty());
+    }
+
+    static Endpoint of(HttpString method, String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(method, template, Optional.of(serviceName), Optional.of(name));
+    }
 
 }
