@@ -3,7 +3,7 @@ services:
     default-auth: header
     base-path: /binary
     package: com.palantir.product
-    name: Ete Binary Service
+    name: Ete Binary Endpoints
     endpoints:
       postBinary:
         http: POST /
