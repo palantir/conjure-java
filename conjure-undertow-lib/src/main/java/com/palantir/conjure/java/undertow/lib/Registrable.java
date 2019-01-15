@@ -24,5 +24,7 @@ import io.undertow.server.RoutingHandler;
  * {@link RoutingHandler Undertow router}.
  */
 public interface Registrable {
+
     void register(EndpointRegistry endpointRegistry);
+
 }

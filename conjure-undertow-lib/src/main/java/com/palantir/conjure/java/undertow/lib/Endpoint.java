@@ -21,28 +21,27 @@ import io.undertow.util.HttpString;
 import java.util.Optional;
 import org.immutables.value.Value;
 
-@Value.Immutable(builder = false)
+@Value.Immutable
 @ImmutablesStyle
 public interface Endpoint {
 
-    @Value.Parameter
     HttpString method();
-
-    @Value.Parameter
     String template();
-
-    @Value.Parameter
     Optional<String> serviceName();
-
-    @Value.Parameter
     Optional<String> name();
 
     static Endpoint of(HttpString method, String template) {
-        return ImmutableEndpoint.of(method, template, Optional.empty(), Optional.empty());
+        return null;
     }
 
     static Endpoint of(HttpString method, String template, String serviceName, String name) {
-        return ImmutableEndpoint.of(method, template, Optional.of(serviceName), Optional.of(name));
+        return null;
     }
+
+    static Builder builder() {
+        return new Builder();
+    }
+
+    final class Builder extends ImmutableEndpoint.Builder {}
 
 }
