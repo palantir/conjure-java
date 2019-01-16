@@ -115,7 +115,7 @@ public final class Bytes {
         return new Bytes(safe);
     }
 
-    /** Constructs a new {@link Bytes} from the provided {@link ByteArrayOutputStream} */
+    /** Constructs a new {@link Bytes} from the provided {@link ByteArrayOutputStream}. */
     public static Bytes from(ByteArrayOutputStream byteStream) {
         // this returns a new copy already
         byte[] safe = byteStream.toByteArray();
@@ -123,7 +123,7 @@ public final class Bytes {
         return new Bytes(safe);
     }
 
-    /** Constructs a new {@link Bytes} by reading the provided {@link InputStream} fully */
+    /** Constructs a new {@link Bytes} by reading the provided {@link InputStream} fully. */
     public static Bytes from(InputStream inputStream) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         copy(inputStream, outputStream);
@@ -131,13 +131,13 @@ public final class Bytes {
         return from(outputStream);
     }
 
-    // more or less what IOUtils would do
+    // more or less what IOUtils would do. In Java9, you could do inputStream.transferTo(outputStream)
     private static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
         byte[] buf = new byte[4096];
-        int r;
+        int read;
 
-        while ((r = inputStream.read(buf)) != -1) {
-            outputStream.write(buf, 0, r);
+        while ((read = inputStream.read(buf)) != -1) {
+            outputStream.write(buf, 0, read);
         }
     }
 
