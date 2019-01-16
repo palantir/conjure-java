@@ -25,8 +25,10 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -111,6 +113,32 @@ public final class Bytes {
         local.get(safe);
 
         return new Bytes(safe);
+    }
+
+    /** Constructs a new {@link Bytes} from the provided {@link ByteArrayOutputStream} */
+    public static Bytes from(ByteArrayOutputStream byteStream) {
+        // this returns a new copy already
+        byte[] safe = byteStream.toByteArray();
+
+        return new Bytes(safe);
+    }
+
+    /** Constructs a new {@link Bytes} by reading the provided {@link InputStream} fully */
+    public static Bytes from(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        copy(inputStream, outputStream);
+
+        return from(outputStream);
+    }
+
+    // more or less what IOUtils would do
+    private static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+        byte[] buf = new byte[4096];
+        int r;
+
+        while ((r = inputStream.read(buf)) != -1) {
+            outputStream.write(buf, 0, r);
+        }
     }
 
     static final class Serializer extends JsonSerializer<Bytes> {

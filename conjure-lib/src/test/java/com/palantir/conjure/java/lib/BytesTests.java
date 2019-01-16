@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -164,5 +166,37 @@ public final class BytesTests {
         assertThat(serialized).isEqualTo("\"dGVzdA==\"");
         assertThat(new String(mapper.readValue(serialized, Bytes.class).asNewByteArray(), StandardCharsets.UTF_8))
                 .isEqualTo("test");
+    }
+
+    @Test
+    public void testFromByteArrayOutputStream() throws IOException {
+        byte[] data = new byte[] {1, 2, 3};
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        stream.write(data);
+
+        Bytes bytes = Bytes.from(stream);
+
+        assertThat(bytes.asNewByteArray()).isEqualTo(data);
+
+        // mutate the baos (by writing more data to its buffer)
+        stream.write(4);
+
+        assertThat(bytes.asNewByteArray()).isEqualTo(data);
+        assertThat(bytes.asNewByteArray()).isNotEqualTo(stream.toByteArray());
+    }
+
+    @Test
+    public void testFromInputStream() throws IOException {
+        byte[] data = new byte[] {1, 2, 3};
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+
+        Bytes bytes = Bytes.from(inputStream);
+
+        assertThat(bytes.asNewByteArray()).isEqualTo(data);
+
+        // read again from the input stream (should be empty now)
+        Bytes bytes2 = Bytes.from(inputStream);
+
+        assertThat(bytes2.size()).isEqualTo(0);
     }
 }
