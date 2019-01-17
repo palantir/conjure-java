@@ -102,16 +102,16 @@ final class UndertowServiceHandlerGenerator {
         ClassName serviceClass = ClassName.get(serviceDefinition.getServiceName().getPackage(),
                 (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
-        TypeSpec.Builder registrableBuilder = TypeSpec.classBuilder(serviceName + "Registrable")
+        TypeSpec.Builder registrable = TypeSpec.classBuilder(serviceName + "Registrable")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(Registrable.class);
 
         // addFields
-        registrableBuilder.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
-        registrableBuilder.addField(ClassName.get(SerializerRegistry.class), SERIALIZER_REGISTRY_VAR_NAME,
+        registrable.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
+        registrable.addField(ClassName.get(SerializerRegistry.class), SERIALIZER_REGISTRY_VAR_NAME,
                 Modifier.PRIVATE, Modifier.FINAL);
         // addConstructor
-        registrableBuilder.addMethod(MethodSpec.constructorBuilder()
+        registrable.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
                 .addParameter(serviceClass, DELEGATE_VAR_NAME)
@@ -140,7 +140,7 @@ final class UndertowServiceHandlerGenerator {
                                         endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName()))
                         ))))
                 .build();
-        registrableBuilder.addMethod(MethodSpec.methodBuilder("register")
+        registrable.addMethod(MethodSpec.methodBuilder("register")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(EndpointRegistry.class, "endpointRegistry")
@@ -148,10 +148,10 @@ final class UndertowServiceHandlerGenerator {
                 .build());
 
         // addEndpointHandlers
-        registrableBuilder.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
+        registrable.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
                 e -> generateEndpointHandler(e, typeDefinitions, typeMapper, returnTypeMapper)));
 
-        TypeSpec routable = registrableBuilder.build();
+        TypeSpec routable = registrable.build();
 
         ClassName registrableFactoryType = ClassName.get(serviceDefinition.getServiceName().getPackage(),
                 serviceDefinition.getServiceName().getName() + "Endpoints");
