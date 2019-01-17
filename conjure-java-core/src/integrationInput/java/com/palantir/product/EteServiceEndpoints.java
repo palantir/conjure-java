@@ -18,7 +18,6 @@ import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderMap;
-import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
@@ -59,197 +58,82 @@ public final class EteServiceEndpoints implements Service {
         @Override
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
+                    .add(Endpoint.get("/base/string", "EteService", "string"), new StringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/string")
-                                    .serviceName("EteService")
-                                    .name("string")
-                                    .build(),
-                            new StringHandler())
-                    .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/integer")
-                                    .serviceName("EteService")
-                                    .name("integer")
-                                    .build(),
+                            Endpoint.get("/base/integer", "EteService", "integer"),
                             new IntegerHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/double")
-                                    .serviceName("EteService")
-                                    .name("double_")
-                                    .build(),
+                            Endpoint.get("/base/double", "EteService", "double_"),
                             new Double_Handler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/boolean")
-                                    .serviceName("EteService")
-                                    .name("boolean_")
-                                    .build(),
+                            Endpoint.get("/base/boolean", "EteService", "boolean_"),
                             new Boolean_Handler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/safelong")
-                                    .serviceName("EteService")
-                                    .name("safelong")
-                                    .build(),
+                            Endpoint.get("/base/safelong", "EteService", "safelong"),
                             new SafelongHandler())
+                    .add(Endpoint.get("/base/rid", "EteService", "rid"), new RidHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/rid")
-                                    .serviceName("EteService")
-                                    .name("rid")
-                                    .build(),
-                            new RidHandler())
-                    .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/bearertoken")
-                                    .serviceName("EteService")
-                                    .name("bearertoken")
-                                    .build(),
+                            Endpoint.get("/base/bearertoken", "EteService", "bearertoken"),
                             new BearertokenHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/optionalString")
-                                    .serviceName("EteService")
-                                    .name("optionalString")
-                                    .build(),
+                            Endpoint.get("/base/optionalString", "EteService", "optionalString"),
                             new OptionalStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/optionalEmpty")
-                                    .serviceName("EteService")
-                                    .name("optionalEmpty")
-                                    .build(),
+                            Endpoint.get("/base/optionalEmpty", "EteService", "optionalEmpty"),
                             new OptionalEmptyHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/datetime")
-                                    .serviceName("EteService")
-                                    .name("datetime")
-                                    .build(),
+                            Endpoint.get("/base/datetime", "EteService", "datetime"),
                             new DatetimeHandler())
+                    .add(Endpoint.get("/base/binary", "EteService", "binary"), new BinaryHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/binary")
-                                    .serviceName("EteService")
-                                    .name("binary")
-                                    .build(),
-                            new BinaryHandler())
-                    .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/path/{param}")
-                                    .serviceName("EteService")
-                                    .name("path")
-                                    .build(),
+                            Endpoint.get("/base/path/{param}", "EteService", "path"),
                             new PathHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/base/notNullBody")
-                                    .serviceName("EteService")
-                                    .name("notNullBody")
-                                    .build(),
+                            Endpoint.post("/base/notNullBody", "EteService", "notNullBody"),
                             new NotNullBodyHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/aliasOne")
-                                    .serviceName("EteService")
-                                    .name("aliasOne")
-                                    .build(),
+                            Endpoint.get("/base/aliasOne", "EteService", "aliasOne"),
                             new AliasOneHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/optionalAliasOne")
-                                    .serviceName("EteService")
-                                    .name("optionalAliasOne")
-                                    .build(),
+                            Endpoint.get(
+                                    "/base/optionalAliasOne", "EteService", "optionalAliasOne"),
                             new OptionalAliasOneHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/aliasTwo")
-                                    .serviceName("EteService")
-                                    .name("aliasTwo")
-                                    .build(),
+                            Endpoint.get("/base/aliasTwo", "EteService", "aliasTwo"),
                             new AliasTwoHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/base/external/notNullBody")
-                                    .serviceName("EteService")
-                                    .name("notNullBodyExternalImport")
-                                    .build(),
+                            Endpoint.post(
+                                    "/base/external/notNullBody",
+                                    "EteService",
+                                    "notNullBodyExternalImport"),
                             new NotNullBodyExternalImportHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/base/external/optional-body")
-                                    .serviceName("EteService")
-                                    .name("optionalBodyExternalImport")
-                                    .build(),
+                            Endpoint.post(
+                                    "/base/external/optional-body",
+                                    "EteService",
+                                    "optionalBodyExternalImport"),
                             new OptionalBodyExternalImportHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/base/external/optional-query")
-                                    .serviceName("EteService")
-                                    .name("optionalQueryExternalImport")
-                                    .build(),
+                            Endpoint.post(
+                                    "/base/external/optional-query",
+                                    "EteService",
+                                    "optionalQueryExternalImport"),
                             new OptionalQueryExternalImportHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/base/no-return")
-                                    .serviceName("EteService")
-                                    .name("noReturn")
-                                    .build(),
+                            Endpoint.post("/base/no-return", "EteService", "noReturn"),
                             new NoReturnHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/enum/query")
-                                    .serviceName("EteService")
-                                    .name("enumQuery")
-                                    .build(),
+                            Endpoint.get("/base/enum/query", "EteService", "enumQuery"),
                             new EnumQueryHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/enum/list/query")
-                                    .serviceName("EteService")
-                                    .name("enumListQuery")
-                                    .build(),
+                            Endpoint.get("/base/enum/list/query", "EteService", "enumListQuery"),
                             new EnumListQueryHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/enum/optional/query")
-                                    .serviceName("EteService")
-                                    .name("optionalEnumQuery")
-                                    .build(),
+                            Endpoint.get(
+                                    "/base/enum/optional/query", "EteService", "optionalEnumQuery"),
                             new OptionalEnumQueryHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/base/enum/header")
-                                    .serviceName("EteService")
-                                    .name("enumHeader")
-                                    .build(),
+                            Endpoint.get("/base/enum/header", "EteService", "enumHeader"),
                             new EnumHeaderHandler());
         }
 

@@ -18,26 +18,55 @@ package com.palantir.conjure.java.undertow.lib;
 
 import com.palantir.tokens.auth.ImmutablesStyle;
 import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import java.util.Optional;
 import org.immutables.value.Value;
 
-@Value.Immutable
+@Value.Immutable(builder = false)
 @ImmutablesStyle
 public interface Endpoint {
 
+    @Value.Parameter
     HttpString method();
+
+    @Value.Parameter
     String template();
+
+    @Value.Parameter
     Optional<String> serviceName();
+
+    @Value.Parameter
     Optional<String> name();
 
-    static Endpoint of(HttpString method, String template) {
-        return builder().method(method).template(template).build();
+    static Endpoint get(String template) {
+        return ImmutableEndpoint.of(Methods.GET, template, Optional.empty(), Optional.empty());
     }
 
-    static Builder builder() {
-        return new Builder();
+    static Endpoint get(String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(Methods.GET, template, Optional.of(serviceName), Optional.of(name));
     }
 
-    final class Builder extends ImmutableEndpoint.Builder {}
+    static Endpoint post(String template) {
+        return ImmutableEndpoint.of(Methods.POST, template, Optional.empty(), Optional.empty());
+    }
 
+    static Endpoint post(String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(Methods.POST, template, Optional.of(serviceName), Optional.of(name));
+    }
+
+    static Endpoint put(String template) {
+        return ImmutableEndpoint.of(Methods.PUT, template, Optional.empty(), Optional.empty());
+    }
+
+    static Endpoint put(String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(Methods.PUT, template, Optional.of(serviceName), Optional.of(name));
+    }
+
+    static Endpoint delete(String template) {
+        return ImmutableEndpoint.of(Methods.DELETE, template, Optional.empty(), Optional.empty());
+    }
+
+    static Endpoint delete(String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(Methods.DELETE, template, Optional.of(serviceName), Optional.of(name));
+    }
 }

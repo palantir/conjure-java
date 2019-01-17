@@ -8,7 +8,6 @@ import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import java.io.IOException;
 import javax.annotation.Generated;
 
@@ -43,13 +42,7 @@ public final class EmptyPathServiceEndpoints implements Service {
         @Override
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry.add(
-                    Endpoint.builder()
-                            .method(Methods.GET)
-                            .template("/")
-                            .serviceName("EmptyPathService")
-                            .name("emptyPath")
-                            .build(),
-                    new EmptyPathHandler());
+                    Endpoint.get("/", "EmptyPathService", "emptyPath"), new EmptyPathHandler());
         }
 
         private class EmptyPathHandler implements HttpHandler {

@@ -49,10 +49,10 @@ public final class MyServiceUndertowHandler implements Registrable {
     @Override
     public void register(EndpointRegistry endpointRegistry) {
         endpointRegistry
-                .add(Endpoint.of(Methods.GET, "/inc/{base}/{numHours}"), new IncrementTimeHandler())
-                .add(Endpoint.of(Methods.POST, "/issunday"), new IsSundayHandler())
-                .add(Endpoint.of(Methods.GET, "/traceId"), new TraceIdHandler())
-                .add(Endpoint.of(Methods.GET, "/maybeString/{shouldReturnString}"), new MaybeStringHandler());
+                .add(Endpoint.get("/inc/{base}/{numHours}"), new IncrementTimeHandler())
+                .add(Endpoint.post("/issunday"), new IsSundayHandler())
+                .add(Endpoint.get("/traceId"), new TraceIdHandler())
+                .add(Endpoint.get("/maybeString/{shouldReturnString}"), new MaybeStringHandler());
 
     }
 

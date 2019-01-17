@@ -13,7 +13,6 @@ import com.palantir.conjure.verification.types.EnumExample;
 import com.palantir.ri.ResourceIdentifier;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
@@ -55,85 +54,64 @@ public final class SingleQueryParamServiceEndpoints implements Service {
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamBoolean/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamBoolean")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamBoolean/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamBoolean"),
                             new QueryParamBooleanHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamDouble/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamDouble")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamDouble/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamDouble"),
                             new QueryParamDoubleHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamInteger/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamInteger")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamInteger/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamInteger"),
                             new QueryParamIntegerHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamRid/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamRid")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamRid/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamRid"),
                             new QueryParamRidHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamSafelong/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamSafelong")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamSafelong/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamSafelong"),
                             new QueryParamSafelongHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamString/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamString")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamString/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamString"),
                             new QueryParamStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamUuid/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamUuid")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamUuid/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamUuid"),
                             new QueryParamUuidHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template(
-                                            "/single-query-param/queryParamOptionalOfString/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamOptionalOfString")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamOptionalOfString/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamOptionalOfString"),
                             new QueryParamOptionalOfStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamAliasString/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamAliasString")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamAliasString/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamAliasString"),
                             new QueryParamAliasStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-query-param/queryParamEnumExample/{index}")
-                                    .serviceName("SingleQueryParamService")
-                                    .name("queryParamEnumExample")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-query-param/queryParamEnumExample/{index}",
+                                    "SingleQueryParamService",
+                                    "queryParamEnumExample"),
                             new QueryParamEnumExampleHandler());
         }
 

@@ -14,7 +14,6 @@ import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,36 +54,22 @@ public final class EteBinaryServiceEndpoints implements Service {
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/binary")
-                                    .serviceName("EteBinaryService")
-                                    .name("postBinary")
-                                    .build(),
+                            Endpoint.post("/binary", "EteBinaryService", "postBinary"),
                             new PostBinaryHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/binary/optional/present")
-                                    .serviceName("EteBinaryService")
-                                    .name("getOptionalBinaryPresent")
-                                    .build(),
+                            Endpoint.get(
+                                    "/binary/optional/present",
+                                    "EteBinaryService",
+                                    "getOptionalBinaryPresent"),
                             new GetOptionalBinaryPresentHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/binary/optional/empty")
-                                    .serviceName("EteBinaryService")
-                                    .name("getOptionalBinaryEmpty")
-                                    .build(),
+                            Endpoint.get(
+                                    "/binary/optional/empty",
+                                    "EteBinaryService",
+                                    "getOptionalBinaryEmpty"),
                             new GetOptionalBinaryEmptyHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.GET)
-                                    .template("/binary/failure")
-                                    .serviceName("EteBinaryService")
-                                    .name("getBinaryFailure")
-                                    .build(),
+                            Endpoint.get("/binary/failure", "EteBinaryService", "getBinaryFailure"),
                             new GetBinaryFailureHandler());
         }
 

@@ -10,7 +10,6 @@ import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import java.io.IOException;
 import javax.annotation.Generated;
 
@@ -44,13 +43,7 @@ public final class TestServiceEndpoints implements Service {
         @Override
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry.add(
-                    Endpoint.builder()
-                            .method(Methods.GET)
-                            .template("/")
-                            .serviceName("TestService")
-                            .name("getBinary")
-                            .build(),
-                    new GetBinaryHandler());
+                    Endpoint.get("/", "TestService", "getBinary"), new GetBinaryHandler());
         }
 
         private class GetBinaryHandler implements HttpHandler {

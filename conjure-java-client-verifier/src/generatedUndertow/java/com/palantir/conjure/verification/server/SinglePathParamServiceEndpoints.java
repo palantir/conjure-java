@@ -13,7 +13,6 @@ import com.palantir.conjure.verification.types.EnumExample;
 import com.palantir.ri.ResourceIdentifier;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
@@ -54,88 +53,64 @@ public final class SinglePathParamServiceEndpoints implements Service {
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-path-param/pathParamBoolean/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamBoolean")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamBoolean/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamBoolean"),
                             new PathParamBooleanHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template(
-                                            "/single-path-param/pathParamDatetime/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamDatetime")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamDatetime/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamDatetime"),
                             new PathParamDatetimeHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-path-param/pathParamDouble/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamDouble")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamDouble/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamDouble"),
                             new PathParamDoubleHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-path-param/pathParamInteger/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamInteger")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamInteger/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamInteger"),
                             new PathParamIntegerHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-path-param/pathParamRid/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamRid")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamRid/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamRid"),
                             new PathParamRidHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template(
-                                            "/single-path-param/pathParamSafelong/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamSafelong")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamSafelong/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamSafelong"),
                             new PathParamSafelongHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-path-param/pathParamString/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamString")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamString/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamString"),
                             new PathParamStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-path-param/pathParamUuid/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamUuid")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamUuid/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamUuid"),
                             new PathParamUuidHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template(
-                                            "/single-path-param/pathParamAliasString/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamAliasString")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamAliasString/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamAliasString"),
                             new PathParamAliasStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template(
-                                            "/single-path-param/pathParamEnumExample/{index}/{param}")
-                                    .serviceName("SinglePathParamService")
-                                    .name("pathParamEnumExample")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-path-param/pathParamEnumExample/{index}/{param}",
+                                    "SinglePathParamService",
+                                    "pathParamEnumExample"),
                             new PathParamEnumExampleHandler());
         }
 

@@ -10,7 +10,6 @@ import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import javax.annotation.Generated;
@@ -45,12 +44,7 @@ public final class CookieServiceEndpoints implements Service {
         @Override
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry.add(
-                    Endpoint.builder()
-                            .method(Methods.GET)
-                            .template("/cookies")
-                            .serviceName("CookieService")
-                            .name("eatCookies")
-                            .build(),
+                    Endpoint.get("/cookies", "CookieService", "eatCookies"),
                     new EatCookiesHandler());
         }
 

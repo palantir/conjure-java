@@ -15,7 +15,6 @@ import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderMap;
-import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
@@ -57,100 +56,76 @@ public final class SingleHeaderServiceEndpoints implements Service {
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerBearertoken/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerBearertoken")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerBearertoken/{index}",
+                                    "SingleHeaderService",
+                                    "headerBearertoken"),
                             new HeaderBearertokenHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerBoolean/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerBoolean")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerBoolean/{index}",
+                                    "SingleHeaderService",
+                                    "headerBoolean"),
                             new HeaderBooleanHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerDatetime/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerDatetime")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerDatetime/{index}",
+                                    "SingleHeaderService",
+                                    "headerDatetime"),
                             new HeaderDatetimeHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerDouble/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerDouble")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerDouble/{index}",
+                                    "SingleHeaderService",
+                                    "headerDouble"),
                             new HeaderDoubleHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerInteger/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerInteger")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerInteger/{index}",
+                                    "SingleHeaderService",
+                                    "headerInteger"),
                             new HeaderIntegerHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerRid/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerRid")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerRid/{index}",
+                                    "SingleHeaderService",
+                                    "headerRid"),
                             new HeaderRidHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerSafelong/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerSafelong")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerSafelong/{index}",
+                                    "SingleHeaderService",
+                                    "headerSafelong"),
                             new HeaderSafelongHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerString/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerString")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerString/{index}",
+                                    "SingleHeaderService",
+                                    "headerString"),
                             new HeaderStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerUuid/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerUuid")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerUuid/{index}",
+                                    "SingleHeaderService",
+                                    "headerUuid"),
                             new HeaderUuidHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerOptionalOfString/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerOptionalOfString")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerOptionalOfString/{index}",
+                                    "SingleHeaderService",
+                                    "headerOptionalOfString"),
                             new HeaderOptionalOfStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerAliasString/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerAliasString")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerAliasString/{index}",
+                                    "SingleHeaderService",
+                                    "headerAliasString"),
                             new HeaderAliasStringHandler())
                     .add(
-                            Endpoint.builder()
-                                    .method(Methods.POST)
-                                    .template("/single-header-param/headerEnumExample/{index}")
-                                    .serviceName("SingleHeaderService")
-                                    .name("headerEnumExample")
-                                    .build(),
+                            Endpoint.post(
+                                    "/single-header-param/headerEnumExample/{index}",
+                                    "SingleHeaderService",
+                                    "headerEnumExample"),
                             new HeaderEnumExampleHandler());
         }
 

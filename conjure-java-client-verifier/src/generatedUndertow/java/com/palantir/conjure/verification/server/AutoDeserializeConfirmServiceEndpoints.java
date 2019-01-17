@@ -10,7 +10,6 @@ import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
@@ -48,12 +47,10 @@ public final class AutoDeserializeConfirmServiceEndpoints implements Service {
         @Override
         public void register(EndpointRegistry endpointRegistry) {
             endpointRegistry.add(
-                    Endpoint.builder()
-                            .method(Methods.POST)
-                            .template("/confirm/{endpoint}/{index}")
-                            .serviceName("AutoDeserializeConfirmService")
-                            .name("confirm")
-                            .build(),
+                    Endpoint.post(
+                            "/confirm/{endpoint}/{index}",
+                            "AutoDeserializeConfirmService",
+                            "confirm"),
                     new ConfirmHandler());
         }
 
