@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/gradle/publish-jar.gradle"
+package com.palantir.conjure.java.undertow.lib;
 
-dependencies {
-    api project(':conjure-lib')
-    // Generated code depends on Undertow APIs
-    api 'io.undertow:undertow-core'
-    // Generated code uses guava TypeToken
-    api 'com.google.guava:guava'
-    implementation 'org.slf4j:slf4j-api'
+/**
+ * Creates a {@link Registrable} which may be registered with a web server. The server is responsible
+ * for providing a {@link ServiceContext} allowing API implementors to add APIs using
+ * <code>server.api(MyServiceEndpoints.of(myServiceImpl)</code>.
+ */
+public interface Service {
 
-    compileOnly 'org.immutables:value::annotations'
-    annotationProcessor 'org.immutables:value'
+    Registrable create(ServiceContext context);
+
 }

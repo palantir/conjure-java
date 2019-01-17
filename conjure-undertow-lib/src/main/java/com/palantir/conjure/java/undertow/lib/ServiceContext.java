@@ -20,13 +20,13 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.logsafe.Preconditions;
 
 /**
- * {@link HandlerContext} provides state required by generated handlers.
+ * {@link ServiceContext} provides state required by generated handlers.
  */
-public final class HandlerContext {
+public final class ServiceContext {
 
     private final SerializerRegistry serializerRegistry;
 
-    private HandlerContext(Builder builder) {
+    private ServiceContext(Builder builder) {
         this.serializerRegistry = Preconditions.checkNotNull(builder.serializerRegistry,
                 "Missing required SerializerRegistry");
     }
@@ -54,8 +54,8 @@ public final class HandlerContext {
             return this;
         }
 
-        public HandlerContext build() {
-            return new HandlerContext(this);
+        public ServiceContext build() {
+            return new ServiceContext(this);
         }
     }
 }

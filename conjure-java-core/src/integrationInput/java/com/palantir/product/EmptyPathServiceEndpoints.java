@@ -1,46 +1,48 @@
 package com.palantir.product;
 
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.Routable;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.Service;
+import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class EmptyPathServiceEndpoint implements Endpoint {
+public final class EmptyPathServiceEndpoints implements Service {
     private final UndertowEmptyPathService delegate;
 
-    private EmptyPathServiceEndpoint(UndertowEmptyPathService delegate) {
+    private EmptyPathServiceEndpoints(UndertowEmptyPathService delegate) {
         this.delegate = delegate;
     }
 
-    public static Endpoint of(UndertowEmptyPathService delegate) {
-        return new EmptyPathServiceEndpoint(delegate);
+    public static Service of(UndertowEmptyPathService delegate) {
+        return new EmptyPathServiceEndpoints(delegate);
     }
 
     @Override
-    public Routable create(HandlerContext context) {
-        return new EmptyPathServiceRoutable(context, delegate);
+    public Registrable create(ServiceContext context) {
+        return new EmptyPathServiceRegistrable(context, delegate);
     }
 
-    private static final class EmptyPathServiceRoutable implements Routable {
+    private static final class EmptyPathServiceRegistrable implements Registrable {
         private final UndertowEmptyPathService delegate;
 
         private final SerializerRegistry serializers;
 
-        private EmptyPathServiceRoutable(
-                HandlerContext context, UndertowEmptyPathService delegate) {
+        private EmptyPathServiceRegistrable(
+                ServiceContext context, UndertowEmptyPathService delegate) {
             this.serializers = context.serializerRegistry();
             this.delegate = delegate;
         }
 
         @Override
-        public void register(RoutingRegistry routingRegistry) {
-            routingRegistry.get("/", new EmptyPathHandler());
+        public void register(EndpointRegistry endpointRegistry) {
+            endpointRegistry.add(
+                    Endpoint.get("/", "EmptyPathService", "emptyPath"), new EmptyPathHandler());
         }
 
         private class EmptyPathHandler implements HttpHandler {

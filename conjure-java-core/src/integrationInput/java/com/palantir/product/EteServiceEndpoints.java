@@ -4,10 +4,11 @@ import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.Routable;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.Service;
+import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
 import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
@@ -28,59 +29,112 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class EteServiceEndpoint implements Endpoint {
+public final class EteServiceEndpoints implements Service {
     private final UndertowEteService delegate;
 
-    private EteServiceEndpoint(UndertowEteService delegate) {
+    private EteServiceEndpoints(UndertowEteService delegate) {
         this.delegate = delegate;
     }
 
-    public static Endpoint of(UndertowEteService delegate) {
-        return new EteServiceEndpoint(delegate);
+    public static Service of(UndertowEteService delegate) {
+        return new EteServiceEndpoints(delegate);
     }
 
     @Override
-    public Routable create(HandlerContext context) {
-        return new EteServiceRoutable(context, delegate);
+    public Registrable create(ServiceContext context) {
+        return new EteServiceRegistrable(context, delegate);
     }
 
-    private static final class EteServiceRoutable implements Routable {
+    private static final class EteServiceRegistrable implements Registrable {
         private final UndertowEteService delegate;
 
         private final SerializerRegistry serializers;
 
-        private EteServiceRoutable(HandlerContext context, UndertowEteService delegate) {
+        private EteServiceRegistrable(ServiceContext context, UndertowEteService delegate) {
             this.serializers = context.serializerRegistry();
             this.delegate = delegate;
         }
 
         @Override
-        public void register(RoutingRegistry routingRegistry) {
-            routingRegistry
-                    .get("/base/string", new StringHandler())
-                    .get("/base/integer", new IntegerHandler())
-                    .get("/base/double", new Double_Handler())
-                    .get("/base/boolean", new Boolean_Handler())
-                    .get("/base/safelong", new SafelongHandler())
-                    .get("/base/rid", new RidHandler())
-                    .get("/base/bearertoken", new BearertokenHandler())
-                    .get("/base/optionalString", new OptionalStringHandler())
-                    .get("/base/optionalEmpty", new OptionalEmptyHandler())
-                    .get("/base/datetime", new DatetimeHandler())
-                    .get("/base/binary", new BinaryHandler())
-                    .get("/base/path/{param}", new PathHandler())
-                    .post("/base/notNullBody", new NotNullBodyHandler())
-                    .get("/base/aliasOne", new AliasOneHandler())
-                    .get("/base/optionalAliasOne", new OptionalAliasOneHandler())
-                    .get("/base/aliasTwo", new AliasTwoHandler())
-                    .post("/base/external/notNullBody", new NotNullBodyExternalImportHandler())
-                    .post("/base/external/optional-body", new OptionalBodyExternalImportHandler())
-                    .post("/base/external/optional-query", new OptionalQueryExternalImportHandler())
-                    .post("/base/no-return", new NoReturnHandler())
-                    .get("/base/enum/query", new EnumQueryHandler())
-                    .get("/base/enum/list/query", new EnumListQueryHandler())
-                    .get("/base/enum/optional/query", new OptionalEnumQueryHandler())
-                    .get("/base/enum/header", new EnumHeaderHandler());
+        public void register(EndpointRegistry endpointRegistry) {
+            endpointRegistry
+                    .add(Endpoint.get("/base/string", "EteService", "string"), new StringHandler())
+                    .add(
+                            Endpoint.get("/base/integer", "EteService", "integer"),
+                            new IntegerHandler())
+                    .add(
+                            Endpoint.get("/base/double", "EteService", "double_"),
+                            new Double_Handler())
+                    .add(
+                            Endpoint.get("/base/boolean", "EteService", "boolean_"),
+                            new Boolean_Handler())
+                    .add(
+                            Endpoint.get("/base/safelong", "EteService", "safelong"),
+                            new SafelongHandler())
+                    .add(Endpoint.get("/base/rid", "EteService", "rid"), new RidHandler())
+                    .add(
+                            Endpoint.get("/base/bearertoken", "EteService", "bearertoken"),
+                            new BearertokenHandler())
+                    .add(
+                            Endpoint.get("/base/optionalString", "EteService", "optionalString"),
+                            new OptionalStringHandler())
+                    .add(
+                            Endpoint.get("/base/optionalEmpty", "EteService", "optionalEmpty"),
+                            new OptionalEmptyHandler())
+                    .add(
+                            Endpoint.get("/base/datetime", "EteService", "datetime"),
+                            new DatetimeHandler())
+                    .add(Endpoint.get("/base/binary", "EteService", "binary"), new BinaryHandler())
+                    .add(
+                            Endpoint.get("/base/path/{param}", "EteService", "path"),
+                            new PathHandler())
+                    .add(
+                            Endpoint.post("/base/notNullBody", "EteService", "notNullBody"),
+                            new NotNullBodyHandler())
+                    .add(
+                            Endpoint.get("/base/aliasOne", "EteService", "aliasOne"),
+                            new AliasOneHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/base/optionalAliasOne", "EteService", "optionalAliasOne"),
+                            new OptionalAliasOneHandler())
+                    .add(
+                            Endpoint.get("/base/aliasTwo", "EteService", "aliasTwo"),
+                            new AliasTwoHandler())
+                    .add(
+                            Endpoint.post(
+                                    "/base/external/notNullBody",
+                                    "EteService",
+                                    "notNullBodyExternalImport"),
+                            new NotNullBodyExternalImportHandler())
+                    .add(
+                            Endpoint.post(
+                                    "/base/external/optional-body",
+                                    "EteService",
+                                    "optionalBodyExternalImport"),
+                            new OptionalBodyExternalImportHandler())
+                    .add(
+                            Endpoint.post(
+                                    "/base/external/optional-query",
+                                    "EteService",
+                                    "optionalQueryExternalImport"),
+                            new OptionalQueryExternalImportHandler())
+                    .add(
+                            Endpoint.post("/base/no-return", "EteService", "noReturn"),
+                            new NoReturnHandler())
+                    .add(
+                            Endpoint.get("/base/enum/query", "EteService", "enumQuery"),
+                            new EnumQueryHandler())
+                    .add(
+                            Endpoint.get("/base/enum/list/query", "EteService", "enumListQuery"),
+                            new EnumListQueryHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/base/enum/optional/query", "EteService", "optionalEnumQuery"),
+                            new OptionalEnumQueryHandler())
+                    .add(
+                            Endpoint.get("/base/enum/header", "EteService", "enumHeader"),
+                            new EnumHeaderHandler());
         }
 
         private class StringHandler implements HttpHandler {

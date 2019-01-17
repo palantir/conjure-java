@@ -191,8 +191,8 @@ _This feature is experimental and subject to change._
 ```java
 public static void main(String[] args) {
     ConjureHandler handler = new ConjureHandler();
-    RecipeBookServiceEndpoint.of(new RecipeBookResource())
-        .create(HandlerContext.builder()
+    RecipeBookServiceEndpoints.of(new RecipeBookResource())
+        .create(ServerContext.builder()
             .serializerRegistry(ConjureSerializerRegistry.getDefault())
             .build())
         .register(handler);

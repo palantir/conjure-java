@@ -3,10 +3,11 @@ package com.palantir.product;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.Routable;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.Service;
+import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
 import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
@@ -22,40 +23,54 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class EteBinaryServiceEndpoint implements Endpoint {
+public final class EteBinaryServiceEndpoints implements Service {
     private final UndertowEteBinaryService delegate;
 
-    private EteBinaryServiceEndpoint(UndertowEteBinaryService delegate) {
+    private EteBinaryServiceEndpoints(UndertowEteBinaryService delegate) {
         this.delegate = delegate;
     }
 
-    public static Endpoint of(UndertowEteBinaryService delegate) {
-        return new EteBinaryServiceEndpoint(delegate);
+    public static Service of(UndertowEteBinaryService delegate) {
+        return new EteBinaryServiceEndpoints(delegate);
     }
 
     @Override
-    public Routable create(HandlerContext context) {
-        return new EteBinaryServiceRoutable(context, delegate);
+    public Registrable create(ServiceContext context) {
+        return new EteBinaryServiceRegistrable(context, delegate);
     }
 
-    private static final class EteBinaryServiceRoutable implements Routable {
+    private static final class EteBinaryServiceRegistrable implements Registrable {
         private final UndertowEteBinaryService delegate;
 
         private final SerializerRegistry serializers;
 
-        private EteBinaryServiceRoutable(
-                HandlerContext context, UndertowEteBinaryService delegate) {
+        private EteBinaryServiceRegistrable(
+                ServiceContext context, UndertowEteBinaryService delegate) {
             this.serializers = context.serializerRegistry();
             this.delegate = delegate;
         }
 
         @Override
-        public void register(RoutingRegistry routingRegistry) {
-            routingRegistry
-                    .post("/binary", new PostBinaryHandler())
-                    .get("/binary/optional/present", new GetOptionalBinaryPresentHandler())
-                    .get("/binary/optional/empty", new GetOptionalBinaryEmptyHandler())
-                    .get("/binary/failure", new GetBinaryFailureHandler());
+        public void register(EndpointRegistry endpointRegistry) {
+            endpointRegistry
+                    .add(
+                            Endpoint.post("/binary", "EteBinaryService", "postBinary"),
+                            new PostBinaryHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/binary/optional/present",
+                                    "EteBinaryService",
+                                    "getOptionalBinaryPresent"),
+                            new GetOptionalBinaryPresentHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/binary/optional/empty",
+                                    "EteBinaryService",
+                                    "getOptionalBinaryEmpty"),
+                            new GetOptionalBinaryEmptyHandler())
+                    .add(
+                            Endpoint.get("/binary/failure", "EteBinaryService", "getBinaryFailure"),
+                            new GetBinaryFailureHandler());
         }
 
         private class PostBinaryHandler implements HttpHandler {

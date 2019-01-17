@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,57 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-/**
- * Creates a {@link Routable} which may be registered with a web server. The server is responsible
- * for providing a {@link HandlerContext} allowing API implementors to register APIs using
- * <code>server.api(MyServiceRoutableFactory.of(myServiceImpl)</code>.
- */
+import com.palantir.tokens.auth.ImmutablesStyle;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import java.util.Optional;
+import org.immutables.value.Value;
+
+@Value.Immutable(builder = false)
+@ImmutablesStyle
 public interface Endpoint {
 
-    Routable create(HandlerContext context);
+    @Value.Parameter
+    HttpString method();
 
+    @Value.Parameter
+    String template();
+
+    @Value.Parameter
+    Optional<String> serviceName();
+
+    @Value.Parameter
+    Optional<String> name();
+
+    static Endpoint get(String template) {
+        return ImmutableEndpoint.of(Methods.GET, template, Optional.empty(), Optional.empty());
+    }
+
+    static Endpoint get(String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(Methods.GET, template, Optional.of(serviceName), Optional.of(name));
+    }
+
+    static Endpoint post(String template) {
+        return ImmutableEndpoint.of(Methods.POST, template, Optional.empty(), Optional.empty());
+    }
+
+    static Endpoint post(String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(Methods.POST, template, Optional.of(serviceName), Optional.of(name));
+    }
+
+    static Endpoint put(String template) {
+        return ImmutableEndpoint.of(Methods.PUT, template, Optional.empty(), Optional.empty());
+    }
+
+    static Endpoint put(String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(Methods.PUT, template, Optional.of(serviceName), Optional.of(name));
+    }
+
+    static Endpoint delete(String template) {
+        return ImmutableEndpoint.of(Methods.DELETE, template, Optional.empty(), Optional.empty());
+    }
+
+    static Endpoint delete(String template, String serviceName, String name) {
+        return ImmutableEndpoint.of(Methods.DELETE, template, Optional.of(serviceName), Optional.of(name));
+    }
 }

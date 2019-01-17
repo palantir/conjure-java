@@ -3,10 +3,11 @@ package com.palantir.another;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.HandlerContext;
-import com.palantir.conjure.java.undertow.lib.Routable;
-import com.palantir.conjure.java.undertow.lib.RoutingRegistry;
+import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.Service;
+import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
 import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
@@ -33,66 +34,130 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class TestServiceEndpoint implements Endpoint {
+public final class TestServiceEndpoints implements Service {
     private final TestService delegate;
 
-    private TestServiceEndpoint(TestService delegate) {
+    private TestServiceEndpoints(TestService delegate) {
         this.delegate = delegate;
     }
 
-    public static Endpoint of(TestService delegate) {
-        return new TestServiceEndpoint(delegate);
+    public static Service of(TestService delegate) {
+        return new TestServiceEndpoints(delegate);
     }
 
     @Override
-    public Routable create(HandlerContext context) {
-        return new TestServiceRoutable(context, delegate);
+    public Registrable create(ServiceContext context) {
+        return new TestServiceRegistrable(context, delegate);
     }
 
-    private static final class TestServiceRoutable implements Routable {
+    private static final class TestServiceRegistrable implements Registrable {
         private final TestService delegate;
 
         private final SerializerRegistry serializers;
 
-        private TestServiceRoutable(HandlerContext context, TestService delegate) {
+        private TestServiceRegistrable(ServiceContext context, TestService delegate) {
             this.serializers = context.serializerRegistry();
             this.delegate = delegate;
         }
 
         @Override
-        public void register(RoutingRegistry routingRegistry) {
-            routingRegistry
-                    .get("/catalog/fileSystems", new GetFileSystemsHandler())
-                    .post("/catalog/datasets", new CreateDatasetHandler())
-                    .get("/catalog/datasets/{datasetRid}", new GetDatasetHandler())
-                    .get("/catalog/datasets/{datasetRid}/raw", new GetRawDataHandler())
-                    .get(
-                            "/catalog/datasets/{datasetRid}/raw-aliased",
+        public void register(EndpointRegistry endpointRegistry) {
+            endpointRegistry
+                    .add(
+                            Endpoint.get("/catalog/fileSystems", "TestService", "getFileSystems"),
+                            new GetFileSystemsHandler())
+                    .add(
+                            Endpoint.post("/catalog/datasets", "TestService", "createDataset"),
+                            new CreateDatasetHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}", "TestService", "getDataset"),
+                            new GetDatasetHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}/raw",
+                                    "TestService",
+                                    "getRawData"),
+                            new GetRawDataHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}/raw-aliased",
+                                    "TestService",
+                                    "getAliasedRawData"),
                             new GetAliasedRawDataHandler())
-                    .get("/catalog/datasets/{datasetRid}/raw-maybe", new MaybeGetRawDataHandler())
-                    .get(
-                            "/catalog/datasets/{datasetRid}/string-aliased",
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}/raw-maybe",
+                                    "TestService",
+                                    "maybeGetRawData"),
+                            new MaybeGetRawDataHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}/string-aliased",
+                                    "TestService",
+                                    "getAliasedString"),
                             new GetAliasedStringHandler())
-                    .post("/catalog/datasets/upload-raw", new UploadRawDataHandler())
-                    .post("/catalog/datasets/upload-raw-aliased", new UploadAliasedRawDataHandler())
-                    .get("/catalog/datasets/{datasetRid}/branches", new GetBranchesHandler())
-                    .get(
-                            "/catalog/datasets/{datasetRid}/branchesDeprecated",
+                    .add(
+                            Endpoint.post(
+                                    "/catalog/datasets/upload-raw", "TestService", "uploadRawData"),
+                            new UploadRawDataHandler())
+                    .add(
+                            Endpoint.post(
+                                    "/catalog/datasets/upload-raw-aliased",
+                                    "TestService",
+                                    "uploadAliasedRawData"),
+                            new UploadAliasedRawDataHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}/branches",
+                                    "TestService",
+                                    "getBranches"),
+                            new GetBranchesHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}/branchesDeprecated",
+                                    "TestService",
+                                    "getBranchesDeprecated"),
                             new GetBranchesDeprecatedHandler())
-                    .get(
-                            "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve",
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve",
+                                    "TestService",
+                                    "resolveBranch"),
                             new ResolveBranchHandler())
-                    .get("/catalog/datasets/{datasetRid}/testParam", new TestParamHandler())
-                    .post("/catalog/test-query-params", new TestQueryParamsHandler())
-                    .post(
-                            "/catalog/test-no-response-query-params",
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/datasets/{datasetRid}/testParam",
+                                    "TestService",
+                                    "testParam"),
+                            new TestParamHandler())
+                    .add(
+                            Endpoint.post(
+                                    "/catalog/test-query-params", "TestService", "testQueryParams"),
+                            new TestQueryParamsHandler())
+                    .add(
+                            Endpoint.post(
+                                    "/catalog/test-no-response-query-params",
+                                    "TestService",
+                                    "testNoResponseQueryParams"),
                             new TestNoResponseQueryParamsHandler())
-                    .get("/catalog/boolean", new TestBooleanHandler())
-                    .get("/catalog/double", new TestDoubleHandler())
-                    .get("/catalog/integer", new TestIntegerHandler())
-                    .post("/catalog/optional", new TestPostOptionalHandler())
-                    .get(
-                            "/catalog/optional-integer-double",
+                    .add(
+                            Endpoint.get("/catalog/boolean", "TestService", "testBoolean"),
+                            new TestBooleanHandler())
+                    .add(
+                            Endpoint.get("/catalog/double", "TestService", "testDouble"),
+                            new TestDoubleHandler())
+                    .add(
+                            Endpoint.get("/catalog/integer", "TestService", "testInteger"),
+                            new TestIntegerHandler())
+                    .add(
+                            Endpoint.post("/catalog/optional", "TestService", "testPostOptional"),
+                            new TestPostOptionalHandler())
+                    .add(
+                            Endpoint.get(
+                                    "/catalog/optional-integer-double",
+                                    "TestService",
+                                    "testOptionalIntegerAndDouble"),
                             new TestOptionalIntegerAndDoubleHandler());
         }
 
