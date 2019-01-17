@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
-import io.undertow.util.Methods;
 import java.io.IOException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

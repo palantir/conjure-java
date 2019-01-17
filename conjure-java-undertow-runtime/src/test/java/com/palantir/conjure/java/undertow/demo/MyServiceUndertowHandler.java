@@ -24,7 +24,6 @@ import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
 import com.palantir.conjure.java.undertow.runtime.Serializer;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
