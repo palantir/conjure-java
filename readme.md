@@ -201,7 +201,7 @@ conjure {
 }
 ```
 
-With this option, Undertow generated interfaces will be prefixed with `Undertow`, here the interface will be called: `UndertowServiceName`
+With this option, Undertow generated interfaces will be prefixed with `Undertow`. Here the interface would be called: `UndertowServiceName`
 
 To use the generated handlers:
 
