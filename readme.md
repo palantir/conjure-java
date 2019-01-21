@@ -185,9 +185,11 @@ RecipeBookServiceRetrofit recipes = Retrofit2Client.create(
 Call<List<Recipe>> asyncResults = recipes.getRecipes();
 ```
 
-## Undertow Handlers
+## Undertow
 
 _This feature is experimental and subject to change._
+
+In the undertow setting, for a `ServiceName` conjure defined service, conjure will generate an interface: `ServiceName` to be extended by your resource and a [Service](https://github.com/palantir/conjure-java/blob/develop/conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/Service.java) named `ServiceNameEndpoints`
 
 To avoid conflicts with jersey interfaces, use in your build.gradle: 
 
@@ -199,7 +201,7 @@ conjure {
 }
 ```
 
-With this option, Undertow generated interfaces will be prefixed by `Undertow`.
+With this option, Undertow generated interfaces will be prefixed with `Undertow`, here the interface will be called: `UndertowServiceName`
 
 To use the generated handlers:
 
