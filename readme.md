@@ -18,6 +18,7 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
     Options:
         --objects    Generate POJOs for Conjure type definitions
         --jersey     Generate jax-rs annotated interfaces for client or server-usage
+        --undertow   Generate undertow handlers and interfaces for server-usage
         --retrofit   Generate retrofit interfaces for streaming/async clients
         --requireNotNullAuthAndBodyParams
                      Generate @NotNull annotations for AuthHeaders and request body params
@@ -184,9 +185,25 @@ RecipeBookServiceRetrofit recipes = Retrofit2Client.create(
 Call<List<Recipe>> asyncResults = recipes.getRecipes();
 ```
 
-## Undertow Handlers
+## Undertow
 
 _This feature is experimental and subject to change._
+
+In the undertow setting, for a `ServiceName` conjure defined service, conjure will generate an interface: `ServiceName` to be extended by your resource and a [Service](https://github.com/palantir/conjure-java/blob/develop/conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/Service.java) named `ServiceNameEndpoints`
+
+To avoid conflicts with the equivalent jersey interface (when you are generating both), use in your build.gradle: 
+
+```groovy
+conjure {
+    java {
+        undertowServicePrefixes = true
+    }
+}
+```
+
+With this option, Undertow generated interfaces will be prefixed with `Undertow`. Here the interface would be called: `UndertowServiceName`
+
+To use the generated handlers:
 
 ```java
 public static void main(String[] args) {
