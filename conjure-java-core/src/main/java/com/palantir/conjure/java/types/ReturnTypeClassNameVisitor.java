@@ -59,6 +59,7 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
 
     @Override
     public TypeName visitOptional(OptionalType type) {
+        // see #204: The implicit tri-state is implemented using null as empty for jersey and retrofit
         if (type.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
                 && type.getItemType().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.BINARY)) {
             return this.visitPrimitive(PrimitiveType.BINARY);
