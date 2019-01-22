@@ -152,12 +152,12 @@ final class UndertowServiceHandlerGenerator {
 
         TypeSpec routable = registrable.build();
 
-        ClassName registrableFactoryType = ClassName.get(serviceDefinition.getServiceName().getPackage(),
+        ClassName serviceType = ClassName.get(serviceDefinition.getServiceName().getPackage(),
                 serviceDefinition.getServiceName().getName() + "Endpoints");
 
         ClassName registrableName = ClassName.get(serviceDefinition.getServiceName().getPackage(),
-                registrableFactoryType.simpleName(), serviceName + "Registrable");
-        TypeSpec registrableFactory = TypeSpec.classBuilder(registrableFactoryType.simpleName())
+                serviceType.simpleName(), serviceName + "Registrable");
+        TypeSpec endpoints = TypeSpec.classBuilder(serviceType.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceHandlerGenerator.class))
                 .addSuperinterface(Service.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -165,7 +165,7 @@ final class UndertowServiceHandlerGenerator {
                 .addMethod(MethodSpec.methodBuilder("of")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .addParameter(serviceClass, DELEGATE_VAR_NAME)
-                        .addStatement("return new $T($N)", registrableFactoryType, DELEGATE_VAR_NAME)
+                        .addStatement("return new $T($N)", serviceType, DELEGATE_VAR_NAME)
                         .returns(Service.class)
                         .build())
                 .addMethod(MethodSpec.constructorBuilder()
@@ -184,7 +184,7 @@ final class UndertowServiceHandlerGenerator {
                 .addType(routable)
                 .build();
 
-        return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), registrableFactory)
+        return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), endpoints)
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
@@ -267,7 +267,7 @@ final class UndertowServiceHandlerGenerator {
         addQueryParamsCode(code, endpointDefinition, typeDefinitions, typeMapper);
 
         List<String> methodArgs = new ArrayList<>();
-        authVarName.ifPresent(name -> methodArgs.add(name));
+        authVarName.ifPresent(methodArgs::add);
         methodArgs.addAll(UndertowServiceGenerator.sortArgumentDefinitions(
                 endpointDefinition.getArgs()).stream().map(
                     arg -> arg.getArgName().get()).collect(Collectors.toList()));
@@ -327,8 +327,7 @@ final class UndertowServiceHandlerGenerator {
     // deserialized optional parameter.
     private Optional<String> addAuthCode(
             CodeBlock.Builder code,
-            EndpointDefinition endpointDefinition
-    ) {
+            EndpointDefinition endpointDefinition) {
         if (!endpointDefinition.getAuth().isPresent()) {
             return Optional.empty();
         }
@@ -365,8 +364,7 @@ final class UndertowServiceHandlerGenerator {
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
             List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper
-    ) {
+            TypeMapper typeMapper) {
         if (hasPathArgument(endpointDefinition.getArgs())) {
             code.addStatement("$1T<$2T, $2T> $3N = $4N.getAttachment($5T.ATTACHMENT_KEY).getParameters()",
                     Map.class, String.class, PATH_PARAMS_VAR_NAME, EXCHANGE_VAR_NAME,
@@ -380,8 +378,7 @@ final class UndertowServiceHandlerGenerator {
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
             List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper
-    ) {
+            TypeMapper typeMapper) {
         if (hasHeaderArgument(endpointDefinition.getArgs())) {
             code.addStatement("$1T $2N = $3N.getRequestHeaders()", io.undertow.util.HeaderMap.class,
                     HEADER_PARAMS_VAR_NAME,
@@ -395,8 +392,7 @@ final class UndertowServiceHandlerGenerator {
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
             List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper
-    ) {
+            TypeMapper typeMapper) {
         if (hasQueryArgument(endpointDefinition.getArgs())) {
             code.addStatement("$1T $2N = $3N.getQueryParameters()",
                     ParameterizedTypeName.get(ClassName.get(Map.class), TypeName.get(String.class),
