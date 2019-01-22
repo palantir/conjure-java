@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
@@ -28,13 +27,9 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
 import java.io.IOException;
-import java.util.function.Supplier;
 
 /** Orchestrates serialization and deserialization of response and request bodies. */
 public final class ConjureSerializerRegistry implements SerializerRegistry {
-
-    private static final Supplier<SerializerRegistry> DEFAULT_SUPPLIER = Suppliers.memoize(() ->
-            new ConjureSerializerRegistry(Serializers.json(), Serializers.cbor()));
 
     private final Serializer defaultSerializer;
     private final Serializer[] serializers;
@@ -53,7 +48,7 @@ public final class ConjureSerializerRegistry implements SerializerRegistry {
      * Provides a default configuration of the {@link SerializerRegistry}.
      */
     public static SerializerRegistry getDefault() {
-        return DEFAULT_SUPPLIER.get();
+        return new ConjureSerializerRegistry(Serializers.json(), Serializers.cbor());
     }
 
     /** Returns the {@link Serializer} to use to deserialize the request body. */
