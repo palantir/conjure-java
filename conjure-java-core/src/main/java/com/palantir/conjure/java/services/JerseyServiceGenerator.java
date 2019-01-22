@@ -67,6 +67,7 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -169,9 +170,13 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         }
 
         if (returnType.equals(BINARY_RETURN_TYPE_OUTPUT) || returnType.equals(BINARY_RETURN_TYPE_RESPONSE)) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Produces"))
-                    .addMember("value", "$T.APPLICATION_OCTET_STREAM", ClassName.get("javax.ws.rs.core", "MediaType"))
-                    .build());
+            methodBuilder
+                    .addAnnotation(Nullable.class)
+                    .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Produces"))
+                            .addMember(
+                                    "value",
+                                    "$T.APPLICATION_OCTET_STREAM",
+                                    ClassName.get("javax.ws.rs.core", "MediaType")).build());
         }
 
         boolean consumesTypeIsBinary = endpointDef.getArgs().stream()
