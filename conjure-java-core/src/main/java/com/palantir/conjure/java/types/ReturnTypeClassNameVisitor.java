@@ -40,7 +40,10 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
     private final ClassName binaryClassName;
     private final TypeName optionalBinaryTypeName;
 
-    public ReturnTypeClassNameVisitor(List<TypeDefinition> types, ClassName binaryClassName, TypeName optionalBinaryTypeName) {
+    public ReturnTypeClassNameVisitor(
+            List<TypeDefinition> types,
+            ClassName binaryClassName,
+            TypeName optionalBinaryTypeName) {
         this.delegate = new DefaultClassNameVisitor(types);
         this.types = types.stream().collect(Collectors.toMap(
                 t -> t.accept(TypeDefinitionVisitor.TYPE_NAME),

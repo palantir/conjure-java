@@ -68,7 +68,6 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
