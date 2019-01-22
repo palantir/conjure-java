@@ -16,7 +16,6 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -70,9 +69,7 @@ public interface TestService {
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-maybe")
-    @Nullable
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    StreamingOutput maybeGetRawData(
+    Optional<StreamingOutput> maybeGetRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 

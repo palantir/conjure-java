@@ -53,6 +53,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.InputStream;
@@ -97,9 +98,16 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 ? BINARY_RETURN_TYPE_RESPONSE
                 : BINARY_RETURN_TYPE_OUTPUT;
 
+        TypeName optionalBinaryReturnType = experimentalFeatures.contains(FeatureFlags.JerseyBinaryAsResponse)
+                ? BINARY_RETURN_TYPE_RESPONSE
+                : ParameterizedTypeName.get(ClassName.get(Optional.class), binaryReturnType);
+
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new ReturnTypeClassNameVisitor(conjureDefinition.getTypes(), binaryReturnType));
+                new ReturnTypeClassNameVisitor(
+                        conjureDefinition.getTypes(),
+                        binaryReturnType,
+                        optionalBinaryReturnType));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),

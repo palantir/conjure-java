@@ -38,13 +38,15 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
     private final DefaultClassNameVisitor delegate;
     private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
     private final ClassName binaryClassName;
+    private final TypeName optionalBinaryTypeName;
 
-    public ReturnTypeClassNameVisitor(List<TypeDefinition> types, ClassName binaryClassName) {
+    public ReturnTypeClassNameVisitor(List<TypeDefinition> types, ClassName binaryClassName, TypeName optionalBinaryTypeName) {
         this.delegate = new DefaultClassNameVisitor(types);
         this.types = types.stream().collect(Collectors.toMap(
                 t -> t.accept(TypeDefinitionVisitor.TYPE_NAME),
                 Function.identity()));
         this.binaryClassName = binaryClassName;
+        this.optionalBinaryTypeName = optionalBinaryTypeName;
     }
 
     @Override
@@ -63,7 +65,7 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
         // Furthermore, jersey cannot support Optional<StreamingOutput>.
         if (type.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
                 && type.getItemType().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.BINARY)) {
-            return this.visitPrimitive(PrimitiveType.BINARY);
+            return optionalBinaryTypeName;
         }
         return delegate.visitOptional(type);
     }
