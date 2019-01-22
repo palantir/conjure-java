@@ -19,7 +19,6 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.google.common.base.Suppliers;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
@@ -30,7 +29,6 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.function.Supplier;
 
 // TODO(rfink): Consider async Jackson, see
 //              https://github.com/spring-projects/spring-framework/commit/31e0e537500c0763a36d3af2570d5c253a374690
@@ -69,54 +67,48 @@ public final class Serializers {
         }
     }
 
-    private static final Supplier<Serializer> jsonInstance = Suppliers.memoize(() ->
-            new AbstractJacksonSerializer(configure(ObjectMappers.newServerObjectMapper())) {
-
-        private static final String CONTENT_TYPE = "application/json";
-
-        @Override
-        public String getContentType() {
-            return CONTENT_TYPE;
-        }
-
-        @Override
-        public boolean supportsContentType(String contentType) {
-            // TODO(ckozak): support wildcards? See javax.ws.rs.core.MediaType.isCompatible
-            return contentType != null
-                    // Use startsWith to avoid failures due to charset
-                    && contentType.startsWith(CONTENT_TYPE);
-        }
-    });
-
-    private static final Supplier<Serializer> cborInstance = Suppliers.memoize(() ->
-            new AbstractJacksonSerializer(configure(ObjectMappers.newCborServerObjectMapper())) {
-
-        private static final String CONTENT_TYPE = "application/cbor";
-
-        @Override
-        public String getContentType() {
-            return CONTENT_TYPE;
-        }
-
-        @Override
-        public boolean supportsContentType(String contentType) {
-            return contentType != null && contentType.startsWith(CONTENT_TYPE);
-        }
-
-        @Override
-        public void serialize(Object value, OutputStream output) throws IOException {
-            super.serialize(value, new ShieldingOutputStream(output));
-        }
-    });
-
     /** Returns a serializer for the Conjure JSON wire format. */
     public static Serializer json() {
-        return jsonInstance.get();
+        return new AbstractJacksonSerializer(configure(ObjectMappers.newServerObjectMapper())) {
+
+            private static final String CONTENT_TYPE = "application/json";
+
+            @Override
+            public String getContentType() {
+                return CONTENT_TYPE;
+            }
+
+            @Override
+            public boolean supportsContentType(String contentType) {
+                // TODO(ckozak): support wildcards? See javax.ws.rs.core.MediaType.isCompatible
+                return contentType != null
+                        // Use startsWith to avoid failures due to charset
+                        && contentType.startsWith(CONTENT_TYPE);
+            }
+        };
     }
 
     /** Returns a serializer for the Conjure CBOR wire format. */
     public static Serializer cbor() {
-        return cborInstance.get();
+        return new AbstractJacksonSerializer(configure(ObjectMappers.newCborServerObjectMapper())) {
+
+            private static final String CONTENT_TYPE = "application/cbor";
+
+            @Override
+            public String getContentType() {
+                return CONTENT_TYPE;
+            }
+
+            @Override
+            public boolean supportsContentType(String contentType) {
+                return contentType != null && contentType.startsWith(CONTENT_TYPE);
+            }
+
+            @Override
+            public void serialize(Object value, OutputStream output) throws IOException {
+                super.serialize(value, new ShieldingOutputStream(output));
+            }
+        };
     }
 
     private static ObjectMapper configure(ObjectMapper mapper) {
