@@ -61,7 +61,7 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
     public TypeName visitOptional(OptionalType type) {
         if (type.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
                 && type.getItemType().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.BINARY)) {
-            return delegate.visitPrimitive(PrimitiveType.BINARY);
+            return this.visitPrimitive(PrimitiveType.BINARY);
         }
         return delegate.visitOptional(type);
     }
