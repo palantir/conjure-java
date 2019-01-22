@@ -178,9 +178,6 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         }
 
         if (returnType.equals(BINARY_RETURN_TYPE_OUTPUT) || returnType.equals(BINARY_RETURN_TYPE_RESPONSE)) {
-            if (endpointDef.getReturns().get().accept(TypeVisitor.IS_OPTIONAL)) {
-                methodBuilder.addAnnotation(Nullable.class);
-            }
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Produces"))
                     .addMember("value", "$T.APPLICATION_OCTET_STREAM", ClassName.get("javax.ws.rs.core", "MediaType"))
                     .build());
