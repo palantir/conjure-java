@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;
-import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -69,7 +68,6 @@ public interface EteService {
 
     @GET
     @Path("base/binary")
-    @Nullable
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput binary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 

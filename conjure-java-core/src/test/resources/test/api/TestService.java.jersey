@@ -56,7 +56,6 @@ public interface TestService {
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw")
-    @Nullable
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput getRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
@@ -64,7 +63,6 @@ public interface TestService {
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-aliased")
-    @Nullable
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput getAliasedRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,

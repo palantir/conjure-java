@@ -1,7 +1,6 @@
 package test.api;
 
 import javax.annotation.Generated;
-import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,7 +14,6 @@ import javax.ws.rs.core.StreamingOutput;
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface TestService {
     @GET
-    @Nullable
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput getBinary();
 }
