@@ -353,24 +353,20 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testBinaryOptionalEmptyResponse() throws Exception {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/binary/optional/empty");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
-        con.setRequestMethod("GET");
-        assertThat(con.getResponseCode()).isEqualTo(204);
-        assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).isNull();
+        Response<ResponseBody> response = binaryClient
+                .getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")).execute();
+        assertThat(response.code()).isEqualTo(204);
+        assertThat(response.headers().get(HttpHeaders.CONTENT_TYPE)).isNull();
+        assertThat(response.body()).isNull();
     }
 
     @Test
     public void testBinaryOptionalPresentResponse() throws Exception {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/binary/optional/present");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
-        con.setRequestMethod("GET");
-        assertThat(con.getResponseCode()).isEqualTo(200);
-        assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
-        assertThat(new String(ByteStreams.toByteArray(con.getInputStream()), StandardCharsets.UTF_8))
-                .isEqualTo("Hello World!");
+        Response<ResponseBody> response = binaryClient
+                .getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")).execute();
+        assertThat(response.code()).isEqualTo(200);
+        assertThat(response.headers().get(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
+        assertThat(response.body().string()).isEqualTo("Hello World!");
     }
 
     @Test
