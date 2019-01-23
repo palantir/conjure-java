@@ -25,7 +25,6 @@ import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
-import com.palantir.product.EteBinaryService;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
