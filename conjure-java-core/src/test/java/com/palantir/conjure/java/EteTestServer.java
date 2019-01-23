@@ -25,6 +25,7 @@ import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
+import com.palantir.conjure.java.server.jersey.Java8OptionalMessageBodyWriter;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -39,6 +40,9 @@ public final class EteTestServer extends Application<Configuration> {
         environment.jersey().setUrlPattern("/api/*");
         environment.jersey().register(new JacksonJsonProvider(ObjectMappers.newServerObjectMapper()));
         environment.jersey().register(ConjureJerseyFeature.INSTANCE);
+        // Must be higher priority than the default writer provided by Dropwizard, otherwise empty optionals
+        // result in 404 response codes.
+        environment.jersey().getResourceConfig().register(Java8OptionalMessageBodyWriter.class, 1);
         environment.jersey().register(new EteResource());
         environment.jersey().register(new EteBinaryResource());
         environment.jersey().register(new EmptyPathResource());
