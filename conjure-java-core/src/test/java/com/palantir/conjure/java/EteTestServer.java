@@ -16,12 +16,16 @@
 
 package com.palantir.conjure.java;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
+import com.palantir.product.EteBinaryService;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -34,7 +38,10 @@ public final class EteTestServer extends Application<Configuration> {
     public void run(Configuration configuration, Environment environment) {
         environment.getApplicationContext().setContextPath("/test-example/*");
         environment.jersey().setUrlPattern("/api/*");
+        environment.jersey().register(new JacksonJsonProvider(ObjectMappers.newServerObjectMapper()));
+        environment.jersey().register(ConjureJerseyFeature.INSTANCE);
         environment.jersey().register(new EteResource());
+        environment.jersey().register(new EteBinaryResource());
         environment.jersey().register(new EmptyPathResource());
     }
 

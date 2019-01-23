@@ -23,14 +23,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
+import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
+import com.palantir.product.EteBinaryServiceRetrofit;
 import com.palantir.product.EteService;
 import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
@@ -51,11 +54,13 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import okhttp3.ResponseBody;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import retrofit2.Response;
 
 public final class JerseyServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
@@ -68,10 +73,16 @@ public final class JerseyServiceEteTest extends TestBase {
             new DropwizardAppRule<>(EteTestServer.class);
 
     private final EteService client;
+    private final EteBinaryServiceRetrofit binary;
 
     public JerseyServiceEteTest() {
         client = JaxRsClient.create(
                 EteService.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
+        binary = Retrofit2Client.create(
+                EteBinaryServiceRetrofit.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
                 clientConfiguration());
@@ -165,10 +176,27 @@ public final class JerseyServiceEteTest extends TestBase {
         assertThat(httpUrlConnection.getResponseCode()).isEqualTo(422);
     }
 
+    @Test
+    public void test_optionalBinary_present() throws IOException {
+        Response<ResponseBody> response = binary.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")).execute();
+        assertThat(response.code()).isEqualTo(200);
+        assertThat(response.headers().get(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
+        assertThat(response.body().string()).isEqualTo("Hello World!");
+    }
+
+    @Test
+    public void test_optionalBinary_empty() throws IOException {
+        Response<ResponseBody> response = binary.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")).execute();
+        assertThat(response.code()).isEqualTo(204);
+        assertThat(response.headers().get(HttpHeaders.CONTENT_TYPE)).isNull();
+        assertThat(response.body()).isNull();
+    }
+
     @BeforeClass
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/ete-service.yml")));
+                ImmutableList.of(new File("src/test/resources/ete-service.yml"),
+                        new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .emit(def, folder.getRoot());
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));

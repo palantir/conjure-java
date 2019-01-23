@@ -52,6 +52,7 @@ dependencies {
     }
     testCompile project(':conjure-java-undertow-runtime')
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
     testCompile 'com.palantir.safe-logging:preconditions-assertj'
