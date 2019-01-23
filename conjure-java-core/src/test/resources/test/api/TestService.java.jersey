@@ -69,6 +69,7 @@ public interface TestService {
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-maybe")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     Optional<StreamingOutput> maybeGetRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);

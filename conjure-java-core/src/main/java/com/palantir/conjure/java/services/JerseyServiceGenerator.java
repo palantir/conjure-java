@@ -80,6 +80,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get(InputStream.class);
     private static final ClassName BINARY_RETURN_TYPE_RESPONSE = ClassName.get(Response.class);
     private static final ClassName BINARY_RETURN_TYPE_OUTPUT = ClassName.get(StreamingOutput.class);
+    private static final TypeName OPTIONAL_BINARY_RETURN_TYPE =
+            ParameterizedTypeName.get(ClassName.get(Optional.class), BINARY_RETURN_TYPE_OUTPUT);
 
     private final Set<FeatureFlags> experimentalFeatures;
 
@@ -98,8 +100,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 : BINARY_RETURN_TYPE_OUTPUT;
 
         TypeName optionalBinaryReturnType = experimentalFeatures.contains(FeatureFlags.JerseyBinaryAsResponse)
-                ? BINARY_RETURN_TYPE_RESPONSE
-                : ParameterizedTypeName.get(ClassName.get(Optional.class), binaryReturnType);
+                ? BINARY_RETURN_TYPE_RESPONSE : OPTIONAL_BINARY_RETURN_TYPE;
 
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
@@ -176,7 +177,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                         .build());
         }
 
-        if (returnType.equals(BINARY_RETURN_TYPE_OUTPUT) || returnType.equals(BINARY_RETURN_TYPE_RESPONSE)) {
+        if (returnType.equals(BINARY_RETURN_TYPE_OUTPUT) || returnType.equals(BINARY_RETURN_TYPE_RESPONSE)
+                || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Produces"))
                     .addMember("value", "$T.APPLICATION_OCTET_STREAM", ClassName.get("javax.ws.rs.core", "MediaType"))
                     .build());
