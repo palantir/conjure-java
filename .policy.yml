@@ -33,7 +33,7 @@ approval_rules:
         users: [ "svc-excavator-bot" ]
       only_changed_files:
         paths:
-          - "^\\.baseline/.*$"
+          - "^\.baseline/.*$"
           - "^.*gradle$"
           - "^gradle/wrapper/.*"
           - "^gradlew$"
