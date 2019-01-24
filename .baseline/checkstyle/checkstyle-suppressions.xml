@@ -27,5 +27,4 @@
 
     <!-- Generated code should not be subjected to checkstyle. -->
     <suppress files="[/\\].*[/\\]generated.*[/\\]" checks="." />
-    <suppress files="[/\\].*[/\\]palantir[/\\]conjure[/\\]spec.*[/\\]" checks="." />
 </suppressions>
