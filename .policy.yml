@@ -3,6 +3,7 @@ policy:
     - or:
       - infra team approval
       - infra team co-approval
+      - undertow team approval
       - excavator only touched baseline, gradle files or versions.props
       - excavator only touched package.json and lock files
   disapproval:
@@ -24,6 +25,19 @@ approval_rules:
       count: 2
       teams:
         - "palantir/infrastructure"
+
+  - name: undertow team approval
+    requires:
+      count: 1
+      users:
+        - "cakofony"
+        - "rubenfiszel"
+        - "uschi2000"
+    if:
+      only_changed_files:
+        paths:
+          - "^.*undertow.*$"
+          - "^.*Undertow.*$"
 
   - name: excavator only touched baseline, gradle files or versions.props
     requires:
