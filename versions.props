@@ -15,7 +15,7 @@ com.palantir.conjure:* = 4.2.2
 com.palantir.ri:resource-identifier = 1.0.1
 com.palantir.syntactic-paths:syntactic-paths = 0.6.1
 com.palantir.tokens:* = 3.5.0
-com.palantir.tracing:tracing = 2.1.1
+com.palantir.tracing:tracing = 2.2.0
 com.palantir.websecurity:dropwizard-web-security = 1.1.0
 com.squareup.okhttp3:* = 3.12.1
 com.squareup:javapoet = 1.11.1
@@ -42,4 +42,4 @@ org.slf4j:* = 1.7.25
 # conflict resolution
 com.palantir.safe-logging:* = 1.8.1
 org.jboss.logging:jboss-logging = 3.3.2.Final
-com.palantir.tracing:tracing-okhttp3 = 2.1.1
+com.palantir.tracing:tracing-okhttp3 = 2.2.0
