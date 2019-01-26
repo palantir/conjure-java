@@ -55,7 +55,8 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
             // Logging context and trace handler must execute prior to the exception
             // to provide user and trace information on exceptions.
             (endpoint, handler) -> new LoggingContextHandler(handler),
-            (endpoint, handler) -> new TraceHandler(endpoint.method() + " " + endpoint.template(), handler),
+            (endpoint, handler) ->
+                    new TraceHandler("Undertow: " + endpoint.method() + " " + endpoint.template(), handler),
             (endpoint, handler) -> new ConjureExceptionHandler(handler)
     ).reverse();
 
