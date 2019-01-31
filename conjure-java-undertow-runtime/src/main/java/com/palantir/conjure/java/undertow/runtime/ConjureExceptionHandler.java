@@ -68,7 +68,6 @@ final class ConjureExceptionHandler implements HttpHandler {
                 statusCode = exception.getErrorType().httpErrorCode();
                 error = SerializableError.forException(exception);
                 log(exception);
-
             } else if (throwable instanceof RemoteException) {
                 // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
                 // We forward these exceptions, but change the ErrorType to INTERNAL, i.e., the problem is now
@@ -93,13 +92,18 @@ final class ConjureExceptionHandler implements HttpHandler {
                         .errorName(errorType.name())
                         .errorCode(errorType.code().toString())
                         .build();
-
             } else if (throwable instanceof IllegalArgumentException) {
                 ServiceException exception = new ServiceException(ErrorType.INVALID_ARGUMENT, throwable);
                 error = SerializableError.forException(exception);
                 statusCode = exception.getErrorType().httpErrorCode();
                 log(exception);
-
+            } else if (throwable instanceof FrameworkException) {
+                FrameworkException frameworkException = (FrameworkException) throwable;
+                statusCode = frameworkException.getStatusCode();
+                ErrorType errorType = statusCode / 100 == 4 ? ErrorType.INVALID_ARGUMENT : ErrorType.INTERNAL;
+                ServiceException exception = new ServiceException(errorType, frameworkException);
+                error = SerializableError.forException(exception);
+                log(exception);
             } else if (throwable instanceof Error) {
                 throw (Error) throwable;
             } else {

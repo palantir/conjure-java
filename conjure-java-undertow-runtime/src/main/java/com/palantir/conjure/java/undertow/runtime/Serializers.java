@@ -18,12 +18,11 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -57,9 +56,9 @@ public final class Serializers {
                 T value = mapper.readValue(input, mapper.constructType(type.getType()));
                 Preconditions.checkNotNull(value, "cannot deserialize a JSON null value");
                 return value;
-            } catch (InvalidFormatException e) {
-                throw new SafeIllegalArgumentException(
-                        "Failed to deserialize response stream. Syntax error?", e, SafeArg.of("type", type.getType()));
+            } catch (MismatchedInputException e) {
+                throw FrameworkException.unprocessableEntity("Failed to deserialize response stream. Syntax error?",
+                        e, SafeArg.of("type", type.getType()));
             } catch (IOException e) {
                 throw new SafeIoException(
                         "Failed to deserialize response stream", e, SafeArg.of("type", type.getType()));

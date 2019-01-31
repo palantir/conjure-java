@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib;
+package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,8 +23,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.reflect.TypeToken;
-import com.palantir.conjure.java.undertow.runtime.Serializer;
-import com.palantir.conjure.java.undertow.runtime.Serializers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,8 +42,9 @@ public final class SerializersTest {
     @Test
     public void json_deserialize_throwsDeserializationErrorsAsIllegalArgumentException() {
         assertThatThrownBy(() -> json.deserialize(asStream("\"2018-08-bogus\""), new TypeToken<OffsetDateTime>() {}))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Failed to deserialize");
+                .isInstanceOf(FrameworkException.class)
+                .hasMessageContaining("Failed to deserialize")
+                .matches(exception -> ((FrameworkException) exception).getStatusCode() == 422, "Expected 422 status");
     }
 
     @Test

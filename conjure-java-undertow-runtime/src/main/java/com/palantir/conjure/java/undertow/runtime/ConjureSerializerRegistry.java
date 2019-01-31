@@ -63,7 +63,7 @@ public final class ConjureSerializerRegistry implements SerializerRegistry {
                 return serializer;
             }
         }
-        throw new SafeIllegalArgumentException("Unsupported Content-Type",
+        throw FrameworkException.unsupportedMediaType("Unsupported Content-Type",
                 SafeArg.of("Content-Type", contentType));
     }
 
