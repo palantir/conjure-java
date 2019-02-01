@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.tracing.undertow.TracedOperationHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -55,7 +56,8 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
             // Logging context and trace handler must execute prior to the exception
             // to provide user and trace information on exceptions.
             (endpoint, handler) -> new LoggingContextHandler(handler),
-            (endpoint, handler) -> new TraceHandler(endpoint.method() + " " + endpoint.template(), handler),
+            (endpoint, handler) -> new TracedOperationHandler(
+                    handler, endpoint.method() + " " + endpoint.template()),
             (endpoint, handler) -> new ConjureExceptionHandler(handler)
     ).reverse();
 
