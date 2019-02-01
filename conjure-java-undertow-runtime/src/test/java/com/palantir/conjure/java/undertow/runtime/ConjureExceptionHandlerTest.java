@@ -18,7 +18,9 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
@@ -27,6 +29,8 @@ import io.undertow.Undertow;
 import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.time.Duration;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -36,7 +40,9 @@ import org.junit.Test;
 
 public final class ConjureExceptionHandlerTest {
 
-    private static final OkHttpClient client = new OkHttpClient.Builder().build();
+    private static final OkHttpClient client = new OkHttpClient.Builder()
+            .followRedirects(false) // we want to explicitly test the 'Location' header
+            .build();
 
     private RuntimeException exception;
     private Undertow server;
@@ -88,6 +94,48 @@ public final class ConjureExceptionHandlerTest {
         assertThat(response.body().string()).isEqualTo(stream.toString());
         // remote exceptions should result in 500 status
         assertThat(response.code()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
+    }
+
+    @Test
+    public void handlesQosExceptionThrottleWithoutDuration() throws IOException {
+        exception = QosException.throttle();
+        Response response = execute();
+
+        assertThat(response.code()).isEqualTo(429);
+        assertThat(response.body().string()).isEmpty();
+        assertThat(response.headers().toMultimap()).doesNotContainKey("Retry-After");
+        assertThat(response.headers().toMultimap()).containsOnlyKeys("connection", "content-length", "date");
+    }
+
+    @Test
+    public void handlesQosExceptionThrottleWithDuration() throws IOException {
+        exception = QosException.throttle(Duration.ofMinutes(2));
+        Response response = execute();
+
+        assertThat(response.code()).isEqualTo(429);
+        assertThat(response.headers().toMultimap())
+                .containsEntry("Retry-After", ImmutableList.of("120"));
+        assertThat(response.body().string()).isEmpty();
+    }
+
+    @Test
+    public void handlesQosExceptionRetryOther() throws IOException {
+        exception = QosException.retryOther(new URL("http://foo"));
+        Response response = execute();
+
+        assertThat(response.code()).isEqualTo(308);
+        assertThat(response.headers().toMultimap())
+                .containsEntry("Location", ImmutableList.of("http://foo"));
+        assertThat(response.body().string()).isEmpty();
+    }
+
+    @Test
+    public void handlesQosExceptionUnavailable() throws IOException {
+        exception = QosException.unavailable();
+        Response response = execute();
+
+        assertThat(response.code()).isEqualTo(503);
+        assertThat(response.body().string()).isEmpty();
     }
 
     @Test

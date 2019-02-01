@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
@@ -25,8 +26,11 @@ import com.palantir.logsafe.SafeArg;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.IoUtils;
@@ -60,14 +64,57 @@ final class ConjureExceptionHandler implements HttpHandler {
         try {
             delegate.handleRequest(exchange);
         } catch (Throwable throwable) {
-            final SerializableError error;
+            final Optional<SerializableError> maybeBody;
             final int statusCode;
 
             if (throwable instanceof ServiceException) {
                 ServiceException exception = (ServiceException) throwable;
                 statusCode = exception.getErrorType().httpErrorCode();
-                error = SerializableError.forException(exception);
+                maybeBody = Optional.of(SerializableError.forException(exception));
                 log(exception);
+            } else if (throwable instanceof QosException) {
+                QosException exception = (QosException) throwable;
+                maybeBody = Optional.empty();
+                statusCode = exception.accept(new QosException.Visitor<Integer>() {
+                    @Override
+                    public Integer visit(QosException.Throttle exception) {
+                        return 429;
+                    }
+
+                    @Override
+                    public Integer visit(QosException.RetryOther exception) {
+                        return 308;
+                    }
+
+                    @Override
+                    public Integer visit(QosException.Unavailable exception) {
+                        return 503;
+                    }
+                });
+                exception.accept(new QosException.Visitor<Void>() {
+                    @Override
+                    public Void visit(QosException.Throttle exception) {
+                        exception.getRetryAfter().ifPresent(duration -> {
+                            exchange.getResponseHeaders()
+                                    .put(Headers.RETRY_AFTER, Long.toString(duration.get(ChronoUnit.SECONDS)));
+                        });
+                        return null;
+                    }
+
+                    @Override
+                    public Void visit(QosException.RetryOther exception) {
+                        exchange.getResponseHeaders()
+                                .put(Headers.LOCATION, exception.getRedirectTo().toString());
+                        return null;
+                    }
+
+                    @Override
+                    public Void visit(QosException.Unavailable exception) {
+                        return null;
+                    }
+                });
+                logQosException(exception);
+
             } else if (throwable instanceof RemoteException) {
                 // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
                 // We forward these exceptions, but change the ErrorType to INTERNAL, i.e., the problem is now
@@ -77,7 +124,8 @@ final class ConjureExceptionHandler implements HttpHandler {
                 RemoteException exception = (RemoteException) throwable;
 
                 // log at WARN instead of ERROR because although this indicates an issue in a remote server
-                log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
+                log.warn(
+                        "Encountered a remote exception. Mapping to an internal error before propagating",
                         SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                         SafeArg.of("errorName", exception.getError().errorName()),
                         SafeArg.of("statusCode", exception.getStatus()),
@@ -87,14 +135,14 @@ final class ConjureExceptionHandler implements HttpHandler {
                 statusCode = errorType.httpErrorCode();
 
                 // Override only the name and code of the error
-                error = SerializableError.builder()
+                maybeBody = Optional.of(SerializableError.builder()
                         .from(exception.getError())
                         .errorName(errorType.name())
                         .errorCode(errorType.code().toString())
-                        .build();
+                        .build());
             } else if (throwable instanceof IllegalArgumentException) {
                 ServiceException exception = new ServiceException(ErrorType.INVALID_ARGUMENT, throwable);
-                error = SerializableError.forException(exception);
+                maybeBody = Optional.of(SerializableError.forException(exception));
                 statusCode = exception.getErrorType().httpErrorCode();
                 log(exception);
             } else if (throwable instanceof FrameworkException) {
@@ -102,14 +150,14 @@ final class ConjureExceptionHandler implements HttpHandler {
                 statusCode = frameworkException.getStatusCode();
                 ErrorType errorType = statusCode / 100 == 4 ? ErrorType.INVALID_ARGUMENT : ErrorType.INTERNAL;
                 ServiceException exception = new ServiceException(errorType, frameworkException);
-                error = SerializableError.forException(exception);
+                maybeBody = Optional.of(SerializableError.forException(exception));
                 log(exception);
             } else if (throwable instanceof Error) {
                 throw (Error) throwable;
             } else {
                 ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
                 statusCode = exception.getErrorType().httpErrorCode();
-                error = SerializableError.forException(exception);
+                maybeBody = Optional.of(SerializableError.forException(exception));
                 log(exception);
             }
 
@@ -117,7 +165,9 @@ final class ConjureExceptionHandler implements HttpHandler {
             if (!isResponseStarted(exchange)) {
                 exchange.setStatusCode(statusCode);
                 try {
-                    serializers.serialize(error, exchange);
+                    if (maybeBody.isPresent()) {
+                        serializers.serialize(maybeBody.get(), exchange);
+                    }
                 } catch (IOException | RuntimeException e) {
                     log.info("Failed to write error response", e);
                 }
@@ -132,6 +182,7 @@ final class ConjureExceptionHandler implements HttpHandler {
         }
     }
 
+
     private static boolean isResponseStarted(HttpServerExchange exchange) {
         if (exchange.isResponseStarted()) {
             return true;
@@ -143,6 +194,10 @@ final class ConjureExceptionHandler implements HttpHandler {
             ((UndertowOutputStream) outputStream).resetBuffer();
         }
         return false;
+    }
+
+    private static void logQosException(QosException exception) {
+        log.debug("Possible quality-of-service intervention", exception);
     }
 
     private static void log(ServiceException exception) {
