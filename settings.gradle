@@ -1,4 +1,4 @@
-rootProject.name = 'conjure-java'
+rootProject.name = 'palantir-conjure-java'
 
 include 'conjure-java'
 include 'conjure-java-core'
