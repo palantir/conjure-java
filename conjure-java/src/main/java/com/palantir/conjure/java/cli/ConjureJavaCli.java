@@ -121,7 +121,7 @@ public final class ConjureJavaCli implements Runnable {
             CliConfiguration config = getConfiguration();
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
-                TypeGenerator typeGenerator = new ObjectGenerator();
+                TypeGenerator typeGenerator = new ObjectGenerator(config.featureFlags());
                 ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.featureFlags());
                 ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.featureFlags());
                 ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.featureFlags());

@@ -83,23 +83,23 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     private static final TypeName OPTIONAL_BINARY_RETURN_TYPE =
             ParameterizedTypeName.get(ClassName.get(Optional.class), BINARY_RETURN_TYPE_OUTPUT);
 
-    private final Set<FeatureFlags> experimentalFeatures;
+    private final Set<FeatureFlags> featureFlags;
 
     public JerseyServiceGenerator() {
         this(ImmutableSet.of());
     }
 
     public JerseyServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
-        this.experimentalFeatures = ImmutableSet.copyOf(experimentalFeatures);
+        this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
     }
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        ClassName binaryReturnType = experimentalFeatures.contains(FeatureFlags.JerseyBinaryAsResponse)
+        ClassName binaryReturnType = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse)
                 ? BINARY_RETURN_TYPE_RESPONSE
                 : BINARY_RETURN_TYPE_OUTPUT;
 
-        TypeName optionalBinaryReturnType = experimentalFeatures.contains(FeatureFlags.JerseyBinaryAsResponse)
+        TypeName optionalBinaryReturnType = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse)
                 ? BINARY_RETURN_TYPE_RESPONSE : OPTIONAL_BINARY_RETURN_TYPE;
 
         TypeMapper returnTypeMapper = new TypeMapper(
@@ -107,12 +107,13 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 new ReturnTypeClassNameVisitor(
                         conjureDefinition.getTypes(),
                         binaryReturnType,
-                        optionalBinaryReturnType));
+                        optionalBinaryReturnType,
+                        featureFlags));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new SpecializeBinaryClassNameVisitor(
-                        new DefaultClassNameVisitor(conjureDefinition.getTypes()),
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags),
                         BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
@@ -339,7 +340,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         if (withAnnotations) {
             paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
                     .addMember("value", "$S", tokenName).build());
-            if (experimentalFeatures.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+            if (featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }
         }
@@ -362,7 +363,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                     .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
             if (def.getType().accept(TypeVisitor.IS_OPTIONAL)
-                    || !experimentalFeatures.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+                    || !featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 return Optional.empty();
             }
             annotationSpecBuilder = AnnotationSpec

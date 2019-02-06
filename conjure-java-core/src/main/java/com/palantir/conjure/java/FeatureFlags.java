@@ -54,4 +54,9 @@ public enum FeatureFlags {
      * Undertow generated service interfaces are generated with an "Undertow" prefix.
      */
     UndertowServicePrefix,
+
+    /**
+     * Fall back to deprecated ByteBuffer values for binary fields.
+     */
+    ByteBufferBinaryFields,
 }

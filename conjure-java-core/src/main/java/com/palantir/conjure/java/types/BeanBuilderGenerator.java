@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -55,6 +56,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -63,21 +65,26 @@ public final class BeanBuilderGenerator {
     private final TypeMapper typeMapper;
     private final ClassName builderClass;
     private final ClassName objectClass;
+    private final Set<FeatureFlags> featureFlags;
 
-    private BeanBuilderGenerator(TypeMapper typeMapper, ClassName builderClass, ClassName objectClass) {
+    private BeanBuilderGenerator(
+            TypeMapper typeMapper,
+            ClassName builderClass,
+            ClassName objectClass,
+            Set<FeatureFlags> featureFlags) {
         this.typeMapper = typeMapper;
         this.builderClass = builderClass;
         this.objectClass = objectClass;
+        this.featureFlags = featureFlags;
     }
 
     public static TypeSpec generate(
             TypeMapper typeMapper,
             ClassName objectClass,
             ClassName builderClass,
-            ObjectDefinition typeDef) {
-
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass)
-                .generate(typeDef);
+            ObjectDefinition typeDef,
+            Set<FeatureFlags> featureFlags) {
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, featureFlags).generate(typeDef);
     }
 
     private TypeSpec generate(ObjectDefinition typeDef) {
@@ -313,7 +320,7 @@ public final class BeanBuilderGenerator {
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
             return shouldClearFirst ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
                     : addStatement;
-        } else if (type.accept(TypeVisitor.IS_BINARY)) {
+        } else if (isByteBuffer(type)) {
             return CodeBlock.builder()
                     .addStatement("$L", Expressions.requireNonNull(
                             spec.name, enriched.fieldName().get() + " cannot be null"))
@@ -343,6 +350,10 @@ public final class BeanBuilderGenerator {
                     : Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null");
             return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
         }
+    }
+
+    private boolean isByteBuffer(Type type) {
+        return type.accept(TypeVisitor.IS_BINARY) && featureFlags.contains(FeatureFlags.ByteBufferBinaryFields);
     }
 
     private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched) {
