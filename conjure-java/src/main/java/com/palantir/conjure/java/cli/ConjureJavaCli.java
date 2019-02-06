@@ -113,6 +113,11 @@ public final class ConjureJavaCli implements Runnable {
                         "Experimental: Generate service interfaces for Undertow with class names prefixed 'Undertow'")
         private boolean undertowServicePrefix;
 
+        @CommandLine.Option(names = "--byteBufferBinaryFields",
+                defaultValue = "false",
+                description = "Generate binary fields using the legacy 'ByteBuffer' type instead of 'Bytes'")
+        private boolean byteBufferBinaryFields;
+
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
 
@@ -157,6 +162,7 @@ public final class ConjureJavaCli implements Runnable {
                     .jerseyBinaryAsResponse(jerseyBinaryAsReponse)
                     .notNullAuthAndBody(notNullAuthAndBody)
                     .undertowServicePrefix(undertowServicePrefix)
+                    .byteBufferBinaryFields(byteBufferBinaryFields)
                     .build();
         }
 

@@ -92,5 +92,9 @@ public abstract class CliConfiguration {
         Builder undertowServicePrefix(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.UndertowServicePrefix) : this;
         }
+
+        Builder byteBufferBinaryFields(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.ByteBufferBinaryFields) : this;
+        }
     }
 }

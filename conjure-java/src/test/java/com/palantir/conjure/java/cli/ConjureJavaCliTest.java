@@ -67,7 +67,8 @@ public final class ConjureJavaCliTest {
                 "--objects",
                 "--retrofitCompletableFutures",
                 "--jerseyBinaryAsResponse",
-                "--requireNotNullAuthAndBodyParams"
+                "--requireNotNullAuthAndBodyParams",
+                "--byteBufferBinaryFields"
         };
         CliConfiguration expectedConfiguration = CliConfiguration.builder()
                 .input(targetFile)
@@ -76,7 +77,8 @@ public final class ConjureJavaCliTest {
                 .featureFlags(ImmutableSet.of(
                         FeatureFlags.RetrofitCompletableFutures,
                         FeatureFlags.JerseyBinaryAsResponse,
-                        FeatureFlags.RequireNotNullAuthAndBodyParams))
+                        FeatureFlags.RequireNotNullAuthAndBodyParams,
+                        FeatureFlags.ByteBufferBinaryFields))
                 .build();
         ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
