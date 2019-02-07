@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.ServiceGenerator;
@@ -122,8 +123,13 @@ public final class ConjureJavaCli implements Runnable {
         private List<String> unmatchedOptions;
 
         @Override
+        @SuppressWarnings("BanSystemErr")
         public void run() {
             CliConfiguration config = getConfiguration();
+            if (!config.featureFlags().contains(FeatureFlags.UseImmutableBytes)) {
+                System.err.println("[WARNING] Using deprecated ByteBuffer codegen, please enable the "
+                        + "--useImmutableBytes feature flag to opt into the preferred implementation");
+            }
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
                 TypeGenerator typeGenerator = new ObjectGenerator(config.featureFlags());

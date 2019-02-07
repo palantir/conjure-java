@@ -26,13 +26,17 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.rules.TemporaryFolder;
 import picocli.CommandLine;
 
 public final class ConjureJavaCliTest {
 
     @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    public final TemporaryFolder folder = new TemporaryFolder();
+
+    @Rule
+    public final SystemErrRule systemErr = new SystemErrRule().enableLog();
 
     private File targetFile;
 
@@ -147,11 +151,13 @@ public final class ConjureJavaCliTest {
                 "generate",
                 "src/test/resources/conjure-api.json",
                 outputDirectory.getAbsolutePath(),
-                "--objects"
+                "--objects",
+                "--useImmutableBytes"
         };
         CommandLine.run(new ConjureJavaCli(), args);
         assertThat(
                 new File(outputDirectory, "com/palantir/conjure/spec/ConjureDefinition.java").isFile()).isTrue();
+        assertThat(systemErr.getLog()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 
     @Test
@@ -160,5 +166,18 @@ public final class ConjureJavaCliTest {
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Error parsing definition");
+    }
+
+    @Test
+    public void writesWarningWhenBytesIsDisabled() throws IOException {
+        File outputDirectory = folder.newFolder();
+        String[] args = {
+                "generate",
+                "src/test/resources/conjure-api.json",
+                outputDirectory.getAbsolutePath(),
+                "--objects"
+        };
+        CommandLine.run(new ConjureJavaCli(), args);
+        assertThat(systemErr.getLog()).contains("[WARNING] Using deprecated ByteBuffer");
     }
 }
