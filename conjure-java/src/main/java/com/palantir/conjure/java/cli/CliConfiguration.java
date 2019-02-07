@@ -93,8 +93,8 @@ public abstract class CliConfiguration {
             return flag ? addFeatureFlags(FeatureFlags.UndertowServicePrefix) : this;
         }
 
-        Builder byteBufferBinaryFields(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.ByteBufferBinaryFields) : this;
+        Builder useImmutableBytes(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.UseImmutableBytes) : this;
         }
     }
 }

@@ -33,7 +33,8 @@ public final class ObjectGeneratorTests {
     public void testObjectGenerator_allExamples() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-types.yml")));
-        List<Path> files = new ObjectGenerator(Collections.emptySet()).emit(def, folder.getRoot());
+        List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes))
+                .emit(def, folder.getRoot());
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
@@ -42,7 +43,7 @@ public final class ObjectGeneratorTests {
     public void testObjectGenerator_byteBufferCompatibility() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
-        List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.ByteBufferBinaryFields))
+        List<Path> files = new ObjectGenerator(Collections.emptySet())
                 .emit(def, folder.getRoot());
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -56,7 +57,7 @@ public final class ObjectGeneratorTests {
                         new File("src/test/resources/example-types.yml"),
                         new File("src/test/resources/example-service.yml")));
         File src = folder.newFolder("src");
-        ObjectGenerator generator = new ObjectGenerator(Collections.emptySet());
+        ObjectGenerator generator = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes));
         generator.emit(conjure, src);
 
         // Generated files contain imports
@@ -73,7 +74,8 @@ public final class ObjectGeneratorTests {
     public void testConjureErrors() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-errors.yml")));
-        List<Path> files = new ObjectGenerator(Collections.emptySet()).emit(def, folder.getRoot());
+        List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes))
+                .emit(def, folder.getRoot());
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }

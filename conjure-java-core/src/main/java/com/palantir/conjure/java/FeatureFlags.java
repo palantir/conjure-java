@@ -56,7 +56,7 @@ public enum FeatureFlags {
     UndertowServicePrefix,
 
     /**
-     * Fall back to deprecated ByteBuffer values for binary fields.
+     * Use the conjure immutable "Bytes" class over ByteBuffer.
      */
-    ByteBufferBinaryFields,
+    UseImmutableBytes,
 }

@@ -194,7 +194,7 @@ public final class BeanGenerator {
                 .returns(field.poetSpec().type);
 
         if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY)
-                && featureFlags.contains(FeatureFlags.ByteBufferBinaryFields)) {
+                && !featureFlags.contains(FeatureFlags.UseImmutableBytes)) {
             getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
         } else {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);

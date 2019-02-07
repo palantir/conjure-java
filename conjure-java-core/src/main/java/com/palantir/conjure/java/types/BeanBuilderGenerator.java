@@ -353,7 +353,7 @@ public final class BeanBuilderGenerator {
     }
 
     private boolean isByteBuffer(Type type) {
-        return type.accept(TypeVisitor.IS_BINARY) && featureFlags.contains(FeatureFlags.ByteBufferBinaryFields);
+        return type.accept(TypeVisitor.IS_BINARY) && !featureFlags.contains(FeatureFlags.UseImmutableBytes);
     }
 
     private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched) {
