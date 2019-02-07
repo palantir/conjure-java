@@ -63,6 +63,7 @@ allprojects {
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'org.inferred.processors'
+    apply plugin: 'com.palantir.baseline-class-uniqueness'
 
     sourceCompatibility = 1.8
 
