@@ -1,70 +1,72 @@
-package com.palantir.product;
+package com.palantir.binary;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Generated;
 
-@JsonDeserialize(builder = BinaryExample.Builder.class)
+@JsonDeserialize(builder = OptionalExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class BinaryExample {
-    private final Bytes binary;
+public final class OptionalExample {
+    private final Optional<ByteBuffer> item;
 
     private volatile int memoizedHashCode;
 
-    private BinaryExample(Bytes binary) {
-        validateFields(binary);
-        this.binary = binary;
+    private OptionalExample(Optional<ByteBuffer> item) {
+        validateFields(item);
+        this.item = item;
     }
 
-    @JsonProperty("binary")
-    public Bytes getBinary() {
-        return this.binary;
+    @JsonProperty("item")
+    public Optional<ByteBuffer> getItem() {
+        return this.item;
     }
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof BinaryExample && equalTo((BinaryExample) other));
+        return this == other
+                || (other instanceof OptionalExample && equalTo((OptionalExample) other));
     }
 
-    private boolean equalTo(BinaryExample other) {
-        return this.binary.equals(other.binary);
+    private boolean equalTo(OptionalExample other) {
+        return this.item.equals(other.item);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(binary);
+            memoizedHashCode = Objects.hash(item);
         }
         return memoizedHashCode;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder("BinaryExample")
+        return new StringBuilder("OptionalExample")
                 .append('{')
-                .append("binary")
+                .append("item")
                 .append(": ")
-                .append(binary)
+                .append(item)
                 .append('}')
                 .toString();
     }
 
-    public static BinaryExample of(Bytes binary) {
-        return builder().binary(binary).build();
+    public static OptionalExample of(ByteBuffer item) {
+        return builder().item(Optional.of(item)).build();
     }
 
-    private static void validateFields(Bytes binary) {
+    private static void validateFields(Optional<ByteBuffer> item) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, binary, "binary");
+        missingFields = addFieldIfMissing(missingFields, item, "item");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set",
@@ -91,23 +93,28 @@ public final class BinaryExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private Bytes binary;
+        private Optional<ByteBuffer> item = Optional.empty();
 
         private Builder() {}
 
-        public Builder from(BinaryExample other) {
-            binary(other.getBinary());
+        public Builder from(OptionalExample other) {
+            item(other.getItem());
             return this;
         }
 
-        @JsonSetter("binary")
-        public Builder binary(Bytes binary) {
-            this.binary = Preconditions.checkNotNull(binary, "binary cannot be null");
+        @JsonSetter("item")
+        public Builder item(Optional<ByteBuffer> item) {
+            this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
-        public BinaryExample build() {
-            return new BinaryExample(binary);
+        public Builder item(ByteBuffer item) {
+            this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
+            return this;
+        }
+
+        public OptionalExample build() {
+            return new OptionalExample(item);
         }
     }
 }

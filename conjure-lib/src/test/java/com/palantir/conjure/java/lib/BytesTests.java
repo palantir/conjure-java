@@ -19,6 +19,7 @@ package com.palantir.conjure.java.lib;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -164,5 +165,23 @@ public final class BytesTests {
         assertThat(serialized).isEqualTo("\"dGVzdA==\"");
         assertThat(new String(mapper.readValue(serialized, Bytes.class).asNewByteArray(), StandardCharsets.UTF_8))
                 .isEqualTo("test");
+    }
+
+    @Test
+    public void testSerDe() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        Bytes original = Bytes.from("test".getBytes(StandardCharsets.UTF_8));
+        String base64String = "\"dGVzdA==\"";
+
+        assertThat(mapper.writeValueAsString(original)).isEqualTo(base64String);
+        assertThat(mapper.readValue(base64String, Bytes.class)).isEqualTo(original);
+    }
+
+    @Test
+    public void testSerDe_cannotMapEmptyArray() {
+        ObjectMapper mapper = new ObjectMapper();
+        assertThatThrownBy(() -> mapper.readValue("[]", Bytes.class))
+                .isInstanceOf(JsonParseException.class);
     }
 }

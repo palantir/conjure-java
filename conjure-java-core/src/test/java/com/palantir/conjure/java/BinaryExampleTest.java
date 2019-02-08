@@ -18,7 +18,6 @@ package com.palantir.conjure.java;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.product.BinaryExample;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 
@@ -28,7 +27,7 @@ public class BinaryExampleTest {
     public void cannotMutateForSubsequentGets() {
         ByteBuffer buffer = ByteBuffer.allocate(1).put((byte) 1);
         buffer.rewind();
-        BinaryExample binaryExample = BinaryExample.of(buffer);
+        com.palantir.binary.BinaryExample binaryExample = com.palantir.binary.BinaryExample.of(buffer);
 
         ByteBuffer firstGet = binaryExample.getBinary();
         ByteBuffer secondGet = binaryExample.getBinary();
@@ -42,7 +41,7 @@ public class BinaryExampleTest {
         byte value = (byte) 1;
         ByteBuffer buffer = ByteBuffer.allocate(1).put(value);
         buffer.rewind();
-        BinaryExample binaryExample = BinaryExample.of(buffer);
+        com.palantir.binary.BinaryExample binaryExample = com.palantir.binary.BinaryExample.of(buffer);
         buffer.put((byte) (value + 1));
         buffer.rewind();
         assertThat(binaryExample.getBinary().get()).isEqualTo(value);

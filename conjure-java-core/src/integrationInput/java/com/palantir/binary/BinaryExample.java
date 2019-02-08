@@ -1,13 +1,13 @@
-package com.palantir.product;
+package com.palantir.binary;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,18 +16,18 @@ import javax.annotation.Generated;
 @JsonDeserialize(builder = BinaryExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class BinaryExample {
-    private final Bytes binary;
+    private final ByteBuffer binary;
 
     private volatile int memoizedHashCode;
 
-    private BinaryExample(Bytes binary) {
+    private BinaryExample(ByteBuffer binary) {
         validateFields(binary);
         this.binary = binary;
     }
 
     @JsonProperty("binary")
-    public Bytes getBinary() {
-        return this.binary;
+    public ByteBuffer getBinary() {
+        return this.binary.asReadOnlyBuffer();
     }
 
     @Override
@@ -58,11 +58,11 @@ public final class BinaryExample {
                 .toString();
     }
 
-    public static BinaryExample of(Bytes binary) {
+    public static BinaryExample of(ByteBuffer binary) {
         return builder().binary(binary).build();
     }
 
-    private static void validateFields(Bytes binary) {
+    private static void validateFields(ByteBuffer binary) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, binary, "binary");
         if (missingFields != null) {
@@ -91,7 +91,7 @@ public final class BinaryExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
-        private Bytes binary;
+        private ByteBuffer binary;
 
         private Builder() {}
 
@@ -101,8 +101,10 @@ public final class BinaryExample {
         }
 
         @JsonSetter("binary")
-        public Builder binary(Bytes binary) {
-            this.binary = Preconditions.checkNotNull(binary, "binary cannot be null");
+        public Builder binary(ByteBuffer binary) {
+            Preconditions.checkNotNull(binary, "binary cannot be null");
+            this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
+            this.binary.rewind();
             return this;
         }
 
