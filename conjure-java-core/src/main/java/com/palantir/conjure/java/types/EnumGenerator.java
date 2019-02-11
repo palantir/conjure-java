@@ -22,6 +22,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.lib.internal.ConjureEnums;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
@@ -36,6 +37,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -49,20 +52,24 @@ public final class EnumGenerator {
 
     private EnumGenerator() {}
 
-    public static JavaFile generateEnumType(EnumDefinition typeDef) {
+    public static JavaFile generateEnumType(EnumDefinition typeDef, Set<FeatureFlags> featureFlags) {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName thisClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName enumClass = ClassName.get(typePackage, typeDef.getTypeName().getName(), "Value");
         ClassName visitorClass = ClassName.get(typePackage, typeDef.getTypeName().getName(), "Visitor");
 
-        return JavaFile.builder(typePackage, createSafeEnum(typeDef, thisClass, enumClass, visitorClass))
+        return JavaFile.builder(typePackage, createSafeEnum(typeDef, thisClass, enumClass, visitorClass, featureFlags))
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
     }
 
     private static TypeSpec createSafeEnum(
-            EnumDefinition typeDef, ClassName thisClass, ClassName enumClass, ClassName visitorClass) {
+            EnumDefinition typeDef,
+            ClassName thisClass,
+            ClassName enumClass,
+            ClassName visitorClass,
+            Set<FeatureFlags> featureFlags) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -86,7 +93,7 @@ public final class EnumGenerator {
                         .build())
                 .addMethod(createEquals(thisClass))
                 .addMethod(createHashCode())
-                .addMethod(createValueOf(thisClass, typeDef.getValues()))
+                .addMethod(createValueOf(thisClass, typeDef.getValues(), featureFlags))
                 .addMethod(generateAcceptVisitMethod(visitorClass, typeDef.getValues()));
 
         typeDef.getDocs().ifPresent(
@@ -201,11 +208,16 @@ public final class EnumGenerator {
                 .build();
     }
 
-    private static MethodSpec createValueOf(ClassName thisClass, Iterable<EnumValueDefinition> values) {
+    private static MethodSpec createValueOf(
+            ClassName thisClass,
+            Iterable<EnumValueDefinition> values,
+            Set<FeatureFlags> featureFlags) {
         ParameterSpec param = ParameterSpec.builder(ClassName.get(String.class), "value").build();
-
-        CodeBlock.Builder parser = CodeBlock.builder()
-                .beginControlFlow("switch ($N)", param);
+        CodeBlock.Builder parser = CodeBlock.builder();
+        if (featureFlags.contains(FeatureFlags.CaseInsensitiveEnums)) {
+            parser.addStatement("value = value.toUpperCase($T.ENGLISH)", Locale.class);
+        }
+        parser.beginControlFlow("switch ($N)", param);
         for (EnumValueDefinition value : values) {
             parser.add("case $S:\n", value.getValue())
                     .indent()

@@ -46,8 +46,7 @@ public final class ObjectGenerator implements TypeGenerator {
                 return UnionGenerator.generateUnionType(
                         typeMapper, typeDef.accept(TypeDefinitionVisitor.UNION));
             } else if (typeDef.accept(TypeDefinitionVisitor.IS_ENUM)) {
-                return EnumGenerator.generateEnumType(
-                        typeDef.accept(TypeDefinitionVisitor.ENUM));
+                return EnumGenerator.generateEnumType(typeDef.accept(TypeDefinitionVisitor.ENUM), featureFlags);
             } else if (typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)) {
                 return AliasGenerator.generateAliasType(
                         typeMapper, typeDef.accept(TypeDefinitionVisitor.ALIAS));

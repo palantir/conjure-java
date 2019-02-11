@@ -119,6 +119,12 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'")
         private boolean useImmutableBytes;
 
+        @CommandLine.Option(names = "--useInsensitiveEnums",
+                defaultValue = "false",
+                description = "Enums valueOf function will use a case-insensitive lookup. Note that this is not "
+                        + "allowed by the conjure specification, however may be enabled for backwards compatibility.")
+        private boolean useInsensitiveEnums;
+
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
 
@@ -169,6 +175,7 @@ public final class ConjureJavaCli implements Runnable {
                     .notNullAuthAndBody(notNullAuthAndBody)
                     .undertowServicePrefix(undertowServicePrefix)
                     .useImmutableBytes(useImmutableBytes)
+                    .useInsensitiveEnums(useInsensitiveEnums)
                     .build();
         }
 
