@@ -120,11 +120,10 @@ final class ConjureExceptionHandler implements HttpHandler {
 
         ErrorType errorType = ErrorType.INTERNAL;
         writeResponse(exchange,
-                // Override only the name and code of the error
                 Optional.of(SerializableError.builder()
-                        .from(exception.getError())
                         .errorName(errorType.name())
                         .errorCode(errorType.code().toString())
+                        .errorInstanceId(exception.getError().errorInstanceId())
                         .build()),
                 errorType.httpErrorCode());
     }
