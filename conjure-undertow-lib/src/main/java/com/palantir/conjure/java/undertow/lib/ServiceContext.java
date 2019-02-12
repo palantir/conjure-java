@@ -25,10 +25,13 @@ import com.palantir.logsafe.Preconditions;
 public final class ServiceContext {
 
     private final SerializerRegistry serializerRegistry;
+    private final ServiceInstrumenter serviceInstrumenter;
 
     private ServiceContext(Builder builder) {
         this.serializerRegistry = Preconditions.checkNotNull(builder.serializerRegistry,
                 "Missing required SerializerRegistry");
+        this.serviceInstrumenter = Preconditions.checkNotNull(builder.serviceInstrumenter,
+                "Missing required ServiceInstrumenter");
     }
 
     /**
@@ -38,6 +41,13 @@ public final class ServiceContext {
         return serializerRegistry;
     }
 
+    /**
+     * {@link ServiceInstrumenter} to apply metric instrumentation to exposed services.
+     */
+    public ServiceInstrumenter serviceInstrumenter() {
+        return serviceInstrumenter;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -45,12 +55,24 @@ public final class ServiceContext {
     public static final class Builder {
 
         private SerializerRegistry serializerRegistry;
+        private ServiceInstrumenter serviceInstrumenter = new ServiceInstrumenter() {
+            @Override
+            public <T> T instrument(T serviceImplementation, Class<T> serviceInterface) {
+                return serviceImplementation;
+            }
+        };
 
         private Builder() {}
 
         @CanIgnoreReturnValue
         public Builder serializerRegistry(SerializerRegistry value) {
             this.serializerRegistry = Preconditions.checkNotNull(value, "Value is required");
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder serviceInstrumenter(ServiceInstrumenter value) {
+            this.serviceInstrumenter = Preconditions.checkNotNull(value, "Value is required");
             return this;
         }
 
