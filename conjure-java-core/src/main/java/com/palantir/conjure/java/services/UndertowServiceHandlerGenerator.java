@@ -115,7 +115,8 @@ final class UndertowServiceHandlerGenerator {
                 .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
                 .addParameter(serviceClass, DELEGATE_VAR_NAME)
                 .addStatement("this.$1N = $2N.serializerRegistry()", SERIALIZER_REGISTRY_VAR_NAME, CONTEXT_VAR_NAME)
-                .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
+                .addStatement("this.$1N = $2N.serviceInstrumenter().instrument($1N, $3T.class)",
+                        DELEGATE_VAR_NAME, CONTEXT_VAR_NAME, serviceClass)
                 .build());
 
         // implement Registrable#add interface

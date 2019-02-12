@@ -47,7 +47,9 @@ public final class EteBinaryServiceEndpoints implements Service {
         private EteBinaryServiceRegistrable(
                 ServiceContext context, UndertowEteBinaryService delegate) {
             this.serializers = context.serializerRegistry();
-            this.delegate = delegate;
+            this.delegate =
+                    context.serviceInstrumenter()
+                            .instrument(delegate, UndertowEteBinaryService.class);
         }
 
         @Override

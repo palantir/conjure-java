@@ -52,7 +52,8 @@ public final class EteServiceEndpoints implements Service {
 
         private EteServiceRegistrable(ServiceContext context, UndertowEteService delegate) {
             this.serializers = context.serializerRegistry();
-            this.delegate = delegate;
+            this.delegate =
+                    context.serviceInstrumenter().instrument(delegate, UndertowEteService.class);
         }
 
         @Override
