@@ -36,7 +36,9 @@ public final class EmptyPathServiceEndpoints implements Service {
         private EmptyPathServiceRegistrable(
                 ServiceContext context, UndertowEmptyPathService delegate) {
             this.serializers = context.serializerRegistry();
-            this.delegate = delegate;
+            this.delegate =
+                    context.serviceInstrumenter()
+                            .instrument(delegate, UndertowEmptyPathService.class);
         }
 
         @Override

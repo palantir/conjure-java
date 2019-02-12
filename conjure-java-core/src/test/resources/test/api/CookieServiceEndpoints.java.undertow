@@ -38,7 +38,7 @@ public final class CookieServiceEndpoints implements Service {
 
         private CookieServiceRegistrable(ServiceContext context, CookieService delegate) {
             this.serializers = context.serializerRegistry();
-            this.delegate = delegate;
+            this.delegate = context.serviceInstrumenter().instrument(delegate, CookieService.class);
         }
 
         @Override
