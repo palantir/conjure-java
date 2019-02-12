@@ -81,12 +81,12 @@ public final class ConjureExceptionHandlerTest {
         exception = new RemoteException(remoteError, ErrorType.CONFLICT.httpErrorCode());
         Response response = execute();
 
-        // Propagates args and errorInstanceId, but changes error code and name to INTERNAL
+        // Propagates errorInstanceId and changes error code and name to INTERNAL
+        // Does not propagate args
         SerializableError expectedPropagatedError = SerializableError.builder()
                 .errorCode(ErrorType.INTERNAL.code().toString())
                 .errorName(ErrorType.INTERNAL.name())
                 .errorInstanceId(remoteError.errorInstanceId())
-                .parameters(remoteError.parameters())
                 .build();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Serializers.json().serialize(expectedPropagatedError, stream);
