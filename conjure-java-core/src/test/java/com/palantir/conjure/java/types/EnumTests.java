@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.insensitive.InsensitiveEnum;
 import com.palantir.product.EnumExample;
 import org.junit.Test;
 
@@ -46,6 +47,17 @@ public class EnumTests {
     public void testVisitUnknown() {
         EnumExample enumExample = EnumExample.valueOf("SOME_VALUE");
         assertThat(enumExample.accept(Visitor.INSTANCE)).isEqualTo("SOME_VALUE");
+    }
+
+    @Test
+    public void testInsensitiveEnum_lowerCase() {
+        assertThat(InsensitiveEnum.valueOf("one")).isEqualTo(InsensitiveEnum.ONE);
+    }
+
+    @Test
+    public void testInsensitiveEnum_lowerCaseUnknown() {
+        InsensitiveEnum value = InsensitiveEnum.valueOf("notknown");
+        assertThat(value.get()).isEqualTo(InsensitiveEnum.Value.UNKNOWN);
     }
 
     @Test

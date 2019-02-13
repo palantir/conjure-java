@@ -59,4 +59,10 @@ public enum FeatureFlags {
      * Use the conjure immutable "Bytes" class over ByteBuffer.
      */
     UseImmutableBytes,
+
+    /**
+     * Enums valueOf function will use a case-insensitive lookup. Note that this is not allowed by the conjure
+     * specification, however may be enabled for backwards compatibility.
+     */
+    CaseInsensitiveEnums,
 }
