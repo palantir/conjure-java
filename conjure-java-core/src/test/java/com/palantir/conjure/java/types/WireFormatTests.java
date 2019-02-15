@@ -4,19 +4,13 @@
 
 package com.palantir.conjure.java.types;
 
-import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.logsafe.SafeLoggable;
-import com.palantir.logsafe.UnsafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.logsafe.testing.LoggableExceptionAssert;
 import com.palantir.product.BinaryAliasExample;
 import com.palantir.product.BinaryExample;
 import com.palantir.product.DateTimeExample;
@@ -39,7 +33,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.UUID;
-import org.assertj.core.api.ThrowableAssert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -196,30 +189,9 @@ public final class WireFormatTests {
     @Test
     public void testEnumCasingDeserializationInvariantToInputCase() throws Exception {
         assertThat(mapper.readValue("\"ONE\"", EnumExample.class)).isEqualTo(EnumExample.ONE);
-        assertThat(mapper.readValue("\"ONE_HUNDRED\"", EnumExample.class)).isEqualTo(EnumExample.ONE_HUNDRED);
-        assertThatExceptionThrownRootCause(() -> mapper.readValue("\"one\"", EnumExample.class))
-                .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasLogMessage("Enum values must use UPPER_SNAKE_CASE")
-                .hasExactlyArgs(UnsafeArg.of("value", "one"));
-        assertThatExceptionThrownRootCause(() -> mapper.readValue("\"onE\"", EnumExample.class))
-                .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasLogMessage("Enum values must use UPPER_SNAKE_CASE")
-                .hasExactlyArgs(UnsafeArg.of("value", "onE"));
-        assertThatExceptionThrownRootCause(() -> mapper.readValue("\"oNE\"", EnumExample.class))
-                .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasLogMessage("Enum values must use UPPER_SNAKE_CASE")
-                .hasExactlyArgs(UnsafeArg.of("value", "oNE"));
-    }
-
-    private <T extends Throwable & SafeLoggable> LoggableExceptionAssert<T> assertThatExceptionThrownRootCause(
-            ThrowableAssert.ThrowingCallable task) {
-        return assertThatLoggableExceptionThrownBy(() -> {
-            try {
-                task.call();
-            } catch (Throwable t) {
-                throw Throwables.getRootCause(t);
-            }
-        });
+        assertThat(mapper.readValue("\"one\"", EnumExample.class)).isEqualTo(EnumExample.ONE);
+        assertThat(mapper.readValue("\"onE\"", EnumExample.class)).isEqualTo(EnumExample.ONE);
+        assertThat(mapper.readValue("\"oNE\"", EnumExample.class)).isEqualTo(EnumExample.ONE);
     }
 
     @Test
