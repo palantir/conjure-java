@@ -187,6 +187,13 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void enumSerializationDoesntPreserveCase() throws Exception {
+        assertThat(mapper.writeValueAsString(mapper.readValue("\"one\"", EnumExample.class))).isEqualTo("\"ONE\"");
+        assertThat(mapper.writeValueAsString(mapper.readValue("\"ONE\"", EnumExample.class))).isEqualTo("\"ONE\"");
+        assertThat(mapper.writeValueAsString(mapper.readValue("\"onE\"", EnumExample.class))).isEqualTo("\"ONE\"");
+    }
+
+    @Test
     public void testEnumCasingDeserializationInvariantToInputCase() throws Exception {
         assertThat(mapper.readValue("\"ONE\"", EnumExample.class)).isEqualTo(EnumExample.ONE);
         assertThat(mapper.readValue("\"ONE_HUNDRED\"", EnumExample.class)).isEqualTo(EnumExample.ONE_HUNDRED);
