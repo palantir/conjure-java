@@ -209,7 +209,6 @@ public final class WireFormatTests {
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Enum values must use UPPER_SNAKE_CASE")
                 .hasExactlyArgs(UnsafeArg.of("value", "oNE"));
-        assertThat(mapper.readValue("\"100\"", EnumExample.class)).isEqualTo(EnumExample.valueOf("100"));
     }
 
     private <T extends Throwable & SafeLoggable> LoggableExceptionAssert<T> assertThatExceptionThrownRootCause(

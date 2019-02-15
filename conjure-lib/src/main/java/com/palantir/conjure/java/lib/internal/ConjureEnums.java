@@ -43,6 +43,6 @@ public final class ConjureEnums {
     }
 
     private static boolean isAllowedCharacter(char character) {
-        return (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '_';
+        return (character >= 'A' && character <= 'Z') || character == '_';
     }
 }
