@@ -224,11 +224,12 @@ public final class EnumGenerator {
                     .addStatement("return $L", value.getValue())
                     .unindent();
         }
-        parser.add("default:\n")
-                .indent()
-                // Only validate unknown values, matches are validated at build time.
-                .addStatement("$T.validate($N)", ConjureEnums.class, param)
-                .addStatement("return new $T(Value.UNKNOWN, $N)", thisClass, param)
+        parser.add("default:\n").indent();
+        if (!featureFlags.contains(FeatureFlags.CaseInsensitiveEnums)) {
+            // Only validate unknown values, matches are validated at build time.
+            parser.addStatement("$T.validate($N)", ConjureEnums.class, param);
+        }
+        parser.addStatement("return new $T(Value.UNKNOWN, $N)", thisClass, param)
                 .unindent()
                 .endControlFlow();
 

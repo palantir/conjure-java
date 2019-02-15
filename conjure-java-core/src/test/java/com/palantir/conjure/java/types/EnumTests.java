@@ -61,6 +61,18 @@ public class EnumTests {
     }
 
     @Test
+    public void testInsensitiveEnum_unknownToleratesEmptyStringsForHistoricalReasons() {
+        InsensitiveEnum value = InsensitiveEnum.valueOf("");
+        assertThat(value.get()).isEqualTo(InsensitiveEnum.Value.UNKNOWN);
+    }
+
+    @Test
+    public void testInsensitiveEnum_unknownToleratesStrangeCharactersForHistoricalReasons() {
+        InsensitiveEnum value = InsensitiveEnum.valueOf("!@£$%^&*()");
+        assertThat(value.get()).isEqualTo(InsensitiveEnum.Value.UNKNOWN);
+    }
+
+    @Test
     public void testNullValidationUsesSafeLoggable() {
         assertThatLoggableExceptionThrownBy(() -> EnumExample.valueOf(null)).hasLogMessage("value cannot be null");
     }

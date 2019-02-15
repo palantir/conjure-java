@@ -2,7 +2,6 @@ package com.palantir.insensitive;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.internal.ConjureEnums;
 import com.palantir.logsafe.Preconditions;
 import java.util.Locale;
 import javax.annotation.Generated;
@@ -75,7 +74,6 @@ public final class InsensitiveEnum {
             case "ONE_HUNDRED":
                 return ONE_HUNDRED;
             default:
-                ConjureEnums.validate(value);
                 return new InsensitiveEnum(Value.UNKNOWN, value);
         }
     }
