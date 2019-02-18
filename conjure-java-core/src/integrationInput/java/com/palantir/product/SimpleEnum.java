@@ -2,8 +2,8 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.conjure.java.lib.internal.ConjureEnums;
 import com.palantir.logsafe.Preconditions;
+import java.util.Locale;
 import javax.annotation.Generated;
 
 /**
@@ -20,8 +20,6 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 public final class SimpleEnum {
     public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
-
-    public static final SimpleEnum VALUE2 = new SimpleEnum(Value.VALUE2, "VALUE2");
 
     private final Value value;
 
@@ -56,14 +54,12 @@ public final class SimpleEnum {
     @JsonCreator
     public static SimpleEnum valueOf(String value) {
         Preconditions.checkNotNull(value, "value cannot be null");
-        switch (value) {
+        String upperCasedValue = value.toUpperCase(Locale.ROOT);
+        switch (upperCasedValue) {
             case "VALUE":
                 return VALUE;
-            case "VALUE2":
-                return VALUE2;
             default:
-                ConjureEnums.validate(value);
-                return new SimpleEnum(Value.UNKNOWN, value);
+                return new SimpleEnum(Value.UNKNOWN, upperCasedValue);
         }
     }
 
@@ -71,8 +67,6 @@ public final class SimpleEnum {
         switch (value) {
             case VALUE:
                 return visitor.visitValue();
-            case VALUE2:
-                return visitor.visitValue2();
             default:
                 return visitor.visitUnknown(string);
         }
@@ -82,16 +76,12 @@ public final class SimpleEnum {
     public enum Value {
         VALUE,
 
-        VALUE2,
-
         UNKNOWN
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public interface Visitor<T> {
         T visitValue();
-
-        T visitValue2();
 
         T visitUnknown(String unknownValue);
     }

@@ -3,9 +3,6 @@ server:
     getMapBinaryAliasExample:
       - '{}'
       - '{"SGVsbG8sIFdvcmxk": true}'
-    # 'BAD VARIANT' is not allowed, this test should use 'BAD_VARIANT' which is a valid unknown enum string.
-    getMapEnumExampleAlias:
-      - '{"ONE": "", "TWO": "", "BAD VARIANT": ""}'
     getRawOptionalExample:
       - 'null'
     getOptionalBearerTokenAliasExample:

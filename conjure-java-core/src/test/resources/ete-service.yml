@@ -13,7 +13,6 @@ types:
       SimpleEnum:
         values:
           - VALUE
-          - VALUE2
 
 services:
   EmptyPathService:

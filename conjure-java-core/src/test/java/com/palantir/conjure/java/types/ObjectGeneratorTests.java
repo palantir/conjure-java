@@ -49,17 +49,6 @@ public final class ObjectGeneratorTests {
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
 
-
-    @Test
-    public void testObjectGenerator_insensitiveEnum() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/example-compat-enum.yml")));
-        List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.CaseInsensitiveEnums))
-                .emit(def, folder.getRoot());
-
-        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
-    }
-
     @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(
