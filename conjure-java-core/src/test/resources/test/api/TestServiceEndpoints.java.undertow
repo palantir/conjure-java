@@ -300,6 +300,7 @@ public final class TestServiceEndpoints implements Service {
 
         private class GetBranchesDeprecatedHandler implements HttpHandler {
             @Override
+            @SuppressWarnings("deprecation")
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = Auth.header(exchange);
                 Map<String, String> pathParams =
