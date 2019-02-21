@@ -128,6 +128,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         return serviceDefinition.getServiceName().getName() + "Retrofit";
     }
 
+    @SuppressWarnings("deprecation")
     private ClassName getReturnType() {
         if (featureFlags.contains(FeatureFlags.RetrofitCompletableFutures)) {
             return COMPLETABLE_FUTURE_TYPE;
