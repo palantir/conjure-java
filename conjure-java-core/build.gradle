@@ -37,6 +37,7 @@ dependencies {
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
     compile 'com.google.googlejavaformat:google-java-format'
     compile 'com.google.guava:guava'
+    compile 'com.palantir.conjure:conjure-generator-common'
     compile 'com.palantir.conjure.java.api:errors'
     compile 'com.palantir.ri:resource-identifier'
     compile 'com.palantir.syntactic-paths:syntactic-paths'
