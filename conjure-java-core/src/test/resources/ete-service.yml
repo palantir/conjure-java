@@ -1,6 +1,7 @@
 types:
   imports:
     StringAliasExampleImport:
+      base-type: string
       external:
         java: com.palantir.product.StringAliasExample
   definitions:
