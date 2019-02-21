@@ -23,5 +23,5 @@
 <!-- IMPORTANT ECLIPSE NOTE: If you change this file, you must restart Eclipse
  for your changes to take effect in its Checkstyle integration. -->
 <suppressions>
-    <suppress files="[/\\].*[/\\]palantir[/\\]conjure[/\\]spec.*[/\\]" checks="." />
+    <suppress files="[/\\]src[/\\]integrationInput[/\\].*" checks="." />
 </suppressions>
