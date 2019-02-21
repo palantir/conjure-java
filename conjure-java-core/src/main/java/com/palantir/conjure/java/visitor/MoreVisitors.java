@@ -33,8 +33,7 @@ public final class MoreVisitors {
         }
     }
 
-
-    /** Copied from {@link com.palantir.conjure.visitor.TypeVisitor.IsTypeVisitor} */
+    /** Copied from {@link com.palantir.conjure.visitor.TypeVisitor.IsTypeVisitor}. */
     private static class IsTypeVisitor implements Type.Visitor<Boolean> {
         @Override
         public Boolean visitPrimitive(PrimitiveType value) {
