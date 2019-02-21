@@ -52,6 +52,9 @@ public interface UndertowEteService {
     Optional<StringAliasExample> optionalBodyExternalImport(
             AuthHeader authHeader, Optional<StringAliasExample> body);
 
+    Optional<StringAliasExample> optionalQueryExternalImport(
+            AuthHeader authHeader, Optional<StringAliasExample> query);
+
     void noReturn(AuthHeader authHeader);
 
     SimpleEnum enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);

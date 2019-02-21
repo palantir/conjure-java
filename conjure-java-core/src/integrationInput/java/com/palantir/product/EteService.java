@@ -114,6 +114,12 @@ public interface EteService {
             Optional<StringAliasExample> body);
 
     @POST
+    @Path("base/external/optional-query")
+    Optional<StringAliasExample> optionalQueryExternalImport(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("query") Optional<StringAliasExample> query);
+
+    @POST
     @Path("base/no-return")
     void noReturn(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
@@ -144,6 +150,11 @@ public interface EteService {
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader) {
+        return optionalQueryExternalImport(authHeader, Optional.empty());
     }
 
     @Deprecated

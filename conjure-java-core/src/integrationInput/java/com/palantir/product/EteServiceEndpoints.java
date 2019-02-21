@@ -115,6 +115,12 @@ public final class EteServiceEndpoints implements Service {
                                     "optionalBodyExternalImport"),
                             new OptionalBodyExternalImportHandler())
                     .add(
+                            Endpoint.post(
+                                    "/base/external/optional-query",
+                                    "EteService",
+                                    "optionalQueryExternalImport"),
+                            new OptionalQueryExternalImportHandler())
+                    .add(
                             Endpoint.post("/base/no-return", "EteService", "noReturn"),
                             new NoReturnHandler())
                     .add(
@@ -333,6 +339,24 @@ public final class EteServiceEndpoints implements Service {
                 Optional<StringAliasExample> body = serializers.deserialize(bodyType, exchange);
                 Optional<StringAliasExample> result =
                         delegate.optionalBodyExternalImport(authHeader, body);
+                if (result.isPresent()) {
+                    serializers.serialize(result, exchange);
+                } else {
+                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
+                }
+            }
+        }
+
+        private class OptionalQueryExternalImportHandler implements HttpHandler {
+            @Override
+            public void handleRequest(HttpServerExchange exchange) throws IOException {
+                AuthHeader authHeader = Auth.header(exchange);
+                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+                Optional<StringAliasExample> query =
+                        StringDeserializers.deserializeOptionalComplex(
+                                queryParams.get("query"), StringAliasExample::valueOf);
+                Optional<StringAliasExample> result =
+                        delegate.optionalQueryExternalImport(authHeader, query);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
                 } else {
