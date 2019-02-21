@@ -51,6 +51,7 @@ import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -205,6 +206,18 @@ final class UndertowServiceHandlerGenerator {
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("handleRequest")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
+                .addException(IOException.class)
+                .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
+
+        endpointDefinition.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
+                AnnotationSpec.builder(SuppressWarnings.class)
+                        .addMember("value", "$S", "deprecation")
+                        .build()));
+
         return TypeSpec.classBuilder(endpointToHandlerClassName(endpointDefinition.getEndpointName()))
                 .addModifiers(Modifier.PRIVATE)
                 .addSuperinterface(HttpHandler.class)
@@ -212,13 +225,7 @@ final class UndertowServiceHandlerGenerator {
                         .filter(def -> def.getParamType().accept(ParameterTypeVisitor.IS_BODY))
                         .map(def -> createTypeField(typeMapper, def))
                         .collect(Collectors.toList()))
-                .addMethod(MethodSpec.methodBuilder("handleRequest")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
-                        .addException(IOException.class)
-                        .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper))
-                        .build())
+                .addMethod(methodBuilder.build())
                 .build();
     }
 
