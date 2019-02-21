@@ -104,12 +104,6 @@ public interface EteServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Body Optional<StringAliasExample> body);
 
-    @POST("./base/external/optional-query")
-    @Headers({"hr-path-template: /base/external/optional-query", "Accept: application/json"})
-    Call<Optional<StringAliasExample>> optionalQueryExternalImport(
-            @Header("Authorization") AuthHeader authHeader,
-            @Query("query") Optional<StringAliasExample> query);
-
     @POST("./base/no-return")
     @Headers({"hr-path-template: /base/no-return", "Accept: application/json"})
     Call<Void> noReturn(@Header("Authorization") AuthHeader authHeader);

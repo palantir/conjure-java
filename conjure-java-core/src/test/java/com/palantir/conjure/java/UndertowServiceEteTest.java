@@ -327,18 +327,6 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    public void testExternalImportOptionalQueryParameter() {
-        Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
-        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);
-    }
-
-    @Test
-    public void testExternalImportOptionalEmptyQueryParameter() {
-        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
-                .isEqualTo(Optional.empty());
-    }
-
-    @Test
     public void testExternalImportOptionalBody() {
         Optional<StringAliasExample> expected = Optional.of(StringAliasExample.of("value"));
         assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), expected)).isEqualTo(expected);

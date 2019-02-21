@@ -130,12 +130,6 @@ public class EteResource implements EteService {
     }
 
     @Override
-    public Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader,
-            Optional<StringAliasExample> query) {
-        return query;
-    }
-
-    @Override
     public void noReturn(AuthHeader authHeader) {
         // nop
     }
