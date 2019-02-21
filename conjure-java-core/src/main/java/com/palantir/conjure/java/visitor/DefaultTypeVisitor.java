@@ -12,6 +12,7 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 
+@SuppressWarnings("DesignForExtension")
 public abstract class DefaultTypeVisitor<T> implements Type.Visitor<T> {
     @Override
     public T visitPrimitive(PrimitiveType value) {
