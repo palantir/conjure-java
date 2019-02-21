@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
@@ -168,9 +169,9 @@ final class UndertowTypeFunctions {
         }
     };
 
-    private abstract static class GetTypeVisitor<T> implements TypeVisitor.Default<T> {
+    private abstract static class GetTypeVisitor<T> extends DefaultTypeVisitor<T> {
         @Override
-        public final T visitDefault() {
+        public T visitUnknown(String unknownType) {
             throw new UnsupportedOperationException();
         }
     }

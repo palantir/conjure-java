@@ -31,6 +31,8 @@ import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
 import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
+import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
@@ -486,7 +488,7 @@ final class UndertowServiceHandlerGenerator {
 
     private CodeBlock decodePlainParameterCodeBlock(Type type, TypeMapper typeMapper, String resultVarName,
             String paramsVarName, String paramId) {
-        if (type.accept(TypeVisitor.IS_EXTERNAL)) {
+        if (type.accept(MoreVisitors.IS_EXTERNAL)) {
             return CodeBlocks.statement(
                     "$1T $2N = $3T.valueOf($4T.deserializeString($5N.get($6S)))",
                     typeMapper.getClassName(type),
@@ -522,7 +524,7 @@ final class UndertowServiceHandlerGenerator {
      */
     private Optional<CodeBlock> getComplexTypeStringDeserializer(
             Type type, TypeMapper typeMapper, String resultVarName, String paramsVarName, String paramId) {
-        return type.accept(new TypeVisitor.Default<Optional<String>>() {
+        return type.accept(new DefaultTypeVisitor<Optional<String>>() {
             @Override
             public Optional<String> visitExternal(ExternalReference value) {
                 return Optional.of("deserializeComplex");
@@ -577,7 +579,7 @@ final class UndertowServiceHandlerGenerator {
     private Type getComplexType(Type type) {
         // No need to handle the map type because it is not allowed in string
         // values like headers, path, or query parameters.
-        return type.accept(new TypeVisitor.Default<Optional<Type>>() {
+        return type.accept(new DefaultTypeVisitor<Optional<Type>>() {
             @Override
             public Optional<Type> visitList(ListType value) {
                 return Optional.of(value.getItemType());
