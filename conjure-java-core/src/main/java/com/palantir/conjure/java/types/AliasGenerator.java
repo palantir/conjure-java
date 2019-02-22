@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
@@ -164,7 +165,7 @@ public final class AliasGenerator {
                 && !conjureType.accept(TypeVisitor.IS_BINARY)) {
             return Optional.of(valueOfFactoryMethodForPrimitive(
                     conjureType.accept(TypeVisitor.PRIMITIVE), thisClass, aliasTypeName));
-        } else if (conjureType.accept(TypeVisitor.IS_INTERNAL_REFERENCE)) {
+        } else if (conjureType.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
             // delegate to aliased type's valueOf factory method
             Optional<AliasDefinition> aliasTypeDef = typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))

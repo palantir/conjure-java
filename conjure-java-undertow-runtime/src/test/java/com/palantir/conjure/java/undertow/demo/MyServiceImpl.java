@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.demo;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.tracing.Tracer;
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -33,7 +34,7 @@ public final class MyServiceImpl implements MyService {
         if (numHours < 0) {
             throw new ServiceException(ErrorType.INVALID_ARGUMENT);
         } else if (numHours == 0) {
-            throw new RuntimeException("Must not add 0 hours");
+            throw new SafeRuntimeException("Must not add 0 hours");
         }
 
         return base.plus(Duration.ofHours(numHours));

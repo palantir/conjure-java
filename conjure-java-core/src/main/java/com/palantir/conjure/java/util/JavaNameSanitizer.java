@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.util;
 
 import com.google.common.collect.ImmutableSet;
+import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.spec.FieldName;
 import javax.lang.model.SourceVersion;
 

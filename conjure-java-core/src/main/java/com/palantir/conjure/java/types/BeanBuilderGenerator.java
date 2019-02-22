@@ -26,6 +26,7 @@ import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -422,7 +423,7 @@ public final class BeanBuilderGenerator {
     // we want to widen containers of anything that's not a primitive, a conjure reference or an optional
     // since we know all of those are final.
     private boolean isWidenableContainedType(Type containedType) {
-        return containedType.accept(new TypeVisitor.Default<Boolean>() {
+        return containedType.accept(new DefaultTypeVisitor<Boolean>() {
             @Override
             public Boolean visitPrimitive(PrimitiveType value) {
                 return value.get() == PrimitiveType.Value.ANY;

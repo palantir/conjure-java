@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -33,7 +34,6 @@ import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
-import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.JavaFile;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -113,7 +113,7 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
      * Produces a type sort ordering for use with {@link #PARAM_SORT_ORDER} such that types with known defaults come
      * after types without known defaults.
      */
-    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new TypeVisitor.Default<Integer>() {
+    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new DefaultTypeVisitor<Integer>() {
         @Override
         public Integer visitOptional(OptionalType value) {
             return 1;

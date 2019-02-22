@@ -77,6 +77,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private final Set<FeatureFlags> featureFlags;
 
+    @SuppressWarnings("deprecation")
     public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
         checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
@@ -127,6 +128,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         return serviceDefinition.getServiceName().getName() + "Retrofit";
     }
 
+    @SuppressWarnings("deprecation")
     private ClassName getReturnType() {
         if (featureFlags.contains(FeatureFlags.RetrofitCompletableFutures)) {
             return COMPLETABLE_FUTURE_TYPE;

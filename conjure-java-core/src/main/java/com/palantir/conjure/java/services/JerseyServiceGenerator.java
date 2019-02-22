@@ -27,6 +27,7 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.BodyParameterType;
@@ -432,7 +433,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
      * Produces a type sort ordering for use with {@link #PARAM_SORT_ORDER} such that types with known defaults come
      * after types without known defaults.
      */
-    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new TypeVisitor.Default<Integer>() {
+    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new DefaultTypeVisitor<Integer>() {
         @Override
         public Integer visitOptional(OptionalType value) {
             return 1;
@@ -460,7 +461,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     };
 
     /** Indicates whether a particular type has a defaultable value. */
-    private static final Type.Visitor<Boolean> TYPE_DEFAULTABLE_PREDICATE = new TypeVisitor.Default<Boolean>() {
+    private static final Type.Visitor<Boolean> TYPE_DEFAULTABLE_PREDICATE = new DefaultTypeVisitor<Boolean>() {
         @Override
         public Boolean visitOptional(OptionalType value) {
             return true;
@@ -487,7 +488,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         }
     };
 
-    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new TypeVisitor.Default<CodeBlock>() {
+    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new DefaultTypeVisitor<CodeBlock>() {
         @Override
         public CodeBlock visitOptional(OptionalType value) {
             if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
