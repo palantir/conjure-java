@@ -90,6 +90,7 @@ public final class BinaryExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @SuppressWarnings("unchecked")
     public static final class Builder {
         private Bytes binary;
 

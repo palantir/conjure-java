@@ -106,6 +106,10 @@ public final class BeanBuilderGenerator {
                 .addAnnotation(
                         AnnotationSpec.builder(JsonIgnoreProperties.class)
                                 .addMember("ignoreUnknown", "$L", true)
+                                .build())
+                .addAnnotation(
+                        AnnotationSpec.builder(SuppressWarnings.class)
+                                .addMember("value", "$S", "unchecked")
                                 .build());
 
         return builder.build();

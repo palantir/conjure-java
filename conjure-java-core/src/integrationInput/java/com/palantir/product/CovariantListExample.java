@@ -108,6 +108,7 @@ public final class CovariantListExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @SuppressWarnings("unchecked")
     public static final class Builder {
         private List<Object> items = new ArrayList<>();
 

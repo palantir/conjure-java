@@ -92,6 +92,7 @@ public final class OptionalExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @SuppressWarnings("unchecked")
     public static final class Builder {
         private Optional<ByteBuffer> item = Optional.empty();
 

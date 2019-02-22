@@ -90,6 +90,7 @@ public final class RidExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @SuppressWarnings("unchecked")
     public static final class Builder {
         private ResourceIdentifier ridValue;
 
