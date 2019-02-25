@@ -248,6 +248,21 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void java_url_client_receives_bad_request_with_json_null() throws IOException {
+        HttpURLConnection connection = preparePostRequest();
+        connection.setRequestProperty("Authorization", "Bearer authheader");
+        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
+        connection.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
+        sendPostRequestData(connection, "null");
+        assertThat(connection.getResponseCode()).isEqualTo(400);
+        try (InputStream responseBody = connection.getErrorStream()) {
+            SerializableError error = CLIENT_OBJECT_MAPPER.readValue(responseBody, SerializableError.class);
+            assertThat(error.errorCode()).isEqualTo("INVALID_ARGUMENT");
+            assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+        }
+    }
+
+    @Test
     public void java_url_client_receives_unprocessable_entity_with_null_body() throws IOException {
         HttpURLConnection httpUrlConnection = preparePostRequest();
         httpUrlConnection.setRequestProperty("Authorization", "Bearer authheader");

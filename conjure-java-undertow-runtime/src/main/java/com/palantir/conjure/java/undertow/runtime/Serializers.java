@@ -54,7 +54,8 @@ public final class Serializers {
         public final <T> T deserialize(InputStream input, TypeToken<T> type) throws IOException {
             try {
                 T value = mapper.readValue(input, mapper.constructType(type.getType()));
-                Preconditions.checkNotNull(value, "cannot deserialize a JSON null value");
+                // Bad input should result in a 4XX response status, throw IAE rather than NPE.
+                Preconditions.checkArgument(value != null, "cannot deserialize a JSON null value");
                 return value;
             } catch (MismatchedInputException e) {
                 throw FrameworkException.unprocessableEntity("Failed to deserialize response stream. Syntax error?",

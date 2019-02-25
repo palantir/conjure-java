@@ -23,6 +23,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.reflect.TypeToken;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -57,7 +58,7 @@ public final class SerializersTest {
     public void json_deserialize_rejectsNulls() throws IOException {
         // TODO(rfink): Do we need to test this for all primitive types?
         assertThatThrownBy(() -> json.deserialize(asStream("null"), new TypeToken<String>() {}))
-                .isInstanceOf(SafeNullPointerException.class);
+                .isInstanceOf(SafeIllegalArgumentException.class);
         assertThat(json.deserialize(asStream("null"), new TypeToken<Optional<String>>() {})).isEmpty();
     }
 
