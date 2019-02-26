@@ -2,7 +2,7 @@ ch.qos.logback:* = 1.2.3
 com.fasterxml.jackson.*:jackson-* = 2.9.8
 com.github.stefanbirkner:system-rules = 1.19.0
 com.google.code.findbugs:jsr305 = 3.0.2
-com.google.errorprone:error_prone_annotations = 2.3.2
+com.google.errorprone:error_prone_annotations = 2.3.3
 com.google.googlejavaformat:google-java-format = 1.7
 com.google.guava:guava = 23.6.1-jre
 com.palantir.conjure.java.api:* = 2.2.0
@@ -16,7 +16,7 @@ com.palantir.conjure:* = 4.5.1
 com.palantir.ri:resource-identifier = 1.0.1
 com.palantir.syntactic-paths:syntactic-paths = 0.6.1
 com.palantir.tokens:* = 3.5.2
-com.palantir.tracing:* = 2.5.0
+com.palantir.tracing:* = 2.6.1
 com.palantir.websecurity:dropwizard-web-security = 1.1.0
 com.squareup.okhttp3:* = 3.13.1
 com.squareup:javapoet = 1.11.1
@@ -41,5 +41,5 @@ org.mockito:mockito-core = 2.24.5
 org.slf4j:* = 1.7.25
 
 # conflict resolution
-com.palantir.safe-logging:* = 1.8.1
+com.palantir.safe-logging:* = 1.8.2
 org.jboss.logging:jboss-logging = 3.3.2.Final
