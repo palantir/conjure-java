@@ -55,7 +55,7 @@ public final class Parameters {
         putParam(exchange, UNSAFE_QUERY_PARAMS_ATTACH_KEY, key, value);
     }
 
-    public static void putParam(
+    private static void putParam(
             HttpServerExchange exchange,
             AttachmentKey<Multimap<String, String>> attachmentKey,
             String key,
