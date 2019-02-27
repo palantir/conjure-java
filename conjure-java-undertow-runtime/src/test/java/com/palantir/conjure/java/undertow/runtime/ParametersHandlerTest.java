@@ -63,7 +63,7 @@ public class ParametersHandlerTest {
     }
 
     @Test
-    public void testWebSecurityHeaders() throws IOException {
+    public void testParametersAreAttached() throws IOException {
         try (Response response = client.newCall(new Request.Builder()
                 .get().url("http://localhost:12345").build()).execute()) {
             assertThatMultimapEquals(
