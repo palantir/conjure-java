@@ -128,7 +128,7 @@ public interface TestService {
     @Path("catalog/test-query-params")
     int testQueryParams(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @QueryParam("different") ResourceIdentifier something,
+            @QueryParam("different") @Safe ResourceIdentifier something,
             @QueryParam("implicit") ResourceIdentifier implicit,
             @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @QueryParam("setEnd") Set<String> setEnd,

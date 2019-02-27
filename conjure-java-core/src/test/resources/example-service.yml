@@ -180,6 +180,8 @@ services:
             type: rid
             param-id: different
             param-type: query
+            markers:
+              - Safe
           optionalMiddle:
             type: optional<rid>
             param-type: query

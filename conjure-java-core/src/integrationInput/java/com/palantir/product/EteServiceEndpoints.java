@@ -5,6 +5,7 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.conjure.java.undertow.lib.Parameters;
 import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
@@ -252,6 +253,7 @@ public final class EteServiceEndpoints implements Service {
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 String param = StringDeserializers.deserializeString(pathParams.get("param"));
+                Parameters.putUnsafePathParam(exchange, "param", String.valueOf(param));
                 String result = delegate.path(authHeader, param);
                 serializers.serialize(result, exchange);
             }
@@ -278,6 +280,8 @@ public final class EteServiceEndpoints implements Service {
                 String queryParamNameRaw =
                         StringDeserializers.deserializeString(queryParams.get("queryParamName"));
                 StringAliasExample queryParamName = StringAliasExample.of(queryParamNameRaw);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "queryParamName", String.valueOf(queryParamName));
                 StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
                 serializers.serialize(result, exchange);
             }
@@ -296,6 +300,8 @@ public final class EteServiceEndpoints implements Service {
                                 queryParamNameRaw.isPresent()
                                         ? StringAliasExample.of(queryParamNameRaw.get())
                                         : null);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "queryParamName", String.valueOf(queryParamName));
                 StringAliasExample result = delegate.optionalAliasOne(authHeader, queryParamName);
                 serializers.serialize(result, exchange);
             }
@@ -310,6 +316,8 @@ public final class EteServiceEndpoints implements Service {
                         StringDeserializers.deserializeString(queryParams.get("queryParamName"));
                 NestedStringAliasExample queryParamName =
                         NestedStringAliasExample.of(StringAliasExample.of(queryParamNameRaw));
+                Parameters.putUnsafeQueryParam(
+                        exchange, "queryParamName", String.valueOf(queryParamName));
                 NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
                 serializers.serialize(result, exchange);
             }
@@ -355,6 +363,7 @@ public final class EteServiceEndpoints implements Service {
                 Optional<StringAliasExample> query =
                         StringDeserializers.deserializeOptionalComplex(
                                 queryParams.get("query"), StringAliasExample::valueOf);
+                Parameters.putUnsafeQueryParam(exchange, "query", String.valueOf(query));
                 Optional<StringAliasExample> result =
                         delegate.optionalQueryExternalImport(authHeader, query);
                 if (result.isPresent()) {
@@ -382,6 +391,8 @@ public final class EteServiceEndpoints implements Service {
                 SimpleEnum queryParamName =
                         StringDeserializers.deserializeComplex(
                                 queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "queryParamName", String.valueOf(queryParamName));
                 SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
                 serializers.serialize(result, exchange);
             }
@@ -395,6 +406,8 @@ public final class EteServiceEndpoints implements Service {
                 List<SimpleEnum> queryParamName =
                         StringDeserializers.deserializeComplexList(
                                 queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "queryParamName", String.valueOf(queryParamName));
                 List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
                 serializers.serialize(result, exchange);
             }
@@ -408,6 +421,8 @@ public final class EteServiceEndpoints implements Service {
                 Optional<SimpleEnum> queryParamName =
                         StringDeserializers.deserializeOptionalComplex(
                                 queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "queryParamName", String.valueOf(queryParamName));
                 Optional<SimpleEnum> result =
                         delegate.optionalEnumQuery(authHeader, queryParamName);
                 if (result.isPresent()) {

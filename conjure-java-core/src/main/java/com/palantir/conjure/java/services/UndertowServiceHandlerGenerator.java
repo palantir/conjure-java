@@ -501,11 +501,24 @@ final class UndertowServiceHandlerGenerator {
     private Optional<String> getStoreParamMethodName(
             ArgumentDefinition arg,
             ParameterType.Visitor<Boolean> visitor) {
-        boolean isSafe = arg.getMarkers().contains("Safe");
+        boolean isSafe = arg.getMarkers().stream().anyMatch(type ->
+                type.accept(
+                        new DefaultTypeVisitor<Boolean>() {
+                            @Override
+                            public Boolean visitExternal(ExternalReference value) {
+                                return value.getExternalReference().getName().equals("Safe")
+                                        && value.getExternalReference().getPackage().equals("com.palantir.redaction");
+                            }
+
+                            @Override
+                            public Boolean visitDefault() {
+                                return false;
+                            }
+                        }));
         if (visitor.equals(ParameterTypeVisitor.IS_PATH)) {
             return Optional.of(isSafe ? "putSafePathParam" : "putUnsafePathParam");
         } else if (visitor.equals(ParameterTypeVisitor.IS_QUERY)) {
-            return Optional.of(isSafe ? "putSafePathParam" : "putUnsafePathParam");
+            return Optional.of(isSafe ? "putSafeQueryParam" : "putUnsafeQueryParam");
         } else {
             return Optional.empty();
         }
@@ -513,10 +526,12 @@ final class UndertowServiceHandlerGenerator {
 
     private CodeBlock generateStoreParamInExchange(ArgumentDefinition arg, ParameterType.Visitor<Boolean> visitor) {
         return getStoreParamMethodName(arg, visitor).map(methodName -> CodeBlocks.statement(
-                "$1T.$2N($3S, $4N)",
+                "$1T.$2N($3N, $4S, $5T.valueOf($6N))",
                 Parameters.class,
                 methodName,
+                EXCHANGE_VAR_NAME,
                 arg.getArgName().get(),
+                String.class,
                 arg.getArgName().get())).orElseGet(() -> CodeBlocks.of());
     }
 

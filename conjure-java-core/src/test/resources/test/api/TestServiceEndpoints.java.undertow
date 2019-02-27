@@ -195,7 +195,7 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putSafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 Optional<Dataset> result = delegate.getDataset(authHeader, datasetRid);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
@@ -213,7 +213,7 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putSafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
                 BinarySerializers.serialize(result, exchange);
             }
@@ -227,7 +227,7 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putSafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
                 serializers.serialize(result, exchange);
             }
@@ -241,7 +241,7 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putSafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 Optional<BinaryResponseBody> result =
                         delegate.maybeGetRawData(authHeader, datasetRid);
                 if (result.isPresent()) {
@@ -260,7 +260,7 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putSafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
                 serializers.serialize(result, exchange);
             }
@@ -299,7 +299,7 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putSafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 Set<String> result = delegate.getBranches(authHeader, datasetRid);
                 serializers.serialize(result, exchange);
             }
@@ -314,7 +314,7 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putSafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
                 serializers.serialize(result, exchange);
             }
@@ -328,9 +328,9 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putSafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 String branch = StringDeserializers.deserializeString(pathParams.get("branch"));
-                Parameters.putUnsafePathParam("branch", branch);
+                Parameters.putUnsafePathParam(exchange, "branch", String.valueOf(branch));
                 Optional<String> result = delegate.resolveBranch(authHeader, datasetRid, branch);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
@@ -348,7 +348,7 @@ public final class TestServiceEndpoints implements Service {
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
                         StringDeserializers.deserializeRid(pathParams.get("datasetRid"));
-                Parameters.putUnsafePathParam("datasetRid", datasetRid);
+                Parameters.putUnsafePathParam(exchange, "datasetRid", String.valueOf(datasetRid));
                 Optional<String> result = delegate.testParam(authHeader, datasetRid);
                 if (result.isPresent()) {
                     serializers.serialize(result, exchange);
@@ -368,20 +368,22 @@ public final class TestServiceEndpoints implements Service {
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
                 ResourceIdentifier something =
                         StringDeserializers.deserializeRid(queryParams.get("different"));
-                Parameters.putUnsafePathParam("something", something);
+                Parameters.putSafeQueryParam(exchange, "something", String.valueOf(something));
                 Optional<ResourceIdentifier> optionalMiddle =
                         StringDeserializers.deserializeOptionalRid(
                                 queryParams.get("optionalMiddle"));
-                Parameters.putUnsafePathParam("optionalMiddle", optionalMiddle);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "optionalMiddle", String.valueOf(optionalMiddle));
                 ResourceIdentifier implicit =
                         StringDeserializers.deserializeRid(queryParams.get("implicit"));
-                Parameters.putUnsafePathParam("implicit", implicit);
+                Parameters.putUnsafeQueryParam(exchange, "implicit", String.valueOf(implicit));
                 Set<String> setEnd =
                         StringDeserializers.deserializeStringSet(queryParams.get("setEnd"));
-                Parameters.putUnsafePathParam("setEnd", setEnd);
+                Parameters.putUnsafeQueryParam(exchange, "setEnd", String.valueOf(setEnd));
                 Optional<ResourceIdentifier> optionalEnd =
                         StringDeserializers.deserializeOptionalRid(queryParams.get("optionalEnd"));
-                Parameters.putUnsafePathParam("optionalEnd", optionalEnd);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "optionalEnd", String.valueOf(optionalEnd));
                 int result =
                         delegate.testQueryParams(
                                 authHeader,
@@ -405,20 +407,22 @@ public final class TestServiceEndpoints implements Service {
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
                 ResourceIdentifier something =
                         StringDeserializers.deserializeRid(queryParams.get("different"));
-                Parameters.putUnsafePathParam("something", something);
+                Parameters.putUnsafeQueryParam(exchange, "something", String.valueOf(something));
                 Optional<ResourceIdentifier> optionalMiddle =
                         StringDeserializers.deserializeOptionalRid(
                                 queryParams.get("optionalMiddle"));
-                Parameters.putUnsafePathParam("optionalMiddle", optionalMiddle);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "optionalMiddle", String.valueOf(optionalMiddle));
                 ResourceIdentifier implicit =
                         StringDeserializers.deserializeRid(queryParams.get("implicit"));
-                Parameters.putUnsafePathParam("implicit", implicit);
+                Parameters.putUnsafeQueryParam(exchange, "implicit", String.valueOf(implicit));
                 Set<String> setEnd =
                         StringDeserializers.deserializeStringSet(queryParams.get("setEnd"));
-                Parameters.putUnsafePathParam("setEnd", setEnd);
+                Parameters.putUnsafeQueryParam(exchange, "setEnd", String.valueOf(setEnd));
                 Optional<ResourceIdentifier> optionalEnd =
                         StringDeserializers.deserializeOptionalRid(queryParams.get("optionalEnd"));
-                Parameters.putUnsafePathParam("optionalEnd", optionalEnd);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "optionalEnd", String.valueOf(optionalEnd));
                 delegate.testNoResponseQueryParams(
                         authHeader,
                         something,
@@ -483,11 +487,13 @@ public final class TestServiceEndpoints implements Service {
                 OptionalInt maybeInteger =
                         StringDeserializers.deserializeOptionalInteger(
                                 queryParams.get("maybeInteger"));
-                Parameters.putUnsafePathParam("maybeInteger", maybeInteger);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "maybeInteger", String.valueOf(maybeInteger));
                 OptionalDouble maybeDouble =
                         StringDeserializers.deserializeOptionalDouble(
                                 queryParams.get("maybeDouble"));
-                Parameters.putUnsafePathParam("maybeDouble", maybeDouble);
+                Parameters.putUnsafeQueryParam(
+                        exchange, "maybeDouble", String.valueOf(maybeDouble));
                 delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
