@@ -24,6 +24,7 @@ import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.conjure.java.undertow.lib.Parameters;
 import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
@@ -471,9 +472,12 @@ final class UndertowServiceHandlerGenerator {
                             typeDefinitions);
                     if (normalizedType.equals(arg.getType())) {
                         // type does not contain any aliases
-                        return decodePlainParameterCodeBlock(normalizedType, typeMapper, arg.getArgName().get(),
+                        return CodeBlocks.of(
+                                decodePlainParameterCodeBlock(normalizedType, typeMapper, arg.getArgName()
+                                        .get(),
                                 paramsVarName,
-                                toParamId.apply(arg));
+                                toParamId.apply(arg)),
+                                generateStoreParamInExchange(arg, paramTypeVisitor));
                     } else {
                         // type contains aliases: decode raw value and then construct real value from raw one
                         String rawVarName = arg.getArgName().get() + "Raw";
@@ -487,10 +491,33 @@ final class UndertowServiceHandlerGenerator {
                                         arg.getArgName().get(),
                                         createConstructorForTypeWithReference(arg.getType(), rawVarName,
                                                 typeDefinitions, typeMapper)
-                                )
+                                ),
+                                generateStoreParamInExchange(arg, paramTypeVisitor)
                         );
                     }
                 }).collect(Collectors.toList()));
+    }
+
+    private Optional<String> getStoreParamMethodName(
+            ArgumentDefinition arg,
+            ParameterType.Visitor<Boolean> visitor) {
+        boolean isSafe = arg.getMarkers().contains("Safe");
+        if (visitor.equals(ParameterTypeVisitor.IS_PATH)) {
+            return Optional.of(isSafe ? "putSafePathParam" : "putUnsafePathParam");
+        } else if (visitor.equals(ParameterTypeVisitor.IS_QUERY)) {
+            return Optional.of(isSafe ? "putSafePathParam" : "putUnsafePathParam");
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private CodeBlock generateStoreParamInExchange(ArgumentDefinition arg, ParameterType.Visitor<Boolean> visitor) {
+        return getStoreParamMethodName(arg, visitor).map(methodName -> CodeBlocks.statement(
+                "$1T.$2N($3S, $4N)",
+                Parameters.class,
+                methodName,
+                arg.getArgName().get(),
+                arg.getArgName().get())).orElseGet(() -> CodeBlocks.of());
     }
 
     private CodeBlock decodePlainParameterCodeBlock(Type type, TypeMapper typeMapper, String resultVarName,

@@ -48,6 +48,7 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
                     // Only applies to GET methods
                     ? new NoCachingResponseHandler(handler) : handler,
             (endpoint, handler) -> new WebSecurityHandler(handler),
+            (endpoint, handler) -> new ParametersHandler(handler),
             // It is vitally important to never run blocking operations on the initial IO thread otherwise
             // the server will not process new requests. all handlers executed after BlockingHandler
             // use the larger task pool which is allowed to block. Any operation which sets thread

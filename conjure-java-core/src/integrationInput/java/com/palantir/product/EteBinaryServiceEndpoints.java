@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.conjure.java.undertow.lib.Parameters;
 import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
@@ -119,6 +120,7 @@ public final class EteBinaryServiceEndpoints implements Service {
                 AuthHeader authHeader = Auth.header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
                 int numBytes = StringDeserializers.deserializeInteger(queryParams.get("numBytes"));
+                Parameters.putUnsafePathParam("numBytes", numBytes);
                 BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
                 BinarySerializers.serialize(result, exchange);
             }
