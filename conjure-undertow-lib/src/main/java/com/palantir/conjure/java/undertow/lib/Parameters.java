@@ -28,39 +28,43 @@ public final class Parameters {
 
     private static final Logger log = LoggerFactory.getLogger(Parameters.class);
 
-    public static final AttachmentKey<Multimap<String, String>> SAFE_PATH_PARAMS_ATTACH_KEY =
+    public static final AttachmentKey<Multimap<String, Object>> SAFE_PARAMS_ATTACH_KEY =
             AttachmentKey.create(Multimap.class);
-    public static final AttachmentKey<Multimap<String, String>> UNSAFE_PATH_PARAMS_ATTACH_KEY =
-            AttachmentKey.create(Multimap.class);
-    public static final AttachmentKey<Multimap<String, String>> SAFE_QUERY_PARAMS_ATTACH_KEY =
-            AttachmentKey.create(Multimap.class);
-    public static final AttachmentKey<Multimap<String, String>> UNSAFE_QUERY_PARAMS_ATTACH_KEY =
+    public static final AttachmentKey<Multimap<String, Object>> UNSAFE_PARAMS_ATTACH_KEY =
             AttachmentKey.create(Multimap.class);
 
     private Parameters() {}
 
-    public static void putSafePathParam(HttpServerExchange exchange, String key, String value) {
-        putParam(exchange, SAFE_PATH_PARAMS_ATTACH_KEY, key, value);
+    public static void putSafePathParam(HttpServerExchange exchange, String key, Object value) {
+        putParam(exchange, SAFE_PARAMS_ATTACH_KEY, key, value);
     }
 
-    public static void putUnsafePathParam(HttpServerExchange exchange, String key, String value) {
-        putParam(exchange, UNSAFE_PATH_PARAMS_ATTACH_KEY, key, value);
+    public static void putUnsafePathParam(HttpServerExchange exchange, String key, Object value) {
+        putParam(exchange, UNSAFE_PARAMS_ATTACH_KEY, key, value);
     }
 
-    public static void putSafeQueryParam(HttpServerExchange exchange, String key, String value) {
-        putParam(exchange, SAFE_QUERY_PARAMS_ATTACH_KEY, key, value);
+    public static void putSafeQueryParam(HttpServerExchange exchange, String key, Object value) {
+        putParam(exchange, SAFE_PARAMS_ATTACH_KEY, key, value);
     }
 
-    public static void putUnsafeQueryParam(HttpServerExchange exchange, String key, String value) {
-        putParam(exchange, UNSAFE_QUERY_PARAMS_ATTACH_KEY, key, value);
+    public static void putUnsafeQueryParam(HttpServerExchange exchange, String key, Object value) {
+        putParam(exchange, UNSAFE_PARAMS_ATTACH_KEY, key, value);
+    }
+
+    public static void putSafeHeaderParam(HttpServerExchange exchange, String key, Object value) {
+        putParam(exchange, SAFE_PARAMS_ATTACH_KEY, key, value);
+    }
+
+    public static void putUnsafeHeaderParam(HttpServerExchange exchange, String key, Object value) {
+        putParam(exchange, UNSAFE_PARAMS_ATTACH_KEY, key, value);
     }
 
     private static void putParam(
             HttpServerExchange exchange,
-            AttachmentKey<Multimap<String, String>> attachmentKey,
+            AttachmentKey<Multimap<String, Object>> attachmentKey,
             String key,
-            String value) {
-        Optional<Multimap<String, String>> multimap = Optional.ofNullable(exchange.getAttachment(attachmentKey));
+            Object value) {
+        Optional<Multimap<String, Object>> multimap = Optional.ofNullable(exchange.getAttachment(attachmentKey));
         if (multimap.isPresent()) {
             multimap.get().put(key, value);
         } else {

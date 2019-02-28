@@ -120,7 +120,7 @@ public final class EteBinaryServiceEndpoints implements Service {
                 AuthHeader authHeader = Auth.header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
                 int numBytes = StringDeserializers.deserializeInteger(queryParams.get("numBytes"));
-                Parameters.putUnsafeQueryParam(exchange, "numBytes", String.valueOf(numBytes));
+                Parameters.putUnsafeQueryParam(exchange, "numBytes", numBytes);
                 BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
                 BinarySerializers.serialize(result, exchange);
             }

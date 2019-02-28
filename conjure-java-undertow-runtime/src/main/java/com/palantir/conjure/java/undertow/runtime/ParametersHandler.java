@@ -37,14 +37,10 @@ public final class ParametersHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        Multimap<String, String> safePathParams = HashMultimap.create();
-        Multimap<String, String> unsafePathParams = HashMultimap.create();
-        Multimap<String, String> safeQueryParams = HashMultimap.create();
-        Multimap<String, String> unsafeQueryParams = HashMultimap.create();
-        exchange.putAttachment(Parameters.SAFE_PATH_PARAMS_ATTACH_KEY, safePathParams);
-        exchange.putAttachment(Parameters.UNSAFE_PATH_PARAMS_ATTACH_KEY, unsafePathParams);
-        exchange.putAttachment(Parameters.SAFE_QUERY_PARAMS_ATTACH_KEY, safeQueryParams);
-        exchange.putAttachment(Parameters.UNSAFE_QUERY_PARAMS_ATTACH_KEY, unsafeQueryParams);
+        Multimap<String, Object> safeParams = HashMultimap.create();
+        Multimap<String, Object> unsafeParams = HashMultimap.create();
+        exchange.putAttachment(Parameters.SAFE_PARAMS_ATTACH_KEY, safeParams);
+        exchange.putAttachment(Parameters.UNSAFE_PARAMS_ATTACH_KEY, unsafeParams);
         delegate.handleRequest(exchange);
     }
 }

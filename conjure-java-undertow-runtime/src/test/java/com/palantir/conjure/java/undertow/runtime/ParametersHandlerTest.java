@@ -25,6 +25,7 @@ import com.palantir.conjure.java.undertow.lib.Parameters;
 import io.undertow.Undertow;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
+import java.util.Map;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -49,6 +50,8 @@ public class ParametersHandlerTest {
                     Parameters.putSafePathParam(exchange, "safePathName", "safePathValue");
                     Parameters.putUnsafeQueryParam(exchange, "unsafeQueryName", "unsafeQueryValue");
                     Parameters.putSafeQueryParam(exchange, "safeQueryName", "safeQueryValue");
+                    Parameters.putUnsafeHeaderParam(exchange, "unsafeHeaderName", "unsafeHeaderValue");
+                    Parameters.putSafeHeaderParam(exchange, "safeHeaderName", "safeHeaderValue");
                     cExchange = exchange;
                 }))
                 .build();
@@ -67,25 +70,27 @@ public class ParametersHandlerTest {
         try (Response response = client.newCall(new Request.Builder()
                 .get().url("http://localhost:12345").build()).execute()) {
             assertThatMultimapEquals(
-                    cExchange.getAttachment(Parameters.UNSAFE_PATH_PARAMS_ATTACH_KEY),
-                    ImmutableMap.of("unsafePathName", ImmutableList.of("unsafePathValue1", "unsafePathValue2")));
+                    cExchange.getAttachment(Parameters.UNSAFE_PARAMS_ATTACH_KEY),
+                    ImmutableMap.of(
+                            "unsafePathName", ImmutableList.of("unsafePathValue1", "unsafePathValue2"),
+                            "unsafeQueryName", ImmutableList.of("unsafeQueryValue"),
+                            "unsafeHeaderName", ImmutableList.of("unsafeHeaderValue")));
             assertThatMultimapEquals(
-                    cExchange.getAttachment(Parameters.SAFE_PATH_PARAMS_ATTACH_KEY),
-                    ImmutableMap.of("safePathName", ImmutableList.of("safePathValue")));
-            assertThatMultimapEquals(
-                    cExchange.getAttachment(Parameters.UNSAFE_QUERY_PARAMS_ATTACH_KEY),
-                    ImmutableMap.of("unsafeQueryName", ImmutableList.of("unsafeQueryValue")));
-            assertThatMultimapEquals(
-                    cExchange.getAttachment(Parameters.SAFE_QUERY_PARAMS_ATTACH_KEY),
-                    ImmutableMap.of("safeQueryName", ImmutableList.of("safeQueryValue")));
+                    cExchange.getAttachment(Parameters.SAFE_PARAMS_ATTACH_KEY),
+                    ImmutableMap.of(
+                            "safePathName", ImmutableList.of("safePathValue"),
+                            "safeQueryName", ImmutableList.of("safeQueryValue"),
+                            "safeHeaderName", ImmutableList.of("safeHeaderValue")));
         }
     }
 
     private void assertThatMultimapEquals(
-            Multimap<String, String> actual,
+            Multimap<String, Object> actual,
             ImmutableMap<String, ImmutableList<String>> expected) {
         assertThat(actual.asMap().entrySet().stream().collect(
-                ImmutableMap.toImmutableMap(e -> e.getKey(), e -> ImmutableList.copyOf(e.getValue()))))
+                ImmutableMap.toImmutableMap(
+                        Map.Entry::getKey,
+                        e -> ImmutableList.copyOf(e.getValue()))))
                 .isEqualTo(expected);
     }
 }

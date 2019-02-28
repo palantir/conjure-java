@@ -44,7 +44,7 @@ public interface TestService {
     @Path("catalog/datasets")
     Dataset createDataset(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @HeaderParam("Test-Header") String testHeaderArg,
+            @HeaderParam("Test-Header") @Safe String testHeaderArg,
             @NotNull CreateDatasetRequest request);
 
     @GET

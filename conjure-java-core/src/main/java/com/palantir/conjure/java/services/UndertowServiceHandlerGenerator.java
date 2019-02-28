@@ -36,15 +36,19 @@ import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
+import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
+import com.palantir.conjure.spec.HeaderParameterType;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterType;
+import com.palantir.conjure.spec.PathParameterType;
 import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
@@ -79,6 +83,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 final class UndertowServiceHandlerGenerator {
 
@@ -477,7 +482,7 @@ final class UndertowServiceHandlerGenerator {
                                         .get(),
                                 paramsVarName,
                                 toParamId.apply(arg)),
-                                generateStoreParamInExchange(arg, paramTypeVisitor));
+                                generateStoreParamInExchange(arg));
                     } else {
                         // type contains aliases: decode raw value and then construct real value from raw one
                         String rawVarName = arg.getArgName().get() + "Raw";
@@ -492,22 +497,19 @@ final class UndertowServiceHandlerGenerator {
                                         createConstructorForTypeWithReference(arg.getType(), rawVarName,
                                                 typeDefinitions, typeMapper)
                                 ),
-                                generateStoreParamInExchange(arg, paramTypeVisitor)
+                                generateStoreParamInExchange(arg)
                         );
                     }
                 }).collect(Collectors.toList()));
     }
 
-    private Optional<String> getStoreParamMethodName(
-            ArgumentDefinition arg,
-            ParameterType.Visitor<Boolean> visitor) {
+    private Optional<Pair<String, String>> getStoreMethodAndParamName(ArgumentDefinition arg) {
         boolean isSafe = arg.getMarkers().stream().anyMatch(type ->
                 type.accept(
                         new DefaultTypeVisitor<Boolean>() {
                             @Override
                             public Boolean visitExternal(ExternalReference value) {
-                                return value.getExternalReference().getName().equals("Safe")
-                                        && value.getExternalReference().getPackage().equals("com.palantir.redaction");
+                                return value.getExternalReference().getName().equals("Safe");
                             }
 
                             @Override
@@ -515,23 +517,47 @@ final class UndertowServiceHandlerGenerator {
                                 return false;
                             }
                         }));
-        if (visitor.equals(ParameterTypeVisitor.IS_PATH)) {
-            return Optional.of(isSafe ? "putSafePathParam" : "putUnsafePathParam");
-        } else if (visitor.equals(ParameterTypeVisitor.IS_QUERY)) {
-            return Optional.of(isSafe ? "putSafeQueryParam" : "putUnsafeQueryParam");
-        } else {
-            return Optional.empty();
-        }
+        return arg.getParamType().accept(new ParameterType.Visitor<Optional<Pair<String, String>>>() {
+            @Override
+            public Optional<Pair<String, String>> visitHeader(HeaderParameterType value) {
+                return Optional.of(Pair.of(
+                        isSafe ? "putSafeHeaderParam" : "putUnsafeHeaderParam",
+                        value.getParamId().get()));
+            }
+
+            @Override
+            public Optional<Pair<String, String>> visitQuery(QueryParameterType value) {
+                return Optional.of(Pair.of(
+                        isSafe ? "putSafeQueryParam" : "putUnsafeQueryParam",
+                        value.getParamId().get()));
+            }
+
+            @Override
+            public Optional<Pair<String, String>> visitPath(PathParameterType value) {
+                return Optional.of(Pair.of(
+                        isSafe ? "putSafePathParam" : "putUnsafePathParam",
+                        arg.getArgName().get()));
+            }
+
+            @Override
+            public Optional<Pair<String, String>> visitBody(BodyParameterType value) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<Pair<String, String>> visitUnknown(String unknownType) {
+                return Optional.empty();
+            }
+        });
     }
 
-    private CodeBlock generateStoreParamInExchange(ArgumentDefinition arg, ParameterType.Visitor<Boolean> visitor) {
-        return getStoreParamMethodName(arg, visitor).map(methodName -> CodeBlocks.statement(
-                "$1T.$2N($3N, $4S, $5T.valueOf($6N))",
+    private CodeBlock generateStoreParamInExchange(ArgumentDefinition arg) {
+        return getStoreMethodAndParamName(arg).map(methodNameAndName -> CodeBlocks.statement(
+                "$1T.$2N($3N, $4S, $5N)",
                 Parameters.class,
-                methodName,
+                methodNameAndName.getLeft(),
                 EXCHANGE_VAR_NAME,
-                arg.getArgName().get(),
-                String.class,
+                methodNameAndName.getRight(),
                 arg.getArgName().get())).orElseGet(() -> CodeBlocks.of());
     }
 

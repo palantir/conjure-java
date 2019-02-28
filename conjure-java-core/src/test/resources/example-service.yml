@@ -68,6 +68,8 @@ services:
             param-id: Test-Header
             param-type: header
             type: string
+            markers:
+              - Safe
         returns: Dataset
 
       getDataset:
