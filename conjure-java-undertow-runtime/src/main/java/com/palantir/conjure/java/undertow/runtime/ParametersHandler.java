@@ -22,12 +22,12 @@ import com.palantir.conjure.java.undertow.lib.Parameters;
 import com.palantir.logsafe.Preconditions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * {@link HttpHandler} that attach to the exchange a safe and an unsafe parameters MultiMap such that a subsequent
+ * handler can attach parameters to the exchange using {@link Parameters} utility methods.
+ */
 public final class ParametersHandler implements HttpHandler {
-
-    private static final Logger log = LoggerFactory.getLogger(ParametersHandler.class);
 
     private final HttpHandler delegate;
 

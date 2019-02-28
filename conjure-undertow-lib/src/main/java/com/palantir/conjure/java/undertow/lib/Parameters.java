@@ -24,6 +24,11 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Utility class to put different types of safe or unsafe parameters in a multimap attached the exchange.
+ * It requires the exchanged o have been previously through a ParametersHandler which would have created the attached
+ * multimaps..
+ */
 public final class Parameters {
 
     private static final Logger log = LoggerFactory.getLogger(Parameters.class);
