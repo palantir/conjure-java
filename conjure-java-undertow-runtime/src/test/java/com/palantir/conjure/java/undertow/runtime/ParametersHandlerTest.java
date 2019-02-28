@@ -60,9 +60,7 @@ public class ParametersHandlerTest {
 
     @AfterClass
     public static void afterClass() {
-        if (server != null) {
-            server.stop();
-        }
+        server.stop();
     }
 
     @Test

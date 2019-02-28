@@ -20,14 +20,13 @@ import com.google.common.collect.Multimap;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utility class to put different types of safe or unsafe parameters in a multimap attached the exchange.
- * It requires the exchanged o have been previously through a ParametersHandler which would have created the attached
- * multimaps..
+ * Utility class to put different types of safe or unsafe parameters in a MultiMap attached to the exchange.
+ * It requires the exchange to have been priorly through a ParametersHandler which would have created the attached
+ * MultiMaps.
  */
 public final class Parameters {
 
@@ -69,11 +68,14 @@ public final class Parameters {
             AttachmentKey<Multimap<String, Object>> attachmentKey,
             String key,
             Object value) {
-        Optional<Multimap<String, Object>> multimap = Optional.ofNullable(exchange.getAttachment(attachmentKey));
-        if (multimap.isPresent()) {
-            multimap.get().put(key, value);
+        Multimap<String, Object> multimap = exchange.getAttachment(attachmentKey);
+        if (multimap != null) {
+            multimap.put(key, value);
         } else {
-            log.warn("Attachment key not found. Impossible to put param {}.", SafeArg.of("param-name", key));
+            log.warn("Failed to attached endpoint parameter because the required exchange attachment does not exist. "
+                    + "Did this request get handled by the ParametersHandler?",
+                    SafeArg.of("attachmentKey", attachmentKey),
+                    SafeArg.of("parameterName", key));
         }
     }
 }

@@ -24,7 +24,7 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 
 /**
- * {@link HttpHandler} that attach to the exchange a safe and an unsafe parameters MultiMap such that a subsequent
+ * {@link HttpHandler} that attaches to the exchange a safe and an unsafe parameters MultiMap such that a subsequent
  * handler can attach parameters to the exchange using {@link Parameters} utility methods.
  */
 public final class ParametersHandler implements HttpHandler {
