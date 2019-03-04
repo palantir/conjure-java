@@ -2,8 +2,8 @@ package com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
@@ -14,19 +14,19 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class EmptyPathServiceEndpoints implements Service {
+public final class EmptyPathServiceEndpoints implements UndertowService {
     private final UndertowEmptyPathService delegate;
 
     private EmptyPathServiceEndpoints(UndertowEmptyPathService delegate) {
         this.delegate = delegate;
     }
 
-    public static Service of(UndertowEmptyPathService delegate) {
+    public static UndertowService of(UndertowEmptyPathService delegate) {
         return new EmptyPathServiceEndpoints(delegate);
     }
 
     @Override
-    public List<Endpoint> create(UndertowRuntime runtime) {
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return new EmptyPathServiceRegistrable(runtime, delegate).create();
     }
 

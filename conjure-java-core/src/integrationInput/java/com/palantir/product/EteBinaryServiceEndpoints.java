@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -21,19 +21,19 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class EteBinaryServiceEndpoints implements Service {
+public final class EteBinaryServiceEndpoints implements UndertowService {
     private final UndertowEteBinaryService delegate;
 
     private EteBinaryServiceEndpoints(UndertowEteBinaryService delegate) {
         this.delegate = delegate;
     }
 
-    public static Service of(UndertowEteBinaryService delegate) {
+    public static UndertowService of(UndertowEteBinaryService delegate) {
         return new EteBinaryServiceEndpoints(delegate);
     }
 
     @Override
-    public List<Endpoint> create(UndertowRuntime runtime) {
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return new EteBinaryServiceRegistrable(runtime, delegate).create();
     }
 

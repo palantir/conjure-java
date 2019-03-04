@@ -3,8 +3,8 @@ package test.api;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
@@ -15,19 +15,19 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class TestServiceEndpoints implements Service {
+public final class TestServiceEndpoints implements UndertowService {
     private final TestService delegate;
 
     private TestServiceEndpoints(TestService delegate) {
         this.delegate = delegate;
     }
 
-    public static Service of(TestService delegate) {
+    public static UndertowService of(TestService delegate) {
         return new TestServiceEndpoints(delegate);
     }
 
     @Override
-    public List<Endpoint> create(UndertowRuntime runtime) {
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return new TestServiceRegistrable(runtime, delegate).create();
     }
 

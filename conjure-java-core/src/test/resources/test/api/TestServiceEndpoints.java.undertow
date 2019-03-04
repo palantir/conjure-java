@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.NestedAliasedBinary;
@@ -32,19 +32,19 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class TestServiceEndpoints implements Service {
+public final class TestServiceEndpoints implements UndertowService {
     private final TestService delegate;
 
     private TestServiceEndpoints(TestService delegate) {
         this.delegate = delegate;
     }
 
-    public static Service of(TestService delegate) {
+    public static UndertowService of(TestService delegate) {
         return new TestServiceEndpoints(delegate);
     }
 
     @Override
-    public List<Endpoint> create(UndertowRuntime runtime) {
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return new TestServiceRegistrable(runtime, delegate).create();
     }
 

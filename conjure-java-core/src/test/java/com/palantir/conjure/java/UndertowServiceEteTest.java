@@ -125,7 +125,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 EteServiceEndpoints.of(new UndertowEteResource()),
                 EmptyPathServiceEndpoints.of(() -> true),
                 EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
-                .forEach(service -> service.create(context).forEach(handler::add));
+                .forEach(service -> service.endpoints(context).forEach(handler::add));
 
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)

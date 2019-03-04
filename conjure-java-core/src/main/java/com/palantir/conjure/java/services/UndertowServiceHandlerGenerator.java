@@ -24,8 +24,8 @@ import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -143,21 +143,21 @@ final class UndertowServiceHandlerGenerator {
                 serviceType.simpleName(), serviceName + "Registrable");
         TypeSpec endpoints = TypeSpec.classBuilder(serviceType.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceHandlerGenerator.class))
-                .addSuperinterface(Service.class)
+                .addSuperinterface(UndertowService.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
                 .addMethod(MethodSpec.methodBuilder("of")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .addParameter(serviceClass, DELEGATE_VAR_NAME)
                         .addStatement("return new $T($N)", serviceType, DELEGATE_VAR_NAME)
-                        .returns(Service.class)
+                        .returns(UndertowService.class)
                         .build())
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)
                         .addParameter(serviceClass, DELEGATE_VAR_NAME)
                         .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
                         .build())
-                .addMethod(MethodSpec.methodBuilder("create")
+                .addMethod(MethodSpec.methodBuilder("endpoints")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
