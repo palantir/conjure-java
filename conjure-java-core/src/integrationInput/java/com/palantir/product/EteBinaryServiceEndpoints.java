@@ -34,15 +34,15 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new EteBinaryServiceRegistrable(runtime, delegate).create();
+        return new EteBinaryServiceFactory(runtime, delegate).create();
     }
 
-    private static final class EteBinaryServiceRegistrable {
+    private static final class EteBinaryServiceFactory {
         private final UndertowEteBinaryService delegate;
 
         private final UndertowRuntime runtime;
 
-        private EteBinaryServiceRegistrable(
+        private EteBinaryServiceFactory(
                 UndertowRuntime runtime, UndertowEteBinaryService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;

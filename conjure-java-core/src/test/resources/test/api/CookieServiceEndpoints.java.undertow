@@ -29,15 +29,15 @@ public final class CookieServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new CookieServiceRegistrable(runtime, delegate).create();
+        return new CookieServiceFactory(runtime, delegate).create();
     }
 
-    private static final class CookieServiceRegistrable {
+    private static final class CookieServiceFactory {
         private final CookieService delegate;
 
         private final UndertowRuntime runtime;
 
-        private CookieServiceRegistrable(UndertowRuntime runtime, CookieService delegate) {
+        private CookieServiceFactory(UndertowRuntime runtime, CookieService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }

@@ -101,15 +101,15 @@ final class UndertowServiceHandlerGenerator {
         ClassName serviceClass = ClassName.get(serviceDefinition.getServiceName().getPackage(),
                 (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
-        TypeSpec.Builder registrable = TypeSpec.classBuilder(serviceName + "Registrable")
+        TypeSpec.Builder factory = TypeSpec.classBuilder(serviceName + "Factory")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
         // addFields
-        registrable.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
-        registrable.addField(ClassName.get(UndertowRuntime.class), RUNTIME_VAR_NAME,
+        factory.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
+        factory.addField(ClassName.get(UndertowRuntime.class), RUNTIME_VAR_NAME,
                 Modifier.PRIVATE, Modifier.FINAL);
         // addConstructor
-        registrable.addMethod(MethodSpec.constructorBuilder()
+        factory.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
                 .addParameter(serviceClass, DELEGATE_VAR_NAME)
@@ -125,22 +125,22 @@ final class UndertowServiceHandlerGenerator {
         }
 
 
-        registrable.addMethod(MethodSpec.methodBuilder("create")
+        factory.addMethod(MethodSpec.methodBuilder("create")
                 .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
                 .addStatement("return $1T.of($2L)", ImmutableList.class, endpointBlock)
                 .build());
 
         // addEndpointHandlers
-        registrable.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
+        factory.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
                 e -> generateEndpointHandler(e, serviceName, typeDefinitions, typeMapper, returnTypeMapper)));
 
-        TypeSpec routable = registrable.build();
+        TypeSpec routable = factory.build();
 
         ClassName serviceType = ClassName.get(serviceDefinition.getServiceName().getPackage(),
                 serviceDefinition.getServiceName().getName() + "Endpoints");
 
         ClassName registrableName = ClassName.get(serviceDefinition.getServiceName().getPackage(),
-                serviceType.simpleName(), serviceName + "Registrable");
+                serviceType.simpleName(), serviceName + "Factory");
         TypeSpec endpoints = TypeSpec.classBuilder(serviceType.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceHandlerGenerator.class))
                 .addSuperinterface(UndertowService.class)
@@ -177,7 +177,7 @@ final class UndertowServiceHandlerGenerator {
 
     private TypeName endpointToHandlerType(com.palantir.conjure.spec.TypeName serviceName, EndpointName name) {
         return ClassName.get(serviceName.getPackage(),
-                serviceName.getName() + "Endpoints", serviceName.getName() + "Registrable",
+                serviceName.getName() + "Endpoints", serviceName.getName() + "Factory",
                 endpointToHandlerClassName(name));
     }
 

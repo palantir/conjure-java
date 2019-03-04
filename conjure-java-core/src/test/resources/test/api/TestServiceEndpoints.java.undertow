@@ -45,15 +45,15 @@ public final class TestServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new TestServiceRegistrable(runtime, delegate).create();
+        return new TestServiceFactory(runtime, delegate).create();
     }
 
-    private static final class TestServiceRegistrable {
+    private static final class TestServiceFactory {
         private final TestService delegate;
 
         private final UndertowRuntime runtime;
 
-        private TestServiceRegistrable(UndertowRuntime runtime, TestService delegate) {
+        private TestServiceFactory(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }

@@ -27,15 +27,15 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new EmptyPathServiceRegistrable(runtime, delegate).create();
+        return new EmptyPathServiceFactory(runtime, delegate).create();
     }
 
-    private static final class EmptyPathServiceRegistrable {
+    private static final class EmptyPathServiceFactory {
         private final UndertowEmptyPathService delegate;
 
         private final UndertowRuntime runtime;
 
-        private EmptyPathServiceRegistrable(
+        private EmptyPathServiceFactory(
                 UndertowRuntime runtime, UndertowEmptyPathService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;

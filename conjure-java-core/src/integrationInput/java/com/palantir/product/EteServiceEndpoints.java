@@ -39,15 +39,15 @@ public final class EteServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new EteServiceRegistrable(runtime, delegate).create();
+        return new EteServiceFactory(runtime, delegate).create();
     }
 
-    private static final class EteServiceRegistrable {
+    private static final class EteServiceFactory {
         private final UndertowEteService delegate;
 
         private final UndertowRuntime runtime;
 
-        private EteServiceRegistrable(UndertowRuntime runtime, UndertowEteService delegate) {
+        private EteServiceFactory(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
