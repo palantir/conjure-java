@@ -2,7 +2,6 @@ package com.palantir.product;
 
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
-import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import io.undertow.server.HttpHandler;
@@ -23,11 +22,11 @@ public final class EmptyPathServiceEndpoints implements Service {
     }
 
     @Override
-    public Registrable create(ServiceContext context) {
-        return new EmptyPathServiceRegistrable(context, delegate);
+    public void register(ServiceContext context, EndpointRegistry endpointRegistry) {
+        new EmptyPathServiceRegistrable(context, delegate).register(endpointRegistry);
     }
 
-    private static final class EmptyPathServiceRegistrable implements Registrable {
+    private static final class EmptyPathServiceRegistrable {
         private final UndertowEmptyPathService delegate;
 
         private final ServiceContext context;
@@ -38,8 +37,7 @@ public final class EmptyPathServiceEndpoints implements Service {
             this.delegate = context.instrument(delegate, UndertowEmptyPathService.class);
         }
 
-        @Override
-        public void register(EndpointRegistry endpointRegistry) {
+        void register(EndpointRegistry endpointRegistry) {
             endpointRegistry.add(
                     Endpoint.get("/", "EmptyPathService", "emptyPath"), new EmptyPathHandler());
         }

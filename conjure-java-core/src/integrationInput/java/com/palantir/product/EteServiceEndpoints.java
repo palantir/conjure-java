@@ -5,7 +5,6 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
-import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.ri.ResourceIdentifier;
@@ -37,11 +36,11 @@ public final class EteServiceEndpoints implements Service {
     }
 
     @Override
-    public Registrable create(ServiceContext context) {
-        return new EteServiceRegistrable(context, delegate);
+    public void register(ServiceContext context, EndpointRegistry endpointRegistry) {
+        new EteServiceRegistrable(context, delegate).register(endpointRegistry);
     }
 
-    private static final class EteServiceRegistrable implements Registrable {
+    private static final class EteServiceRegistrable {
         private final UndertowEteService delegate;
 
         private final ServiceContext context;
@@ -51,8 +50,7 @@ public final class EteServiceEndpoints implements Service {
             this.delegate = context.instrument(delegate, UndertowEteService.class);
         }
 
-        @Override
-        public void register(EndpointRegistry endpointRegistry) {
+        void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
                     .add(Endpoint.get("/base/string", "EteService", "string"), new StringHandler())
                     .add(

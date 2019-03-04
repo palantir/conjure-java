@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
-import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.tokens.auth.AuthHeader;
@@ -31,11 +30,11 @@ public final class EteBinaryServiceEndpoints implements Service {
     }
 
     @Override
-    public Registrable create(ServiceContext context) {
-        return new EteBinaryServiceRegistrable(context, delegate);
+    public void register(ServiceContext context, EndpointRegistry endpointRegistry) {
+        new EteBinaryServiceRegistrable(context, delegate).register(endpointRegistry);
     }
 
-    private static final class EteBinaryServiceRegistrable implements Registrable {
+    private static final class EteBinaryServiceRegistrable {
         private final UndertowEteBinaryService delegate;
 
         private final ServiceContext context;
@@ -46,8 +45,7 @@ public final class EteBinaryServiceEndpoints implements Service {
             this.delegate = context.instrument(delegate, UndertowEteBinaryService.class);
         }
 
-        @Override
-        public void register(EndpointRegistry endpointRegistry) {
+        void register(EndpointRegistry endpointRegistry) {
             endpointRegistry
                     .add(
                             Endpoint.post("/binary", "EteBinaryService", "postBinary"),
