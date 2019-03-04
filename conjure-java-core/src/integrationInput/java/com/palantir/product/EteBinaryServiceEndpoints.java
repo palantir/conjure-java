@@ -30,8 +30,8 @@ public final class EteBinaryServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry endpointRegistry) {
-        new EteBinaryServiceRegistrable(context, delegate).register(endpointRegistry);
+    public void register(ServiceContext context, EndpointRegistry registry) {
+        new EteBinaryServiceRegistrable(context, delegate).register(registry);
     }
 
     private static final class EteBinaryServiceRegistrable {
@@ -45,26 +45,23 @@ public final class EteBinaryServiceEndpoints implements Service {
             this.delegate = context.instrument(delegate, UndertowEteBinaryService.class);
         }
 
-        void register(EndpointRegistry endpointRegistry) {
-            endpointRegistry
-                    .add(
-                            Endpoint.post("/binary", "EteBinaryService", "postBinary"),
-                            new PostBinaryHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/binary/optional/present",
-                                    "EteBinaryService",
-                                    "getOptionalBinaryPresent"),
-                            new GetOptionalBinaryPresentHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/binary/optional/empty",
-                                    "EteBinaryService",
-                                    "getOptionalBinaryEmpty"),
-                            new GetOptionalBinaryEmptyHandler())
-                    .add(
-                            Endpoint.get("/binary/failure", "EteBinaryService", "getBinaryFailure"),
-                            new GetBinaryFailureHandler());
+        void register(EndpointRegistry registry) {
+            registry.add(
+                    Endpoint.post("/binary", "EteBinaryService", "postBinary"),
+                    new PostBinaryHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/binary/optional/present",
+                            "EteBinaryService",
+                            "getOptionalBinaryPresent"),
+                    new GetOptionalBinaryPresentHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/binary/optional/empty", "EteBinaryService", "getOptionalBinaryEmpty"),
+                    new GetOptionalBinaryEmptyHandler());
+            registry.add(
+                    Endpoint.get("/binary/failure", "EteBinaryService", "getBinaryFailure"),
+                    new GetBinaryFailureHandler());
         }
 
         private class PostBinaryHandler implements HttpHandler {

@@ -24,8 +24,8 @@ public final class CookieServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry endpointRegistry) {
-        new CookieServiceRegistrable(context, delegate).register(endpointRegistry);
+    public void register(ServiceContext context, EndpointRegistry registry) {
+        new CookieServiceRegistrable(context, delegate).register(registry);
     }
 
     private static final class CookieServiceRegistrable {
@@ -38,8 +38,8 @@ public final class CookieServiceEndpoints implements Service {
             this.delegate = context.instrument(delegate, CookieService.class);
         }
 
-        void register(EndpointRegistry endpointRegistry) {
-            endpointRegistry.add(
+        void register(EndpointRegistry registry) {
+            registry.add(
                     Endpoint.get("/cookies", "CookieService", "eatCookies"),
                     new EatCookiesHandler());
         }

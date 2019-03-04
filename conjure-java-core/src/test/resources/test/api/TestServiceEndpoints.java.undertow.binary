@@ -23,8 +23,8 @@ public final class TestServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry endpointRegistry) {
-        new TestServiceRegistrable(context, delegate).register(endpointRegistry);
+    public void register(ServiceContext context, EndpointRegistry registry) {
+        new TestServiceRegistrable(context, delegate).register(registry);
     }
 
     private static final class TestServiceRegistrable {
@@ -37,9 +37,8 @@ public final class TestServiceEndpoints implements Service {
             this.delegate = context.instrument(delegate, TestService.class);
         }
 
-        void register(EndpointRegistry endpointRegistry) {
-            endpointRegistry.add(
-                    Endpoint.get("/", "TestService", "getBinary"), new GetBinaryHandler());
+        void register(EndpointRegistry registry) {
+            registry.add(Endpoint.get("/", "TestService", "getBinary"), new GetBinaryHandler());
         }
 
         private class GetBinaryHandler implements HttpHandler {

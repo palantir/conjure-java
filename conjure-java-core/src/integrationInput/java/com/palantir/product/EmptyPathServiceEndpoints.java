@@ -22,8 +22,8 @@ public final class EmptyPathServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry endpointRegistry) {
-        new EmptyPathServiceRegistrable(context, delegate).register(endpointRegistry);
+    public void register(ServiceContext context, EndpointRegistry registry) {
+        new EmptyPathServiceRegistrable(context, delegate).register(registry);
     }
 
     private static final class EmptyPathServiceRegistrable {
@@ -37,8 +37,8 @@ public final class EmptyPathServiceEndpoints implements Service {
             this.delegate = context.instrument(delegate, UndertowEmptyPathService.class);
         }
 
-        void register(EndpointRegistry endpointRegistry) {
-            endpointRegistry.add(
+        void register(EndpointRegistry registry) {
+            registry.add(
                     Endpoint.get("/", "EmptyPathService", "emptyPath"), new EmptyPathHandler());
         }
 

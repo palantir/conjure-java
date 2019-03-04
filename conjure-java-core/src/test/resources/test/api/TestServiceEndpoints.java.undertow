@@ -41,8 +41,8 @@ public final class TestServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry endpointRegistry) {
-        new TestServiceRegistrable(context, delegate).register(endpointRegistry);
+    public void register(ServiceContext context, EndpointRegistry registry) {
+        new TestServiceRegistrable(context, delegate).register(registry);
     }
 
     private static final class TestServiceRegistrable {
@@ -55,104 +55,95 @@ public final class TestServiceEndpoints implements Service {
             this.delegate = context.instrument(delegate, TestService.class);
         }
 
-        void register(EndpointRegistry endpointRegistry) {
-            endpointRegistry
-                    .add(
-                            Endpoint.get("/catalog/fileSystems", "TestService", "getFileSystems"),
-                            new GetFileSystemsHandler())
-                    .add(
-                            Endpoint.post("/catalog/datasets", "TestService", "createDataset"),
-                            new CreateDatasetHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}", "TestService", "getDataset"),
-                            new GetDatasetHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}/raw",
-                                    "TestService",
-                                    "getRawData"),
-                            new GetRawDataHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}/raw-aliased",
-                                    "TestService",
-                                    "getAliasedRawData"),
-                            new GetAliasedRawDataHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}/raw-maybe",
-                                    "TestService",
-                                    "maybeGetRawData"),
-                            new MaybeGetRawDataHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}/string-aliased",
-                                    "TestService",
-                                    "getAliasedString"),
-                            new GetAliasedStringHandler())
-                    .add(
-                            Endpoint.post(
-                                    "/catalog/datasets/upload-raw", "TestService", "uploadRawData"),
-                            new UploadRawDataHandler())
-                    .add(
-                            Endpoint.post(
-                                    "/catalog/datasets/upload-raw-aliased",
-                                    "TestService",
-                                    "uploadAliasedRawData"),
-                            new UploadAliasedRawDataHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}/branches",
-                                    "TestService",
-                                    "getBranches"),
-                            new GetBranchesHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}/branchesDeprecated",
-                                    "TestService",
-                                    "getBranchesDeprecated"),
-                            new GetBranchesDeprecatedHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve",
-                                    "TestService",
-                                    "resolveBranch"),
-                            new ResolveBranchHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/datasets/{datasetRid}/testParam",
-                                    "TestService",
-                                    "testParam"),
-                            new TestParamHandler())
-                    .add(
-                            Endpoint.post(
-                                    "/catalog/test-query-params", "TestService", "testQueryParams"),
-                            new TestQueryParamsHandler())
-                    .add(
-                            Endpoint.post(
-                                    "/catalog/test-no-response-query-params",
-                                    "TestService",
-                                    "testNoResponseQueryParams"),
-                            new TestNoResponseQueryParamsHandler())
-                    .add(
-                            Endpoint.get("/catalog/boolean", "TestService", "testBoolean"),
-                            new TestBooleanHandler())
-                    .add(
-                            Endpoint.get("/catalog/double", "TestService", "testDouble"),
-                            new TestDoubleHandler())
-                    .add(
-                            Endpoint.get("/catalog/integer", "TestService", "testInteger"),
-                            new TestIntegerHandler())
-                    .add(
-                            Endpoint.post("/catalog/optional", "TestService", "testPostOptional"),
-                            new TestPostOptionalHandler())
-                    .add(
-                            Endpoint.get(
-                                    "/catalog/optional-integer-double",
-                                    "TestService",
-                                    "testOptionalIntegerAndDouble"),
-                            new TestOptionalIntegerAndDoubleHandler());
+        void register(EndpointRegistry registry) {
+            registry.add(
+                    Endpoint.get("/catalog/fileSystems", "TestService", "getFileSystems"),
+                    new GetFileSystemsHandler());
+            registry.add(
+                    Endpoint.post("/catalog/datasets", "TestService", "createDataset"),
+                    new CreateDatasetHandler());
+            registry.add(
+                    Endpoint.get("/catalog/datasets/{datasetRid}", "TestService", "getDataset"),
+                    new GetDatasetHandler());
+            registry.add(
+                    Endpoint.get("/catalog/datasets/{datasetRid}/raw", "TestService", "getRawData"),
+                    new GetRawDataHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/catalog/datasets/{datasetRid}/raw-aliased",
+                            "TestService",
+                            "getAliasedRawData"),
+                    new GetAliasedRawDataHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/catalog/datasets/{datasetRid}/raw-maybe",
+                            "TestService",
+                            "maybeGetRawData"),
+                    new MaybeGetRawDataHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/catalog/datasets/{datasetRid}/string-aliased",
+                            "TestService",
+                            "getAliasedString"),
+                    new GetAliasedStringHandler());
+            registry.add(
+                    Endpoint.post("/catalog/datasets/upload-raw", "TestService", "uploadRawData"),
+                    new UploadRawDataHandler());
+            registry.add(
+                    Endpoint.post(
+                            "/catalog/datasets/upload-raw-aliased",
+                            "TestService",
+                            "uploadAliasedRawData"),
+                    new UploadAliasedRawDataHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/catalog/datasets/{datasetRid}/branches",
+                            "TestService",
+                            "getBranches"),
+                    new GetBranchesHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/catalog/datasets/{datasetRid}/branchesDeprecated",
+                            "TestService",
+                            "getBranchesDeprecated"),
+                    new GetBranchesDeprecatedHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve",
+                            "TestService",
+                            "resolveBranch"),
+                    new ResolveBranchHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/catalog/datasets/{datasetRid}/testParam", "TestService", "testParam"),
+                    new TestParamHandler());
+            registry.add(
+                    Endpoint.post("/catalog/test-query-params", "TestService", "testQueryParams"),
+                    new TestQueryParamsHandler());
+            registry.add(
+                    Endpoint.post(
+                            "/catalog/test-no-response-query-params",
+                            "TestService",
+                            "testNoResponseQueryParams"),
+                    new TestNoResponseQueryParamsHandler());
+            registry.add(
+                    Endpoint.get("/catalog/boolean", "TestService", "testBoolean"),
+                    new TestBooleanHandler());
+            registry.add(
+                    Endpoint.get("/catalog/double", "TestService", "testDouble"),
+                    new TestDoubleHandler());
+            registry.add(
+                    Endpoint.get("/catalog/integer", "TestService", "testInteger"),
+                    new TestIntegerHandler());
+            registry.add(
+                    Endpoint.post("/catalog/optional", "TestService", "testPostOptional"),
+                    new TestPostOptionalHandler());
+            registry.add(
+                    Endpoint.get(
+                            "/catalog/optional-integer-double",
+                            "TestService",
+                            "testOptionalIntegerAndDouble"),
+                    new TestOptionalIntegerAndDoubleHandler());
         }
 
         private class GetFileSystemsHandler implements HttpHandler {
