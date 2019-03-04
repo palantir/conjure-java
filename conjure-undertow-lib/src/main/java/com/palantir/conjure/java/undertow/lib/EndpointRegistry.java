@@ -27,6 +27,6 @@ import io.undertow.server.HttpHandler;
  */
 public interface EndpointRegistry {
 
-    EndpointRegistry add(Endpoint description, HttpHandler handler);
+    void add(Endpoint description, HttpHandler handler);
 
 }

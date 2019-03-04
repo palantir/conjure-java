@@ -79,6 +79,7 @@ final class UndertowServiceHandlerGenerator {
     private static final String EXCHANGE_VAR_NAME = "exchange";
     private static final String DELEGATE_VAR_NAME = "delegate";
     private static final String CONTEXT_VAR_NAME = "context";
+    private static final String ENDPOINT_REGISTRY_NAME = "registry";
 
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
 
@@ -115,30 +116,25 @@ final class UndertowServiceHandlerGenerator {
                         DELEGATE_VAR_NAME, CONTEXT_VAR_NAME, serviceClass)
                 .build());
 
-        // implement Registrable#add interface
-        // TODO(nmiyake): check for path disjointness per https://palantir.quip.com/5VxNAIyYYvnZ. Eventually, this
-        // should be enforced at the IR level -- once that is done, the generator will not need to perform any
-        // validation as the proper endpoint uniqueness guarantees will be provided by the IR itself.
-        CodeBlock routingHandler = CodeBlock.builder()
-                .add(CodeBlocks.of(Iterables.transform(
-                        serviceDefinition.getEndpoints(),
-                        e -> CodeBlock.of(
-                                ".add($1L, $2L)",
-                                CodeBlock.of(
-                                        "$1T.$2L($3S, $4S, $5S)",
-                                        Endpoint.class,
-                                        e.getHttpMethod().toString().toLowerCase(),
-                                        e.getHttpPath(),
-                                        serviceName,
-                                        e.getEndpointName().get()),
-                                CodeBlock.of(
-                                        "new $1T()",
-                                        endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName()))
-                        ))))
-                .build();
+        CodeBlock.Builder routingHandler = CodeBlock.builder();
+        for (EndpointDefinition e : serviceDefinition.getEndpoints()) {
+            routingHandler.addStatement("$1N.add($2L, $3L)",
+                    ENDPOINT_REGISTRY_NAME,
+                    CodeBlock.of(
+                            "$1T.$2L($3S, $4S, $5S)",
+                            Endpoint.class,
+                            e.getHttpMethod().toString().toLowerCase(),
+                            e.getHttpPath(),
+                            serviceName,
+                            e.getEndpointName().get()),
+                    CodeBlock.of(
+                            "new $1T()",
+                            endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName())));
+        }
+
         registrable.addMethod(MethodSpec.methodBuilder("register")
-                .addParameter(EndpointRegistry.class, "endpointRegistry")
-                .addStatement("$1L$2L", "endpointRegistry", routingHandler)
+                .addParameter(EndpointRegistry.class, ENDPOINT_REGISTRY_NAME)
+                .addCode(routingHandler.build())
                 .build());
 
         // addEndpointHandlers
@@ -172,9 +168,9 @@ final class UndertowServiceHandlerGenerator {
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
-                        .addParameter(EndpointRegistry.class, "endpointRegistry")
+                        .addParameter(EndpointRegistry.class, ENDPOINT_REGISTRY_NAME)
                         .addStatement("new $1T($2N, $3N).register($4N)",
-                                registrableName, CONTEXT_VAR_NAME, DELEGATE_VAR_NAME, "endpointRegistry")
+                                registrableName, CONTEXT_VAR_NAME, DELEGATE_VAR_NAME, ENDPOINT_REGISTRY_NAME)
                         .build())
 
                 .addType(routable)
