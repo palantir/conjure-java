@@ -1,13 +1,17 @@
 package test.api;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -23,8 +27,8 @@ public final class TestServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(UndertowRuntime runtime, EndpointRegistry registry) {
-        new TestServiceRegistrable(runtime, delegate).register(registry);
+    public List<Endpoint> create(UndertowRuntime runtime) {
+        return new TestServiceRegistrable(runtime, delegate).create();
     }
 
     private static final class TestServiceRegistrable {
@@ -37,15 +41,40 @@ public final class TestServiceEndpoints implements Service {
             this.delegate = delegate;
         }
 
-        void register(EndpointRegistry registry) {
-            registry.add(Endpoint.get("/", "TestService", "getBinary"), new GetBinaryHandler());
+        List<Endpoint> create() {
+            return ImmutableList.of(new GetBinaryEndpoint());
         }
 
-        private class GetBinaryHandler implements HttpHandler {
+        private class GetBinaryEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 BinaryResponseBody result = delegate.getBinary();
                 runtime.serde().serialize(result, exchange);
+            }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("getBinary");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
             }
         }
     }

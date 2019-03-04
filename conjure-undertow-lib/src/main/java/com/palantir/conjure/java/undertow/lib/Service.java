@@ -16,14 +16,19 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
+import java.util.List;
+
 /**
- * Registers a service interface with a web server. The server is responsible
- * for providing a {@link UndertowRuntime} and {@link EndpointRegistry} allowing
- * API implementors to add APIs using
+ * A {@link Service} provides a list of {@link Endpoint endpoints} when it is
+ * given the {@link UndertowRuntime}. These {@link Endpoint endpoints} may be
+ * registered with an {@link EndpointRegistry} in order to be exposed by a
+ * web server. The server is responsible for providing an {@link UndertowRuntime} and
+ * orchestrating registration with the {@link EndpointRegistry} allowing API
+ * implementors to add APIs using
  * <code>server.api(MyServiceEndpoints.of(myServiceImpl)</code>.
  */
 public interface Service {
 
-    void register(UndertowRuntime runtime, EndpointRegistry registry);
+    List<Endpoint> create(UndertowRuntime runtime);
 
 }

@@ -19,9 +19,9 @@ package com.palantir.conjure.java.verification.server.undertest;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
-import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
+import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoints;
 import com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
 import io.undertow.Handlers;
@@ -35,17 +35,17 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
     private Undertow server;
 
     @Override
-    protected void before() throws Throwable {
-        UndertowAutoDeserializeService service = Reflection.newProxy(
+    protected void before() {
+        UndertowAutoDeserializeService autoDeserialize = Reflection.newProxy(
                 UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
-        Service endpoints = AutoDeserializeServiceEndpoints.of(service);
+        Service service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
         ConjureHandler handler = new ConjureHandler();
         UndertowRuntime context = ConjureUndertowRuntime.builder()
                 .serializerRegistry(ConjureSerializerRegistry.getDefault())
                 .build();
 
-        endpoints.register(context, handler);
+        service.create(context).forEach(handler::add);
 
         server = Undertow.builder()
                 .addHttpListener(PORT, "0.0.0.0")

@@ -1,10 +1,10 @@
 package com.palantir.product;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.ri.ResourceIdentifier;
@@ -13,6 +13,8 @@ import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderMap;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
@@ -36,8 +38,8 @@ public final class EteServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(UndertowRuntime runtime, EndpointRegistry registry) {
-        new EteServiceRegistrable(runtime, delegate).register(registry);
+    public List<Endpoint> create(UndertowRuntime runtime) {
+        return new EteServiceRegistrable(runtime, delegate).create();
     }
 
     private static final class EteServiceRegistrable {
@@ -50,144 +52,273 @@ public final class EteServiceEndpoints implements Service {
             this.delegate = delegate;
         }
 
-        void register(EndpointRegistry registry) {
-            registry.add(Endpoint.get("/base/string", "EteService", "string"), new StringHandler());
-            registry.add(
-                    Endpoint.get("/base/integer", "EteService", "integer"), new IntegerHandler());
-            registry.add(
-                    Endpoint.get("/base/double", "EteService", "double_"), new Double_Handler());
-            registry.add(
-                    Endpoint.get("/base/boolean", "EteService", "boolean_"), new Boolean_Handler());
-            registry.add(
-                    Endpoint.get("/base/safelong", "EteService", "safelong"),
-                    new SafelongHandler());
-            registry.add(Endpoint.get("/base/rid", "EteService", "rid"), new RidHandler());
-            registry.add(
-                    Endpoint.get("/base/bearertoken", "EteService", "bearertoken"),
-                    new BearertokenHandler());
-            registry.add(
-                    Endpoint.get("/base/optionalString", "EteService", "optionalString"),
-                    new OptionalStringHandler());
-            registry.add(
-                    Endpoint.get("/base/optionalEmpty", "EteService", "optionalEmpty"),
-                    new OptionalEmptyHandler());
-            registry.add(
-                    Endpoint.get("/base/datetime", "EteService", "datetime"),
-                    new DatetimeHandler());
-            registry.add(Endpoint.get("/base/binary", "EteService", "binary"), new BinaryHandler());
-            registry.add(
-                    Endpoint.get("/base/path/{param}", "EteService", "path"), new PathHandler());
-            registry.add(
-                    Endpoint.post("/base/notNullBody", "EteService", "notNullBody"),
-                    new NotNullBodyHandler());
-            registry.add(
-                    Endpoint.get("/base/aliasOne", "EteService", "aliasOne"),
-                    new AliasOneHandler());
-            registry.add(
-                    Endpoint.get("/base/optionalAliasOne", "EteService", "optionalAliasOne"),
-                    new OptionalAliasOneHandler());
-            registry.add(
-                    Endpoint.get("/base/aliasTwo", "EteService", "aliasTwo"),
-                    new AliasTwoHandler());
-            registry.add(
-                    Endpoint.post(
-                            "/base/external/notNullBody",
-                            "EteService",
-                            "notNullBodyExternalImport"),
-                    new NotNullBodyExternalImportHandler());
-            registry.add(
-                    Endpoint.post(
-                            "/base/external/optional-body",
-                            "EteService",
-                            "optionalBodyExternalImport"),
-                    new OptionalBodyExternalImportHandler());
-            registry.add(
-                    Endpoint.post(
-                            "/base/external/optional-query",
-                            "EteService",
-                            "optionalQueryExternalImport"),
-                    new OptionalQueryExternalImportHandler());
-            registry.add(
-                    Endpoint.post("/base/no-return", "EteService", "noReturn"),
-                    new NoReturnHandler());
-            registry.add(
-                    Endpoint.get("/base/enum/query", "EteService", "enumQuery"),
-                    new EnumQueryHandler());
-            registry.add(
-                    Endpoint.get("/base/enum/list/query", "EteService", "enumListQuery"),
-                    new EnumListQueryHandler());
-            registry.add(
-                    Endpoint.get("/base/enum/optional/query", "EteService", "optionalEnumQuery"),
-                    new OptionalEnumQueryHandler());
-            registry.add(
-                    Endpoint.get("/base/enum/header", "EteService", "enumHeader"),
-                    new EnumHeaderHandler());
+        List<Endpoint> create() {
+            return ImmutableList.of(
+                    new StringEndpoint(),
+                    new IntegerEndpoint(),
+                    new Double_Endpoint(),
+                    new Boolean_Endpoint(),
+                    new SafelongEndpoint(),
+                    new RidEndpoint(),
+                    new BearertokenEndpoint(),
+                    new OptionalStringEndpoint(),
+                    new OptionalEmptyEndpoint(),
+                    new DatetimeEndpoint(),
+                    new BinaryEndpoint(),
+                    new PathEndpoint(),
+                    new NotNullBodyEndpoint(),
+                    new AliasOneEndpoint(),
+                    new OptionalAliasOneEndpoint(),
+                    new AliasTwoEndpoint(),
+                    new NotNullBodyExternalImportEndpoint(),
+                    new OptionalBodyExternalImportEndpoint(),
+                    new OptionalQueryExternalImportEndpoint(),
+                    new NoReturnEndpoint(),
+                    new EnumQueryEndpoint(),
+                    new EnumListQueryEndpoint(),
+                    new OptionalEnumQueryEndpoint(),
+                    new EnumHeaderEndpoint());
         }
 
-        private class StringHandler implements HttpHandler {
+        private class StringEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 String result = delegate.string(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/string";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("string");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class IntegerHandler implements HttpHandler {
+        private class IntegerEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 int result = delegate.integer(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/integer";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("integer");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class Double_Handler implements HttpHandler {
+        private class Double_Endpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 double result = delegate.double_(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/double";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("double_");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class Boolean_Handler implements HttpHandler {
+        private class Boolean_Endpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 boolean result = delegate.boolean_(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/boolean";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("boolean_");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class SafelongHandler implements HttpHandler {
+        private class SafelongEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 SafeLong result = delegate.safelong(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/safelong";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("safelong");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class RidHandler implements HttpHandler {
+        private class RidEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 ResourceIdentifier result = delegate.rid(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/rid";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("rid");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class BearertokenHandler implements HttpHandler {
+        private class BearertokenEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 BearerToken result = delegate.bearertoken(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/bearertoken";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("bearertoken");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class OptionalStringHandler implements HttpHandler {
+        private class OptionalStringEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -198,9 +329,34 @@ public final class EteServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/optionalString";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("optionalString");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class OptionalEmptyHandler implements HttpHandler {
+        private class OptionalEmptyEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -211,27 +367,102 @@ public final class EteServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/optionalEmpty";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("optionalEmpty");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class DatetimeHandler implements HttpHandler {
+        private class DatetimeEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 OffsetDateTime result = delegate.datetime(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/datetime";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("datetime");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class BinaryHandler implements HttpHandler {
+        private class BinaryEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 BinaryResponseBody result = delegate.binary(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/binary";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("binary");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class PathHandler implements HttpHandler {
+        private class PathEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -241,9 +472,34 @@ public final class EteServiceEndpoints implements Service {
                 String result = delegate.path(authHeader, param);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/path/{param}";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("path");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class NotNullBodyHandler implements HttpHandler {
+        private class NotNullBodyEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<StringAliasExample> notNullBodyType =
                     new TypeToken<StringAliasExample>() {};
 
@@ -255,9 +511,34 @@ public final class EteServiceEndpoints implements Service {
                 StringAliasExample result = delegate.notNullBody(authHeader, notNullBody);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/notNullBody";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("notNullBody");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class AliasOneHandler implements HttpHandler {
+        private class AliasOneEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -268,9 +549,34 @@ public final class EteServiceEndpoints implements Service {
                 StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/aliasOne";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("aliasOne");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class OptionalAliasOneHandler implements HttpHandler {
+        private class OptionalAliasOneEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -286,9 +592,34 @@ public final class EteServiceEndpoints implements Service {
                 StringAliasExample result = delegate.optionalAliasOne(authHeader, queryParamName);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/optionalAliasOne";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("optionalAliasOne");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class AliasTwoHandler implements HttpHandler {
+        private class AliasTwoEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -300,9 +631,34 @@ public final class EteServiceEndpoints implements Service {
                 NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/aliasTwo";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("aliasTwo");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class NotNullBodyExternalImportHandler implements HttpHandler {
+        private class NotNullBodyExternalImportEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<StringAliasExample> notNullBodyType =
                     new TypeToken<StringAliasExample>() {};
 
@@ -315,9 +671,34 @@ public final class EteServiceEndpoints implements Service {
                         delegate.notNullBodyExternalImport(authHeader, notNullBody);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/external/notNullBody";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("notNullBodyExternalImport");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class OptionalBodyExternalImportHandler implements HttpHandler {
+        private class OptionalBodyExternalImportEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<Optional<StringAliasExample>> bodyType =
                     new TypeToken<Optional<StringAliasExample>>() {};
 
@@ -333,9 +714,34 @@ public final class EteServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/external/optional-body";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("optionalBodyExternalImport");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class OptionalQueryExternalImportHandler implements HttpHandler {
+        private class OptionalQueryExternalImportEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -352,18 +758,68 @@ public final class EteServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/external/optional-query";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("optionalQueryExternalImport");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class NoReturnHandler implements HttpHandler {
+        private class NoReturnEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 delegate.noReturn(authHeader);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/no-return";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("noReturn");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class EnumQueryHandler implements HttpHandler {
+        private class EnumQueryEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -375,9 +831,34 @@ public final class EteServiceEndpoints implements Service {
                 SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/enum/query";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("enumQuery");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class EnumListQueryHandler implements HttpHandler {
+        private class EnumListQueryEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -389,9 +870,34 @@ public final class EteServiceEndpoints implements Service {
                 List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/enum/list/query";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("enumListQuery");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class OptionalEnumQueryHandler implements HttpHandler {
+        private class OptionalEnumQueryEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -408,9 +914,34 @@ public final class EteServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/enum/optional/query";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("optionalEnumQuery");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class EnumHeaderHandler implements HttpHandler {
+        private class EnumHeaderEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -421,6 +952,31 @@ public final class EteServiceEndpoints implements Service {
                                         headerParams.get("Custom-Header"), SimpleEnum::valueOf);
                 SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
                 runtime.serde().serialize(result, exchange);
+            }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/base/enum/header";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("EteService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("enumHeader");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
             }
         }
     }

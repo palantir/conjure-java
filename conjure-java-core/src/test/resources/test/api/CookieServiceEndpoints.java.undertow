@@ -1,14 +1,18 @@
 package test.api;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -24,8 +28,8 @@ public final class CookieServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(UndertowRuntime runtime, EndpointRegistry registry) {
-        new CookieServiceRegistrable(runtime, delegate).register(registry);
+    public List<Endpoint> create(UndertowRuntime runtime) {
+        return new CookieServiceRegistrable(runtime, delegate).create();
     }
 
     private static final class CookieServiceRegistrable {
@@ -38,18 +42,41 @@ public final class CookieServiceEndpoints implements Service {
             this.delegate = delegate;
         }
 
-        void register(EndpointRegistry registry) {
-            registry.add(
-                    Endpoint.get("/cookies", "CookieService", "eatCookies"),
-                    new EatCookiesHandler());
+        List<Endpoint> create() {
+            return ImmutableList.of(new EatCookiesEndpoint());
         }
 
-        private class EatCookiesHandler implements HttpHandler {
+        private class EatCookiesEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 BearerToken cookieToken = runtime.auth().cookie(exchange, "PALANTIR_TOKEN");
                 delegate.eatCookies(cookieToken);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/cookies";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("CookieService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("eatCookies");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
             }
         }
     }

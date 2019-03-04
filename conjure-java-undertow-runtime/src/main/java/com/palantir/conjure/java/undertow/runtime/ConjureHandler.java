@@ -78,8 +78,8 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
     }
 
     @Override
-    public void add(Endpoint endpoint, HttpHandler handler) {
-        HttpHandler current = handler;
+    public void add(Endpoint endpoint) {
+        HttpHandler current = endpoint.handler();
         for (BiFunction<Endpoint, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
             current = wrapper.apply(endpoint, current);
         }

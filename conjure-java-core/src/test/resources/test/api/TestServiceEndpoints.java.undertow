@@ -1,9 +1,9 @@
 package com.palantir.another;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.product.AliasedString;
@@ -16,11 +16,14 @@ import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderMap;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -41,8 +44,8 @@ public final class TestServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(UndertowRuntime runtime, EndpointRegistry registry) {
-        new TestServiceRegistrable(runtime, delegate).register(registry);
+    public List<Endpoint> create(UndertowRuntime runtime) {
+        return new TestServiceRegistrable(runtime, delegate).create();
     }
 
     private static final class TestServiceRegistrable {
@@ -55,107 +58,65 @@ public final class TestServiceEndpoints implements Service {
             this.delegate = delegate;
         }
 
-        void register(EndpointRegistry registry) {
-            registry.add(
-                    Endpoint.get("/catalog/fileSystems", "TestService", "getFileSystems"),
-                    new GetFileSystemsHandler());
-            registry.add(
-                    Endpoint.post("/catalog/datasets", "TestService", "createDataset"),
-                    new CreateDatasetHandler());
-            registry.add(
-                    Endpoint.get("/catalog/datasets/{datasetRid}", "TestService", "getDataset"),
-                    new GetDatasetHandler());
-            registry.add(
-                    Endpoint.get("/catalog/datasets/{datasetRid}/raw", "TestService", "getRawData"),
-                    new GetRawDataHandler());
-            registry.add(
-                    Endpoint.get(
-                            "/catalog/datasets/{datasetRid}/raw-aliased",
-                            "TestService",
-                            "getAliasedRawData"),
-                    new GetAliasedRawDataHandler());
-            registry.add(
-                    Endpoint.get(
-                            "/catalog/datasets/{datasetRid}/raw-maybe",
-                            "TestService",
-                            "maybeGetRawData"),
-                    new MaybeGetRawDataHandler());
-            registry.add(
-                    Endpoint.get(
-                            "/catalog/datasets/{datasetRid}/string-aliased",
-                            "TestService",
-                            "getAliasedString"),
-                    new GetAliasedStringHandler());
-            registry.add(
-                    Endpoint.post("/catalog/datasets/upload-raw", "TestService", "uploadRawData"),
-                    new UploadRawDataHandler());
-            registry.add(
-                    Endpoint.post(
-                            "/catalog/datasets/upload-raw-aliased",
-                            "TestService",
-                            "uploadAliasedRawData"),
-                    new UploadAliasedRawDataHandler());
-            registry.add(
-                    Endpoint.get(
-                            "/catalog/datasets/{datasetRid}/branches",
-                            "TestService",
-                            "getBranches"),
-                    new GetBranchesHandler());
-            registry.add(
-                    Endpoint.get(
-                            "/catalog/datasets/{datasetRid}/branchesDeprecated",
-                            "TestService",
-                            "getBranchesDeprecated"),
-                    new GetBranchesDeprecatedHandler());
-            registry.add(
-                    Endpoint.get(
-                            "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve",
-                            "TestService",
-                            "resolveBranch"),
-                    new ResolveBranchHandler());
-            registry.add(
-                    Endpoint.get(
-                            "/catalog/datasets/{datasetRid}/testParam", "TestService", "testParam"),
-                    new TestParamHandler());
-            registry.add(
-                    Endpoint.post("/catalog/test-query-params", "TestService", "testQueryParams"),
-                    new TestQueryParamsHandler());
-            registry.add(
-                    Endpoint.post(
-                            "/catalog/test-no-response-query-params",
-                            "TestService",
-                            "testNoResponseQueryParams"),
-                    new TestNoResponseQueryParamsHandler());
-            registry.add(
-                    Endpoint.get("/catalog/boolean", "TestService", "testBoolean"),
-                    new TestBooleanHandler());
-            registry.add(
-                    Endpoint.get("/catalog/double", "TestService", "testDouble"),
-                    new TestDoubleHandler());
-            registry.add(
-                    Endpoint.get("/catalog/integer", "TestService", "testInteger"),
-                    new TestIntegerHandler());
-            registry.add(
-                    Endpoint.post("/catalog/optional", "TestService", "testPostOptional"),
-                    new TestPostOptionalHandler());
-            registry.add(
-                    Endpoint.get(
-                            "/catalog/optional-integer-double",
-                            "TestService",
-                            "testOptionalIntegerAndDouble"),
-                    new TestOptionalIntegerAndDoubleHandler());
+        List<Endpoint> create() {
+            return ImmutableList.of(
+                    new GetFileSystemsEndpoint(),
+                    new CreateDatasetEndpoint(),
+                    new GetDatasetEndpoint(),
+                    new GetRawDataEndpoint(),
+                    new GetAliasedRawDataEndpoint(),
+                    new MaybeGetRawDataEndpoint(),
+                    new GetAliasedStringEndpoint(),
+                    new UploadRawDataEndpoint(),
+                    new UploadAliasedRawDataEndpoint(),
+                    new GetBranchesEndpoint(),
+                    new GetBranchesDeprecatedEndpoint(),
+                    new ResolveBranchEndpoint(),
+                    new TestParamEndpoint(),
+                    new TestQueryParamsEndpoint(),
+                    new TestNoResponseQueryParamsEndpoint(),
+                    new TestBooleanEndpoint(),
+                    new TestDoubleEndpoint(),
+                    new TestIntegerEndpoint(),
+                    new TestPostOptionalEndpoint(),
+                    new TestOptionalIntegerAndDoubleEndpoint());
         }
 
-        private class GetFileSystemsHandler implements HttpHandler {
+        private class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, BackingFileSystem> result = delegate.getFileSystems(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/fileSystems";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("getFileSystems");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class CreateDatasetHandler implements HttpHandler {
+        private class CreateDatasetEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<CreateDatasetRequest> requestType =
                     new TypeToken<CreateDatasetRequest>() {};
 
@@ -169,9 +130,34 @@ public final class TestServiceEndpoints implements Service {
                 Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("createDataset");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class GetDatasetHandler implements HttpHandler {
+        private class GetDatasetEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -186,9 +172,34 @@ public final class TestServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("getDataset");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class GetRawDataHandler implements HttpHandler {
+        private class GetRawDataEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -199,9 +210,34 @@ public final class TestServiceEndpoints implements Service {
                 BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}/raw";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("getRawData");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class GetAliasedRawDataHandler implements HttpHandler {
+        private class GetAliasedRawDataEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -212,9 +248,34 @@ public final class TestServiceEndpoints implements Service {
                 NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}/raw-aliased";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("getAliasedRawData");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class MaybeGetRawDataHandler implements HttpHandler {
+        private class MaybeGetRawDataEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -230,9 +291,34 @@ public final class TestServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}/raw-maybe";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("maybeGetRawData");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class GetAliasedStringHandler implements HttpHandler {
+        private class GetAliasedStringEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -243,9 +329,34 @@ public final class TestServiceEndpoints implements Service {
                 AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}/string-aliased";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("getAliasedString");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class UploadRawDataHandler implements HttpHandler {
+        private class UploadRawDataEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<InputStream> inputType = new TypeToken<InputStream>() {};
 
             @Override
@@ -255,9 +366,34 @@ public final class TestServiceEndpoints implements Service {
                 delegate.uploadRawData(authHeader, input);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/upload-raw";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("uploadRawData");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class UploadAliasedRawDataHandler implements HttpHandler {
+        private class UploadAliasedRawDataEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<NestedAliasedBinary> inputType =
                     new TypeToken<NestedAliasedBinary>() {};
 
@@ -268,9 +404,34 @@ public final class TestServiceEndpoints implements Service {
                 delegate.uploadAliasedRawData(authHeader, input);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/upload-raw-aliased";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("uploadAliasedRawData");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class GetBranchesHandler implements HttpHandler {
+        private class GetBranchesEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -281,9 +442,34 @@ public final class TestServiceEndpoints implements Service {
                 Set<String> result = delegate.getBranches(authHeader, datasetRid);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}/branches";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("getBranches");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class GetBranchesDeprecatedHandler implements HttpHandler {
+        private class GetBranchesDeprecatedEndpoint implements HttpHandler, Endpoint {
             @Override
             @SuppressWarnings("deprecation")
             public void handleRequest(HttpServerExchange exchange) throws IOException {
@@ -295,9 +481,34 @@ public final class TestServiceEndpoints implements Service {
                 Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}/branchesDeprecated";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("getBranchesDeprecated");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class ResolveBranchHandler implements HttpHandler {
+        private class ResolveBranchEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -313,9 +524,34 @@ public final class TestServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("resolveBranch");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class TestParamHandler implements HttpHandler {
+        private class TestParamEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -330,9 +566,34 @@ public final class TestServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/datasets/{datasetRid}/testParam";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("testParam");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class TestQueryParamsHandler implements HttpHandler {
+        private class TestQueryParamsEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<String> queryType = new TypeToken<String>() {};
 
             @Override
@@ -361,9 +622,34 @@ public final class TestServiceEndpoints implements Service {
                                 query);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/test-query-params";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("testQueryParams");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class TestNoResponseQueryParamsHandler implements HttpHandler {
+        private class TestNoResponseQueryParamsEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<String> queryType = new TypeToken<String>() {};
 
             @Override
@@ -391,36 +677,136 @@ public final class TestServiceEndpoints implements Service {
                         query);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/test-no-response-query-params";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("testNoResponseQueryParams");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class TestBooleanHandler implements HttpHandler {
+        private class TestBooleanEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 boolean result = delegate.testBoolean(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/boolean";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("testBoolean");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class TestDoubleHandler implements HttpHandler {
+        private class TestDoubleEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 double result = delegate.testDouble(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/double";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("testDouble");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class TestIntegerHandler implements HttpHandler {
+        private class TestIntegerEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
                 int result = delegate.testInteger(authHeader);
                 runtime.serde().serialize(result, exchange);
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/integer";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("testInteger");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class TestPostOptionalHandler implements HttpHandler {
+        private class TestPostOptionalEndpoint implements HttpHandler, Endpoint {
             private final TypeToken<Optional<String>> maybeStringType =
                     new TypeToken<Optional<String>>() {};
 
@@ -436,9 +822,34 @@ public final class TestServiceEndpoints implements Service {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
             }
+
+            @Override
+            public final HttpString method() {
+                return Methods.POST;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/optional";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("testPostOptional");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
+            }
         }
 
-        private class TestOptionalIntegerAndDoubleHandler implements HttpHandler {
+        private class TestOptionalIntegerAndDoubleEndpoint implements HttpHandler, Endpoint {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 AuthHeader authHeader = runtime.auth().header(exchange);
@@ -449,6 +860,31 @@ public final class TestServiceEndpoints implements Service {
                         runtime.serde().deserializeOptionalDouble(queryParams.get("maybeDouble"));
                 delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+
+            @Override
+            public final HttpString method() {
+                return Methods.GET;
+            }
+
+            @Override
+            public final String template() {
+                return "/catalog/optional-integer-double";
+            }
+
+            @Override
+            public final Optional<String> serviceName() {
+                return Optional.of("TestService");
+            }
+
+            @Override
+            public final Optional<String> name() {
+                return Optional.of("testOptionalIntegerAndDouble");
+            }
+
+            @Override
+            public final HttpHandler handler() {
+                return this;
             }
         }
     }

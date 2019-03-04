@@ -35,7 +35,6 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
-import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
@@ -122,11 +121,12 @@ public final class UndertowServiceEteTest extends TestBase {
                 .build();
 
         ConjureHandler handler = new ConjureHandler();
-        List<Service> endpoints = ImmutableList.of(
+        ImmutableList.of(
                 EteServiceEndpoints.of(new UndertowEteResource()),
                 EmptyPathServiceEndpoints.of(() -> true),
-                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()));
-        endpoints.forEach(endpoint -> endpoint.register(context, handler));
+                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
+                .forEach(service -> service.create(context).forEach(handler::add));
+
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)
                 .addHttpListener(8080, "0.0.0.0")

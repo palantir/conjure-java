@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.services;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.ConjureAnnotations;
@@ -23,7 +24,6 @@ import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -59,6 +59,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
@@ -115,30 +117,22 @@ final class UndertowServiceHandlerGenerator {
                 .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
                 .build());
 
-        CodeBlock.Builder routingHandler = CodeBlock.builder();
+        CodeBlock endpointBlock = CodeBlock.builder().build();
         for (EndpointDefinition e : serviceDefinition.getEndpoints()) {
-            routingHandler.addStatement("$1N.add($2L, $3L)",
-                    ENDPOINT_REGISTRY_NAME,
-                    CodeBlock.of(
-                            "$1T.$2L($3S, $4S, $5S)",
-                            Endpoint.class,
-                            e.getHttpMethod().toString().toLowerCase(),
-                            e.getHttpPath(),
-                            serviceName,
-                            e.getEndpointName().get()),
-                    CodeBlock.of(
-                            "new $1T()",
-                            endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName())));
+            CodeBlock nextBlock = CodeBlock.of("new $1T()",
+                    endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName()));
+            endpointBlock = endpointBlock.isEmpty() ? nextBlock : CodeBlock.of("$1L, $2L", endpointBlock, nextBlock);
         }
 
-        registrable.addMethod(MethodSpec.methodBuilder("register")
-                .addParameter(EndpointRegistry.class, ENDPOINT_REGISTRY_NAME)
-                .addCode(routingHandler.build())
+
+        registrable.addMethod(MethodSpec.methodBuilder("create")
+                .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
+                .addStatement("return $1T.of($2L)", ImmutableList.class, endpointBlock)
                 .build());
 
         // addEndpointHandlers
         registrable.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
-                e -> generateEndpointHandler(e, typeDefinitions, typeMapper, returnTypeMapper)));
+                e -> generateEndpointHandler(e, serviceName, typeDefinitions, typeMapper, returnTypeMapper)));
 
         TypeSpec routable = registrable.build();
 
@@ -163,13 +157,13 @@ final class UndertowServiceHandlerGenerator {
                         .addParameter(serviceClass, DELEGATE_VAR_NAME)
                         .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
                         .build())
-                .addMethod(MethodSpec.methodBuilder("register")
+                .addMethod(MethodSpec.methodBuilder("create")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
-                        .addParameter(EndpointRegistry.class, ENDPOINT_REGISTRY_NAME)
-                        .addStatement("new $1T($2N, $3N).register($4N)",
-                                registrableName, RUNTIME_VAR_NAME, DELEGATE_VAR_NAME, ENDPOINT_REGISTRY_NAME)
+                        .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
+                        .addStatement("return new $1T($2N, $3N).create()",
+                                registrableName, RUNTIME_VAR_NAME, DELEGATE_VAR_NAME)
                         .build())
 
                 .addType(routable)
@@ -188,10 +182,11 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private String endpointToHandlerClassName(EndpointName name) {
-        return StringUtils.capitalize(name.get()) + "Handler";
+        return StringUtils.capitalize(name.get()) + "Endpoint";
     }
 
     private TypeSpec generateEndpointHandler(EndpointDefinition endpointDefinition,
+            String serviceName,
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
@@ -210,11 +205,43 @@ final class UndertowServiceHandlerGenerator {
         return TypeSpec.classBuilder(endpointToHandlerClassName(endpointDefinition.getEndpointName()))
                 .addModifiers(Modifier.PRIVATE)
                 .addSuperinterface(HttpHandler.class)
+                .addSuperinterface(Endpoint.class)
                 .addFields(endpointDefinition.getArgs().stream()
                         .filter(def -> def.getParamType().accept(ParameterTypeVisitor.IS_BODY))
                         .map(def -> createTypeField(typeMapper, def))
                         .collect(Collectors.toList()))
                 .addMethod(methodBuilder.build())
+                .addMethod(MethodSpec.methodBuilder("method")
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addAnnotation(Override.class)
+                        .returns(HttpString.class)
+                        .addStatement("return $1T.$2N", Methods.class, endpointDefinition.getHttpMethod().toString())
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("template")
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addAnnotation(Override.class)
+                        .returns(String.class)
+                        .addStatement("return $1S", endpointDefinition.getHttpPath())
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("serviceName")
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addAnnotation(Override.class)
+                        .returns(ParameterizedTypeName.get(Optional.class, String.class))
+                        .addStatement("return $1T.of($2S)", Optional.class, serviceName)
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("name")
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addAnnotation(Override.class)
+                        .returns(ParameterizedTypeName.get(Optional.class, String.class))
+                        .addStatement("return $1T.of($2S)", Optional.class,
+                                endpointDefinition.getEndpointName().get())
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("handler")
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addAnnotation(Override.class)
+                        .returns(HttpHandler.class)
+                        .addStatement("return this")
+                        .build())
                 .build();
     }
 
@@ -300,7 +327,8 @@ final class UndertowServiceHandlerGenerator {
                                 .endControlFlow()
                                 .build());
             } else {
-                code.addStatement("$1N.serde().serialize($2N, $3N)", RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
+                code.addStatement("$1N.serde().serialize($2N, $3N)",
+                        RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
             }
         } else {
             code.addStatement("$1N.$2L($3L)",
