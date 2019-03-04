@@ -25,6 +25,12 @@ import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Utility functions for octet-stream serde.
+ *
+ * @deprecated Use functions on the ServiceContext instead.
+ */
+@Deprecated
 public final class BinarySerializers {
 
     private static final String CONTENT_TYPE = "application/octet-stream";

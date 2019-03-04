@@ -16,68 +16,192 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.palantir.logsafe.Preconditions;
+import com.google.common.reflect.TypeToken;
+import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.ri.ResourceIdentifier;
+import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens.auth.UnverifiedJsonWebToken;
+import io.undertow.server.HttpServerExchange;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import javax.annotation.Nullable;
+import org.slf4j.MDC;
 
 /**
  * {@link ServiceContext} provides state required by generated handlers.
  */
-public final class ServiceContext {
+public interface ServiceContext {
 
-    private final SerializerRegistry serializerRegistry;
-    private final ServiceInstrumenter serviceInstrumenter;
+    /** Serialize a value to a provided exchange. */
+    void serialize(Object value, HttpServerExchange exchange) throws IOException;
 
-    private ServiceContext(Builder builder) {
-        this.serializerRegistry = Preconditions.checkNotNull(builder.serializerRegistry,
-                "Missing required SerializerRegistry");
-        this.serviceInstrumenter = Preconditions.checkNotNull(builder.serviceInstrumenter,
-                "Missing required ServiceInstrumenter");
-    }
+    /** Serialize a {@link BinaryResponseBody} to <pre>application/octet-stream</pre>. */
+    void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException;
+
+    /** Deserializes the request body into the requested type. */
+    <T> T deserialize(TypeToken<T> type, HttpServerExchange exchange) throws IOException;
+
+    /** Reads an {@link InputStream} from the {@link HttpServerExchange} request body. */
+    InputStream deserializeInputStream(HttpServerExchange exchange);
+
+    /**
+     * Parses an {@link AuthHeader} from the provided {@link HttpServerExchange} and applies
+     * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
+     */
+    AuthHeader authHeader(HttpServerExchange exchange);
+
+    /**
+     * Parses a {@link BearerToken} from the provided {@link HttpServerExchange} and applies
+     * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
+     */
+    BearerToken authCookie(HttpServerExchange exchange, String cookieName);
+
+    /** Applies instrumentation to the provided implementation, returning the instrumented service. */
+    <T> T instrument(T serviceImplementation, Class<T> serviceInterface);
 
     /**
      * {@link SerializerRegistry} for request and response body serialization.
+     *
+     * @deprecated Use {@link #serialize(Object, HttpServerExchange)} and
+     * {@link #deserialize(TypeToken, HttpServerExchange)}.
      */
-    public SerializerRegistry serializerRegistry() {
-        return serializerRegistry;
-    }
+    @Deprecated
+    SerializerRegistry serializerRegistry();
 
     /**
      * {@link ServiceInstrumenter} to apply metric instrumentation to exposed services.
+     *
+     * @deprecated Use {@link #instrument(Object, Class)}.
      */
-    public ServiceInstrumenter serviceInstrumenter() {
-        return serviceInstrumenter;
-    }
+    @Deprecated
+    ServiceInstrumenter serviceInstrumenter();
 
-    public static Builder builder() {
-        return new Builder();
-    }
+    // query, path, and header parameter deserializers
 
-    public static final class Builder {
+    BearerToken deserializeBearerToken(String in);
 
-        private SerializerRegistry serializerRegistry;
-        private ServiceInstrumenter serviceInstrumenter = new ServiceInstrumenter() {
-            @Override
-            public <T> T instrument(T serviceImplementation, Class<T> serviceInterface) {
-                return serviceImplementation;
-            }
-        };
+    BearerToken deserializeBearerToken(Iterable<String> in);
 
-        private Builder() {}
+    Optional<BearerToken> deserializeOptionalBearerToken(@Nullable String in);
 
-        @CanIgnoreReturnValue
-        public Builder serializerRegistry(SerializerRegistry value) {
-            this.serializerRegistry = Preconditions.checkNotNull(value, "Value is required");
-            return this;
-        }
+    Optional<BearerToken> deserializeOptionalBearerToken(@Nullable Iterable<String> in);
 
-        @CanIgnoreReturnValue
-        public Builder serviceInstrumenter(ServiceInstrumenter value) {
-            this.serviceInstrumenter = Preconditions.checkNotNull(value, "Value is required");
-            return this;
-        }
+    List<BearerToken> deserializeBearerTokenList(@Nullable Iterable<String> in);
 
-        public ServiceContext build() {
-            return new ServiceContext(this);
-        }
-    }
+    Set<BearerToken> deserializeBearerTokenSet(@Nullable Iterable<String> in);
+
+    boolean deserializeBoolean(String in);
+
+    boolean deserializeBoolean(@Nullable Iterable<String> in);
+
+    Optional<Boolean> deserializeOptionalBoolean(String in);
+
+    Optional<Boolean> deserializeOptionalBoolean(@Nullable Iterable<String> in);
+
+    List<Boolean> deserializeBooleanList(@Nullable Iterable<String> in);
+
+    Set<Boolean> deserializeBooleanSet(@Nullable Iterable<String> in);
+
+    OffsetDateTime deserializeDateTime(String in);
+
+    OffsetDateTime deserializeDateTime(@Nullable Iterable<String> in);
+
+    Optional<OffsetDateTime> deserializeOptionalDateTime(String in);
+
+    Optional<OffsetDateTime> deserializeOptionalDateTime(@Nullable Iterable<String> in);
+
+    List<OffsetDateTime> deserializeDateTimeList(@Nullable Iterable<String> in);
+
+    Set<OffsetDateTime> deserializeDateTimeSet(@Nullable Iterable<String> in);
+
+    double deserializeDouble(String in);
+
+    double deserializeDouble(@Nullable Iterable<String> in);
+
+    OptionalDouble deserializeOptionalDouble(String in);
+
+    OptionalDouble deserializeOptionalDouble(@Nullable Iterable<String> in);
+
+    List<Double> deserializeDoubleList(@Nullable Iterable<String> in);
+
+    Set<Double> deserializeDoubleSet(@Nullable Iterable<String> in);
+
+    int deserializeInteger(String in);
+
+    int deserializeInteger(@Nullable Iterable<String> in);
+
+    OptionalInt deserializeOptionalInteger(String in);
+
+    OptionalInt deserializeOptionalInteger(@Nullable Iterable<String> in);
+
+    List<Integer> deserializeIntegerList(@Nullable Iterable<String> in);
+
+    Set<Integer> deserializeIntegerSet(@Nullable Iterable<String> in);
+
+    ResourceIdentifier deserializeRid(String in);
+
+    ResourceIdentifier deserializeRid(@Nullable Iterable<String> in);
+
+    Optional<ResourceIdentifier> deserializeOptionalRid(String in);
+
+    Optional<ResourceIdentifier> deserializeOptionalRid(@Nullable Iterable<String> in);
+
+    List<ResourceIdentifier> deserializeRidList(@Nullable Iterable<String> in);
+
+    Set<ResourceIdentifier> deserializeRidSet(@Nullable Iterable<String> in);
+
+    SafeLong deserializeSafeLong(String in);
+
+    SafeLong deserializeSafeLong(@Nullable Iterable<String> in);
+
+    Optional<SafeLong> deserializeOptionalSafeLong(String in);
+
+    Optional<SafeLong> deserializeOptionalSafeLong(@Nullable Iterable<String> in);
+
+    List<SafeLong> deserializeSafeLongList(@Nullable Iterable<String> in);
+
+    Set<SafeLong> deserializeSafeLongSet(@Nullable Iterable<String> in);
+
+    String deserializeString(String in);
+
+    String deserializeString(@Nullable Iterable<String> in);
+
+    Optional<String> deserializeOptionalString(String in);
+
+    Optional<String> deserializeOptionalString(@Nullable Iterable<String> in);
+
+    List<String> deserializeStringList(@Nullable Iterable<String> in);
+
+    Set<String> deserializeStringSet(@Nullable Iterable<String> in);
+
+    UUID deserializeUuid(String in);
+
+    UUID deserializeUuid(@Nullable Iterable<String> in);
+
+    Optional<UUID> deserializeOptionalUuid(String in);
+
+    Optional<UUID> deserializeOptionalUuid(@Nullable Iterable<String> in);
+
+    List<UUID> deserializeUuidList(@Nullable Iterable<String> in);
+
+    Set<UUID> deserializeUuidSet(@Nullable Iterable<String> in);
+
+    <T> T deserializeComplex(String in, Function<String, T> factory);
+
+    <T> T deserializeComplex(@Nullable Iterable<String> in, Function<String, T> factory);
+
+    <T> Optional<T> deserializeOptionalComplex(@Nullable Iterable<String> in, Function<String, T> factory);
+
+    <T> List<T> deserializeComplexList(@Nullable Iterable<String> in, Function<String, T> factory);
+
+    <T> Set<T> deserializeComplexSet(@Nullable Iterable<String> in, Function<String, T> factory);
 }

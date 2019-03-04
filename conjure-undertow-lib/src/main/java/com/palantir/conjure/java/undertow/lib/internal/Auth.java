@@ -30,7 +30,10 @@ import org.slf4j.MDC;
 
 /**
  * Provides utility methods to parse auth types.
+ *
+ * @deprecated Use auth methods on the ServiceContext.
  */
+@Deprecated
 public final class Auth {
 
     private static final String USER_ID_KEY = "userId";

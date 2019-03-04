@@ -40,6 +40,7 @@ import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.undertow.lib.ServiceInstrumenter;
+import com.palantir.conjure.java.undertow.runtime.ConjureContext;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -123,7 +124,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void before() {
-        ServiceContext context = ServiceContext.builder()
+        ServiceContext context = ConjureContext.builder()
                 .serializerRegistry(ConjureSerializerRegistry.getDefault())
                 .serviceInstrumenter(new ServiceInstrumenter() {
                     @Override
