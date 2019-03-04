@@ -19,13 +19,11 @@ package com.palantir.conjure.java.undertow.lib;
 import java.util.List;
 
 /**
- * A {@link UndertowService} provides a list of {@link Endpoint endpoints} when it is
- * given the {@link UndertowRuntime}. These {@link Endpoint endpoints} may be
- * registered with an {@link EndpointRegistry} in order to be exposed by a
- * web server. The server is responsible for providing an {@link UndertowRuntime} and
- * orchestrating registration with the {@link EndpointRegistry} allowing API
- * implementors to add APIs using
- * <code>server.api(MyServiceEndpoints.of(myServiceImpl)</code>.
+ * The Undertow server Conjure generator produces implementations of {@link UndertowService}
+ * which produce an {@link Endpoint} for each endpoint described in the Conjure definition.
+ * The server is responsible for providing an {@link UndertowRuntime} and orchestrating
+ * registration with the {@link EndpointRegistry} allowing API implementors to add APIs
+ * using <code>server.api(MyServiceEndpoints.of(myServiceImpl)</code>.
  */
 public interface UndertowService {
 
