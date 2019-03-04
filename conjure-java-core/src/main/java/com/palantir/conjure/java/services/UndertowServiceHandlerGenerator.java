@@ -24,7 +24,6 @@ import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
-import com.palantir.conjure.java.undertow.lib.Registrable;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -100,8 +99,7 @@ final class UndertowServiceHandlerGenerator {
                 (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
         TypeSpec.Builder registrable = TypeSpec.classBuilder(serviceName + "Registrable")
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                .addSuperinterface(Registrable.class);
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
         // addFields
         registrable.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
@@ -139,8 +137,6 @@ final class UndertowServiceHandlerGenerator {
                         ))))
                 .build();
         registrable.addMethod(MethodSpec.methodBuilder("register")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
                 .addParameter(EndpointRegistry.class, "endpointRegistry")
                 .addStatement("$1L$2L", "endpointRegistry", routingHandler)
                 .build());
@@ -172,12 +168,13 @@ final class UndertowServiceHandlerGenerator {
                         .addParameter(serviceClass, DELEGATE_VAR_NAME)
                         .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
                         .build())
-                .addMethod(MethodSpec.methodBuilder("create")
+                .addMethod(MethodSpec.methodBuilder("register")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
-                        .returns(Registrable.class)
-                        .addStatement("return new $1T($2N, $3N)", registrableName, CONTEXT_VAR_NAME, DELEGATE_VAR_NAME)
+                        .addParameter(EndpointRegistry.class, "endpointRegistry")
+                        .addStatement("new $1T($2N, $3N).register($4N)",
+                                registrableName, CONTEXT_VAR_NAME, DELEGATE_VAR_NAME, "endpointRegistry")
                         .build())
 
                 .addType(routable)

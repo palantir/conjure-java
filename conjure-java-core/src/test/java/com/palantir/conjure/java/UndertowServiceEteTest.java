@@ -150,7 +150,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 EteServiceEndpoints.of(new UndertowEteResource()),
                 EmptyPathServiceEndpoints.of(() -> true),
                 EteBinaryServiceEndpoints.of(new UndertowBinaryResource()));
-        endpoints.forEach(endpoint -> endpoint.create(context).register(handler));
+        endpoints.forEach(endpoint -> endpoint.register(context, handler));
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)
                 .addHttpListener(8080, "0.0.0.0")

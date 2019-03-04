@@ -45,7 +45,7 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
                 .serializerRegistry(ConjureSerializerRegistry.getDefault())
                 .build();
 
-        endpoints.create(context).register(handler);
+        endpoints.register(context, handler);
 
         server = Undertow.builder()
                 .addHttpListener(PORT, "0.0.0.0")

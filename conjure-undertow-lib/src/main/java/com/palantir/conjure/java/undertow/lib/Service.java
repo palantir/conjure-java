@@ -17,12 +17,13 @@
 package com.palantir.conjure.java.undertow.lib;
 
 /**
- * Creates a {@link Registrable} which may be registered with a web server. The server is responsible
- * for providing a {@link ServiceContext} allowing API implementors to add APIs using
+ * Registers a service interface with a web server. The server is responsible
+ * for providing a {@link ServiceContext} and {@link EndpointRegistry} allowing
+ * API implementors to add APIs using
  * <code>server.api(MyServiceEndpoints.of(myServiceImpl)</code>.
  */
 public interface Service {
 
-    Registrable create(ServiceContext context);
+    void register(ServiceContext context, EndpointRegistry registry);
 
 }
