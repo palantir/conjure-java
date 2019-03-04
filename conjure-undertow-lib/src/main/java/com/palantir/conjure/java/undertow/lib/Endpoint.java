@@ -20,18 +20,34 @@ import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
 import java.util.Optional;
 
+/**
+ * An {@link Endpoint} represents a single rpc method. End points provide a location, tuple of
+ * {@link Endpoint#method()} and {@link Endpoint#template()}, as well as an implementation, the
+ * {@link Endpoint#handler()}.
+ */
 public interface Endpoint {
 
+    /** HTTP method which matches this {@link Endpoint}. See {@link io.undertow.util.Methods}. */
     HttpString method();
 
+    /**
+     * Conjure formatted http path template.
+     * For example, this may take the form <pre>/ping</pre> or <pre>/object/{objectId}</pre>.
+     * For more information, see the
+     * <a href="https://github.com/palantir/conjure/blob/master/docs/spec/conjure_definitions.md#pathstring">
+     * specification for conjure path strings</a>.
+     */
     String template();
 
+    /** Undertow {@link HttpHandler} which provides the endpoint implementation. */
     HttpHandler handler();
 
+    /** Simple name of the service which provides this endpoint. This data may be used for metric instrumentation. */
     default Optional<String> serviceName() {
         return Optional.empty();
     }
 
+    /** Simple name of the endpoint method. This data may be used for metric instrumentation. */
     default Optional<String> name() {
         return Optional.empty();
     }

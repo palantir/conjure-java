@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.undertow.lib;
 
 /**
- * {@link UndertowRuntime} provides state required by generated handlers.
+ * {@link UndertowRuntime} provides functionality required by generated handlers.
  */
 public interface UndertowRuntime {
 
