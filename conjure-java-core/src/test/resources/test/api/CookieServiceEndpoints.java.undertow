@@ -3,10 +3,8 @@ package test.api;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Registrable;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.lib.internal.Auth;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -34,11 +32,11 @@ public final class CookieServiceEndpoints implements Service {
     private static final class CookieServiceRegistrable implements Registrable {
         private final CookieService delegate;
 
-        private final SerializerRegistry serializers;
+        private final ServiceContext context;
 
         private CookieServiceRegistrable(ServiceContext context, CookieService delegate) {
-            this.serializers = context.serializerRegistry();
-            this.delegate = context.serviceInstrumenter().instrument(delegate, CookieService.class);
+            this.context = context;
+            this.delegate = context.instrument(delegate, CookieService.class);
         }
 
         @Override
@@ -51,7 +49,7 @@ public final class CookieServiceEndpoints implements Service {
         private class EatCookiesHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                BearerToken cookieToken = Auth.cookie(exchange, "PALANTIR_TOKEN");
+                BearerToken cookieToken = context.authCookie(exchange, "PALANTIR_TOKEN");
                 delegate.eatCookies(cookieToken);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }

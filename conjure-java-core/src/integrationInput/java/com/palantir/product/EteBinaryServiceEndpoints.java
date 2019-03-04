@@ -5,12 +5,8 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Registrable;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.lib.internal.Auth;
-import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
-import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -42,14 +38,12 @@ public final class EteBinaryServiceEndpoints implements Service {
     private static final class EteBinaryServiceRegistrable implements Registrable {
         private final UndertowEteBinaryService delegate;
 
-        private final SerializerRegistry serializers;
+        private final ServiceContext context;
 
         private EteBinaryServiceRegistrable(
                 ServiceContext context, UndertowEteBinaryService delegate) {
-            this.serializers = context.serializerRegistry();
-            this.delegate =
-                    context.serviceInstrumenter()
-                            .instrument(delegate, UndertowEteBinaryService.class);
+            this.context = context;
+            this.delegate = context.instrument(delegate, UndertowEteBinaryService.class);
         }
 
         @Override
@@ -80,20 +74,20 @@ public final class EteBinaryServiceEndpoints implements Service {
 
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = Auth.header(exchange);
-                InputStream body = BinarySerializers.deserializeInputStream(exchange);
+                AuthHeader authHeader = context.authHeader(exchange);
+                InputStream body = context.deserializeInputStream(exchange);
                 BinaryResponseBody result = delegate.postBinary(authHeader, body);
-                BinarySerializers.serialize(result, exchange);
+                context.serialize(result, exchange);
             }
         }
 
         private class GetOptionalBinaryPresentHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = Auth.header(exchange);
+                AuthHeader authHeader = context.authHeader(exchange);
                 Optional<BinaryResponseBody> result = delegate.getOptionalBinaryPresent(authHeader);
                 if (result.isPresent()) {
-                    BinarySerializers.serialize(result.get(), exchange);
+                    context.serialize(result.get(), exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -103,10 +97,10 @@ public final class EteBinaryServiceEndpoints implements Service {
         private class GetOptionalBinaryEmptyHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = Auth.header(exchange);
+                AuthHeader authHeader = context.authHeader(exchange);
                 Optional<BinaryResponseBody> result = delegate.getOptionalBinaryEmpty(authHeader);
                 if (result.isPresent()) {
-                    BinarySerializers.serialize(result.get(), exchange);
+                    context.serialize(result.get(), exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -116,11 +110,11 @@ public final class EteBinaryServiceEndpoints implements Service {
         private class GetBinaryFailureHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = Auth.header(exchange);
+                AuthHeader authHeader = context.authHeader(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                int numBytes = StringDeserializers.deserializeInteger(queryParams.get("numBytes"));
+                int numBytes = context.deserializeInteger(queryParams.get("numBytes"));
                 BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
-                BinarySerializers.serialize(result, exchange);
+                context.serialize(result, exchange);
             }
         }
     }
