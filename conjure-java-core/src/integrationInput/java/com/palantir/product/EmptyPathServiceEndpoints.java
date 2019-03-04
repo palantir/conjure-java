@@ -3,7 +3,7 @@ package com.palantir.product;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
@@ -22,19 +22,19 @@ public final class EmptyPathServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry registry) {
-        new EmptyPathServiceRegistrable(context, delegate).register(registry);
+    public void register(UndertowRuntime runtime, EndpointRegistry registry) {
+        new EmptyPathServiceRegistrable(runtime, delegate).register(registry);
     }
 
     private static final class EmptyPathServiceRegistrable {
         private final UndertowEmptyPathService delegate;
 
-        private final ServiceContext context;
+        private final UndertowRuntime runtime;
 
         private EmptyPathServiceRegistrable(
-                ServiceContext context, UndertowEmptyPathService delegate) {
-            this.context = context;
-            this.delegate = context.instrument(delegate, UndertowEmptyPathService.class);
+                UndertowRuntime runtime, UndertowEmptyPathService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
         }
 
         void register(EndpointRegistry registry) {
@@ -46,7 +46,7 @@ public final class EmptyPathServiceEndpoints implements Service {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 boolean result = delegate.emptyPath();
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
     }

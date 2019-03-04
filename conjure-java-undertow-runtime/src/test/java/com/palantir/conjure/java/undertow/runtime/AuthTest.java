@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib.internal;
+package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.runtime.ConjureContext;
-import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -33,7 +31,7 @@ import org.junit.Test;
 
 public final class AuthTest {
 
-    private static final ServiceContext CONTEXT = ConjureContext.builder()
+    private static final UndertowRuntime CONTEXT = ConjureUndertowRuntime.builder()
             .serializerRegistry(ConjureSerializerRegistry.getDefault())
             .build();
 
@@ -42,13 +40,13 @@ public final class AuthTest {
         AuthHeader expected = AuthHeader.of(BearerToken.valueOf("token"));
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, expected.toString());
-        assertThat(CONTEXT.authHeader(exchange)).isEqualTo(expected);
+        assertThat(CONTEXT.auth().header(exchange)).isEqualTo(expected);
     }
 
     @Test
     public void testAuthHeaderNotPresent() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        assertThatThrownBy(() -> CONTEXT.authHeader(exchange))
+        assertThatThrownBy(() -> CONTEXT.auth().header(exchange))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessage("One Authorization header value is required");
     }
@@ -58,7 +56,7 @@ public final class AuthTest {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer foo");
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer bar");
-        assertThatThrownBy(() -> CONTEXT.authHeader(exchange))
+        assertThatThrownBy(() -> CONTEXT.auth().header(exchange))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessage("One Authorization header value is required");
     }

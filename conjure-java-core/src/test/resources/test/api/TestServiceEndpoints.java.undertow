@@ -5,7 +5,7 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.NestedAliasedBinary;
@@ -41,18 +41,18 @@ public final class TestServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry registry) {
-        new TestServiceRegistrable(context, delegate).register(registry);
+    public void register(UndertowRuntime runtime, EndpointRegistry registry) {
+        new TestServiceRegistrable(runtime, delegate).register(registry);
     }
 
     private static final class TestServiceRegistrable {
         private final TestService delegate;
 
-        private final ServiceContext context;
+        private final UndertowRuntime runtime;
 
-        private TestServiceRegistrable(ServiceContext context, TestService delegate) {
-            this.context = context;
-            this.delegate = context.instrument(delegate, TestService.class);
+        private TestServiceRegistrable(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
         }
 
         void register(EndpointRegistry registry) {
@@ -149,9 +149,9 @@ public final class TestServiceEndpoints implements Service {
         private class GetFileSystemsHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, BackingFileSystem> result = delegate.getFileSystems(authHeader);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
@@ -161,26 +161,27 @@ public final class TestServiceEndpoints implements Service {
 
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
-                CreateDatasetRequest request = context.deserialize(requestType, exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
+                CreateDatasetRequest request = runtime.serde().deserialize(requestType, exchange);
                 HeaderMap headerParams = exchange.getRequestHeaders();
-                String testHeaderArg = context.deserializeString(headerParams.get("Test-Header"));
+                String testHeaderArg =
+                        runtime.serde().deserializeString(headerParams.get("Test-Header"));
                 Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
         private class GetDatasetHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
                 Optional<Dataset> result = delegate.getDataset(authHeader, datasetRid);
                 if (result.isPresent()) {
-                    context.serialize(result, exchange);
+                    runtime.serde().serialize(result, exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -190,41 +191,41 @@ public final class TestServiceEndpoints implements Service {
         private class GetRawDataHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
                 BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
         private class GetAliasedRawDataHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
                 NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
         private class MaybeGetRawDataHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
                 Optional<BinaryResponseBody> result =
                         delegate.maybeGetRawData(authHeader, datasetRid);
                 if (result.isPresent()) {
-                    context.serialize(result.get(), exchange);
+                    runtime.serde().serialize(result.get(), exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -234,13 +235,13 @@ public final class TestServiceEndpoints implements Service {
         private class GetAliasedStringHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
                 AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
@@ -249,8 +250,8 @@ public final class TestServiceEndpoints implements Service {
 
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
-                InputStream input = context.deserializeInputStream(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
+                InputStream input = runtime.serde().deserializeInputStream(exchange);
                 delegate.uploadRawData(authHeader, input);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
@@ -262,8 +263,8 @@ public final class TestServiceEndpoints implements Service {
 
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
-                NestedAliasedBinary input = context.deserialize(inputType, exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
+                NestedAliasedBinary input = runtime.serde().deserialize(inputType, exchange);
                 delegate.uploadAliasedRawData(authHeader, input);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
@@ -272,13 +273,13 @@ public final class TestServiceEndpoints implements Service {
         private class GetBranchesHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
                 Set<String> result = delegate.getBranches(authHeader, datasetRid);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
@@ -286,28 +287,28 @@ public final class TestServiceEndpoints implements Service {
             @Override
             @SuppressWarnings("deprecation")
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
                 Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
         private class ResolveBranchHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
-                String branch = context.deserializeString(pathParams.get("branch"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+                String branch = runtime.serde().deserializeString(pathParams.get("branch"));
                 Optional<String> result = delegate.resolveBranch(authHeader, datasetRid, branch);
                 if (result.isPresent()) {
-                    context.serialize(result, exchange);
+                    runtime.serde().serialize(result, exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -317,14 +318,14 @@ public final class TestServiceEndpoints implements Service {
         private class TestParamHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, String> pathParams =
                         exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
                 ResourceIdentifier datasetRid =
-                        context.deserializeRid(pathParams.get("datasetRid"));
+                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
                 Optional<String> result = delegate.testParam(authHeader, datasetRid);
                 if (result.isPresent()) {
-                    context.serialize(result, exchange);
+                    runtime.serde().serialize(result, exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -336,16 +337,19 @@ public final class TestServiceEndpoints implements Service {
 
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
-                String query = context.deserialize(queryType, exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
+                String query = runtime.serde().deserialize(queryType, exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                ResourceIdentifier something = context.deserializeRid(queryParams.get("different"));
+                ResourceIdentifier something =
+                        runtime.serde().deserializeRid(queryParams.get("different"));
                 Optional<ResourceIdentifier> optionalMiddle =
-                        context.deserializeOptionalRid(queryParams.get("optionalMiddle"));
-                ResourceIdentifier implicit = context.deserializeRid(queryParams.get("implicit"));
-                Set<String> setEnd = context.deserializeStringSet(queryParams.get("setEnd"));
+                        runtime.serde().deserializeOptionalRid(queryParams.get("optionalMiddle"));
+                ResourceIdentifier implicit =
+                        runtime.serde().deserializeRid(queryParams.get("implicit"));
+                Set<String> setEnd =
+                        runtime.serde().deserializeStringSet(queryParams.get("setEnd"));
                 Optional<ResourceIdentifier> optionalEnd =
-                        context.deserializeOptionalRid(queryParams.get("optionalEnd"));
+                        runtime.serde().deserializeOptionalRid(queryParams.get("optionalEnd"));
                 int result =
                         delegate.testQueryParams(
                                 authHeader,
@@ -355,7 +359,7 @@ public final class TestServiceEndpoints implements Service {
                                 setEnd,
                                 optionalEnd,
                                 query);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
@@ -364,16 +368,19 @@ public final class TestServiceEndpoints implements Service {
 
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
-                String query = context.deserialize(queryType, exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
+                String query = runtime.serde().deserialize(queryType, exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                ResourceIdentifier something = context.deserializeRid(queryParams.get("different"));
+                ResourceIdentifier something =
+                        runtime.serde().deserializeRid(queryParams.get("different"));
                 Optional<ResourceIdentifier> optionalMiddle =
-                        context.deserializeOptionalRid(queryParams.get("optionalMiddle"));
-                ResourceIdentifier implicit = context.deserializeRid(queryParams.get("implicit"));
-                Set<String> setEnd = context.deserializeStringSet(queryParams.get("setEnd"));
+                        runtime.serde().deserializeOptionalRid(queryParams.get("optionalMiddle"));
+                ResourceIdentifier implicit =
+                        runtime.serde().deserializeRid(queryParams.get("implicit"));
+                Set<String> setEnd =
+                        runtime.serde().deserializeStringSet(queryParams.get("setEnd"));
                 Optional<ResourceIdentifier> optionalEnd =
-                        context.deserializeOptionalRid(queryParams.get("optionalEnd"));
+                        runtime.serde().deserializeOptionalRid(queryParams.get("optionalEnd"));
                 delegate.testNoResponseQueryParams(
                         authHeader,
                         something,
@@ -389,27 +396,27 @@ public final class TestServiceEndpoints implements Service {
         private class TestBooleanHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 boolean result = delegate.testBoolean(authHeader);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
         private class TestDoubleHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 double result = delegate.testDouble(authHeader);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
         private class TestIntegerHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 int result = delegate.testInteger(authHeader);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
@@ -419,11 +426,12 @@ public final class TestServiceEndpoints implements Service {
 
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
-                Optional<String> maybeString = context.deserialize(maybeStringType, exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
+                Optional<String> maybeString =
+                        runtime.serde().deserialize(maybeStringType, exchange);
                 Optional<String> result = delegate.testPostOptional(authHeader, maybeString);
                 if (result.isPresent()) {
-                    context.serialize(result, exchange);
+                    runtime.serde().serialize(result, exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -433,12 +441,12 @@ public final class TestServiceEndpoints implements Service {
         private class TestOptionalIntegerAndDoubleHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
                 OptionalInt maybeInteger =
-                        context.deserializeOptionalInteger(queryParams.get("maybeInteger"));
+                        runtime.serde().deserializeOptionalInteger(queryParams.get("maybeInteger"));
                 OptionalDouble maybeDouble =
-                        context.deserializeOptionalDouble(queryParams.get("maybeDouble"));
+                        runtime.serde().deserializeOptionalDouble(queryParams.get("maybeDouble"));
                 delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }

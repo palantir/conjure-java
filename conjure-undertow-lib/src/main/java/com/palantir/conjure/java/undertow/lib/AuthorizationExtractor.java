@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.runtime;
+package com.palantir.conjure.java.undertow.lib;
 
-/**
- * {@link ServiceInstrumenter} may transform service implementations in order to apply instrumentation.
- */
-public interface ServiceInstrumenter {
+import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tokens.auth.BearerToken;
+import io.undertow.server.HttpServerExchange;
 
-    /** Applies instrumentation to the provided implementation, returning the instrumented service. */
-    <T> T instrument(T serviceImplementation, Class<T> serviceInterface);
+/** Provides auth functionality for generated code. */
+public interface AuthorizationExtractor {
+
+    /** Parses an {@link AuthHeader} from the provided {@link HttpServerExchange}. */
+    AuthHeader header(HttpServerExchange exchange);
+
+    /** Parses a {@link BearerToken} from the provided {@link HttpServerExchange}. */
+    BearerToken cookie(HttpServerExchange exchange, String cookieName);
 
 }

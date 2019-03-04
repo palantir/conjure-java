@@ -19,7 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.CookieImpl;
@@ -59,7 +59,7 @@ public class BearerTokenLoggingTest {
     private static final String SESSION_ID = "3fc663d4-3e48-4ded-ba4e-d78af98b8363";
     private static final String TOKEN_ID = "a459b4a1-5089-4fe0-8655-d5dfd9b2b7fd";
 
-    private static final ServiceContext CONTEXT = ConjureContext.builder()
+    private static final UndertowRuntime CONTEXT = ConjureUndertowRuntime.builder()
             .serializerRegistry(ConjureSerializerRegistry.getDefault())
             .build();
 
@@ -76,7 +76,7 @@ public class BearerTokenLoggingTest {
         exchange = HttpServerExchanges.createStub();
         exchange.setRequestMethod(Methods.GET);
         handler = new LoggingContextHandler(httpServerExchange -> {
-            CONTEXT.authHeader(httpServerExchange);
+            CONTEXT.auth().header(httpServerExchange);
             delegate.handleRequest(httpServerExchange);
         });
     }
@@ -105,7 +105,7 @@ public class BearerTokenLoggingTest {
     @Test
     public void testCookieAuth() throws Exception {
         handler = new LoggingContextHandler(httpServerExchange -> {
-            CONTEXT.authCookie(httpServerExchange, "PALANTIR_TOKEN");
+            CONTEXT.auth().cookie(httpServerExchange, "PALANTIR_TOKEN");
             assertThat(MDC.get("userId")).isEqualTo(USER_ID);
             assertThat(MDC.get("sessionId")).isEqualTo(SESSION_ID);
             assertThat(MDC.get("tokenId")).isNull();

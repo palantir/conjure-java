@@ -4,7 +4,7 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
@@ -23,18 +23,18 @@ public final class TestServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry registry) {
-        new TestServiceRegistrable(context, delegate).register(registry);
+    public void register(UndertowRuntime runtime, EndpointRegistry registry) {
+        new TestServiceRegistrable(runtime, delegate).register(registry);
     }
 
     private static final class TestServiceRegistrable {
         private final TestService delegate;
 
-        private final ServiceContext context;
+        private final UndertowRuntime runtime;
 
-        private TestServiceRegistrable(ServiceContext context, TestService delegate) {
-            this.context = context;
-            this.delegate = context.instrument(delegate, TestService.class);
+        private TestServiceRegistrable(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
         }
 
         void register(EndpointRegistry registry) {
@@ -45,7 +45,7 @@ public final class TestServiceEndpoints implements Service {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
                 BinaryResponseBody result = delegate.getBinary();
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
     }

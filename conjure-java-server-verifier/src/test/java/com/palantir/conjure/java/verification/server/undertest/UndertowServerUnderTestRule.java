@@ -18,8 +18,8 @@ package com.palantir.conjure.java.verification.server.undertest;
 
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.runtime.ConjureContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
 import com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoints;
@@ -41,7 +41,7 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
         Service endpoints = AutoDeserializeServiceEndpoints.of(service);
 
         ConjureHandler handler = new ConjureHandler();
-        ServiceContext context = ConjureContext.builder()
+        UndertowRuntime context = ConjureUndertowRuntime.builder()
                 .serializerRegistry(ConjureSerializerRegistry.getDefault())
                 .build();
 

@@ -25,7 +25,7 @@ import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -78,7 +78,7 @@ final class UndertowServiceHandlerGenerator {
 
     private static final String EXCHANGE_VAR_NAME = "exchange";
     private static final String DELEGATE_VAR_NAME = "delegate";
-    private static final String CONTEXT_VAR_NAME = "context";
+    private static final String RUNTIME_VAR_NAME = "runtime";
     private static final String ENDPOINT_REGISTRY_NAME = "registry";
 
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
@@ -104,16 +104,15 @@ final class UndertowServiceHandlerGenerator {
 
         // addFields
         registrable.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
-        registrable.addField(ClassName.get(ServiceContext.class), CONTEXT_VAR_NAME,
+        registrable.addField(ClassName.get(UndertowRuntime.class), RUNTIME_VAR_NAME,
                 Modifier.PRIVATE, Modifier.FINAL);
         // addConstructor
         registrable.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
-                .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
+                .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
                 .addParameter(serviceClass, DELEGATE_VAR_NAME)
-                .addStatement("this.$1N = $1N", CONTEXT_VAR_NAME)
-                .addStatement("this.$1N = $2N.instrument($1N, $3T.class)",
-                        DELEGATE_VAR_NAME, CONTEXT_VAR_NAME, serviceClass)
+                .addStatement("this.$1N = $1N", RUNTIME_VAR_NAME)
+                .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
                 .build());
 
         CodeBlock.Builder routingHandler = CodeBlock.builder();
@@ -167,10 +166,10 @@ final class UndertowServiceHandlerGenerator {
                 .addMethod(MethodSpec.methodBuilder("register")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
+                        .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
                         .addParameter(EndpointRegistry.class, ENDPOINT_REGISTRY_NAME)
                         .addStatement("new $1T($2N, $3N).register($4N)",
-                                registrableName, CONTEXT_VAR_NAME, DELEGATE_VAR_NAME, ENDPOINT_REGISTRY_NAME)
+                                registrableName, RUNTIME_VAR_NAME, DELEGATE_VAR_NAME, ENDPOINT_REGISTRY_NAME)
                         .build())
 
                 .addType(routable)
@@ -243,13 +242,13 @@ final class UndertowServiceHandlerGenerator {
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
             if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
                 // TODO(ckozak): Support aliased and optional binary types
-                code.addStatement("$1T $2N = $3N.deserializeInputStream($4N)",
-                        InputStream.class, bodyParam.getArgName().get(), CONTEXT_VAR_NAME, EXCHANGE_VAR_NAME);
+                code.addStatement("$1T $2N = $3N.serde().deserializeInputStream($4N)",
+                        InputStream.class, bodyParam.getArgName().get(), RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
             } else {
-                code.addStatement("$1T $2N = $3N.deserialize($4N, $5N)",
+                code.addStatement("$1T $2N = $3N.serde().deserialize($4N, $5N)",
                         typeMapper.getClassName(bodyParam.getType()).box(),
                         bodyParam.getArgName().get(),
-                        CONTEXT_VAR_NAME,
+                        RUNTIME_VAR_NAME,
                         bodyParam.getArgName().get() + "Type",
                         EXCHANGE_VAR_NAME);
             }
@@ -286,10 +285,10 @@ final class UndertowServiceHandlerGenerator {
             if (UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions)
                     .accept(TypeVisitor.IS_OPTIONAL)) {
                 CodeBlock serializer = UndertowTypeFunctions.isOptionalBinary(returnType)
-                        ? CodeBlock.builder().add("$1N.serialize($2N.get(), $3N)",
-                        CONTEXT_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build()
-                        : CodeBlock.builder().add("$1N.serialize($2N, $3N)",
-                                CONTEXT_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build();
+                        ? CodeBlock.builder().add("$1N.serde().serialize($2N.get(), $3N)",
+                        RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build()
+                        : CodeBlock.builder().add("$1N.serde().serialize($2N, $3N)",
+                                RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build();
                 // For optional<>: set response code to 204/NO_CONTENT if result is absent
                 code.add(
                         CodeBlock.builder()
@@ -301,7 +300,7 @@ final class UndertowServiceHandlerGenerator {
                                 .endControlFlow()
                                 .build());
             } else {
-                code.addStatement("$1N.serialize($2N, $3N)", CONTEXT_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
+                code.addStatement("$1N.serde().serialize($2N, $3N)", RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
             }
         } else {
             code.addStatement("$1N.$2L($3L)",
@@ -329,17 +328,17 @@ final class UndertowServiceHandlerGenerator {
             @Override
             public Optional<String> visitHeader(HeaderAuthType value) {
                 // header auth
-                code.addStatement("$1T $2N = $3N.authHeader($4N)",
-                        AuthHeader.class, AUTH_HEADER_VAR_NAME, CONTEXT_VAR_NAME, EXCHANGE_VAR_NAME);
+                code.addStatement("$1T $2N = $3N.auth().header($4N)",
+                        AuthHeader.class, AUTH_HEADER_VAR_NAME, RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
                 return Optional.of(AUTH_HEADER_VAR_NAME);
             }
 
             @Override
             public Optional<String> visitCookie(CookieAuthType value) {
-                code.addStatement("$1T $2N = $3N.authCookie($4N, $5S)",
+                code.addStatement("$1T $2N = $3N.auth().cookie($4N, $5S)",
                         BearerToken.class,
                         COOKIE_TOKEN_VAR_NAME,
-                        CONTEXT_VAR_NAME,
+                        RUNTIME_VAR_NAME,
                         EXCHANGE_VAR_NAME,
                         endpointDefinition.getAuth().get().accept(AuthTypeVisitor.COOKIE).getCookieName());
                 return Optional.of(COOKIE_TOKEN_VAR_NAME);
@@ -479,11 +478,11 @@ final class UndertowServiceHandlerGenerator {
             String paramsVarName, String paramId) {
         if (type.accept(MoreVisitors.IS_EXTERNAL)) {
             return CodeBlocks.statement(
-                    "$1T $2N = $3T.valueOf($4N.deserializeString($5N.get($6S)))",
+                    "$1T $2N = $3T.valueOf($4N.serde().deserializeString($5N.get($6S)))",
                     typeMapper.getClassName(type),
                     resultVarName,
                     typeMapper.getClassName(type),
-                    CONTEXT_VAR_NAME,
+                    RUNTIME_VAR_NAME,
                     paramsVarName,
                     paramId
             );
@@ -494,10 +493,10 @@ final class UndertowServiceHandlerGenerator {
             return complexDeserializer.get();
         }
         return CodeBlocks.statement(
-                "$1T $2N = $3N.$4L($5N.get($6S))",
+                "$1T $2N = $3N.serde().$4L($5N.get($6S))",
                 typeMapper.getClassName(type),
                 resultVarName,
-                CONTEXT_VAR_NAME,
+                RUNTIME_VAR_NAME,
                 deserializeFunctionName(type),
                 paramsVarName,
                 paramId
@@ -549,10 +548,10 @@ final class UndertowServiceHandlerGenerator {
                 return Optional.empty();
             }
         }).map(functionName -> CodeBlocks.statement(
-                "$1T $2N = $3N.$4L($5N.get($6S), $7T::valueOf)",
+                "$1T $2N = $3N.serde().$4L($5N.get($6S), $7T::valueOf)",
                 typeMapper.getClassName(type),
                 resultVarName,
-                CONTEXT_VAR_NAME,
+                RUNTIME_VAR_NAME,
                 functionName,
                 paramsVarName,
                 paramId,

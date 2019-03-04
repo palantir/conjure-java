@@ -5,7 +5,7 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -30,19 +30,19 @@ public final class EteBinaryServiceEndpoints implements Service {
     }
 
     @Override
-    public void register(ServiceContext context, EndpointRegistry registry) {
-        new EteBinaryServiceRegistrable(context, delegate).register(registry);
+    public void register(UndertowRuntime runtime, EndpointRegistry registry) {
+        new EteBinaryServiceRegistrable(runtime, delegate).register(registry);
     }
 
     private static final class EteBinaryServiceRegistrable {
         private final UndertowEteBinaryService delegate;
 
-        private final ServiceContext context;
+        private final UndertowRuntime runtime;
 
         private EteBinaryServiceRegistrable(
-                ServiceContext context, UndertowEteBinaryService delegate) {
-            this.context = context;
-            this.delegate = context.instrument(delegate, UndertowEteBinaryService.class);
+                UndertowRuntime runtime, UndertowEteBinaryService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
         }
 
         void register(EndpointRegistry registry) {
@@ -69,20 +69,20 @@ public final class EteBinaryServiceEndpoints implements Service {
 
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
-                InputStream body = context.deserializeInputStream(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
+                InputStream body = runtime.serde().deserializeInputStream(exchange);
                 BinaryResponseBody result = delegate.postBinary(authHeader, body);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
 
         private class GetOptionalBinaryPresentHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Optional<BinaryResponseBody> result = delegate.getOptionalBinaryPresent(authHeader);
                 if (result.isPresent()) {
-                    context.serialize(result.get(), exchange);
+                    runtime.serde().serialize(result.get(), exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -92,10 +92,10 @@ public final class EteBinaryServiceEndpoints implements Service {
         private class GetOptionalBinaryEmptyHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Optional<BinaryResponseBody> result = delegate.getOptionalBinaryEmpty(authHeader);
                 if (result.isPresent()) {
-                    context.serialize(result.get(), exchange);
+                    runtime.serde().serialize(result.get(), exchange);
                 } else {
                     exchange.setStatusCode(StatusCodes.NO_CONTENT);
                 }
@@ -105,11 +105,11 @@ public final class EteBinaryServiceEndpoints implements Service {
         private class GetBinaryFailureHandler implements HttpHandler {
             @Override
             public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = context.authHeader(exchange);
+                AuthHeader authHeader = runtime.auth().header(exchange);
                 Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                int numBytes = context.deserializeInteger(queryParams.get("numBytes"));
+                int numBytes = runtime.serde().deserializeInteger(queryParams.get("numBytes"));
                 BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
-                context.serialize(result, exchange);
+                runtime.serde().serialize(result, exchange);
             }
         }
     }

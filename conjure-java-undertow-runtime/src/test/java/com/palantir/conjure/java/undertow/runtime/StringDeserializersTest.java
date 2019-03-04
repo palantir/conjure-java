@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib.internal;
+package com.palantir.conjure.java.undertow.runtime;
 
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.runtime.ConjureContext;
-import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
+import com.palantir.conjure.java.undertow.lib.SerDe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -39,9 +37,7 @@ import org.junit.Test;
 
 public final class StringDeserializersTest {
 
-    private static final ServiceContext CONTEXT = ConjureContext.builder()
-            .serializerRegistry(ConjureSerializerRegistry.getDefault())
-            .build();
+    private static final SerDe SERDE = new ConjureSerDe(ConjureSerializerRegistry.getDefault());
 
     @Test
     public void testDeserializeBearerToken() throws Exception {
@@ -60,12 +56,12 @@ public final class StringDeserializersTest {
 
     @Test
     public void testDeserializeDouble() throws Exception {
-        runDeserializerTest("Double", "1.234", 1.234, in -> OptionalDouble.of(in));
+        runDeserializerTest("Double", "1.234", 1.234, OptionalDouble::of);
     }
 
     @Test
     public void testDeserializeInteger() throws Exception {
-        runDeserializerTest("Integer", "13", 13, in -> OptionalInt.of(in));
+        runDeserializerTest("Integer", "13", 13, OptionalInt::of);
     }
 
     @Test
@@ -93,7 +89,7 @@ public final class StringDeserializersTest {
     @Test
     public void testBearerTokensNotIncludedInThrowable() {
         assertThatLoggableExceptionThrownBy(() ->
-                CONTEXT.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
+                SERDE.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Expected one element")
                 .hasExactlyArgs(SafeArg.of("size", 3));
@@ -102,7 +98,7 @@ public final class StringDeserializersTest {
     @Test
     public void testValuesAreLoggedUnsafe() {
         assertThatLoggableExceptionThrownBy(() ->
-                CONTEXT.deserializeString(ImmutableList.of("one", "two", "three")))
+                SERDE.deserializeString(ImmutableList.of("one", "two", "three")))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Expected one element")
                 .hasExactlyArgs(SafeArg.of("size", 3),
@@ -110,22 +106,22 @@ public final class StringDeserializersTest {
     }
 
     private static <T> void runDeserializerTest(String typeName, String plainIn, T want) throws Exception {
-        runDeserializerTest(typeName, plainIn, want, in -> Optional.of(in));
+        runDeserializerTest(typeName, plainIn, want, Optional::of);
     }
 
     private static <T> void runDeserializerTest(String typeName, String plainIn, T want,
             Function<T, Object> createOptional) throws Exception {
-        assertThat(ServiceContext.class.getMethod("deserialize" + typeName, String.class).invoke(CONTEXT,
-                plainIn)).isEqualTo(want);
+        assertThat(SerDe.class.getMethod("deserialize" + typeName, String.class)
+                .invoke(SERDE, plainIn)).isEqualTo(want);
 
-        assertThat(ServiceContext.class.getMethod("deserialize" + typeName, Iterable.class).invoke(CONTEXT,
-                ImmutableList.of(plainIn))).isEqualTo(want);
+        assertThat(SerDe.class.getMethod("deserialize" + typeName, Iterable.class)
+                .invoke(SERDE, ImmutableList.of(plainIn))).isEqualTo(want);
 
-        assertThat(ServiceContext.class.getMethod("deserializeOptional" + typeName, String.class).invoke(CONTEXT,
-                plainIn)).isEqualTo(createOptional.apply(want));
+        assertThat(SerDe.class.getMethod("deserializeOptional" + typeName, String.class)
+                .invoke(SERDE, plainIn)).isEqualTo(createOptional.apply(want));
 
-        assertThat(ServiceContext.class.getMethod("deserializeOptional" + typeName, Iterable.class).invoke(CONTEXT,
-                ImmutableList.of(plainIn))).isEqualTo(createOptional.apply(want));
+        assertThat(SerDe.class.getMethod("deserializeOptional" + typeName, Iterable.class)
+                .invoke(SERDE, ImmutableList.of(plainIn))).isEqualTo(createOptional.apply(want));
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package com.palantir.conjure.java.undertow.lib;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
-import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import com.palantir.tokens.auth.UnverifiedJsonWebToken;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,12 +32,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import javax.annotation.Nullable;
-import org.slf4j.MDC;
 
-/**
- * {@link ServiceContext} provides state required by generated handlers.
- */
-public interface ServiceContext {
+/** Serialization functionality consumed by generated code. */
+public interface SerDe {
 
     /** Serialize a value to a provided exchange. */
     void serialize(Object value, HttpServerExchange exchange) throws IOException;
@@ -52,21 +47,6 @@ public interface ServiceContext {
 
     /** Reads an {@link InputStream} from the {@link HttpServerExchange} request body. */
     InputStream deserializeInputStream(HttpServerExchange exchange);
-
-    /**
-     * Parses an {@link AuthHeader} from the provided {@link HttpServerExchange} and applies
-     * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
-     */
-    AuthHeader authHeader(HttpServerExchange exchange);
-
-    /**
-     * Parses a {@link BearerToken} from the provided {@link HttpServerExchange} and applies
-     * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
-     */
-    BearerToken authCookie(HttpServerExchange exchange, String cookieName);
-
-    /** Applies instrumentation to the provided implementation, returning the instrumented service. */
-    <T> T instrument(T serviceImplementation, Class<T> serviceInterface);
 
     // query, path, and header parameter deserializers
 
@@ -187,4 +167,5 @@ public interface ServiceContext {
     <T> List<T> deserializeComplexList(@Nullable Iterable<String> in, Function<String, T> factory);
 
     <T> Set<T> deserializeComplexSet(@Nullable Iterable<String> in, Function<String, T> factory);
+
 }
