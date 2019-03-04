@@ -60,7 +60,7 @@ public final class ConjureHandlerTest {
             }
         };
         ConjureHandler handler = new ConjureHandler();
-        handler.add(new Endpoint() {
+        handler.register(new Endpoint() {
             @Override
             public HttpString method() {
                 return Methods.GET;

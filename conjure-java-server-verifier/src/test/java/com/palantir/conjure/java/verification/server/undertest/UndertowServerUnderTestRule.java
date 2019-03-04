@@ -42,7 +42,7 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
         ConjureHandler handler = new ConjureHandler();
         UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
-        service.endpoints(context).forEach(handler::add);
+        service.endpoints(context).forEach(handler::register);
 
         server = Undertow.builder()
                 .addHttpListener(PORT, "0.0.0.0")

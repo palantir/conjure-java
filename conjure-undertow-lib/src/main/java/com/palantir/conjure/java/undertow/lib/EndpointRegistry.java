@@ -27,6 +27,6 @@ import io.undertow.server.HttpHandler;
  */
 public interface EndpointRegistry {
 
-    void add(Endpoint endpoint);
+    void register(Endpoint endpoint);
 
 }
