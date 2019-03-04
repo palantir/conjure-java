@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib;
+package com.palantir.conjure.java.undertow.runtime;
 
-/**
- * {@link ServiceInstrumenter} may transform service implementations in order to apply instrumentation.
- */
-public interface ServiceInstrumenter {
+import com.palantir.tokens.auth.UnverifiedJsonWebToken;
+import io.undertow.util.AttachmentKey;
+import java.util.Optional;
 
-    /** Applies instrumentation to the provided implementation, returning the instrumented service. */
-    <T> T instrument(T serviceImplementation, Class<T> serviceInterface);
+public final class Attachments {
 
+    public static final AttachmentKey<Optional<UnverifiedJsonWebToken>> UNVERIFIED_JWT =
+            AttachmentKey.create(Optional.class);
+
+    private Attachments() {}
 }

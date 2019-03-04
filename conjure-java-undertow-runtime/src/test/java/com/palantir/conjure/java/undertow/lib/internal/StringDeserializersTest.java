@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.runtime.ConjureContext;
+import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -35,6 +38,10 @@ import java.util.function.Function;
 import org.junit.Test;
 
 public final class StringDeserializersTest {
+
+    private static final ServiceContext CONTEXT = ConjureContext.builder()
+            .serializerRegistry(ConjureSerializerRegistry.getDefault())
+            .build();
 
     @Test
     public void testDeserializeBearerToken() throws Exception {
@@ -86,7 +93,7 @@ public final class StringDeserializersTest {
     @Test
     public void testBearerTokensNotIncludedInThrowable() {
         assertThatLoggableExceptionThrownBy(() ->
-                StringDeserializers.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
+                CONTEXT.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Expected one element")
                 .hasExactlyArgs(SafeArg.of("size", 3));
@@ -95,7 +102,7 @@ public final class StringDeserializersTest {
     @Test
     public void testValuesAreLoggedUnsafe() {
         assertThatLoggableExceptionThrownBy(() ->
-                StringDeserializers.deserializeString(ImmutableList.of("one", "two", "three")))
+                CONTEXT.deserializeString(ImmutableList.of("one", "two", "three")))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Expected one element")
                 .hasExactlyArgs(SafeArg.of("size", 3),
@@ -108,16 +115,16 @@ public final class StringDeserializersTest {
 
     private static <T> void runDeserializerTest(String typeName, String plainIn, T want,
             Function<T, Object> createOptional) throws Exception {
-        assertThat(StringDeserializers.class.getMethod("deserialize" + typeName, String.class).invoke(null,
+        assertThat(ServiceContext.class.getMethod("deserialize" + typeName, String.class).invoke(CONTEXT,
                 plainIn)).isEqualTo(want);
 
-        assertThat(StringDeserializers.class.getMethod("deserialize" + typeName, Iterable.class).invoke(null,
+        assertThat(ServiceContext.class.getMethod("deserialize" + typeName, Iterable.class).invoke(CONTEXT,
                 ImmutableList.of(plainIn))).isEqualTo(want);
 
-        assertThat(StringDeserializers.class.getMethod("deserializeOptional" + typeName, String.class).invoke(null,
+        assertThat(ServiceContext.class.getMethod("deserializeOptional" + typeName, String.class).invoke(CONTEXT,
                 plainIn)).isEqualTo(createOptional.apply(want));
 
-        assertThat(StringDeserializers.class.getMethod("deserializeOptional" + typeName, Iterable.class).invoke(null,
+        assertThat(ServiceContext.class.getMethod("deserializeOptional" + typeName, Iterable.class).invoke(CONTEXT,
                 ImmutableList.of(plainIn))).isEqualTo(createOptional.apply(want));
     }
 

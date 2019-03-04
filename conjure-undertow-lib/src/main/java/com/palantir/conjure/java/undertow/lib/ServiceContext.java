@@ -68,23 +68,6 @@ public interface ServiceContext {
     /** Applies instrumentation to the provided implementation, returning the instrumented service. */
     <T> T instrument(T serviceImplementation, Class<T> serviceInterface);
 
-    /**
-     * {@link SerializerRegistry} for request and response body serialization.
-     *
-     * @deprecated Use {@link #serialize(Object, HttpServerExchange)} and
-     * {@link #deserialize(TypeToken, HttpServerExchange)}.
-     */
-    @Deprecated
-    SerializerRegistry serializerRegistry();
-
-    /**
-     * {@link ServiceInstrumenter} to apply metric instrumentation to exposed services.
-     *
-     * @deprecated Use {@link #instrument(Object, Class)}.
-     */
-    @Deprecated
-    ServiceInstrumenter serviceInstrumenter();
-
     // query, path, and header parameter deserializers
 
     BearerToken deserializeBearerToken(String in);

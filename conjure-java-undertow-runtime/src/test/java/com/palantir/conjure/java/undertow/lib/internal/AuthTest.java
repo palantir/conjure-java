@@ -20,6 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
+import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.runtime.ConjureContext;
+import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -30,18 +33,22 @@ import org.junit.Test;
 
 public final class AuthTest {
 
+    private static final ServiceContext CONTEXT = ConjureContext.builder()
+            .serializerRegistry(ConjureSerializerRegistry.getDefault())
+            .build();
+
     @Test
     public void testParseAuthHeader() {
         AuthHeader expected = AuthHeader.of(BearerToken.valueOf("token"));
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, expected.toString());
-        assertThat(Auth.header(exchange)).isEqualTo(expected);
+        assertThat(CONTEXT.authHeader(exchange)).isEqualTo(expected);
     }
 
     @Test
     public void testAuthHeaderNotPresent() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        assertThatThrownBy(() -> Auth.header(exchange))
+        assertThatThrownBy(() -> CONTEXT.authHeader(exchange))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessage("One Authorization header value is required");
     }
@@ -51,7 +58,7 @@ public final class AuthTest {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer foo");
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer bar");
-        assertThatThrownBy(() -> Auth.header(exchange))
+        assertThatThrownBy(() -> CONTEXT.authHeader(exchange))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessage("One Authorization header value is required");
     }

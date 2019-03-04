@@ -24,11 +24,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.lib.ServiceInstrumenter;
-import com.palantir.conjure.java.undertow.lib.internal.Auth;
-import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
@@ -36,7 +32,10 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens.auth.UnverifiedJsonWebToken;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderValues;
+import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
@@ -48,8 +47,10 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.Nullable;
+import org.slf4j.MDC;
 
 /**
  * {@link ConjureContext} provides state required by generated handlers.
@@ -64,29 +65,6 @@ public final class ConjureContext implements ServiceContext {
                 "Missing required SerializerRegistry");
         this.serviceInstrumenter = Preconditions.checkNotNull(builder.serviceInstrumenter,
                 "Missing required ServiceInstrumenter");
-    }
-
-    /**
-     * {@link SerializerRegistry} for request and response body serialization.
-     *
-     * @deprecated Use {@link #serialize(Object, HttpServerExchange)} and
-     * {@link #deserialize(TypeToken, HttpServerExchange)}.
-     */
-    @Deprecated
-    @Override
-    public SerializerRegistry serializerRegistry() {
-        return serializerRegistry;
-    }
-
-    /**
-     * {@link ServiceInstrumenter} to apply metric instrumentation to exposed services.
-     *
-     * @deprecated Use {@link #instrument(Object, Class)}.
-     */
-    @Deprecated
-    @Override
-    public ServiceInstrumenter serviceInstrumenter() {
-        return serviceInstrumenter;
     }
 
     @Override
@@ -109,14 +87,56 @@ public final class ConjureContext implements ServiceContext {
         return BinarySerializers.deserializeInputStream(exchange);
     }
 
+    /**
+     * Parses an {@link AuthHeader} from the provided {@link HttpServerExchange} and applies
+     * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
+     */
     @Override
     public AuthHeader authHeader(HttpServerExchange exchange) {
-        return Auth.header(exchange);
+        HeaderValues authorization = exchange.getRequestHeaders().get(Headers.AUTHORIZATION);
+        // Do not use Iterables.getOnlyElement because it includes values in the exception message.
+        // We do not want credential material logged to disk, even if it's marked unsafe.
+        Preconditions.checkArgument(authorization != null && authorization.size() == 1,
+                "One Authorization header value is required");
+        return setState(exchange, AuthHeader.valueOf(authorization.get(0)));
     }
 
+    /**
+     * Parses a {@link BearerToken} from the provided {@link HttpServerExchange} and applies
+     * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
+     */
     @Override
     public BearerToken authCookie(HttpServerExchange exchange, String cookieName) {
-        return Auth.cookie(exchange, cookieName);
+        return setState(exchange, deserializeBearerToken(exchange.getRequestCookies().get(cookieName).getValue()));
+    }
+
+    private static final String USER_ID_KEY = "userId";
+    private static final String SESSION_ID_KEY = "sessionId";
+    private static final String TOKEN_ID_KEY = "tokenId";
+    private static Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
+    private static Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
+
+    /**
+     * Attempts to extract a {@link UnverifiedJsonWebToken JSON Web Token} from the
+     * {@link BearerToken} value, and populates the SLF4J {@link MDC} with
+     * user id, session id, and token id extracted from the JWT. This is
+     * best-effort and does not throw an exception in case any of these steps fail.
+     */
+    private static BearerToken setState(HttpServerExchange exchange, BearerToken token) {
+        Optional<UnverifiedJsonWebToken> parsedJwt = UnverifiedJsonWebToken.tryParse(token.getToken());
+        exchange.putAttachment(Attachments.UNVERIFIED_JWT, parsedJwt);
+        if (parsedJwt.isPresent()) {
+            UnverifiedJsonWebToken jwt = parsedJwt.get();
+            MDC.put(USER_ID_KEY, jwt.getUnverifiedUserId());
+            jwt.getUnverifiedSessionId().ifPresent(sessionIdSetter);
+            jwt.getUnverifiedTokenId().ifPresent(tokenIdSetter);
+        }
+        return token;
+    }
+
+    private static AuthHeader setState(HttpServerExchange exchange, AuthHeader authHeader) {
+        setState(exchange, authHeader.getBearerToken());
+        return authHeader;
     }
 
     @Override

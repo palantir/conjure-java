@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib;
+package com.palantir.conjure.java.undertow.runtime;
 
-import com.palantir.tokens.auth.UnverifiedJsonWebToken;
-import io.undertow.util.AttachmentKey;
-import java.util.Optional;
+/**
+ * {@link ServiceInstrumenter} may transform service implementations in order to apply instrumentation.
+ */
+public interface ServiceInstrumenter {
 
-public final class Attachments {
+    /** Applies instrumentation to the provided implementation, returning the instrumented service. */
+    <T> T instrument(T serviceImplementation, Class<T> serviceInterface);
 
-    public static final AttachmentKey<Optional<UnverifiedJsonWebToken>> UNVERIFIED_JWT =
-            AttachmentKey.create(Optional.class);
-
-    private Attachments() {}
 }

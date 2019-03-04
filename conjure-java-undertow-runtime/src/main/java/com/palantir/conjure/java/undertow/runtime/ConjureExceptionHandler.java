@@ -21,7 +21,6 @@ import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpHandler;

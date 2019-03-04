@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib.internal;
+package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.logsafe.Preconditions;
@@ -25,23 +25,18 @@ import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Utility functions for octet-stream serde.
- *
- * @deprecated Use functions on the ServiceContext instead.
- */
-@Deprecated
-public final class BinarySerializers {
+/** Utility functions for octet-stream serde. */
+final class BinarySerializers {
 
     private static final String CONTENT_TYPE = "application/octet-stream";
 
-    public static void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
+    static void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
         Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, CONTENT_TYPE);
         value.write(exchange.getOutputStream());
     }
 
-    public static InputStream deserializeInputStream(HttpServerExchange exchange) {
+    static InputStream deserializeInputStream(HttpServerExchange exchange) {
         String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
         if (contentType == null) {
             throw new SafeIllegalArgumentException("Request is missing Content-Type header");
