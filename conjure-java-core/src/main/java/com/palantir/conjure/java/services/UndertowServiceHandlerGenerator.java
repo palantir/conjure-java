@@ -25,12 +25,8 @@ import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.conjure.java.undertow.lib.Registrable;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
 import com.palantir.conjure.java.undertow.lib.Service;
 import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.lib.internal.Auth;
-import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
-import com.palantir.conjure.java.undertow.lib.internal.StringDeserializers;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -82,7 +78,6 @@ import org.apache.commons.lang3.StringUtils;
 final class UndertowServiceHandlerGenerator {
 
     private static final String EXCHANGE_VAR_NAME = "exchange";
-    private static final String SERIALIZER_REGISTRY_VAR_NAME = "serializers";
     private static final String DELEGATE_VAR_NAME = "delegate";
     private static final String CONTEXT_VAR_NAME = "context";
 
@@ -110,15 +105,15 @@ final class UndertowServiceHandlerGenerator {
 
         // addFields
         registrable.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
-        registrable.addField(ClassName.get(SerializerRegistry.class), SERIALIZER_REGISTRY_VAR_NAME,
+        registrable.addField(ClassName.get(ServiceContext.class), CONTEXT_VAR_NAME,
                 Modifier.PRIVATE, Modifier.FINAL);
         // addConstructor
         registrable.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ServiceContext.class, CONTEXT_VAR_NAME)
                 .addParameter(serviceClass, DELEGATE_VAR_NAME)
-                .addStatement("this.$1N = $2N.serializerRegistry()", SERIALIZER_REGISTRY_VAR_NAME, CONTEXT_VAR_NAME)
-                .addStatement("this.$1N = $2N.serviceInstrumenter().instrument($1N, $3T.class)",
+                .addStatement("this.$1N = $1N", CONTEXT_VAR_NAME)
+                .addStatement("this.$1N = $2N.instrument($1N, $3T.class)",
                         DELEGATE_VAR_NAME, CONTEXT_VAR_NAME, serviceClass)
                 .build());
 
@@ -255,13 +250,13 @@ final class UndertowServiceHandlerGenerator {
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
             if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
                 // TODO(ckozak): Support aliased and optional binary types
-                code.addStatement("$1T $2N = $3T.deserializeInputStream($4N)",
-                        InputStream.class, bodyParam.getArgName().get(), BinarySerializers.class, EXCHANGE_VAR_NAME);
+                code.addStatement("$1T $2N = $3N.deserializeInputStream($4N)",
+                        InputStream.class, bodyParam.getArgName().get(), CONTEXT_VAR_NAME, EXCHANGE_VAR_NAME);
             } else {
                 code.addStatement("$1T $2N = $3N.deserialize($4N, $5N)",
                         typeMapper.getClassName(bodyParam.getType()).box(),
                         bodyParam.getArgName().get(),
-                        SERIALIZER_REGISTRY_VAR_NAME,
+                        CONTEXT_VAR_NAME,
                         bodyParam.getArgName().get() + "Type",
                         EXCHANGE_VAR_NAME);
             }
@@ -298,10 +293,10 @@ final class UndertowServiceHandlerGenerator {
             if (UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions)
                     .accept(TypeVisitor.IS_OPTIONAL)) {
                 CodeBlock serializer = UndertowTypeFunctions.isOptionalBinary(returnType)
-                        ? CodeBlock.builder().add("$1T.serialize($2N.get(), $3N)",
-                                BinarySerializers.class, resultVarName, EXCHANGE_VAR_NAME).build()
+                        ? CodeBlock.builder().add("$1N.serialize($2N.get(), $3N)",
+                        CONTEXT_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build()
                         : CodeBlock.builder().add("$1N.serialize($2N, $3N)",
-                                SERIALIZER_REGISTRY_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build();
+                                CONTEXT_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build();
                 // For optional<>: set response code to 204/NO_CONTENT if result is absent
                 code.add(
                         CodeBlock.builder()
@@ -313,13 +308,7 @@ final class UndertowServiceHandlerGenerator {
                                 .endControlFlow()
                                 .build());
             } else {
-                if (returnType.accept(TypeVisitor.IS_BINARY)) {
-                    code.addStatement("$1T.serialize($2N, $3N)",
-                            BinarySerializers.class, resultVarName, EXCHANGE_VAR_NAME);
-                } else {
-                    code.addStatement("$1N.serialize($2N, $3N)",
-                            SERIALIZER_REGISTRY_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
-                }
+                code.addStatement("$1N.serialize($2N, $3N)", CONTEXT_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
             }
         } else {
             code.addStatement("$1N.$2L($3L)",
@@ -347,17 +336,17 @@ final class UndertowServiceHandlerGenerator {
             @Override
             public Optional<String> visitHeader(HeaderAuthType value) {
                 // header auth
-                code.addStatement("$1T $2N = $3T.header($4N)",
-                        AuthHeader.class, AUTH_HEADER_VAR_NAME, Auth.class, EXCHANGE_VAR_NAME);
+                code.addStatement("$1T $2N = $3N.authHeader($4N)",
+                        AuthHeader.class, AUTH_HEADER_VAR_NAME, CONTEXT_VAR_NAME, EXCHANGE_VAR_NAME);
                 return Optional.of(AUTH_HEADER_VAR_NAME);
             }
 
             @Override
             public Optional<String> visitCookie(CookieAuthType value) {
-                code.addStatement("$1T $2N = $3T.cookie($4N, $5S)",
+                code.addStatement("$1T $2N = $3N.authCookie($4N, $5S)",
                         BearerToken.class,
                         COOKIE_TOKEN_VAR_NAME,
-                        Auth.class,
+                        CONTEXT_VAR_NAME,
                         EXCHANGE_VAR_NAME,
                         endpointDefinition.getAuth().get().accept(AuthTypeVisitor.COOKIE).getCookieName());
                 return Optional.of(COOKIE_TOKEN_VAR_NAME);
@@ -497,11 +486,11 @@ final class UndertowServiceHandlerGenerator {
             String paramsVarName, String paramId) {
         if (type.accept(MoreVisitors.IS_EXTERNAL)) {
             return CodeBlocks.statement(
-                    "$1T $2N = $3T.valueOf($4T.deserializeString($5N.get($6S)))",
+                    "$1T $2N = $3T.valueOf($4N.deserializeString($5N.get($6S)))",
                     typeMapper.getClassName(type),
                     resultVarName,
                     typeMapper.getClassName(type),
-                    StringDeserializers.class,
+                    CONTEXT_VAR_NAME,
                     paramsVarName,
                     paramId
             );
@@ -512,10 +501,10 @@ final class UndertowServiceHandlerGenerator {
             return complexDeserializer.get();
         }
         return CodeBlocks.statement(
-                "$1T $2N = $3T.$4L($5N.get($6S))",
+                "$1T $2N = $3N.$4L($5N.get($6S))",
                 typeMapper.getClassName(type),
                 resultVarName,
-                ClassName.get(StringDeserializers.class),
+                CONTEXT_VAR_NAME,
                 deserializeFunctionName(type),
                 paramsVarName,
                 paramId
@@ -567,10 +556,10 @@ final class UndertowServiceHandlerGenerator {
                 return Optional.empty();
             }
         }).map(functionName -> CodeBlocks.statement(
-                "$1T $2N = $3T.$4L($5N.get($6S), $7T::valueOf)",
+                "$1T $2N = $3N.$4L($5N.get($6S), $7T::valueOf)",
                 typeMapper.getClassName(type),
                 resultVarName,
-                StringDeserializers.class,
+                CONTEXT_VAR_NAME,
                 functionName,
                 paramsVarName,
                 paramId,
