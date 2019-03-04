@@ -37,7 +37,6 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
 import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
@@ -116,9 +115,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @BeforeClass
     public static void before() {
-        UndertowRuntime context = ConjureUndertowRuntime.builder()
-                .serializerRegistry(ConjureSerializerRegistry.getDefault())
-                .build();
+        UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
         ConjureHandler handler = new ConjureHandler();
         ImmutableList.of(

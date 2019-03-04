@@ -45,7 +45,7 @@ final class ConjureExceptionHandler implements HttpHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptionHandler.class);
     // Exceptions should always be serialized using JSON
-    private static final SerializerRegistry DEFAULT_SERIALIZERS = new ConjureSerializerRegistry(Serializers.json());
+    private static final SerializerRegistry DEFAULT_SERIALIZERS = new SerializerRegistry(Serializers.json());
 
     private final SerializerRegistry serializers;
     private final HttpHandler delegate;

@@ -59,9 +59,7 @@ public class BearerTokenLoggingTest {
     private static final String SESSION_ID = "3fc663d4-3e48-4ded-ba4e-d78af98b8363";
     private static final String TOKEN_ID = "a459b4a1-5089-4fe0-8655-d5dfd9b2b7fd";
 
-    private static final UndertowRuntime CONTEXT = ConjureUndertowRuntime.builder()
-            .serializerRegistry(ConjureSerializerRegistry.getDefault())
-            .build();
+    private static final UndertowRuntime CONTEXT = ConjureUndertowRuntime.builder().build();
 
     private AtomicReference<Runnable> delegateRunnable = new AtomicReference<>();
     private HttpHandler delegate = request -> delegateRunnable.get().run();

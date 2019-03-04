@@ -24,7 +24,6 @@ import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.SerDe;
-import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -53,8 +52,7 @@ final class ConjureSerDe implements SerDe {
     private final SerializerRegistry serializerRegistry;
 
     ConjureSerDe(SerializerRegistry serializerRegistry) {
-        this.serializerRegistry = Preconditions.checkNotNull(
-                serializerRegistry, "SerializerRegistry is required");
+        this.serializerRegistry = serializerRegistry;
     }
 
     @Override

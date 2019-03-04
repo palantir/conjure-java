@@ -16,11 +16,13 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.SerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
+import java.util.List;
 
 /**
  * {@link ConjureUndertowRuntime} provides functionality required by generated handlers.
@@ -31,7 +33,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final AuthorizationExtractor auth;
 
     private ConjureUndertowRuntime(Builder builder) {
-        this.serde = new ConjureSerDe(builder.serializerRegistry);
+        this.serde = new ConjureSerDe(builder.serializers.isEmpty()
+                ? SerializerRegistry.getDefault() : new SerializerRegistry(builder.serializers));
         this.auth = new ConjureAuthorizationExtractor(serde);
     }
 
@@ -51,13 +54,13 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     public static final class Builder {
 
-        private SerializerRegistry serializerRegistry;
+        private final List<Serializer> serializers = Lists.newArrayList();
 
         private Builder() {}
 
         @CanIgnoreReturnValue
-        public Builder serializerRegistry(SerializerRegistry value) {
-            this.serializerRegistry = Preconditions.checkNotNull(value, "Value is required");
+        public Builder serializer(Serializer value) {
+            serializers.add(Preconditions.checkNotNull(value, "Value is required"));
             return this;
         }
 

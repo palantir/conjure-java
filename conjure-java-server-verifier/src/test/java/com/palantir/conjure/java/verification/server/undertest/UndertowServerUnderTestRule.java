@@ -20,7 +20,6 @@ import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
 import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoints;
 import com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
@@ -41,9 +40,7 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
         UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
         ConjureHandler handler = new ConjureHandler();
-        UndertowRuntime context = ConjureUndertowRuntime.builder()
-                .serializerRegistry(ConjureSerializerRegistry.getDefault())
-                .build();
+        UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
         service.endpoints(context).forEach(handler::add);
 

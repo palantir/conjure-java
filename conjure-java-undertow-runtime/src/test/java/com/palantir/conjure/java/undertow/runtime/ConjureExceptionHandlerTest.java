@@ -52,7 +52,7 @@ public final class ConjureExceptionHandlerTest {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new ConjureSerializerRegistry(Serializers.json()), exchange -> {
+                        new SerializerRegistry(Serializers.json()), exchange -> {
                     throw exception;
                 })))
                 .build();
@@ -162,7 +162,7 @@ public final class ConjureExceptionHandlerTest {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new ConjureSerializerRegistry(Serializers.json()), exchange -> {
+                        new SerializerRegistry(Serializers.json()), exchange -> {
                     throw new Error();
                 })))
                 .build();

@@ -31,9 +31,7 @@ import org.junit.Test;
 
 public final class AuthTest {
 
-    private static final UndertowRuntime CONTEXT = ConjureUndertowRuntime.builder()
-            .serializerRegistry(ConjureSerializerRegistry.getDefault())
-            .build();
+    private static final UndertowRuntime CONTEXT = ConjureUndertowRuntime.builder().build();
 
     @Test
     public void testParseAuthHeader() {

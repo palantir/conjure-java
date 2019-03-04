@@ -37,7 +37,7 @@ import org.junit.Test;
 
 public final class StringDeserializersTest {
 
-    private static final SerDe SERDE = new ConjureSerDe(ConjureSerializerRegistry.getDefault());
+    private static final SerDe SERDE = new ConjureSerDe(SerializerRegistry.getDefault());
 
     @Test
     public void testDeserializeBearerToken() throws Exception {

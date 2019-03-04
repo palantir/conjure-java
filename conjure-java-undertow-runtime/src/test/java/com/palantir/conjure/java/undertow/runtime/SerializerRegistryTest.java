@@ -37,7 +37,7 @@ public class SerializerRegistryTest {
 
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-        ConjureSerializerRegistry serializers = new ConjureSerializerRegistry(json, plain);
+        SerializerRegistry serializers = new SerializerRegistry(json, plain);
         Serializer serializer = serializers.getRequestDeserializer(exchange);
         assertThat(serializer).isSameAs(plain);
     }
@@ -45,7 +45,7 @@ public class SerializerRegistryTest {
     @Test
     public void testRequestNoContentType() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        ConjureSerializerRegistry serializers = new ConjureSerializerRegistry(new StubSerializer("application/json"));
+        SerializerRegistry serializers = new SerializerRegistry(new StubSerializer("application/json"));
         assertThatThrownBy(() -> serializers.getRequestDeserializer(exchange))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Request is missing Content-Type header");
@@ -55,7 +55,7 @@ public class SerializerRegistryTest {
     public void testUnsupportedRequestContentType() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/unknown");
-        ConjureSerializerRegistry serializers = new ConjureSerializerRegistry(new StubSerializer("application/json"));
+        SerializerRegistry serializers = new SerializerRegistry(new StubSerializer("application/json"));
         assertThatThrownBy(() -> serializers.getRequestDeserializer(exchange))
                 .isInstanceOf(FrameworkException.class)
                 .hasMessageContaining("Unsupported Content-Type");
@@ -68,7 +68,7 @@ public class SerializerRegistryTest {
 
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().put(Headers.ACCEPT, "text/plain");
-        ConjureSerializerRegistry serializers = new ConjureSerializerRegistry(json, plain);
+        SerializerRegistry serializers = new SerializerRegistry(json, plain);
         Serializer serializer = serializers.getResponseSerializer(exchange);
         assertThat(serializer).isSameAs(plain);
     }
@@ -79,7 +79,7 @@ public class SerializerRegistryTest {
         Serializer plain = new StubSerializer("text/plain");
 
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        ConjureSerializerRegistry serializers = new ConjureSerializerRegistry(json, plain);
+        SerializerRegistry serializers = new SerializerRegistry(json, plain);
         Serializer serializer = serializers.getResponseSerializer(exchange);
         assertThat(serializer).isSameAs(json);
     }
@@ -91,7 +91,7 @@ public class SerializerRegistryTest {
 
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().put(Headers.ACCEPT, "application/unknown");
-        ConjureSerializerRegistry serializers = new ConjureSerializerRegistry(json, plain);
+        SerializerRegistry serializers = new SerializerRegistry(json, plain);
         Serializer serializer = serializers.getResponseSerializer(exchange);
         assertThat(serializer).isSameAs(json);
     }
