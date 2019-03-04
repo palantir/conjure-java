@@ -27,55 +27,48 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new EmptyPathServiceFactory(runtime, delegate).create();
+        return ImmutableList.of(new EmptyPathEndpoint(runtime, delegate));
     }
 
-    private static final class EmptyPathServiceFactory {
-        private final UndertowEmptyPathService delegate;
-
+    private static final class EmptyPathEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private EmptyPathServiceFactory(
-                UndertowRuntime runtime, UndertowEmptyPathService delegate) {
+        private final UndertowEmptyPathService delegate;
+
+        EmptyPathEndpoint(UndertowRuntime runtime, UndertowEmptyPathService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
 
-        List<Endpoint> create() {
-            return ImmutableList.of(new EmptyPathEndpoint());
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            boolean result = delegate.emptyPath();
+            runtime.serde().serialize(result, exchange);
         }
 
-        private class EmptyPathEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                boolean result = delegate.emptyPath();
-                runtime.serde().serialize(result, exchange);
-            }
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
 
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
+        @Override
+        public String template() {
+            return "/";
+        }
 
-            @Override
-            public final String template() {
-                return "/";
-            }
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("UndertowEmptyPathService");
+        }
 
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("EmptyPathService");
-            }
+        @Override
+        public Optional<String> name() {
+            return Optional.of("emptyPath");
+        }
 
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("emptyPath");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
+        @Override
+        public HttpHandler handler() {
+            return this;
         }
     }
 }

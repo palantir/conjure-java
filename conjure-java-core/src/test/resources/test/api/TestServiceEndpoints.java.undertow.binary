@@ -28,54 +28,48 @@ public final class TestServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new TestServiceFactory(runtime, delegate).create();
+        return ImmutableList.of(new GetBinaryEndpoint(runtime, delegate));
     }
 
-    private static final class TestServiceFactory {
-        private final TestService delegate;
-
+    private static final class GetBinaryEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private TestServiceFactory(UndertowRuntime runtime, TestService delegate) {
+        private final TestService delegate;
+
+        GetBinaryEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
 
-        List<Endpoint> create() {
-            return ImmutableList.of(new GetBinaryEndpoint());
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            BinaryResponseBody result = delegate.getBinary();
+            runtime.serde().serialize(result, exchange);
         }
 
-        private class GetBinaryEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                BinaryResponseBody result = delegate.getBinary();
-                runtime.serde().serialize(result, exchange);
-            }
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
 
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
+        @Override
+        public String template() {
+            return "/";
+        }
 
-            @Override
-            public final String template() {
-                return "/";
-            }
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
 
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
+        @Override
+        public Optional<String> name() {
+            return Optional.of("getBinary");
+        }
 
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("getBinary");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
+        @Override
+        public HttpHandler handler() {
+            return this;
         }
     }
 }

@@ -81,7 +81,6 @@ final class UndertowServiceHandlerGenerator {
     private static final String EXCHANGE_VAR_NAME = "exchange";
     private static final String DELEGATE_VAR_NAME = "delegate";
     private static final String RUNTIME_VAR_NAME = "runtime";
-    private static final String ENDPOINT_REGISTRY_NAME = "registry";
 
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
 
@@ -117,30 +116,17 @@ final class UndertowServiceHandlerGenerator {
                 .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
                 .build());
 
-        CodeBlock endpointBlock = CodeBlock.builder().build();
-        for (EndpointDefinition e : serviceDefinition.getEndpoints()) {
-            CodeBlock nextBlock = CodeBlock.of("new $1T()",
-                    endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName()));
-            endpointBlock = endpointBlock.isEmpty() ? nextBlock : CodeBlock.of("$1L, $2L", endpointBlock, nextBlock);
-        }
-
-
-        factory.addMethod(MethodSpec.methodBuilder("create")
-                .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
-                .addStatement("return $1T.of($2L)", ImmutableList.class, endpointBlock)
-                .build());
-
-        // addEndpointHandlers
-        factory.addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
-                e -> generateEndpointHandler(e, serviceName, typeDefinitions, typeMapper, returnTypeMapper)));
-
-        TypeSpec routable = factory.build();
-
         ClassName serviceType = ClassName.get(serviceDefinition.getServiceName().getPackage(),
                 serviceDefinition.getServiceName().getName() + "Endpoints");
 
-        ClassName registrableName = ClassName.get(serviceDefinition.getServiceName().getPackage(),
-                serviceType.simpleName(), serviceName + "Factory");
+        CodeBlock endpointBlock = CodeBlock.builder().build();
+        for (EndpointDefinition e : serviceDefinition.getEndpoints()) {
+            CodeBlock nextBlock = CodeBlock.of("new $1T($2N, $3N)",
+                    endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName()),
+                    RUNTIME_VAR_NAME, DELEGATE_VAR_NAME);
+            endpointBlock = endpointBlock.isEmpty() ? nextBlock : CodeBlock.of("$1L, $2L", endpointBlock, nextBlock);
+        }
+
         TypeSpec endpoints = TypeSpec.classBuilder(serviceType.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceHandlerGenerator.class))
                 .addSuperinterface(UndertowService.class)
@@ -162,11 +148,10 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
                         .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
-                        .addStatement("return new $1T($2N, $3N).create()",
-                                registrableName, RUNTIME_VAR_NAME, DELEGATE_VAR_NAME)
+                        .addStatement("return $1T.of($2L)", ImmutableList.class, endpointBlock)
                         .build())
-
-                .addType(routable)
+                .addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
+                        e -> generateEndpointHandler(e, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
                 .build();
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), endpoints)
@@ -176,8 +161,7 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private TypeName endpointToHandlerType(com.palantir.conjure.spec.TypeName serviceName, EndpointName name) {
-        return ClassName.get(serviceName.getPackage(),
-                serviceName.getName() + "Endpoints", serviceName.getName() + "Factory",
+        return ClassName.get(serviceName.getPackage(), serviceName.getName() + "Endpoints",
                 endpointToHandlerClassName(name));
     }
 
@@ -185,8 +169,9 @@ final class UndertowServiceHandlerGenerator {
         return StringUtils.capitalize(name.get()) + "Endpoint";
     }
 
-    private TypeSpec generateEndpointHandler(EndpointDefinition endpointDefinition,
-            String serviceName,
+    private TypeSpec generateEndpointHandler(
+            EndpointDefinition endpointDefinition,
+            ClassName serviceClass,
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
@@ -203,41 +188,50 @@ final class UndertowServiceHandlerGenerator {
                         .build()));
 
         return TypeSpec.classBuilder(endpointToHandlerClassName(endpointDefinition.getEndpointName()))
-                .addModifiers(Modifier.PRIVATE)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(HttpHandler.class)
                 .addSuperinterface(Endpoint.class)
+                .addField(FieldSpec.builder(
+                        UndertowRuntime.class, RUNTIME_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
+                .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
                 .addFields(endpointDefinition.getArgs().stream()
                         .filter(def -> def.getParamType().accept(ParameterTypeVisitor.IS_BODY))
                         .map(def -> createTypeField(typeMapper, def))
                         .collect(Collectors.toList()))
+                .addMethod(MethodSpec.constructorBuilder()
+                        .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
+                        .addParameter(serviceClass, DELEGATE_VAR_NAME)
+                        .addStatement("this.$1N = $1N", RUNTIME_VAR_NAME)
+                        .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
+                        .build())
                 .addMethod(methodBuilder.build())
                 .addMethod(MethodSpec.methodBuilder("method")
-                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(HttpString.class)
                         .addStatement("return $1T.$2N", Methods.class, endpointDefinition.getHttpMethod().toString())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("template")
-                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(String.class)
                         .addStatement("return $1S", endpointDefinition.getHttpPath())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("serviceName")
-                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(ParameterizedTypeName.get(Optional.class, String.class))
-                        .addStatement("return $1T.of($2S)", Optional.class, serviceName)
+                        .addStatement("return $1T.of($2S)", Optional.class, serviceClass.simpleName())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("name")
-                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(ParameterizedTypeName.get(Optional.class, String.class))
                         .addStatement("return $1T.of($2S)", Optional.class,
                                 endpointDefinition.getEndpointName().get())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("handler")
-                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(HttpHandler.class)
                         .addStatement("return this")

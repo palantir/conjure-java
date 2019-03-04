@@ -29,55 +29,49 @@ public final class CookieServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new CookieServiceFactory(runtime, delegate).create();
+        return ImmutableList.of(new EatCookiesEndpoint(runtime, delegate));
     }
 
-    private static final class CookieServiceFactory {
-        private final CookieService delegate;
-
+    private static final class EatCookiesEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private CookieServiceFactory(UndertowRuntime runtime, CookieService delegate) {
+        private final CookieService delegate;
+
+        EatCookiesEndpoint(UndertowRuntime runtime, CookieService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
 
-        List<Endpoint> create() {
-            return ImmutableList.of(new EatCookiesEndpoint());
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            BearerToken cookieToken = runtime.auth().cookie(exchange, "PALANTIR_TOKEN");
+            delegate.eatCookies(cookieToken);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
-        private class EatCookiesEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                BearerToken cookieToken = runtime.auth().cookie(exchange, "PALANTIR_TOKEN");
-                delegate.eatCookies(cookieToken);
-                exchange.setStatusCode(StatusCodes.NO_CONTENT);
-            }
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
 
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
+        @Override
+        public String template() {
+            return "/cookies";
+        }
 
-            @Override
-            public final String template() {
-                return "/cookies";
-            }
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("CookieService");
+        }
 
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("CookieService");
-            }
+        @Override
+        public Optional<String> name() {
+            return Optional.of("eatCookies");
+        }
 
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("eatCookies");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
+        @Override
+        public HttpHandler handler() {
+            return this;
         }
     }
 }

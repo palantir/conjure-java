@@ -45,847 +45,1003 @@ public final class TestServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return new TestServiceFactory(runtime, delegate).create();
+        return ImmutableList.of(
+                new GetFileSystemsEndpoint(runtime, delegate),
+                new CreateDatasetEndpoint(runtime, delegate),
+                new GetDatasetEndpoint(runtime, delegate),
+                new GetRawDataEndpoint(runtime, delegate),
+                new GetAliasedRawDataEndpoint(runtime, delegate),
+                new MaybeGetRawDataEndpoint(runtime, delegate),
+                new GetAliasedStringEndpoint(runtime, delegate),
+                new UploadRawDataEndpoint(runtime, delegate),
+                new UploadAliasedRawDataEndpoint(runtime, delegate),
+                new GetBranchesEndpoint(runtime, delegate),
+                new GetBranchesDeprecatedEndpoint(runtime, delegate),
+                new ResolveBranchEndpoint(runtime, delegate),
+                new TestParamEndpoint(runtime, delegate),
+                new TestQueryParamsEndpoint(runtime, delegate),
+                new TestNoResponseQueryParamsEndpoint(runtime, delegate),
+                new TestBooleanEndpoint(runtime, delegate),
+                new TestDoubleEndpoint(runtime, delegate),
+                new TestIntegerEndpoint(runtime, delegate),
+                new TestPostOptionalEndpoint(runtime, delegate),
+                new TestOptionalIntegerAndDoubleEndpoint(runtime, delegate));
     }
 
-    private static final class TestServiceFactory {
-        private final TestService delegate;
-
+    private static final class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private TestServiceFactory(UndertowRuntime runtime, TestService delegate) {
+        private final TestService delegate;
+
+        GetFileSystemsEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
 
-        List<Endpoint> create() {
-            return ImmutableList.of(
-                    new GetFileSystemsEndpoint(),
-                    new CreateDatasetEndpoint(),
-                    new GetDatasetEndpoint(),
-                    new GetRawDataEndpoint(),
-                    new GetAliasedRawDataEndpoint(),
-                    new MaybeGetRawDataEndpoint(),
-                    new GetAliasedStringEndpoint(),
-                    new UploadRawDataEndpoint(),
-                    new UploadAliasedRawDataEndpoint(),
-                    new GetBranchesEndpoint(),
-                    new GetBranchesDeprecatedEndpoint(),
-                    new ResolveBranchEndpoint(),
-                    new TestParamEndpoint(),
-                    new TestQueryParamsEndpoint(),
-                    new TestNoResponseQueryParamsEndpoint(),
-                    new TestBooleanEndpoint(),
-                    new TestDoubleEndpoint(),
-                    new TestIntegerEndpoint(),
-                    new TestPostOptionalEndpoint(),
-                    new TestOptionalIntegerAndDoubleEndpoint());
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, BackingFileSystem> result = delegate.getFileSystems(authHeader);
+            runtime.serde().serialize(result, exchange);
         }
 
-        private class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, BackingFileSystem> result = delegate.getFileSystems(authHeader);
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/fileSystems";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("getFileSystems");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class CreateDatasetEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final TypeToken<CreateDatasetRequest> requestType =
+                new TypeToken<CreateDatasetRequest>() {};
+
+        CreateDatasetEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            CreateDatasetRequest request = runtime.serde().deserialize(requestType, exchange);
+            HeaderMap headerParams = exchange.getRequestHeaders();
+            String testHeaderArg =
+                    runtime.serde().deserializeString(headerParams.get("Test-Header"));
+            Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("createDataset");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetDatasetEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetDatasetEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            Optional<Dataset> result = delegate.getDataset(authHeader, datasetRid);
+            if (result.isPresent()) {
                 runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/fileSystems";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("getFileSystems");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class CreateDatasetEndpoint implements HttpHandler, Endpoint {
-            private final TypeToken<CreateDatasetRequest> requestType =
-                    new TypeToken<CreateDatasetRequest>() {};
-
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                CreateDatasetRequest request = runtime.serde().deserialize(requestType, exchange);
-                HeaderMap headerParams = exchange.getRequestHeaders();
-                String testHeaderArg =
-                        runtime.serde().deserializeString(headerParams.get("Test-Header"));
-                Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
-                runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.POST;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("createDataset");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class GetDatasetEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                Optional<Dataset> result = delegate.getDataset(authHeader, datasetRid);
-                if (result.isPresent()) {
-                    runtime.serde().serialize(result, exchange);
-                } else {
-                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
-                }
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("getDataset");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class GetRawDataEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
-                runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}/raw";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("getRawData");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class GetAliasedRawDataEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
-                runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}/raw-aliased";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("getAliasedRawData");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class MaybeGetRawDataEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                Optional<BinaryResponseBody> result =
-                        delegate.maybeGetRawData(authHeader, datasetRid);
-                if (result.isPresent()) {
-                    runtime.serde().serialize(result.get(), exchange);
-                } else {
-                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
-                }
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}/raw-maybe";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("maybeGetRawData");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class GetAliasedStringEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
-                runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}/string-aliased";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("getAliasedString");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class UploadRawDataEndpoint implements HttpHandler, Endpoint {
-            private final TypeToken<InputStream> inputType = new TypeToken<InputStream>() {};
-
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                InputStream input = runtime.serde().deserializeInputStream(exchange);
-                delegate.uploadRawData(authHeader, input);
+            } else {
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
-
-            @Override
-            public final HttpString method() {
-                return Methods.POST;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/upload-raw";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("uploadRawData");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
         }
 
-        private class UploadAliasedRawDataEndpoint implements HttpHandler, Endpoint {
-            private final TypeToken<NestedAliasedBinary> inputType =
-                    new TypeToken<NestedAliasedBinary>() {};
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
 
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                NestedAliasedBinary input = runtime.serde().deserialize(inputType, exchange);
-                delegate.uploadAliasedRawData(authHeader, input);
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("getDataset");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/raw";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("getRawData");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetAliasedRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetAliasedRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/raw-aliased";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("getAliasedRawData");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class MaybeGetRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        MaybeGetRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            Optional<BinaryResponseBody> result = delegate.maybeGetRawData(authHeader, datasetRid);
+            if (result.isPresent()) {
+                runtime.serde().serialize(result.get(), exchange);
+            } else {
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
-
-            @Override
-            public final HttpString method() {
-                return Methods.POST;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/upload-raw-aliased";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("uploadAliasedRawData");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
         }
 
-        private class GetBranchesEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                Set<String> result = delegate.getBranches(authHeader, datasetRid);
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/raw-maybe";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("maybeGetRawData");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetAliasedStringEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetAliasedStringEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/string-aliased";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("getAliasedString");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class UploadRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final TypeToken<InputStream> inputType = new TypeToken<InputStream>() {};
+
+        UploadRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            InputStream input = runtime.serde().deserializeInputStream(exchange);
+            delegate.uploadRawData(authHeader, input);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/upload-raw";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("uploadRawData");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class UploadAliasedRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final TypeToken<NestedAliasedBinary> inputType =
+                new TypeToken<NestedAliasedBinary>() {};
+
+        UploadAliasedRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            NestedAliasedBinary input = runtime.serde().deserialize(inputType, exchange);
+            delegate.uploadAliasedRawData(authHeader, input);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/upload-raw-aliased";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("uploadAliasedRawData");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetBranchesEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetBranchesEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            Set<String> result = delegate.getBranches(authHeader, datasetRid);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/branches";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("getBranches");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetBranchesDeprecatedEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetBranchesDeprecatedEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/branchesDeprecated";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("getBranchesDeprecated");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ResolveBranchEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        ResolveBranchEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            String branch = runtime.serde().deserializeString(pathParams.get("branch"));
+            Optional<String> result = delegate.resolveBranch(authHeader, datasetRid, branch);
+            if (result.isPresent()) {
                 runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}/branches";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("getBranches");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class GetBranchesDeprecatedEndpoint implements HttpHandler, Endpoint {
-            @Override
-            @SuppressWarnings("deprecation")
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
-                runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}/branchesDeprecated";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("getBranchesDeprecated");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class ResolveBranchEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                String branch = runtime.serde().deserializeString(pathParams.get("branch"));
-                Optional<String> result = delegate.resolveBranch(authHeader, datasetRid, branch);
-                if (result.isPresent()) {
-                    runtime.serde().serialize(result, exchange);
-                } else {
-                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
-                }
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("resolveBranch");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class TestParamEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, String> pathParams =
-                        exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-                ResourceIdentifier datasetRid =
-                        runtime.serde().deserializeRid(pathParams.get("datasetRid"));
-                Optional<String> result = delegate.testParam(authHeader, datasetRid);
-                if (result.isPresent()) {
-                    runtime.serde().serialize(result, exchange);
-                } else {
-                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
-                }
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/datasets/{datasetRid}/testParam";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("testParam");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class TestQueryParamsEndpoint implements HttpHandler, Endpoint {
-            private final TypeToken<String> queryType = new TypeToken<String>() {};
-
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                String query = runtime.serde().deserialize(queryType, exchange);
-                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                ResourceIdentifier something =
-                        runtime.serde().deserializeRid(queryParams.get("different"));
-                Optional<ResourceIdentifier> optionalMiddle =
-                        runtime.serde().deserializeOptionalRid(queryParams.get("optionalMiddle"));
-                ResourceIdentifier implicit =
-                        runtime.serde().deserializeRid(queryParams.get("implicit"));
-                Set<String> setEnd =
-                        runtime.serde().deserializeStringSet(queryParams.get("setEnd"));
-                Optional<ResourceIdentifier> optionalEnd =
-                        runtime.serde().deserializeOptionalRid(queryParams.get("optionalEnd"));
-                int result =
-                        delegate.testQueryParams(
-                                authHeader,
-                                something,
-                                implicit,
-                                optionalMiddle,
-                                setEnd,
-                                optionalEnd,
-                                query);
-                runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.POST;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/test-query-params";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("testQueryParams");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class TestNoResponseQueryParamsEndpoint implements HttpHandler, Endpoint {
-            private final TypeToken<String> queryType = new TypeToken<String>() {};
-
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                String query = runtime.serde().deserialize(queryType, exchange);
-                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                ResourceIdentifier something =
-                        runtime.serde().deserializeRid(queryParams.get("different"));
-                Optional<ResourceIdentifier> optionalMiddle =
-                        runtime.serde().deserializeOptionalRid(queryParams.get("optionalMiddle"));
-                ResourceIdentifier implicit =
-                        runtime.serde().deserializeRid(queryParams.get("implicit"));
-                Set<String> setEnd =
-                        runtime.serde().deserializeStringSet(queryParams.get("setEnd"));
-                Optional<ResourceIdentifier> optionalEnd =
-                        runtime.serde().deserializeOptionalRid(queryParams.get("optionalEnd"));
-                delegate.testNoResponseQueryParams(
-                        authHeader,
-                        something,
-                        implicit,
-                        optionalMiddle,
-                        setEnd,
-                        optionalEnd,
-                        query);
+            } else {
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
-
-            @Override
-            public final HttpString method() {
-                return Methods.POST;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/test-no-response-query-params";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("testNoResponseQueryParams");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
         }
 
-        private class TestBooleanEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                boolean result = delegate.testBoolean(authHeader);
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("resolveBranch");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestParamEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        TestParamEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.serde().deserializeRid(pathParams.get("datasetRid"));
+            Optional<String> result = delegate.testParam(authHeader, datasetRid);
+            if (result.isPresent()) {
                 runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/boolean";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("testBoolean");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class TestDoubleEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                double result = delegate.testDouble(authHeader);
-                runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/double";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("testDouble");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class TestIntegerEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                int result = delegate.testInteger(authHeader);
-                runtime.serde().serialize(result, exchange);
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/integer";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("testInteger");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class TestPostOptionalEndpoint implements HttpHandler, Endpoint {
-            private final TypeToken<Optional<String>> maybeStringType =
-                    new TypeToken<Optional<String>>() {};
-
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Optional<String> maybeString =
-                        runtime.serde().deserialize(maybeStringType, exchange);
-                Optional<String> result = delegate.testPostOptional(authHeader, maybeString);
-                if (result.isPresent()) {
-                    runtime.serde().serialize(result, exchange);
-                } else {
-                    exchange.setStatusCode(StatusCodes.NO_CONTENT);
-                }
-            }
-
-            @Override
-            public final HttpString method() {
-                return Methods.POST;
-            }
-
-            @Override
-            public final String template() {
-                return "/catalog/optional";
-            }
-
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
-
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("testPostOptional");
-            }
-
-            @Override
-            public final HttpHandler handler() {
-                return this;
-            }
-        }
-
-        private class TestOptionalIntegerAndDoubleEndpoint implements HttpHandler, Endpoint {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                AuthHeader authHeader = runtime.auth().header(exchange);
-                Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-                OptionalInt maybeInteger =
-                        runtime.serde().deserializeOptionalInteger(queryParams.get("maybeInteger"));
-                OptionalDouble maybeDouble =
-                        runtime.serde().deserializeOptionalDouble(queryParams.get("maybeDouble"));
-                delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
+            } else {
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
+        }
 
-            @Override
-            public final HttpString method() {
-                return Methods.GET;
-            }
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
 
-            @Override
-            public final String template() {
-                return "/catalog/optional-integer-double";
-            }
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/testParam";
+        }
 
-            @Override
-            public final Optional<String> serviceName() {
-                return Optional.of("TestService");
-            }
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
 
-            @Override
-            public final Optional<String> name() {
-                return Optional.of("testOptionalIntegerAndDouble");
-            }
+        @Override
+        public Optional<String> name() {
+            return Optional.of("testParam");
+        }
 
-            @Override
-            public final HttpHandler handler() {
-                return this;
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestQueryParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final TypeToken<String> queryType = new TypeToken<String>() {};
+
+        TestQueryParamsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            String query = runtime.serde().deserialize(queryType, exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            ResourceIdentifier something =
+                    runtime.serde().deserializeRid(queryParams.get("different"));
+            Optional<ResourceIdentifier> optionalMiddle =
+                    runtime.serde().deserializeOptionalRid(queryParams.get("optionalMiddle"));
+            ResourceIdentifier implicit =
+                    runtime.serde().deserializeRid(queryParams.get("implicit"));
+            Set<String> setEnd = runtime.serde().deserializeStringSet(queryParams.get("setEnd"));
+            Optional<ResourceIdentifier> optionalEnd =
+                    runtime.serde().deserializeOptionalRid(queryParams.get("optionalEnd"));
+            int result =
+                    delegate.testQueryParams(
+                            authHeader,
+                            something,
+                            implicit,
+                            optionalMiddle,
+                            setEnd,
+                            optionalEnd,
+                            query);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/test-query-params";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("testQueryParams");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestNoResponseQueryParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final TypeToken<String> queryType = new TypeToken<String>() {};
+
+        TestNoResponseQueryParamsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            String query = runtime.serde().deserialize(queryType, exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            ResourceIdentifier something =
+                    runtime.serde().deserializeRid(queryParams.get("different"));
+            Optional<ResourceIdentifier> optionalMiddle =
+                    runtime.serde().deserializeOptionalRid(queryParams.get("optionalMiddle"));
+            ResourceIdentifier implicit =
+                    runtime.serde().deserializeRid(queryParams.get("implicit"));
+            Set<String> setEnd = runtime.serde().deserializeStringSet(queryParams.get("setEnd"));
+            Optional<ResourceIdentifier> optionalEnd =
+                    runtime.serde().deserializeOptionalRid(queryParams.get("optionalEnd"));
+            delegate.testNoResponseQueryParams(
+                    authHeader, something, implicit, optionalMiddle, setEnd, optionalEnd, query);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/test-no-response-query-params";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("testNoResponseQueryParams");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestBooleanEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        TestBooleanEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            boolean result = delegate.testBoolean(authHeader);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/boolean";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("testBoolean");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestDoubleEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        TestDoubleEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            double result = delegate.testDouble(authHeader);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/double";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("testDouble");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestIntegerEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        TestIntegerEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            int result = delegate.testInteger(authHeader);
+            runtime.serde().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/integer";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("testInteger");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestPostOptionalEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final TypeToken<Optional<String>> maybeStringType =
+                new TypeToken<Optional<String>>() {};
+
+        TestPostOptionalEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Optional<String> maybeString = runtime.serde().deserialize(maybeStringType, exchange);
+            Optional<String> result = delegate.testPostOptional(authHeader, maybeString);
+            if (result.isPresent()) {
+                runtime.serde().serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/optional";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("testPostOptional");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestOptionalIntegerAndDoubleEndpoint
+            implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        TestOptionalIntegerAndDoubleEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            OptionalInt maybeInteger =
+                    runtime.serde().deserializeOptionalInteger(queryParams.get("maybeInteger"));
+            OptionalDouble maybeDouble =
+                    runtime.serde().deserializeOptionalDouble(queryParams.get("maybeDouble"));
+            delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/optional-integer-double";
+        }
+
+        @Override
+        public Optional<String> serviceName() {
+            return Optional.of("TestService");
+        }
+
+        @Override
+        public Optional<String> name() {
+            return Optional.of("testOptionalIntegerAndDouble");
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
         }
     }
 }
