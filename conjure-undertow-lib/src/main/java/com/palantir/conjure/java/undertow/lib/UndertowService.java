@@ -22,7 +22,7 @@ import java.util.List;
  * The Undertow server Conjure generator emits implementations of {@link UndertowService}
  * which produce an {@link Endpoint} for each endpoint described in the Conjure definition.
  * The server is responsible for providing an {@link UndertowRuntime} and orchestrating
- * registration with the {@link EndpointRegistry} allowing API implementors to add APIs
+ * registration with the <pre>ConjureHandler</pre> allowing API implementors to add APIs
  * using <code>server.api(MyServiceEndpoints.of(myServiceImpl)</code>.
  */
 public interface UndertowService {

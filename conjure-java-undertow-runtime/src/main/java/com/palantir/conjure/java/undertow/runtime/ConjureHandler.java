@@ -18,7 +18,6 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -31,10 +30,11 @@ import io.undertow.util.Methods;
 import java.util.function.BiFunction;
 
 /**
- * Default Conjure implementation of a {@link EndpointRegistry}
- * which can be registered as an Undertow {@link HttpHandler}.
+ * Conjure routing mechanism which can be registered as an Undertow {@link HttpHandler}.
+ * This handler takes care of exception handling, tracing, and web-security headers
+ * among {@link ConjureHandler#WRAPPERS other features}.
  */
-public final class ConjureHandler implements HttpHandler, EndpointRegistry {
+public final class ConjureHandler implements HttpHandler {
 
     private static final ImmutableList<BiFunction<Endpoint, HttpHandler, HttpHandler>> WRAPPERS =
             ImmutableList.<BiFunction<Endpoint, HttpHandler, HttpHandler>>of(
@@ -64,10 +64,12 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
 
     private final RoutingHandler routingHandler;
 
+    /** The fallback {@link HttpHandler handler} is invoked when no {@link Endpoint} matches a request. */
     public ConjureHandler(HttpHandler fallback) {
         this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
     }
 
+    /** Default constructor, when no endpoints match a request, a 404 response code is set. */
     public ConjureHandler() {
         this(ResponseCodeHandler.HANDLE_404);
     }
@@ -77,7 +79,7 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
         routingHandler.handleRequest(exchange);
     }
 
-    @Override
+    /** {@link Endpoint Endpoints} may be registered with this handler in order to be exposed by the web server. */
     public void register(Endpoint endpoint) {
         HttpHandler current = endpoint.handler();
         for (BiFunction<Endpoint, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
