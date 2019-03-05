@@ -12,7 +12,6 @@ import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -60,13 +59,13 @@ public final class CookieServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("CookieService");
+        public String serviceName() {
+            return "CookieService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("eatCookies");
+        public String name() {
+            return "eatCookies";
         }
 
         @Override

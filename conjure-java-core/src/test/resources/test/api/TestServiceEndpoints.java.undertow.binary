@@ -11,7 +11,6 @@ import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -58,13 +57,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getBinary");
+        public String name() {
+            return "getBinary";
         }
 
         @Override

@@ -96,13 +96,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getFileSystems");
+        public String name() {
+            return "getFileSystems";
         }
 
         @Override
@@ -146,13 +146,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("createDataset");
+        public String name() {
+            return "createDataset";
         }
 
         @Override
@@ -197,13 +197,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getDataset");
+        public String name() {
+            return "getDataset";
         }
 
         @Override
@@ -244,13 +244,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getRawData");
+        public String name() {
+            return "getRawData";
         }
 
         @Override
@@ -291,13 +291,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getAliasedRawData");
+        public String name() {
+            return "getAliasedRawData";
         }
 
         @Override
@@ -342,13 +342,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("maybeGetRawData");
+        public String name() {
+            return "maybeGetRawData";
         }
 
         @Override
@@ -389,13 +389,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getAliasedString");
+        public String name() {
+            return "getAliasedString";
         }
 
         @Override
@@ -435,13 +435,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("uploadRawData");
+        public String name() {
+            return "uploadRawData";
         }
 
         @Override
@@ -482,13 +482,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("uploadAliasedRawData");
+        public String name() {
+            return "uploadAliasedRawData";
         }
 
         @Override
@@ -529,13 +529,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getBranches");
+        public String name() {
+            return "getBranches";
         }
 
         @Override
@@ -577,13 +577,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getBranchesDeprecated");
+        public String name() {
+            return "getBranchesDeprecated";
         }
 
         @Override
@@ -629,13 +629,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("resolveBranch");
+        public String name() {
+            return "resolveBranch";
         }
 
         @Override
@@ -680,13 +680,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("testParam");
+        public String name() {
+            return "testParam";
         }
 
         @Override
@@ -744,13 +744,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("testQueryParams");
+        public String name() {
+            return "testQueryParams";
         }
 
         @Override
@@ -801,13 +801,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("testNoResponseQueryParams");
+        public String name() {
+            return "testNoResponseQueryParams";
         }
 
         @Override
@@ -844,13 +844,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("testBoolean");
+        public String name() {
+            return "testBoolean";
         }
 
         @Override
@@ -887,13 +887,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("testDouble");
+        public String name() {
+            return "testDouble";
         }
 
         @Override
@@ -930,13 +930,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("testInteger");
+        public String name() {
+            return "testInteger";
         }
 
         @Override
@@ -981,13 +981,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("testPostOptional");
+        public String name() {
+            return "testPostOptional";
         }
 
         @Override
@@ -1030,13 +1030,13 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("TestService");
+        public String serviceName() {
+            return "TestService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("testOptionalIntegerAndDouble");
+        public String name() {
+            return "testOptionalIntegerAndDouble";
         }
 
         @Override

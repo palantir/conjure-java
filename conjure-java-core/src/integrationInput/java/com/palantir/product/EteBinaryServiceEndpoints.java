@@ -72,13 +72,13 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteBinaryService");
+        public String serviceName() {
+            return "UndertowEteBinaryService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("postBinary");
+        public String name() {
+            return "postBinary";
         }
 
         @Override
@@ -120,13 +120,13 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteBinaryService");
+        public String serviceName() {
+            return "UndertowEteBinaryService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getOptionalBinaryPresent");
+        public String name() {
+            return "getOptionalBinaryPresent";
         }
 
         @Override
@@ -167,13 +167,13 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteBinaryService");
+        public String serviceName() {
+            return "UndertowEteBinaryService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getOptionalBinaryEmpty");
+        public String name() {
+            return "getOptionalBinaryEmpty";
         }
 
         @Override
@@ -212,13 +212,13 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteBinaryService");
+        public String serviceName() {
+            return "UndertowEteBinaryService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("getBinaryFailure");
+        public String name() {
+            return "getBinaryFailure";
         }
 
         @Override

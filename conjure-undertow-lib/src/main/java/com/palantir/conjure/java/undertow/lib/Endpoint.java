@@ -18,7 +18,6 @@ package com.palantir.conjure.java.undertow.lib;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
-import java.util.Optional;
 
 /**
  * An {@link Endpoint} represents a single rpc method. End points provide a location, tuple of
@@ -43,12 +42,8 @@ public interface Endpoint {
     HttpHandler handler();
 
     /** Simple name of the service which provides this endpoint. This data may be used for metric instrumentation. */
-    default Optional<String> serviceName() {
-        return Optional.empty();
-    }
+    String serviceName();
 
     /** Simple name of the endpoint method. This data may be used for metric instrumentation. */
-    default Optional<String> name() {
-        return Optional.empty();
-    }
+    String name();
 }

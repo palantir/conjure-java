@@ -10,7 +10,6 @@ import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -57,13 +56,13 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEmptyPathService");
+        public String serviceName() {
+            return "UndertowEmptyPathService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("emptyPath");
+        public String name() {
+            return "emptyPath";
         }
 
         @Override

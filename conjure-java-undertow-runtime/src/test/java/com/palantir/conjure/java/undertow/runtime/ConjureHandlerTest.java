@@ -75,6 +75,16 @@ public final class ConjureHandlerTest {
             public HttpHandler handler() {
                 return httpHandler;
             }
+
+            @Override
+            public String serviceName() {
+                return "TestService";
+            }
+
+            @Override
+            public String name() {
+                return "test";
+            }
         });
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")

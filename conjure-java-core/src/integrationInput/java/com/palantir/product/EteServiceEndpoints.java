@@ -94,13 +94,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("string");
+        public String name() {
+            return "string";
         }
 
         @Override
@@ -137,13 +137,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("integer");
+        public String name() {
+            return "integer";
         }
 
         @Override
@@ -180,13 +180,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("double_");
+        public String name() {
+            return "double_";
         }
 
         @Override
@@ -223,13 +223,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("boolean_");
+        public String name() {
+            return "boolean_";
         }
 
         @Override
@@ -266,13 +266,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("safelong");
+        public String name() {
+            return "safelong";
         }
 
         @Override
@@ -309,13 +309,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("rid");
+        public String name() {
+            return "rid";
         }
 
         @Override
@@ -352,13 +352,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("bearertoken");
+        public String name() {
+            return "bearertoken";
         }
 
         @Override
@@ -399,13 +399,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("optionalString");
+        public String name() {
+            return "optionalString";
         }
 
         @Override
@@ -446,13 +446,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("optionalEmpty");
+        public String name() {
+            return "optionalEmpty";
         }
 
         @Override
@@ -489,13 +489,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("datetime");
+        public String name() {
+            return "datetime";
         }
 
         @Override
@@ -532,13 +532,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("binary");
+        public String name() {
+            return "binary";
         }
 
         @Override
@@ -578,13 +578,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("path");
+        public String name() {
+            return "path";
         }
 
         @Override
@@ -625,13 +625,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("notNullBody");
+        public String name() {
+            return "notNullBody";
         }
 
         @Override
@@ -672,13 +672,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("aliasOne");
+        public String name() {
+            return "aliasOne";
         }
 
         @Override
@@ -723,13 +723,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("optionalAliasOne");
+        public String name() {
+            return "optionalAliasOne";
         }
 
         @Override
@@ -771,13 +771,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("aliasTwo");
+        public String name() {
+            return "aliasTwo";
         }
 
         @Override
@@ -818,13 +818,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("notNullBodyExternalImport");
+        public String name() {
+            return "notNullBodyExternalImport";
         }
 
         @Override
@@ -870,13 +870,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("optionalBodyExternalImport");
+        public String name() {
+            return "optionalBodyExternalImport";
         }
 
         @Override
@@ -924,13 +924,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("optionalQueryExternalImport");
+        public String name() {
+            return "optionalQueryExternalImport";
         }
 
         @Override
@@ -967,13 +967,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("noReturn");
+        public String name() {
+            return "noReturn";
         }
 
         @Override
@@ -1015,13 +1015,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("enumQuery");
+        public String name() {
+            return "enumQuery";
         }
 
         @Override
@@ -1063,13 +1063,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("enumListQuery");
+        public String name() {
+            return "enumListQuery";
         }
 
         @Override
@@ -1115,13 +1115,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("optionalEnumQuery");
+        public String name() {
+            return "optionalEnumQuery";
         }
 
         @Override
@@ -1163,13 +1163,13 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public Optional<String> serviceName() {
-            return Optional.of("UndertowEteService");
+        public String serviceName() {
+            return "UndertowEteService";
         }
 
         @Override
-        public Optional<String> name() {
-            return Optional.of("enumHeader");
+        public String name() {
+            return "enumHeader";
         }
 
         @Override

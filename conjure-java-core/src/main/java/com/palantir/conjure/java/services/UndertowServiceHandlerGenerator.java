@@ -220,15 +220,17 @@ final class UndertowServiceHandlerGenerator {
                 .addMethod(MethodSpec.methodBuilder("serviceName")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
-                        .returns(ParameterizedTypeName.get(Optional.class, String.class))
-                        .addStatement("return $1T.of($2S)", Optional.class, serviceClass.simpleName())
+                        .returns(String.class)
+                        // Note that this is the service name as defined in conjure, not the potentially modified
+                        // name of the generated service interface. We may generate "UndertowFooService", but we
+                        // should still return "FooService" here.
+                        .addStatement("return $1S", serviceClass.simpleName())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("name")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
-                        .returns(ParameterizedTypeName.get(Optional.class, String.class))
-                        .addStatement("return $1T.of($2S)", Optional.class,
-                                endpointDefinition.getEndpointName().get())
+                        .returns(String.class)
+                        .addStatement("return $1S", endpointDefinition.getEndpointName().get())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("handler")
                         .addModifiers(Modifier.PUBLIC)
