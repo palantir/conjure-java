@@ -17,7 +17,9 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -27,6 +29,7 @@ import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.Methods;
+import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -64,14 +67,9 @@ public final class ConjureHandler implements HttpHandler {
 
     private final RoutingHandler routingHandler;
 
-    /** The fallback {@link HttpHandler handler} is invoked when no {@link Endpoint} matches a request. */
-    public ConjureHandler(HttpHandler fallback) {
+    private ConjureHandler(HttpHandler fallback, List<Endpoint> endpoints) {
         this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
-    }
-
-    /** Default constructor, when no endpoints match a request, a 404 response code is set. */
-    public ConjureHandler() {
-        this(ResponseCodeHandler.HANDLE_404);
+        endpoints.forEach(this::register);
     }
 
     @Override
@@ -79,8 +77,7 @@ public final class ConjureHandler implements HttpHandler {
         routingHandler.handleRequest(exchange);
     }
 
-    /** {@link Endpoint Endpoints} may be registered with this handler in order to be exposed by the web server. */
-    public void register(Endpoint endpoint) {
+    private void register(Endpoint endpoint) {
         HttpHandler current = endpoint.handler();
         for (BiFunction<Endpoint, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
             current = wrapper.apply(endpoint, current);
@@ -88,4 +85,41 @@ public final class ConjureHandler implements HttpHandler {
         routingHandler.add(endpoint.method(), endpoint.template(), current);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private final List<Endpoint> endpoints = Lists.newArrayList();
+        private HttpHandler fallback = ResponseCodeHandler.HANDLE_404;
+
+        private Builder() { }
+
+        public Builder endpoints(Endpoint value) {
+            endpoints.add(Preconditions.checkNotNull(value, "Value is required"));
+            return this;
+        }
+
+        public Builder addAllEndpoints(Iterable<Endpoint> values) {
+            Preconditions.checkNotNull(values, "Values is required");
+            for (Endpoint endpoint : values) {
+                endpoints(endpoint);
+            }
+            return this;
+        }
+
+        /**
+         * The fallback {@link HttpHandler handler} is invoked when no {@link Endpoint} matches a request.
+         * By default a 404 response status will be served.
+         */
+        public Builder fallback(HttpHandler value) {
+            fallback = Preconditions.checkNotNull(value, "Value is required");
+            return this;
+        }
+
+        public HttpHandler build() {
+            return new ConjureHandler(fallback, endpoints);
+        }
+    }
 }

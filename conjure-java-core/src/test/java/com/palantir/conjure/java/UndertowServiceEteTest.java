@@ -54,6 +54,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
+import io.undertow.server.HttpHandler;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -117,12 +118,14 @@ public final class UndertowServiceEteTest extends TestBase {
     public static void before() {
         UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
-        ConjureHandler handler = new ConjureHandler();
-        ImmutableList.of(
+        HttpHandler handler = ConjureHandler.builder().addAllEndpoints(ImmutableList.of(
                 EteServiceEndpoints.of(new UndertowEteResource()),
                 EmptyPathServiceEndpoints.of(() -> true),
                 EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
-                .forEach(service -> service.endpoints(context).forEach(handler::register));
+                .stream()
+                .flatMap(service -> service.endpoints(context).stream())
+                .collect(ImmutableList.toImmutableList()))
+                .build();
 
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)

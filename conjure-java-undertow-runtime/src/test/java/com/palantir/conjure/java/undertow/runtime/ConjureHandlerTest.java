@@ -59,33 +59,33 @@ public final class ConjureHandlerTest {
                 innerObserver.control();
             }
         };
-        ConjureHandler handler = new ConjureHandler();
-        handler.register(new Endpoint() {
-            @Override
-            public HttpString method() {
-                return Methods.GET;
-            }
+        HttpHandler handler = ConjureHandler.builder()
+                .endpoints(new Endpoint() {
+                    @Override
+                    public HttpString method() {
+                        return Methods.GET;
+                    }
 
-            @Override
-            public String template() {
-                return "/test";
-            }
+                    @Override
+                    public String template() {
+                        return "/test";
+                    }
 
-            @Override
-            public HttpHandler handler() {
-                return httpHandler;
-            }
+                    @Override
+                    public HttpHandler handler() {
+                        return httpHandler;
+                    }
 
-            @Override
-            public String serviceName() {
-                return "TestService";
-            }
+                    @Override
+                    public String serviceName() {
+                        return "TestService";
+                    }
 
-            @Override
-            public String name() {
-                return "test";
-            }
-        });
+                    @Override
+                    public String name() {
+                        return "test";
+                    }
+                }).build();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(handler)

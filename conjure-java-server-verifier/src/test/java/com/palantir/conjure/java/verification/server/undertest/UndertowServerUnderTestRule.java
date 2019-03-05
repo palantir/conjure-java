@@ -25,6 +25,7 @@ import com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoints;
 import com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 import org.junit.rules.ExternalResource;
 
 public final class UndertowServerUnderTestRule extends ExternalResource {
@@ -39,10 +40,11 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
                 UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
         UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
-        ConjureHandler handler = new ConjureHandler();
         UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
-        service.endpoints(context).forEach(handler::register);
+        HttpHandler handler = ConjureHandler.builder()
+                .addAllEndpoints(service.endpoints(context))
+                .build();
 
         server = Undertow.builder()
                 .addHttpListener(PORT, "0.0.0.0")
