@@ -49,6 +49,7 @@ public interface SerDe {
     InputStream deserializeInputStream(HttpServerExchange exchange);
 
     // query, path, and header parameter deserializers
+    // TODO(ckozak): Write javadoc
 
     BearerToken deserializeBearerToken(String in);
 
