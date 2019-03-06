@@ -45,6 +45,12 @@ public interface SerDe {
     /** Deserializes the request body into the requested type. */
     <T> T deserialize(TypeToken<T> type, HttpServerExchange exchange) throws IOException;
 
+    /** Create a {@link Serializer} for the requested type. Serializers should be reused. */
+    <T> Serializer<T> serializer(TypeToken<T> type);
+
+    /** Create a {@link Deserializer} for the requested type. Deserializer should be reused. */
+    <T> Deserializer<T> deserializer(TypeToken<T> type);
+
     /** Reads an {@link InputStream} from the {@link HttpServerExchange} request body. */
     InputStream deserializeInputStream(HttpServerExchange exchange);
 

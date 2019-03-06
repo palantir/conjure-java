@@ -23,7 +23,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.SerDe;
+import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -49,15 +51,15 @@ import javax.annotation.Nullable;
  */
 final class ConjureSerDe implements SerDe {
 
-    private final SerializerRegistry serializerRegistry;
+    private final EncodingRegistry encodingRegistry;
 
-    ConjureSerDe(SerializerRegistry serializerRegistry) {
-        this.serializerRegistry = serializerRegistry;
+    ConjureSerDe(EncodingRegistry encodingRegistry) {
+        this.encodingRegistry = encodingRegistry;
     }
 
     @Override
     public void serialize(Object value, HttpServerExchange exchange) throws IOException {
-        serializerRegistry.serialize(value, exchange);
+        encodingRegistry.serializer(new TypeToken<Object>() {}).serialize(value, exchange);
     }
 
     @Override
@@ -67,7 +69,17 @@ final class ConjureSerDe implements SerDe {
 
     @Override
     public <T> T deserialize(TypeToken<T> type, HttpServerExchange exchange) throws IOException {
-        return serializerRegistry.deserialize(type, exchange);
+        return encodingRegistry.deserializer(type).deserialize(exchange);
+    }
+
+    @Override
+    public <T> Serializer<T> serializer(TypeToken<T> type) {
+        return encodingRegistry.serializer(type);
+    }
+
+    @Override
+    public <T> Deserializer<T> deserializer(TypeToken<T> type) {
+        return encodingRegistry.deserializer(type);
     }
 
     @Override

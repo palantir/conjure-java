@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -52,7 +53,7 @@ public final class ConjureExceptionHandlerTest {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new SerializerRegistry(Serializers.json()), exchange -> {
+                        new EncodingRegistry(Encodings.json()), exchange -> {
                     throw exception;
                 })))
                 .build();
@@ -89,7 +90,7 @@ public final class ConjureExceptionHandlerTest {
                 .errorInstanceId(remoteError.errorInstanceId())
                 .build();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Serializers.json().serialize(expectedPropagatedError, stream);
+        Encodings.json().serializer(new TypeToken<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
         assertThat(response.body().string()).isEqualTo(stream.toString());
         // remote exceptions should result in 500 status
@@ -162,7 +163,7 @@ public final class ConjureExceptionHandlerTest {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new SerializerRegistry(Serializers.json()), exchange -> {
+                        new EncodingRegistry(Encodings.json()), exchange -> {
                     throw new Error();
                 })))
                 .build();
