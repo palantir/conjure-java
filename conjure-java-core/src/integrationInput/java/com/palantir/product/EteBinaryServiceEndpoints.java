@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
@@ -46,11 +47,12 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         private final UndertowEteBinaryService delegate;
 
-        private final TypeToken<InputStream> bodyType = new TypeToken<InputStream>() {};
+        private final Deserializer<InputStream> deserializer;
 
         PostBinaryEndpoint(UndertowRuntime runtime, UndertowEteBinaryService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
+            this.deserializer = runtime.serde().deserializer(new TypeToken<InputStream>() {});
         }
 
         @Override

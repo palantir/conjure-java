@@ -1,7 +1,9 @@
 package com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import io.undertow.server.HttpHandler;
@@ -34,15 +36,18 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
 
         private final UndertowEmptyPathService delegate;
 
+        private final Serializer<Boolean> serializer;
+
         EmptyPathEndpoint(UndertowRuntime runtime, UndertowEmptyPathService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
+            this.serializer = runtime.serde().serializer(new TypeToken<Boolean>() {});
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             boolean result = delegate.emptyPath();
-            runtime.serde().serialize(result, exchange);
+            serializer.serialize(result, exchange);
         }
 
         @Override

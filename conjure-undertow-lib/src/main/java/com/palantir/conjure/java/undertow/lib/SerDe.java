@@ -36,14 +36,8 @@ import javax.annotation.Nullable;
 /** Serialization functionality consumed by generated code. */
 public interface SerDe {
 
-    /** Serialize a value to a provided exchange. */
-    void serialize(Object value, HttpServerExchange exchange) throws IOException;
-
     /** Serialize a {@link BinaryResponseBody} to <pre>application/octet-stream</pre>. */
     void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException;
-
-    /** Deserializes the request body into the requested type. */
-    <T> T deserialize(TypeToken<T> type, HttpServerExchange exchange) throws IOException;
 
     /** Create a {@link Serializer} for the requested type. Serializers should be reused. */
     <T> Serializer<T> serializer(TypeToken<T> type);

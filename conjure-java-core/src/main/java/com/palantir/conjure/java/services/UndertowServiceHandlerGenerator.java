@@ -18,12 +18,15 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.MoreCollectors;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -81,7 +84,8 @@ final class UndertowServiceHandlerGenerator {
     private static final String EXCHANGE_VAR_NAME = "exchange";
     private static final String DELEGATE_VAR_NAME = "delegate";
     private static final String RUNTIME_VAR_NAME = "runtime";
-
+    private static final String DESERIALIZER_VAR_NAME = "deserializer";
+    private static final String SERIALIZER_VAR_NAME = "serializer";
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
 
     private static final String COOKIE_TOKEN_VAR_NAME = "cookieToken";
@@ -175,36 +179,61 @@ final class UndertowServiceHandlerGenerator {
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("handleRequest")
+        MethodSpec.Builder handleMethodBuilder = MethodSpec.methodBuilder("handleRequest")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                 .addException(IOException.class)
                 .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
 
-        endpointDefinition.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
+        endpointDefinition.getDeprecated().ifPresent(deprecatedDocsValue -> handleMethodBuilder.addAnnotation(
                 AnnotationSpec.builder(SuppressWarnings.class)
                         .addMember("value", "$S", "deprecation")
                         .build()));
 
-        return TypeSpec.classBuilder(endpointToHandlerClassName(endpointDefinition.getEndpointName()))
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                .addSuperinterface(HttpHandler.class)
-                .addSuperinterface(Endpoint.class)
-                .addField(FieldSpec.builder(
-                        UndertowRuntime.class, RUNTIME_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
-                .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
-                .addFields(endpointDefinition.getArgs().stream()
-                        .filter(def -> def.getParamType().accept(ParameterTypeVisitor.IS_BODY))
-                        .map(def -> createTypeField(typeMapper, def))
-                        .collect(Collectors.toList()))
-                .addMethod(MethodSpec.constructorBuilder()
-                        .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
-                        .addParameter(serviceClass, DELEGATE_VAR_NAME)
-                        .addStatement("this.$1N = $1N", RUNTIME_VAR_NAME)
-                        .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
-                        .build())
-                .addMethod(methodBuilder.build())
+        MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
+                .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
+                .addParameter(serviceClass, DELEGATE_VAR_NAME)
+                .addStatement("this.$1N = $1N", RUNTIME_VAR_NAME)
+                .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME);
+
+        TypeSpec.Builder endpointBuilder =
+                TypeSpec.classBuilder(endpointToHandlerClassName(endpointDefinition.getEndpointName()))
+                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                        .addSuperinterface(HttpHandler.class)
+                        .addSuperinterface(Endpoint.class)
+                        .addField(FieldSpec.builder(
+                                UndertowRuntime.class, RUNTIME_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
+                        .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE,
+                                Modifier.FINAL).build());
+
+        getBodyParamTypeArgument(endpointDefinition.getArgs())
+                .map(ArgumentDefinition::getType)
+                .map(typeMapper::getClassName)
+                .map(TypeName::box)
+                .ifPresent(typeName -> {
+                    TypeName type = ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
+                    endpointBuilder.addField(FieldSpec.builder(
+                            type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                    ctorBuilder.addStatement("this.$1N = $2N.serde().deserializer(new $3T() {})",
+                            DESERIALIZER_VAR_NAME, RUNTIME_VAR_NAME,
+                            ParameterizedTypeName.get(ClassName.get(TypeToken.class), typeName));
+                });
+
+        endpointDefinition.getReturns().ifPresent(returnType -> {
+            if (!UndertowTypeFunctions.isOptionalBinary(returnType) && !returnType.accept(TypeVisitor.IS_BINARY)) {
+                TypeName typeName = returnTypeMapper.getClassName(returnType).box();
+                TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
+                endpointBuilder.addField(FieldSpec.builder(type,
+                        SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                ctorBuilder.addStatement("this.$1N = $2N.serde().serializer(new $3T() {})", SERIALIZER_VAR_NAME,
+                        RUNTIME_VAR_NAME, ParameterizedTypeName.get(ClassName.get(TypeToken.class), typeName));
+            }
+        });
+
+        endpointBuilder
+                .addMethod(ctorBuilder.build())
+                .addMethod(handleMethodBuilder.build())
                 .addMethod(MethodSpec.methodBuilder("method")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
@@ -237,17 +266,9 @@ final class UndertowServiceHandlerGenerator {
                         .addAnnotation(Override.class)
                         .returns(HttpHandler.class)
                         .addStatement("return this")
-                        .build())
-                .build();
-    }
+                        .build());
 
-    private static FieldSpec createTypeField(TypeMapper typeMapper, ArgumentDefinition argument) {
-        String name = argument.getArgName().get() + "Type";
-        TypeName type = ParameterizedTypeName.get(
-                ClassName.get(TypeToken.class), typeMapper.getClassName(argument.getType()));
-        return FieldSpec.builder(type, name, Modifier.PRIVATE, Modifier.FINAL)
-                .initializer("new $T() {}", type)
-                .build();
+        return endpointBuilder.build();
     }
 
     private static final String PATH_PARAMS_VAR_NAME = "pathParams";
@@ -268,11 +289,10 @@ final class UndertowServiceHandlerGenerator {
                 code.addStatement("$1T $2N = $3N.serde().deserializeInputStream($4N)",
                         InputStream.class, bodyParam.getArgName().get(), RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
             } else {
-                code.addStatement("$1T $2N = $3N.serde().deserialize($4N, $5N)",
+                code.addStatement("$1T $2N = $3N.deserialize($4N)",
                         typeMapper.getClassName(bodyParam.getType()).box(),
                         bodyParam.getArgName().get(),
-                        RUNTIME_VAR_NAME,
-                        bodyParam.getArgName().get() + "Type",
+                        DESERIALIZER_VAR_NAME,
                         EXCHANGE_VAR_NAME);
             }
         });
@@ -310,8 +330,8 @@ final class UndertowServiceHandlerGenerator {
                 CodeBlock serializer = UndertowTypeFunctions.isOptionalBinary(returnType)
                         ? CodeBlock.builder().add("$1N.serde().serialize($2N.get(), $3N)",
                         RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build()
-                        : CodeBlock.builder().add("$1N.serde().serialize($2N, $3N)",
-                                RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build();
+                        : CodeBlock.builder().add("$1N.serialize($2N, $3N)",
+                                SERIALIZER_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build();
                 // For optional<>: set response code to 204/NO_CONTENT if result is absent
                 code.add(
                         CodeBlock.builder()
@@ -323,8 +343,13 @@ final class UndertowServiceHandlerGenerator {
                                 .endControlFlow()
                                 .build());
             } else {
-                code.addStatement("$1N.serde().serialize($2N, $3N)",
-                        RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
+                if (returnType.accept(TypeVisitor.IS_BINARY)) {
+                    code.addStatement("$1N.serde().serialize($2N, $3N)",
+                            RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
+                } else {
+                    code.addStatement("$1N.serialize($2N, $3N)",
+                            SERIALIZER_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
+                }
             }
         } else {
             code.addStatement("$1N.$2L($3L)",
@@ -714,11 +739,8 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private Optional<ArgumentDefinition> getBodyParamTypeArgument(List<ArgumentDefinition> args) {
-        List<ArgumentDefinition> bodyArgs = args.stream().filter(
-                arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY)).collect(Collectors.toList());
-        if (bodyArgs.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(Iterables.getOnlyElement(bodyArgs));
+        return args.stream()
+                .filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY))
+                .collect(MoreCollectors.toOptional());
     }
 }
