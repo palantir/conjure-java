@@ -58,11 +58,6 @@ final class ConjureSerDe implements SerDe {
     }
 
     @Override
-    public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
-        BinarySerializers.serialize(value, exchange);
-    }
-
-    @Override
     public <T> Serializer<T> serializer(TypeToken<T> type) {
         return encodingRegistry.serializer(type);
     }
@@ -70,6 +65,11 @@ final class ConjureSerDe implements SerDe {
     @Override
     public <T> Deserializer<T> deserializer(TypeToken<T> type) {
         return encodingRegistry.deserializer(type);
+    }
+
+    @Override
+    public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
+        BinarySerializers.serialize(value, exchange);
     }
 
     @Override
