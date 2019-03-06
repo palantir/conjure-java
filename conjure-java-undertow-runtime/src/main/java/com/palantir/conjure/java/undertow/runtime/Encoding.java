@@ -21,7 +21,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/** Serializes and deserializes Java objects into the corresponding wire format. */
+/**
+ * An encoding provides support for a <pre>Content-Type</pre> corresponding with the conjure wire format. Encodings
+ * provide a {@link Encoding#getContentType() content type} string as well as factories for typed {@link Serializer}
+ * and {@link Deserializer} objects.
+ */
 public interface Encoding {
 
     /**
