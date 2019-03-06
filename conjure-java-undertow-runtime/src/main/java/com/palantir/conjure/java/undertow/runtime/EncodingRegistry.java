@@ -42,6 +42,7 @@ final class EncodingRegistry {
      * by a given request, or the first serializer if no such serializer can be found.
      */
     EncodingRegistry(List<Encoding> encodings) {
+        // Defensive copy
         this.encodings = ImmutableList.copyOf(encodings);
         Preconditions.checkArgument(encodings.size() > 0, "At least one Encoding is required");
     }
