@@ -33,8 +33,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final AuthorizationExtractor auth;
 
     private ConjureUndertowRuntime(Builder builder) {
-        this.serde = new ConjureSerDe(builder.serializers.isEmpty()
-                ? EncodingRegistry.getDefault() : new EncodingRegistry(builder.serializers));
+        this.serde = new ConjureSerDe(builder.encodings.isEmpty()
+                ? EncodingRegistry.getDefault() : new EncodingRegistry(builder.encodings));
         this.auth = new ConjureAuthorizationExtractor(serde);
     }
 
@@ -54,13 +54,13 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     public static final class Builder {
 
-        private final List<Encoding> serializers = Lists.newArrayList();
+        private final List<Encoding> encodings = Lists.newArrayList();
 
         private Builder() {}
 
         @CanIgnoreReturnValue
-        public Builder serializer(Encoding value) {
-            serializers.add(Preconditions.checkNotNull(value, "Value is required"));
+        public Builder encodings(Encoding value) {
+            encodings.add(Preconditions.checkNotNull(value, "Value is required"));
             return this;
         }
 

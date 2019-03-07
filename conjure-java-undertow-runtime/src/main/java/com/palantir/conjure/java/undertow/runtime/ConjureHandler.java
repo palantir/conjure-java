@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tracing.undertow.TracedOperationHandler;
@@ -96,11 +97,13 @@ public final class ConjureHandler implements HttpHandler {
 
         private Builder() { }
 
+        @CanIgnoreReturnValue
         public Builder endpoints(Endpoint value) {
             endpoints.add(Preconditions.checkNotNull(value, "Value is required"));
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder addAllEndpoints(Iterable<Endpoint> values) {
             Preconditions.checkNotNull(values, "Values is required");
             for (Endpoint endpoint : values) {
@@ -113,6 +116,7 @@ public final class ConjureHandler implements HttpHandler {
          * The fallback {@link HttpHandler handler} is invoked when no {@link Endpoint} matches a request.
          * By default a 404 response status will be served.
          */
+        @CanIgnoreReturnValue
         public Builder fallback(HttpHandler value) {
             fallback = Preconditions.checkNotNull(value, "Value is required");
             return this;
