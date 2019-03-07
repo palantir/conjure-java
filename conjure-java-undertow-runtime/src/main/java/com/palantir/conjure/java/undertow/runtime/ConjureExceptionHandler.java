@@ -31,6 +31,7 @@ import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -39,28 +40,21 @@ import org.xnio.IoUtils;
 
 /**
  * Delegates to the given {@link HttpHandler}, and catches&forwards all {@link Throwable}s. Any exception thrown in
- * the delegate handler is caught and serialized using the configured {@link EncodingRegistry} into a
- * {@link SerializableError}. The result is written it into the exchange's output stream, and an appropriate HTTP
- * status code is set.
+ * the delegate handler is caught and serialized using the Conjure JSON format into a {@link SerializableError}. The
+ * result is written it into the exchange's output stream, and an appropriate HTTP status code is set.
  */
 final class ConjureExceptionHandler implements HttpHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptionHandler.class);
-    private static final TypeToken<SerializableError> SERIALIZABLE_ERROR_TYPE_TOKEN =
-            new TypeToken<SerializableError>() {};
-    // Exceptions should always be serialized using JSON
-    private static final EncodingRegistry DEFAULT_SERIALIZERS = new EncodingRegistry(Encodings.json());
 
-    private final Serializer<SerializableError> serializer;
+    // Exceptions should always be serialized using JSON
+    private final Serializer<SerializableError> serializer =
+            new ConjureBodySerDe(Collections.singletonList(Encodings.json()))
+            .serializer(new TypeToken<SerializableError>() {});
     private final HttpHandler delegate;
 
-    ConjureExceptionHandler(EncodingRegistry encodings, HttpHandler delegate) {
-        this.serializer = encodings.serializer(SERIALIZABLE_ERROR_TYPE_TOKEN);
-        this.delegate = delegate;
-    }
-
     ConjureExceptionHandler(HttpHandler delegate) {
-        this(DEFAULT_SERIALIZERS, delegate);
+        this.delegate = delegate;
     }
 
     @Override

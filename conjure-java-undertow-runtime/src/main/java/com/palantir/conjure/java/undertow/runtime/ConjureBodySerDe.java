@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ObjectArrays;
 import com.google.common.reflect.TypeToken;
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.logsafe.Preconditions;
@@ -28,42 +29,55 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.InputStream;
 import java.util.List;
 
-/** Orchestrates serialization and deserialization of response and request bodies. */
-final class EncodingRegistry {
+/** Package private internal API. */
+final class ConjureBodySerDe implements BodySerDe {
+
+    private static final String BINARY_CONTENT_TYPE = "application/octet-stream";
 
     private final List<Encoding> encodings;
 
     /**
-     * Creates a registry that selects the first (based on input order) of the provided encodings that
+     * Selects the first (based on input order) of the provided encodings that
      * {@link Encoding#supportsContentType supports} the serialization format {@link Headers#ACCEPT accepted}
      * by a given request, or the first serializer if no such serializer can be found.
      */
-    EncodingRegistry(List<Encoding> encodings) {
+    ConjureBodySerDe(List<Encoding> encodings) {
         // Defensive copy
         this.encodings = ImmutableList.copyOf(encodings);
         Preconditions.checkArgument(encodings.size() > 0, "At least one Encoding is required");
     }
 
-    EncodingRegistry(Encoding defaultSerializer, Encoding... encodings) {
-        this(Arrays.asList(ObjectArrays.concat(defaultSerializer, encodings)));
-    }
-
-    /**
-     * Provides a default configuration of the {@link EncodingRegistry}.
-     */
-    static EncodingRegistry getDefault() {
-        return new EncodingRegistry(Encodings.json(), Encodings.cbor());
-    }
-
-    <T> Serializer<T> serializer(TypeToken<T> token) {
+    @Override
+    public <T> Serializer<T> serializer(TypeToken<T> token) {
         return new EncodingSerializerRegistry<>(encodings, token);
     }
 
-    <T> Deserializer<T> deserializer(TypeToken<T> token) {
+    @Override
+    public <T> Deserializer<T> deserializer(TypeToken<T> token) {
         return new EncodingDeserializerRegistry<>(encodings, token);
+    }
+
+    @Override
+    public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
+        Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
+        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
+        value.write(exchange.getOutputStream());
+    }
+
+    @Override
+    public InputStream deserializeInputStream(HttpServerExchange exchange) {
+        String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
+        if (contentType == null) {
+            throw new SafeIllegalArgumentException("Request is missing Content-Type header");
+        }
+        if (!contentType.startsWith(BINARY_CONTENT_TYPE)) {
+            throw new SafeIllegalArgumentException("Unsupported Content-Type",
+                    SafeArg.of("Content-Type", contentType));
+        }
+        return exchange.getInputStream();
     }
 
     private static final class EncodingSerializerRegistry<T> implements Serializer<T> {

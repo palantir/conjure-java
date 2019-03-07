@@ -16,13 +16,9 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
-import io.undertow.server.HttpServerExchange;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -33,22 +29,14 @@ import java.util.UUID;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 
-/** Serialization functionality consumed by generated code. */
-public interface SerDe {
+/**
+ * Provides functionality to parse supported types using the
+ * <a href="https://github.com/palantir/conjure/blob/master/docs/spec/wire.md#6-plain-format">Conjure PLAIN format</a>.
+ *
+ * These utilities are used to parse HTTP path, query, and header parameter values.
+ */
+public interface PlainSerDe {
 
-    /** Create a {@link Serializer} for the requested type. Serializer instances should be reused. */
-    <T> Serializer<T> serializer(TypeToken<T> type);
-
-    /** Create a {@link Deserializer} for the requested type. Deserializer instances should be reused. */
-    <T> Deserializer<T> deserializer(TypeToken<T> type);
-
-    /** Serialize a {@link BinaryResponseBody} to <pre>application/octet-stream</pre>. */
-    void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException;
-
-    /** Reads an {@link InputStream} from the {@link HttpServerExchange} request body. */
-    InputStream deserializeInputStream(HttpServerExchange exchange);
-
-    // query, path, and header parameter deserializers
     // TODO(ckozak): Write javadoc
 
     BearerToken deserializeBearerToken(String in);

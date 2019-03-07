@@ -16,10 +16,12 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
-import com.palantir.conjure.java.undertow.lib.SerDe;
+import com.palantir.conjure.java.undertow.lib.BodySerDe;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
 import java.util.List;
@@ -29,13 +31,13 @@ import java.util.List;
  */
 public final class ConjureUndertowRuntime implements UndertowRuntime {
 
-    private final SerDe serde;
+    private final BodySerDe bodySerDe;
     private final AuthorizationExtractor auth;
 
     private ConjureUndertowRuntime(Builder builder) {
-        this.serde = new ConjureSerDe(builder.encodings.isEmpty()
-                ? EncodingRegistry.getDefault() : new EncodingRegistry(builder.encodings));
-        this.auth = new ConjureAuthorizationExtractor(serde);
+        this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
+                ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
+        this.auth = new ConjureAuthorizationExtractor(plainSerDe());
     }
 
     public static Builder builder() {
@@ -43,8 +45,13 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     }
 
     @Override
-    public SerDe serde() {
-        return serde;
+    public BodySerDe bodySerDe() {
+        return bodySerDe;
+    }
+
+    @Override
+    public PlainSerDe plainSerDe() {
+        return ConjurePlainSerDe.INSTANCE;
     }
 
     @Override

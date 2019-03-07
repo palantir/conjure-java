@@ -32,19 +32,26 @@ import java.io.OutputStream;
 public interface Encoding {
 
     /**
-     * Create a new {@link Serializer} for the requested type. It is recommended to reuse instances over requesting
+     * Creates a new {@link Serializer} for the requested type. It is recommended to reuse instances over requesting
      * new ones for each request.
      */
     <T> Serializer<T> serializer(TypeToken<T> type);
 
     /**
-     * Create a new {@link Deserializer} for the requested type. It is recommended to reuse instances over requesting
+     * Creates a new {@link Deserializer} for the requested type. It is recommended to reuse instances over requesting
      * new ones for each request.
      */
     <T> Deserializer<T> deserializer(TypeToken<T> type);
 
+    /** Returns the value used in response <pre>Content-Type</pre> header. */
     String getContentType();
 
+    /**
+     * Checks if a <pre>Content-Type</pre> or <pre>Accept</pre> value is supported by this encoding. This is not an
+     * exact match on {@link #getContentType()} because values may contain additional metadata, for
+     * example <pre>Content-Type: application/json; charset=utf-8</pre> may be supported by an {@link Encoding}
+     * which returns <pre>application/json</pre> from {@link #getContentType()}.
+     */
     boolean supportsContentType(String contentType);
 
     interface Deserializer<T> {
