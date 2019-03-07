@@ -52,8 +52,7 @@ public final class ConjureExceptionHandlerTest {
     public void before() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new EncodingRegistry(Encodings.json()), exchange -> {
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
                     throw exception;
                 })))
                 .build();
@@ -162,8 +161,7 @@ public final class ConjureExceptionHandlerTest {
         server.stop();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new EncodingRegistry(Encodings.json()), exchange -> {
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
                     throw new Error();
                 })))
                 .build();
