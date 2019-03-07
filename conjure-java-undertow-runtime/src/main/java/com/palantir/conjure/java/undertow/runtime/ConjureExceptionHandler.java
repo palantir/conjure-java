@@ -16,11 +16,13 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpHandler;
@@ -29,6 +31,7 @@ import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -37,26 +40,21 @@ import org.xnio.IoUtils;
 
 /**
  * Delegates to the given {@link HttpHandler}, and catches&forwards all {@link Throwable}s. Any exception thrown in
- * the delegate handler is caught and serialized using the configured {@link SerializerRegistry} into a
- * {@link SerializableError}. The result is written it into the exchange's output stream, and an appropriate HTTP
- * status code is set.
+ * the delegate handler is caught and serialized using the Conjure JSON format into a {@link SerializableError}. The
+ * result is written it into the exchange's output stream, and an appropriate HTTP status code is set.
  */
 final class ConjureExceptionHandler implements HttpHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptionHandler.class);
-    // Exceptions should always be serialized using JSON
-    private static final SerializerRegistry DEFAULT_SERIALIZERS = new SerializerRegistry(Serializers.json());
 
-    private final SerializerRegistry serializers;
+    // Exceptions should always be serialized using JSON
+    private final Serializer<SerializableError> serializer =
+            new ConjureBodySerDe(Collections.singletonList(Encodings.json()))
+            .serializer(new TypeToken<SerializableError>() {});
     private final HttpHandler delegate;
 
-    ConjureExceptionHandler(SerializerRegistry serializers, HttpHandler delegate) {
-        this.serializers = serializers;
-        this.delegate = delegate;
-    }
-
     ConjureExceptionHandler(HttpHandler delegate) {
-        this(DEFAULT_SERIALIZERS, delegate);
+        this.delegate = delegate;
     }
 
     @Override
@@ -150,7 +148,7 @@ final class ConjureExceptionHandler implements HttpHandler {
             exchange.setStatusCode(statusCode);
             try {
                 if (maybeBody.isPresent()) {
-                    serializers.serialize(maybeBody.get(), exchange);
+                    serializer.serialize(maybeBody.get(), exchange);
                 }
             } catch (IOException | RuntimeException e) {
                 log.info("Failed to write error response", e);

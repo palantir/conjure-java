@@ -1,7 +1,6 @@
 package com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -46,8 +45,6 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         private final UndertowEteBinaryService delegate;
 
-        private final TypeToken<InputStream> bodyType = new TypeToken<InputStream>() {};
-
         PostBinaryEndpoint(UndertowRuntime runtime, UndertowEteBinaryService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
@@ -56,9 +53,9 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
-            InputStream body = runtime.serde().deserializeInputStream(exchange);
+            InputStream body = runtime.bodySerDe().deserializeInputStream(exchange);
             BinaryResponseBody result = delegate.postBinary(authHeader, body);
-            runtime.serde().serialize(result, exchange);
+            runtime.bodySerDe().serialize(result, exchange);
         }
 
         @Override
@@ -103,7 +100,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Optional<BinaryResponseBody> result = delegate.getOptionalBinaryPresent(authHeader);
             if (result.isPresent()) {
-                runtime.serde().serialize(result.get(), exchange);
+                runtime.bodySerDe().serialize(result.get(), exchange);
             } else {
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
@@ -150,7 +147,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Optional<BinaryResponseBody> result = delegate.getOptionalBinaryEmpty(authHeader);
             if (result.isPresent()) {
-                runtime.serde().serialize(result.get(), exchange);
+                runtime.bodySerDe().serialize(result.get(), exchange);
             } else {
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
@@ -196,9 +193,9 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            int numBytes = runtime.serde().deserializeInteger(queryParams.get("numBytes"));
+            int numBytes = runtime.plainSerDe().deserializeInteger(queryParams.get("numBytes"));
             BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
-            runtime.serde().serialize(result, exchange);
+            runtime.bodySerDe().serialize(result, exchange);
         }
 
         @Override

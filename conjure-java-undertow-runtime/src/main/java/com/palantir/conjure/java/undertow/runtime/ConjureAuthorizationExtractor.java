@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
-import com.palantir.conjure.java.undertow.lib.SerDe;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -38,10 +38,10 @@ import org.slf4j.MDC;
  */
 final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
 
-    private final SerDe serde;
+    private final PlainSerDe plainSerDe;
 
-    ConjureAuthorizationExtractor(SerDe serde) {
-        this.serde = serde;
+    ConjureAuthorizationExtractor(PlainSerDe plainSerDe) {
+        this.plainSerDe = plainSerDe;
     }
 
     /**
@@ -65,7 +65,7 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
     @Override
     public BearerToken cookie(HttpServerExchange exchange, String cookieName) {
         return setState(exchange,
-                serde.deserializeBearerToken(exchange.getRequestCookies().get(cookieName).getValue()));
+                plainSerDe.deserializeBearerToken(exchange.getRequestCookies().get(cookieName).getValue()));
     }
 
     private static final String USER_ID_KEY = "userId";

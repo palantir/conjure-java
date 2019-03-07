@@ -20,18 +20,13 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
-import com.palantir.conjure.java.undertow.lib.SerDe;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
-import io.undertow.server.HttpServerExchange;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Iterator;
@@ -44,36 +39,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 
-/**
- * Package private internal API.
- */
-final class ConjureSerDe implements SerDe {
-
-    private final SerializerRegistry serializerRegistry;
-
-    ConjureSerDe(SerializerRegistry serializerRegistry) {
-        this.serializerRegistry = serializerRegistry;
-    }
-
-    @Override
-    public void serialize(Object value, HttpServerExchange exchange) throws IOException {
-        serializerRegistry.serialize(value, exchange);
-    }
-
-    @Override
-    public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
-        BinarySerializers.serialize(value, exchange);
-    }
-
-    @Override
-    public <T> T deserialize(TypeToken<T> type, HttpServerExchange exchange) throws IOException {
-        return serializerRegistry.deserialize(type, exchange);
-    }
-
-    @Override
-    public InputStream deserializeInputStream(HttpServerExchange exchange) {
-        return BinarySerializers.deserializeInputStream(exchange);
-    }
+/** Package private internal API. */
+enum ConjurePlainSerDe implements PlainSerDe {
+    INSTANCE;
 
     @Override
     public BearerToken deserializeBearerToken(String in) {

@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.undertow.lib.SerDe;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -37,7 +37,7 @@ import org.junit.Test;
 
 public final class StringDeserializersTest {
 
-    private static final SerDe SERDE = new ConjureSerDe(SerializerRegistry.getDefault());
+    private static final PlainSerDe PLAIN = ConjurePlainSerDe.INSTANCE;
 
     @Test
     public void testDeserializeBearerToken() throws Exception {
@@ -89,7 +89,7 @@ public final class StringDeserializersTest {
     @Test
     public void testBearerTokensNotIncludedInThrowable() {
         assertThatLoggableExceptionThrownBy(() ->
-                SERDE.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
+                PLAIN.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Expected one element")
                 .hasExactlyArgs(SafeArg.of("size", 3));
@@ -98,7 +98,7 @@ public final class StringDeserializersTest {
     @Test
     public void testValuesAreLoggedUnsafe() {
         assertThatLoggableExceptionThrownBy(() ->
-                SERDE.deserializeString(ImmutableList.of("one", "two", "three")))
+                PLAIN.deserializeString(ImmutableList.of("one", "two", "three")))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Expected one element")
                 .hasExactlyArgs(SafeArg.of("size", 3),
@@ -111,17 +111,17 @@ public final class StringDeserializersTest {
 
     private static <T> void runDeserializerTest(String typeName, String plainIn, T want,
             Function<T, Object> createOptional) throws Exception {
-        assertThat(SerDe.class.getMethod("deserialize" + typeName, String.class)
-                .invoke(SERDE, plainIn)).isEqualTo(want);
+        assertThat(PlainSerDe.class.getMethod("deserialize" + typeName, String.class)
+                .invoke(PLAIN, plainIn)).isEqualTo(want);
 
-        assertThat(SerDe.class.getMethod("deserialize" + typeName, Iterable.class)
-                .invoke(SERDE, ImmutableList.of(plainIn))).isEqualTo(want);
+        assertThat(PlainSerDe.class.getMethod("deserialize" + typeName, Iterable.class)
+                .invoke(PLAIN, ImmutableList.of(plainIn))).isEqualTo(want);
 
-        assertThat(SerDe.class.getMethod("deserializeOptional" + typeName, String.class)
-                .invoke(SERDE, plainIn)).isEqualTo(createOptional.apply(want));
+        assertThat(PlainSerDe.class.getMethod("deserializeOptional" + typeName, String.class)
+                .invoke(PLAIN, plainIn)).isEqualTo(createOptional.apply(want));
 
-        assertThat(SerDe.class.getMethod("deserializeOptional" + typeName, Iterable.class)
-                .invoke(SERDE, ImmutableList.of(plainIn))).isEqualTo(createOptional.apply(want));
+        assertThat(PlainSerDe.class.getMethod("deserializeOptional" + typeName, Iterable.class)
+                .invoke(PLAIN, ImmutableList.of(plainIn))).isEqualTo(createOptional.apply(want));
     }
 
 }
