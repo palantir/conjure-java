@@ -43,7 +43,7 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             BinaryResponseBody result = delegate.getBinary();
-            runtime.serde().serialize(result, exchange);
+            runtime.body().serialize(result, exchange);
         }
 
         @Override

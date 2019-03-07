@@ -22,17 +22,22 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /** Request and response Deserialization and Serialization functionality used by generated code. */
-public interface SerDe {
+public interface BodySerDe {
 
-    /** Create a {@link Serializer} for the requested type. Serializer instances should be reused. */
+    /** Creates a {@link Serializer} for the requested type. Serializer instances should be reused. */
     <T> Serializer<T> serializer(TypeToken<T> type);
 
-    /** Create a {@link Deserializer} for the requested type. Deserializer instances should be reused. */
+    /** Creates a {@link Deserializer} for the requested type. Deserializer instances should be reused. */
     <T> Deserializer<T> deserializer(TypeToken<T> type);
 
-    /** Serialize a {@link BinaryResponseBody} to <pre>application/octet-stream</pre>. */
+    /** Serializes a {@link BinaryResponseBody} to <pre>application/octet-stream</pre>. */
     void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException;
 
-    /** Reads an {@link InputStream} from the {@link HttpServerExchange} request body. */
+    /**
+     * Reads an {@link InputStream} from the {@link HttpServerExchange} request body.
+     *
+     * This method is named <pre>deserializeInputStream</pre> not <pre>deserializeBinary</pre>
+     * to support future streaming binary bindings without conflicting method signatures.
+     */
     InputStream deserializeInputStream(HttpServerExchange exchange);
 }

@@ -217,7 +217,7 @@ final class UndertowServiceHandlerGenerator {
                     TypeName type = ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
                     endpointBuilder.addField(FieldSpec.builder(
                             type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
-                    ctorBuilder.addStatement("this.$1N = $2N.serde().deserializer(new $3T() {})",
+                    ctorBuilder.addStatement("this.$1N = $2N.body().deserializer(new $3T() {})",
                             DESERIALIZER_VAR_NAME, RUNTIME_VAR_NAME,
                             ParameterizedTypeName.get(ClassName.get(TypeToken.class), typeName));
                 });
@@ -228,7 +228,7 @@ final class UndertowServiceHandlerGenerator {
                 TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
                 endpointBuilder.addField(FieldSpec.builder(type,
                         SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
-                ctorBuilder.addStatement("this.$1N = $2N.serde().serializer(new $3T() {})", SERIALIZER_VAR_NAME,
+                ctorBuilder.addStatement("this.$1N = $2N.body().serializer(new $3T() {})", SERIALIZER_VAR_NAME,
                         RUNTIME_VAR_NAME, ParameterizedTypeName.get(ClassName.get(TypeToken.class), typeName));
             }
         });
@@ -288,7 +288,7 @@ final class UndertowServiceHandlerGenerator {
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
             if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
                 // TODO(ckozak): Support aliased and optional binary types
-                code.addStatement("$1T $2N = $3N.serde().deserializeInputStream($4N)",
+                code.addStatement("$1T $2N = $3N.body().deserializeInputStream($4N)",
                         InputStream.class, bodyParam.getArgName().get(), RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
             } else {
                 code.addStatement("$1T $2N = $3N.deserialize($4N)",
@@ -330,7 +330,7 @@ final class UndertowServiceHandlerGenerator {
             if (UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions)
                     .accept(TypeVisitor.IS_OPTIONAL)) {
                 CodeBlock serializer = UndertowTypeFunctions.isOptionalBinary(returnType)
-                        ? CodeBlock.builder().add("$1N.serde().serialize($2N.get(), $3N)",
+                        ? CodeBlock.builder().add("$1N.body().serialize($2N.get(), $3N)",
                         RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build()
                         : CodeBlock.builder().add("$1N.serialize($2N, $3N)",
                                 SERIALIZER_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME).build();
@@ -346,7 +346,7 @@ final class UndertowServiceHandlerGenerator {
                                 .build());
             } else {
                 if (returnType.accept(TypeVisitor.IS_BINARY)) {
-                    code.addStatement("$1N.serde().serialize($2N, $3N)",
+                    code.addStatement("$1N.body().serialize($2N, $3N)",
                             RUNTIME_VAR_NAME, resultVarName, EXCHANGE_VAR_NAME);
                 } else {
                     code.addStatement("$1N.serialize($2N, $3N)",

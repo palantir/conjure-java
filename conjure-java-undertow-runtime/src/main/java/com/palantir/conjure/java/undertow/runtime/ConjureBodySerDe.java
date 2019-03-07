@@ -18,19 +18,19 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
-import com.palantir.conjure.java.undertow.lib.SerDe;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 import java.io.InputStream;
 
 /** Package private internal API. */
-final class ConjureSerDe implements SerDe {
+final class ConjureBodySerDe implements BodySerDe {
 
     private final EncodingRegistry encodingRegistry;
 
-    ConjureSerDe(EncodingRegistry encodingRegistry) {
+    ConjureBodySerDe(EncodingRegistry encodingRegistry) {
         this.encodingRegistry = encodingRegistry;
     }
 

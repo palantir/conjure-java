@@ -53,9 +53,9 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
-            InputStream body = runtime.serde().deserializeInputStream(exchange);
+            InputStream body = runtime.body().deserializeInputStream(exchange);
             BinaryResponseBody result = delegate.postBinary(authHeader, body);
-            runtime.serde().serialize(result, exchange);
+            runtime.body().serialize(result, exchange);
         }
 
         @Override
@@ -100,7 +100,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Optional<BinaryResponseBody> result = delegate.getOptionalBinaryPresent(authHeader);
             if (result.isPresent()) {
-                runtime.serde().serialize(result.get(), exchange);
+                runtime.body().serialize(result.get(), exchange);
             } else {
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
@@ -147,7 +147,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Optional<BinaryResponseBody> result = delegate.getOptionalBinaryEmpty(authHeader);
             if (result.isPresent()) {
-                runtime.serde().serialize(result.get(), exchange);
+                runtime.body().serialize(result.get(), exchange);
             } else {
                 exchange.setStatusCode(StatusCodes.NO_CONTENT);
             }
@@ -195,7 +195,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             int numBytes = runtime.plain().deserializeInteger(queryParams.get("numBytes"));
             BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
-            runtime.serde().serialize(result, exchange);
+            runtime.body().serialize(result, exchange);
         }
 
         @Override
