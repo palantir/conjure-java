@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ObjectArrays;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
@@ -31,7 +30,6 @@ import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 /** Package private internal API. */
@@ -50,10 +48,6 @@ final class ConjureBodySerDe implements BodySerDe {
         // Defensive copy
         this.encodings = ImmutableList.copyOf(encodings);
         Preconditions.checkArgument(encodings.size() > 0, "At least one Encoding is required");
-    }
-
-    ConjureBodySerDe(Encoding defaultSerializer, Encoding... encodings) {
-        this(Arrays.asList(ObjectArrays.concat(defaultSerializer, encodings)));
     }
 
     @Override

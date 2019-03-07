@@ -31,6 +31,7 @@ import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -47,7 +48,8 @@ final class ConjureExceptionHandler implements HttpHandler {
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptionHandler.class);
 
     // Exceptions should always be serialized using JSON
-    private final Serializer<SerializableError> serializer = new ConjureBodySerDe(Encodings.json())
+    private final Serializer<SerializableError> serializer =
+            new ConjureBodySerDe(Collections.singletonList(Encodings.json()))
             .serializer(new TypeToken<SerializableError>() {});
     private final HttpHandler delegate;
 

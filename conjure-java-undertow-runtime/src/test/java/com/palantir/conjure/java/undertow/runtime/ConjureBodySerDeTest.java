@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
@@ -40,7 +41,7 @@ public class ConjureBodySerDeTest {
 
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-        BodySerDe serializers = new ConjureBodySerDe(json, plain);
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(json, plain));
         String value = serializers.deserializer(TYPE).deserialize(exchange);
         assertThat(value).isEqualTo(plain.getContentType());
     }
@@ -48,7 +49,7 @@ public class ConjureBodySerDeTest {
     @Test
     public void testRequestNoContentType() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        BodySerDe serializers = new ConjureBodySerDe(new StubEncoding("application/json"));
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(new StubEncoding("application/json")));
         assertThatThrownBy(() -> serializers.deserializer(TYPE).deserialize(exchange))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Request is missing Content-Type header");
@@ -58,7 +59,7 @@ public class ConjureBodySerDeTest {
     public void testUnsupportedRequestContentType() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/unknown");
-        BodySerDe serializers = new ConjureBodySerDe(new StubEncoding("application/json"));
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(new StubEncoding("application/json")));
         assertThatThrownBy(() -> serializers.deserializer(TYPE).deserialize(exchange))
                 .isInstanceOf(FrameworkException.class)
                 .hasMessageContaining("Unsupported Content-Type");
@@ -71,7 +72,7 @@ public class ConjureBodySerDeTest {
 
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().put(Headers.ACCEPT, "text/plain");
-        BodySerDe serializers = new ConjureBodySerDe(json, plain);
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(json, plain));
         serializers.serializer(TYPE).serialize("test", exchange);
         assertThat(exchange.getResponseHeaders().getFirst(Headers.CONTENT_TYPE)).isSameAs(plain.getContentType());
     }
@@ -82,7 +83,7 @@ public class ConjureBodySerDeTest {
         Encoding plain = new StubEncoding("text/plain");
 
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        BodySerDe serializers = new ConjureBodySerDe(json, plain);
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(json, plain));
         serializers.serializer(TYPE).serialize("test", exchange);
         assertThat(exchange.getResponseHeaders().getFirst(Headers.CONTENT_TYPE)).isEqualTo(json.getContentType());
     }
@@ -94,7 +95,7 @@ public class ConjureBodySerDeTest {
 
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().put(Headers.ACCEPT, "application/unknown");
-        BodySerDe serializers = new ConjureBodySerDe(json, plain);
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(json, plain));
         serializers.serializer(TYPE).serialize("test", exchange);
         assertThat(exchange.getResponseHeaders().getFirst(Headers.CONTENT_TYPE)).isEqualTo(json.getContentType());
     }
