@@ -82,8 +82,8 @@ final class EncodingRegistry {
         public void serialize(T value, HttpServerExchange exchange) throws IOException {
             Preconditions.checkNotNull(value, "cannot serialize null value");
             EncodingSerializerContainer<T> container = getResponseSerializer(exchange);
-            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, container.getContentType());
-            container.getSerializer().serialize(value, exchange.getOutputStream());
+            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, container.encoding.getContentType());
+            container.serializer.serialize(value, exchange.getOutputStream());
         }
 
         /** Returns the {@link EncodingSerializerContainer} to use for the exchange response. */
@@ -95,9 +95,9 @@ final class EncodingRegistry {
                 for (int i = 0; i < acceptValues.size(); i++) {
                     String acceptValue = acceptValues.get(i);
                     for (int j = 0; j < encodings.size(); j++) {
-                        EncodingSerializerContainer<T> encoding = encodings.get(j);
-                        if (encoding.supportsContentType(acceptValue)) {
-                            return encoding;
+                        EncodingSerializerContainer<T> container = encodings.get(j);
+                        if (container.encoding.supportsContentType(acceptValue)) {
+                            return container;
                         }
                     }
                 }
@@ -116,18 +116,6 @@ final class EncodingRegistry {
             this.encoding = encoding;
             this.serializer = encoding.serializer(token);
         }
-
-        Encoding.Serializer<T> getSerializer() {
-            return serializer;
-        }
-
-        String getContentType() {
-            return encoding.getContentType();
-        }
-
-        boolean supportsContentType(String contentType) {
-            return encoding.supportsContentType(contentType);
-        }
     }
 
     private static final class EncodingDeserializerRegistry<T> implements Deserializer<T> {
@@ -143,7 +131,7 @@ final class EncodingRegistry {
         @Override
         public T deserialize(HttpServerExchange exchange) throws IOException {
             EncodingDeserializerContainer<T> container = getRequestDeserializer(exchange);
-            return container.getDeserializer().deserialize(exchange.getInputStream());
+            return container.deserializer.deserialize(exchange.getInputStream());
         }
 
         /** Returns the {@link EncodingDeserializerContainer} to use to deserialize the request body. */
@@ -155,7 +143,7 @@ final class EncodingRegistry {
             }
             for (int i = 0; i < encodings.size(); i++) {
                 EncodingDeserializerContainer<T> container = encodings.get(i);
-                if (container.supportsContentType(contentType)) {
+                if (container.encoding.supportsContentType(contentType)) {
                     return container;
                 }
             }
@@ -172,14 +160,6 @@ final class EncodingRegistry {
         EncodingDeserializerContainer(Encoding encoding, TypeToken<T> token) {
             this.encoding = encoding;
             this.deserializer = encoding.deserializer(token);
-        }
-
-        Encoding.Deserializer<T> getDeserializer() {
-            return deserializer;
-        }
-
-        boolean supportsContentType(String contentType) {
-            return encoding.supportsContentType(contentType);
         }
     }
 }
