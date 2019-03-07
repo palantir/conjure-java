@@ -37,6 +37,8 @@ import java.util.List;
 /** Package private internal API. */
 final class ConjureBodySerDe implements BodySerDe {
 
+    private static final String BINARY_CONTENT_TYPE = "application/octet-stream";
+
     private final List<Encoding> encodings;
 
     /**
@@ -66,12 +68,22 @@ final class ConjureBodySerDe implements BodySerDe {
 
     @Override
     public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
-        BinarySerializers.serialize(value, exchange);
+        Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
+        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
+        value.write(exchange.getOutputStream());
     }
 
     @Override
     public InputStream deserializeInputStream(HttpServerExchange exchange) {
-        return BinarySerializers.deserializeInputStream(exchange);
+        String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
+        if (contentType == null) {
+            throw new SafeIllegalArgumentException("Request is missing Content-Type header");
+        }
+        if (!contentType.startsWith(BINARY_CONTENT_TYPE)) {
+            throw new SafeIllegalArgumentException("Unsupported Content-Type",
+                    SafeArg.of("Content-Type", contentType));
+        }
+        return exchange.getInputStream();
     }
 
     private static final class EncodingSerializerRegistry<T> implements Serializer<T> {
