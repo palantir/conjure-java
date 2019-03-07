@@ -597,7 +597,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            String param = runtime.serde().plain().deserializeString(pathParams.get("param"));
+            String param = runtime.plain().deserializeString(pathParams.get("param"));
             String result = delegate.path(authHeader, param);
             serializer.serialize(result, exchange);
         }
@@ -697,7 +697,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             String queryParamNameRaw =
-                    runtime.serde().plain().deserializeString(queryParams.get("queryParamName"));
+                    runtime.plain().deserializeString(queryParams.get("queryParamName"));
             StringAliasExample queryParamName = StringAliasExample.of(queryParamNameRaw);
             StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
             serializer.serialize(result, exchange);
@@ -747,9 +747,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             Optional<String> queryParamNameRaw =
-                    runtime.serde()
-                            .plain()
-                            .deserializeOptionalString(queryParams.get("queryParamName"));
+                    runtime.plain().deserializeOptionalString(queryParams.get("queryParamName"));
             Optional<StringAliasExample> queryParamName =
                     Optional.ofNullable(
                             queryParamNameRaw.isPresent()
@@ -804,7 +802,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             String queryParamNameRaw =
-                    runtime.serde().plain().deserializeString(queryParams.get("queryParamName"));
+                    runtime.plain().deserializeString(queryParams.get("queryParamName"));
             NestedStringAliasExample queryParamName =
                     NestedStringAliasExample.of(StringAliasExample.of(queryParamNameRaw));
             NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
@@ -965,8 +963,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             Optional<StringAliasExample> query =
-                    runtime.serde()
-                            .plain()
+                    runtime.plain()
                             .deserializeOptionalComplex(
                                     queryParams.get("query"), StringAliasExample::valueOf);
             Optional<StringAliasExample> result =
@@ -1065,8 +1062,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             SimpleEnum queryParamName =
-                    runtime.serde()
-                            .plain()
+                    runtime.plain()
                             .deserializeComplex(
                                     queryParams.get("queryParamName"), SimpleEnum::valueOf);
             SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
@@ -1117,8 +1113,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             List<SimpleEnum> queryParamName =
-                    runtime.serde()
-                            .plain()
+                    runtime.plain()
                             .deserializeComplexList(
                                     queryParams.get("queryParamName"), SimpleEnum::valueOf);
             List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
@@ -1169,8 +1164,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             Optional<SimpleEnum> queryParamName =
-                    runtime.serde()
-                            .plain()
+                    runtime.plain()
                             .deserializeOptionalComplex(
                                     queryParams.get("queryParamName"), SimpleEnum::valueOf);
             Optional<SimpleEnum> result = delegate.optionalEnumQuery(authHeader, queryParamName);
@@ -1225,8 +1219,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             HeaderMap headerParams = exchange.getRequestHeaders();
             SimpleEnum headerParameter =
-                    runtime.serde()
-                            .plain()
+                    runtime.plain()
                             .deserializeComplex(
                                     headerParams.get("Custom-Header"), SimpleEnum::valueOf);
             SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);

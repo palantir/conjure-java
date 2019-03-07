@@ -19,7 +19,6 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
-import com.palantir.conjure.java.undertow.lib.Plain;
 import com.palantir.conjure.java.undertow.lib.SerDe;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import io.undertow.server.HttpServerExchange;
@@ -53,10 +52,5 @@ final class ConjureSerDe implements SerDe {
     @Override
     public InputStream deserializeInputStream(HttpServerExchange exchange) {
         return BinarySerializers.deserializeInputStream(exchange);
-    }
-
-    @Override
-    public Plain plain() {
-        return ConjurePlain.INSTANCE;
     }
 }

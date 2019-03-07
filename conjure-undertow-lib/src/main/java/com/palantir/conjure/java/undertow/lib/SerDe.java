@@ -35,7 +35,4 @@ public interface SerDe {
 
     /** Reads an {@link InputStream} from the {@link HttpServerExchange} request body. */
     InputStream deserializeInputStream(HttpServerExchange exchange);
-
-    /** Provides the {@link Plain} used to parse request path, query, and header parameters. */
-    Plain plain();
 }
