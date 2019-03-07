@@ -25,6 +25,9 @@ import java.io.OutputStream;
  * An encoding provides support for a <pre>Content-Type</pre> corresponding with the conjure wire format. Encodings
  * provide a {@link Encoding#getContentType() content type} string as well as factories for typed {@link Serializer}
  * and {@link Deserializer} objects.
+ *
+ * This interface is considered internal API and may change without a major version rev. Custom implementations
+ * are not recommended, but may be implemented to test custom encodings without a fork of the runtime.
  */
 public interface Encoding {
 
