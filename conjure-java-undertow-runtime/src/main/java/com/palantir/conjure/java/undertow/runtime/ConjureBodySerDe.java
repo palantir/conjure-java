@@ -42,7 +42,7 @@ final class ConjureBodySerDe implements BodySerDe {
     private final List<Encoding> encodings;
 
     /**
-     * Creates a registry that selects the first (based on input order) of the provided encodings that
+     * Selects the first (based on input order) of the provided encodings that
      * {@link Encoding#supportsContentType supports} the serialization format {@link Headers#ACCEPT accepted}
      * by a given request, or the first serializer if no such serializer can be found.
      */
