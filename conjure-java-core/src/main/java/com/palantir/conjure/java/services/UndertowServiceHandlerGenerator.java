@@ -209,6 +209,8 @@ final class UndertowServiceHandlerGenerator {
 
         getBodyParamTypeArgument(endpointDefinition.getArgs())
                 .map(ArgumentDefinition::getType)
+                // Filter out binary data
+                .flatMap(type -> type.accept(TypeVisitor.IS_BINARY) ? Optional.empty() : Optional.of(type))
                 .map(typeMapper::getClassName)
                 .map(TypeName::box)
                 .ifPresent(typeName -> {

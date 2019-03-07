@@ -428,12 +428,9 @@ public final class TestServiceEndpoints implements UndertowService {
 
         private final TestService delegate;
 
-        private final Deserializer<InputStream> deserializer;
-
         UploadRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.serde().deserializer(new TypeToken<InputStream>() {});
         }
 
         @Override
