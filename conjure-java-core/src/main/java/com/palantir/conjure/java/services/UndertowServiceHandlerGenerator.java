@@ -529,7 +529,7 @@ final class UndertowServiceHandlerGenerator {
             String paramsVarName, String paramId) {
         if (type.accept(MoreVisitors.IS_EXTERNAL)) {
             return CodeBlocks.statement(
-                    "$1T $2N = $3T.valueOf($4N.serde().deserializeString($5N.get($6S)))",
+                    "$1T $2N = $3T.valueOf($4N.serde().plain().deserializeString($5N.get($6S)))",
                     typeMapper.getClassName(type),
                     resultVarName,
                     typeMapper.getClassName(type),
@@ -544,7 +544,7 @@ final class UndertowServiceHandlerGenerator {
             return complexDeserializer.get();
         }
         return CodeBlocks.statement(
-                "$1T $2N = $3N.serde().$4L($5N.get($6S))",
+                "$1T $2N = $3N.serde().plain().$4L($5N.get($6S))",
                 typeMapper.getClassName(type),
                 resultVarName,
                 RUNTIME_VAR_NAME,
@@ -599,7 +599,7 @@ final class UndertowServiceHandlerGenerator {
                 return Optional.empty();
             }
         }).map(functionName -> CodeBlocks.statement(
-                "$1T $2N = $3N.serde().$4L($5N.get($6S), $7T::valueOf)",
+                "$1T $2N = $3N.serde().plain().$4L($5N.get($6S), $7T::valueOf)",
                 typeMapper.getClassName(type),
                 resultVarName,
                 RUNTIME_VAR_NAME,

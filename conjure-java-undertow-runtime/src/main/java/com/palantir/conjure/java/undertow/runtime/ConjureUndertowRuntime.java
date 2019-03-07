@@ -35,7 +35,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private ConjureUndertowRuntime(Builder builder) {
         this.serde = new ConjureSerDe(builder.encodings.isEmpty()
                 ? EncodingRegistry.getDefault() : new EncodingRegistry(builder.encodings));
-        this.auth = new ConjureAuthorizationExtractor(serde);
+        this.auth = new ConjureAuthorizationExtractor(serde().plain());
     }
 
     public static Builder builder() {
