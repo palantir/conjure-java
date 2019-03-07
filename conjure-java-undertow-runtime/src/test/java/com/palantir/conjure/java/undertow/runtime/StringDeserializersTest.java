@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.undertow.lib.Plain;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -37,7 +37,7 @@ import org.junit.Test;
 
 public final class StringDeserializersTest {
 
-    private static final Plain PLAIN = ConjurePlain.INSTANCE;
+    private static final PlainSerDe PLAIN = ConjurePlainSerDe.INSTANCE;
 
     @Test
     public void testDeserializeBearerToken() throws Exception {
@@ -111,16 +111,16 @@ public final class StringDeserializersTest {
 
     private static <T> void runDeserializerTest(String typeName, String plainIn, T want,
             Function<T, Object> createOptional) throws Exception {
-        assertThat(Plain.class.getMethod("deserialize" + typeName, String.class)
+        assertThat(PlainSerDe.class.getMethod("deserialize" + typeName, String.class)
                 .invoke(PLAIN, plainIn)).isEqualTo(want);
 
-        assertThat(Plain.class.getMethod("deserialize" + typeName, Iterable.class)
+        assertThat(PlainSerDe.class.getMethod("deserialize" + typeName, Iterable.class)
                 .invoke(PLAIN, ImmutableList.of(plainIn))).isEqualTo(want);
 
-        assertThat(Plain.class.getMethod("deserializeOptional" + typeName, String.class)
+        assertThat(PlainSerDe.class.getMethod("deserializeOptional" + typeName, String.class)
                 .invoke(PLAIN, plainIn)).isEqualTo(createOptional.apply(want));
 
-        assertThat(Plain.class.getMethod("deserializeOptional" + typeName, Iterable.class)
+        assertThat(PlainSerDe.class.getMethod("deserializeOptional" + typeName, Iterable.class)
                 .invoke(PLAIN, ImmutableList.of(plainIn))).isEqualTo(createOptional.apply(want));
     }
 

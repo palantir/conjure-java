@@ -20,7 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
-import com.palantir.conjure.java.undertow.lib.Plain;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
 import java.util.List;
@@ -30,13 +30,13 @@ import java.util.List;
  */
 public final class ConjureUndertowRuntime implements UndertowRuntime {
 
-    private final BodySerDe body;
+    private final BodySerDe bodySerDe;
     private final AuthorizationExtractor auth;
 
     private ConjureUndertowRuntime(Builder builder) {
-        this.body = new ConjureBodySerDe(builder.encodings.isEmpty()
+        this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
                 ? EncodingRegistry.getDefault() : new EncodingRegistry(builder.encodings));
-        this.auth = new ConjureAuthorizationExtractor(plain());
+        this.auth = new ConjureAuthorizationExtractor(plainSerDe());
     }
 
     public static Builder builder() {
@@ -44,13 +44,13 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     }
 
     @Override
-    public BodySerDe body() {
-        return body;
+    public BodySerDe bodySerDe() {
+        return bodySerDe;
     }
 
     @Override
-    public Plain plain() {
-        return ConjurePlain.INSTANCE;
+    public PlainSerDe plainSerDe() {
+        return ConjurePlainSerDe.INSTANCE;
     }
 
     @Override

@@ -19,16 +19,16 @@ package com.palantir.conjure.java.undertow.lib;
 /**
  * {@link UndertowRuntime} is the anchor for all non-generated logic used by generated handlers.
  *
- * The {@link UndertowRuntime} and provided interfaces {@link BodySerDe}, {@link Plain}, and
+ * The {@link UndertowRuntime} and provided interfaces {@link BodySerDe}, {@link PlainSerDe}, and
  * {@link AuthorizationExtractor} are internal API, no guarantees are made for custom implementations.
  */
 public interface UndertowRuntime {
 
     /** Provides the {@link BodySerDe} used to deserialize and serialize request and response bodies respectively. */
-    BodySerDe body();
+    BodySerDe bodySerDe();
 
-    /** Provides the {@link Plain} used to parse request path, query, and header parameters. */
-    Plain plain();
+    /** Provides the {@link PlainSerDe} used to parse request path, query, and header parameters. */
+    PlainSerDe plainSerDe();
 
     /** Provides the {@link AuthorizationExtractor} used to read auth tokens from request headers. */
     AuthorizationExtractor auth();

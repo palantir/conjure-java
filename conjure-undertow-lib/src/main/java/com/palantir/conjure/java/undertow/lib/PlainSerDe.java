@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  *
  * These utilities are used to parse HTTP path, query, and header parameter values.
  */
-public interface Plain {
+public interface PlainSerDe {
 
     // TODO(ckozak): Write javadoc
 

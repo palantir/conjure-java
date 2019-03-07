@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.undertow.lib.Plain;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -40,7 +40,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 /** Package private internal API. */
-enum ConjurePlain implements Plain {
+enum ConjurePlainSerDe implements PlainSerDe {
     INSTANCE;
 
     @Override
