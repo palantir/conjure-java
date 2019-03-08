@@ -16,10 +16,10 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.logsafe.SafeArg;
@@ -44,7 +44,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     INSTANCE;
 
     @Override
-    public BearerToken deserializeBearerToken(String in) {
+    public BearerToken deserializeBearerToken(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return BearerToken.valueOf(in);
         } catch (RuntimeException ex) {
@@ -53,14 +54,14 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public BearerToken deserializeBearerToken(Iterable<String> in) {
+    public BearerToken deserializeBearerToken(@Nullable Iterable<String> in) {
         // BearerToken values should never be logged
         return deserializeBearerToken(getOnlyElementDoNotLogValues(in));
     }
 
     @Override
     public Optional<BearerToken> deserializeOptionalBearerToken(@Nullable String in) {
-        if (Strings.isNullOrEmpty(in)) {
+        if (in == null) {
             return Optional.empty();
         }
         return Optional.of(deserializeBearerToken(in));
@@ -100,7 +101,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public boolean deserializeBoolean(String in) {
+    public boolean deserializeBoolean(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return Boolean.parseBoolean(in);
         } catch (RuntimeException ex) {
@@ -114,7 +116,10 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public Optional<Boolean> deserializeOptionalBoolean(String in) {
+    public Optional<Boolean> deserializeOptionalBoolean(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeBoolean(in));
     }
 
@@ -151,7 +156,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public OffsetDateTime deserializeDateTime(String in) {
+    public OffsetDateTime deserializeDateTime(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return OffsetDateTime.parse(in);
         } catch (RuntimeException ex) {
@@ -165,7 +171,10 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public Optional<OffsetDateTime> deserializeOptionalDateTime(String in) {
+    public Optional<OffsetDateTime> deserializeOptionalDateTime(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeDateTime(in));
     }
 
@@ -202,7 +211,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public double deserializeDouble(String in) {
+    public double deserializeDouble(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return Double.parseDouble(in);
         } catch (RuntimeException ex) {
@@ -216,7 +226,10 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public OptionalDouble deserializeOptionalDouble(String in) {
+    public OptionalDouble deserializeOptionalDouble(@Nullable String in) {
+        if (in == null) {
+            return OptionalDouble.empty();
+        }
         return OptionalDouble.of(deserializeDouble(in));
     }
 
@@ -253,7 +266,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public int deserializeInteger(String in) {
+    public int deserializeInteger(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return Integer.parseInt(in);
         } catch (RuntimeException ex) {
@@ -267,7 +281,10 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public OptionalInt deserializeOptionalInteger(String in) {
+    public OptionalInt deserializeOptionalInteger(@Nullable String in) {
+        if (in == null) {
+            return OptionalInt.empty();
+        }
         return OptionalInt.of(deserializeInteger(in));
     }
 
@@ -304,7 +321,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public ResourceIdentifier deserializeRid(String in) {
+    public ResourceIdentifier deserializeRid(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return ResourceIdentifier.valueOf(in);
         } catch (RuntimeException ex) {
@@ -318,7 +336,10 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public Optional<ResourceIdentifier> deserializeOptionalRid(String in) {
+    public Optional<ResourceIdentifier> deserializeOptionalRid(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeRid(in));
     }
 
@@ -355,7 +376,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public SafeLong deserializeSafeLong(String in) {
+    public SafeLong deserializeSafeLong(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return SafeLong.valueOf(in);
         } catch (RuntimeException ex) {
@@ -369,7 +391,10 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public Optional<SafeLong> deserializeOptionalSafeLong(String in) {
+    public Optional<SafeLong> deserializeOptionalSafeLong(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeSafeLong(in));
     }
 
@@ -406,8 +431,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public String deserializeString(String in) {
-        return in;
+    public String deserializeString(@Nullable String in) {
+        return checkArgumentNotNull(in);
     }
 
     @Override
@@ -416,7 +441,10 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public Optional<String> deserializeOptionalString(String in) {
+    public Optional<String> deserializeOptionalString(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeString(in));
     }
 
@@ -439,7 +467,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public UUID deserializeUuid(String in) {
+    public UUID deserializeUuid(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return UUID.fromString(in);
         } catch (RuntimeException ex) {
@@ -453,7 +482,10 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public Optional<UUID> deserializeOptionalUuid(String in) {
+    public Optional<UUID> deserializeOptionalUuid(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeUuid(in));
     }
 
@@ -490,8 +522,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public <T> T deserializeComplex(String in, Function<String, T> factory) {
-        return factory.apply(deserializeString(in));
+    public <T> T deserializeComplex(@Nullable String in, Function<String, T> factory) {
+        return factory.apply(deserializeString(checkArgumentNotNull(in)));
     }
 
     @Override
@@ -556,5 +588,14 @@ enum ConjurePlainSerDe implements PlainSerDe {
         } else {
             throw new SafeIllegalArgumentException("Expected one element", SafeArg.of("size", size));
         }
+    }
+
+    /** Throws a SafeIllegalArgumentException rather than NPE in order to cause a 400 response. */
+    @CanIgnoreReturnValue
+    private static <T> T checkArgumentNotNull(@Nullable T input) {
+        if (input == null) {
+            throw new SafeIllegalArgumentException("Value is required");
+        }
+        return input;
     }
 }

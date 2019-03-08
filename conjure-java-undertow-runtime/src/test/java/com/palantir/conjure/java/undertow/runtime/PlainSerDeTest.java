@@ -27,6 +27,8 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -35,7 +37,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import org.junit.Test;
 
-public final class StringDeserializersTest {
+public final class PlainSerDeTest {
 
     private static final PlainSerDe PLAIN = ConjurePlainSerDe.INSTANCE;
 
@@ -114,14 +116,33 @@ public final class StringDeserializersTest {
         assertThat(PlainSerDe.class.getMethod("deserialize" + typeName, String.class)
                 .invoke(PLAIN, plainIn)).isEqualTo(want);
 
+        assertThatLoggableExceptionThrownBy(() -> {
+            try {
+                PlainSerDe.class.getMethod("deserialize" + typeName, String.class)
+                        .invoke(PLAIN, new Object[] {null});
+            } catch (InvocationTargetException ite) {
+                throw ite.getCause();
+            }
+        })
+                .describedAs("invoking a string deserializer with null should result in an IAE")
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasLogMessage("Value is required");
+
         assertThat(PlainSerDe.class.getMethod("deserialize" + typeName, Iterable.class)
                 .invoke(PLAIN, ImmutableList.of(plainIn))).isEqualTo(want);
 
-        assertThat(PlainSerDe.class.getMethod("deserializeOptional" + typeName, String.class)
-                .invoke(PLAIN, plainIn)).isEqualTo(createOptional.apply(want));
+        Method optionalStringDeserializer = PlainSerDe.class.getMethod("deserializeOptional" + typeName, String.class);
+        assertThat(optionalStringDeserializer.invoke(PLAIN, plainIn)).isEqualTo(createOptional.apply(want));
+
+        assertThat(optionalStringDeserializer.invoke(PLAIN, new Object[] { null }))
+                .isEqualTo(createEmptyOptional(optionalStringDeserializer));
 
         assertThat(PlainSerDe.class.getMethod("deserializeOptional" + typeName, Iterable.class)
                 .invoke(PLAIN, ImmutableList.of(plainIn))).isEqualTo(createOptional.apply(want));
+    }
+
+    private static Object createEmptyOptional(Method deserializerMethod) throws ReflectiveOperationException {
+        return deserializerMethod.getReturnType().getDeclaredMethod("empty").invoke(null);
     }
 
 }

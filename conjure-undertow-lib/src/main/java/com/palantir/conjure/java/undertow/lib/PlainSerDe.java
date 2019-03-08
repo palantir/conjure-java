@@ -39,9 +39,9 @@ public interface PlainSerDe {
 
     // TODO(ckozak): Write javadoc
 
-    BearerToken deserializeBearerToken(String in);
+    BearerToken deserializeBearerToken(@Nullable String in);
 
-    BearerToken deserializeBearerToken(Iterable<String> in);
+    BearerToken deserializeBearerToken(@Nullable Iterable<String> in);
 
     Optional<BearerToken> deserializeOptionalBearerToken(@Nullable String in);
 
@@ -51,11 +51,11 @@ public interface PlainSerDe {
 
     Set<BearerToken> deserializeBearerTokenSet(@Nullable Iterable<String> in);
 
-    boolean deserializeBoolean(String in);
+    boolean deserializeBoolean(@Nullable String in);
 
     boolean deserializeBoolean(@Nullable Iterable<String> in);
 
-    Optional<Boolean> deserializeOptionalBoolean(String in);
+    Optional<Boolean> deserializeOptionalBoolean(@Nullable String in);
 
     Optional<Boolean> deserializeOptionalBoolean(@Nullable Iterable<String> in);
 
@@ -63,11 +63,11 @@ public interface PlainSerDe {
 
     Set<Boolean> deserializeBooleanSet(@Nullable Iterable<String> in);
 
-    OffsetDateTime deserializeDateTime(String in);
+    OffsetDateTime deserializeDateTime(@Nullable String in);
 
     OffsetDateTime deserializeDateTime(@Nullable Iterable<String> in);
 
-    Optional<OffsetDateTime> deserializeOptionalDateTime(String in);
+    Optional<OffsetDateTime> deserializeOptionalDateTime(@Nullable String in);
 
     Optional<OffsetDateTime> deserializeOptionalDateTime(@Nullable Iterable<String> in);
 
@@ -75,11 +75,11 @@ public interface PlainSerDe {
 
     Set<OffsetDateTime> deserializeDateTimeSet(@Nullable Iterable<String> in);
 
-    double deserializeDouble(String in);
+    double deserializeDouble(@Nullable String in);
 
     double deserializeDouble(@Nullable Iterable<String> in);
 
-    OptionalDouble deserializeOptionalDouble(String in);
+    OptionalDouble deserializeOptionalDouble(@Nullable String in);
 
     OptionalDouble deserializeOptionalDouble(@Nullable Iterable<String> in);
 
@@ -87,11 +87,11 @@ public interface PlainSerDe {
 
     Set<Double> deserializeDoubleSet(@Nullable Iterable<String> in);
 
-    int deserializeInteger(String in);
+    int deserializeInteger(@Nullable String in);
 
     int deserializeInteger(@Nullable Iterable<String> in);
 
-    OptionalInt deserializeOptionalInteger(String in);
+    OptionalInt deserializeOptionalInteger(@Nullable String in);
 
     OptionalInt deserializeOptionalInteger(@Nullable Iterable<String> in);
 
@@ -103,7 +103,7 @@ public interface PlainSerDe {
 
     ResourceIdentifier deserializeRid(@Nullable Iterable<String> in);
 
-    Optional<ResourceIdentifier> deserializeOptionalRid(String in);
+    Optional<ResourceIdentifier> deserializeOptionalRid(@Nullable String in);
 
     Optional<ResourceIdentifier> deserializeOptionalRid(@Nullable Iterable<String> in);
 
@@ -111,11 +111,11 @@ public interface PlainSerDe {
 
     Set<ResourceIdentifier> deserializeRidSet(@Nullable Iterable<String> in);
 
-    SafeLong deserializeSafeLong(String in);
+    SafeLong deserializeSafeLong(@Nullable String in);
 
     SafeLong deserializeSafeLong(@Nullable Iterable<String> in);
 
-    Optional<SafeLong> deserializeOptionalSafeLong(String in);
+    Optional<SafeLong> deserializeOptionalSafeLong(@Nullable String in);
 
     Optional<SafeLong> deserializeOptionalSafeLong(@Nullable Iterable<String> in);
 
@@ -123,11 +123,11 @@ public interface PlainSerDe {
 
     Set<SafeLong> deserializeSafeLongSet(@Nullable Iterable<String> in);
 
-    String deserializeString(String in);
+    String deserializeString(@Nullable String in);
 
     String deserializeString(@Nullable Iterable<String> in);
 
-    Optional<String> deserializeOptionalString(String in);
+    Optional<String> deserializeOptionalString(@Nullable String in);
 
     Optional<String> deserializeOptionalString(@Nullable Iterable<String> in);
 
@@ -135,11 +135,11 @@ public interface PlainSerDe {
 
     Set<String> deserializeStringSet(@Nullable Iterable<String> in);
 
-    UUID deserializeUuid(String in);
+    UUID deserializeUuid(@Nullable String in);
 
     UUID deserializeUuid(@Nullable Iterable<String> in);
 
-    Optional<UUID> deserializeOptionalUuid(String in);
+    Optional<UUID> deserializeOptionalUuid(@Nullable String in);
 
     Optional<UUID> deserializeOptionalUuid(@Nullable Iterable<String> in);
 
@@ -147,7 +147,7 @@ public interface PlainSerDe {
 
     Set<UUID> deserializeUuidSet(@Nullable Iterable<String> in);
 
-    <T> T deserializeComplex(String in, Function<String, T> factory);
+    <T> T deserializeComplex(@Nullable String in, Function<String, T> factory);
 
     <T> T deserializeComplex(@Nullable Iterable<String> in, Function<String, T> factory);
 
