@@ -24,6 +24,7 @@ import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.BlockingHandler;
@@ -51,8 +52,7 @@ public final class ConjureExceptionHandlerTest {
     public void before() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new ConjureSerializerRegistry(Serializers.json()), exchange -> {
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
                     throw exception;
                 })))
                 .build();
@@ -89,7 +89,7 @@ public final class ConjureExceptionHandlerTest {
                 .errorInstanceId(remoteError.errorInstanceId())
                 .build();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Serializers.json().serialize(expectedPropagatedError, stream);
+        Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
         assertThat(response.body().string()).isEqualTo(stream.toString());
         // remote exceptions should result in 500 status
@@ -161,8 +161,7 @@ public final class ConjureExceptionHandlerTest {
         server.stop();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        new ConjureSerializerRegistry(Serializers.json()), exchange -> {
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
                     throw new Error();
                 })))
                 .build();

@@ -22,8 +22,4 @@ dependencies {
     api 'io.undertow:undertow-core'
     // Generated code uses guava TypeToken
     api 'com.google.guava:guava'
-    implementation 'org.slf4j:slf4j-api'
-
-    compileOnly 'org.immutables:value::annotations'
-    annotationProcessor 'org.immutables:value'
 }

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib.internal;
+package com.palantir.conjure.java.undertow.runtime;
 
-import com.palantir.conjure.java.undertow.lib.Attachments;
+import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -29,21 +30,26 @@ import java.util.function.Consumer;
 import org.slf4j.MDC;
 
 /**
- * Provides utility methods to parse auth types.
+ * Implementation of {@link AuthorizationExtractor} which sets thread state based on a parsed
+ * {@link UnverifiedJsonWebToken}. This behavior requires invocations to be wrapped with the
+ * {@link LoggingContextHandler} to avoid leaking {@link MDC} state to other operations.
+ *
+ * Package private internal API.
  */
-public final class Auth {
+final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
 
-    private static final String USER_ID_KEY = "userId";
-    private static final String SESSION_ID_KEY = "sessionId";
-    private static final String TOKEN_ID_KEY = "tokenId";
-    private static Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
-    private static Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
+    private final PlainSerDe plainSerDe;
+
+    ConjureAuthorizationExtractor(PlainSerDe plainSerDe) {
+        this.plainSerDe = plainSerDe;
+    }
 
     /**
      * Parses an {@link AuthHeader} from the provided {@link HttpServerExchange} and applies
      * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
      */
-    public static AuthHeader header(HttpServerExchange exchange) {
+    @Override
+    public AuthHeader header(HttpServerExchange exchange) {
         HeaderValues authorization = exchange.getRequestHeaders().get(Headers.AUTHORIZATION);
         // Do not use Iterables.getOnlyElement because it includes values in the exception message.
         // We do not want credential material logged to disk, even if it's marked unsafe.
@@ -56,10 +62,17 @@ public final class Auth {
      * Parses a {@link BearerToken} from the provided {@link HttpServerExchange} and applies
      * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
      */
-    public static BearerToken cookie(HttpServerExchange exchange, String cookieName) {
-        return setState(exchange, StringDeserializers.deserializeBearerToken(
-                exchange.getRequestCookies().get(cookieName).getValue()));
+    @Override
+    public BearerToken cookie(HttpServerExchange exchange, String cookieName) {
+        return setState(exchange,
+                plainSerDe.deserializeBearerToken(exchange.getRequestCookies().get(cookieName).getValue()));
     }
+
+    private static final String USER_ID_KEY = "userId";
+    private static final String SESSION_ID_KEY = "sessionId";
+    private static final String TOKEN_ID_KEY = "tokenId";
+    private static Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
+    private static Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
 
     /**
      * Attempts to extract a {@link UnverifiedJsonWebToken JSON Web Token} from the
@@ -83,6 +96,4 @@ public final class Auth {
         setState(exchange, authHeader.getBearerToken());
         return authHeader;
     }
-
-    private Auth() {}
 }

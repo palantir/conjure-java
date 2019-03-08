@@ -209,16 +209,12 @@ To use the generated handlers:
 
 ```java
 public static void main(String[] args) {
-    ConjureHandler handler = new ConjureHandler();
-    RecipeBookServiceEndpoints.of(new RecipeBookResource())
-        .create(ServerContext.builder()
-            .serializerRegistry(ConjureSerializerRegistry.getDefault())
-            .build())
-        .register(handler);
-
     Undertow server = Undertow.builder()
             .addHttpListener(8080, "0.0.0.0")
-            .setHandler(handler)
+            .setHandler(ConjureHandler.builder()
+                    .addAllEndpoints(RecipeBookServiceEndpoints.of(new RecipeBookResource())
+                            .endpoints(ConjureUndertowRuntime.builder().build()))
+                    .build())
             .build();
     server.start();
 }

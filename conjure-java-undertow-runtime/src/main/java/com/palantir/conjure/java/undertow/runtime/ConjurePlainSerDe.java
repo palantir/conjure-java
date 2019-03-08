@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib.internal;
+package com.palantir.conjure.java.undertow.runtime;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -38,14 +39,13 @@ import java.util.UUID;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 
-// TODO(nmiyake): figure out exception handling. Currently, throws empty IllegalArgumentException on any failure.
-// Should method signatures be changed to include name of parameter or should exception handling be done in generated
-// code?
-public final class StringDeserializers {
+/** Package private internal API. */
+enum ConjurePlainSerDe implements PlainSerDe {
+    INSTANCE;
 
-    private StringDeserializers() {}
-
-    public static BearerToken deserializeBearerToken(String in) {
+    @Override
+    public BearerToken deserializeBearerToken(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return BearerToken.valueOf(in);
         } catch (RuntimeException ex) {
@@ -53,19 +53,22 @@ public final class StringDeserializers {
         }
     }
 
-    public static BearerToken deserializeBearerToken(Iterable<String> in) {
+    @Override
+    public BearerToken deserializeBearerToken(@Nullable Iterable<String> in) {
         // BearerToken values should never be logged
         return deserializeBearerToken(getOnlyElementDoNotLogValues(in));
     }
 
-    public static Optional<BearerToken> deserializeOptionalBearerToken(@Nullable String in) {
-        if (Strings.isNullOrEmpty(in)) {
+    @Override
+    public Optional<BearerToken> deserializeOptionalBearerToken(@Nullable String in) {
+        if (in == null) {
             return Optional.empty();
         }
         return Optional.of(deserializeBearerToken(in));
     }
 
-    public static Optional<BearerToken> deserializeOptionalBearerToken(@Nullable Iterable<String> in) {
+    @Override
+    public Optional<BearerToken> deserializeOptionalBearerToken(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return Optional.empty();
         }
@@ -73,7 +76,8 @@ public final class StringDeserializers {
         return Optional.of(deserializeBearerToken(getOnlyElementDoNotLogValues(in)));
     }
 
-    public static List<BearerToken> deserializeBearerTokenList(@Nullable Iterable<String> in) {
+    @Override
+    public List<BearerToken> deserializeBearerTokenList(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -84,7 +88,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static Set<BearerToken> deserializeBearerTokenSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<BearerToken> deserializeBearerTokenSet(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -95,7 +100,9 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static boolean deserializeBoolean(String in) {
+    @Override
+    public boolean deserializeBoolean(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return Boolean.parseBoolean(in);
         } catch (RuntimeException ex) {
@@ -103,22 +110,29 @@ public final class StringDeserializers {
         }
     }
 
-    public static boolean deserializeBoolean(@Nullable Iterable<String> in) {
+    @Override
+    public boolean deserializeBoolean(@Nullable Iterable<String> in) {
         return deserializeBoolean(getOnlyElement(in));
     }
 
-    public static Optional<Boolean> deserializeOptionalBoolean(String in) {
+    @Override
+    public Optional<Boolean> deserializeOptionalBoolean(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeBoolean(in));
     }
 
-    public static Optional<Boolean> deserializeOptionalBoolean(@Nullable Iterable<String> in) {
+    @Override
+    public Optional<Boolean> deserializeOptionalBoolean(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return Optional.empty();
         }
         return Optional.of(deserializeBoolean(getOnlyElement(in)));
     }
 
-    public static List<Boolean> deserializeBooleanList(@Nullable Iterable<String> in) {
+    @Override
+    public List<Boolean> deserializeBooleanList(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -129,7 +143,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static Set<Boolean> deserializeBooleanSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<Boolean> deserializeBooleanSet(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -140,7 +155,9 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static OffsetDateTime deserializeDateTime(String in) {
+    @Override
+    public OffsetDateTime deserializeDateTime(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return OffsetDateTime.parse(in);
         } catch (RuntimeException ex) {
@@ -148,22 +165,29 @@ public final class StringDeserializers {
         }
     }
 
-    public static OffsetDateTime deserializeDateTime(@Nullable Iterable<String> in) {
+    @Override
+    public OffsetDateTime deserializeDateTime(@Nullable Iterable<String> in) {
         return deserializeDateTime(getOnlyElement(in));
     }
 
-    public static Optional<OffsetDateTime> deserializeOptionalDateTime(String in) {
+    @Override
+    public Optional<OffsetDateTime> deserializeOptionalDateTime(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeDateTime(in));
     }
 
-    public static Optional<OffsetDateTime> deserializeOptionalDateTime(@Nullable Iterable<String> in) {
+    @Override
+    public Optional<OffsetDateTime> deserializeOptionalDateTime(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return Optional.empty();
         }
         return Optional.of(deserializeDateTime(getOnlyElement(in)));
     }
 
-    public static List<OffsetDateTime> deserializeDateTimeList(@Nullable Iterable<String> in) {
+    @Override
+    public List<OffsetDateTime> deserializeDateTimeList(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -174,7 +198,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static Set<OffsetDateTime> deserializeDateTimeSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<OffsetDateTime> deserializeDateTimeSet(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -185,7 +210,9 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static double deserializeDouble(String in) {
+    @Override
+    public double deserializeDouble(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return Double.parseDouble(in);
         } catch (RuntimeException ex) {
@@ -193,22 +220,29 @@ public final class StringDeserializers {
         }
     }
 
-    public static double deserializeDouble(@Nullable Iterable<String> in) {
+    @Override
+    public double deserializeDouble(@Nullable Iterable<String> in) {
         return deserializeDouble(getOnlyElement(in));
     }
 
-    public static OptionalDouble deserializeOptionalDouble(String in) {
+    @Override
+    public OptionalDouble deserializeOptionalDouble(@Nullable String in) {
+        if (in == null) {
+            return OptionalDouble.empty();
+        }
         return OptionalDouble.of(deserializeDouble(in));
     }
 
-    public static OptionalDouble deserializeOptionalDouble(@Nullable Iterable<String> in) {
+    @Override
+    public OptionalDouble deserializeOptionalDouble(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return OptionalDouble.empty();
         }
         return OptionalDouble.of(deserializeDouble(getOnlyElement(in)));
     }
 
-    public static List<Double> deserializeDoubleList(@Nullable Iterable<String> in) {
+    @Override
+    public List<Double> deserializeDoubleList(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -219,7 +253,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static Set<Double> deserializeDoubleSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<Double> deserializeDoubleSet(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -230,7 +265,9 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static int deserializeInteger(String in) {
+    @Override
+    public int deserializeInteger(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return Integer.parseInt(in);
         } catch (RuntimeException ex) {
@@ -238,22 +275,29 @@ public final class StringDeserializers {
         }
     }
 
-    public static int deserializeInteger(@Nullable Iterable<String> in) {
+    @Override
+    public int deserializeInteger(@Nullable Iterable<String> in) {
         return deserializeInteger(getOnlyElement(in));
     }
 
-    public static OptionalInt deserializeOptionalInteger(String in) {
+    @Override
+    public OptionalInt deserializeOptionalInteger(@Nullable String in) {
+        if (in == null) {
+            return OptionalInt.empty();
+        }
         return OptionalInt.of(deserializeInteger(in));
     }
 
-    public static OptionalInt deserializeOptionalInteger(@Nullable Iterable<String> in) {
+    @Override
+    public OptionalInt deserializeOptionalInteger(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return OptionalInt.empty();
         }
         return OptionalInt.of(deserializeInteger(getOnlyElement(in)));
     }
 
-    public static List<Integer> deserializeIntegerList(@Nullable Iterable<String> in) {
+    @Override
+    public List<Integer> deserializeIntegerList(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -264,7 +308,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static Set<Integer> deserializeIntegerSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<Integer> deserializeIntegerSet(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -275,7 +320,9 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static ResourceIdentifier deserializeRid(String in) {
+    @Override
+    public ResourceIdentifier deserializeRid(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return ResourceIdentifier.valueOf(in);
         } catch (RuntimeException ex) {
@@ -283,22 +330,29 @@ public final class StringDeserializers {
         }
     }
 
-    public static ResourceIdentifier deserializeRid(@Nullable Iterable<String> in) {
+    @Override
+    public ResourceIdentifier deserializeRid(@Nullable Iterable<String> in) {
         return deserializeRid(getOnlyElement(in));
     }
 
-    public static Optional<ResourceIdentifier> deserializeOptionalRid(String in) {
+    @Override
+    public Optional<ResourceIdentifier> deserializeOptionalRid(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeRid(in));
     }
 
-    public static Optional<ResourceIdentifier> deserializeOptionalRid(@Nullable Iterable<String> in) {
+    @Override
+    public Optional<ResourceIdentifier> deserializeOptionalRid(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return Optional.empty();
         }
         return Optional.of(deserializeRid(getOnlyElement(in)));
     }
 
-    public static List<ResourceIdentifier> deserializeRidList(@Nullable Iterable<String> in) {
+    @Override
+    public List<ResourceIdentifier> deserializeRidList(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -309,7 +363,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static Set<ResourceIdentifier> deserializeRidSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<ResourceIdentifier> deserializeRidSet(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -320,7 +375,9 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static SafeLong deserializeSafeLong(String in) {
+    @Override
+    public SafeLong deserializeSafeLong(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return SafeLong.valueOf(in);
         } catch (RuntimeException ex) {
@@ -328,22 +385,29 @@ public final class StringDeserializers {
         }
     }
 
-    public static SafeLong deserializeSafeLong(@Nullable Iterable<String> in) {
+    @Override
+    public SafeLong deserializeSafeLong(@Nullable Iterable<String> in) {
         return deserializeSafeLong(getOnlyElement(in));
     }
 
-    public static Optional<SafeLong> deserializeOptionalSafeLong(String in) {
+    @Override
+    public Optional<SafeLong> deserializeOptionalSafeLong(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeSafeLong(in));
     }
 
-    public static Optional<SafeLong> deserializeOptionalSafeLong(@Nullable Iterable<String> in) {
+    @Override
+    public Optional<SafeLong> deserializeOptionalSafeLong(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return Optional.empty();
         }
         return Optional.of(deserializeSafeLong(getOnlyElement(in)));
     }
 
-    public static List<SafeLong> deserializeSafeLongList(@Nullable Iterable<String> in) {
+    @Override
+    public List<SafeLong> deserializeSafeLongList(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -354,7 +418,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static Set<SafeLong> deserializeSafeLongSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<SafeLong> deserializeSafeLongSet(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -365,34 +430,45 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static String deserializeString(String in) {
-        return in;
+    @Override
+    public String deserializeString(@Nullable String in) {
+        return checkArgumentNotNull(in);
     }
 
-    public static String deserializeString(@Nullable Iterable<String> in) {
+    @Override
+    public String deserializeString(@Nullable Iterable<String> in) {
         return deserializeString(getOnlyElement(in));
     }
 
-    public static Optional<String> deserializeOptionalString(String in) {
+    @Override
+    public Optional<String> deserializeOptionalString(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeString(in));
     }
 
-    public static Optional<String> deserializeOptionalString(@Nullable Iterable<String> in) {
+    @Override
+    public Optional<String> deserializeOptionalString(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return Optional.empty();
         }
         return Optional.of(deserializeString(getOnlyElement(in)));
     }
 
-    public static List<String> deserializeStringList(@Nullable Iterable<String> in) {
+    @Override
+    public List<String> deserializeStringList(@Nullable Iterable<String> in) {
         return in == null ? Collections.emptyList() : ImmutableList.copyOf(in);
     }
 
-    public static Set<String> deserializeStringSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<String> deserializeStringSet(@Nullable Iterable<String> in) {
         return in == null ? Collections.emptySet() : ImmutableSet.copyOf(in);
     }
 
-    public static UUID deserializeUuid(String in) {
+    @Override
+    public UUID deserializeUuid(@Nullable String in) {
+        checkArgumentNotNull(in);
         try {
             return UUID.fromString(in);
         } catch (RuntimeException ex) {
@@ -400,22 +476,29 @@ public final class StringDeserializers {
         }
     }
 
-    public static UUID deserializeUuid(@Nullable Iterable<String> in) {
+    @Override
+    public UUID deserializeUuid(@Nullable Iterable<String> in) {
         return deserializeUuid(getOnlyElement(in));
     }
 
-    public static Optional<UUID> deserializeOptionalUuid(String in) {
+    @Override
+    public Optional<UUID> deserializeOptionalUuid(@Nullable String in) {
+        if (in == null) {
+            return Optional.empty();
+        }
         return Optional.of(deserializeUuid(in));
     }
 
-    public static Optional<UUID> deserializeOptionalUuid(@Nullable Iterable<String> in) {
+    @Override
+    public Optional<UUID> deserializeOptionalUuid(@Nullable Iterable<String> in) {
         if (in == null || Iterables.isEmpty(in)) {
             return Optional.empty();
         }
         return Optional.of(deserializeUuid(getOnlyElement(in)));
     }
 
-    public static List<UUID> deserializeUuidList(@Nullable Iterable<String> in) {
+    @Override
+    public List<UUID> deserializeUuidList(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -426,7 +509,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static Set<UUID> deserializeUuidSet(@Nullable Iterable<String> in) {
+    @Override
+    public Set<UUID> deserializeUuidSet(@Nullable Iterable<String> in) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -437,20 +521,24 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static <T> T deserializeComplex(String in, Function<String, T> factory) {
+    @Override
+    public <T> T deserializeComplex(@Nullable String in, Function<String, T> factory) {
+        return factory.apply(deserializeString(checkArgumentNotNull(in)));
+    }
+
+    @Override
+    public <T> T deserializeComplex(@Nullable Iterable<String> in, Function<String, T> factory) {
         return factory.apply(deserializeString(in));
     }
 
-    public static <T> T deserializeComplex(@Nullable Iterable<String> in, Function<String, T> factory) {
-        return factory.apply(deserializeString(in));
-    }
-
-    public static <T> Optional<T> deserializeOptionalComplex(
+    @Override
+    public <T> Optional<T> deserializeOptionalComplex(
             @Nullable Iterable<String> in, Function<String, T> factory) {
         return deserializeOptionalString(in).map(factory);
     }
 
-    public static <T> List<T> deserializeComplexList(@Nullable Iterable<String> in, Function<String, T> factory) {
+    @Override
+    public <T> List<T> deserializeComplexList(@Nullable Iterable<String> in, Function<String, T> factory) {
         if (in == null) {
             return Collections.emptyList();
         }
@@ -461,7 +549,8 @@ public final class StringDeserializers {
         return builder.build();
     }
 
-    public static <T> Set<T> deserializeComplexSet(@Nullable Iterable<String> in, Function<String, T> factory) {
+    @Override
+    public <T> Set<T> deserializeComplexSet(@Nullable Iterable<String> in, Function<String, T> factory) {
         if (in == null) {
             return Collections.emptySet();
         }
@@ -499,5 +588,14 @@ public final class StringDeserializers {
         } else {
             throw new SafeIllegalArgumentException("Expected one element", SafeArg.of("size", size));
         }
+    }
+
+    /** Throws a SafeIllegalArgumentException rather than NPE in order to cause a 400 response. */
+    @CanIgnoreReturnValue
+    private static <T> T checkArgumentNotNull(@Nullable T input) {
+        if (input == null) {
+            throw new SafeIllegalArgumentException("Value is required");
+        }
+        return input;
     }
 }

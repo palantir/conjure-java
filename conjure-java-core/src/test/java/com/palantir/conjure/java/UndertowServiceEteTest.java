@@ -26,8 +26,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
-import com.google.common.reflect.AbstractInvocationHandler;
-import com.google.common.reflect.Reflection;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -37,11 +35,9 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
-import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.lib.ServiceInstrumenter;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
+import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
@@ -58,13 +54,12 @@ import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
+import io.undertow.server.HttpHandler;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -119,37 +114,19 @@ public final class UndertowServiceEteTest extends TestBase {
                 clientConfiguration());
     }
 
-    private static volatile Method mostRecentMethodInvocation;
-
     @BeforeClass
     public static void before() {
-        ServiceContext context = ServiceContext.builder()
-                .serializerRegistry(ConjureSerializerRegistry.getDefault())
-                .serviceInstrumenter(new ServiceInstrumenter() {
-                    @Override
-                    public <T> T instrument(T serviceImplementation, Class<T> serviceInterface) {
-                        return Reflection.newProxy(serviceInterface, new AbstractInvocationHandler() {
-                            @Override
-                            protected Object handleInvocation(
-                                    Object proxy, Method method, Object[] args) throws Throwable {
-                                mostRecentMethodInvocation = method;
-                                try {
-                                    return method.invoke(serviceImplementation, args);
-                                } catch (InvocationTargetException e) {
-                                    throw e.getCause();
-                                }
-                            }
-                        });
-                    }
-                })
-                .build();
+        UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
-        ConjureHandler handler = new ConjureHandler();
-        List<Service> endpoints = ImmutableList.of(
+        HttpHandler handler = ConjureHandler.builder().addAllEndpoints(ImmutableList.of(
                 EteServiceEndpoints.of(new UndertowEteResource()),
                 EmptyPathServiceEndpoints.of(() -> true),
-                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()));
-        endpoints.forEach(endpoint -> endpoint.create(context).register(handler));
+                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
+                .stream()
+                .flatMap(service -> service.endpoints(context).stream())
+                .collect(ImmutableList.toImmutableList()))
+                .build();
+
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)
                 .addHttpListener(8080, "0.0.0.0")
@@ -470,13 +447,6 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testEnumHeaderParameter() {
         assertThat(client.enumHeader(AuthHeader.valueOf("authHeader"), SimpleEnum.VALUE)).isEqualTo(SimpleEnum.VALUE);
-    }
-
-    @Test
-    public void testInstrumentation() {
-        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")))
-                .isEqualTo(Optional.empty());
-        assertThat(mostRecentMethodInvocation.getName()).isEqualTo("optionalEmpty");
     }
 
     @BeforeClass

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-/**
- * Used by {@link Service}s to create an object-thunk that can {@link #register}
- * the service's pair of ({@link Endpoint}, {@link io.undertow.server.HttpHandler}) to
- * {@link EndpointRegistry#add}.
- */
-public interface Registrable {
+import io.undertow.server.HttpServerExchange;
+import java.io.IOException;
 
-    void register(EndpointRegistry endpointRegistry);
+/** Reads objects from a request. */
+public interface Deserializer<T> {
+
+    /** Deserialize the request body. */
+    T deserialize(HttpServerExchange exchange) throws IOException;
 
 }
