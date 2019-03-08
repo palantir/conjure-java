@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import io.undertow.server.HttpServerExchange;
@@ -32,7 +32,7 @@ import org.junit.Test;
 
 public class ConjureBodySerDeTest {
 
-    private static final TypeToken<String> TYPE = new TypeToken<String>() {};
+    private static final TypeMarker<String> TYPE = new TypeMarker<String>() {};
 
     @Test
     public void testRequestContentType() throws IOException {
@@ -110,7 +110,7 @@ public class ConjureBodySerDeTest {
         }
 
         @Override
-        public <T> Serializer<T> serializer(TypeToken<T> type) {
+        public <T> Serializer<T> serializer(TypeMarker<T> type) {
             return (value, output) -> {
                 // nop
             };
@@ -118,7 +118,7 @@ public class ConjureBodySerDeTest {
 
         @Override
         @SuppressWarnings("unchecked")
-        public <T> Deserializer<T> deserializer(TypeToken<T> type) {
+        public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
             return input -> {
                 Preconditions.checkArgument(TYPE.equals(type), "This stub encoding only supports String");
                 return (T) getContentType();

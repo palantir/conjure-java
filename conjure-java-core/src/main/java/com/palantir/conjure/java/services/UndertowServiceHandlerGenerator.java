@@ -19,7 +19,6 @@ package com.palantir.conjure.java.services;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MoreCollectors;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.CodeBlocks;
@@ -27,6 +26,7 @@ import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -219,7 +219,7 @@ final class UndertowServiceHandlerGenerator {
                             type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
                     ctorBuilder.addStatement("this.$1N = $2N.bodySerDe().deserializer(new $3T() {})",
                             DESERIALIZER_VAR_NAME, RUNTIME_VAR_NAME,
-                            ParameterizedTypeName.get(ClassName.get(TypeToken.class), typeName));
+                            ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
                 });
 
         endpointDefinition.getReturns().ifPresent(returnType -> {
@@ -229,7 +229,7 @@ final class UndertowServiceHandlerGenerator {
                 endpointBuilder.addField(FieldSpec.builder(type,
                         SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
                 ctorBuilder.addStatement("this.$1N = $2N.bodySerDe().serializer(new $3T() {})", SERIALIZER_VAR_NAME,
-                        RUNTIME_VAR_NAME, ParameterizedTypeName.get(ClassName.get(TypeToken.class), typeName));
+                        RUNTIME_VAR_NAME, ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
             }
         });
 

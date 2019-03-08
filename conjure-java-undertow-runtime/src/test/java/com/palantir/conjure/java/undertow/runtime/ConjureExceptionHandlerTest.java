@@ -19,12 +19,12 @@ package com.palantir.conjure.java.undertow.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.BlockingHandler;
@@ -89,7 +89,7 @@ public final class ConjureExceptionHandlerTest {
                 .errorInstanceId(remoteError.errorInstanceId())
                 .build();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Encodings.json().serializer(new TypeToken<SerializableError>() {}).serialize(expectedPropagatedError, stream);
+        Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
         assertThat(response.body().string()).isEqualTo(stream.toString());
         // remote exceptions should result in 500 status

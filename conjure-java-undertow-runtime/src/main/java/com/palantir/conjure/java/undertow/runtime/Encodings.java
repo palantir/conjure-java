@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
@@ -46,7 +46,7 @@ public final class Encodings {
         }
 
         @Override
-        public <T> Serializer<T> serializer(TypeToken<T> type) {
+        public <T> Serializer<T> serializer(TypeMarker<T> type) {
             ObjectWriter writer = mapper.writerFor(mapper.constructType(type.getType()));
             return (value, output) -> {
                 Preconditions.checkNotNull(value, "cannot serialize null value");
@@ -55,7 +55,7 @@ public final class Encodings {
         }
 
         @Override
-        public <T> Deserializer<T> deserializer(TypeToken<T> type) {
+        public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
             ObjectReader reader = mapper.readerFor(mapper.constructType(type.getType()));
             return input -> {
                 try {
@@ -113,7 +113,7 @@ public final class Encodings {
             }
 
             @Override
-            public <T> Serializer<T> serializer(TypeToken<T> type) {
+            public <T> Serializer<T> serializer(TypeMarker<T> type) {
                 Serializer<T> delegate = super.serializer(type);
                 return (value, output) -> delegate.serialize(value, new ShieldingOutputStream(output));
             }

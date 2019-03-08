@@ -1,9 +1,9 @@
 package com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import io.undertow.server.HttpHandler;
@@ -41,7 +41,7 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
         EmptyPathEndpoint(UndertowRuntime runtime, UndertowEmptyPathService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<Boolean>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
         }
 
         @Override

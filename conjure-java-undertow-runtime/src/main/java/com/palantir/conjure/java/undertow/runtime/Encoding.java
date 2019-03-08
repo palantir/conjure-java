@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import com.google.common.reflect.TypeToken;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,13 +35,13 @@ public interface Encoding {
      * Creates a new {@link Serializer} for the requested type. It is recommended to reuse instances over requesting
      * new ones for each request.
      */
-    <T> Serializer<T> serializer(TypeToken<T> type);
+    <T> Serializer<T> serializer(TypeMarker<T> type);
 
     /**
      * Creates a new {@link Deserializer} for the requested type. It is recommended to reuse instances over requesting
      * new ones for each request.
      */
-    <T> Deserializer<T> deserializer(TypeToken<T> type);
+    <T> Deserializer<T> deserializer(TypeMarker<T> type);
 
     /** Returns the value used in response <pre>Content-Type</pre> header. */
     String getContentType();
