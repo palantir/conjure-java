@@ -1,12 +1,12 @@
 package com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.ri.ResourceIdentifier;
@@ -78,7 +78,7 @@ public final class EteServiceEndpoints implements UndertowService {
         StringEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<String>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
         }
 
         @Override
@@ -124,7 +124,7 @@ public final class EteServiceEndpoints implements UndertowService {
         IntegerEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<Integer>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Integer>() {});
         }
 
         @Override
@@ -170,7 +170,7 @@ public final class EteServiceEndpoints implements UndertowService {
         Double_Endpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<Double>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Double>() {});
         }
 
         @Override
@@ -216,7 +216,7 @@ public final class EteServiceEndpoints implements UndertowService {
         Boolean_Endpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<Boolean>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
         }
 
         @Override
@@ -262,7 +262,7 @@ public final class EteServiceEndpoints implements UndertowService {
         SafelongEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<SafeLong>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<SafeLong>() {});
         }
 
         @Override
@@ -309,7 +309,7 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer =
-                    runtime.bodySerDe().serializer(new TypeToken<ResourceIdentifier>() {});
+                    runtime.bodySerDe().serializer(new TypeMarker<ResourceIdentifier>() {});
         }
 
         @Override
@@ -355,7 +355,7 @@ public final class EteServiceEndpoints implements UndertowService {
         BearertokenEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<BearerToken>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<BearerToken>() {});
         }
 
         @Override
@@ -401,7 +401,7 @@ public final class EteServiceEndpoints implements UndertowService {
         OptionalStringEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<Optional<String>>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
         }
 
         @Override
@@ -451,7 +451,7 @@ public final class EteServiceEndpoints implements UndertowService {
         OptionalEmptyEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<Optional<String>>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
         }
 
         @Override
@@ -501,7 +501,7 @@ public final class EteServiceEndpoints implements UndertowService {
         DatetimeEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<OffsetDateTime>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<OffsetDateTime>() {});
         }
 
         @Override
@@ -590,7 +590,7 @@ public final class EteServiceEndpoints implements UndertowService {
         PathEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<String>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
         }
 
         @Override
@@ -642,9 +642,9 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.deserializer =
-                    runtime.bodySerDe().deserializer(new TypeToken<StringAliasExample>() {});
+                    runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
             this.serializer =
-                    runtime.bodySerDe().serializer(new TypeToken<StringAliasExample>() {});
+                    runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
         }
 
         @Override
@@ -692,7 +692,7 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer =
-                    runtime.bodySerDe().serializer(new TypeToken<StringAliasExample>() {});
+                    runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
         }
 
         @Override
@@ -743,7 +743,7 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer =
-                    runtime.bodySerDe().serializer(new TypeToken<StringAliasExample>() {});
+                    runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
         }
 
         @Override
@@ -799,7 +799,7 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer =
-                    runtime.bodySerDe().serializer(new TypeToken<NestedStringAliasExample>() {});
+                    runtime.bodySerDe().serializer(new TypeMarker<NestedStringAliasExample>() {});
         }
 
         @Override
@@ -853,9 +853,9 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.deserializer =
-                    runtime.bodySerDe().deserializer(new TypeToken<StringAliasExample>() {});
+                    runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
             this.serializer =
-                    runtime.bodySerDe().serializer(new TypeToken<StringAliasExample>() {});
+                    runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
         }
 
         @Override
@@ -906,10 +906,10 @@ public final class EteServiceEndpoints implements UndertowService {
             this.delegate = delegate;
             this.deserializer =
                     runtime.bodySerDe()
-                            .deserializer(new TypeToken<Optional<StringAliasExample>>() {});
+                            .deserializer(new TypeMarker<Optional<StringAliasExample>>() {});
             this.serializer =
                     runtime.bodySerDe()
-                            .serializer(new TypeToken<Optional<StringAliasExample>>() {});
+                            .serializer(new TypeMarker<Optional<StringAliasExample>>() {});
         }
 
         @Override
@@ -964,7 +964,7 @@ public final class EteServiceEndpoints implements UndertowService {
             this.delegate = delegate;
             this.serializer =
                     runtime.bodySerDe()
-                            .serializer(new TypeToken<Optional<StringAliasExample>>() {});
+                            .serializer(new TypeMarker<Optional<StringAliasExample>>() {});
         }
 
         @Override
@@ -1063,7 +1063,7 @@ public final class EteServiceEndpoints implements UndertowService {
         EnumQueryEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<SimpleEnum>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<SimpleEnum>() {});
         }
 
         @Override
@@ -1114,7 +1114,7 @@ public final class EteServiceEndpoints implements UndertowService {
         EnumListQueryEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<List<SimpleEnum>>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<List<SimpleEnum>>() {});
         }
 
         @Override
@@ -1166,7 +1166,7 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer =
-                    runtime.bodySerDe().serializer(new TypeToken<Optional<SimpleEnum>>() {});
+                    runtime.bodySerDe().serializer(new TypeMarker<Optional<SimpleEnum>>() {});
         }
 
         @Override
@@ -1221,7 +1221,7 @@ public final class EteServiceEndpoints implements UndertowService {
         EnumHeaderEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeToken<SimpleEnum>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<SimpleEnum>() {});
         }
 
         @Override

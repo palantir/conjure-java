@@ -18,7 +18,6 @@ package com.palantir.conjure.java.undertow.lib;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
@@ -36,7 +35,7 @@ public final class SerializableErrorTest {
         SerializableError error = SerializableError.forException(
                 new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("foo", 42), UnsafeArg.of("bar", "boom")));
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        Encodings.json().serializer(new TypeToken<SerializableError>() {}).serialize(error, stream);
+        Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(error, stream);
         assertThat(stream.toString()).isEqualTo(
                 "{\"errorCode\":\"INVALID_ARGUMENT\",\"errorName\":\"Default:InvalidArgument\",\"errorInstanceId\":\""
                         + error.errorInstanceId() + "\",\"parameters\":{\"foo\":\"42\",\"bar\":\"boom\"}}");

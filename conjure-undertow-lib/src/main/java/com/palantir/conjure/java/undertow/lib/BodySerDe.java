@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.google.common.reflect.TypeToken;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,10 +24,10 @@ import java.io.InputStream;
 public interface BodySerDe {
 
     /** Creates a {@link Serializer} for the requested type. Serializer instances should be reused. */
-    <T> Serializer<T> serializer(TypeToken<T> type);
+    <T> Serializer<T> serializer(TypeMarker<T> type);
 
     /** Creates a {@link Deserializer} for the requested type. Deserializer instances should be reused. */
-    <T> Deserializer<T> deserializer(TypeToken<T> type);
+    <T> Deserializer<T> deserializer(TypeMarker<T> type);
 
     /** Serializes a {@link BinaryResponseBody} to <pre>application/octet-stream</pre>. */
     void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException;

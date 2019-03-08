@@ -17,11 +17,11 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -51,12 +51,12 @@ final class ConjureBodySerDe implements BodySerDe {
     }
 
     @Override
-    public <T> Serializer<T> serializer(TypeToken<T> token) {
+    public <T> Serializer<T> serializer(TypeMarker<T> token) {
         return new EncodingSerializerRegistry<>(encodings, token);
     }
 
     @Override
-    public <T> Deserializer<T> deserializer(TypeToken<T> token) {
+    public <T> Deserializer<T> deserializer(TypeMarker<T> token) {
         return new EncodingDeserializerRegistry<>(encodings, token);
     }
 
@@ -85,7 +85,7 @@ final class ConjureBodySerDe implements BodySerDe {
         private final EncodingSerializerContainer<T> defaultEncoding;
         private final List<EncodingSerializerContainer<T>> encodings;
 
-        EncodingSerializerRegistry(List<Encoding> encodings, TypeToken<T> token) {
+        EncodingSerializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
             this.encodings = encodings.stream()
                     .map(encoding -> new EncodingSerializerContainer<>(encoding, token))
                     .collect(ImmutableList.toImmutableList());
@@ -126,7 +126,7 @@ final class ConjureBodySerDe implements BodySerDe {
         private final Encoding encoding;
         private final Encoding.Serializer<T> serializer;
 
-        EncodingSerializerContainer(Encoding encoding, TypeToken<T> token) {
+        EncodingSerializerContainer(Encoding encoding, TypeMarker<T> token) {
             this.encoding = encoding;
             this.serializer = encoding.serializer(token);
         }
@@ -136,7 +136,7 @@ final class ConjureBodySerDe implements BodySerDe {
 
         private final List<EncodingDeserializerContainer<T>> encodings;
 
-        EncodingDeserializerRegistry(List<Encoding> encodings, TypeToken<T> token) {
+        EncodingDeserializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
             this.encodings = encodings.stream()
                     .map(encoding -> new EncodingDeserializerContainer<>(encoding, token))
                     .collect(ImmutableList.toImmutableList());
@@ -171,7 +171,7 @@ final class ConjureBodySerDe implements BodySerDe {
         private final Encoding encoding;
         private final Encoding.Deserializer<T> deserializer;
 
-        EncodingDeserializerContainer(Encoding encoding, TypeToken<T> token) {
+        EncodingDeserializerContainer(Encoding encoding, TypeMarker<T> token) {
             this.encoding = encoding;
             this.deserializer = encoding.deserializer(token);
         }

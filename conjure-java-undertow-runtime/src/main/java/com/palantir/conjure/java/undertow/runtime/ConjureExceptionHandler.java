@@ -16,13 +16,13 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import com.google.common.reflect.TypeToken;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpHandler;
@@ -50,7 +50,7 @@ final class ConjureExceptionHandler implements HttpHandler {
     // Exceptions should always be serialized using JSON
     private final Serializer<SerializableError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json()))
-            .serializer(new TypeToken<SerializableError>() {});
+            .serializer(new TypeMarker<SerializableError>() {});
     private final HttpHandler delegate;
 
     ConjureExceptionHandler(HttpHandler delegate) {
