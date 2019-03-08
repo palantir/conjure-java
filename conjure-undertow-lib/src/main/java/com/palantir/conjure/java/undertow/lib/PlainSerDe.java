@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 
 /**
  * Provides functionality to parse supported types using the
- * <a href="https://github.com/palantir/conjure/blob/master/docs/spec/wire.md#6-plain-format">Conjure PLAIN format</a>.
+ * <a href="https://palantir.github.io/conjure/#/docs/spec/wire?id=_6-plain-format">Conjure PLAIN format</a>.
  *
  * These utilities are used to parse HTTP path, query, and header parameter values.
  */

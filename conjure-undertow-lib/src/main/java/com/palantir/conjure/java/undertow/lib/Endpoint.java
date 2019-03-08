@@ -33,7 +33,7 @@ public interface Endpoint {
      * Conjure formatted http path template.
      * For example, this may take the form <pre>/ping</pre> or <pre>/object/{objectId}</pre>.
      * For more information, see the
-     * <a href="https://github.com/palantir/conjure/blob/master/docs/spec/conjure_definitions.md#pathstring">
+     * <a href="https://palantir.github.io/conjure/#/docs/spec/conjure_definitions?id=pathstring">
      * specification for conjure path strings</a>.
      */
     String template();
