@@ -43,8 +43,8 @@ public class ConjureSafeParamStorerTest {
                 .addHttpListener(12345, "localhost")
                 .setHandler(exchange -> {
                     paramStorer.putSafeParam(exchange, "key1", "value1");
+                    paramStorer.putSafeParam(exchange, "key1", "newValue1");
                     paramStorer.putSafeParam(exchange, "key2", "value2");
-                    paramStorer.putSafeParam(exchange, "key1", "newValue2");
                     cExchange = exchange;
                 })
                 .build();
@@ -63,8 +63,8 @@ public class ConjureSafeParamStorerTest {
             response.close();
             Assertions.assertThat(paramStorer.getSafeParams(cExchange))
                     .isEqualTo(ImmutableMap.of(
-                            "key1", "value1",
-                            "key2", "newValue2"));
+                            "key1", "newValue1",
+                            "key2", "value2"));
         }
     }
 

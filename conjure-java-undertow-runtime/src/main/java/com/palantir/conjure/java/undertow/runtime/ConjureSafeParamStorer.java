@@ -54,11 +54,11 @@ enum ConjureSafeParamStorer implements SafeParamStorer {
             exchange.putAttachment(SAFE_PARAMS_ATTACH_KEY, map);
         }
         if (map.containsKey(key)) {
-             log.warn(
-                     "Overwritting safe parameter.",
-                     SafeArg.of("key", key),
-                     SafeArg.of("oldValue", map.get(key)),
-                     SafeArg.of("newValue", value));
+            log.warn(
+                    "Overwritting safe parameter.",
+                    SafeArg.of("key", key),
+                    SafeArg.of("oldValue", map.get(key)),
+                    SafeArg.of("newValue", value));
         }
         map.put(key, value);
     }
