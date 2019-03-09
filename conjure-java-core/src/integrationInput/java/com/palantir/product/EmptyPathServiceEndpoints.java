@@ -1,58 +1,78 @@
 package com.palantir.product;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
-import com.palantir.conjure.java.undertow.lib.Registrable;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
-import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import java.io.IOException;
+import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class EmptyPathServiceEndpoints implements Service {
+public final class EmptyPathServiceEndpoints implements UndertowService {
     private final UndertowEmptyPathService delegate;
 
     private EmptyPathServiceEndpoints(UndertowEmptyPathService delegate) {
         this.delegate = delegate;
     }
 
-    public static Service of(UndertowEmptyPathService delegate) {
+    public static UndertowService of(UndertowEmptyPathService delegate) {
         return new EmptyPathServiceEndpoints(delegate);
     }
 
     @Override
-    public Registrable create(ServiceContext context) {
-        return new EmptyPathServiceRegistrable(context, delegate);
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new EmptyPathEndpoint(runtime, delegate));
     }
 
-    private static final class EmptyPathServiceRegistrable implements Registrable {
+    private static final class EmptyPathEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
         private final UndertowEmptyPathService delegate;
 
-        private final SerializerRegistry serializers;
+        private final Serializer<Boolean> serializer;
 
-        private EmptyPathServiceRegistrable(
-                ServiceContext context, UndertowEmptyPathService delegate) {
-            this.serializers = context.serializerRegistry();
-            this.delegate =
-                    context.serviceInstrumenter()
-                            .instrument(delegate, UndertowEmptyPathService.class);
+        EmptyPathEndpoint(UndertowRuntime runtime, UndertowEmptyPathService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
         }
 
         @Override
-        public void register(EndpointRegistry endpointRegistry) {
-            endpointRegistry.add(
-                    Endpoint.get("/", "EmptyPathService", "emptyPath"), new EmptyPathHandler());
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            boolean result = delegate.emptyPath();
+            serializer.serialize(result, exchange);
         }
 
-        private class EmptyPathHandler implements HttpHandler {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                boolean result = delegate.emptyPath();
-                serializers.serialize(result, exchange);
-            }
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/";
+        }
+
+        @Override
+        public String serviceName() {
+            return "UndertowEmptyPathService";
+        }
+
+        @Override
+        public String name() {
+            return "emptyPath";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
         }
     }
 }

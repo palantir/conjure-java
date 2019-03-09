@@ -17,8 +17,10 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -28,13 +30,15 @@ import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.Methods;
+import java.util.List;
 import java.util.function.BiFunction;
 
 /**
- * Default Conjure implementation of a {@link EndpointRegistry}
- * which can be registered as an Undertow {@link HttpHandler}.
+ * Conjure routing mechanism which can be registered as an Undertow {@link HttpHandler}.
+ * This handler takes care of exception handling, tracing, and web-security headers
+ * among {@link ConjureHandler#WRAPPERS other features}.
  */
-public final class ConjureHandler implements HttpHandler, EndpointRegistry {
+public final class ConjureHandler implements HttpHandler {
 
     private static final ImmutableList<BiFunction<Endpoint, HttpHandler, HttpHandler>> WRAPPERS =
             ImmutableList.<BiFunction<Endpoint, HttpHandler, HttpHandler>>of(
@@ -48,7 +52,6 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
                     // Only applies to GET methods
                     ? new NoCachingResponseHandler(handler) : handler,
             (endpoint, handler) -> new WebSecurityHandler(handler),
-            (endpoint, handler) -> new ParametersHandler(handler),
             // It is vitally important to never run blocking operations on the initial IO thread otherwise
             // the server will not process new requests. all handlers executed after BlockingHandler
             // use the larger task pool which is allowed to block. Any operation which sets thread
@@ -65,12 +68,9 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
 
     private final RoutingHandler routingHandler;
 
-    public ConjureHandler(HttpHandler fallback) {
+    private ConjureHandler(HttpHandler fallback, List<Endpoint> endpoints) {
         this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
-    }
-
-    public ConjureHandler() {
-        this(ResponseCodeHandler.HANDLE_404);
+        endpoints.forEach(this::register);
     }
 
     @Override
@@ -78,14 +78,52 @@ public final class ConjureHandler implements HttpHandler, EndpointRegistry {
         routingHandler.handleRequest(exchange);
     }
 
-    @Override
-    public ConjureHandler add(Endpoint endpoint, HttpHandler handler) {
-        HttpHandler current = handler;
+    private void register(Endpoint endpoint) {
+        HttpHandler current = endpoint.handler();
         for (BiFunction<Endpoint, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
             current = wrapper.apply(endpoint, current);
         }
         routingHandler.add(endpoint.method(), endpoint.template(), current);
-        return this;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private final List<Endpoint> endpoints = Lists.newArrayList();
+        private HttpHandler fallback = ResponseCodeHandler.HANDLE_404;
+
+        private Builder() { }
+
+        @CanIgnoreReturnValue
+        public Builder endpoints(Endpoint value) {
+            endpoints.add(Preconditions.checkNotNull(value, "Value is required"));
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder addAllEndpoints(Iterable<Endpoint> values) {
+            Preconditions.checkNotNull(values, "Values is required");
+            for (Endpoint endpoint : values) {
+                endpoints(endpoint);
+            }
+            return this;
+        }
+
+        /**
+         * The fallback {@link HttpHandler handler} is invoked when no {@link Endpoint} matches a request.
+         * By default a 404 response status will be served.
+         */
+        @CanIgnoreReturnValue
+        public Builder fallback(HttpHandler value) {
+            fallback = Preconditions.checkNotNull(value, "Value is required");
+            return this;
+        }
+
+        public HttpHandler build() {
+            return new ConjureHandler(fallback, endpoints);
+        }
+    }
 }

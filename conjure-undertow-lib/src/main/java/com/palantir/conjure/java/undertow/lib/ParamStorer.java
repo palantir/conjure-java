@@ -16,12 +16,17 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
+import io.undertow.server.HttpServerExchange;
+import java.util.Map;
+
 /**
- * {@link ServiceInstrumenter} may transform service implementations in order to apply instrumentation.
+ * Utility class to put different types of safe or unsafe parameters in a MultiMap attached to the exchange.
+ * It requires the exchange to have been priorly through a ParametersHandler which would have created the attached
+ * MultiMaps.
  */
-public interface ServiceInstrumenter {
+public interface ParamStorer {
 
-    /** Applies instrumentation to the provided implementation, returning the instrumented service. */
-    <T> T instrument(T serviceImplementation, Class<T> serviceInterface);
+    Map<String, Object> getParams(HttpServerExchange exchange);
 
+    void putSafeParam(HttpServerExchange exchange, String key, Object value);
 }

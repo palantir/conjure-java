@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.palantir.tokens.auth.UnverifiedJsonWebToken;
-import io.undertow.util.AttachmentKey;
-import java.util.Optional;
+import io.undertow.server.HttpServerExchange;
+import java.io.IOException;
 
-public final class Attachments {
+/** Writes objects to a response. */
+public interface Serializer<T> {
 
-    public static final AttachmentKey<Optional<UnverifiedJsonWebToken>> UNVERIFIED_JWT =
-            AttachmentKey.create(Optional.class);
+    /** Serialize a value to a provided exchange using the Conjure wire format. */
+    void serialize(T value, HttpServerExchange exchange) throws IOException;
 
-    private Attachments() {}
 }

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib;
+package com.palantir.conjure.java.undertow.runtime;
 
-/**
- * Creates a {@link Registrable} which may be registered with a web server. The server is responsible
- * for providing a {@link ServiceContext} allowing API implementors to add APIs using
- * <code>server.api(MyServiceEndpoints.of(myServiceImpl)</code>.
- */
-public interface Service {
+import com.palantir.tokens.auth.UnverifiedJsonWebToken;
+import io.undertow.util.AttachmentKey;
+import java.util.Optional;
 
-    Registrable create(ServiceContext context);
+public final class Attachments {
 
+    public static final AttachmentKey<Optional<UnverifiedJsonWebToken>> UNVERIFIED_JWT =
+            AttachmentKey.create(Optional.class);
+
+    private Attachments() {}
 }

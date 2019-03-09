@@ -16,17 +16,17 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import io.undertow.server.HttpHandler;
+import java.util.List;
 
 /**
- * Add handlers to this registry by calling the method corresponding to the http method
- * with {@link HttpHandler} and the path template of the "route".
- * The purpose of this layer of indirection on top of a {@link EndpointRegistry} is to restrict the exposed API
- * and allow the usage of registered paths for other means than registering to a
- * {@link io.undertow.server.RoutingHandler} (e.g" checking for overlapping paths)
+ * The Undertow server Conjure generator emits implementations of {@link UndertowService}
+ * which produce an {@link Endpoint} for each endpoint described in the Conjure definition.
+ * The server is responsible for providing an {@link UndertowRuntime} and orchestrating
+ * registration with the <pre>ConjureHandler</pre> allowing API implementors to add APIs
+ * using <code>server.api(MyServiceEndpoints.of(myServiceImpl)</code>.
  */
-public interface EndpointRegistry {
+public interface UndertowService {
 
-    EndpointRegistry add(Endpoint description, HttpHandler handler);
+    List<Endpoint> endpoints(UndertowRuntime runtime);
 
 }

@@ -1,57 +1,74 @@
 package test.api;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
-import com.palantir.conjure.java.undertow.lib.Registrable;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
-import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.lib.internal.BinarySerializers;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import java.io.IOException;
+import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class TestServiceEndpoints implements Service {
+public final class TestServiceEndpoints implements UndertowService {
     private final TestService delegate;
 
     private TestServiceEndpoints(TestService delegate) {
         this.delegate = delegate;
     }
 
-    public static Service of(TestService delegate) {
+    public static UndertowService of(TestService delegate) {
         return new TestServiceEndpoints(delegate);
     }
 
     @Override
-    public Registrable create(ServiceContext context) {
-        return new TestServiceRegistrable(context, delegate);
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new GetBinaryEndpoint(runtime, delegate));
     }
 
-    private static final class TestServiceRegistrable implements Registrable {
+    private static final class GetBinaryEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
         private final TestService delegate;
 
-        private final SerializerRegistry serializers;
-
-        private TestServiceRegistrable(ServiceContext context, TestService delegate) {
-            this.serializers = context.serializerRegistry();
-            this.delegate = context.serviceInstrumenter().instrument(delegate, TestService.class);
+        GetBinaryEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
         }
 
         @Override
-        public void register(EndpointRegistry endpointRegistry) {
-            endpointRegistry.add(
-                    Endpoint.get("/", "TestService", "getBinary"), new GetBinaryHandler());
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            BinaryResponseBody result = delegate.getBinary();
+            runtime.bodySerDe().serialize(result, exchange);
         }
 
-        private class GetBinaryHandler implements HttpHandler {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                BinaryResponseBody result = delegate.getBinary();
-                BinarySerializers.serialize(result, exchange);
-            }
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getBinary";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
         }
     }
 }

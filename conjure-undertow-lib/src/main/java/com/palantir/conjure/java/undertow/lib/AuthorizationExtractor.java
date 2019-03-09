@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.google.common.reflect.TypeToken;
+import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
-import java.io.IOException;
 
-/** Orchestrates serialization and deserialization of response and request bodies. */
-public interface SerializerRegistry {
+/** Provides auth functionality for generated code. */
+public interface AuthorizationExtractor {
 
-    /** Serialize a value to a provided exchange. */
-    void serialize(Object value, HttpServerExchange exchange) throws IOException;
+    /** Parses an {@link AuthHeader} from the provided {@link HttpServerExchange}. */
+    AuthHeader header(HttpServerExchange exchange);
 
-    /** Deserializes the request body into the requested type. */
-    <T> T deserialize(TypeToken<T> type, HttpServerExchange exchange) throws IOException;
+    /** Parses a {@link BearerToken} from the provided {@link HttpServerExchange}. */
+    BearerToken cookie(HttpServerExchange exchange, String cookieName);
+
 }

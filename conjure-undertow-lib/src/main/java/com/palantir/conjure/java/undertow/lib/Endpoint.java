@@ -16,57 +16,34 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.palantir.tokens.auth.ImmutablesStyle;
+import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
-import io.undertow.util.Methods;
-import java.util.Optional;
-import org.immutables.value.Value;
 
-@Value.Immutable(builder = false)
-@ImmutablesStyle
+/**
+ * An {@link Endpoint} represents a single rpc method. End points provide a location, tuple of
+ * {@link Endpoint#method()} and {@link Endpoint#template()}, as well as an implementation, the
+ * {@link Endpoint#handler()}.
+ */
 public interface Endpoint {
 
-    @Value.Parameter
+    /** HTTP method which matches this {@link Endpoint}. See {@link io.undertow.util.Methods}. */
     HttpString method();
 
-    @Value.Parameter
+    /**
+     * Conjure formatted http path template.
+     * For example, this may take the form <pre>/ping</pre> or <pre>/object/{objectId}</pre>.
+     * For more information, see the
+     * <a href="https://palantir.github.io/conjure/#/docs/spec/conjure_definitions?id=pathstring">
+     * specification for conjure path strings</a>.
+     */
     String template();
 
-    @Value.Parameter
-    Optional<String> serviceName();
+    /** Undertow {@link HttpHandler} which provides the endpoint implementation. */
+    HttpHandler handler();
 
-    @Value.Parameter
-    Optional<String> name();
+    /** Simple name of the service which provides this endpoint. This data may be used for metric instrumentation. */
+    String serviceName();
 
-    static Endpoint get(String template) {
-        return ImmutableEndpoint.of(Methods.GET, template, Optional.empty(), Optional.empty());
-    }
-
-    static Endpoint get(String template, String serviceName, String name) {
-        return ImmutableEndpoint.of(Methods.GET, template, Optional.of(serviceName), Optional.of(name));
-    }
-
-    static Endpoint post(String template) {
-        return ImmutableEndpoint.of(Methods.POST, template, Optional.empty(), Optional.empty());
-    }
-
-    static Endpoint post(String template, String serviceName, String name) {
-        return ImmutableEndpoint.of(Methods.POST, template, Optional.of(serviceName), Optional.of(name));
-    }
-
-    static Endpoint put(String template) {
-        return ImmutableEndpoint.of(Methods.PUT, template, Optional.empty(), Optional.empty());
-    }
-
-    static Endpoint put(String template, String serviceName, String name) {
-        return ImmutableEndpoint.of(Methods.PUT, template, Optional.of(serviceName), Optional.of(name));
-    }
-
-    static Endpoint delete(String template) {
-        return ImmutableEndpoint.of(Methods.DELETE, template, Optional.empty(), Optional.empty());
-    }
-
-    static Endpoint delete(String template, String serviceName, String name) {
-        return ImmutableEndpoint.of(Methods.DELETE, template, Optional.of(serviceName), Optional.of(name));
-    }
+    /** Simple name of the endpoint method. This data may be used for metric instrumentation. */
+    String name();
 }

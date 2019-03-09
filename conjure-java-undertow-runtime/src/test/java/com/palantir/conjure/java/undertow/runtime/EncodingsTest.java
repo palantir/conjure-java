@@ -22,7 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.reflect.TypeToken;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import java.io.ByteArrayInputStream;
@@ -34,15 +34,15 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import org.junit.Test;
 
-public final class SerializersTest {
+public final class EncodingsTest {
 
-    private final Serializer json = Serializers.json();
+    private final Encoding json = Encodings.json();
 
     // TODO(rfink): Wire tests for JSON serializer
 
     @Test
     public void json_deserialize_throwsDeserializationErrorsAsIllegalArgumentException() {
-        assertThatThrownBy(() -> json.deserialize(asStream("\"2018-08-bogus\""), new TypeToken<OffsetDateTime>() {}))
+        assertThatThrownBy(() -> deserialize(asStream("\"2018-08-bogus\""), new TypeMarker<OffsetDateTime>() {}))
                 .isInstanceOf(FrameworkException.class)
                 .hasMessageContaining("Failed to deserialize")
                 .matches(exception -> ((FrameworkException) exception).getStatusCode() == 422, "Expected 422 status");
@@ -50,26 +50,34 @@ public final class SerializersTest {
 
     @Test
     public void json_serialize_rejectsNulls() {
-        assertThatThrownBy(() -> json.serialize(null /* under test: null value throws */, null /* unused stream */))
+        assertThatThrownBy(() -> serialize(null /* under test: null value throws */, null /* unused stream */))
                 .isInstanceOf(SafeNullPointerException.class);
     }
 
     @Test
     public void json_deserialize_rejectsNulls() throws IOException {
         // TODO(rfink): Do we need to test this for all primitive types?
-        assertThatThrownBy(() -> json.deserialize(asStream("null"), new TypeToken<String>() {}))
+        assertThatThrownBy(() -> deserialize(asStream("null"), new TypeMarker<String>() {}))
                 .isInstanceOf(SafeIllegalArgumentException.class);
-        assertThat(json.deserialize(asStream("null"), new TypeToken<Optional<String>>() {})).isEmpty();
+        assertThat(deserialize(asStream("null"), new TypeMarker<Optional<String>>() {})).isEmpty();
     }
 
     @Test
     public void json_serialize_doesNotCloseOutputStream() throws IOException {
         OutputStream outputStream = mock(OutputStream.class);
-        json.serialize("test", outputStream);
+        serialize("test", outputStream);
         verify(outputStream, never()).close();
     }
 
     private static InputStream asStream(String data) {
         return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void serialize(Object object, OutputStream stream) throws IOException {
+        json.serializer(new TypeMarker<Object>() {}).serialize(object, stream);
+    }
+
+    private <T> T deserialize(InputStream stream, TypeMarker<T> token) throws IOException {
+        return json.deserializer(token).deserialize(stream);
     }
 }

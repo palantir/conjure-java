@@ -6,7 +6,7 @@ com.google.errorprone:error_prone_annotations = 2.3.3
 com.google.googlejavaformat:google-java-format = 1.7
 com.google.guava:guava = 23.6.1-jre
 com.palantir.conjure.java.api:* = 2.2.0
-com.palantir.conjure.java.runtime:* = 4.15.0
+com.palantir.conjure.java.runtime:* = 4.16.0
 # dependency-upgrader:OFF
 # Regression introduced by https://github.com/palantir/conjure-java-runtime/pull/865
 com.palantir.conjure.java.runtime:conjure-java-jaxrs-client = 4.6.0
@@ -16,7 +16,7 @@ com.palantir.conjure:* = 4.5.1
 com.palantir.ri:resource-identifier = 1.0.1
 com.palantir.syntactic-paths:syntactic-paths = 0.6.1
 com.palantir.tokens:* = 3.5.2
-com.palantir.tracing:* = 2.6.1
+com.palantir.tracing:* = 2.7.0
 com.palantir.websecurity:dropwizard-web-security = 1.1.0
 com.squareup.okhttp3:* = 3.13.1
 com.squareup:javapoet = 1.11.1
@@ -31,13 +31,13 @@ javax.ws.rs:javax.ws.rs-api = 2.0.1
 joda-time:joda-time = 2.10.1
 junit:junit = 4.12
 org.apache.commons:commons-lang3 = 3.8.1
-org.assertj:* = 3.12.0
+org.assertj:* = 3.12.1
 org.glassfish.jersey.core:jersey-server = 2.25.1
 org.hamcrest:hamcrest-core = 2.1
 org.hibernate:hibernate-validator = 5.4.2.Final
 org.immutables:value = 2.7.5
 org.javassist:javassist = 3.22.0-GA
-org.mockito:mockito-core = 2.24.5
+org.mockito:mockito-core = 2.25.0
 org.slf4j:* = 1.7.25
 
 # conflict resolution

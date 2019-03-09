@@ -56,6 +56,7 @@ public final class HttpServerExchanges {
         HttpServerExchange httpServerExchange =
                 new HttpServerExchange(connection, new HeaderMap(), new HeaderMap(), 200);
         httpServerExchange.setProtocol(Protocols.HTTP_1_1);
+        httpServerExchange.startBlocking();
         return httpServerExchange;
     }
 }

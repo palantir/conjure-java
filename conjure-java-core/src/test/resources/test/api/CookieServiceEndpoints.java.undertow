@@ -1,60 +1,76 @@
 package test.api;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.EndpointRegistry;
-import com.palantir.conjure.java.undertow.lib.Registrable;
-import com.palantir.conjure.java.undertow.lib.SerializerRegistry;
-import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
-import com.palantir.conjure.java.undertow.lib.internal.Auth;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
+import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class CookieServiceEndpoints implements Service {
+public final class CookieServiceEndpoints implements UndertowService {
     private final CookieService delegate;
 
     private CookieServiceEndpoints(CookieService delegate) {
         this.delegate = delegate;
     }
 
-    public static Service of(CookieService delegate) {
+    public static UndertowService of(CookieService delegate) {
         return new CookieServiceEndpoints(delegate);
     }
 
     @Override
-    public Registrable create(ServiceContext context) {
-        return new CookieServiceRegistrable(context, delegate);
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new EatCookiesEndpoint(runtime, delegate));
     }
 
-    private static final class CookieServiceRegistrable implements Registrable {
+    private static final class EatCookiesEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
         private final CookieService delegate;
 
-        private final SerializerRegistry serializers;
-
-        private CookieServiceRegistrable(ServiceContext context, CookieService delegate) {
-            this.serializers = context.serializerRegistry();
-            this.delegate = context.serviceInstrumenter().instrument(delegate, CookieService.class);
+        EatCookiesEndpoint(UndertowRuntime runtime, CookieService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
         }
 
         @Override
-        public void register(EndpointRegistry endpointRegistry) {
-            endpointRegistry.add(
-                    Endpoint.get("/cookies", "CookieService", "eatCookies"),
-                    new EatCookiesHandler());
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            BearerToken cookieToken = runtime.auth().cookie(exchange, "PALANTIR_TOKEN");
+            delegate.eatCookies(cookieToken);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
-        private class EatCookiesHandler implements HttpHandler {
-            @Override
-            public void handleRequest(HttpServerExchange exchange) throws IOException {
-                BearerToken cookieToken = Auth.cookie(exchange, "PALANTIR_TOKEN");
-                delegate.eatCookies(cookieToken);
-                exchange.setStatusCode(StatusCodes.NO_CONTENT);
-            }
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/cookies";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CookieService";
+        }
+
+        @Override
+        public String name() {
+            return "eatCookies";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
         }
     }
 }

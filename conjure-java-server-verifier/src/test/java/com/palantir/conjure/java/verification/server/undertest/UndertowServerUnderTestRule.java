@@ -17,14 +17,15 @@
 package com.palantir.conjure.java.verification.server.undertest;
 
 import com.google.common.reflect.Reflection;
-import com.palantir.conjure.java.undertow.lib.Service;
-import com.palantir.conjure.java.undertow.lib.ServiceContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.java.undertow.runtime.ConjureSerializerRegistry;
+import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoints;
 import com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 import org.junit.rules.ExternalResource;
 
 public final class UndertowServerUnderTestRule extends ExternalResource {
@@ -34,17 +35,16 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
     private Undertow server;
 
     @Override
-    protected void before() throws Throwable {
-        UndertowAutoDeserializeService service = Reflection.newProxy(
+    protected void before() {
+        UndertowAutoDeserializeService autoDeserialize = Reflection.newProxy(
                 UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
-        Service endpoints = AutoDeserializeServiceEndpoints.of(service);
+        UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
-        ConjureHandler handler = new ConjureHandler();
-        ServiceContext context = ServiceContext.builder()
-                .serializerRegistry(ConjureSerializerRegistry.getDefault())
+        UndertowRuntime context = ConjureUndertowRuntime.builder().build();
+
+        HttpHandler handler = ConjureHandler.builder()
+                .addAllEndpoints(service.endpoints(context))
                 .build();
-
-        endpoints.create(context).register(handler);
 
         server = Undertow.builder()
                 .addHttpListener(PORT, "0.0.0.0")
