@@ -28,14 +28,14 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class ParamStorerTest {
+public class SafeParamStorerTest {
 
     private static Undertow server;
 
     private static final OkHttpClient client = new OkHttpClient.Builder().build();
     private static HttpServerExchange cExchange;
 
-    private static ConjureParamStorer paramStorer = ConjureParamStorer.INSTANCE;
+    private static ConjureSafeParamStorer paramStorer = ConjureSafeParamStorer.INSTANCE;
 
     @BeforeClass
     public static void beforeClass() {
@@ -60,7 +60,7 @@ public class ParamStorerTest {
         try (Response response = client.newCall(new Request.Builder()
                 .get().url("http://localhost:12345").build()).execute()) {
             response.close();
-            Assertions.assertThat(paramStorer.getParams(cExchange))
+            Assertions.assertThat(paramStorer.getSafeParams(cExchange))
                     .isEqualTo(ImmutableMap.of(
                             "key1", "value1",
                             "key2", "value2"));

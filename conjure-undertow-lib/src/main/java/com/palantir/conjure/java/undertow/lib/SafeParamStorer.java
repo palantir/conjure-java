@@ -20,13 +20,11 @@ import io.undertow.server.HttpServerExchange;
 import java.util.Map;
 
 /**
- * Utility class to put different types of safe or unsafe parameters in a MultiMap attached to the exchange.
- * It requires the exchange to have been priorly through a ParametersHandler which would have created the attached
- * MultiMaps.
+ * Provides safe parameters storing functionality for generated code.
  */
-public interface ParamStorer {
+public interface SafeParamStorer {
 
-    Map<String, Object> getParams(HttpServerExchange exchange);
+    Map<String, Object> getSafeParams(HttpServerExchange exchange);
 
     void putSafeParam(HttpServerExchange exchange, String key, Object value);
 }

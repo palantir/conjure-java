@@ -21,7 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
-import com.palantir.conjure.java.undertow.lib.ParamStorer;
+import com.palantir.conjure.java.undertow.lib.SafeParamStorer;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
@@ -57,8 +57,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
 
     @Override
-    public ParamStorer paramStorer() {
-        return ConjureParamStorer.INSTANCE;
+    public SafeParamStorer safeParamStorer() {
+        return ConjureSafeParamStorer.INSTANCE;
     }
 
     @Override

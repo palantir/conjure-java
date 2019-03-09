@@ -17,21 +17,27 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableMap;
-import com.palantir.conjure.java.undertow.lib.ParamStorer;
+import com.palantir.conjure.java.undertow.lib.SafeParamStorer;
+import com.palantir.logsafe.SafeArg;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-enum ConjureParamStorer implements ParamStorer {
+enum ConjureSafeParamStorer implements SafeParamStorer {
     INSTANCE;
+
+    private static final Logger log = LoggerFactory.getLogger(ConjureSafeParamStorer.class);
+
 
     private static final AttachmentKey<Map<String, Object>> SAFE_PARAMS_ATTACH_KEY =
             AttachmentKey.create(Map.class);
 
     @Override
-    public Map<String, Object> getParams(HttpServerExchange exchange) {
+    public Map<String, Object> getSafeParams(HttpServerExchange exchange) {
         return Optional.ofNullable(exchange.getAttachment(SAFE_PARAMS_ATTACH_KEY))
                 .map(ImmutableMap::copyOf)
                 .orElseGet(ImmutableMap::of);
@@ -46,6 +52,13 @@ enum ConjureParamStorer implements ParamStorer {
         if (map == null) {
             map = new HashMap<>(10);
             exchange.putAttachment(SAFE_PARAMS_ATTACH_KEY, map);
+        }
+        if (map.containsKey(key)) {
+             log.warn(
+                     "Overwritting safe parameter.",
+                     SafeArg.of("key", key),
+                     SafeArg.of("oldValue", map.get(key)),
+                     SafeArg.of("newValue", value));
         }
         map.put(key, value);
     }

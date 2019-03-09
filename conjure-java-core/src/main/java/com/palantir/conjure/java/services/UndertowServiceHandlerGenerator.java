@@ -91,10 +91,10 @@ final class UndertowServiceHandlerGenerator {
     private static final String DESERIALIZER_VAR_NAME = "deserializer";
     private static final String SERIALIZER_VAR_NAME = "serializer";
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
-    private static final String PARAM_STORER_VAR_NAME = "paramStorer";
+    private static final String PARAM_STORER_VAR_NAME = "safeParamStorer";
 
     private static final String COOKIE_TOKEN_VAR_NAME = "cookieToken";
-    private static final String PUT_PARAM_METHOD_NAME = "putParam";
+    private static final String PUT_PARAM_METHOD_NAME = "putSafeParam";
 
     private final Set<FeatureFlags> experimentalFeatures;
 
