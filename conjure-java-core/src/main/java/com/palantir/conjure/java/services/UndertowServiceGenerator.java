@@ -16,8 +16,9 @@
 
 package com.palantir.conjure.java.services;
 
-import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.GuavaImmutableClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -30,16 +31,15 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.PathParameterType;
 import com.palantir.conjure.spec.QueryParameterType;
-import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
-import com.palantir.conjure.spec.TypeDefinition;
 import com.squareup.javapoet.JavaFile;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class UndertowServiceGenerator implements ServiceGenerator {
 
@@ -51,27 +51,25 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
+        TypeMapper bodyMapper = new TypeMapper(conjureDefinition.getTypes(),
+                new UndertowRequestBodyClassNameVisitor(
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), experimentalFeatures)));
+        TypeMapper handlerBodyMapper = new TypeMapper(conjureDefinition.getTypes(),
+                new UndertowRequestBodyClassNameVisitor(
+                        new GuavaImmutableClassNameVisitor(conjureDefinition.getTypes(), experimentalFeatures)));
+        TypeMapper paramMapper = new TypeMapper(conjureDefinition.getTypes(),
+                new DefaultClassNameVisitor(conjureDefinition.getTypes(), experimentalFeatures));
+        TypeMapper responseMapper = new TypeMapper(conjureDefinition.getTypes(),
+                new UndertowReturnValueClassNameVisitor(conjureDefinition.getTypes(), experimentalFeatures));
+        UndertowTypeMappers serviceMappers = new UndertowTypeMappers(
+                bodyMapper, handlerBodyMapper, paramMapper, responseMapper);
         return conjureDefinition.getServices().stream()
-                .flatMap(serviceDef -> generateService(serviceDef, conjureDefinition.getTypes(),
-                        new TypeMapper(
-                                conjureDefinition.getTypes(),
-                                new UndertowRequestBodyClassNameVisitor(
-                                        conjureDefinition.getTypes(), experimentalFeatures)),
-                        new TypeMapper(
-                                conjureDefinition.getTypes(),
-                                new UndertowReturnValueClassNameVisitor(
-                                        conjureDefinition.getTypes(), experimentalFeatures)))
-                        .stream()).collect(Collectors.toSet());
-    }
-
-    private List<JavaFile> generateService(ServiceDefinition serviceDefinition, List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper, TypeMapper returnTypeMapper) {
-        return ImmutableList.of(
-                new UndertowServiceInterfaceGenerator(experimentalFeatures)
-                        .generateServiceInterface(serviceDefinition, typeMapper, returnTypeMapper),
-                new UndertowServiceHandlerGenerator(experimentalFeatures)
-                        .generateServiceHandler(serviceDefinition, typeDefinitions, typeMapper, returnTypeMapper)
-        );
+                .flatMap(serviceDef -> Stream.of(
+                        new UndertowServiceInterfaceGenerator(experimentalFeatures)
+                                .generateServiceInterface(serviceDef, serviceMappers),
+                        new UndertowServiceHandlerGenerator(experimentalFeatures)
+                                .generateServiceHandler(serviceDef, conjureDefinition.getTypes(), serviceMappers)))
+                .collect(Collectors.toSet());
     }
 
     static List<ArgumentDefinition> sortArgumentDefinitions(List<ArgumentDefinition> in) {

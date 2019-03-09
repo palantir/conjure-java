@@ -71,7 +71,9 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -447,6 +449,14 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testEnumHeaderParameter() {
         assertThat(client.enumHeader(AuthHeader.valueOf("authHeader"), SimpleEnum.VALUE)).isEqualTo(SimpleEnum.VALUE);
+    }
+
+    @Test
+    public void testNestedComplexCastedTypes() {
+        Optional<Map<String, List<Set<String>>>> value = Optional.of(Collections.singletonMap("test",
+                Collections.singletonList(Collections.singleton("value"))));
+        assertThat(client.complexNestedWrappers(AuthHeader.valueOf("authHeader"), value))
+                .isEqualTo(value);
     }
 
     @BeforeClass

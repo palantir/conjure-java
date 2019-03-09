@@ -7,7 +7,9 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
@@ -65,4 +67,7 @@ public interface UndertowEteService {
             AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
     SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
+
+    Optional<Map<String, List<Set<String>>>> complexNestedWrappers(
+            AuthHeader authHeader, Optional<Map<String, List<Set<String>>>> body);
 }

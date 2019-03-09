@@ -1,6 +1,8 @@
 package com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -25,6 +27,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -65,7 +68,8 @@ public final class EteServiceEndpoints implements UndertowService {
                 new EnumQueryEndpoint(runtime, delegate),
                 new EnumListQueryEndpoint(runtime, delegate),
                 new OptionalEnumQueryEndpoint(runtime, delegate),
-                new EnumHeaderEndpoint(runtime, delegate));
+                new EnumHeaderEndpoint(runtime, delegate),
+                new ComplexNestedWrappersEndpoint(runtime, delegate));
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
@@ -1254,6 +1258,77 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "enumHeader";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ComplexNestedWrappersEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Deserializer<
+                        Optional<ImmutableMap<String, ImmutableList<ImmutableSet<String>>>>>
+                deserializer;
+
+        private final Serializer<Optional<Map<String, List<Set<String>>>>> serializer;
+
+        ComplexNestedWrappersEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer =
+                    runtime.bodySerDe()
+                            .deserializer(
+                                    new TypeMarker<
+                                            Optional<
+                                                    ImmutableMap<
+                                                            String,
+                                                            ImmutableList<
+                                                                    ImmutableSet<String>>>>>() {});
+            this.serializer =
+                    runtime.bodySerDe()
+                            .serializer(
+                                    new TypeMarker<Optional<Map<String, List<Set<String>>>>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            @SuppressWarnings("unchecked")
+            Optional<Map<String, List<Set<String>>>> body =
+                    (Optional<Map<String, List<Set<String>>>>)
+                            (Object) deserializer.deserialize(exchange);
+            Optional<Map<String, List<Set<String>>>> result =
+                    delegate.complexNestedWrappers(authHeader, body);
+            if (result.isPresent()) {
+                serializer.serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/base/wrappers/complex";
+        }
+
+        @Override
+        public String serviceName() {
+            return "UndertowEteService";
+        }
+
+        @Override
+        public String name() {
+            return "complexNestedWrappers";
         }
 
         @Override

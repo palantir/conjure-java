@@ -31,7 +31,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -158,6 +160,12 @@ public class EteResource implements EteService {
     @Override
     public SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter) {
         return headerParameter;
+    }
+
+    @Override
+    public Optional<Map<String, List<Set<String>>>> complexNestedWrappers(
+            AuthHeader authHeader, Optional<Map<String, List<Set<String>>>> body) {
+        return body;
     }
 
     interface Streaming extends StreamingOutput, BinaryResponseBody {}

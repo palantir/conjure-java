@@ -169,3 +169,9 @@ services:
             param-id: Custom-Header
             type: SimpleEnum
         returns: SimpleEnum
+
+      complexNestedWrappers:
+        http: POST /wrappers/complex
+        args:
+          body: optional<map<string, list<set<string>>>>
+        returns: optional<map<string, list<set<string>>>>

@@ -7,7 +7,9 @@ import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -146,6 +148,12 @@ public interface EteService {
     SimpleEnum enumHeader(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Custom-Header") SimpleEnum headerParameter);
+
+    @POST
+    @Path("base/wrappers/complex")
+    Optional<Map<String, List<Set<String>>>> complexNestedWrappers(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            Optional<Map<String, List<Set<String>>>> body);
 
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {

@@ -16,28 +16,23 @@
 
 package com.palantir.conjure.java.services;
 
-import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.ClassNameVisitor;
-import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
-import com.palantir.conjure.spec.TypeDefinition;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Set;
 
 public final class UndertowRequestBodyClassNameVisitor implements ClassNameVisitor {
 
     private final ClassNameVisitor delegate;
 
-    public UndertowRequestBodyClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlags> featureFlags) {
-        delegate = new DefaultClassNameVisitor(types, featureFlags);
+    public UndertowRequestBodyClassNameVisitor(ClassNameVisitor delegate) {
+        this.delegate = delegate;
     }
 
     @Override
@@ -55,7 +50,8 @@ public final class UndertowRequestBodyClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitOptional(OptionalType optionalType) {
-        // TODO(ckozak): Support this? I don't know that jersey does.
+        // optional<binary> requests are not allowed, unlike responses there is no way to differentiate
+        // present 0-byte binary from empty optional.
         return delegate.visitOptional(optionalType);
     }
 

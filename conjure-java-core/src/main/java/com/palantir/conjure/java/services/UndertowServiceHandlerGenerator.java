@@ -49,6 +49,8 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.AnnotationSpec;
@@ -71,6 +73,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -97,7 +100,7 @@ final class UndertowServiceHandlerGenerator {
     }
 
     public JavaFile generateServiceHandler(ServiceDefinition serviceDefinition, List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+            UndertowTypeMappers mappers) {
 
         String serviceName = serviceDefinition.getServiceName().getName();
         // class name
@@ -155,7 +158,7 @@ final class UndertowServiceHandlerGenerator {
                         .addStatement("return $1T.of($2L)", ImmutableList.class, endpointBlock)
                         .build())
                 .addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
-                        e -> generateEndpointHandler(e, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
+                        e -> generateEndpointHandler(e, serviceClass, typeDefinitions, mappers)))
                 .build();
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), endpoints)
@@ -177,14 +180,13 @@ final class UndertowServiceHandlerGenerator {
             EndpointDefinition endpointDefinition,
             ClassName serviceClass,
             List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            UndertowTypeMappers mappers) {
         MethodSpec.Builder handleMethodBuilder = MethodSpec.methodBuilder("handleRequest")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                 .addException(IOException.class)
-                .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
+                .addCode(endpointInvocation(endpointDefinition, typeDefinitions, mappers));
 
         endpointDefinition.getDeprecated().ifPresent(deprecatedDocsValue -> handleMethodBuilder.addAnnotation(
                 AnnotationSpec.builder(SuppressWarnings.class)
@@ -211,7 +213,7 @@ final class UndertowServiceHandlerGenerator {
                 .map(ArgumentDefinition::getType)
                 // Filter out binary data
                 .flatMap(type -> type.accept(TypeVisitor.IS_BINARY) ? Optional.empty() : Optional.of(type))
-                .map(typeMapper::getClassName)
+                .map(in -> mappers.handlerRequest().getClassName(in))
                 .map(TypeName::box)
                 .ifPresent(typeName -> {
                     TypeName type = ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
@@ -224,7 +226,7 @@ final class UndertowServiceHandlerGenerator {
 
         endpointDefinition.getReturns().ifPresent(returnType -> {
             if (!UndertowTypeFunctions.isOptionalBinary(returnType) && !returnType.accept(TypeVisitor.IS_BINARY)) {
-                TypeName typeName = returnTypeMapper.getClassName(returnType).box();
+                TypeName typeName = mappers.response().getClassName(returnType).box();
                 TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
                 endpointBuilder.addField(FieldSpec.builder(type,
                         SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
@@ -278,7 +280,7 @@ final class UndertowServiceHandlerGenerator {
     private static final String HEADER_PARAMS_VAR_NAME = "headerParams";
 
     private CodeBlock endpointInvocation(EndpointDefinition endpointDefinition, List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+            UndertowTypeMappers mappers) {
         CodeBlock.Builder code = CodeBlock.builder();
 
         // auth code
@@ -291,22 +293,33 @@ final class UndertowServiceHandlerGenerator {
                 code.addStatement("$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
                         InputStream.class, bodyParam.getArgName().get(), RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
             } else {
-                code.addStatement("$1T $2N = $3N.deserialize($4N)",
-                        typeMapper.getClassName(bodyParam.getType()).box(),
-                        bodyParam.getArgName().get(),
-                        DESERIALIZER_VAR_NAME,
-                        EXCHANGE_VAR_NAME);
+                // This class uses a strict type mapper to force immutable wrapper types.
+                // Where our service interface may expect List<String>, we deserialize to ImmutableList<String>
+                // for behavior consistent with generated beans, and pass the value to the service.
+                // This becomes problematic whe inner types are expanded. For example Optional<List<String>>
+                // becomes Optional<ImmutableList<String>>, and cannot be cast to the service type.
+                // In this case, we cast all the way down to object, then back to our target type to
+                // avoid compilation errors without sacrificing immutability.
+                TypeName handlerType = mappers.handlerRequest().getClassName(bodyParam.getType()).box();
+                TypeName serviceType = mappers.request().getClassName(bodyParam.getType()).box();
+                boolean requiresCast = requiresForcefulCast(handlerType, serviceType);
+                if (requiresCast) {
+                    code.add("@$1T($2S)", SuppressWarnings.class, "unchecked");
+                }
+                code.addStatement(requiresCast
+                                ? "$1T $2N = ($1T) (Object) $3N.deserialize($4N)" : "$1T $2N = $3N.deserialize($4N)",
+                        serviceType, bodyParam.getArgName().get(), DESERIALIZER_VAR_NAME, EXCHANGE_VAR_NAME);
             }
         });
 
         // path parameters
-        addPathParamsCode(code, endpointDefinition, typeDefinitions, typeMapper);
+        addPathParamsCode(code, endpointDefinition, typeDefinitions, mappers.params());
 
         // header parameters
-        addHeaderParamsCode(code, endpointDefinition, typeDefinitions, typeMapper);
+        addHeaderParamsCode(code, endpointDefinition, typeDefinitions, mappers.params());
 
         // query parameters
-        addQueryParamsCode(code, endpointDefinition, typeDefinitions, typeMapper);
+        addQueryParamsCode(code, endpointDefinition, typeDefinitions, mappers.params());
 
         List<String> methodArgs = new ArrayList<>();
         authVarName.ifPresent(methodArgs::add);
@@ -318,7 +331,7 @@ final class UndertowServiceHandlerGenerator {
         if (endpointDefinition.getReturns().isPresent()) {
             Type returnType = endpointDefinition.getReturns().get();
             code.addStatement("$1T $2N = $3N.$4L($5L)",
-                    returnTypeMapper.getClassName(returnType),
+                    mappers.response().getClassName(returnType),
                     resultVarName,
                     DELEGATE_VAR_NAME,
                     endpointDefinition.getEndpointName(),
@@ -363,6 +376,17 @@ final class UndertowServiceHandlerGenerator {
             code.addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class);
         }
         return code.build();
+    }
+
+    private static boolean requiresForcefulCast(TypeName handlerType, TypeName serviceType) {
+        if (handlerType instanceof ParameterizedTypeName) {
+            Preconditions.checkState(serviceType instanceof ParameterizedTypeName,
+                    "Expected ParameterizedTypeName", SafeArg.of("serviceType", serviceType));
+            ParameterizedTypeName handler = (ParameterizedTypeName) handlerType;
+            ParameterizedTypeName service = (ParameterizedTypeName) serviceType;
+            return !Objects.equals(handler.typeArguments, service.typeArguments);
+        }
+        return false;
     }
 
     // Adds code for authorization. Returns an optional that contains the name of the variable that contains the

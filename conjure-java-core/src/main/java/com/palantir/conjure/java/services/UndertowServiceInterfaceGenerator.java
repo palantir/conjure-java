@@ -26,6 +26,7 @@ import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.ClassName;
@@ -49,7 +50,7 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     public JavaFile generateServiceInterface(
-            ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+            ServiceDefinition serviceDefinition, UndertowTypeMappers mappers) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
                 (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName())
@@ -61,7 +62,7 @@ final class UndertowServiceInterfaceGenerator {
                 serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper))
+                .map(endpoint -> generateServiceInterfaceMethod(endpoint, mappers))
                 .collect(Collectors.toList()));
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
@@ -72,11 +73,10 @@ final class UndertowServiceInterfaceGenerator {
 
     private MethodSpec generateServiceInterfaceMethod(
             EndpointDefinition endpointDef,
-            TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            UndertowTypeMappers mappers) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addParameters(createServiceMethodParameters(endpointDef, typeMapper));
+                .addParameters(createServiceMethodParameters(endpointDef, mappers));
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
                 ClassName.get("java.lang", "Deprecated")));
@@ -84,12 +84,13 @@ final class UndertowServiceInterfaceGenerator {
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(
-                UndertowTypeFunctions.unbox(returnTypeMapper.getClassName(type))));
+                UndertowTypeFunctions.unbox(mappers.response().getClassName(type))));
 
         return methodBuilder.build();
     }
 
-    private List<ParameterSpec> createServiceMethodParameters(EndpointDefinition endpointDef, TypeMapper typeMapper) {
+    private List<ParameterSpec> createServiceMethodParameters(EndpointDefinition endpointDef,
+            UndertowTypeMappers mappers) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
         endpointDef.getAuth().ifPresent(
@@ -116,7 +117,8 @@ final class UndertowServiceInterfaceGenerator {
         // com.palantir.conjure.java.services.JerseyServiceGenerator.createServiceMethodParameters.
         List<ArgumentDefinition> sortedArgList = UndertowServiceGenerator.sortArgumentDefinitions(
                 endpointDef.getArgs());
-        sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def)));
+        sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(
+                def.getParamType().accept(ParameterTypeVisitor.IS_BODY) ?  mappers.request() : mappers.params(), def)));
         // end copied block
 
         return ImmutableList.copyOf(parameterSpecs);

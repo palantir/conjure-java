@@ -6,7 +6,9 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -137,4 +139,10 @@ public interface EteServiceRetrofit {
     Call<SimpleEnum> enumHeader(
             @Header("Authorization") AuthHeader authHeader,
             @Header("Custom-Header") SimpleEnum headerParameter);
+
+    @POST("./base/wrappers/complex")
+    @Headers({"hr-path-template: /base/wrappers/complex", "Accept: application/json"})
+    Call<Optional<Map<String, List<Set<String>>>>> complexNestedWrappers(
+            @Header("Authorization") AuthHeader authHeader,
+            @Body Optional<Map<String, List<Set<String>>>> body);
 }
