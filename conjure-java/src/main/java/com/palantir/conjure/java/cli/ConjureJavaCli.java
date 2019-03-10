@@ -126,7 +126,7 @@ public final class ConjureJavaCli implements Runnable {
         @SuppressWarnings("BanSystemErr")
         public void run() {
             CliConfiguration config = getConfiguration();
-            if (!config.featureFlags().contains(FeatureFlags.UseImmutableBytes)) {
+            if (config.generateObjects() && !config.featureFlags().contains(FeatureFlags.UseImmutableBytes)) {
                 System.err.println("[WARNING] Using deprecated ByteBuffer codegen, please enable the "
                         + "--useImmutableBytes feature flag to opt into the preferred implementation");
             }

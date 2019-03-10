@@ -180,4 +180,17 @@ public final class ConjureJavaCliTest {
         CommandLine.run(new ConjureJavaCli(), args);
         assertThat(systemErr.getLog()).contains("[WARNING] Using deprecated ByteBuffer");
     }
+
+    @Test
+    public void doesNotWriteWarningWhenObjectsAreNotGenerated() throws IOException {
+        File outputDirectory = folder.newFolder();
+        String[] args = {
+                "generate",
+                "src/test/resources/conjure-api.json",
+                outputDirectory.getAbsolutePath(),
+                "--jersey"
+        };
+        CommandLine.run(new ConjureJavaCli(), args);
+        assertThat(systemErr.getLog()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
+    }
 }
