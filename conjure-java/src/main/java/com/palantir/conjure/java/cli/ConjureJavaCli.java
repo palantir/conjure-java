@@ -30,6 +30,7 @@ import com.palantir.conjure.java.types.TypeGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -117,6 +118,10 @@ public final class ConjureJavaCli implements Runnable {
                 defaultValue = "false",
                 description = "Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'")
         private boolean useImmutableBytes;
+
+        @SuppressWarnings("unused")
+        @CommandLine.Unmatched
+        private List<String> unmatchedOptions;
 
         @Override
         @SuppressWarnings("BanSystemErr")
