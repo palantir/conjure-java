@@ -27,3 +27,7 @@ server:
       - 'null'
     getOptionalAnyAliasExample:
       - 'null'
+    getListAnyAliasExample:
+      - '[null, 0, "content", true, [1,2,3], {"key":3}]'
+    getSetAnyAliasExample:
+      - '[null, 0, "content", true, [1,2,3], {"key":3}]'

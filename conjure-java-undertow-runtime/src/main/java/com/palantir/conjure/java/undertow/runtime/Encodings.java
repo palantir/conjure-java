@@ -124,7 +124,10 @@ public final class Encodings {
         // See documentation on Encoding.Serializer#serialize: Implementations must not close the stream.
         return mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
                 // Avoid flushing, allowing us to set content-length if the length is below the buffer size.
-                .disable(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM);
+                .disable(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM)
+                // Deserialize List, Map, and Set to guava ImmutableList, ImmutableMap, and ImmutableSet
+                // in order to match semantics of our generated bean objects.
+                .registerModule(new ImmutableCollectionsModule());
     }
 
     /**

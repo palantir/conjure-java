@@ -22,6 +22,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
@@ -31,7 +34,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.Test;
 
 public final class EncodingsTest {
@@ -67,6 +73,24 @@ public final class EncodingsTest {
         OutputStream outputStream = mock(OutputStream.class);
         serialize("test", outputStream);
         verify(outputStream, never()).close();
+    }
+
+    @Test
+    public void json_deserialize_list_immutable() throws IOException {
+        assertThat(deserialize(asStream("[1,2,3]"), new TypeMarker<List<Integer>>() {}))
+                .isInstanceOf(ImmutableList.class);
+    }
+
+    @Test
+    public void json_deserialize_set_immutable() throws IOException {
+        assertThat(deserialize(asStream("[1,2,3]"), new TypeMarker<Set<Integer>>() {}))
+                .isInstanceOf(ImmutableSet.class);
+    }
+
+    @Test
+    public void json_deserialize_map_immutable() throws IOException {
+        assertThat(deserialize(asStream("{\"0\":\"1\"}"), new TypeMarker<Map<String, String>>() {}))
+                .isInstanceOf(ImmutableMap.class);
     }
 
     private static InputStream asStream(String data) {
