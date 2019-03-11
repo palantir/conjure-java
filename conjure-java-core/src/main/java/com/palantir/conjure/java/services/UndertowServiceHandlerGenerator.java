@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.services;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MoreCollectors;
 import com.palantir.conjure.java.ConjureAnnotations;
@@ -68,6 +67,8 @@ import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -152,7 +153,8 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
                         .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
-                        .addStatement("return $1T.of($2L)", ImmutableList.class, endpointBlock)
+                        .addStatement("return $1T.unmodifiableList($2T.asList($3L))",
+                                Collections.class, Arrays.class, endpointBlock)
                         .build())
                 .addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
                         e -> generateEndpointHandler(e, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
