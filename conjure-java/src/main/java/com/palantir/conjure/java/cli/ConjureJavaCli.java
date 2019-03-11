@@ -119,6 +119,7 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'")
         private boolean useImmutableBytes;
 
+        @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
 

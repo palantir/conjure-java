@@ -494,13 +494,10 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
                 PrimitiveType primitiveType = value.getItemType().accept(TypeVisitor.PRIMITIVE);
                 // special handling for primitive optionals with Java 8
-                switch (primitiveType.get()) {
-                    case DOUBLE:
-                        return CodeBlock.of("$T.empty()", OptionalDouble.class);
-                    case INTEGER:
-                        return CodeBlock.of("$T.empty()", OptionalInt.class);
-                    default:
-                        // not other optional types
+                if (primitiveType.equals(PrimitiveType.DOUBLE)) {
+                    return CodeBlock.of("$T.empty()", OptionalDouble.class);
+                } else if (primitiveType.equals(PrimitiveType.INTEGER)) {
+                    return CodeBlock.of("$T.empty()", OptionalInt.class);
                 }
             }
             return CodeBlock.of("$T.empty()", Optional.class);
