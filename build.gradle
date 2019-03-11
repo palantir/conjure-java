@@ -68,6 +68,7 @@ subprojects {
     sourceCompatibility = 1.8
 
     tasks.withType(JavaCompile) {
+        options.errorprone.errorproneArgs += ['-Xep:PreferSafeLoggingPreconditions:OFF', '-Xep:PreferSafeLoggableExceptions:OFF']
         options.compilerArgs += ['-Werror']
     }
 
