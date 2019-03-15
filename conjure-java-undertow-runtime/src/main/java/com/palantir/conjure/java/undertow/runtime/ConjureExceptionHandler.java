@@ -179,10 +179,14 @@ final class ConjureExceptionHandler implements HttpHandler {
     private static void log(ServiceException exception) {
         if (exception.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
             log.info("Error handling request",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
+                    SafeArg.of("errorName", exception.getErrorType().name()),
+                    exception);
         } else {
             log.error("Error handling request",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
+                    SafeArg.of("errorName", exception.getErrorType().name()),
+                    exception);
         }
     }
 
