@@ -5,6 +5,10 @@ types:
       base-type: string
       external:
         java: test.api.ExampleExternalReference
+    ExternalLong:
+      base-type: safelong
+      external:
+        java: java.lang.Long
   definitions:
     default-package: com.palantir.product
     objects:
@@ -112,6 +116,12 @@ types:
           rid: optional<rid>
           bearertoken: optional<bearertoken>
           uuid: optional<uuid>
+      ExternalLongAliasExample:
+        alias: ExternalLong
+      ExternalLongExample:
+        fields:
+          externalLong: ExternalLong
+          optionalExternalLong: optional<ExternalLong>
       ManyFieldExample:
         fields:
           string:
@@ -178,6 +188,7 @@ types:
         union:
           foo: string
           bar: integer
+          baz: ExternalLong
       SingleUnion:
         union:
           foo: string
