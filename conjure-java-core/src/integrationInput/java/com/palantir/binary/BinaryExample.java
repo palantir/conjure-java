@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +105,7 @@ public final class BinaryExample {
         public Builder binary(ByteBuffer binary) {
             Preconditions.checkNotNull(binary, "binary cannot be null");
             this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
-            this.binary.rewind();
+            ((Buffer) this.binary).rewind();
             return this;
         }
 
