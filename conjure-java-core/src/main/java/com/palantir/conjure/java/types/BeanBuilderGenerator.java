@@ -341,7 +341,7 @@ public final class BeanBuilderGenerator {
                 Type innerType = optionalType.getItemType();
                 return CodeBlock.builder()
                         .addStatement("this.$1N = ($3T<$4T>) $2L",
-                                spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType))
+                                spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType).box())
                         .build();
             } else {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);

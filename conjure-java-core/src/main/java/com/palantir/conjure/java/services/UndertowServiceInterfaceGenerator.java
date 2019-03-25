@@ -83,8 +83,7 @@ final class UndertowServiceInterfaceGenerator {
 
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
-        endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(
-                UndertowTypeFunctions.unbox(returnTypeMapper.getClassName(type))));
+        endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
 
         return methodBuilder.build();
     }
@@ -123,8 +122,6 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     private ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def) {
-        ParameterSpec.Builder param = ParameterSpec.builder(
-                UndertowTypeFunctions.unbox(typeMapper.getClassName(def.getType())), def.getArgName().get());
-        return param.build();
+        return ParameterSpec.builder(typeMapper.getClassName(def.getType()), def.getArgName().get()).build();
     }
 }

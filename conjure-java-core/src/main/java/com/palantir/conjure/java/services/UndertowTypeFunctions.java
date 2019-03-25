@@ -30,7 +30,6 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.squareup.javapoet.TypeName;
 import java.util.List;
 import java.util.Optional;
 
@@ -258,13 +257,6 @@ final class UndertowTypeFunctions {
         public Boolean visitUnknown(String unknownType) {
             return false;
         }
-    }
-
-    static TypeName unbox(TypeName input) {
-        if (input.isBoxedPrimitive()) {
-            return input.unbox();
-        }
-        return input;
     }
 
     private UndertowTypeFunctions() {}

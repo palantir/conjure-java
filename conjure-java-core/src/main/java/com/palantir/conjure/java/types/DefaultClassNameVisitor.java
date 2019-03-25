@@ -153,7 +153,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     @Override
     public TypeName visitExternal(ExternalReference externalType) {
         String conjurePackage = externalType.getExternalReference().getPackage();
-        return ClassName.get(conjurePackage, externalType.getExternalReference().getName());
+        ClassName typeName = ClassName.get(conjurePackage, externalType.getExternalReference().getName());
+        return typeName.isBoxedPrimitive() ? typeName.unbox() : typeName;
     }
 
     @Override
