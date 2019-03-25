@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,12 +22,16 @@ public final class ExternalLongExample {
 
     private final Optional<Long> optionalExternalLong;
 
+    private final List<Long> listExternalLong;
+
     private volatile int memoizedHashCode;
 
-    private ExternalLongExample(long externalLong, Optional<Long> optionalExternalLong) {
-        validateFields(optionalExternalLong);
+    private ExternalLongExample(
+            long externalLong, Optional<Long> optionalExternalLong, List<Long> listExternalLong) {
+        validateFields(optionalExternalLong, listExternalLong);
         this.externalLong = externalLong;
         this.optionalExternalLong = optionalExternalLong;
+        this.listExternalLong = Collections.unmodifiableList(listExternalLong);
     }
 
     @JsonProperty("externalLong")
@@ -38,6 +44,11 @@ public final class ExternalLongExample {
         return this.optionalExternalLong;
     }
 
+    @JsonProperty("listExternalLong")
+    public List<Long> getListExternalLong() {
+        return this.listExternalLong;
+    }
+
     @Override
     public boolean equals(Object other) {
         return this == other
@@ -46,13 +57,14 @@ public final class ExternalLongExample {
 
     private boolean equalTo(ExternalLongExample other) {
         return this.externalLong == other.externalLong
-                && this.optionalExternalLong.equals(other.optionalExternalLong);
+                && this.optionalExternalLong.equals(other.optionalExternalLong)
+                && this.listExternalLong.equals(other.listExternalLong);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(externalLong, optionalExternalLong);
+            memoizedHashCode = Objects.hash(externalLong, optionalExternalLong, listExternalLong);
         }
         return memoizedHashCode;
     }
@@ -68,21 +80,29 @@ public final class ExternalLongExample {
                 .append("optionalExternalLong")
                 .append(": ")
                 .append(optionalExternalLong)
+                .append(", ")
+                .append("listExternalLong")
+                .append(": ")
+                .append(listExternalLong)
                 .append('}')
                 .toString();
     }
 
-    public static ExternalLongExample of(long externalLong, Long optionalExternalLong) {
+    public static ExternalLongExample of(
+            long externalLong, Long optionalExternalLong, List<Long> listExternalLong) {
         return builder()
                 .externalLong(externalLong)
                 .optionalExternalLong(Optional.of(optionalExternalLong))
+                .listExternalLong(listExternalLong)
                 .build();
     }
 
-    private static void validateFields(Optional<Long> optionalExternalLong) {
+    private static void validateFields(
+            Optional<Long> optionalExternalLong, List<Long> listExternalLong) {
         List<String> missingFields = null;
         missingFields =
                 addFieldIfMissing(missingFields, optionalExternalLong, "optionalExternalLong");
+        missingFields = addFieldIfMissing(missingFields, listExternalLong, "listExternalLong");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set",
@@ -95,7 +115,7 @@ public final class ExternalLongExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(1);
+                missingFields = new ArrayList<>(2);
             }
             missingFields.add(fieldName);
         }
@@ -113,6 +133,8 @@ public final class ExternalLongExample {
 
         private Optional<Long> optionalExternalLong = Optional.empty();
 
+        private List<Long> listExternalLong = new ArrayList<>();
+
         private boolean _externalLongInitialized = false;
 
         private Builder() {}
@@ -120,6 +142,7 @@ public final class ExternalLongExample {
         public Builder from(ExternalLongExample other) {
             externalLong(other.getExternalLong());
             optionalExternalLong(other.getOptionalExternalLong());
+            listExternalLong(other.getListExternalLong());
             return this;
         }
 
@@ -144,6 +167,29 @@ public final class ExternalLongExample {
                     Optional.of(
                             Preconditions.checkNotNull(
                                     optionalExternalLong, "optionalExternalLong cannot be null"));
+            return this;
+        }
+
+        @JsonSetter("listExternalLong")
+        public Builder listExternalLong(Iterable<? extends Long> listExternalLong) {
+            this.listExternalLong.clear();
+            ConjureCollections.addAll(
+                    this.listExternalLong,
+                    Preconditions.checkNotNull(
+                            listExternalLong, "listExternalLong cannot be null"));
+            return this;
+        }
+
+        public Builder addAllListExternalLong(Iterable<? extends Long> listExternalLong) {
+            ConjureCollections.addAll(
+                    this.listExternalLong,
+                    Preconditions.checkNotNull(
+                            listExternalLong, "listExternalLong cannot be null"));
+            return this;
+        }
+
+        public Builder listExternalLong(long listExternalLong) {
+            this.listExternalLong.add(listExternalLong);
             return this;
         }
 
@@ -172,7 +218,7 @@ public final class ExternalLongExample {
 
         public ExternalLongExample build() {
             validatePrimitiveFieldsHaveBeenInitialized();
-            return new ExternalLongExample(externalLong, optionalExternalLong);
+            return new ExternalLongExample(externalLong, optionalExternalLong, listExternalLong);
         }
     }
 }
