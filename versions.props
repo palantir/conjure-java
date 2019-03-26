@@ -6,7 +6,7 @@ com.google.errorprone:error_prone_annotations = 2.3.3
 com.google.googlejavaformat:google-java-format = 1.7
 com.google.guava:guava = 27.0.1-jre
 com.palantir.conjure.java.api:* = 2.3.0
-com.palantir.conjure.java.runtime:* = 4.18.0
+com.palantir.conjure.java.runtime:* = 4.18.1
 # dependency-upgrader:OFF
 # Regression introduced by https://github.com/palantir/conjure-java-runtime/pull/865
 com.palantir.conjure.java.runtime:conjure-java-jaxrs-client = 4.6.0
