@@ -28,6 +28,7 @@ import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -312,7 +313,7 @@ final class UndertowServiceHandlerGenerator {
 
         List<String> methodArgs = new ArrayList<>();
         authVarName.ifPresent(methodArgs::add);
-        methodArgs.addAll(UndertowServiceGenerator.sortArgumentDefinitions(
+        methodArgs.addAll(ParameterOrder.sorted(
                 endpointDefinition.getArgs()).stream().map(
                     arg -> arg.getArgName().get()).collect(Collectors.toList()));
 

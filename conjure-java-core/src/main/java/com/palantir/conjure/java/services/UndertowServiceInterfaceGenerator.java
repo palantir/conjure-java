@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
@@ -108,15 +109,8 @@ final class UndertowServiceInterfaceGenerator {
                         throw new IllegalStateException("unknown auth type: " + unknownType);
                     }
                 })));
-
-        // TODO(nmiyake): export and share this logic properly in conjure-java project instead of relying on copy-pasted
-        // code matching the implementation. In order to maintain API compatibility with Conjure-generated Jersey APIs,
-        // the following code block must match the code defined in
-        // com.palantir.conjure.java.services.JerseyServiceGenerator.createServiceMethodParameters.
-        List<ArgumentDefinition> sortedArgList = UndertowServiceGenerator.sortArgumentDefinitions(
-                endpointDef.getArgs());
+        List<ArgumentDefinition> sortedArgList = ParameterOrder.sorted(endpointDef.getArgs());
         sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def)));
-        // end copied block
 
         return ImmutableList.copyOf(parameterSpecs);
     }
