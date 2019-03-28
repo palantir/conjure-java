@@ -75,6 +75,16 @@ task conjureJavaObjects(type: JavaExec) {
     doFirst { delete "src/generatedObjects/java/*" }
 }
 
+task conjureJavaJaxRsClient(type: JavaExec) {
+    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jaxRsClient'
+
+    inputs.file "${-> configurations.verificationApi.singleFile}"
+    outputs.dir "src/generatedJersey/java"
+    doFirst { delete "src/generatedJersey/java/*" }
+}
+
 task conjureJavaJersey(type: JavaExec) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
@@ -97,6 +107,7 @@ task conjureJavaUndertow(type: JavaExec) {
 }
 
 compileGeneratedObjectsJava.dependsOn conjureJavaObjects
+compileGeneratedObjectsJava.dependsOn conjureJavaJaxRsClient
 compileGeneratedObjectsJava.dependsOn conjureJavaJersey
 compileGeneratedObjectsJava.dependsOn conjureJavaUndertow
 

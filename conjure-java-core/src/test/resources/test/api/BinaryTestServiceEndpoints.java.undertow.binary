@@ -15,15 +15,15 @@ import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
-public final class TestServiceEndpoints implements UndertowService {
-    private final TestService delegate;
+public final class BinaryTestServiceEndpoints implements UndertowService {
+    private final BinaryTestService delegate;
 
-    private TestServiceEndpoints(TestService delegate) {
+    private BinaryTestServiceEndpoints(BinaryTestService delegate) {
         this.delegate = delegate;
     }
 
-    public static UndertowService of(TestService delegate) {
-        return new TestServiceEndpoints(delegate);
+    public static UndertowService of(BinaryTestService delegate) {
+        return new BinaryTestServiceEndpoints(delegate);
     }
 
     @Override
@@ -35,9 +35,9 @@ public final class TestServiceEndpoints implements UndertowService {
     private static final class GetBinaryEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private final TestService delegate;
+        private final BinaryTestService delegate;
 
-        GetBinaryEndpoint(UndertowRuntime runtime, TestService delegate) {
+        GetBinaryEndpoint(UndertowRuntime runtime, BinaryTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
@@ -60,7 +60,7 @@ public final class TestServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "TestService";
+            return "BinaryTestService";
         }
 
         @Override

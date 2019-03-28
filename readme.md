@@ -17,7 +17,10 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
     Options:
         --objects    Generate POJOs for Conjure type definitions
-        --jersey     Generate jax-rs annotated interfaces for client or server-usage
+        --jaxRsClient
+                     Generate jax-rs annotated interfaces for client usage
+        --jersey     Generate jax-rs annotated interfaces server-usage. These may produce functional clients in many
+                     cases, however the '--jaxRsClient' option is preferred for client usage
         --undertow   Generate undertow handlers and interfaces for server-usage
         --retrofit   Generate retrofit interfaces for streaming/async clients
         --requireNotNullAuthAndBodyParams

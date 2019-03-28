@@ -37,6 +37,12 @@ public abstract class CliConfiguration {
 
     @Value.Default
     @SuppressWarnings("checkstyle:designforextension")
+    boolean generateJaxRsClient() {
+        return false;
+    }
+
+    @Value.Default
+    @SuppressWarnings("checkstyle:designforextension")
     boolean generateJersey() {
         return false;
     }
@@ -64,7 +70,8 @@ public abstract class CliConfiguration {
     final void check() {
         Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
         Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
-        Preconditions.checkArgument(generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
+        Preconditions.checkArgument(generateObjects() ^ generateJaxRsClient()
+                        ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
                 "Must specify exactly one project to generate");
     }
 

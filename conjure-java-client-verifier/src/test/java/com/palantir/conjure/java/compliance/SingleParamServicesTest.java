@@ -44,10 +44,15 @@ public class SingleParamServicesTest {
 
     private static final Logger log = LoggerFactory.getLogger(SingleParamServicesTest.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private static ImmutableMap<String, Object> servicesMaps = ImmutableMap.of(
+    private static ImmutableMap<String, Object> jerseyServicesMaps = ImmutableMap.of(
             "singlePathParamService", VerificationClients.singlePathParamService(server),
             "singleHeaderService", VerificationClients.singleHeaderService(server),
             "singleQueryParamService", VerificationClients.singleQueryParamService(server));
+
+    private static ImmutableMap<String, Object> jaxRsServicesMaps = ImmutableMap.of(
+            "singlePathParamService", VerificationClients.singlePathParamServiceJaxRs(server),
+            "singleHeaderService", VerificationClients.singleHeaderServiceJaxRs(server),
+            "singleQueryParamService", VerificationClients.singleQueryParamServiceJaxRs(server));
 
     @Parameterized.Parameter(0)
     public String serviceName;
@@ -93,7 +98,16 @@ public class SingleParamServicesTest {
     }
 
     @Test
-    public void runTestCase() throws Exception {
+    public void runJerseyTestCase() throws Exception {
+        runTestCase(jerseyServicesMaps);
+    }
+
+    @Test
+    public void runJaxRsTestCase() throws Exception {
+        runTestCase(jaxRsServicesMaps);
+    }
+
+    private void runTestCase(ImmutableMap<String, Object> servicesMaps) throws Exception {
         Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         System.out.println(String.format("Invoking %s %s(%s)", serviceName, endpointName, jsonString));

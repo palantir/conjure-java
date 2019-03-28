@@ -21,13 +21,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
 import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.services.JaxRsClientGenerator;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
-import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
-import com.palantir.conjure.java.types.TypeGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -72,9 +72,15 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate POJOs for Conjure type definitions")
         private boolean generateObjects;
 
+        @CommandLine.Option(names = "--jaxRsClient",
+                defaultValue = "false",
+                description = "Generate jax-rs annotated interfaces for client usage")
+        private boolean generateJaxRsClient;
+
         @CommandLine.Option(names = "--jersey",
                 defaultValue = "false",
-                description = "Generate jax-rs annotated interfaces for client or server-usage")
+                description = "Generate jax-rs annotated interfaces server-usage. These may produce functional "
+                        + "clients in many cases, however the '--jaxrsClient' option is preferred for client usage")
         private boolean generateJersey;
 
         @CommandLine.Option(names = "--undertow",
@@ -127,31 +133,31 @@ public final class ConjureJavaCli implements Runnable {
         @SuppressWarnings("BanSystemErr")
         public void run() {
             CliConfiguration config = getConfiguration();
-            if (config.generateObjects() && !config.featureFlags().contains(FeatureFlags.UseImmutableBytes)) {
-                System.err.println("[WARNING] Using deprecated ByteBuffer codegen, please enable the "
-                        + "--useImmutableBytes feature flag to opt into the preferred implementation");
-            }
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
-                TypeGenerator typeGenerator = new ObjectGenerator(config.featureFlags());
-                ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.featureFlags());
-                ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.featureFlags());
-                ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.featureFlags());
-
                 if (config.generateObjects()) {
-                    typeGenerator.emit(conjureDefinition, config.outputDirectory());
+                    if (!config.featureFlags().contains(FeatureFlags.UseImmutableBytes)) {
+                        System.err.println("[WARNING] Using deprecated ByteBuffer codegen, please enable the "
+                                + "--useImmutableBytes feature flag to opt into the preferred implementation");
+                    }
+                    new ObjectGenerator(config.featureFlags()).emit(conjureDefinition, config.outputDirectory());
+                }
+                if (config.generateJaxRsClient()) {
+                    new JaxRsClientGenerator(config.featureFlags()).emit(conjureDefinition, config.outputDirectory());
                 }
                 if (config.generateJersey()) {
-                    jerseyGenerator.emit(conjureDefinition, config.outputDirectory());
+                    new JerseyServiceGenerator(config.featureFlags()).emit(conjureDefinition, config.outputDirectory());
                 }
                 if (config.generateRetrofit()) {
-                    retrofitGenerator.emit(conjureDefinition, config.outputDirectory());
+                    new Retrofit2ServiceGenerator(config.featureFlags())
+                            .emit(conjureDefinition, config.outputDirectory());
                 }
                 if (config.generateUndertow()) {
-                    undertowGenerator.emit(conjureDefinition, config.outputDirectory());
+                    new UndertowServiceGenerator(config.featureFlags())
+                            .emit(conjureDefinition, config.outputDirectory());
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Error parsing definition", e);
+                throw new SafeRuntimeException("Error parsing definition", e);
             }
         }
 
@@ -160,6 +166,7 @@ public final class ConjureJavaCli implements Runnable {
             return CliConfiguration.builder()
                     .input(new File(input))
                     .outputDirectory(new File(output))
+                    .generateJaxRsClient(generateJaxRsClient)
                     .generateJersey(generateJersey)
                     .generateObjects(generateObjects)
                     .generateRetrofit(generateRetrofit)

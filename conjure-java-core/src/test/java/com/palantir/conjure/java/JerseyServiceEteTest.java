@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
@@ -30,9 +31,11 @@ import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.conjure.java.services.JaxRsClientGenerator;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
+import com.palantir.product.EteBinaryServiceJaxRsClient;
 import com.palantir.product.EteBinaryServiceRetrofit;
 import com.palantir.product.EteService;
 import com.palantir.product.StringAliasExample;
@@ -43,6 +46,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -74,10 +78,16 @@ public final class JerseyServiceEteTest extends TestBase {
 
     private final EteService client;
     private final EteBinaryServiceRetrofit binary;
+    private final EteBinaryServiceJaxRsClient binaryJaxrs;
 
     public JerseyServiceEteTest() {
         client = JaxRsClient.create(
                 EteService.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
+        binaryJaxrs = JaxRsClient.create(
+                EteBinaryServiceJaxRsClient.class,
                 clientUserAgent(),
                 new HostMetricsRegistry(),
                 clientConfiguration());
@@ -177,7 +187,7 @@ public final class JerseyServiceEteTest extends TestBase {
     }
 
     @Test
-    public void test_optionalBinary_present() throws IOException {
+    public void test_optionalBinary_present_retrofit() throws IOException {
         Response<ResponseBody> response = binary.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")).execute();
         assertThat(response.code()).isEqualTo(200);
         assertThat(response.headers().get(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
@@ -185,11 +195,30 @@ public final class JerseyServiceEteTest extends TestBase {
     }
 
     @Test
-    public void test_optionalBinary_empty() throws IOException {
+    public void test_optionalBinary_present() {
+        Optional<InputStream> response = binaryJaxrs.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader"));
+        assertThat(response).hasValueSatisfying(inputStream -> {
+            try {
+                assertThat(new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8))
+                        .isEqualTo("Hello World!");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @Test
+    public void test_optionalBinary_empty_retrofit() throws IOException {
         Response<ResponseBody> response = binary.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")).execute();
         assertThat(response.code()).isEqualTo(204);
         assertThat(response.headers().get(HttpHeaders.CONTENT_TYPE)).isNull();
         assertThat(response.body()).isNull();
+    }
+
+    @Test
+    public void test_optionalBinary_empty() {
+        Optional<InputStream> response = binaryJaxrs.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader"));
+        assertThat(response).isEmpty();
     }
 
     @BeforeClass
@@ -197,8 +226,11 @@ public final class JerseyServiceEteTest extends TestBase {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/ete-service.yml"),
                         new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
-                .emit(def, folder.getRoot());
+        List<Path> files = ImmutableList.<Path>builder()
+                .addAll(new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
+                        .emit(def, folder.getRoot()))
+                .addAll(new JaxRsClientGenerator(ImmutableSet.of()).emit(def, folder.getRoot()))
+                .build();
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 

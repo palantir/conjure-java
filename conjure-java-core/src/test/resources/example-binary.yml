@@ -1,5 +1,5 @@
 services:
-  TestService:
+  BinaryTestService:
     default-auth: none
     base-path: /
     package: test.api

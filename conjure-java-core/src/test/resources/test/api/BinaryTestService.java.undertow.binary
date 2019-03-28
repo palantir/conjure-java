@@ -4,6 +4,6 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-public interface TestService {
+public interface BinaryTestService {
     BinaryResponseBody getBinary();
 }
