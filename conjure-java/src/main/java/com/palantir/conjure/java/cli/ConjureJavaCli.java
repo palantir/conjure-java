@@ -80,7 +80,7 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(names = "--undertow",
                 defaultValue = "false",
                 description =
-                        "Experimental: Generate undertow service interfaces and endpoint wrappers for server usage")
+                        "Generate undertow service interfaces and endpoint wrappers for server usage")
         private boolean generateUndertow;
 
         @CommandLine.Option(names = "--retrofit",
@@ -111,7 +111,7 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(names = "--undertowServicePrefixes",
                 defaultValue = "false",
                 description =
-                        "Experimental: Generate service interfaces for Undertow with class names prefixed 'Undertow'")
+                        "Generate service interfaces for Undertow with class names prefixed 'Undertow'")
         private boolean undertowServicePrefix;
 
         @CommandLine.Option(names = "--useImmutableBytes",
