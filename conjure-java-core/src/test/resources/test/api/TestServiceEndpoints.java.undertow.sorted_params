@@ -1,0 +1,124 @@
+package test.api;
+
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.tokens.auth.BearerToken;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderMap;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.PathTemplateMatch;
+import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import javax.annotation.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+public final class TestServiceEndpoints implements UndertowService {
+    private final TestService delegate;
+
+    private TestServiceEndpoints(TestService delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(TestService delegate) {
+        return new TestServiceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return Collections.unmodifiableList(
+                Arrays.asList(new GetMethodParamsEndpoint(runtime, delegate)));
+    }
+
+    private static final class GetMethodParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Deserializer<Set<String>> deserializer;
+
+        private final Serializer<String> serializer;
+
+        GetMethodParamsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            Set<String> testBodySetArg = deserializer.deserialize(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            int testPathIntegerArg =
+                    runtime.plainSerDe().deserializeInteger(pathParams.get("testPathIntegerArg"));
+            String testPathStringArg =
+                    runtime.plainSerDe().deserializeString(pathParams.get("testPathStringArg"));
+            HeaderMap headerParams = exchange.getRequestHeaders();
+            Optional<OffsetDateTime> testHeaderOptionalArg =
+                    runtime.plainSerDe()
+                            .deserializeOptionalDateTime(headerParams.get("TestHeaderDateTime"));
+            BearerToken testHeaderBearerTokenArg =
+                    runtime.plainSerDe()
+                            .deserializeBearerToken(headerParams.get("TestHeaderBearerToken"));
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            boolean testQueryBooleanArg =
+                    runtime.plainSerDe().deserializeBoolean(queryParams.get("testQueryBoolean"));
+            Optional<String> testQueryOptionalArg =
+                    runtime.plainSerDe()
+                            .deserializeOptionalString(queryParams.get("testQueryOptional"));
+            UUID testQueryUuidArg =
+                    runtime.plainSerDe().deserializeUuid(queryParams.get("testQueryUuid"));
+            String result =
+                    delegate.getMethodParams(
+                            testHeaderBearerTokenArg,
+                            testHeaderOptionalArg,
+                            testPathIntegerArg,
+                            testPathStringArg,
+                            testQueryBooleanArg,
+                            testQueryUuidArg,
+                            testQueryOptionalArg,
+                            testBodySetArg);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.PUT;
+        }
+
+        @Override
+        public String template() {
+            return "/{testPathStringArg}/{testPathIntegerArg}";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getMethodParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

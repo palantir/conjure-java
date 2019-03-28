@@ -1,0 +1,54 @@
+package test.api;
+
+import com.palantir.tokens.auth.BearerToken;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import javax.annotation.Generated;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Path("/")
+@Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+public interface TestService {
+    @PUT
+    @Path("{testPathStringArg}/{testPathIntegerArg}")
+    String getMethodParams(
+            @HeaderParam("TestHeaderBearerToken") BearerToken testHeaderBearerTokenArg,
+            @HeaderParam("TestHeaderDateTime") Optional<OffsetDateTime> testHeaderOptionalArg,
+            @PathParam("testPathIntegerArg") int testPathIntegerArg,
+            @PathParam("testPathStringArg") String testPathStringArg,
+            @QueryParam("testQueryBoolean") boolean testQueryBooleanArg,
+            @QueryParam("testQueryUuid") UUID testQueryUuidArg,
+            @QueryParam("testQueryOptional") Optional<String> testQueryOptionalArg,
+            Set<String> testBodySetArg);
+
+    @Deprecated
+    default String getMethodParams(
+            BearerToken testHeaderBearerTokenArg,
+            Optional<OffsetDateTime> testHeaderOptionalArg,
+            int testPathIntegerArg,
+            String testPathStringArg,
+            boolean testQueryBooleanArg,
+            UUID testQueryUuidArg,
+            Set<String> testBodySetArg) {
+        return getMethodParams(
+                testHeaderBearerTokenArg,
+                testHeaderOptionalArg,
+                testPathIntegerArg,
+                testPathStringArg,
+                testQueryBooleanArg,
+                testQueryUuidArg,
+                Optional.empty(),
+                testBodySetArg);
+    }
+}

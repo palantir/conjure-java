@@ -109,7 +109,9 @@ final class UndertowServiceInterfaceGenerator {
                         throw new IllegalStateException("unknown auth type: " + unknownType);
                     }
                 })));
-        List<ArgumentDefinition> sortedArgList = ParameterOrder.sorted(endpointDef.getArgs());
+
+        boolean disableParameterSorting = experimentalFeatures.contains(FeatureFlags.DisableParameterSorting);
+        List<ArgumentDefinition> sortedArgList = ParameterOrder.sorted(endpointDef.getArgs(), disableParameterSorting);
         sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def)));
 
         return ImmutableList.copyOf(parameterSpecs);

@@ -140,11 +140,14 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toList()));
 
-        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper,
-                        argumentTypeMapper))
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList()));
+        // When parameters are not sorted, do not generate the backwards compatibility service methods
+        if (!featureFlags.contains(FeatureFlags.DisableParameterSorting)) {
+            serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+                    .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper,
+                            argumentTypeMapper))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList()));
+        }
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
                 .skipJavaLangImports(true)
@@ -288,7 +291,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         Optional<AuthType> auth = endpointDef.getAuth();
         createAuthParameter(auth, withAnnotations).ifPresent(parameterSpecs::add);
 
-        ParameterOrder.sorted(endpointDef.getArgs()).forEach(def ->
+        boolean disableParameterSorting = featureFlags.contains(FeatureFlags.DisableParameterSorting);
+        ParameterOrder.sorted(endpointDef.getArgs(), disableParameterSorting).forEach(def ->
                 parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations)));
         return ImmutableList.copyOf(parameterSpecs);
     }

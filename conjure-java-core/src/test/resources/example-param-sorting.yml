@@ -1,0 +1,41 @@
+services:
+  TestService:
+    default-auth: none
+    base-path: /
+    package: test.api
+    name: Test Interface
+    endpoints:
+      getMethodParams:
+        http: PUT /{testPathStringArg}/{testPathIntegerArg}
+        args:
+          testBodySetArg:
+            param-type: body
+            type: set<string>
+          testQueryBooleanArg:
+            param-id: testQueryBoolean
+            param-type: query
+            type: boolean
+          # Put an optional query param before non-optional to trigger backcompat method generation for Jersey
+          testQueryOptionalArg:
+            param-id: testQueryOptional
+            param-type: query
+            type: optional<string>
+          testQueryUuidArg:
+            param-id: testQueryUuid
+            param-type: query
+            type: uuid
+          testPathIntegerArg:
+            param-type: path
+            type: integer
+          testPathStringArg:
+            param-type: path
+            type: string
+          testHeaderOptionalArg:
+            param-id: TestHeaderDateTime
+            param-type: header
+            type: optional<datetime>
+          testHeaderBearerTokenArg:
+            param-id: TestHeaderBearerToken
+            param-type: header
+            type: bearertoken
+        returns: string

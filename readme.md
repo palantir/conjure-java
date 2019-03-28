@@ -30,6 +30,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Generate service interfaces for Undertow with class names prefixed 'Undertow'
         --useImmutableBytes
                      Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'
+        --disableParameterSorting
+                     Generate service interfaces that respect the order of method parameters in the conjure definition
 
 ### Feature Flags
 

@@ -315,8 +315,10 @@ final class UndertowServiceHandlerGenerator {
 
         List<String> methodArgs = new ArrayList<>();
         authVarName.ifPresent(methodArgs::add);
+
+        boolean disableParameterSorting = experimentalFeatures.contains(FeatureFlags.DisableParameterSorting);
         methodArgs.addAll(ParameterOrder.sorted(
-                endpointDefinition.getArgs()).stream().map(
+                endpointDefinition.getArgs(), disableParameterSorting).stream().map(
                     arg -> arg.getArgName().get()).collect(Collectors.toList()));
 
         final String resultVarName = "result";

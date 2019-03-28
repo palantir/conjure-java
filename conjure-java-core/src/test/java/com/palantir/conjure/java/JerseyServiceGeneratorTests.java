@@ -97,6 +97,25 @@ public final class JerseyServiceGeneratorTests extends TestBase {
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.binary_as_response");
     }
 
+    @Test
+    public void testSortedMethodParameters() throws IOException {
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-param-sorting.yml")));
+        List<Path> files = new JerseyServiceGenerator(Collections.emptySet())
+                .emit(def, folder.getRoot());
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.sorted_params");
+    }
+
+    @Test
+    public void testUnsortedMethodParameters() throws IOException {
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-param-sorting.yml")));
+        List<Path> files =
+                new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.DisableParameterSorting))
+                        .emit(def, folder.getRoot());
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.unsorted_params");
+    }
+
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));

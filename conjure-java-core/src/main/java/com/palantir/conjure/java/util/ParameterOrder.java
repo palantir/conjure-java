@@ -96,7 +96,10 @@ public final class ParameterOrder {
     private static final Comparator<ArgumentDefinition> COMPARATOR = Comparator.comparing(o ->
             o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER));
 
-    public static List<ArgumentDefinition> sorted(List<ArgumentDefinition> input) {
+    public static List<ArgumentDefinition> sorted(List<ArgumentDefinition> input, boolean disableParameterSorting) {
+        if (disableParameterSorting) {
+            return ImmutableList.copyOf(input);
+        }
         return input.stream()
                 .sorted(COMPARATOR)
                 .collect(ImmutableList.toImmutableList());

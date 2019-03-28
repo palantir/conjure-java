@@ -1,0 +1,21 @@
+package test.api;
+
+import com.palantir.tokens.auth.BearerToken;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import javax.annotation.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+public interface TestService {
+    String getMethodParams(
+            BearerToken testHeaderBearerTokenArg,
+            Optional<OffsetDateTime> testHeaderOptionalArg,
+            int testPathIntegerArg,
+            String testPathStringArg,
+            boolean testQueryBooleanArg,
+            UUID testQueryUuidArg,
+            Optional<String> testQueryOptionalArg,
+            Set<String> testBodySetArg);
+}

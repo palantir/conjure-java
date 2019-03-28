@@ -119,6 +119,11 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'")
         private boolean useImmutableBytes;
 
+        @CommandLine.Option(names = "--disableParameterSorting",
+                defaultValue = "false",
+                description = "Generate jersey interfaces without sorted method parameters.")
+        private boolean disableParameterSorting;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -170,6 +175,7 @@ public final class ConjureJavaCli implements Runnable {
                     .notNullAuthAndBody(notNullAuthAndBody)
                     .undertowServicePrefix(undertowServicePrefix)
                     .useImmutableBytes(useImmutableBytes)
+                    .disableParameterSorting(disableParameterSorting)
                     .build();
         }
 

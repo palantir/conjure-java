@@ -59,4 +59,10 @@ public enum FeatureFlags {
      * Use the conjure immutable "Bytes" class over ByteBuffer.
      */
     UseImmutableBytes,
+
+    /**
+     * Instructs the {@link com.palantir.conjure.java.services.ServiceGenerator} implementation to not sort parameters
+     * for generated service methods. See {@link com.palantir.conjure.java.util.ParameterOrder} for sort implementation.
+     */
+    DisableParameterSorting,
 }

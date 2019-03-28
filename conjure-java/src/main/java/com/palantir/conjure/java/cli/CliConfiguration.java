@@ -96,5 +96,9 @@ public abstract class CliConfiguration {
         Builder useImmutableBytes(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.UseImmutableBytes) : this;
         }
+
+        Builder disableParameterSorting(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.DisableParameterSorting) : this;
+        }
     }
 }
