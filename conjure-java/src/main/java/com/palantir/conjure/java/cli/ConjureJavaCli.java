@@ -27,7 +27,6 @@ import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -157,7 +156,7 @@ public final class ConjureJavaCli implements Runnable {
                             .emit(conjureDefinition, config.outputDirectory());
                 }
             } catch (IOException e) {
-                throw new SafeRuntimeException("Error parsing definition", e);
+                throw new RuntimeException("Error parsing definition", e);
             }
         }
 
