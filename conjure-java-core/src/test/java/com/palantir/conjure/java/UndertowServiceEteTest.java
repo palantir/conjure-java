@@ -343,6 +343,25 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void testExternalImportOptionalEmptyBodyZeroLength_noContentType() throws IOException {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/external/optional-body");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        assertThat(con.getResponseCode()).isEqualTo(204);
+    }
+
+    @Test
+    public void testExternalImportOptionalEmptyBodyZeroLength_withContentType() throws IOException {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/external/optional-body");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
+        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        assertThat(con.getResponseCode()).isEqualTo(204);
+    }
+
+    @Test
     public void testUnknownContentType() {
         assertThatThrownBy(() -> binaryClient.postBinary(AuthHeader.valueOf("authHeader"),
                 RequestBody.create(MediaType.parse("application/unsupported"), new byte[] {1, 2, 3})).execute())

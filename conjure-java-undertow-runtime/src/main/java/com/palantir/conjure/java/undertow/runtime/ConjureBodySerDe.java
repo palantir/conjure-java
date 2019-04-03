@@ -30,6 +30,7 @@ import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.util.List;
 
 /** Package private internal API. */
@@ -135,17 +136,44 @@ final class ConjureBodySerDe implements BodySerDe {
     private static final class EncodingDeserializerRegistry<T> implements Deserializer<T> {
 
         private final List<EncodingDeserializerContainer<T>> encodings;
+        private final boolean optionalType;
+        private final TypeMarker<T> marker;
 
         EncodingDeserializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
             this.encodings = encodings.stream()
                     .map(encoding -> new EncodingDeserializerContainer<>(encoding, token))
                     .collect(ImmutableList.toImmutableList());
+            this.optionalType = TypeMarkers.isOptional(token);
+            this.marker = token;
         }
 
         @Override
         public T deserialize(HttpServerExchange exchange) throws IOException {
+            if (optionalType && maybeEmptyBody(exchange)) {
+                return deserializeOptional(exchange);
+            }
+            return deserializeInternal(exchange, exchange.getInputStream());
+        }
+
+        private T deserializeOptional(HttpServerExchange exchange) throws IOException {
+            PushbackInputStream requestStream = new PushbackInputStream(exchange.getInputStream(), 1);
+            int read = requestStream.read();
+            if (read == -1) {
+                return TypeMarkers.getEmptyOptional(marker);
+            }
+            requestStream.unread(read);
+            return deserializeInternal(exchange, requestStream);
+        }
+
+        private T deserializeInternal(HttpServerExchange exchange, InputStream requestStream) throws IOException {
             EncodingDeserializerContainer<T> container = getRequestDeserializer(exchange);
-            return container.deserializer.deserialize(exchange.getInputStream());
+            return container.deserializer.deserialize(requestStream);
+        }
+
+        private static boolean maybeEmptyBody(HttpServerExchange exchange) {
+            // Content-Length maybe null if "Transfer-Encoding: chunked" is sent with a full body.
+            String contentLength = exchange.getRequestHeaders().getFirst(Headers.CONTENT_LENGTH);
+            return contentLength == null || "0".equals(contentLength);
         }
 
         /** Returns the {@link EncodingDeserializerContainer} to use to deserialize the request body. */
