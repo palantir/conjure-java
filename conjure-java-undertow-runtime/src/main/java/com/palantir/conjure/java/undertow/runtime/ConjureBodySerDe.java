@@ -149,6 +149,10 @@ final class ConjureBodySerDe implements BodySerDe {
 
         @Override
         public T deserialize(HttpServerExchange exchange) throws IOException {
+            // If this deserializer is built for an optional root type, Optional<?>, OptionalInt, etc,
+            // and the incoming request body might be empty (does not have a content-length greater than zero)
+            // we must map from an empty request body to an empty optional.
+            // See https://github.com/palantir/conjure/blob/master/docs/spec/wire.md#23-body-parameter
             if (optionalType && maybeEmptyBody(exchange)) {
                 return deserializeOptional(exchange);
             }
@@ -156,12 +160,16 @@ final class ConjureBodySerDe implements BodySerDe {
         }
 
         private T deserializeOptional(HttpServerExchange exchange) throws IOException {
+            // If the first byte of the request stream is -1 (EOF) we return the empty optional type.
+            // We cannot provide the empty stream to jackson because there is no content for jackson
+            // to deserialize.
             PushbackInputStream requestStream = new PushbackInputStream(exchange.getInputStream(), 1);
-            int read = requestStream.read();
-            if (read == -1) {
+            int firstByte = requestStream.read();
+            if (firstByte == -1) {
                 return TypeMarkers.getEmptyOptional(marker);
             }
-            requestStream.unread(read);
+            // Otherwise reset the request stream and deserialize normally.
+            requestStream.unread(firstByte);
             return deserializeInternal(exchange, requestStream);
         }
 
