@@ -149,11 +149,10 @@ final class ConjureBodySerDe implements BodySerDe {
 
         @Override
         public T deserialize(HttpServerExchange exchange) throws IOException {
-            InputStream requestStream = exchange.getInputStream();
             if (optionalType && maybeEmptyBody(exchange)) {
                 return deserializeOptional(exchange);
             }
-            return deserializeInternal(exchange, requestStream);
+            return deserializeInternal(exchange, exchange.getInputStream());
         }
 
         private T deserializeOptional(HttpServerExchange exchange) throws IOException {
