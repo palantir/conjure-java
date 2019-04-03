@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -56,9 +57,11 @@ public final class Encodings {
 
         @Override
         public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
-            ObjectReader reader = mapper.readerFor(mapper.constructType(type.getType()));
+            JavaType javaType = mapper.constructType(type.getType());
+            ObjectReader reader = mapper.readerFor(javaType);
             return input -> {
                 try {
+                    mapper.convertValue(null, javaType);
                     T value = reader.readValue(input);
                     // Bad input should result in a 4XX response status, throw IAE rather than NPE.
                     Preconditions.checkArgument(value != null, "cannot deserialize a JSON null value");
