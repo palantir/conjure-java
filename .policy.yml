@@ -30,7 +30,7 @@ approval_rules:
     requires:
       count: 1
       users:
-        - "cakofony"
+        - "carterkozak"
         - "rubenfiszel"
         - "uschi2000"
     if:
