@@ -19,11 +19,13 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -33,11 +35,13 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     private final BodySerDe bodySerDe;
     private final AuthorizationExtractor auth;
+    private final AsyncRequestProcessing async;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
                 ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
+        this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout);
     }
 
     public static Builder builder() {
@@ -59,11 +63,23 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         return auth;
     }
 
+    @Override
+    public AsyncRequestProcessing async() {
+        return async;
+    }
+
     public static final class Builder {
 
+        private Duration asyncTimeout = Duration.ofMinutes(3);
         private final List<Encoding> encodings = Lists.newArrayList();
 
         private Builder() {}
+
+        @CanIgnoreReturnValue
+        public Builder asyncTimeout(Duration value) {
+            asyncTimeout = Preconditions.checkNotNull(value, "Value is required");
+            return this;
+        }
 
         @CanIgnoreReturnValue
         public Builder encodings(Encoding value) {
