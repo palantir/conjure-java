@@ -32,4 +32,7 @@ public interface UndertowRuntime {
 
     /** Provides the {@link AuthorizationExtractor} used to read auth tokens from request headers. */
     AuthorizationExtractor auth();
+
+    /** Provides the {@link AsyncRequestProcessing} used to detach execution from the request thread. */
+    AsyncRequestProcessing async();
 }
