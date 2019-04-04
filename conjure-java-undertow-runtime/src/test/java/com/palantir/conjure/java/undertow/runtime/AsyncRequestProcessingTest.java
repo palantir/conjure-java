@@ -173,6 +173,11 @@ public final class AsyncRequestProcessingTest {
         // TODO(ckozak): Accidental blocking on I/O threads is dangerous, there's no reason to execute there.
     }
 
+    @Test
+    public void testExceptionThrownInHandlerMethod() {
+        // TODO(ckozak): Exceptions thrown in the service method should be handled the same way as blocking services.
+    }
+
     private static Response execute(OptionalInt delay) {
         Request request = new Request.Builder()
                 .get()

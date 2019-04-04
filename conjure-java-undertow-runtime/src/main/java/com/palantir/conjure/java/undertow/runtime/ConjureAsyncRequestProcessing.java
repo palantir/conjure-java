@@ -105,7 +105,16 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
         }
 
         void register() {
+            // Dispatch the registration task. We're executing inside of root handler, so the dispatched task will
+            // execute on this thread after the current handler completes execution. This allows us to avoid racing
+            // registration with completion.
             exchange.dispatch(() -> {
+                // If an exception has was thrown in the initial request handler (bytes have already been written to
+                // the response) do not register callbacks.
+                if (exchange.isResponseStarted() || exchange.getResponseBytesSent() > 0) {
+                    exchange.endExchange();
+                    return;
+                }
                 registered = true;
                 // TODO(ckozak): potential optimization: avoid scheduling a timeout if the future is already complete.
                 // Timeout scheduling MUST occur prior to adding the future callback, otherwise quick completion
