@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib;
+package com.palantir.conjure.java.undertow.runtime;
 
 import io.undertow.server.HttpServerExchange;
 
@@ -23,5 +23,5 @@ import io.undertow.server.HttpServerExchange;
  */
 public interface ParamMarkers {
 
-    void mark(Class<?> markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);
+    void param(Class<?> markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);
 }

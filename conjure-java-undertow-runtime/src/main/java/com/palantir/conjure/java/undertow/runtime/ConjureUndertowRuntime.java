@@ -22,7 +22,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.Markers;
-import com.palantir.conjure.java.undertow.lib.ParamMarkers;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
@@ -43,7 +42,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
         List<ParamMarkers> paramMarkers = ImmutableList.copyOf(builder.paramMarkersActions);
         this.markers = (markerClass, parameterName, parameterValue, exchange) ->
-                paramMarkers.forEach(marked -> marked.mark(markerClass, parameterName, parameterValue, exchange));
+                paramMarkers.forEach(marked -> marked.param(markerClass, parameterName, parameterValue, exchange));
 
     }
 
