@@ -124,6 +124,8 @@ services:
           input:
             type: binary
             param-type: body
+            markers:
+              - Safe
 
       uploadAliasedRawData:
         http: POST /datasets/upload-raw-aliased
@@ -173,6 +175,8 @@ services:
             type: rid
             param-id: datasetRid
             param-type: path
+            markers:
+              - Safe
         returns: optional<string>
 
       testQueryParams:

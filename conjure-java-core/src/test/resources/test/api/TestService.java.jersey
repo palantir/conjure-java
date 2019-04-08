@@ -86,7 +86,7 @@ public interface TestService {
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     void uploadRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @NotNull InputStream input);
+            @NotNull @Safe InputStream input);
 
     @POST
     @Path("catalog/datasets/upload-raw-aliased")
@@ -123,7 +123,7 @@ public interface TestService {
     @Path("catalog/datasets/{datasetRid}/testParam")
     Optional<String> testParam(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") ResourceIdentifier datasetRid);
+            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @POST
     @Path("catalog/test-query-params")

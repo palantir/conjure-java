@@ -451,6 +451,7 @@ public final class TestServiceEndpoints implements UndertowService {
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
             InputStream input = runtime.bodySerDe().deserializeInputStream(exchange);
+            runtime.markers().param(Safe.class, "input", input, exchange);
             delegate.uploadRawData(authHeader, input);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -708,6 +709,7 @@ public final class TestServiceEndpoints implements UndertowService {
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid =
                     runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param(Safe.class, "datasetRid", datasetRid, exchange);
             Optional<String> result = delegate.testParam(authHeader, datasetRid);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
