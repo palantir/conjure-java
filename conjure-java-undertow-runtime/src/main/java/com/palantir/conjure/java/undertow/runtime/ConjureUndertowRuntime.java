@@ -21,7 +21,8 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
-import com.palantir.conjure.java.undertow.lib.MarkedParam;
+import com.palantir.conjure.java.undertow.lib.Markers;
+import com.palantir.conjure.java.undertow.lib.ParamMarkers;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
@@ -34,15 +35,15 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     private final BodySerDe bodySerDe;
     private final AuthorizationExtractor auth;
-    private final MarkedParam markedParam;
+    private final Markers markers;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
                 ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
-        List<MarkedParam> markedParams = ImmutableList.copyOf(builder.markedParamActions);
-        this.markedParam = (markerClass, parameterName, parameterValue, exchange) ->
-                markedParams.forEach(marked -> marked.mark(markerClass, parameterName, parameterValue, exchange));
+        List<ParamMarkers> paramMarkers = ImmutableList.copyOf(builder.paramMarkersActions);
+        this.markers = (markerClass, parameterName, parameterValue, exchange) ->
+                paramMarkers.forEach(marked -> marked.mark(markerClass, parameterName, parameterValue, exchange));
 
     }
 
@@ -62,8 +63,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
 
     @Override
-    public MarkedParam markedParam() {
-        return markedParam;
+    public Markers markers() {
+        return markers;
     }
 
     @Override
@@ -74,7 +75,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     public static final class Builder {
 
         private final List<Encoding> encodings = Lists.newArrayList();
-        private List<MarkedParam> markedParamActions = Lists.newArrayList();
+        private final List<ParamMarkers> paramMarkersActions = Lists.newArrayList();
 
         private Builder() {}
 
@@ -85,8 +86,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         }
 
         @CanIgnoreReturnValue
-        public Builder markedParamAction(MarkedParam value) {
-            markedParamActions.add(Preconditions.checkNotNull(value, "Value is required"));
+        public Builder paramMarker(ParamMarkers value) {
+            paramMarkersActions.add(Preconditions.checkNotNull(value, "Value is required"));
             return this;
         }
 

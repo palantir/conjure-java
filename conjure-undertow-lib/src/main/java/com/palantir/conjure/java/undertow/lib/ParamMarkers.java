@@ -21,7 +21,7 @@ import io.undertow.server.HttpServerExchange;
 /**
  * execute arbitrary actions given a marker on a param.
  */
-public interface MarkedParam {
+public interface ParamMarkers {
 
     void mark(Class<?> markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);
 }
