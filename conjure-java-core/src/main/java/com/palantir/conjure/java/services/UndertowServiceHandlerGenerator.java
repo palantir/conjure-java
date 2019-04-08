@@ -376,7 +376,7 @@ final class UndertowServiceHandlerGenerator {
             String paramName,
             TypeMapper typeMapper) {
         return CodeBlocks.of(markers.stream().map(marker ->
-                CodeBlock.of("$1N.$2N($3N.class, $4S, $5N, $6N)",
+                CodeBlock.of("$1N.$2N($3T.class, $4S, $5N, $6N);",
                         RUNTIME_VAR_NAME, MARKED_PARAM_VAR_NAME,
                         typeMapper.getClassName(marker).box(), paramName,
                         paramName,
