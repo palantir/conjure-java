@@ -34,6 +34,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class TestServiceEndpoints implements UndertowService {
@@ -350,6 +351,7 @@ public final class TestServiceEndpoints implements UndertowService {
             ResourceIdentifier datasetRid =
                     runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
             runtime.markParam(Safe.class, "datasetRid", datasetRid, exchange);
+            runtime.markParam(Nonnull.class, "datasetRid", datasetRid, exchange);
             Optional<BinaryResponseBody> result = delegate.maybeGetRawData(authHeader, datasetRid);
             if (result.isPresent()) {
                 runtime.bodySerDe().serialize(result.get(), exchange);

@@ -106,6 +106,7 @@ services:
             type: rid
             markers:
              - Safe
+             - Nonnull
         returns: optional<binary>
 
       getAliasedString:
