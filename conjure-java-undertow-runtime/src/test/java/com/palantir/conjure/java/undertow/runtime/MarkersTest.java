@@ -48,4 +48,3 @@ public class MarkersTest {
         Mockito.verify(paramMarker).mark(MarkersTest.class, "foo", "bar", exchange);
     }
 }
-
