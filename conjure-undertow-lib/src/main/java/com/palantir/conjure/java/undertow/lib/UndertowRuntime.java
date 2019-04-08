@@ -33,7 +33,7 @@ public interface UndertowRuntime {
     /** Provides the {@link AuthorizationExtractor} used to read auth tokens from request headers. */
     AuthorizationExtractor auth();
 
-    /** Provides the {@link SafeParamStorer} used to store safe parameters (header, query, body params) for further
+    /** Provides the {@link MarkedParam} used to store safe parameters (header, query, body params) for further
      * processing. (e.g logging) */
-    SafeParamStorer safeParamStorer();
+    MarkedParam markedParam();
 }

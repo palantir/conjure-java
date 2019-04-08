@@ -17,14 +17,11 @@
 package com.palantir.conjure.java.undertow.lib;
 
 import io.undertow.server.HttpServerExchange;
-import java.util.Map;
 
 /**
  * Provides safe parameters storing functionality for generated code.
  */
-public interface SafeParamStorer {
+public interface MarkedParam {
 
-    Map<String, Object> getSafeParams(HttpServerExchange exchange);
-
-    void putSafeParam(HttpServerExchange exchange, String key, Object value);
+    void mark(Class<?> markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);
 }

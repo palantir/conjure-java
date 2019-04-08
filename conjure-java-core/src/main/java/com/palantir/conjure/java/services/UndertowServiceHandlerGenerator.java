@@ -33,19 +33,15 @@ import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
-import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
-import com.palantir.conjure.spec.HeaderParameterType;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterType;
-import com.palantir.conjure.spec.PathParameterType;
 import com.palantir.conjure.spec.PrimitiveType;
-import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
@@ -93,10 +89,9 @@ final class UndertowServiceHandlerGenerator {
     private static final String DESERIALIZER_VAR_NAME = "deserializer";
     private static final String SERIALIZER_VAR_NAME = "serializer";
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
-    private static final String PARAM_STORER_VAR_NAME = "safeParamStorer";
+    private static final String MARKED_PARAM_VAR_NAME = "mark";
 
     private static final String COOKIE_TOKEN_VAR_NAME = "cookieToken";
-    private static final String PUT_PARAM_METHOD_NAME = "putSafeParam";
 
     private final Set<FeatureFlags> experimentalFeatures;
 
@@ -295,17 +290,19 @@ final class UndertowServiceHandlerGenerator {
 
         // body parameter
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
+            String paramName = bodyParam.getArgName().get();
             if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
                 // TODO(ckozak): Support aliased and optional binary types
                 code.addStatement("$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
-                        InputStream.class, bodyParam.getArgName().get(), RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
+                        InputStream.class, paramName, RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
             } else {
                 code.addStatement("$1T $2N = $3N.deserialize($4N)",
                         typeMapper.getClassName(bodyParam.getType()).box(),
-                        bodyParam.getArgName().get(),
+                        paramName,
                         DESERIALIZER_VAR_NAME,
                         EXCHANGE_VAR_NAME);
             }
+            code.add(generateParamMarkers(bodyParam.getMarkers(), paramName, typeMapper));
         });
 
         // path parameters
@@ -372,6 +369,19 @@ final class UndertowServiceHandlerGenerator {
             code.addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class);
         }
         return code.build();
+    }
+
+    private CodeBlock generateParamMarkers(
+            List<Type> markers,
+            String paramName,
+            TypeMapper typeMapper) {
+        return CodeBlocks.of(markers.stream().map(marker ->
+                CodeBlock.of("$1N.$2N($3N.class, $4S, $5N, $6N)",
+                        RUNTIME_VAR_NAME, MARKED_PARAM_VAR_NAME,
+                        typeMapper.getClassName(marker).box(), paramName,
+                        paramName,
+                        EXCHANGE_VAR_NAME))
+                .collect(Collectors.toList()));
     }
 
     // Adds code for authorization. Returns an optional that contains the name of the variable that contains the
@@ -510,89 +520,33 @@ final class UndertowServiceHandlerGenerator {
                 arg -> {
                     Type normalizedType = UndertowTypeFunctions.toConjureTypeWithoutAliases(arg.getType(),
                             typeDefinitions);
+                    String paramName = arg.getArgName().get();
+                    final CodeBlock retrieveParam;
                     if (normalizedType.equals(arg.getType())) {
                         // type does not contain any aliases
-                        return CodeBlocks.of(
-                                decodePlainParameterCodeBlock(normalizedType, typeMapper, arg.getArgName()
-                                        .get(),
+                        retrieveParam = decodePlainParameterCodeBlock(normalizedType, typeMapper, paramName,
                                 paramsVarName,
-                                toParamId.apply(arg)),
-                                generateStoreParamInExchange(arg));
+                                toParamId.apply(arg));
                     } else {
                         // type contains aliases: decode raw value and then construct real value from raw one
                         String rawVarName = arg.getArgName().get() + "Raw";
-                        return CodeBlocks.of(
+                        retrieveParam = CodeBlocks.of(
                                 decodePlainParameterCodeBlock(normalizedType, typeMapper, rawVarName,
                                         paramsVarName,
                                         toParamId.apply(arg)),
                                 CodeBlocks.statement(
                                         "$1T $2N = $3L",
                                         typeMapper.getClassName(arg.getType()),
-                                        arg.getArgName().get(),
+                                        paramName,
                                         createConstructorForTypeWithReference(arg.getType(), rawVarName,
                                                 typeDefinitions, typeMapper)
-                                ),
-                                generateStoreParamInExchange(arg)
+                                )
                         );
                     }
+                    return CodeBlocks.of(
+                            retrieveParam,
+                            generateParamMarkers(arg.getMarkers(), paramName, typeMapper));
                 }).collect(Collectors.toList()));
-    }
-
-    private Optional<String> getStoreMethodAndParamName(ArgumentDefinition arg) {
-        boolean isSafe = arg.getMarkers().stream().anyMatch(type ->
-                type.accept(
-                        new DefaultTypeVisitor<Boolean>() {
-                            @Override
-                            public Boolean visitExternal(ExternalReference value) {
-                                return value.getExternalReference().getName().equals("Safe");
-                            }
-
-                            @Override
-                            public Boolean visitDefault() {
-                                return false;
-                            }
-                        }));
-        if (isSafe) {
-            return arg.getParamType().accept(new ParameterType.Visitor<Optional<String>>() {
-                @Override
-                public Optional<String> visitHeader(HeaderParameterType value) {
-                    return Optional.of(value.getParamId().get());
-                }
-
-                @Override
-                public Optional<String> visitQuery(QueryParameterType value) {
-                    return Optional.of(value.getParamId().get());
-                }
-
-                @Override
-                public Optional<String> visitPath(PathParameterType value) {
-                    return Optional.of(arg.getArgName().get());
-                }
-
-                @Override
-                public Optional<String> visitBody(BodyParameterType value) {
-                    return Optional.empty();
-                }
-
-                @Override
-                public Optional<String> visitUnknown(String unknownType) {
-                    return Optional.empty();
-                }
-            });
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private CodeBlock generateStoreParamInExchange(ArgumentDefinition arg) {
-        return getStoreMethodAndParamName(arg).map(methodNameAndName -> CodeBlocks.statement(
-                "$1N.$2N().$3N($4N, $5S, $6N)",
-                RUNTIME_VAR_NAME,
-                PARAM_STORER_VAR_NAME,
-                PUT_PARAM_METHOD_NAME,
-                EXCHANGE_VAR_NAME,
-                methodNameAndName,
-                arg.getArgName().get())).orElseGet(() -> CodeBlocks.of());
     }
 
     private CodeBlock decodePlainParameterCodeBlock(Type type, TypeMapper typeMapper, String resultVarName,

@@ -21,8 +21,8 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
+import com.palantir.conjure.java.undertow.lib.MarkedParam;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
-import com.palantir.conjure.java.undertow.lib.SafeParamStorer;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
 import java.util.List;
@@ -34,11 +34,16 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     private final BodySerDe bodySerDe;
     private final AuthorizationExtractor auth;
+    private final MarkedParam markedParam;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
                 ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
+        List<MarkedParam> markedParams = ImmutableList.copyOf(builder.markedParamActions);
+        this.markedParam = (markerClass, parameterName, parameterValue, exchange) ->
+                markedParams.forEach(marked -> marked.mark(markerClass, parameterName, parameterValue, exchange));
+
     }
 
     public static Builder builder() {
@@ -57,8 +62,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
 
     @Override
-    public SafeParamStorer safeParamStorer() {
-        return ConjureSafeParamStorer.INSTANCE;
+    public MarkedParam markedParam() {
+        return markedParam;
     }
 
     @Override
@@ -69,12 +74,19 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     public static final class Builder {
 
         private final List<Encoding> encodings = Lists.newArrayList();
+        private List<MarkedParam> markedParamActions = Lists.newArrayList();
 
         private Builder() {}
 
         @CanIgnoreReturnValue
         public Builder encodings(Encoding value) {
             encodings.add(Preconditions.checkNotNull(value, "Value is required"));
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder markedParamAction(MarkedParam value) {
+            markedParamActions.add(Preconditions.checkNotNull(value, "Value is required"));
             return this;
         }
 
