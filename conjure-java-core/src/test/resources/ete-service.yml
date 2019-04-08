@@ -79,7 +79,7 @@ services:
         returns: binary
 
       path:
-        http: GET /path/{mark}
+        http: GET /path/{param}
         args:
           param: string
         returns: string

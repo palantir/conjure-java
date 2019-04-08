@@ -66,9 +66,9 @@ public interface EteServiceRetrofit {
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
 
-    @GET("./base/path/{mark}")
-    @Headers({"hr-path-template: /base/path/{mark}", "Accept: application/json"})
-    Call<String> path(@Header("Authorization") AuthHeader authHeader, @Path("mark") String param);
+    @GET("./base/path/{param}")
+    @Headers({"hr-path-template: /base/path/{param}", "Accept: application/json"})
+    Call<String> path(@Header("Authorization") AuthHeader authHeader, @Path("param") String param);
 
     @POST("./base/notNullBody")
     @Headers({"hr-path-template: /base/notNullBody", "Accept: application/json"})

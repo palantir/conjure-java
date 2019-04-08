@@ -133,12 +133,12 @@ public final class ErrorGenerator {
 
             methodBuilder.addJavadoc("Throws a {@link ServiceException} of type $L when {@code $L} is true.\n",
                     entry.getErrorName().getName(), shouldThrowVar);
-            methodBuilder.addJavadoc("@mark $L $L\n", shouldThrowVar, "Cause the method to throw when true");
+            methodBuilder.addJavadoc("@param $L $L\n", shouldThrowVar, "Cause the method to throw when true");
             Streams.concat(
                     entry.getSafeArgs().stream(),
                     entry.getUnsafeArgs().stream()).forEach(arg -> {
                         methodBuilder.addParameter(typeMapper.getClassName(arg.getType()), arg.getFieldName().get());
-                        methodBuilder.addJavadoc("@mark $L $L", arg.getFieldName().get(),
+                        methodBuilder.addJavadoc("@param $L $L", arg.getFieldName().get(),
                                         StringUtils.appendIfMissing(
                                                 arg.getDocs().map(Documentation::get).orElse(""), "\n"));
                     });
@@ -203,7 +203,7 @@ public final class ErrorGenerator {
         Class<?> clazz = isSafe ? SafeArg.class : UnsafeArg.class;
         methodBuilder.addCode(",\n    $T.of($S, $L)", clazz, argName, argName);
         argDefinition.getDocs().ifPresent(docs ->
-                methodBuilder.addJavadoc("@mark $L $L", argName, StringUtils.appendIfMissing(docs.get(), "\n")));
+                methodBuilder.addJavadoc("@param $L $L", argName, StringUtils.appendIfMissing(docs.get(), "\n")));
     }
 
     private static ClassName errorTypesClassName(String conjurePackage, ErrorNamespace namespace) {
