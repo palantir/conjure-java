@@ -40,7 +40,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
                 ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
-        List<ParamMarkers> paramMarkers = ImmutableList.copyOf(builder.paramMarkersActions);
+        List<ParamMarker> paramMarkers = ImmutableList.copyOf(builder.paramMarkers);
         this.markers = (markerClass, parameterName, parameterValue, exchange) ->
                 paramMarkers.forEach(marked -> marked.mark(markerClass, parameterName, parameterValue, exchange));
 
@@ -74,7 +74,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     public static final class Builder {
 
         private final List<Encoding> encodings = Lists.newArrayList();
-        private final List<ParamMarkers> paramMarkersActions = Lists.newArrayList();
+        private final List<ParamMarker> paramMarkers = Lists.newArrayList();
 
         private Builder() {}
 
@@ -85,8 +85,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         }
 
         @CanIgnoreReturnValue
-        public Builder paramMarker(ParamMarkers value) {
-            paramMarkersActions.add(Preconditions.checkNotNull(value, "Value is required"));
+        public Builder paramMarker(ParamMarker value) {
+            paramMarkers.add(Preconditions.checkNotNull(value, "Value is required"));
             return this;
         }
 
