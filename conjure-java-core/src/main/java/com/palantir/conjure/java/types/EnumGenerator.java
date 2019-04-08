@@ -236,7 +236,7 @@ public final class EnumGenerator {
                 .addAnnotation(JsonCreator.class)
                 .addParameter(param)
                 .addStatement("$L", Expressions.requireNonNull(param.name, param.name + " cannot be null"))
-                // uppercase param for backwards compatibility
+                // uppercase mark for backwards compatibility
                 .addStatement("String upperCasedValue = $N.toUpperCase($T.ROOT)", param, Locale.class)
                 .addCode(parser.build())
                 .build();

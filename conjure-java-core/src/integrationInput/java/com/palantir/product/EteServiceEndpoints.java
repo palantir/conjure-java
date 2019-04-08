@@ -600,7 +600,7 @@ public final class EteServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            String param = runtime.plainSerDe().deserializeString(pathParams.get("param"));
+            String param = runtime.plainSerDe().deserializeString(pathParams.get("mark"));
             String result = delegate.path(authHeader, param);
             serializer.serialize(result, exchange);
         }
@@ -612,7 +612,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/base/path/{param}";
+            return "/base/path/{mark}";
         }
 
         @Override

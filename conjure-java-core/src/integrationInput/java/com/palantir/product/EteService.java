@@ -72,10 +72,10 @@ public interface EteService {
     StreamingOutput binary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
-    @Path("base/path/{param}")
+    @Path("base/path/{mark}")
     String path(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("param") String param);
+            @PathParam("mark") String param);
 
     @POST
     @Path("base/notNullBody")

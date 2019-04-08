@@ -20,5 +20,5 @@ import io.undertow.server.HttpServerExchange;
 
 public interface Markers {
 
-    void markParam(Class<?> markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);
+    void param(Class<?> markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);
 }
