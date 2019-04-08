@@ -19,7 +19,7 @@ package com.palantir.conjure.java.undertow.lib;
 import io.undertow.server.HttpServerExchange;
 
 /**
- * Provides safe parameters storing functionality for generated code.
+ * execute arbitrary actions given a marker on a param.
  */
 public interface MarkedParam {
 
