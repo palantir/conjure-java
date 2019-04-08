@@ -1,6 +1,5 @@
 package com.palantir.product;
 
-import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -21,6 +20,8 @@ import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -41,31 +42,32 @@ public final class EteServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return ImmutableList.of(
-                new StringEndpoint(runtime, delegate),
-                new IntegerEndpoint(runtime, delegate),
-                new Double_Endpoint(runtime, delegate),
-                new Boolean_Endpoint(runtime, delegate),
-                new SafelongEndpoint(runtime, delegate),
-                new RidEndpoint(runtime, delegate),
-                new BearertokenEndpoint(runtime, delegate),
-                new OptionalStringEndpoint(runtime, delegate),
-                new OptionalEmptyEndpoint(runtime, delegate),
-                new DatetimeEndpoint(runtime, delegate),
-                new BinaryEndpoint(runtime, delegate),
-                new PathEndpoint(runtime, delegate),
-                new NotNullBodyEndpoint(runtime, delegate),
-                new AliasOneEndpoint(runtime, delegate),
-                new OptionalAliasOneEndpoint(runtime, delegate),
-                new AliasTwoEndpoint(runtime, delegate),
-                new NotNullBodyExternalImportEndpoint(runtime, delegate),
-                new OptionalBodyExternalImportEndpoint(runtime, delegate),
-                new OptionalQueryExternalImportEndpoint(runtime, delegate),
-                new NoReturnEndpoint(runtime, delegate),
-                new EnumQueryEndpoint(runtime, delegate),
-                new EnumListQueryEndpoint(runtime, delegate),
-                new OptionalEnumQueryEndpoint(runtime, delegate),
-                new EnumHeaderEndpoint(runtime, delegate));
+        return Collections.unmodifiableList(
+                Arrays.asList(
+                        new StringEndpoint(runtime, delegate),
+                        new IntegerEndpoint(runtime, delegate),
+                        new Double_Endpoint(runtime, delegate),
+                        new Boolean_Endpoint(runtime, delegate),
+                        new SafelongEndpoint(runtime, delegate),
+                        new RidEndpoint(runtime, delegate),
+                        new BearertokenEndpoint(runtime, delegate),
+                        new OptionalStringEndpoint(runtime, delegate),
+                        new OptionalEmptyEndpoint(runtime, delegate),
+                        new DatetimeEndpoint(runtime, delegate),
+                        new BinaryEndpoint(runtime, delegate),
+                        new PathEndpoint(runtime, delegate),
+                        new NotNullBodyEndpoint(runtime, delegate),
+                        new AliasOneEndpoint(runtime, delegate),
+                        new OptionalAliasOneEndpoint(runtime, delegate),
+                        new AliasTwoEndpoint(runtime, delegate),
+                        new NotNullBodyExternalImportEndpoint(runtime, delegate),
+                        new OptionalBodyExternalImportEndpoint(runtime, delegate),
+                        new OptionalQueryExternalImportEndpoint(runtime, delegate),
+                        new NoReturnEndpoint(runtime, delegate),
+                        new EnumQueryEndpoint(runtime, delegate),
+                        new EnumListQueryEndpoint(runtime, delegate),
+                        new OptionalEnumQueryEndpoint(runtime, delegate),
+                        new EnumHeaderEndpoint(runtime, delegate)));
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {

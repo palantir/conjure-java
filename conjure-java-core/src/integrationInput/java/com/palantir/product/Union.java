@@ -37,11 +37,17 @@ public final class Union {
         return new Union(new BarWrapper(value));
     }
 
+    public static Union baz(long value) {
+        return new Union(new BazWrapper(value));
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         if (value instanceof FooWrapper) {
             return visitor.visitFoo(((FooWrapper) value).value);
         } else if (value instanceof BarWrapper) {
             return visitor.visitBar(((BarWrapper) value).value);
+        } else if (value instanceof BazWrapper) {
+            return visitor.visitBaz(((BazWrapper) value).value);
         } else if (value instanceof UnknownWrapper) {
             return visitor.visitUnknown(((UnknownWrapper) value).getType());
         }
@@ -79,6 +85,8 @@ public final class Union {
 
         T visitBar(int value);
 
+        T visitBaz(long value);
+
         T visitUnknown(String unknownType);
     }
 
@@ -87,7 +95,11 @@ public final class Union {
             property = "type",
             visible = true,
             defaultImpl = UnknownWrapper.class)
-    @JsonSubTypes({@JsonSubTypes.Type(FooWrapper.class), @JsonSubTypes.Type(BarWrapper.class)})
+    @JsonSubTypes({
+        @JsonSubTypes.Type(FooWrapper.class),
+        @JsonSubTypes.Type(BarWrapper.class),
+        @JsonSubTypes.Type(BazWrapper.class)
+    })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {}
 
@@ -164,6 +176,47 @@ public final class Union {
         @Override
         public String toString() {
             return new StringBuilder("BarWrapper")
+                    .append('{')
+                    .append("value")
+                    .append(": ")
+                    .append(value)
+                    .append('}')
+                    .toString();
+        }
+    }
+
+    @JsonTypeName("baz")
+    private static class BazWrapper implements Base {
+        private final long value;
+
+        @JsonCreator
+        private BazWrapper(@JsonProperty("baz") long value) {
+            Preconditions.checkNotNull(value, "baz cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("baz")
+        private long getValue() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof BazWrapper && equalTo((BazWrapper) other));
+        }
+
+        private boolean equalTo(BazWrapper other) {
+            return this.value == other.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("BazWrapper")
                     .append('{')
                     .append("value")
                     .append(": ")

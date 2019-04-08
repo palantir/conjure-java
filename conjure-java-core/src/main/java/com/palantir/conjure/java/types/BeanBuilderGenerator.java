@@ -48,6 +48,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -328,7 +329,7 @@ public final class BeanBuilderGenerator {
                     .addStatement("this.$1N = $2T.allocate($1N.remaining()).put($1N.duplicate())",
                             spec.name,
                             ByteBuffer.class)
-                    .addStatement("this.$1N.rewind()", spec.name)
+                    .addStatement("(($1T)this.$2N).rewind()", Buffer.class, spec.name)
                     .build();
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
@@ -340,7 +341,7 @@ public final class BeanBuilderGenerator {
                 Type innerType = optionalType.getItemType();
                 return CodeBlock.builder()
                         .addStatement("this.$1N = ($3T<$4T>) $2L",
-                                spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType))
+                                spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType).box())
                         .build();
             } else {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);

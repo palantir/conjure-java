@@ -36,10 +36,8 @@ import com.palantir.conjure.spec.HttpPath;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
-import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.util.syntacticpath.Path;
 import com.palantir.util.syntacticpath.Paths;
 import com.squareup.javapoet.AnnotationSpec;
@@ -268,17 +266,6 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         return returnType.equals(BINARY_RETURN_TYPE)
                 ? MediaType.APPLICATION_OCTET_STREAM
                 : MediaType.APPLICATION_JSON;
-    }
-
-    private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
-        checkArgument(markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
-                "Markers must refer to reference types.");
-        return markers.stream()
-                .map(typeMapper::getClassName)
-                .map(ClassName.class::cast)
-                .map(AnnotationSpec::builder)
-                .map(AnnotationSpec.Builder::build)
-                .collect(Collectors.toSet());
     }
 
     private static ClassName httpMethodToClassName(String method) {

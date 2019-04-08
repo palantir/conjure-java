@@ -27,9 +27,9 @@ buildscript {
 
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'com.netflix.nebula:nebula-publishing-plugin:9.5.0'
-        classpath 'com.palantir.baseline:gradle-baseline-java:0.51.1'
-        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:1.1.1'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:10.0.1'
+        classpath 'com.palantir.baseline:gradle-baseline-java:0.54.0'
+        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:1.4.0'
         classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.11.0'
         classpath 'gradle.plugin.org.inferred:gradle-processors:2.2.0'
     }
@@ -68,7 +68,13 @@ subprojects {
     sourceCompatibility = 1.8
 
     tasks.withType(JavaCompile) {
+        options.errorprone.errorproneArgs += ['-Xep:PreferSafeLoggingPreconditions:OFF', '-Xep:PreferSafeLoggableExceptions:OFF']
         options.compilerArgs += ['-Werror']
+        
+        // necessary until https://github.com/palantir/gradle-baseline/pull/582
+        if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
+            options.compilerArgs += ['--release', '8']
+        }
     }
 
     // Run `./gradlew test -Drecreate=true` to recreate all the expected

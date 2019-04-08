@@ -76,6 +76,12 @@ client:
       - '"!!!"'
       - '"one-hundred"' # https://github.com/palantir/conjure-java/issues/134
 
+    receiveListAnyAliasExample:
+      - '[null]'
+
+    receiveSetAnyAliasExample:
+      - '[null]'
+
   singleHeaderService:
     headerOptionalString:
       - "null"

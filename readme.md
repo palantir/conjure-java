@@ -26,6 +26,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Generate retrofit services which return Java8 CompletableFuture instead of OkHttp Call (deprecated)
         --retrofitListenableFutures
                      Generate retrofit services which return Guava ListenableFuture instead of OkHttp Call
+        --undertowServicePrefixes
+                     Generate service interfaces for Undertow with class names prefixed 'Undertow'
         --useImmutableBytes
                      Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'
 
@@ -188,8 +190,6 @@ Call<List<Recipe>> asyncResults = recipes.getRecipes();
 ```
 
 ## Undertow
-
-_This feature is experimental and subject to change._
 
 In the undertow setting, for a `ServiceName` conjure defined service, conjure will generate an interface: `ServiceName` to be extended by your resource and a [Service](https://github.com/palantir/conjure-java/blob/develop/conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/Service.java) named `ServiceNameEndpoints`
 

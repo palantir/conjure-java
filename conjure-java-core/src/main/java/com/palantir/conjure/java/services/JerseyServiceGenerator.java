@@ -27,21 +27,18 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
-import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
-import com.palantir.conjure.spec.HeaderParameterType;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
-import com.palantir.conjure.spec.PathParameterType;
 import com.palantir.conjure.spec.PrimitiveType;
-import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
@@ -61,7 +58,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -292,13 +288,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         Optional<AuthType> auth = endpointDef.getAuth();
         createAuthParameter(auth, withAnnotations).ifPresent(parameterSpecs::add);
 
-        List<ArgumentDefinition> sortedArgList = new ArrayList<>(endpointDef.getArgs());
-        sortedArgList.sort(Comparator.comparing(o ->
-                o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER)));
-
-        sortedArgList.forEach(def -> {
-            parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations));
-        });
+        ParameterOrder.sorted(endpointDef.getArgs()).forEach(def ->
+                parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations)));
         return ImmutableList.copyOf(parameterSpecs);
     }
 
@@ -401,65 +392,6 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
 
-    /** Produces an ordering for ParamaterType of Header, Path, Query, Body. */
-    private static final ParameterType.Visitor<Integer> PARAM_SORT_ORDER = new ParameterType.Visitor<Integer>() {
-        @Override
-        public Integer visitBody(BodyParameterType value) {
-            return 30;
-        }
-
-        @Override
-        public Integer visitHeader(HeaderParameterType value) {
-            return 0;
-        }
-
-        @Override
-        public Integer visitPath(PathParameterType value) {
-            return 10;
-        }
-
-        @Override
-        public Integer visitQuery(QueryParameterType value) {
-            return 20;
-        }
-
-        @Override
-        public Integer visitUnknown(String unknownType) {
-            return -1;
-        }
-    };
-
-    /**
-     * Produces a type sort ordering for use with {@link #PARAM_SORT_ORDER} such that types with known defaults come
-     * after types without known defaults.
-     */
-    private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new DefaultTypeVisitor<Integer>() {
-        @Override
-        public Integer visitOptional(OptionalType value) {
-            return 1;
-        }
-
-        @Override
-        public Integer visitList(ListType value) {
-            return 1;
-        }
-
-        @Override
-        public Integer visitSet(SetType value) {
-            return 1;
-        }
-
-        @Override
-        public Integer visitMap(MapType value) {
-            return 1;
-        }
-
-        @Override
-        public Integer visitDefault() {
-            return 0;
-        }
-    };
-
     /** Indicates whether a particular type has a defaultable value. */
     private static final Type.Visitor<Boolean> TYPE_DEFAULTABLE_PREDICATE = new DefaultTypeVisitor<Boolean>() {
         @Override
@@ -494,13 +426,10 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
                 PrimitiveType primitiveType = value.getItemType().accept(TypeVisitor.PRIMITIVE);
                 // special handling for primitive optionals with Java 8
-                switch (primitiveType.get()) {
-                    case DOUBLE:
-                        return CodeBlock.of("$T.empty()", OptionalDouble.class);
-                    case INTEGER:
-                        return CodeBlock.of("$T.empty()", OptionalInt.class);
-                    default:
-                        // not other optional types
+                if (primitiveType.equals(PrimitiveType.DOUBLE)) {
+                    return CodeBlock.of("$T.empty()", OptionalDouble.class);
+                } else if (primitiveType.equals(PrimitiveType.INTEGER)) {
+                    return CodeBlock.of("$T.empty()", OptionalInt.class);
                 }
             }
             return CodeBlock.of("$T.empty()", Optional.class);

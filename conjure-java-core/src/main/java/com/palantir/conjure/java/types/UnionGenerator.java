@@ -84,7 +84,7 @@ public final class UnionGenerator {
                 .addType(generateBase(baseClass, memberTypes))
                 .addTypes(generateWrapperClasses(typeMapper, baseClass, typeDef.getUnion()))
                 .addType(generateUnknownWrapper(baseClass))
-                .addMethod(generateEquals(unionClass, memberTypes))
+                .addMethod(generateEquals(unionClass))
                 .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
                 .addMethod(MethodSpecs.createToString(unionClass.simpleName(),
@@ -177,8 +177,7 @@ public final class UnionGenerator {
         return visitBuilder.addCode(codeBuilder.build()).build();
     }
 
-
-    private static MethodSpec generateEquals(ClassName unionClass, Map<FieldName, TypeName> memberTypes) {
+    private static MethodSpec generateEquals(ClassName unionClass) {
         ParameterSpec other = ParameterSpec.builder(TypeName.OBJECT, "other").build();
         CodeBlock.Builder codeBuilder = CodeBlock.builder()
                 .add("return this == $1N || ($1N instanceof $2T && equalTo(($2T) $1N))", other, unionClass);
@@ -354,12 +353,6 @@ public final class UnionGenerator {
                                 fieldSpec -> FieldName.of(fieldSpec.name))
                                 .collect(Collectors.toList())));
         return typeBuilder.build();
-    }
-
-    private static TypeName rawBoxedType(TypeName memberType) {
-        TypeName rawType = memberType instanceof ParameterizedTypeName
-                ? ((ParameterizedTypeName) memberType).rawType : memberType;
-        return rawType.box();
     }
 
     private static ClassName wrapperClass(ClassName unionClass, FieldName memberTypeName) {
