@@ -89,7 +89,6 @@ final class UndertowServiceHandlerGenerator {
     private static final String DESERIALIZER_VAR_NAME = "deserializer";
     private static final String SERIALIZER_VAR_NAME = "serializer";
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
-    private static final String MARKED_PARAM_VAR_NAME = "markers().param";
 
     private static final String COOKIE_TOKEN_VAR_NAME = "cookieToken";
 
@@ -376,8 +375,8 @@ final class UndertowServiceHandlerGenerator {
             String paramName,
             TypeMapper typeMapper) {
         return CodeBlocks.of(markers.stream().map(marker ->
-                CodeBlock.of("$1N.$2N($3S, $4S, $5N, $6N);",
-                        RUNTIME_VAR_NAME, MARKED_PARAM_VAR_NAME,
+                CodeBlock.of("$1N.markers().param($2S, $3S, $4N, $5N);",
+                        RUNTIME_VAR_NAME,
                         typeMapper.getClassName(marker).box(), paramName,
                         paramName,
                         EXCHANGE_VAR_NAME))
