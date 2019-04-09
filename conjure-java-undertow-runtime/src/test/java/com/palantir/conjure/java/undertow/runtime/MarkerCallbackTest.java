@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MarkersTest {
+public class MarkerCallbackTest {
 
     @Mock
     private ParamMarker paramMarker;
@@ -44,7 +44,7 @@ public class MarkersTest {
 
     @Test
     public void testMarkersIsCalled() {
-        runtime.markers().param(MarkersTest.class, "foo", "bar", exchange);
-        Mockito.verify(paramMarker).mark(MarkersTest.class, "foo", "bar", exchange);
+        runtime.markers().param("fully.qualified.Path", "foo", "bar", exchange);
+        Mockito.verify(paramMarker).mark("fully.qualified.Path", "foo", "bar", exchange);
     }
 }

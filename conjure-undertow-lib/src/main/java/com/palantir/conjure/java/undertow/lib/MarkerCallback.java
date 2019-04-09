@@ -18,7 +18,7 @@ package com.palantir.conjure.java.undertow.lib;
 
 import io.undertow.server.HttpServerExchange;
 
-public interface Markers {
+public interface MarkerCallback {
 
-    void param(Class<?> markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);
+    void param(String markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);
 }

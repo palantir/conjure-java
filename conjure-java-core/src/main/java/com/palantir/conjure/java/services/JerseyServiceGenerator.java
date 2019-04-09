@@ -369,7 +369,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
         checkArgument(markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
-                "Markers must refer to reference types.");
+                "MarkerCallback must refer to reference types.");
         return markers.stream()
                 .map(typeMapper::getClassName)
                 .map(ClassName.class::cast)
