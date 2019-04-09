@@ -26,7 +26,7 @@ final class MarkerCallbacks {
      * Builds a {@link MarkerCallback} from the provided {@link ParamMarker parameter markers}.
      * Pre-compute callbacks here rather than iteration each time a marked parameter is encountered.
      */
-    static MarkerCallback from(List<ParamMarker> paramMarkers) {
+    static MarkerCallback fold(List<ParamMarker> paramMarkers) {
         return paramMarkers.stream().reduce(
                 (markerClass, parameterName, parameterValue, exchange) -> { },
                 (paramMarker1, paramMarker2) -> (markerClass, parameterName, parameterValue, exchange) -> {
