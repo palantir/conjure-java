@@ -16,6 +16,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -44,7 +45,7 @@ public interface TestService {
     @Path("catalog/datasets")
     Dataset createDataset(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @HeaderParam("Test-Header") String testHeaderArg,
+            @HeaderParam("Test-Header") @Safe String testHeaderArg,
             @NotNull CreateDatasetRequest request);
 
     @GET
@@ -72,7 +73,7 @@ public interface TestService {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     Optional<StreamingOutput> maybeGetRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+            @PathParam("datasetRid") @Safe @Nonnull ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/string-aliased")
@@ -85,7 +86,7 @@ public interface TestService {
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     void uploadRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @NotNull InputStream input);
+            @NotNull @Safe InputStream input);
 
     @POST
     @Path("catalog/datasets/upload-raw-aliased")
@@ -122,13 +123,13 @@ public interface TestService {
     @Path("catalog/datasets/{datasetRid}/testParam")
     Optional<String> testParam(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") ResourceIdentifier datasetRid);
+            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @POST
     @Path("catalog/test-query-params")
     int testQueryParams(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @QueryParam("different") ResourceIdentifier something,
+            @QueryParam("different") @Safe ResourceIdentifier something,
             @QueryParam("implicit") ResourceIdentifier implicit,
             @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @QueryParam("setEnd") Set<String> setEnd,

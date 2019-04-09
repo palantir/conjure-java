@@ -289,17 +289,19 @@ final class UndertowServiceHandlerGenerator {
 
         // body parameter
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
+            String paramName = bodyParam.getArgName().get();
             if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
                 // TODO(ckozak): Support aliased and optional binary types
                 code.addStatement("$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
-                        InputStream.class, bodyParam.getArgName().get(), RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
+                        InputStream.class, paramName, RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
             } else {
                 code.addStatement("$1T $2N = $3N.deserialize($4N)",
                         typeMapper.getClassName(bodyParam.getType()).box(),
-                        bodyParam.getArgName().get(),
+                        paramName,
                         DESERIALIZER_VAR_NAME,
                         EXCHANGE_VAR_NAME);
             }
+            code.add(generateParamMarkers(bodyParam.getMarkers(), paramName, typeMapper));
         });
 
         // path parameters
@@ -366,6 +368,19 @@ final class UndertowServiceHandlerGenerator {
             code.addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class);
         }
         return code.build();
+    }
+
+    private CodeBlock generateParamMarkers(
+            List<Type> markers,
+            String paramName,
+            TypeMapper typeMapper) {
+        return CodeBlocks.of(markers.stream().map(marker ->
+                CodeBlock.of("$1N.markers().param($2S, $3S, $4N, $5N);",
+                        RUNTIME_VAR_NAME,
+                        typeMapper.getClassName(marker).box(), paramName,
+                        paramName,
+                        EXCHANGE_VAR_NAME))
+                .collect(Collectors.toList()));
     }
 
     // Adds code for authorization. Returns an optional that contains the name of the variable that contains the
@@ -504,27 +519,32 @@ final class UndertowServiceHandlerGenerator {
                 arg -> {
                     Type normalizedType = UndertowTypeFunctions.toConjureTypeWithoutAliases(arg.getType(),
                             typeDefinitions);
+                    String paramName = arg.getArgName().get();
+                    final CodeBlock retrieveParam;
                     if (normalizedType.equals(arg.getType())) {
                         // type does not contain any aliases
-                        return decodePlainParameterCodeBlock(normalizedType, typeMapper, arg.getArgName().get(),
+                        retrieveParam = decodePlainParameterCodeBlock(normalizedType, typeMapper, paramName,
                                 paramsVarName,
                                 toParamId.apply(arg));
                     } else {
                         // type contains aliases: decode raw value and then construct real value from raw one
                         String rawVarName = arg.getArgName().get() + "Raw";
-                        return CodeBlocks.of(
+                        retrieveParam = CodeBlocks.of(
                                 decodePlainParameterCodeBlock(normalizedType, typeMapper, rawVarName,
                                         paramsVarName,
                                         toParamId.apply(arg)),
                                 CodeBlocks.statement(
                                         "$1T $2N = $3L",
                                         typeMapper.getClassName(arg.getType()),
-                                        arg.getArgName().get(),
+                                        paramName,
                                         createConstructorForTypeWithReference(arg.getType(), rawVarName,
                                                 typeDefinitions, typeMapper)
                                 )
                         );
                     }
+                    return CodeBlocks.of(
+                            retrieveParam,
+                            generateParamMarkers(arg.getMarkers(), paramName, typeMapper));
                 }).collect(Collectors.toList()));
     }
 

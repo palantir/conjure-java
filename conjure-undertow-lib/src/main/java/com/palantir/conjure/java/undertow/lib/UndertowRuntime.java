@@ -32,4 +32,7 @@ public interface UndertowRuntime {
 
     /** Provides the {@link AuthorizationExtractor} used to read auth tokens from request headers. */
     AuthorizationExtractor auth();
+
+    /** Provides the {@link MarkerCallback} to execute arbitrary actions given a marker on a param. */
+    MarkerCallback markers();
 }

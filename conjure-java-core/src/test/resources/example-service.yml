@@ -68,6 +68,8 @@ services:
             param-id: Test-Header
             param-type: header
             type: string
+            markers:
+              - Safe
         returns: Dataset
 
       getDataset:
@@ -104,6 +106,7 @@ services:
             type: rid
             markers:
              - Safe
+             - Nonnull
         returns: optional<binary>
 
       getAliasedString:
@@ -121,6 +124,8 @@ services:
           input:
             type: binary
             param-type: body
+            markers:
+              - Safe
 
       uploadAliasedRawData:
         http: POST /datasets/upload-raw-aliased
@@ -170,6 +175,8 @@ services:
             type: rid
             param-id: datasetRid
             param-type: path
+            markers:
+              - Safe
         returns: optional<string>
 
       testQueryParams:
@@ -180,6 +187,8 @@ services:
             type: rid
             param-id: different
             param-type: query
+            markers:
+              - Safe
           optionalMiddle:
             type: optional<rid>
             param-type: query
