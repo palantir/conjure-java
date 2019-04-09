@@ -27,18 +27,12 @@ final class MarkerCallbacks {
      * Pre-compute callbacks here rather than iteration each time a marked parameter is encountered.
      */
     static MarkerCallback from(List<ParamMarker> paramMarkers) {
-        ParamMarker resultMarker = (markerClass, parameterName, parameterValue, exchange) -> { };
-        for (ParamMarker marker : paramMarkers) {
-            resultMarker = merge(resultMarker, marker);
-        }
-        return resultMarker::mark;
-    }
-
-    private static ParamMarker merge(ParamMarker first, ParamMarker second) {
-        return (markerClass, parameterName, parameterValue, exchange) -> {
-            first.mark(markerClass, parameterName, parameterValue, exchange);
-            second.mark(markerClass, parameterName, parameterValue, exchange);
-        };
+        return paramMarkers.stream().reduce(
+                (markerClass, parameterName, parameterValue, exchange) -> { },
+                (paramMarker1, paramMarker2) -> (markerClass, parameterName, parameterValue, exchange) -> {
+                    paramMarker1.mark(markerClass, parameterName, parameterValue, exchange);
+                    paramMarker2.mark(markerClass, parameterName, parameterValue, exchange);
+                })::mark;
     }
 
     private MarkerCallbacks() {}
