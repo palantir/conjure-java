@@ -40,10 +40,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
                 ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
-        List<ParamMarker> paramMarkers = ImmutableList.copyOf(builder.paramMarkers);
-        this.markerCallback = (markerClass, parameterName, parameterValue, exchange) ->
-                paramMarkers.forEach(marked -> marked.mark(markerClass, parameterName, parameterValue, exchange));
-
+        this.markerCallback = MarkerCallbacks.from(builder.paramMarkers);
     }
 
     public static Builder builder() {
