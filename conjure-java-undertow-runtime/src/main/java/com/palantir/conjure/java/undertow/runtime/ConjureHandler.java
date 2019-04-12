@@ -33,6 +33,7 @@ import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.Methods;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -131,12 +132,12 @@ public final class ConjureHandler implements HttpHandler {
         }
 
         private void checkOverlappingPaths() {
-            List<String> duplicates = endpoints.stream()
+            Set<String> duplicates = endpoints.stream()
                     .collect(Collectors.groupingBy(
                             endpoint -> String.format(
                                     "%s: %s",
                                     endpoint.method(),
-                                    endpoint.template().replaceAll("\\{.*\\}", "{}"))))
+                                    endpoint.template().replaceAll("\\{.*?\\}", "{param}"))))
                     .entrySet()
                     .stream().filter(groups -> groups.getValue().size() > 1)
                     .map(entry -> {
@@ -144,7 +145,7 @@ public final class ConjureHandler implements HttpHandler {
                                 .map(endpoint -> String.format("%s.%s", endpoint.serviceName(), endpoint.name()))
                                 .collect(Collectors.joining(", "));
                         return String.format("%s: %s", entry.getKey(), services);
-                    }).collect(Collectors.toList());
+                    }).collect(Collectors.toSet());
             if (!duplicates.isEmpty()) {
                 throw new SafeIllegalArgumentException(
                         "The same route is declared by multiple UndertowServices",

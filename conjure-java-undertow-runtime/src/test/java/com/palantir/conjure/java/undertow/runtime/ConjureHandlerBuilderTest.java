@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.SafeLoggable;
@@ -33,9 +34,9 @@ public class ConjureHandlerBuilderTest {
     @Test
     public void addOverlappingEndpoints() {
         ConjureHandler.Builder builder = ConjureHandler.builder()
-                .endpoints(buildEndpoint(Methods.GET, "/foo/{a}", "serviceName1", "bar"))
-                .endpoints(buildEndpoint(Methods.GET, "/foo/{b}", "serviceName1", "bar2"))
-                .endpoints(buildEndpoint(Methods.GET, "/foo/{c}", "serviceName2", "bar"))
+                .endpoints(buildEndpoint(Methods.GET, "/foo/{a}/foo/{b}", "serviceName1", "bar"))
+                .endpoints(buildEndpoint(Methods.GET, "/foo/{c}/foo/{d}", "serviceName1", "bar2"))
+                .endpoints(buildEndpoint(Methods.GET, "/foo/{e}/foo/{f}", "serviceName2", "bar"))
                 .endpoints(buildEndpoint(Methods.POST, "/foo", "serviceName1", "bar"))
                 .endpoints(buildEndpoint(Methods.POST, "/foo", "serviceName2", "bar"))
                 .endpoints(buildEndpoint(Methods.GET, "/foo2", "serviceName1", "bar"));
@@ -45,8 +46,9 @@ public class ConjureHandlerBuilderTest {
                 .matches(e -> ((SafeLoggable) e).getArgs().equals(ImmutableList.of(
                         SafeArg.of(
                                 "duplicates",
-                                ImmutableList.of(
-                                        "GET: /foo/{}: serviceName1.bar, serviceName1.bar2, serviceName2.bar",
+                                ImmutableSet.of(
+                                        "GET: /foo/{param}/foo/{param}: "
+                                                + "serviceName1.bar, serviceName1.bar2, serviceName2.bar",
                                         "POST: /foo: serviceName1.bar, serviceName2.bar")))));
 
 
