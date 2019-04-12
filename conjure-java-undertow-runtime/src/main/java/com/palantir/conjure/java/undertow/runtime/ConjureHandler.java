@@ -21,6 +21,8 @@ import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -32,6 +34,7 @@ import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.Methods;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * Conjure routing mechanism which can be registered as an Undertow {@link HttpHandler}.
@@ -123,7 +126,27 @@ public final class ConjureHandler implements HttpHandler {
         }
 
         public HttpHandler build() {
+            checkOverlappingPaths();
             return new ConjureHandler(fallback, endpoints);
+        }
+
+        private void checkOverlappingPaths() {
+            List<String> duplicates = endpoints.stream()
+                    .collect(Collectors.groupingBy(
+                            endpoint -> String.format("%s: %s", endpoint.method(), endpoint.template())))
+                    .entrySet()
+                    .stream().filter(groups -> groups.getValue().size() > 1)
+                    .map(entry -> {
+                        String services = entry.getValue().stream()
+                                .map(endpoint -> String.format("%s.%s", endpoint.serviceName(), endpoint.name()))
+                                .collect(Collectors.joining(", "));
+                        return String.format("%s: %s", entry.getKey(), services);
+                    }).collect(Collectors.toList());
+            if (!duplicates.isEmpty()) {
+                throw new SafeIllegalArgumentException(
+                        "The same route is declared by multiple UndertowServices",
+                        SafeArg.of("duplicates", duplicates));
+            }
         }
     }
 }
