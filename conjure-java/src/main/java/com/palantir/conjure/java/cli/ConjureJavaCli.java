@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.VisibleForTesting;
-import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.ServiceGenerator;
@@ -114,11 +113,6 @@ public final class ConjureJavaCli implements Runnable {
                         "Generate service interfaces for Undertow with class names prefixed 'Undertow'")
         private boolean undertowServicePrefix;
 
-        @CommandLine.Option(names = "--useImmutableBytes",
-                defaultValue = "false",
-                description = "Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'")
-        private boolean useImmutableBytes;
-
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -127,13 +121,9 @@ public final class ConjureJavaCli implements Runnable {
         @SuppressWarnings("BanSystemErr")
         public void run() {
             CliConfiguration config = getConfiguration();
-            if (config.generateObjects() && !config.featureFlags().contains(FeatureFlags.UseImmutableBytes)) {
-                System.err.println("[WARNING] Using deprecated ByteBuffer codegen, please enable the "
-                        + "--useImmutableBytes feature flag to opt into the preferred implementation");
-            }
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
-                TypeGenerator typeGenerator = new ObjectGenerator(config.featureFlags());
+                TypeGenerator typeGenerator = new ObjectGenerator();
                 ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.featureFlags());
                 ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.featureFlags());
                 ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.featureFlags());
@@ -169,7 +159,6 @@ public final class ConjureJavaCli implements Runnable {
                     .jerseyBinaryAsResponse(jerseyBinaryAsReponse)
                     .notNullAuthAndBody(notNullAuthAndBody)
                     .undertowServicePrefix(undertowServicePrefix)
-                    .useImmutableBytes(useImmutableBytes)
                     .build();
         }
 

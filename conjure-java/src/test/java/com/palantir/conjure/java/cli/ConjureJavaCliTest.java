@@ -71,8 +71,7 @@ public final class ConjureJavaCliTest {
                 "--objects",
                 "--retrofitCompletableFutures",
                 "--jerseyBinaryAsResponse",
-                "--requireNotNullAuthAndBodyParams",
-                "--useImmutableBytes"
+                "--requireNotNullAuthAndBodyParams"
         };
         CliConfiguration expectedConfiguration = CliConfiguration.builder()
                 .input(targetFile)
@@ -81,8 +80,7 @@ public final class ConjureJavaCliTest {
                 .featureFlags(ImmutableSet.of(
                         FeatureFlags.RetrofitCompletableFutures,
                         FeatureFlags.JerseyBinaryAsResponse,
-                        FeatureFlags.RequireNotNullAuthAndBodyParams,
-                        FeatureFlags.UseImmutableBytes))
+                        FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .build();
         ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
@@ -151,13 +149,11 @@ public final class ConjureJavaCliTest {
                 "generate",
                 "src/test/resources/conjure-api.json",
                 outputDirectory.getAbsolutePath(),
-                "--objects",
-                "--useImmutableBytes"
+                "--objects"
         };
         CommandLine.run(new ConjureJavaCli(), args);
         assertThat(
                 new File(outputDirectory, "com/palantir/conjure/spec/ConjureDefinition.java").isFile()).isTrue();
-        assertThat(systemErr.getLog()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 
     @Test
@@ -166,31 +162,5 @@ public final class ConjureJavaCliTest {
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Error parsing definition");
-    }
-
-    @Test
-    public void writesWarningWhenBytesIsDisabled() throws IOException {
-        File outputDirectory = folder.newFolder();
-        String[] args = {
-                "generate",
-                "src/test/resources/conjure-api.json",
-                outputDirectory.getAbsolutePath(),
-                "--objects"
-        };
-        CommandLine.run(new ConjureJavaCli(), args);
-        assertThat(systemErr.getLog()).contains("[WARNING] Using deprecated ByteBuffer");
-    }
-
-    @Test
-    public void doesNotWriteWarningWhenObjectsAreNotGenerated() throws IOException {
-        File outputDirectory = folder.newFolder();
-        String[] args = {
-                "generate",
-                "src/test/resources/conjure-api.json",
-                outputDirectory.getAbsolutePath(),
-                "--jersey"
-        };
-        CommandLine.run(new ConjureJavaCli(), args);
-        assertThat(systemErr.getLog()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 }

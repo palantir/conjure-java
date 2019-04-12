@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -48,8 +47,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -58,7 +55,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -67,26 +63,22 @@ public final class BeanBuilderGenerator {
     private final TypeMapper typeMapper;
     private final ClassName builderClass;
     private final ClassName objectClass;
-    private final Set<FeatureFlags> featureFlags;
 
     private BeanBuilderGenerator(
             TypeMapper typeMapper,
             ClassName builderClass,
-            ClassName objectClass,
-            Set<FeatureFlags> featureFlags) {
+            ClassName objectClass) {
         this.typeMapper = typeMapper;
         this.builderClass = builderClass;
         this.objectClass = objectClass;
-        this.featureFlags = featureFlags;
     }
 
     public static TypeSpec generate(
             TypeMapper typeMapper,
             ClassName objectClass,
             ClassName builderClass,
-            ObjectDefinition typeDef,
-            Set<FeatureFlags> featureFlags) {
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, featureFlags).generate(typeDef);
+            ObjectDefinition typeDef) {
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass).generate(typeDef);
     }
 
     private TypeSpec generate(ObjectDefinition typeDef) {
@@ -322,15 +314,6 @@ public final class BeanBuilderGenerator {
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
             return shouldClearFirst ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
                     : addStatement;
-        } else if (isByteBuffer(type)) {
-            return CodeBlock.builder()
-                    .addStatement("$L", Expressions.requireNonNull(
-                            spec.name, enriched.fieldName().get() + " cannot be null"))
-                    .addStatement("this.$1N = $2T.allocate($1N.remaining()).put($1N.duplicate())",
-                            spec.name,
-                            ByteBuffer.class)
-                    .addStatement("(($1T)this.$2N).rewind()", Buffer.class, spec.name)
-                    .build();
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
             CodeBlock nullCheckedValue = Expressions.requireNonNull(
@@ -352,10 +335,6 @@ public final class BeanBuilderGenerator {
                     : Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null");
             return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
         }
-    }
-
-    private boolean isByteBuffer(Type type) {
-        return type.accept(TypeVisitor.IS_BINARY) && !featureFlags.contains(FeatureFlags.UseImmutableBytes);
     }
 
     private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched) {

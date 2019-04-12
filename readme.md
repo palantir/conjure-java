@@ -28,8 +28,6 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Generate retrofit services which return Guava ListenableFuture instead of OkHttp Call
         --undertowServicePrefixes
                      Generate service interfaces for Undertow with class names prefixed 'Undertow'
-        --useImmutableBytes
-                     Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'
 
 ### Feature Flags
 
@@ -219,13 +217,6 @@ public static void main(String[] args) {
     server.start();
 }
 ```
-
-## conjure-lib `Bytes` class
-
-By default, conjure-java will use `java.nio.ByteByffer` to represent fields of Conjure type `binary`.  However, the ByteBuffer class has many subtleties, including interior mutability.
-
-To avoid many of these foot-guns, we recommend using the `useImmutableBytes` feature flag to opt-in to using the [`com.palantir.conjure.java.lib.Bytes`](conjure-lib/src/main/java/com/palantir/conjure/java/lib/Bytes.java) class.
-This will become the default behaviour in a future major release of conjure-java.
 
 ## Contributing
 

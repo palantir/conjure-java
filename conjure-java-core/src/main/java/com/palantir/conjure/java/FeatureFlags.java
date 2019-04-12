@@ -54,9 +54,4 @@ public enum FeatureFlags {
      * Undertow generated service interfaces are generated with an "Undertow" prefix.
      */
     UndertowServicePrefix,
-
-    /**
-     * Use the conjure immutable "Bytes" class over ByteBuffer.
-     */
-    UseImmutableBytes,
 }

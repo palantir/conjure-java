@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.java.FeatureFlags;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.spec.ExternalReference;
@@ -33,7 +33,6 @@ import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +40,6 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Maps the conjure type into the 'standard' java type i.e. the type one would use in beans/normal variables (as opposed
@@ -50,13 +48,11 @@ import java.util.stream.Collectors;
 public final class DefaultClassNameVisitor implements ClassNameVisitor {
 
     private final Set<com.palantir.conjure.spec.TypeName> typesByName;
-    private final Set<FeatureFlags> featureFlags;
 
-    public DefaultClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlags> featureFlags) {
+    public DefaultClassNameVisitor(List<TypeDefinition> types) {
         this.typesByName = types.stream()
                 .map(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME))
-                .collect(Collectors.toSet());
-        this.featureFlags = featureFlags;
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
@@ -122,8 +118,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
             case SAFELONG:
                 return ClassName.get(SafeLong.class);
             case BINARY:
-                return featureFlags.contains(FeatureFlags.UseImmutableBytes)
-                        ? ClassName.get(Bytes.class) : ClassName.get(ByteBuffer.class);
+                return ClassName.get(Bytes.class);
             case ANY:
                 return ClassName.get(Object.class);
             case BOOLEAN:

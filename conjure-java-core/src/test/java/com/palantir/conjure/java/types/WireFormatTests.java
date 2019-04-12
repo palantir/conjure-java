@@ -28,7 +28,6 @@ import com.palantir.product.StringExample;
 import com.palantir.product.UnionTypeExample;
 import com.palantir.product.UuidExample;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Set;
@@ -96,23 +95,9 @@ public final class WireFormatTests {
     }
 
     @Test
-    public void testBinaryFieldsDeserializeFromBase64_legacy() throws Exception {
-        assertThat(mapper.readValue("{\"binary\": \"AAEC\"}",
-                com.palantir.binary.BinaryExample.class).getBinary())
-                .isEqualTo(ByteBuffer.wrap(new byte[] {0, 1, 2}));
-    }
-
-    @Test
     public void testBinaryFieldsSerializeToBase64() throws Exception {
         assertThat(mapper.writeValueAsString(
                 BinaryExample.builder().binary(Bytes.from(new byte[] {0, 1, 2})).build()))
-                .isEqualTo("{\"binary\":\"AAEC\"}");
-    }
-
-    @Test
-    public void testBinaryFieldsSerializeToBase64_legacy() throws Exception {
-        assertThat(mapper.writeValueAsString(
-                com.palantir.binary.BinaryExample.builder().binary(ByteBuffer.wrap(new byte[] {0, 1, 2})).build()))
                 .isEqualTo("{\"binary\":\"AAEC\"}");
     }
 
@@ -123,22 +108,9 @@ public final class WireFormatTests {
     }
 
     @Test
-    public void testBinaryAliasFieldsDeserializeFromBase64_legacy() throws Exception {
-        assertThat(mapper.readValue("\"AAEC\"", com.palantir.binary.BinaryAliasExample.class).get())
-                .isEqualTo(ByteBuffer.wrap(new byte[] {0, 1, 2}));
-    }
-
-    @Test
     public void testBinaryAliasFieldsSerializeToBase64() throws Exception {
         assertThat(mapper.writeValueAsString(
                 BinaryAliasExample.of(Bytes.from(new byte[] {0, 1, 2}))))
-                .isEqualTo("\"AAEC\"");
-    }
-
-    @Test
-    public void testBinaryAliasFieldsSerializeToBase64_legacy() throws Exception {
-        assertThat(mapper.writeValueAsString(
-                com.palantir.binary.BinaryAliasExample.of(ByteBuffer.wrap(new byte[] {0, 1, 2}))))
                 .isEqualTo("\"AAEC\"");
     }
 
@@ -218,13 +190,6 @@ public final class WireFormatTests {
     }
 
     @Test
-    public void testAliasTypesEqualWhenInnerTypeEqual_legacyBinary() throws Exception {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[] {0, 1, 2});
-        assertThat(com.palantir.binary.BinaryAliasExample.of(byteBuffer))
-                .isEqualTo(com.palantir.binary.BinaryAliasExample.of(byteBuffer));
-    }
-
-    @Test
     public void testAliasTypesHashCodeEqualWhenInnerTypeEqual() throws Exception {
         assertThat(StringAliasExample.of("a").hashCode()).isEqualTo(StringAliasExample.of("a").hashCode());
         assertThat(IntegerAliasExample.of(103).hashCode()).isEqualTo(IntegerAliasExample.of(103).hashCode());
@@ -232,16 +197,6 @@ public final class WireFormatTests {
         Bytes bytes = Bytes.from(new byte[] {0, 1, 2});
         assertThat(BinaryAliasExample.of(bytes).hashCode())
                 .isEqualTo(BinaryAliasExample.of(bytes).hashCode());
-    }
-
-    @Test
-    public void testAliasTypesHashCodeEqualWhenInnerTypeEqual_legacyBinary() throws Exception {
-        assertThat(StringAliasExample.of("a").hashCode()).isEqualTo(StringAliasExample.of("a").hashCode());
-        assertThat(IntegerAliasExample.of(103).hashCode()).isEqualTo(IntegerAliasExample.of(103).hashCode());
-        assertThat(DoubleAliasExample.of(10.3).hashCode()).isEqualTo(DoubleAliasExample.of(10.3).hashCode());
-        ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[] {0, 1, 2});
-        assertThat(com.palantir.binary.BinaryAliasExample.of(byteBuffer).hashCode())
-                .isEqualTo(com.palantir.binary.BinaryAliasExample.of(byteBuffer).hashCode());
     }
 
     @Test

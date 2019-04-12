@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.services;
 
-import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.spec.ExternalReference;
@@ -30,14 +29,13 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
 
 public final class UndertowRequestBodyClassNameVisitor implements ClassNameVisitor {
 
     private final ClassNameVisitor delegate;
 
-    public UndertowRequestBodyClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlags> featureFlags) {
-        delegate = new DefaultClassNameVisitor(types, featureFlags);
+    public UndertowRequestBodyClassNameVisitor(List<TypeDefinition> types) {
+        delegate = new DefaultClassNameVisitor(types);
     }
 
     @Override

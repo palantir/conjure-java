@@ -92,9 +92,5 @@ public abstract class CliConfiguration {
         Builder undertowServicePrefix(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.UndertowServicePrefix) : this;
         }
-
-        Builder useImmutableBytes(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.UseImmutableBytes) : this;
-        }
     }
 }
