@@ -133,7 +133,10 @@ public final class ConjureHandler implements HttpHandler {
         private void checkOverlappingPaths() {
             List<String> duplicates = endpoints.stream()
                     .collect(Collectors.groupingBy(
-                            endpoint -> String.format("%s: %s", endpoint.method(), endpoint.template())))
+                            endpoint -> String.format(
+                                    "%s: %s",
+                                    endpoint.method(),
+                                    endpoint.template().replaceAll("\\{.*\\}", "{}"))))
                     .entrySet()
                     .stream().filter(groups -> groups.getValue().size() > 1)
                     .map(entry -> {
