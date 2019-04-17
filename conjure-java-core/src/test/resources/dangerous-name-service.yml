@@ -1,0 +1,33 @@
+services:
+  NameCollisionService:
+    name: Naming Collision Service
+    package: com.palantir.product
+    base-path: /
+
+    endpoints:
+      int:
+        http: GET /
+        auth: header
+        args:
+          authHeader:
+            param-type: query
+            type: string
+          long:
+            param-type: query
+            type: string
+          runtime:
+            param-type: query
+            type: string
+          serializer:
+            param-type: query
+            type: string
+          deserializer:
+            param-type: query
+            type: string
+          delegate:
+            param-type: query
+            type: string
+          result:
+            param-type: query
+            type: string
+        returns: string
