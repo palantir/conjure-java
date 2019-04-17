@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
@@ -8,8 +9,10 @@ import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
+import io.undertow.util.PathTemplateMatch;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,49 +43,54 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
 
         private final UndertowNameCollisionService delegate;
 
+        private final Deserializer<String> deserializer;
+
         private final Serializer<String> serializer;
 
         IntEndpoint(UndertowRuntime runtime, UndertowNameCollisionService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            String deserializer_ = deserializer.deserialize(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            String runtime_ = runtime.plainSerDe().deserializeString(pathParams.get("runtime"));
+            HeaderMap headerParams = exchange.getRequestHeaders();
+            String serializer_ =
+                    runtime.plainSerDe().deserializeString(headerParams.get("Serializer"));
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             String authHeader_ =
                     runtime.plainSerDe().deserializeString(queryParams.get("authHeader"));
             String long_ = runtime.plainSerDe().deserializeString(queryParams.get("long"));
-            String runtime_ = runtime.plainSerDe().deserializeString(queryParams.get("runtime"));
-            String serializer_ =
-                    runtime.plainSerDe().deserializeString(queryParams.get("serializer"));
-            String deserializer_ =
-                    runtime.plainSerDe().deserializeString(queryParams.get("deserializer"));
             String delegate_ = runtime.plainSerDe().deserializeString(queryParams.get("delegate"));
             String result_ = runtime.plainSerDe().deserializeString(queryParams.get("result"));
             String result =
                     delegate.int_(
                             authHeader,
+                            serializer_,
+                            runtime_,
                             authHeader_,
                             long_,
-                            runtime_,
-                            serializer_,
-                            deserializer_,
                             delegate_,
-                            result_);
+                            result_,
+                            deserializer_);
             serializer.serialize(result, exchange);
         }
 
         @Override
         public HttpString method() {
-            return Methods.GET;
+            return Methods.POST;
         }
 
         @Override
         public String template() {
-            return "/";
+            return "/{runtime}";
         }
 
         @Override

@@ -6,7 +6,7 @@ services:
 
     endpoints:
       int:
-        http: GET /
+        http: POST /{runtime}
         auth: header
         args:
           authHeader:
@@ -16,13 +16,14 @@ services:
             param-type: query
             type: string
           runtime:
-            param-type: query
+            param-type: path
             type: string
           serializer:
-            param-type: query
+            param-type: header
+            param-id: Serializer
             type: string
           deserializer:
-            param-type: query
+            param-type: body
             type: string
           delegate:
             param-type: query

@@ -7,11 +7,11 @@ import javax.annotation.Generated;
 public interface UndertowNameCollisionService {
     String int_(
             AuthHeader authHeader,
+            String serializer,
+            String runtime,
             String authHeader_,
             String long_,
-            String runtime,
-            String serializer,
-            String deserializer,
             String delegate,
-            String result);
+            String result,
+            String deserializer);
 }

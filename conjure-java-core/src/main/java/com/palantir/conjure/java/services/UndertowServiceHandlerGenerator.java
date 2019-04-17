@@ -293,7 +293,7 @@ final class UndertowServiceHandlerGenerator {
 
         // body parameter
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
-            String paramName = bodyParam.getArgName().get();
+            String paramName = sanitizeVarName(bodyParam.getArgName().get(), endpointDefinition);
             if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
                 // TODO(ckozak): Support aliased and optional binary types
                 code.addStatement("$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
