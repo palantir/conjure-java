@@ -72,7 +72,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteBinaryService";
+            return "EteBinaryService";
         }
 
         @Override
@@ -120,7 +120,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteBinaryService";
+            return "EteBinaryService";
         }
 
         @Override
@@ -167,7 +167,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteBinaryService";
+            return "EteBinaryService";
         }
 
         @Override
@@ -212,7 +212,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteBinaryService";
+            return "EteBinaryService";
         }
 
         @Override

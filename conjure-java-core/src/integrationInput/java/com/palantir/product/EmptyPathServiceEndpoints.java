@@ -64,7 +64,7 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEmptyPathService";
+            return "EmptyPathService";
         }
 
         @Override

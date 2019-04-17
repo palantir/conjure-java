@@ -105,7 +105,7 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowNameCollisionService";
+            return "NameCollisionService";
         }
 
         @Override

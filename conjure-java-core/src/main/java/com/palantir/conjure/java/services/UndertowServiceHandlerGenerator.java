@@ -162,7 +162,8 @@ final class UndertowServiceHandlerGenerator {
                                 Collections.class, Arrays.class, endpointBlock)
                         .build())
                 .addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
-                        e -> generateEndpointHandler(e, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
+                        e -> generateEndpointHandler(e, serviceDefinition, serviceClass, typeDefinitions, typeMapper,
+                                returnTypeMapper)))
                 .build();
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), endpoints)
@@ -182,6 +183,7 @@ final class UndertowServiceHandlerGenerator {
 
     private TypeSpec generateEndpointHandler(
             EndpointDefinition endpointDefinition,
+            ServiceDefinition serviceDefinition,
             ClassName serviceClass,
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
@@ -262,7 +264,7 @@ final class UndertowServiceHandlerGenerator {
                         // Note that this is the service name as defined in conjure, not the potentially modified
                         // name of the generated service interface. We may generate "UndertowFooService", but we
                         // should still return "FooService" here.
-                        .addStatement("return $1S", serviceClass.simpleName())
+                        .addStatement("return $1S", serviceDefinition.getServiceName().getName())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("name")
                         .addModifiers(Modifier.PUBLIC)
