@@ -305,7 +305,7 @@ final class UndertowServiceHandlerGenerator {
                         DESERIALIZER_VAR_NAME,
                         EXCHANGE_VAR_NAME);
             }
-            code.add(generateParamMarkers(bodyParam.getMarkers(), paramName, typeMapper));
+            code.add(generateParamMarkers(bodyParam.getMarkers(), bodyParam.getArgName().get(), paramName, typeMapper));
         });
 
         // path parameters
@@ -378,12 +378,15 @@ final class UndertowServiceHandlerGenerator {
     private CodeBlock generateParamMarkers(
             List<Type> markers,
             String paramName,
+            // Variable may be sanitized
+            String variableName,
             TypeMapper typeMapper) {
         return CodeBlocks.of(markers.stream().map(marker ->
                 CodeBlock.of("$1N.markers().param($2S, $3S, $4N, $5N);",
                         RUNTIME_VAR_NAME,
-                        typeMapper.getClassName(marker).box(), paramName,
+                        typeMapper.getClassName(marker).box(),
                         paramName,
+                        variableName,
                         EXCHANGE_VAR_NAME))
                 .collect(Collectors.toList()));
     }
@@ -550,7 +553,7 @@ final class UndertowServiceHandlerGenerator {
                     }
                     return CodeBlocks.of(
                             retrieveParam,
-                            generateParamMarkers(arg.getMarkers(), paramName, typeMapper));
+                            generateParamMarkers(arg.getMarkers(), arg.getArgName().get(), paramName, typeMapper));
                 }).collect(Collectors.toList()));
     }
 

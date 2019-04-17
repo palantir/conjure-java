@@ -1,3 +1,9 @@
+types:
+  imports:
+    Safe:
+      external:
+        java: com.palantir.redaction.Safe
+
 services:
   NameCollisionService:
     name: Naming Collision Service
@@ -12,23 +18,37 @@ services:
           authHeader:
             param-type: query
             type: string
+            markers:
+              - Safe
           long:
             param-type: query
             type: string
+            markers:
+              - Safe
           runtime:
             param-type: path
             type: string
+            markers:
+              - Safe
           serializer:
             param-type: header
             param-id: Serializer
             type: string
+            markers:
+              - Safe
           deserializer:
             param-type: body
             type: string
+            markers:
+              - Safe
           delegate:
             param-type: query
             type: string
+            markers:
+              - Safe
           result:
             param-type: query
             type: string
+            markers:
+              - Safe
         returns: string
