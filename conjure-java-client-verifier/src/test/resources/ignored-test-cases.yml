@@ -78,9 +78,77 @@ client:
 
     receiveListAnyAliasExample:
       - '[null]'
+      - 'null'
 
     receiveSetAnyAliasExample:
       - '[null]'
+      - 'null'
+
+    receiveListBearerTokenAliasExample:
+      - 'null'
+
+    receiveListBinaryAliasExample:
+      - 'null'
+
+    receiveListBooleanAliasExample:
+      - 'null'
+
+    receiveListDateTimeAliasExample:
+      - 'null'
+
+    receiveListDoubleAliasExample:
+      - 'null'
+
+    receiveListIntegerAliasExample:
+      - 'null'
+
+    receiveListRidAliasExample:
+      - 'null'
+
+    receiveListSafeLongAliasExample:
+      - 'null'
+
+    receiveListStringAliasExample:
+      - 'null'
+
+    receiveListUuidAliasExample:
+      - 'null'
+
+    receiveListOptionalAnyAliasExample:
+      - 'null'
+
+    receiveSetBearerTokenAliasExample:
+      - 'null'
+
+    receiveSetBinaryAliasExample:
+      - 'null'
+
+    receiveSetBooleanAliasExample:
+      - 'null'
+
+    receiveSetDateTimeAliasExample:
+      - 'null'
+
+    receiveSetDoubleAliasExample:
+      - 'null'
+
+    receiveSetIntegerAliasExample:
+      - 'null'
+
+    receiveSetRidAliasExample:
+      - 'null'
+
+    receiveSetSafeLongAliasExample:
+      - 'null'
+
+    receiveSetStringAliasExample:
+      - 'null'
+
+    receiveSetUuidAliasExample:
+      - 'null'
+
+    receiveSetOptionalAnyAliasExample:
+      - 'null'
 
   singleHeaderService:
     headerOptionalString:
