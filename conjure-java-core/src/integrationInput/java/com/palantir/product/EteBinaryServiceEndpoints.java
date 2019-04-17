@@ -54,9 +54,9 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            InputStream body = runtime.bodySerDe().deserializeInputStream(exchange);
-            BinaryResponseBody result = delegate.postBinary(authHeader, body);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final InputStream body = runtime.bodySerDe().deserializeInputStream(exchange);
+            final BinaryResponseBody result = delegate.postBinary(authHeader, body);
             runtime.bodySerDe().serialize(result, exchange);
         }
 
@@ -99,8 +99,9 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Optional<BinaryResponseBody> result = delegate.getOptionalBinaryPresent(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Optional<BinaryResponseBody> result =
+                    delegate.getOptionalBinaryPresent(authHeader);
             if (result.isPresent()) {
                 runtime.bodySerDe().serialize(result.get(), exchange);
             } else {
@@ -146,8 +147,8 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Optional<BinaryResponseBody> result = delegate.getOptionalBinaryEmpty(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Optional<BinaryResponseBody> result = delegate.getOptionalBinaryEmpty(authHeader);
             if (result.isPresent()) {
                 runtime.bodySerDe().serialize(result.get(), exchange);
             } else {
@@ -193,10 +194,11 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            int numBytes = runtime.plainSerDe().deserializeInteger(queryParams.get("numBytes"));
-            BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            final int numBytes =
+                    runtime.plainSerDe().deserializeInteger(queryParams.get("numBytes"));
+            final BinaryResponseBody result = delegate.getBinaryFailure(authHeader, numBytes);
             runtime.bodySerDe().serialize(result, exchange);
         }
 

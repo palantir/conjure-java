@@ -292,10 +292,10 @@ final class UndertowServiceHandlerGenerator {
             String paramName = bodyParam.getArgName().get();
             if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
                 // TODO(ckozak): Support aliased and optional binary types
-                code.addStatement("$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
+                code.addStatement("final $1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
                         InputStream.class, paramName, RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
             } else {
-                code.addStatement("$1T $2N = $3N.deserialize($4N)",
+                code.addStatement("final $1T $2N = $3N.deserialize($4N)",
                         typeMapper.getClassName(bodyParam.getType()).box(),
                         paramName,
                         DESERIALIZER_VAR_NAME,
@@ -322,7 +322,7 @@ final class UndertowServiceHandlerGenerator {
         final String resultVarName = "result";
         if (endpointDefinition.getReturns().isPresent()) {
             Type returnType = endpointDefinition.getReturns().get();
-            code.addStatement("$1T $2N = $3N.$4L($5L)",
+            code.addStatement("final $1T $2N = $3N.$4L($5L)",
                     returnTypeMapper.getClassName(returnType),
                     resultVarName,
                     DELEGATE_VAR_NAME,
@@ -397,14 +397,14 @@ final class UndertowServiceHandlerGenerator {
             @Override
             public Optional<String> visitHeader(HeaderAuthType value) {
                 // header auth
-                code.addStatement("$1T $2N = $3N.auth().header($4N)",
+                code.addStatement("final $1T $2N = $3N.auth().header($4N)",
                         AuthHeader.class, AUTH_HEADER_VAR_NAME, RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
                 return Optional.of(AUTH_HEADER_VAR_NAME);
             }
 
             @Override
             public Optional<String> visitCookie(CookieAuthType value) {
-                code.addStatement("$1T $2N = $3N.auth().cookie($4N, $5S)",
+                code.addStatement("final $1T $2N = $3N.auth().cookie($4N, $5S)",
                         BearerToken.class,
                         COOKIE_TOKEN_VAR_NAME,
                         RUNTIME_VAR_NAME,
@@ -426,7 +426,7 @@ final class UndertowServiceHandlerGenerator {
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasPathArgument(endpointDefinition.getArgs())) {
-            code.addStatement("$1T<$2T, $2T> $3N = $4N.getAttachment($5T.ATTACHMENT_KEY).getParameters()",
+            code.addStatement("final $1T<$2T, $2T> $3N = $4N.getAttachment($5T.ATTACHMENT_KEY).getParameters()",
                     Map.class, String.class, PATH_PARAMS_VAR_NAME, EXCHANGE_VAR_NAME,
                     io.undertow.util.PathTemplateMatch.class);
             code.add(
@@ -440,7 +440,7 @@ final class UndertowServiceHandlerGenerator {
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasHeaderArgument(endpointDefinition.getArgs())) {
-            code.addStatement("$1T $2N = $3N.getRequestHeaders()", io.undertow.util.HeaderMap.class,
+            code.addStatement("final $1T $2N = $3N.getRequestHeaders()", io.undertow.util.HeaderMap.class,
                     HEADER_PARAMS_VAR_NAME,
                     EXCHANGE_VAR_NAME);
             code.add(generateHeaderParameterCodeBlock(endpointDefinition.getArgs().stream(), typeDefinitions,
@@ -454,7 +454,7 @@ final class UndertowServiceHandlerGenerator {
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasQueryArgument(endpointDefinition.getArgs())) {
-            code.addStatement("$1T $2N = $3N.getQueryParameters()",
+            code.addStatement("final $1T $2N = $3N.getQueryParameters()",
                     ParameterizedTypeName.get(ClassName.get(Map.class), TypeName.get(String.class),
                             ParameterizedTypeName.get(Deque.class, String.class)), QUERY_PARAMS_VAR_NAME,
                     EXCHANGE_VAR_NAME);
@@ -534,7 +534,7 @@ final class UndertowServiceHandlerGenerator {
                                         paramsVarName,
                                         toParamId.apply(arg)),
                                 CodeBlocks.statement(
-                                        "$1T $2N = $3L",
+                                        "final $1T $2N = $3L",
                                         typeMapper.getClassName(arg.getType()),
                                         paramName,
                                         createConstructorForTypeWithReference(arg.getType(), rawVarName,
@@ -552,7 +552,7 @@ final class UndertowServiceHandlerGenerator {
             String paramsVarName, String paramId) {
         if (type.accept(MoreVisitors.IS_EXTERNAL)) {
             return CodeBlocks.statement(
-                    "$1T $2N = $3T.valueOf($4N.plainSerDe().deserializeString($5N.get($6S)))",
+                    "final $1T $2N = $3T.valueOf($4N.plainSerDe().deserializeString($5N.get($6S)))",
                     typeMapper.getClassName(type),
                     resultVarName,
                     typeMapper.getClassName(type),
@@ -567,7 +567,7 @@ final class UndertowServiceHandlerGenerator {
             return complexDeserializer.get();
         }
         return CodeBlocks.statement(
-                "$1T $2N = $3N.plainSerDe().$4L($5N.get($6S))",
+                "final $1T $2N = $3N.plainSerDe().$4L($5N.get($6S))",
                 typeMapper.getClassName(type),
                 resultVarName,
                 RUNTIME_VAR_NAME,
@@ -622,7 +622,7 @@ final class UndertowServiceHandlerGenerator {
                 return Optional.empty();
             }
         }).map(functionName -> CodeBlocks.statement(
-                "$1T $2N = $3N.plainSerDe().$4L($5N.get($6S), $7T::valueOf)",
+                "final $1T $2N = $3N.plainSerDe().$4L($5N.get($6S), $7T::valueOf)",
                 typeMapper.getClassName(type),
                 resultVarName,
                 RUNTIME_VAR_NAME,

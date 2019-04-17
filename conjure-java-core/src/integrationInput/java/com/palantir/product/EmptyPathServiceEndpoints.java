@@ -48,7 +48,7 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            boolean result = delegate.emptyPath();
+            final boolean result = delegate.emptyPath();
             serializer.serialize(result, exchange);
         }
 

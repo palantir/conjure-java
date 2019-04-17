@@ -85,8 +85,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            String result = delegate.string(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final String result = delegate.string(authHeader);
             serializer.serialize(result, exchange);
         }
 
@@ -131,8 +131,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            int result = delegate.integer(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final int result = delegate.integer(authHeader);
             serializer.serialize(result, exchange);
         }
 
@@ -177,8 +177,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            double result = delegate.double_(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final double result = delegate.double_(authHeader);
             serializer.serialize(result, exchange);
         }
 
@@ -223,8 +223,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            boolean result = delegate.boolean_(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final boolean result = delegate.boolean_(authHeader);
             serializer.serialize(result, exchange);
         }
 
@@ -269,8 +269,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            SafeLong result = delegate.safelong(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final SafeLong result = delegate.safelong(authHeader);
             serializer.serialize(result, exchange);
         }
 
@@ -316,8 +316,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            ResourceIdentifier result = delegate.rid(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final ResourceIdentifier result = delegate.rid(authHeader);
             serializer.serialize(result, exchange);
         }
 
@@ -362,8 +362,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            BearerToken result = delegate.bearertoken(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final BearerToken result = delegate.bearertoken(authHeader);
             serializer.serialize(result, exchange);
         }
 
@@ -408,8 +408,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Optional<String> result = delegate.optionalString(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Optional<String> result = delegate.optionalString(authHeader);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
             } else {
@@ -458,8 +458,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Optional<String> result = delegate.optionalEmpty(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Optional<String> result = delegate.optionalEmpty(authHeader);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
             } else {
@@ -508,8 +508,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            OffsetDateTime result = delegate.datetime(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final OffsetDateTime result = delegate.datetime(authHeader);
             serializer.serialize(result, exchange);
         }
 
@@ -551,8 +551,8 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            BinaryResponseBody result = delegate.binary(authHeader);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final BinaryResponseBody result = delegate.binary(authHeader);
             runtime.bodySerDe().serialize(result, exchange);
         }
 
@@ -597,11 +597,11 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, String> pathParams =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            String param = runtime.plainSerDe().deserializeString(pathParams.get("param"));
-            String result = delegate.path(authHeader, param);
+            final String param = runtime.plainSerDe().deserializeString(pathParams.get("param"));
+            final String result = delegate.path(authHeader, param);
             serializer.serialize(result, exchange);
         }
 
@@ -651,9 +651,9 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            StringAliasExample notNullBody = deserializer.deserialize(exchange);
-            StringAliasExample result = delegate.notNullBody(authHeader, notNullBody);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final StringAliasExample notNullBody = deserializer.deserialize(exchange);
+            final StringAliasExample result = delegate.notNullBody(authHeader, notNullBody);
             serializer.serialize(result, exchange);
         }
 
@@ -699,12 +699,12 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            String queryParamNameRaw =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            final String queryParamNameRaw =
                     runtime.plainSerDe().deserializeString(queryParams.get("queryParamName"));
-            StringAliasExample queryParamName = StringAliasExample.of(queryParamNameRaw);
-            StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
+            final StringAliasExample queryParamName = StringAliasExample.of(queryParamNameRaw);
+            final StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
 
@@ -750,17 +750,17 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            Optional<String> queryParamNameRaw =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            final Optional<String> queryParamNameRaw =
                     runtime.plainSerDe()
                             .deserializeOptionalString(queryParams.get("queryParamName"));
-            Optional<StringAliasExample> queryParamName =
+            final Optional<StringAliasExample> queryParamName =
                     Optional.ofNullable(
                             queryParamNameRaw.isPresent()
                                     ? StringAliasExample.of(queryParamNameRaw.get())
                                     : null);
-            StringAliasExample result = delegate.optionalAliasOne(authHeader, queryParamName);
+            final StringAliasExample result = delegate.optionalAliasOne(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
 
@@ -806,13 +806,13 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            String queryParamNameRaw =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            final String queryParamNameRaw =
                     runtime.plainSerDe().deserializeString(queryParams.get("queryParamName"));
-            NestedStringAliasExample queryParamName =
+            final NestedStringAliasExample queryParamName =
                     NestedStringAliasExample.of(StringAliasExample.of(queryParamNameRaw));
-            NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
+            final NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
 
@@ -862,9 +862,10 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            StringAliasExample notNullBody = deserializer.deserialize(exchange);
-            StringAliasExample result = delegate.notNullBodyExternalImport(authHeader, notNullBody);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final StringAliasExample notNullBody = deserializer.deserialize(exchange);
+            final StringAliasExample result =
+                    delegate.notNullBodyExternalImport(authHeader, notNullBody);
             serializer.serialize(result, exchange);
         }
 
@@ -916,9 +917,9 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Optional<StringAliasExample> body = deserializer.deserialize(exchange);
-            Optional<StringAliasExample> result =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Optional<StringAliasExample> body = deserializer.deserialize(exchange);
+            final Optional<StringAliasExample> result =
                     delegate.optionalBodyExternalImport(authHeader, body);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
@@ -971,13 +972,13 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            Optional<StringAliasExample> query =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            final Optional<StringAliasExample> query =
                     runtime.plainSerDe()
                             .deserializeOptionalComplex(
                                     queryParams.get("query"), StringAliasExample::valueOf);
-            Optional<StringAliasExample> result =
+            final Optional<StringAliasExample> result =
                     delegate.optionalQueryExternalImport(authHeader, query);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
@@ -1024,7 +1025,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
+            final AuthHeader authHeader = runtime.auth().header(exchange);
             delegate.noReturn(authHeader);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -1070,13 +1071,13 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            SimpleEnum queryParamName =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            final SimpleEnum queryParamName =
                     runtime.plainSerDe()
                             .deserializeComplex(
                                     queryParams.get("queryParamName"), SimpleEnum::valueOf);
-            SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
+            final SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
 
@@ -1121,13 +1122,13 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            List<SimpleEnum> queryParamName =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            final List<SimpleEnum> queryParamName =
                     runtime.plainSerDe()
                             .deserializeComplexList(
                                     queryParams.get("queryParamName"), SimpleEnum::valueOf);
-            List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
+            final List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
 
@@ -1173,13 +1174,14 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            Optional<SimpleEnum> queryParamName =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            final Optional<SimpleEnum> queryParamName =
                     runtime.plainSerDe()
                             .deserializeOptionalComplex(
                                     queryParams.get("queryParamName"), SimpleEnum::valueOf);
-            Optional<SimpleEnum> result = delegate.optionalEnumQuery(authHeader, queryParamName);
+            final Optional<SimpleEnum> result =
+                    delegate.optionalEnumQuery(authHeader, queryParamName);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
             } else {
@@ -1228,13 +1230,13 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            AuthHeader authHeader = runtime.auth().header(exchange);
-            HeaderMap headerParams = exchange.getRequestHeaders();
-            SimpleEnum headerParameter =
+            final AuthHeader authHeader = runtime.auth().header(exchange);
+            final HeaderMap headerParams = exchange.getRequestHeaders();
+            final SimpleEnum headerParameter =
                     runtime.plainSerDe()
                             .deserializeComplex(
                                     headerParams.get("Custom-Header"), SimpleEnum::valueOf);
-            SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
+            final SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
             serializer.serialize(result, exchange);
         }
 
