@@ -158,26 +158,24 @@ public final class AliasGenerator {
             ClassName thisClass,
             TypeName aliasTypeName,
             TypeMapper typeMapper) {
-
-        // doesn't support valueOf factories for ANY and BINARY types
+        // doesn't support valueOf factories for ANY or BINARY types
         if (conjureType.accept(TypeVisitor.IS_PRIMITIVE)
                 && !conjureType.accept(TypeVisitor.IS_ANY)
                 && !conjureType.accept(TypeVisitor.IS_BINARY)) {
             return Optional.of(valueOfFactoryMethodForPrimitive(
                     conjureType.accept(TypeVisitor.PRIMITIVE), thisClass, aliasTypeName));
         } else if (conjureType.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
-            // delegate to aliased type's valueOf factory method
-            Optional<AliasDefinition> aliasTypeDef = typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
+            return typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
-                    .map(type -> type.accept(TypeDefinitionVisitor.ALIAS));
-
-            return aliasTypeDef.map(type -> {
-                ClassName className = ClassName.get(type.getTypeName().getPackage(), type.getTypeName().getName());
-                return CodeBlock.builder()
-                        .addStatement("return new $T($T.valueOf(value))", thisClass, className).build();
-            });
+                    .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
+                    .flatMap(type -> valueOfFactoryMethod(type.getAlias(), thisClass, aliasTypeName, typeMapper)
+                            .map(ignored -> {
+                                ClassName className = ClassName.get(
+                                        type.getTypeName().getPackage(), type.getTypeName().getName());
+                                return CodeBlock.builder()
+                                        .addStatement("return new $T($T.valueOf(value))", thisClass, className).build();
+                            }));
         }
-
         return Optional.empty();
     }
 
