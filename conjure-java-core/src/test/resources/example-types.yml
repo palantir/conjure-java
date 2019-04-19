@@ -196,3 +196,13 @@ types:
       SimpleEnum:
         values:
           - VALUE
+      StringAliasOne:
+        alias: string
+      StringAliasTwo:
+        alias: optional<StringAliasOne>
+      StringAliasThree:
+        alias: StringAliasTwo
+      BinaryAliasOne:
+        alias: binary
+      BinaryAliasTwo:
+        alias: BinaryAliasOne
