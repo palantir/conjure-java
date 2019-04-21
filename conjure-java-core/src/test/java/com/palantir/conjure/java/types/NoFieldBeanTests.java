@@ -18,10 +18,15 @@ package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.product.EmptyObjectExample;
+import java.io.IOException;
 import org.junit.Test;
 
 public class NoFieldBeanTests {
+
+    private final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
 
     @Test
     public void testSingletonInstance() {
@@ -29,8 +34,18 @@ public class NoFieldBeanTests {
     }
 
     @Test
+    public void testDeserializeUsesSingleton() throws IOException {
+        assertThat(mapper.readValue("{}", EmptyObjectExample.class)).isSameAs(EmptyObjectExample.of());
+    }
+
+    @Test
     public void testConstantToString() {
         EmptyObjectExample value = EmptyObjectExample.of();
         assertThat(value.toString()).isSameAs(value.toString());
+    }
+
+    @Test
+    public void testSerializedForm() throws IOException {
+        assertThat(mapper.writeValueAsString(EmptyObjectExample.of())).isEqualTo("{}");
     }
 }
