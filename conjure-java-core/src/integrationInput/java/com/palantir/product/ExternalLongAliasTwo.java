@@ -6,15 +6,15 @@ import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class BinaryAliasTwo {
-    private final BinaryAliasOne value;
+public final class ExternalLongAliasTwo {
+    private final ExternalLongAliasOne value;
 
-    private BinaryAliasTwo(BinaryAliasOne value) {
+    private ExternalLongAliasTwo(ExternalLongAliasOne value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue
-    public BinaryAliasOne get() {
+    public ExternalLongAliasOne get() {
         return value;
     }
 
@@ -26,8 +26,8 @@ public final class BinaryAliasTwo {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof BinaryAliasTwo
-                        && this.value.equals(((BinaryAliasTwo) other).value));
+                || (other instanceof ExternalLongAliasTwo
+                        && this.value.equals(((ExternalLongAliasTwo) other).value));
     }
 
     @Override
@@ -35,8 +35,12 @@ public final class BinaryAliasTwo {
         return value.hashCode();
     }
 
+    public static ExternalLongAliasTwo valueOf(String value) {
+        return of(ExternalLongAliasOne.valueOf(value));
+    }
+
     @JsonCreator
-    public static BinaryAliasTwo of(BinaryAliasOne value) {
-        return new BinaryAliasTwo(value);
+    public static ExternalLongAliasTwo of(ExternalLongAliasOne value) {
+        return new ExternalLongAliasTwo(value);
     }
 }

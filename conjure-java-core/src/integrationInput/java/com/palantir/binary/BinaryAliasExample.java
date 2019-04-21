@@ -2,8 +2,8 @@ package com.palantir.binary;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.logsafe.Preconditions;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
@@ -11,8 +11,7 @@ public final class BinaryAliasExample {
     private final ByteBuffer value;
 
     private BinaryAliasExample(ByteBuffer value) {
-        Objects.requireNonNull(value, "value cannot be null");
-        this.value = value;
+        this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue

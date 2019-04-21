@@ -21,17 +21,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
+import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.Preconditions;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import java.util.Objects;
+import java.lang.reflect.Method;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +83,7 @@ public final class AliasGenerator {
                         .build());
 
         Optional<CodeBlock> maybeValueOfFactoryMethod = valueOfFactoryMethod(
-                typeDef.getAlias(), thisClass, aliasTypeName, typeMapper);
+                typeDef.getAlias(), aliasTypeName, typeMapper);
         if (maybeValueOfFactoryMethod.isPresent()) {
             spec.addMethod(MethodSpec.methodBuilder("valueOf")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -155,7 +157,6 @@ public final class AliasGenerator {
 
     private static Optional<CodeBlock> valueOfFactoryMethod(
             Type conjureType,
-            ClassName thisClass,
             TypeName aliasTypeName,
             TypeMapper typeMapper) {
         // doesn't support valueOf factories for ANY or BINARY types
@@ -163,50 +164,56 @@ public final class AliasGenerator {
                 && !conjureType.accept(TypeVisitor.IS_ANY)
                 && !conjureType.accept(TypeVisitor.IS_BINARY)) {
             return Optional.of(valueOfFactoryMethodForPrimitive(
-                    conjureType.accept(TypeVisitor.PRIMITIVE), thisClass, aliasTypeName));
+                    conjureType.accept(TypeVisitor.PRIMITIVE), aliasTypeName));
         } else if (conjureType.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
             return typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
                     .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
-                    .flatMap(type -> valueOfFactoryMethod(type.getAlias(), thisClass, aliasTypeName, typeMapper)
+                    .flatMap(type -> valueOfFactoryMethod(type.getAlias(), aliasTypeName, typeMapper)
                             .map(ignored -> {
                                 ClassName className = ClassName.get(
                                         type.getTypeName().getPackage(), type.getTypeName().getName());
                                 return CodeBlock.builder()
-                                        .addStatement("return new $T($T.valueOf(value))", thisClass, className).build();
+                                        .addStatement("return of($T.valueOf(value))", className).build();
                             }));
+        } else if (conjureType.accept(MoreVisitors.IS_EXTERNAL)) {
+            ExternalReference reference = conjureType.accept(MoreVisitors.EXTERNAL);
+            // Only generate valueOf methods for external type imports if the fallback type is valid
+            if (valueOfFactoryMethod(reference.getFallback(), aliasTypeName, typeMapper).isPresent()
+                    && hasValueOfFactory(reference.getExternalReference())) {
+                return Optional.of(CodeBlock.builder()
+                        .addStatement("return of($T.valueOf(value))", aliasTypeName.box())
+                        .build());
+            }
         }
         return Optional.empty();
     }
 
     @SuppressWarnings("checkstyle:cyclomaticcomplexity")
-    private static CodeBlock valueOfFactoryMethodForPrimitive(
-            PrimitiveType primitiveType,
-            ClassName thisClass,
-            TypeName aliasTypeName) {
+    private static CodeBlock valueOfFactoryMethodForPrimitive(PrimitiveType primitiveType, TypeName aliasTypeName) {
         switch (primitiveType.get()) {
             case STRING:
-                return CodeBlock.builder().addStatement("return new $T(value)", thisClass).build();
+                return CodeBlock.builder().addStatement("return of(value)").build();
             case DOUBLE:
                 return CodeBlock.builder()
-                        .addStatement("return new $T($T.parseDouble(value))", thisClass, aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseDouble(value))", aliasTypeName.box()).build();
             case INTEGER:
                 return CodeBlock.builder()
-                        .addStatement("return new $T($T.parseInt(value))", thisClass, aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseInt(value))", aliasTypeName.box()).build();
             case BOOLEAN:
                 return CodeBlock.builder()
-                        .addStatement("return new $T($T.parseBoolean(value))", thisClass, aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseBoolean(value))", aliasTypeName.box()).build();
             case SAFELONG:
             case RID:
             case BEARERTOKEN:
                 return CodeBlock.builder()
-                        .addStatement("return new $T($T.valueOf(value))", thisClass, aliasTypeName).build();
+                        .addStatement("return of($T.valueOf(value))", aliasTypeName).build();
             case UUID:
                 return CodeBlock.builder()
-                        .addStatement("return new $T($T.fromString(value))", thisClass, aliasTypeName).build();
+                        .addStatement("return of($T.fromString(value))", aliasTypeName).build();
             case DATETIME:
                 return CodeBlock.builder()
-                        .addStatement("return new $T($T.parse(value))", thisClass, aliasTypeName).build();
+                        .addStatement("return of($T.parse(value))", aliasTypeName).build();
             case BINARY:
             case ANY:
             case UNKNOWN:
@@ -215,16 +222,32 @@ public final class AliasGenerator {
                 "Unsupported primitive type: " + primitiveType + "for `valueOf` method.");
     }
 
+    /**
+     * Detects if the class is available in the generator classpath and has a public static <code>valueOf(String)
+     * </code>.
+     */
+    private static boolean hasValueOfFactory(com.palantir.conjure.spec.TypeName className) {
+        try {
+            Class clazz = Class.forName(className.getPackage() + '.' + className.getName());
+            Method valueOf = clazz.getDeclaredMethod("valueOf", (Class<?>) String.class);
+            return java.lang.reflect.Modifier.isPublic(valueOf.getModifiers())
+                    && java.lang.reflect.Modifier.isStatic(valueOf.getModifiers());
+        } catch (ReflectiveOperationException e) {
+            // Class doesn't exist on the code-gen classpath, or the type doesn't have a valueOf method
+            return false;
+        }
+    }
+
     private static MethodSpec createConstructor(TypeName aliasTypeName) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(aliasTypeName, "value");
         if (!aliasTypeName.isPrimitive()) {
-            builder.addStatement("$T.requireNonNull(value, \"value cannot be null\")", Objects.class);
+            builder.addStatement("this.value = $T.checkNotNull(value, \"value cannot be null\")", Preconditions.class);
+        } else {
+            builder.addStatement("this.value = value");
         }
-        return builder
-                .addStatement("this.value = value")
-                .build();
+        return builder.build();
     }
 
     private static CodeBlock primitiveSafeEquality(ClassName thisClass, TypeName aliasTypeName) {

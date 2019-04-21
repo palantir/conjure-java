@@ -206,3 +206,7 @@ types:
         alias: binary
       BinaryAliasTwo:
         alias: BinaryAliasOne
+      ExternalLongAliasOne:
+        alias: ExternalLong
+      ExternalLongAliasTwo:
+        alias: ExternalLongAliasOne

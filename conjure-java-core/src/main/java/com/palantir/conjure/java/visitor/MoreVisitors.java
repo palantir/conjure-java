@@ -17,12 +17,20 @@ public final class MoreVisitors {
     private MoreVisitors() {}
 
     public static final IsExternalType IS_EXTERNAL = new IsExternalType();
+    public static final ExternalType EXTERNAL = new ExternalType();
     public static final IsInternalReference IS_INTERNAL_REFERENCE = new IsInternalReference();
 
     private static class IsExternalType extends IsTypeVisitor {
         @Override
         public Boolean visitExternal(ExternalReference value) {
             return true;
+        }
+    }
+
+    private static class ExternalType extends DefaultTypeVisitor<ExternalReference> {
+        @Override
+        public ExternalReference visitExternal(ExternalReference value) {
+            return value;
         }
     }
 
