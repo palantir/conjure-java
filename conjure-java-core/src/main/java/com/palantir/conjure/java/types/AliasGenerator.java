@@ -169,7 +169,8 @@ public final class AliasGenerator {
             return typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
                     .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
-                    .flatMap(type -> valueOfFactoryMethod(type.getAlias(), aliasTypeName, typeMapper)
+                    .flatMap(type -> valueOfFactoryMethod(
+                            type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper)
                             .map(ignored -> {
                                 ClassName className = ClassName.get(
                                         type.getTypeName().getPackage(), type.getTypeName().getName());
@@ -179,8 +180,9 @@ public final class AliasGenerator {
         } else if (conjureType.accept(MoreVisitors.IS_EXTERNAL)) {
             ExternalReference reference = conjureType.accept(MoreVisitors.EXTERNAL);
             // Only generate valueOf methods for external type imports if the fallback type is valid
-            if (valueOfFactoryMethod(reference.getFallback(), aliasTypeName, typeMapper).isPresent()
-                    && hasValueOfFactory(reference.getExternalReference())) {
+            if (valueOfFactoryMethod(reference.getFallback(),
+                    typeMapper.getClassName(reference.getFallback()), typeMapper).isPresent()
+                    && hasValueOfFactory(reference.getExternalReference()) && aliasTypeName.isPrimitive()) {
                 return Optional.of(CodeBlock.builder()
                         .addStatement("return of($T.valueOf(value))", aliasTypeName.box())
                         .build());
