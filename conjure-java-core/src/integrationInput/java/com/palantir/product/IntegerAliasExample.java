@@ -35,7 +35,7 @@ public final class IntegerAliasExample {
     }
 
     public static IntegerAliasExample valueOf(String value) {
-        return new IntegerAliasExample(Integer.parseInt(value));
+        return of(Integer.parseInt(value));
     }
 
     @JsonCreator
