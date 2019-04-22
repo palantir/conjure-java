@@ -2,19 +2,20 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ReferenceAliasExample {
-    private final AnyExample value;
+public final class BinaryAliasOne {
+    private final Bytes value;
 
-    private ReferenceAliasExample(AnyExample value) {
+    private BinaryAliasOne(Bytes value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue
-    public AnyExample get() {
+    public Bytes get() {
         return value;
     }
 
@@ -26,8 +27,8 @@ public final class ReferenceAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof ReferenceAliasExample
-                        && this.value.equals(((ReferenceAliasExample) other).value));
+                || (other instanceof BinaryAliasOne
+                        && this.value.equals(((BinaryAliasOne) other).value));
     }
 
     @Override
@@ -36,7 +37,7 @@ public final class ReferenceAliasExample {
     }
 
     @JsonCreator
-    public static ReferenceAliasExample of(AnyExample value) {
-        return new ReferenceAliasExample(value);
+    public static BinaryAliasOne of(Bytes value) {
+        return new BinaryAliasOne(value);
     }
 }

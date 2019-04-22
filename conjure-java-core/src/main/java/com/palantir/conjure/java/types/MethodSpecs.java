@@ -90,18 +90,20 @@ public final class MethodSpecs {
     }
 
     public static MethodSpec createToString(String thisClassName, Collection<FieldName> fieldNames) {
-        CodeBlock returnStatement = CodeBlock.builder()
-                .add("return new $T($S).append('{')\n", StringBuilder.class, thisClassName)
-                .indent()
-                .indent()
-                .add(CodeBlocks.of(fieldNames.stream()
-                        .map(MethodSpecs::createAppendStatement)
-                        .collect(joining(CodeBlock.of(".append(\", \")")))))
-                .unindent()
-                .add(".append('}')\n")
-                .addStatement(".toString()")
-                .unindent()
-                .build();
+        CodeBlock returnStatement = fieldNames.isEmpty()
+                ? CodeBlock.builder().addStatement("return $S", thisClassName + "{}").build()
+                : CodeBlock.builder()
+                        .add("return new $T($S).append('{')\n", StringBuilder.class, thisClassName)
+                        .indent()
+                        .indent()
+                        .add(CodeBlocks.of(fieldNames.stream()
+                                .map(MethodSpecs::createAppendStatement)
+                                .collect(joining(CodeBlock.of(".append(\", \")")))))
+                        .unindent()
+                        .add(".append('}')\n")
+                        .addStatement(".toString()")
+                        .unindent()
+                        .build();
 
         return MethodSpec.methodBuilder("toString")
                 .addAnnotation(Override.class)

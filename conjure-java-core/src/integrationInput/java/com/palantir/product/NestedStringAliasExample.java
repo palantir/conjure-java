@@ -2,7 +2,7 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Objects;
+import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
@@ -10,8 +10,7 @@ public final class NestedStringAliasExample {
     private final StringAliasExample value;
 
     private NestedStringAliasExample(StringAliasExample value) {
-        Objects.requireNonNull(value, "value cannot be null");
-        this.value = value;
+        this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue
@@ -37,7 +36,7 @@ public final class NestedStringAliasExample {
     }
 
     public static NestedStringAliasExample valueOf(String value) {
-        return new NestedStringAliasExample(StringAliasExample.valueOf(value));
+        return of(StringAliasExample.valueOf(value));
     }
 
     @JsonCreator

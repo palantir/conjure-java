@@ -35,7 +35,7 @@ public final class DoubleAliasExample {
     }
 
     public static DoubleAliasExample valueOf(String value) {
-        return new DoubleAliasExample(Double.parseDouble(value));
+        return of(Double.parseDouble(value));
     }
 
     @JsonCreator

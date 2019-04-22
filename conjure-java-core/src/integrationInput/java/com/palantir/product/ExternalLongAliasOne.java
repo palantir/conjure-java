@@ -5,15 +5,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class BooleanAliasExample {
-    private final boolean value;
+public final class ExternalLongAliasOne {
+    private final long value;
 
-    private BooleanAliasExample(boolean value) {
+    private ExternalLongAliasOne(long value) {
         this.value = value;
     }
 
     @JsonValue
-    public boolean get() {
+    public long get() {
         return value;
     }
 
@@ -25,21 +25,21 @@ public final class BooleanAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof BooleanAliasExample
-                        && this.value == ((BooleanAliasExample) other).value);
+                || (other instanceof ExternalLongAliasOne
+                        && this.value == ((ExternalLongAliasOne) other).value);
     }
 
     @Override
     public int hashCode() {
-        return Boolean.hashCode(value);
+        return Long.hashCode(value);
     }
 
-    public static BooleanAliasExample valueOf(String value) {
-        return of(Boolean.parseBoolean(value));
+    public static ExternalLongAliasOne valueOf(String value) {
+        return of(Long.valueOf(value));
     }
 
     @JsonCreator
-    public static BooleanAliasExample of(boolean value) {
-        return new BooleanAliasExample(value);
+    public static ExternalLongAliasOne of(long value) {
+        return new ExternalLongAliasOne(value);
     }
 }

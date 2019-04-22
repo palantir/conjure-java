@@ -3,18 +3,19 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ReferenceAliasExample {
-    private final AnyExample value;
+public final class StringAliasTwo {
+    private final Optional<StringAliasOne> value;
 
-    private ReferenceAliasExample(AnyExample value) {
+    private StringAliasTwo(Optional<StringAliasOne> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue
-    public AnyExample get() {
+    public Optional<StringAliasOne> get() {
         return value;
     }
 
@@ -26,8 +27,8 @@ public final class ReferenceAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof ReferenceAliasExample
-                        && this.value.equals(((ReferenceAliasExample) other).value));
+                || (other instanceof StringAliasTwo
+                        && this.value.equals(((StringAliasTwo) other).value));
     }
 
     @Override
@@ -36,7 +37,7 @@ public final class ReferenceAliasExample {
     }
 
     @JsonCreator
-    public static ReferenceAliasExample of(AnyExample value) {
-        return new ReferenceAliasExample(value);
+    public static StringAliasTwo of(Optional<StringAliasOne> value) {
+        return new StringAliasTwo(value);
     }
 }
