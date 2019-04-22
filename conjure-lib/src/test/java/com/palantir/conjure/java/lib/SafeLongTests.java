@@ -16,41 +16,42 @@
 
 package com.palantir.conjure.java.lib;
 
+import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.io.IOException;
 import java.util.Map;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public final class SafeLongTests {
 
     private static final long maxValue = 9007199254740991L;
     private static final long minValue = -9007199254740991L;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Test
     public void testTooLarge() {
         long tooLarge = maxValue + 1;
 
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("number must be safely representable in javascript");
-        SafeLong.of(tooLarge);
+        assertThatLoggableExceptionThrownBy(() -> SafeLong.of(tooLarge))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("number must be safely representable in javascript")
+                .hasMessageContaining(Long.toString(minValue))
+                .hasMessageContaining(Long.toString(maxValue));
     }
 
     @Test
     public void testTooSmall() {
         long tooSmall = minValue - 1;
-
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("number must be safely representable in javascript");
-        SafeLong.of(tooSmall);
+        assertThatLoggableExceptionThrownBy(() -> SafeLong.of(tooSmall))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("number must be safely representable in javascript")
+                .hasMessageContaining(Long.toString(minValue))
+                .hasMessageContaining(Long.toString(maxValue));
     }
 
     @Test
@@ -69,13 +70,12 @@ public final class SafeLongTests {
     }
 
     @Test
-    public void testDeserializationFailsWhenTooLarge() throws IOException {
+    public void testDeserializationFailsWhenTooLarge() {
         String json = "{\"value\": 9007199254740992}";
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<Map<String, SafeLong>> typeReference = new TypeReference<Map<String, SafeLong>>() {};
 
-        expectedException.expect(JsonMappingException.class);
-        mapper.readValue(json, typeReference);
+        assertThatThrownBy(() -> mapper.readValue(json, typeReference)).isInstanceOf(JsonMappingException.class);
     }
 
     @Test

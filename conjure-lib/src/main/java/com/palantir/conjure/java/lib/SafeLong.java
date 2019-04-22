@@ -18,6 +18,7 @@ package com.palantir.conjure.java.lib;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.logsafe.Preconditions;
 import org.immutables.value.Value;
 
 /**
@@ -36,11 +37,9 @@ public abstract class SafeLong {
 
     @Value.Check
     protected final void check() {
-        if (!(MIN_SAFE_VALUE <= longValue() && longValue() <= MAX_SAFE_VALUE)) {
-            throw new IllegalArgumentException(String.format(
-                    "number must be safely representable in javascript i.e. lie between %s and %s",
-                    MIN_SAFE_VALUE, MAX_SAFE_VALUE));
-        }
+        Preconditions.checkArgument(MIN_SAFE_VALUE <= longValue() && longValue() <= MAX_SAFE_VALUE,
+                "number must be safely representable in javascript i.e. "
+                        + "lie between -9007199254740991 and 9007199254740991");
     }
 
     public static SafeLong valueOf(String value) {
