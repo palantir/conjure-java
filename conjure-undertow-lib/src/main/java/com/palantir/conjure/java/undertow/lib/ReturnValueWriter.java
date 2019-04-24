@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/gradle/publish-jar.gradle"
+package com.palantir.conjure.java.undertow.lib;
 
-dependencies {
-    api project(':conjure-lib')
-    // Generated code depends on Undertow APIs
-    api 'io.undertow:undertow-core'
-    // Ideally we would declare a dependency on 'com.google.guava:listenablefuture:1.0' without all of guava,
-    // however gcv forces consistent versions across the project.
-    api 'com.google.guava:guava'
+import io.undertow.server.HttpServerExchange;
+import java.io.IOException;
+
+/**
+ * Writes a typed return value to the HTTP response.
+ */
+public interface ReturnValueWriter<T> {
+
+    void write(T returnValue, HttpServerExchange exchange) throws IOException;
+
 }
