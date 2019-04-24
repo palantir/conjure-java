@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -75,12 +76,12 @@ final class UndertowServiceInterfaceGenerator {
             EndpointDefinition endpointDef,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+        String methodName = JavaNameSanitizer.sanitize(endpointDef.getEndpointName().get());
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(createServiceMethodParameters(endpointDef, typeMapper));
 
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
-                ClassName.get("java.lang", "Deprecated")));
+        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
 
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
@@ -110,12 +111,14 @@ final class UndertowServiceInterfaceGenerator {
                     }
                 })));
         List<ArgumentDefinition> sortedArgList = ParameterOrder.sorted(endpointDef.getArgs());
-        sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def)));
+        sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, endpointDef)));
 
         return ImmutableList.copyOf(parameterSpecs);
     }
 
-    private ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def) {
-        return ParameterSpec.builder(typeMapper.getClassName(def.getType()), def.getArgName().get()).build();
+    private ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
+            EndpointDefinition endpoint) {
+        return ParameterSpec.builder(typeMapper.getClassName(def.getType()),
+                JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint)).build();
     }
 }

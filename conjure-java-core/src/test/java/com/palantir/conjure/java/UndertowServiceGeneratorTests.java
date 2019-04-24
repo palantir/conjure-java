@@ -79,6 +79,17 @@ public final class UndertowServiceGeneratorTests extends TestBase {
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.binary");
     }
 
+    @Test
+    public void testEndpointWithNameCollisions() throws IOException {
+        ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
+                new File("src/test/resources/dangerous-name-service.yml")));
+        File src = folder.newFolder("src");
+        ServiceGenerator generator = new UndertowServiceGenerator(
+                Collections.singleton(FeatureFlags.UndertowServicePrefix));
+        List<Path> files = generator.emit(conjure, src);
+        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
+    }
+
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));

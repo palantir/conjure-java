@@ -102,7 +102,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -148,7 +148,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -194,7 +194,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -240,7 +240,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -286,7 +286,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -333,7 +333,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -379,7 +379,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -429,7 +429,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -479,7 +479,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -525,7 +525,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -568,7 +568,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -617,7 +617,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -669,7 +669,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -720,7 +720,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -776,7 +776,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -828,7 +828,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -880,7 +880,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -939,7 +939,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -998,7 +998,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -1041,7 +1041,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -1092,7 +1092,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -1143,7 +1143,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -1199,7 +1199,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
@@ -1250,7 +1250,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String serviceName() {
-            return "UndertowEteService";
+            return "EteService";
         }
 
         @Override
