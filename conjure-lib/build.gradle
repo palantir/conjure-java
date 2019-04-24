@@ -28,6 +28,7 @@ dependencies {
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
+    testCompile 'com.palantir.safe-logging:preconditions-assertj'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'
