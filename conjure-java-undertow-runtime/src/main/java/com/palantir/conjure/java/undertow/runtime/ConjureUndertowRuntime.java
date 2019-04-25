@@ -87,19 +87,19 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
         @CanIgnoreReturnValue
         public Builder asyncTimeout(Duration value) {
-            asyncTimeout = Preconditions.checkNotNull(value, "Value is required");
+            asyncTimeout = Preconditions.checkNotNull(value, "asyncTimeout is required");
             return this;
         }
 
         @CanIgnoreReturnValue
         public Builder encodings(Encoding value) {
-            encodings.add(Preconditions.checkNotNull(value, "Value is required"));
+            encodings.add(Preconditions.checkNotNull(value, "encoding is required"));
             return this;
         }
 
         @CanIgnoreReturnValue
         public Builder paramMarker(ParamMarker value) {
-            paramMarkers.add(Preconditions.checkNotNull(value, "Value is required"));
+            paramMarkers.add(Preconditions.checkNotNull(value, "paramMarker is required"));
             return this;
         }
 
