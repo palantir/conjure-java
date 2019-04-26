@@ -71,7 +71,7 @@ public final class AsyncRequestProcessingTest {
                 int delay = maybeDelay.getAsInt();
                 future = Futures.transform(
                         scheduler.schedule(() -> { }, delay, TimeUnit.MILLISECONDS),
-                        ignored -> "Completed " + "after " + delay + "ms",
+                        ignored -> "Completed after " + delay + "ms",
                         MoreExecutors.directExecutor());
             } else {
                 future = Futures.immediateFuture("Completed immediately");
@@ -114,15 +114,11 @@ public final class AsyncRequestProcessingTest {
 
     @After
     public void after() throws InterruptedException {
-        if (server != null) {
-            server.stop();
-        }
-        if (scheduler != null) {
-            scheduler.shutdownNow();
-            assertThat(scheduler.awaitTermination(1, TimeUnit.MINUTES))
-                    .describedAs("Executor failed to shut down")
-                    .isTrue();
-        }
+        server.stop();
+        scheduler.shutdownNow();
+        assertThat(scheduler.awaitTermination(1, TimeUnit.MINUTES))
+                .describedAs("Executor failed to shut down")
+                .isTrue();
     }
 
     @Test

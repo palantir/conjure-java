@@ -35,16 +35,20 @@ import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.xnio.XnioExecutor;
 
+/** TODO(ckozak): Document ConjureAsyncRequestProcessing threading model. */
 final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
 
     private static final Executor DIRECT_EXECUTOR = MoreExecutors.directExecutor();
+    // Thread interruption can result in unexpected behavior. Most uses of this feature are not based on
+    // running tasks, so the value passed to Future.cancel makes no difference.
+    private static final boolean INTERRUPT_ON_CANCEL = false;
     private static final AttachmentKey<ListenableFuture<?>> FUTURE = AttachmentKey.create(ListenableFuture.class);
     // If the request is ended before the future has completed, cancel the future to signal that work
     // should be stopped. This occurs when clients cancel requests or connections are closed.
     private static final ExchangeCompletionListener COMPLETION_LISTENER = (exchange, nextListener) -> {
         ListenableFuture<?> future = exchange.getAttachment(FUTURE);
-        if (future != null && !future.isDone()) {
-            future.cancel(false);
+        if (future != null) {
+            future.cancel(INTERRUPT_ON_CANCEL);
         }
         nextListener.proceed();
     };
@@ -54,7 +58,7 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
     private final Duration timeout;
 
     ConjureAsyncRequestProcessing(Duration timeout) {
-        this.timeout = Preconditions.checkNotNull(timeout, "Timeout is required");
+        this.timeout = timeout;
     }
 
     @Override
@@ -75,13 +79,15 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
         exchange.addExchangeCompleteListener(COMPLETION_LISTENER);
 
         XnioExecutor.Key timeoutKey = exchange.getIoThread()
-                .executeAfter(() -> future.cancel(false), timeout.toMillis(), TimeUnit.MILLISECONDS);
+                .executeAfter(() -> future.cancel(INTERRUPT_ON_CANCEL), timeout.toMillis(), TimeUnit.MILLISECONDS);
         future.addListener(timeoutKey::remove, DIRECT_EXECUTOR);
-        // Dispatch the registration task. We're executing inside of root handler, so the dispatched task will
-        // execute on this thread after the current handler completes execution. This allows us to avoid racing
-        // registration with completion.
-        // This leaves the exchange in a dispatched state preventing the calling Connectors.executeRootHandler
-        // from terminating this request while the future awaits completion.
+        // Dispatch the registration task, this accomplishes two things:
+        // 1. Puts the exchange into a 'dispatched' state, otherwise the request will be terminated when
+        //    the endpoint HttpHandler returns. See Connectors.executeRootHandler for more information.
+        // 2. Avoids racing completion with the current handler chain. The dispatched task will be executed
+        //    after this Endpoints HttpHandler returns. Otherwise an unlucky future could race
+        //    HttpServerExchange.isInCall transitioning from true -> false, causing hte dispatch task not
+        //    to execute.
         exchange.dispatch(() -> Futures.addCallback(future, new FutureCallback<T>() {
             @Override
             public void onSuccess(@Nullable T result) {
