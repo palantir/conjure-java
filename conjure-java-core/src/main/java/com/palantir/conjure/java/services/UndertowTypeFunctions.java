@@ -18,8 +18,11 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
+import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -28,8 +31,12 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.SafeArg;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
 import java.util.Optional;
 
@@ -256,6 +263,33 @@ final class UndertowTypeFunctions {
         @Override
         public Boolean visitUnknown(String unknownType) {
             return false;
+        }
+    }
+
+    static boolean isAsync(EndpointDefinition endpoint) {
+        return endpoint.getMarkers().stream()
+                .anyMatch(type -> type.accept(TypeNameVisitor.INSTANCE)
+                        .map(name -> "Async".equalsIgnoreCase(name.getName()))
+                        .orElse(false));
+    }
+
+    static ParameterizedTypeName getAsyncReturnType(EndpointDefinition endpoint, TypeMapper mapper) {
+        Preconditions.checkArgument(isAsync(endpoint), "Endpoint must be async", SafeArg.of("endpoint", endpoint));
+        return ParameterizedTypeName.get(ClassName.get(ListenableFuture.class),
+                endpoint.getReturns().map(mapper::getClassName).orElse(ClassName.get(Void.class)).box());
+    }
+
+    private static final class TypeNameVisitor extends DefaultTypeVisitor<Optional<TypeName>> {
+        private static final TypeNameVisitor INSTANCE = new TypeNameVisitor();
+
+        @Override
+        public Optional<TypeName> visitExternal(ExternalReference value) {
+            return Optional.of(value.getExternalReference());
+        }
+
+        @Override
+        public Optional<TypeName> visitDefault() {
+            return Optional.empty();
         }
     }
 

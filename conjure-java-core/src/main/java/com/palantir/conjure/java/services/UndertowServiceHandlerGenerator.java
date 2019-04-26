@@ -25,6 +25,7 @@ import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -279,6 +280,22 @@ final class UndertowServiceHandlerGenerator {
                         .addStatement("return this")
                         .build());
 
+        if (UndertowTypeFunctions.isAsync(endpointDefinition)) {
+            ParameterizedTypeName type = UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper);
+            TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
+            endpointBuilder.addSuperinterface(ParameterizedTypeName.get(
+                    ClassName.get(ReturnValueWriter.class), resultType));
+
+            endpointBuilder.addMethod(MethodSpec.methodBuilder("write")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addParameter(resultType, RESULT_VAR_NAME)
+                    .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
+                    .addException(IOException.class)
+                    .addCode(generateReturnValueCodeBlock(endpointDefinition, typeDefinitions))
+                    .build());
+        }
+
         return endpointBuilder.build();
     }
 
@@ -327,16 +344,37 @@ final class UndertowServiceHandlerGenerator {
                 .map(arg -> sanitizeVarName(arg, endpointDefinition))
                 .collect(Collectors.toList()));
 
-        if (endpointDefinition.getReturns().isPresent()) {
-            Type returnType = endpointDefinition.getReturns().get();
+        boolean async = UndertowTypeFunctions.isAsync(endpointDefinition);
+        if (async || endpointDefinition.getReturns().isPresent()) {
             code.addStatement("$1T $2N = $3N.$4L($5L)",
-                    returnTypeMapper.getClassName(returnType),
+                    async
+                            ? UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper)
+                            : returnTypeMapper.getClassName(endpointDefinition.getReturns().get()),
                     RESULT_VAR_NAME,
                     DELEGATE_VAR_NAME,
                     JavaNameSanitizer.sanitize(endpointDefinition.getEndpointName().get()),
                     String.join(", ", methodArgs)
             );
+        } else {
+            code.addStatement("$1N.$2L($3L)",
+                    DELEGATE_VAR_NAME,
+                    endpointDefinition.getEndpointName(),
+                    String.join(", ", methodArgs));
+        }
+        if (UndertowTypeFunctions.isAsync(endpointDefinition)) {
+            code.add(CodeBlocks.statement("$1N.async().register($2N, this, $3N)",
+                    RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME));
+        } else {
+            code.add(generateReturnValueCodeBlock(endpointDefinition, typeDefinitions));
+        }
+        return code.build();
+    }
 
+    private CodeBlock generateReturnValueCodeBlock(
+            EndpointDefinition endpointDefinition, List<TypeDefinition> typeDefinitions) {
+        CodeBlock.Builder code = CodeBlock.builder();
+        if (endpointDefinition.getReturns().isPresent()) {
+            Type returnType = endpointDefinition.getReturns().get();
             // optional<> handling
             // TODO(ckozak): Support aliased binary types
             if (UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions)
@@ -366,10 +404,6 @@ final class UndertowServiceHandlerGenerator {
                 }
             }
         } else {
-            code.addStatement("$1N.$2L($3L)",
-                    DELEGATE_VAR_NAME,
-                    endpointDefinition.getEndpointName(),
-                    String.join(", ", methodArgs));
             // Set 204 response code for void methods
             // Use the constant from undertow for improved source readability, javac will compile it out.
             code.addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class);
