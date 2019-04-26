@@ -66,6 +66,12 @@ public final class AsyncServiceEndpoints implements UndertowService {
         }
 
         @Override
+        public void write(BinaryResponseBody result, HttpServerExchange exchange)
+                throws IOException {
+            runtime.bodySerDe().serialize(result, exchange);
+        }
+
+        @Override
         public HttpString method() {
             return Methods.GET;
         }
@@ -89,12 +95,6 @@ public final class AsyncServiceEndpoints implements UndertowService {
         public HttpHandler handler() {
             return this;
         }
-
-        @Override
-        public void write(BinaryResponseBody result, HttpServerExchange exchange)
-                throws IOException {
-            runtime.bodySerDe().serialize(result, exchange);
-        }
     }
 
     private static final class BinaryOptionalAsyncEndpoint
@@ -114,6 +114,16 @@ public final class AsyncServiceEndpoints implements UndertowService {
             ListenableFuture<Optional<BinaryResponseBody>> result =
                     delegate.binaryOptionalAsync(authHeader);
             runtime.async().register(result, this, exchange);
+        }
+
+        @Override
+        public void write(Optional<BinaryResponseBody> result, HttpServerExchange exchange)
+                throws IOException {
+            if (result.isPresent()) {
+                runtime.bodySerDe().serialize(result.get(), exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
         }
 
         @Override
@@ -140,16 +150,6 @@ public final class AsyncServiceEndpoints implements UndertowService {
         public HttpHandler handler() {
             return this;
         }
-
-        @Override
-        public void write(Optional<BinaryResponseBody> result, HttpServerExchange exchange)
-                throws IOException {
-            if (result.isPresent()) {
-                runtime.bodySerDe().serialize(result.get(), exchange);
-            } else {
-                exchange.setStatusCode(StatusCodes.NO_CONTENT);
-            }
-        }
     }
 
     private static final class NoReturnAsyncEndpoint
@@ -168,6 +168,11 @@ public final class AsyncServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             ListenableFuture<Void> result = delegate.noReturnAsync(authHeader);
             runtime.async().register(result, this, exchange);
+        }
+
+        @Override
+        public void write(Void result, HttpServerExchange exchange) throws IOException {
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
         @Override
@@ -194,11 +199,6 @@ public final class AsyncServiceEndpoints implements UndertowService {
         public HttpHandler handler() {
             return this;
         }
-
-        @Override
-        public void write(Void result, HttpServerExchange exchange) throws IOException {
-            exchange.setStatusCode(StatusCodes.NO_CONTENT);
-        }
     }
 
     private static final class NoReturnThrowingAsyncEndpoint
@@ -217,6 +217,11 @@ public final class AsyncServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             ListenableFuture<Void> result = delegate.noReturnThrowingAsync(authHeader);
             runtime.async().register(result, this, exchange);
+        }
+
+        @Override
+        public void write(Void result, HttpServerExchange exchange) throws IOException {
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
         @Override
@@ -243,11 +248,6 @@ public final class AsyncServiceEndpoints implements UndertowService {
         public HttpHandler handler() {
             return this;
         }
-
-        @Override
-        public void write(Void result, HttpServerExchange exchange) throws IOException {
-            exchange.setStatusCode(StatusCodes.NO_CONTENT);
-        }
     }
 
     private static final class NoReturnFailedFutureAsyncEndpoint
@@ -266,6 +266,11 @@ public final class AsyncServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             ListenableFuture<Void> result = delegate.noReturnFailedFutureAsync(authHeader);
             runtime.async().register(result, this, exchange);
+        }
+
+        @Override
+        public void write(Void result, HttpServerExchange exchange) throws IOException {
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
         @Override
@@ -291,11 +296,6 @@ public final class AsyncServiceEndpoints implements UndertowService {
         @Override
         public HttpHandler handler() {
             return this;
-        }
-
-        @Override
-        public void write(Void result, HttpServerExchange exchange) throws IOException {
-            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
     }
 
@@ -326,6 +326,15 @@ public final class AsyncServiceEndpoints implements UndertowService {
         }
 
         @Override
+        public void write(Optional<String> result, HttpServerExchange exchange) throws IOException {
+            if (result.isPresent()) {
+                serializer.serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
         public HttpString method() {
             return Methods.GET;
         }
@@ -348,15 +357,6 @@ public final class AsyncServiceEndpoints implements UndertowService {
         @Override
         public HttpHandler handler() {
             return this;
-        }
-
-        @Override
-        public void write(Optional<String> result, HttpServerExchange exchange) throws IOException {
-            if (result.isPresent()) {
-                serializer.serialize(result, exchange);
-            } else {
-                exchange.setStatusCode(StatusCodes.NO_CONTENT);
-            }
         }
     }
 }

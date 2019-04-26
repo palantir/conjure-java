@@ -245,8 +245,25 @@ final class UndertowServiceHandlerGenerator {
 
         endpointBuilder
                 .addMethod(ctorBuilder.build())
-                .addMethod(handleMethodBuilder.build())
-                .addMethod(MethodSpec.methodBuilder("method")
+                .addMethod(handleMethodBuilder.build());
+
+        if (UndertowTypeFunctions.isAsync(endpointDefinition)) {
+            ParameterizedTypeName type = UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper);
+            TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
+            endpointBuilder.addSuperinterface(ParameterizedTypeName.get(
+                    ClassName.get(ReturnValueWriter.class), resultType));
+
+            endpointBuilder.addMethod(MethodSpec.methodBuilder("write")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addParameter(resultType, RESULT_VAR_NAME)
+                    .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
+                    .addException(IOException.class)
+                    .addCode(generateReturnValueCodeBlock(endpointDefinition, typeDefinitions))
+                    .build());
+        }
+
+        endpointBuilder.addMethod(MethodSpec.methodBuilder("method")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(HttpString.class)
@@ -279,22 +296,6 @@ final class UndertowServiceHandlerGenerator {
                         .returns(HttpHandler.class)
                         .addStatement("return this")
                         .build());
-
-        if (UndertowTypeFunctions.isAsync(endpointDefinition)) {
-            ParameterizedTypeName type = UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper);
-            TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
-            endpointBuilder.addSuperinterface(ParameterizedTypeName.get(
-                    ClassName.get(ReturnValueWriter.class), resultType));
-
-            endpointBuilder.addMethod(MethodSpec.methodBuilder("write")
-                    .addModifiers(Modifier.PUBLIC)
-                    .addAnnotation(Override.class)
-                    .addParameter(resultType, RESULT_VAR_NAME)
-                    .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
-                    .addException(IOException.class)
-                    .addCode(generateReturnValueCodeBlock(endpointDefinition, typeDefinitions))
-                    .build());
-        }
 
         return endpointBuilder.build();
     }
