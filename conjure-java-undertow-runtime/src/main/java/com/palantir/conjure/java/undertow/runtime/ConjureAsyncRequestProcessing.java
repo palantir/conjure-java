@@ -31,6 +31,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -93,9 +94,30 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
         Preconditions.checkNotNull(returnValueWriter, "returnValueWriter");
         Preconditions.checkNotNull(exchange, "exchange");
 
-        // TODO(ckozak): potential optimization: avoid both dispatching and scheduling a timeout if the future is
-        // already complete.
+        if (future.isDone()) {
+            // Optimization: write the completed result immediately without dispatching across threads.
+            writeCompleteFuture(future, returnValueWriter, exchange);
+        } else {
+            registerCallback(future, returnValueWriter, exchange);
+        }
+    }
 
+    private <T> void writeCompleteFuture(
+            ListenableFuture<T> future,
+            ReturnValueWriter<T> returnValueWriter,
+            HttpServerExchange exchange) throws IOException {
+        try {
+            T result = Futures.getDone(future);
+            returnValueWriter.write(result, exchange);
+        } catch (ExecutionException e) {
+            ConjureExceptions.handle(exchange, exceptionSerializer, e.getCause());
+        } catch (RuntimeException e) {
+            ConjureExceptions.handle(exchange, exceptionSerializer, e);
+        }
+    }
+
+    private <T> void registerCallback(
+            ListenableFuture<T> future, ReturnValueWriter<T> returnValueWriter, HttpServerExchange exchange) {
         // Attach data to the exchange in order to reuse a stateless listener
         exchange.putAttachment(FUTURE, future);
         // Cancel the future if the exchange is completed before the future is done
