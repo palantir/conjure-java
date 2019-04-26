@@ -26,6 +26,7 @@ import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.logsafe.Preconditions;
 import io.undertow.server.ExchangeCompletionListener;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
 import java.io.IOException;
@@ -35,7 +36,29 @@ import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.xnio.XnioExecutor;
 
-/** TODO(ckozak): Document ConjureAsyncRequestProcessing threading model. */
+/**
+ * <h3>Thread Model</h3>
+ *
+ * <ul>
+ *     <li>
+ *         Any {@link ListenableFuture} may be registered for asynchronous request processing regardless of type,
+ *         where it's executed, and what thread completes it.
+ *     </li>
+ *     <li>
+ *         All serialization and I/O occurs on the server task pool, matching synchronous conjure services.
+ *     </li>
+ * </ul>
+ *
+ * This requires us to move execution away from {@link ListenableFuture} callbacks as quickly as
+ * possible, because they're controlled by a future created in the service implementation. This way
+ * service authors do not need to be aware of the time it takes to serialize results and write them to
+ * clients, which can be time consuming depending on the network. For example, an endpoint which
+ * schedules results on a single-threaded {@link java.util.concurrent.ScheduledExecutorService} would
+ * congest the executor and fail to execute other scheduled work at the expected time.
+ * We use {@link HttpServerExchange#dispatch(HttpHandler)} to put work onto the server task pool where
+ * it is executed as similarly as possible to synchronous conjure endpoints to avoid behavior
+ * differences between the two.
+ */
 final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
 
     private static final Executor DIRECT_EXECUTOR = MoreExecutors.directExecutor();
