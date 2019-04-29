@@ -59,4 +59,11 @@ public enum FeatureFlags {
      * Use the conjure immutable "Bytes" class over ByteBuffer.
      */
     UseImmutableBytes,
+
+    /**
+     * Instructs the {@link com.palantir.conjure.java.services.UndertowServiceGenerator} to generate service
+     * endpoints returning {@link com.google.common.util.concurrent.ListenableFuture} to allow asynchronous
+     * request processing.
+     */
+    UndertowListenableFutures,
 }

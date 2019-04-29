@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
@@ -38,6 +39,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 final class UndertowTypeFunctions {
 
@@ -265,14 +267,14 @@ final class UndertowTypeFunctions {
         }
     }
 
-    // TODO(ckozak): Better algorithm to opt into async functionality
-    static boolean isAsync(EndpointDefinition endpoint) {
-        return endpoint.getMarkers().stream()
-                .anyMatch(type -> type.toString().contains("Async"));
+    static boolean isAsync(EndpointDefinition endpoint, Set<FeatureFlags> flags) {
+        return flags.contains(FeatureFlags.UndertowListenableFutures);
     }
 
-    static ParameterizedTypeName getAsyncReturnType(EndpointDefinition endpoint, TypeMapper mapper) {
-        Preconditions.checkArgument(isAsync(endpoint), "Endpoint must be async", SafeArg.of("endpoint", endpoint));
+    static ParameterizedTypeName getAsyncReturnType(
+            EndpointDefinition endpoint, TypeMapper mapper, Set<FeatureFlags> flags) {
+        Preconditions.checkArgument(isAsync(endpoint, flags),
+                "Endpoint must be async", SafeArg.of("endpoint", endpoint));
         return ParameterizedTypeName.get(ClassName.get(ListenableFuture.class),
                 endpoint.getReturns().map(mapper::getClassName).orElse(ClassName.get(Void.class)).box());
     }

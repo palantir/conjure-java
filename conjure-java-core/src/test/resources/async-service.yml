@@ -1,11 +1,3 @@
-types:
-  definitions:
-    default-package: com.palantir.product
-    objects:
-      Async:
-        fields: {}
-        docs: Marker to opt into asynchronous request processing
-
 services:
   AsyncService:
     name: Async Service
@@ -17,29 +9,19 @@ services:
       binaryAsync:
         http: GET /async/binary
         returns: binary
-        markers:
-          - Async
 
       binaryOptionalAsync:
         http: GET /async/optional/binary
         returns: optional<binary>
-        markers:
-          - Async
 
       noReturnAsync:
         http: GET /async/no-return
-        markers:
-          - Async
 
       noReturnThrowingAsync:
         http: GET /async/no-return/throwing
-        markers:
-          - Async
 
       noReturnFailedFutureAsync:
         http: GET /async/no-return/failed
-        markers:
-          - Async
 
       optionalEnumQueryAsync:
         http: GET /enum/optional/query
@@ -48,5 +30,3 @@ services:
             param-type: query
             type: optional<string>
         returns: optional<string>
-        markers:
-          - Async

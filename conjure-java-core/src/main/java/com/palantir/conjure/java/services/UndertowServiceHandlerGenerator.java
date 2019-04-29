@@ -247,8 +247,9 @@ final class UndertowServiceHandlerGenerator {
                 .addMethod(ctorBuilder.build())
                 .addMethod(handleMethodBuilder.build());
 
-        if (UndertowTypeFunctions.isAsync(endpointDefinition)) {
-            ParameterizedTypeName type = UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper);
+        if (UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures)) {
+            ParameterizedTypeName type = UndertowTypeFunctions.getAsyncReturnType(
+                    endpointDefinition, returnTypeMapper, experimentalFeatures);
             TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
             endpointBuilder.addSuperinterface(ParameterizedTypeName.get(
                     ClassName.get(ReturnValueWriter.class), resultType));
@@ -345,11 +346,12 @@ final class UndertowServiceHandlerGenerator {
                 .map(arg -> sanitizeVarName(arg, endpointDefinition))
                 .collect(Collectors.toList()));
 
-        boolean async = UndertowTypeFunctions.isAsync(endpointDefinition);
+        boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures);
         if (async || endpointDefinition.getReturns().isPresent()) {
             code.addStatement("$1T $2N = $3N.$4L($5L)",
                     async
-                            ? UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper)
+                            ? UndertowTypeFunctions.getAsyncReturnType(
+                                    endpointDefinition, returnTypeMapper, experimentalFeatures)
                             : returnTypeMapper.getClassName(endpointDefinition.getReturns().get()),
                     RESULT_VAR_NAME,
                     DELEGATE_VAR_NAME,
@@ -362,7 +364,7 @@ final class UndertowServiceHandlerGenerator {
                     endpointDefinition.getEndpointName(),
                     String.join(", ", methodArgs));
         }
-        if (UndertowTypeFunctions.isAsync(endpointDefinition)) {
+        if (UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures)) {
             code.add(CodeBlocks.statement("$1N.async().register($2N, this, $3N)",
                     RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME));
         } else {

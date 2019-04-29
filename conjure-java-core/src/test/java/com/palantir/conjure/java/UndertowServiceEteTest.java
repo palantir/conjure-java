@@ -72,7 +72,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -515,11 +514,18 @@ public final class UndertowServiceEteTest extends TestBase {
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"),
-                new File("src/test/resources/ete-binary.yml"),
+                new File("src/test/resources/ete-binary.yml")));
+        ImmutableList.Builder<Path> files = ImmutableList.builder();
+        files.addAll(new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
+                .emit(def, folder.getRoot()));
+
+        ConjureDefinition asyncDef = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/async-service.yml")));
-        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
-                .emit(def, folder.getRoot());
-        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
+        files.addAll(new UndertowServiceGenerator(ImmutableSet.of(
+                FeatureFlags.UndertowServicePrefix, FeatureFlags.UndertowListenableFutures))
+                .emit(asyncDef, folder.getRoot()));
+
+        validateGeneratorOutput(files.build(), Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {
