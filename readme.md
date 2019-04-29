@@ -222,6 +222,70 @@ public static void main(String[] args) {
 }
 ```
 
+### Asynchronous Request Processing
+
+The Conjure Undertow generator supports asynchronous request processing allowing all service methods to return a
+[Guava ListenableFuture](https://github.com/google/guava/wiki/ListenableFutureExplained). These methods may be
+implemented synchronously by replacing `return object` with `return Futures.immediateFuture(object)`.
+
+Asynchronous request processing decouples the HTTP request lifecycle from server task threads, allowing you to replace
+waiting on shared resources with callbacks, reducing the number of required threads.
+
+This feature is enabled using:
+
+```groovy
+conjure {
+    java {
+        undertowListenableFutures = true
+    }
+}
+```
+
+#### Examples
+
+*Asynchronous request processing is helpful for endpoints which do not need a thread for the entirety of
+the request.*
+
+:+1: Delegation to an asynchronous client, for instance either retrofit or dialogue :+1:
+
+```java
+@Override
+public ListenableFuture<String> getValue() {
+    // Assuming this retrofit client was compiled with --retrofitListenableFutures
+    return retrofitClient.getValue();
+}
+```
+
+:-1: Not for delegation to synchronous operations, Feign clients for example :-1:
+
+This example is less efficient than `return Futures.immediateFuture(feignClient.getValue())` because you pay an
+additional cost to switch threads, and maintain an additional executor beyond the configured server thread pool.
+
+```java
+ListeningExecutor executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+
+@Override
+public ListenableFuture<String> getValue() {
+    // BAD: do not do this!
+    return executor.submit(() -> feignClient.getValue());
+}
+```
+
+:+1: Long polling :+1:
+
+Long polling provides lower latency than simple repeated polling, but requests take a long time relative
+to computation. A single thread can often handle updating all polling requests without blocking N request
+threads waiting for results.
+
+```java
+@Override
+public ListenableFuture<String> getValue() {
+    SettableFuture<String> result = SettableFuture.create();
+    registerFuture(result);
+    return result;
+}
+```
+
 ## conjure-lib `Bytes` class
 
 By default, conjure-java will use `java.nio.ByteByffer` to represent fields of Conjure type `binary`.  However, the ByteBuffer class has many subtleties, including interior mutability.
