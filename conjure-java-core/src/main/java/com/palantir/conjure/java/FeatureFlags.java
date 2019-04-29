@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java;
 
+import com.google.common.annotations.Beta;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import javax.validation.constraints.NotNull;
@@ -66,4 +67,12 @@ public enum FeatureFlags {
      * request processing.
      */
     UndertowListenableFutures,
+
+    /**
+     * Allows synchronous and {@link com.google.common.util.concurrent.ListenableFuture} based asynchronous request
+     * handling to be mixed in a single module using {@link com.palantir.conjure.spec.EndpointDefinition#getMarkers()}.
+     * This feature is experimental and subject to change.
+     */
+    @Beta
+    ExperimentalUndertowAsyncMarkers,
 }

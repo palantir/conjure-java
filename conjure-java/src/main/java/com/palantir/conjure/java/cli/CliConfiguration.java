@@ -100,5 +100,9 @@ public abstract class CliConfiguration {
         Builder undertowListenableFutures(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.UndertowListenableFutures) : this;
         }
+
+        Builder experimentalUndertowAsyncMarkers(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.ExperimentalUndertowAsyncMarkers) : this;
+        }
     }
 }
