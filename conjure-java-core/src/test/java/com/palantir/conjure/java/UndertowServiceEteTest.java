@@ -39,8 +39,6 @@ import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.product.AsyncService;
-import com.palantir.product.AsyncServiceEndpoints;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
 import com.palantir.product.EteBinaryServiceEndpoints;
@@ -72,6 +70,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -97,8 +96,6 @@ public final class UndertowServiceEteTest extends TestBase {
 
     private final EteBinaryServiceRetrofit binaryClient;
 
-    private final AsyncService asyncServiceClient;
-
     public UndertowServiceEteTest() {
         client = JaxRsClient.create(
                 EteService.class,
@@ -115,11 +112,6 @@ public final class UndertowServiceEteTest extends TestBase {
                 clientUserAgent(),
                 new HostMetricsRegistry(),
                 clientConfiguration());
-        asyncServiceClient = JaxRsClient.create(
-                AsyncService.class,
-                clientUserAgent(),
-                new HostMetricsRegistry(),
-                clientConfiguration());
     }
 
     @BeforeClass
@@ -129,8 +121,7 @@ public final class UndertowServiceEteTest extends TestBase {
         HttpHandler handler = ConjureHandler.builder().addAllEndpoints(ImmutableList.of(
                 EteServiceEndpoints.of(new UndertowEteResource()),
                 EmptyPathServiceEndpoints.of(() -> true),
-                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()),
-                AsyncServiceEndpoints.of(new AsyncServiceResource()))
+                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
                 .stream()
                 .flatMap(service -> service.endpoints(context).stream())
                 .collect(ImmutableList.toImmutableList()))
@@ -483,49 +474,14 @@ public final class UndertowServiceEteTest extends TestBase {
         assertThat(client.enumHeader(AuthHeader.valueOf("authHeader"), SimpleEnum.VALUE)).isEqualTo(SimpleEnum.VALUE);
     }
 
-    @Test
-    public void testAsyncNoReturnValue() {
-        asyncServiceClient.noReturnAsync(AuthHeader.valueOf("authHeader"));
-    }
-
-    @Test
-    public void testAsyncNoReturnValueThrows() {
-        assertThatThrownBy(() -> asyncServiceClient.noReturnThrowingAsync(AuthHeader.valueOf("authHeader")))
-                .isInstanceOf(RemoteException.class)
-                .satisfies(throwable -> assertThat(((RemoteException) throwable).getError().parameters())
-                        .containsEntry("type", "throwing"));
-    }
-
-    @Test
-    public void testAsyncNoReturnValueFailedFuture() {
-        assertThatThrownBy(() -> asyncServiceClient.noReturnFailedFutureAsync(AuthHeader.valueOf("authHeader")))
-                .isInstanceOf(RemoteException.class)
-                .satisfies(throwable -> assertThat(((RemoteException) throwable).getError().parameters())
-                        .containsEntry("type", "failedFuture"));
-    }
-
-    @Test
-    public void testAsyncOptional() {
-        Optional<String> input = Optional.of("Hello, World!");
-        assertThat(asyncServiceClient.optionalEnumQueryAsync(AuthHeader.valueOf("authHeader"), input)).isEqualTo(input);
-    }
-
     @BeforeClass
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml")));
-        ImmutableList.Builder<Path> files = ImmutableList.builder();
-        files.addAll(new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
-                .emit(def, folder.getRoot()));
-
-        ConjureDefinition asyncDef = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/async-service.yml")));
-        files.addAll(new UndertowServiceGenerator(ImmutableSet.of(
-                FeatureFlags.UndertowServicePrefix, FeatureFlags.UndertowListenableFutures))
-                .emit(asyncDef, folder.getRoot()));
-
-        validateGeneratorOutput(files.build(), Paths.get("src/integrationInput/java/com/palantir/product"));
+        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
+                .emit(def, folder.getRoot());
+        validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {
