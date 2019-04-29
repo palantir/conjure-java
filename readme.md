@@ -28,6 +28,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Generate retrofit services which return Guava ListenableFuture instead of OkHttp Call
         --undertowServicePrefixes
                      Generate service interfaces for Undertow with class names prefixed 'Undertow'
+        --undertowListenableFutures
+                     Generate Undertow services which return Guava ListenableFuture for asynchronous processing
         --useImmutableBytes
                      Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'
 
