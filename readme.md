@@ -256,6 +256,21 @@ public ListenableFuture<String> getValue() {
 }
 ```
 
+:+1: Long polling :+1:
+
+Long polling provides lower latency than simple repeated polling, but requests take a long time relative
+to computation. A single thread can often handle updating all polling requests without blocking N request
+threads waiting for results.
+
+```java
+@Override
+public ListenableFuture<String> getValue() {
+    SettableFuture<String> result = SettableFuture.create();
+    registerFuture(result);
+    return result;
+}
+```
+
 :-1: Not for delegation to synchronous operations, Feign clients for example :-1:
 
 This example is less efficient than `return Futures.immediateFuture(feignClient.getValue())` because you pay an
@@ -271,18 +286,22 @@ public ListenableFuture<String> getValue() {
 }
 ```
 
-:+1: Long polling :+1:
+:-1: Not waiting on another thread :-1:
 
-Long polling provides lower latency than simple repeated polling, but requests take a long time relative
-to computation. A single thread can often handle updating all polling requests without blocking N request
-threads waiting for results.
+This is even less efficient than the previous example because it requires two entire threads for the duration
+of the request. It's reasonable to defer computation to an executor bounded to the work, but you should
+wrap the executor with `MoreExecutors.listeningDecorator` and return the future to avoid blocking a server
+worker thread for both the queued and execution durations of the task.
 
 ```java
+ExecutorService executor = Executors.newFixedThreadPool(CORES);
+
 @Override
-public ListenableFuture<String> getValue() {
-    SettableFuture<String> result = SettableFuture.create();
-    registerFuture(result);
-    return result;
+public ListenableFuture<BigInteger> getValue() {
+    // BAD: do not do this!
+    Future<BigInteger> future = executor.submit(() -> complexComputation());
+    BigInteger result = Uninterruptibles.getUninterruptibly(future);
+    return Futures.immediateFuture(result);
 }
 ```
 
