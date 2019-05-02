@@ -96,5 +96,13 @@ public abstract class CliConfiguration {
         Builder useImmutableBytes(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.UseImmutableBytes) : this;
         }
+
+        Builder undertowListenableFutures(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.UndertowListenableFutures) : this;
+        }
+
+        Builder experimentalUndertowAsyncMarkers(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.ExperimentalUndertowAsyncMarkers) : this;
+        }
     }
 }

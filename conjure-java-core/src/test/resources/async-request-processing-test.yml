@@ -1,0 +1,33 @@
+services:
+  AsyncRequestProcessingTestService:
+    name: Async Request Processing Test Service
+    package: com.palantir.product
+    default-auth: none
+    base-path: /async
+
+    endpoints:
+      delay:
+        http: GET /delay
+        args:
+          delayMillis:
+            param-type: query
+            type: optional<integer>
+        returns: string
+
+      throwsInHandler:
+        http: GET /throws
+
+      failedFuture:
+        http: GET /failed-future
+        args:
+          delayMillis:
+            param-type: query
+            type: optional<integer>
+
+      binary:
+        http: GET /binary
+        args:
+          stringValue:
+            param-type: query
+            type: optional<string>
+        returns: optional<binary>

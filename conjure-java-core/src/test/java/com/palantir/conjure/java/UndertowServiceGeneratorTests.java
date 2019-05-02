@@ -90,6 +90,25 @@ public final class UndertowServiceGeneratorTests extends TestBase {
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
+    @Test
+    public void testIndividualMethodAsync() throws IOException {
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
+        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.ExperimentalUndertowAsyncMarkers))
+                .emit(def, folder.getRoot());
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.async");
+    }
+
+    @Test
+    public void testIndividualMethodAsyncWithoutFlag() throws IOException {
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
+        // Without FeatureFlags.ExperimentalUndertowAsyncMarkers this should generate blocking methods
+        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of())
+                .emit(def, folder.getRoot());
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow");
+    }
+
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));

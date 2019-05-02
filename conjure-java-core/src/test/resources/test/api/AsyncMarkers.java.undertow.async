@@ -1,0 +1,11 @@
+package test.api;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import javax.annotation.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+public interface AsyncMarkers {
+    ListenableFuture<String> async();
+
+    String sync();
+}

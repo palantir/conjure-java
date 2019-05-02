@@ -35,4 +35,7 @@ public interface UndertowRuntime {
 
     /** Provides the {@link MarkerCallback} to execute arbitrary actions given a marker on a param. */
     MarkerCallback markers();
+
+    /** Provides the {@link AsyncRequestProcessing} used to detach execution from the request thread. */
+    AsyncRequestProcessing async();
 }

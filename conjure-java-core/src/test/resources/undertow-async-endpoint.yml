@@ -1,0 +1,21 @@
+types:
+  imports:
+    Async:
+      external:
+        java: com.palantir.conjure.java.undertow.Async
+
+services:
+  AsyncMarkers:
+    default-auth: none
+    base-path: /
+    package: test.api
+    name: Async Endpoint Test
+    endpoints:
+      async:
+        http: GET /async
+        returns: string
+        markers:
+          - Async
+      sync:
+        http: GET /sync
+        returns: string

@@ -16,10 +16,15 @@
 
 package com.palantir.conjure.java.services;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
+import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -30,8 +35,12 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.SafeArg;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 final class UndertowTypeFunctions {
 
@@ -175,86 +184,56 @@ final class UndertowTypeFunctions {
         }
     }
 
-    private abstract static class AbstractTypeVisitor<T> implements Type.Visitor<T> {
+    private abstract static class AbstractTypeVisitor<T> extends DefaultTypeVisitor<T> {
         @Override
-        public T visitPrimitive(PrimitiveType value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public T visitOptional(OptionalType value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public T visitList(ListType value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public T visitSet(SetType value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public T visitMap(MapType value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public T visitReference(com.palantir.conjure.spec.TypeName value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public T visitExternal(ExternalReference value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public T visitUnknown(String unknownType) {
+        public T visitDefault() {
             throw new UnsupportedOperationException();
         }
     }
 
-    private abstract static class IsTypeVisitor implements Type.Visitor<Boolean> {
+    private abstract static class IsTypeVisitor extends DefaultTypeVisitor<Boolean> {
         @Override
-        public Boolean visitPrimitive(PrimitiveType value) {
+        public final Boolean visitDefault() {
             return false;
         }
+    }
 
-        @Override
-        public Boolean visitOptional(OptionalType value) {
-            return false;
-        }
+    /**
+     * Asynchronous-processing capable endpoints are generated if either of the following are true.
+     * <ul>
+     *     <li>The {@link FeatureFlags#UndertowListenableFutures} is set</li>
+     *     <li>
+     *         Experimental: Both {@link FeatureFlags#ExperimentalUndertowAsyncMarkers} is set and
+     *         {@link EndpointDefinition#getMarkers()} contains an imported annotation with name <pre>Async</pre>.
+     *     </li>
+     * </ul>
+     */
+    static boolean isAsync(EndpointDefinition endpoint, Set<FeatureFlags> flags) {
+        return flags.contains(FeatureFlags.UndertowListenableFutures)
+                || (flags.contains(FeatureFlags.ExperimentalUndertowAsyncMarkers)
+                && endpoint.getMarkers().stream().anyMatch(marker ->
+                marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)));
+    }
 
-        @Override
-        public Boolean visitList(ListType value) {
-            return false;
-        }
+    static ParameterizedTypeName getAsyncReturnType(
+            EndpointDefinition endpoint, TypeMapper mapper, Set<FeatureFlags> flags) {
+        Preconditions.checkArgument(isAsync(endpoint, flags),
+                "Endpoint must be async", SafeArg.of("endpoint", endpoint));
+        return ParameterizedTypeName.get(ClassName.get(ListenableFuture.class),
+                endpoint.getReturns().map(mapper::getClassName).orElse(ClassName.get(Void.class)).box());
+    }
 
-        @Override
-        public Boolean visitSet(SetType value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitMap(MapType value) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
-            return false;
-        }
+    @Beta
+    private static final class IsUndertowAsyncMarkerVisitor extends DefaultTypeVisitor<Boolean> {
+        static final IsUndertowAsyncMarkerVisitor INSTANCE = new IsUndertowAsyncMarkerVisitor();
 
         @Override
         public Boolean visitExternal(ExternalReference value) {
-            return false;
+            return "Async".equals(value.getExternalReference().getName());
         }
 
         @Override
-        public Boolean visitUnknown(String unknownType) {
+        public Boolean visitDefault() {
             return false;
         }
     }

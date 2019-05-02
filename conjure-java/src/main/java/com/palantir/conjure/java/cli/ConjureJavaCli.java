@@ -19,6 +19,7 @@ package com.palantir.conjure.java.cli;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
@@ -114,6 +115,20 @@ public final class ConjureJavaCli implements Runnable {
                         "Generate service interfaces for Undertow with class names prefixed 'Undertow'")
         private boolean undertowServicePrefix;
 
+        @CommandLine.Option(names = "--undertowListenableFutures",
+                defaultValue = "false",
+                description = "Generate Undertow services which return Guava ListenableFuture for asynchronous "
+                        + "processing")
+        private boolean undertowListenableFutures;
+
+        @Beta
+        @CommandLine.Option(
+                names = "--experimentalUndertowAsyncMarkers",
+                defaultValue = "false",
+                description = "Experimental: Allows Undertow asynchronous processing to be enabled on individual "
+                        + "endpoints")
+        private boolean experimentalUndertowAsyncMarkers;
+
         @CommandLine.Option(names = "--useImmutableBytes",
                 defaultValue = "false",
                 description = "Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'")
@@ -170,6 +185,8 @@ public final class ConjureJavaCli implements Runnable {
                     .notNullAuthAndBody(notNullAuthAndBody)
                     .undertowServicePrefix(undertowServicePrefix)
                     .useImmutableBytes(useImmutableBytes)
+                    .undertowListenableFutures(undertowListenableFutures)
+                    .experimentalUndertowAsyncMarkers(experimentalUndertowAsyncMarkers)
                     .build();
         }
 

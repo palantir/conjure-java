@@ -28,6 +28,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Generate retrofit services which return Guava ListenableFuture instead of OkHttp Call
         --undertowServicePrefixes
                      Generate service interfaces for Undertow with class names prefixed 'Undertow'
+        --undertowListenableFutures
+                     Generate Undertow services which return Guava ListenableFuture for asynchronous processing
         --useImmutableBytes
                      Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'
 
@@ -217,6 +219,89 @@ public static void main(String[] args) {
                     .build())
             .build();
     server.start();
+}
+```
+
+### Asynchronous Request Processing
+
+The Conjure Undertow generator supports asynchronous request processing allowing all service methods to return a
+[Guava ListenableFuture](https://github.com/google/guava/wiki/ListenableFutureExplained). These methods may be
+implemented synchronously by replacing `return object` with `return Futures.immediateFuture(object)`.
+
+Asynchronous request processing decouples the HTTP request lifecycle from server task threads, allowing you to replace
+waiting on shared resources with callbacks, reducing the number of required threads.
+
+This feature is enabled using:
+
+```groovy
+conjure {
+    java {
+        undertowListenableFutures = true
+    }
+}
+```
+
+#### Examples
+
+*Asynchronous request processing is helpful for endpoints which do not need a thread for the entirety of
+the request.*
+
+:+1: Delegation to an asynchronous client, for instance either retrofit or dialogue :+1:
+
+```java
+@Override
+public ListenableFuture<String> getValue() {
+    // Assuming this retrofit client was compiled with --retrofitListenableFutures
+    return retrofitClient.getValue();
+}
+```
+
+:+1: Long polling :+1:
+
+Long polling provides lower latency than simple repeated polling, but requests take a long time relative
+to computation. A single thread can often handle updating all polling requests without blocking N request
+threads waiting for results.
+
+```java
+@Override
+public ListenableFuture<String> getValue() {
+    SettableFuture<String> result = SettableFuture.create();
+    registerFuture(result);
+    return result;
+}
+```
+
+:-1: Not for delegation to synchronous operations, Feign clients for example :-1:
+
+This example is less efficient than `return Futures.immediateFuture(feignClient.getValue())` because you pay an
+additional cost to switch threads, and maintain an additional executor beyond the configured server thread pool.
+
+```java
+ListeningExecutor executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+
+@Override
+public ListenableFuture<String> getValue() {
+    // BAD: do not do this!
+    return executor.submit(() -> feignClient.getValue());
+}
+```
+
+:-1: Not waiting on another thread :-1:
+
+This is even less efficient than the previous example because it requires two entire threads for the duration
+of the request. It's reasonable to defer computation to an executor bounded to the work, but you should
+wrap the executor with `MoreExecutors.listeningDecorator` and return the future to avoid blocking a server
+worker thread for both the queued and execution durations of the task.
+
+```java
+ExecutorService executor = Executors.newFixedThreadPool(CORES);
+
+@Override
+public ListenableFuture<BigInteger> getValue() {
+    // BAD: do not do this!
+    Future<BigInteger> future = executor.submit(() -> complexComputation());
+    BigInteger result = Uninterruptibles.getUninterruptibly(future);
+    return Futures.immediateFuture(result);
 }
 ```
 

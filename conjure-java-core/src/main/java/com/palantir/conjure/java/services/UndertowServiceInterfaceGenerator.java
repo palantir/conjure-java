@@ -85,7 +85,12 @@ final class UndertowServiceInterfaceGenerator {
 
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
-        endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
+        if (UndertowTypeFunctions.isAsync(endpointDef, experimentalFeatures)) {
+            methodBuilder.returns(UndertowTypeFunctions.getAsyncReturnType(
+                    endpointDef, returnTypeMapper, experimentalFeatures));
+        } else {
+            endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
+        }
 
         return methodBuilder.build();
     }
