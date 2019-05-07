@@ -18,8 +18,8 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
@@ -195,7 +195,7 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields) {
-        CodeBlock assignmentBlock = CodeBlocks.of(Iterables.transform(enrichedFields,
+        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(enrichedFields,
                 enrichedField -> CodeBlocks.statement(
                         "$1N(other.$2N())",
                         enrichedField.poetSpec().name,

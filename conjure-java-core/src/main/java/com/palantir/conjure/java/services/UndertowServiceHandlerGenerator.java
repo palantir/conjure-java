@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.MoreCollectors;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
@@ -162,7 +163,7 @@ final class UndertowServiceHandlerGenerator {
                         .addStatement("return $1T.unmodifiableList($2T.asList($3L))",
                                 Collections.class, Arrays.class, endpointBlock)
                         .build())
-                .addTypes(Iterables.transform(serviceDefinition.getEndpoints(),
+                .addTypes(Lists.transform(serviceDefinition.getEndpoints(),
                         e -> generateEndpointHandler(e, serviceDefinition, serviceClass, typeDefinitions, typeMapper,
                                 returnTypeMapper)))
                 .build();
