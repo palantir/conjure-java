@@ -4,6 +4,10 @@ types:
       base-type: string
       external:
         java: com.palantir.product.StringAliasExample
+    Long:
+      base-type: string
+      external:
+        java: java.lang.Long
   definitions:
     default-package: com.palantir.product
     objects:
@@ -83,6 +87,12 @@ services:
         args:
           param: string
         returns: string
+
+      externalLongPath:
+        http: GET /externalLong/{param}
+        args:
+          param: Long
+        returns: Long
 
       notNullBody:
         http: POST /notNullBody
