@@ -34,6 +34,7 @@ public final class ExternalLongAliasOne {
         return Long.hashCode(value);
     }
 
+    @JsonCreator
     public static ExternalLongAliasOne valueOf(String value) {
         return of(Long.valueOf(value));
     }

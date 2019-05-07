@@ -27,6 +27,7 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -34,6 +35,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -90,6 +92,12 @@ public final class AliasGenerator {
                     .addParameter(String.class, "value")
                     .returns(thisClass)
                     .addCode(maybeValueOfFactoryMethod.get())
+                    .addAnnotations(typeDef.getAlias().accept(MoreVisitors.IS_EXTERNAL)
+                            // JsonCreator behaves in unexpected ways:
+                            // https://github.com/FasterXML/jackson-databind/issues/2318
+                            // allow jackson to try all possible approaches to deserialize external type imports.
+                            ? Collections.singleton(AnnotationSpec.builder(JsonCreator.class).build())
+                            : Collections.emptySet())
                     .build());
         }
 

@@ -9,6 +9,10 @@ types:
       base-type: safelong
       external:
         java: java.lang.Long
+    ExternalString:
+      base-type: string
+      external:
+        java: java.lang.String
   definitions:
     default-package: com.palantir.product
     objects:
@@ -118,6 +122,8 @@ types:
           uuid: optional<uuid>
       ExternalLongAliasExample:
         alias: ExternalLong
+      ExternalStringAliasExample:
+        alias: ExternalString
       ExternalLongExample:
         fields:
           externalLong: ExternalLong
