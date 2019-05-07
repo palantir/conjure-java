@@ -1,6 +1,5 @@
 package com.palantir.product;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import javax.annotation.Generated;
 
@@ -38,7 +37,6 @@ public final class ExternalLongAliasOne {
         return of(Long.valueOf(value));
     }
 
-    @JsonCreator
     public static ExternalLongAliasOne of(long value) {
         return new ExternalLongAliasOne(value);
     }
