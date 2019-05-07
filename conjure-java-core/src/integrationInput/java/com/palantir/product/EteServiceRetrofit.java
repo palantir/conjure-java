@@ -70,6 +70,11 @@ public interface EteServiceRetrofit {
     @Headers({"hr-path-template: /base/path/{param}", "Accept: application/json"})
     Call<String> path(@Header("Authorization") AuthHeader authHeader, @Path("param") String param);
 
+    @GET("./base/externalLong/{param}")
+    @Headers({"hr-path-template: /base/externalLong/{param}", "Accept: application/json"})
+    Call<Long> externalLongPath(
+            @Header("Authorization") AuthHeader authHeader, @Path("param") long param);
+
     @POST("./base/notNullBody")
     @Headers({"hr-path-template: /base/notNullBody", "Accept: application/json"})
     Call<StringAliasExample> notNullBody(
