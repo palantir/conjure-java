@@ -92,7 +92,7 @@ services:
         http: GET /externalLong/{param}
         args:
           param: Long
-        returns: string
+        returns: Long
 
       notNullBody:
         http: POST /notNullBody

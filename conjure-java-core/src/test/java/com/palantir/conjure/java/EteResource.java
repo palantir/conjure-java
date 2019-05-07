@@ -98,6 +98,11 @@ public class EteResource implements EteService {
     }
 
     @Override
+    public long externalLongPath(AuthHeader authHeader, long param) {
+        return param;
+    }
+
+    @Override
     public StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody) {
         return notNullBody;
     }

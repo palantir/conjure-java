@@ -79,7 +79,7 @@ public interface EteService {
 
     @GET
     @Path("base/externalLong/{param}")
-    String externalLongPath(
+    long externalLongPath(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("param") long param);
 

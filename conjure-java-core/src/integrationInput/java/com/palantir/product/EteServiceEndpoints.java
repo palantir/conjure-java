@@ -637,12 +637,12 @@ public final class EteServiceEndpoints implements UndertowService {
 
         private final UndertowEteService delegate;
 
-        private final Serializer<String> serializer;
+        private final Serializer<Long> serializer;
 
         ExternalLongPathEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Long>() {});
         }
 
         @Override
@@ -652,7 +652,7 @@ public final class EteServiceEndpoints implements UndertowService {
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             long param =
                     Long.valueOf(runtime.plainSerDe().deserializeString(pathParams.get("param")));
-            String result = delegate.externalLongPath(authHeader, param);
+            long result = delegate.externalLongPath(authHeader, param);
             serializer.serialize(result, exchange);
         }
 
