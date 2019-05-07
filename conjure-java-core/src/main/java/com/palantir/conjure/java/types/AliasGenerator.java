@@ -92,18 +92,18 @@ public final class AliasGenerator {
                     .addParameter(String.class, "value")
                     .returns(thisClass)
                     .addCode(maybeValueOfFactoryMethod.get())
+                    .addAnnotations(typeDef.getAlias().accept(MoreVisitors.IS_EXTERNAL)
+                            // JsonCreator behaves in unexpected ways:
+                            // https://github.com/FasterXML/jackson-databind/issues/2318
+                            // allow jackson to try all possible approaches to deserialize external type imports.
+                            ? Collections.singleton(AnnotationSpec.builder(JsonCreator.class).build())
+                            : Collections.emptySet())
                     .build());
         }
 
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addAnnotations(maybeValueOfFactoryMethod.isPresent()
-                        && typeDef.getAlias().accept(MoreVisitors.IS_EXTERNAL)
-                        // JsonCreator behaves in unexpected ways:
-                        // https://github.com/FasterXML/jackson-databind/issues/2318
-                        // allow jackson to try all possible approaches to deserialize external type imports.
-                        ? Collections.emptySet()
-                        : Collections.singleton(AnnotationSpec.builder(JsonCreator.class).build()))
+                .addAnnotation(JsonCreator.class)
                 .addParameter(aliasTypeName, "value")
                 .returns(thisClass)
                 .addStatement("return new $T(value)", thisClass)
