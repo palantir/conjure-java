@@ -71,8 +71,7 @@ public final class Goethe {
                         // Diagnostic values are one-indexed, while our list is zero-indexed.
                         .append(lines.get(formatterDiagnostic.line() - 1))
                         .append('\n')
-                        // Offset by two to convert from one-indexed to zero indexed values, and account for the
-                        // carrot.
+                        // Offset by two to convert from one-indexed to zero indexed values, and account for the caret.
                         .append(Strings.repeat(" ", Math.max(0, formatterDiagnostic.column() - 2)))
                         .append("^\n\n");
             }
