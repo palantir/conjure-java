@@ -56,6 +56,7 @@ public final class EteServiceEndpoints implements UndertowService {
                         new DatetimeEndpoint(runtime, delegate),
                         new BinaryEndpoint(runtime, delegate),
                         new PathEndpoint(runtime, delegate),
+                        new ExternalLongPathEndpoint(runtime, delegate),
                         new NotNullBodyEndpoint(runtime, delegate),
                         new AliasOneEndpoint(runtime, delegate),
                         new OptionalAliasOneEndpoint(runtime, delegate),
@@ -623,6 +624,56 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "path";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ExternalLongPathEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Serializer<String> serializer;
+
+        ExternalLongPathEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            long param =
+                    Long.valueOf(runtime.plainSerDe().deserializeString(pathParams.get("param")));
+            String result = delegate.externalLongPath(authHeader, param);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/base/externalLong/{param}";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "externalLongPath";
         }
 
         @Override
