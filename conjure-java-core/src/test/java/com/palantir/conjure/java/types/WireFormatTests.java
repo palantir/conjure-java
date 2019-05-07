@@ -19,6 +19,7 @@ import com.palantir.product.DoubleExample;
 import com.palantir.product.EmptyObjectExample;
 import com.palantir.product.EnumExample;
 import com.palantir.product.ExternalLongAliasExample;
+import com.palantir.product.ExternalStringAliasExample;
 import com.palantir.product.IntegerAliasExample;
 import com.palantir.product.ListExample;
 import com.palantir.product.MapExample;
@@ -382,6 +383,12 @@ public final class WireFormatTests {
     public void test_long_alias_string() throws IOException {
         assertThat(mapper.readValue("\"123\"", ExternalLongAliasExample.class))
                 .isEqualTo(ExternalLongAliasExample.of(123L));
+    }
+
+    @Test
+    public void test_external_string_alias() throws IOException {
+        assertThat(mapper.readValue("\"Hello, World!\"", ExternalStringAliasExample.class))
+                .isEqualTo(ExternalStringAliasExample.of("Hello, World!"));
     }
 
     @Test
