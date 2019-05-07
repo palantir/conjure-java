@@ -77,6 +77,12 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("param") String param);
 
+    @GET
+    @Path("base/externalLong/{param}")
+    long externalLongPath(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @PathParam("param") long param);
+
     @POST
     @Path("base/notNullBody")
     StringAliasExample notNullBody(

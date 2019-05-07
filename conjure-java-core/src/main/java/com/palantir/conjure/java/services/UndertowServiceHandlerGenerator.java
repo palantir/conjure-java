@@ -603,7 +603,7 @@ final class UndertowServiceHandlerGenerator {
                     "$1T $2N = $3T.valueOf($4N.plainSerDe().deserializeString($5N.get($6S)))",
                     typeMapper.getClassName(type),
                     resultVarName,
-                    typeMapper.getClassName(type),
+                    typeMapper.getClassName(type).box(),
                     RUNTIME_VAR_NAME,
                     paramsVarName,
                     paramId
