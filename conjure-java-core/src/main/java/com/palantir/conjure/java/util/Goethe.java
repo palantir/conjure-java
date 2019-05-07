@@ -16,10 +16,13 @@
 
 package com.palantir.conjure.java.util;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
+import com.google.googlejavaformat.FormatterDiagnostic;
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
 import com.google.googlejavaformat.java.JavaFormatterOptions;
@@ -29,6 +32,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 /** Tools for a better JavaPoet. */
 public final class Goethe {
@@ -46,10 +50,36 @@ public final class Goethe {
             file.writeTo(code);
 
             CharSink sink = com.google.common.io.Files.asCharSink(outputFile.toFile(), StandardCharsets.UTF_8);
-            JAVA_FORMATTER.formatSource(CharSource.wrap(code), sink);
+            try {
+                JAVA_FORMATTER.formatSource(CharSource.wrap(code), sink);
+            } catch (FormatterException e) {
+                throw new RuntimeException(generateMessage(file, code.toString(), e.diagnostics()), e);
+            }
             return outputFile;
-        } catch (IOException | FormatterException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static String generateMessage(
+            JavaFile file, String unformattedSource, List<FormatterDiagnostic> formatterDiagnostics) {
+        try {
+            List<String> lines = Splitter.on('\n').splitToList(unformattedSource);
+            StringBuilder failureText = new StringBuilder();
+            failureText.append("Failed to format '")
+                    .append(file.packageName).append('.').append(file.typeSpec.name).append("'\n");
+            for (FormatterDiagnostic formatterDiagnostic : formatterDiagnostics) {
+                failureText.append(formatterDiagnostic.message()).append("\n")
+                        // Diagnostic values are one-indexed, while our list is zero-indexed.
+                        .append(lines.get(formatterDiagnostic.line() - 1))
+                        .append('\n')
+                        // Offset by two to convert from one-indexed to zero indexed values, and account for the caret.
+                        .append(Strings.repeat(" ", Math.max(0, formatterDiagnostic.column() - 2)))
+                        .append("^\n\n");
+            }
+            return CharMatcher.is('\n').trimFrom(failureText.toString());
+        } catch (RuntimeException e) {
+            return "Failed to format:\n" + unformattedSource;
         }
     }
 
