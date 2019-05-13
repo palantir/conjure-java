@@ -39,7 +39,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final AuthorizationExtractor auth;
     private final MarkerCallback markerCallback;
     private final AsyncRequestProcessing async;
-    private final DeprecationCallback deprecated;
+    private final DeprecationCallback deprecation;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
@@ -47,7 +47,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout);
-        this.deprecated = builder.deprecated;
+        this.deprecation = builder.deprecation;
     }
 
     public static Builder builder() {
@@ -81,8 +81,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     }
 
     @Override
-    public DeprecationCallback deprecated() {
-        return deprecated;
+    public DeprecationCallback deprecation() {
+        return deprecation;
     }
 
     public static final class Builder {
@@ -90,7 +90,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private final List<Encoding> encodings = Lists.newArrayList();
         private final List<ParamMarker> paramMarkers = Lists.newArrayList();
-        private DeprecationCallback deprecated = (serviceName, endpointName, deprecatedDoc, exchange) -> { };
+        private DeprecationCallback deprecation = (serviceName, endpointName, deprecatedDoc, exchange) -> { };
 
         private Builder() {}
 
@@ -113,8 +113,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         }
 
         @CanIgnoreReturnValue
-        public Builder deprecated(DeprecationCallback value) {
-            deprecated = Preconditions.checkNotNull(value, "deprecated is required");
+        public Builder deprecation(DeprecationCallback value) {
+            deprecation = Preconditions.checkNotNull(value, "deprecated is required");
             return this;
         }
 

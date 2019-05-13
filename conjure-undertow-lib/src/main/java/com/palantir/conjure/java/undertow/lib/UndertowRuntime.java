@@ -40,5 +40,5 @@ public interface UndertowRuntime {
     AsyncRequestProcessing async();
 
     /** Provides the {@link DeprecationCallback} to execute for each request given a deprecated endpoint. */
-    DeprecationCallback deprecated();
+    DeprecationCallback deprecation();
 }
