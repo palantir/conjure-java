@@ -90,7 +90,6 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private final List<Encoding> encodings = Lists.newArrayList();
         private final List<ParamMarker> paramMarkers = Lists.newArrayList();
-        private DeprecationCallback deprecation = (serviceName, endpointName, deprecatedDoc, exchange) -> { };
 
         private Builder() {}
 
@@ -109,12 +108,6 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         @CanIgnoreReturnValue
         public Builder paramMarker(ParamMarker value) {
             paramMarkers.add(Preconditions.checkNotNull(value, "paramMarker is required"));
-            return this;
-        }
-
-        @CanIgnoreReturnValue
-        public Builder deprecation(DeprecationCallback value) {
-            deprecation = Preconditions.checkNotNull(value, "deprecated is required");
             return this;
         }
 
