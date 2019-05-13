@@ -22,7 +22,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
-import com.palantir.conjure.java.undertow.lib.DeprecatedCallback;
+import com.palantir.conjure.java.undertow.lib.DeprecationCallback;
 import com.palantir.conjure.java.undertow.lib.MarkerCallback;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -39,7 +39,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final AuthorizationExtractor auth;
     private final MarkerCallback markerCallback;
     private final AsyncRequestProcessing async;
-    private final DeprecatedCallback deprecated;
+    private final DeprecationCallback deprecated;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
@@ -81,7 +81,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     }
 
     @Override
-    public DeprecatedCallback deprecated() {
+    public DeprecationCallback deprecated() {
         return deprecated;
     }
 
@@ -90,7 +90,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private final List<Encoding> encodings = Lists.newArrayList();
         private final List<ParamMarker> paramMarkers = Lists.newArrayList();
-        private DeprecatedCallback deprecated = (packagePath, serviceName, endpointName, deprecatedDoc, exchange) -> {};
+        private DeprecationCallback deprecated = (packagePath, serviceName, endpointName, deprecatedDoc, exchange) -> {};
 
         private Builder() {}
 
@@ -113,7 +113,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         }
 
         @CanIgnoreReturnValue
-        public Builder deprecated(DeprecatedCallback value) {
+        public Builder deprecated(DeprecationCallback value) {
             deprecated = Preconditions.checkNotNull(value, "deprecated is required");
             return this;
         }

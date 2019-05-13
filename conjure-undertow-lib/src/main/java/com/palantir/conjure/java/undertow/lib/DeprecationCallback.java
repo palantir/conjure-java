@@ -18,7 +18,7 @@ package com.palantir.conjure.java.undertow.lib;
 
 import io.undertow.server.HttpServerExchange;
 
-public interface DeprecatedCallback {
+public interface DeprecationCallback {
 
     void deprecated(
             String packagePath,
