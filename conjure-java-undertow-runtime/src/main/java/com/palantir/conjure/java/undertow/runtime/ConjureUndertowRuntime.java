@@ -90,7 +90,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private final List<Encoding> encodings = Lists.newArrayList();
         private final List<ParamMarker> paramMarkers = Lists.newArrayList();
-        private DeprecationCallback deprecated = (packagePath, serviceName, endpointName, deprecatedDoc, exchange) -> {};
+        private DeprecationCallback deprecated = (serviceName, endpointName, deprecatedDoc, exchange) -> { };
 
         private Builder() {}
 

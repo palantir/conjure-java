@@ -322,10 +322,9 @@ final class UndertowServiceHandlerGenerator {
 
         // deprecated handler
         endpointDefinition.getDeprecated().ifPresent(documentation ->
-                code.addStatement("$1N.$2N($3S, $4S, $5S, $6S, $7N)",
+                code.addStatement("$1N.$2N($3S, $4S, $5S, $6N)",
                         RUNTIME_VAR_NAME,
                         DEPRECATED_CALLBACK_VAR_NAME,
-                        serviceDefinition.getServiceName().getPackage(),
                         serviceDefinition.getServiceName().getName(),
                         endpointDefinition.getEndpointName(),
                         documentation,

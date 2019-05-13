@@ -20,8 +20,11 @@ import io.undertow.server.HttpServerExchange;
 
 public interface DeprecationCallback {
 
-    void deprecated(
-            String packagePath,
+    /**
+     * Called when a deprecated endpoint (whose deprecated field contains some documentation)
+     * is invoked.
+     */
+    void deprecation(
             String serviceName,
             String endpointName,
             String deprecatedDoc,
