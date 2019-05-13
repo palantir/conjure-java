@@ -91,7 +91,7 @@ final class UndertowServiceHandlerGenerator {
     private static final String RUNTIME_VAR_NAME = "runtime";
     private static final String DESERIALIZER_VAR_NAME = "deserializer";
     private static final String SERIALIZER_VAR_NAME = "serializer";
-    private static final String DEPRECATED_CALLBACK_VAR_NAME = "deprecated";
+    private static final String DEPRECATED_CALLBACK_VAR_NAME = "deprecation";
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
     private static final String COOKIE_TOKEN_VAR_NAME = "cookieToken";
     private static final String RESULT_VAR_NAME = "result";
