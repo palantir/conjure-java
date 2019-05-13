@@ -91,6 +91,7 @@ final class UndertowServiceHandlerGenerator {
     private static final String RUNTIME_VAR_NAME = "runtime";
     private static final String DESERIALIZER_VAR_NAME = "deserializer";
     private static final String SERIALIZER_VAR_NAME = "serializer";
+    private static final String DEPRECATED_CALLBACK_VAR_NAME = "deprecated";
     private static final String AUTH_HEADER_VAR_NAME = "authHeader";
     private static final String COOKIE_TOKEN_VAR_NAME = "cookieToken";
     private static final String RESULT_VAR_NAME = "result";
@@ -195,7 +196,12 @@ final class UndertowServiceHandlerGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                 .addException(IOException.class)
-                .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
+                .addCode(endpointInvocation(
+                        serviceDefinition,
+                        endpointDefinition,
+                        typeDefinitions,
+                        typeMapper,
+                        returnTypeMapper));
 
         endpointDefinition.getDeprecated().ifPresent(deprecatedDocsValue -> handleMethodBuilder.addAnnotation(
                 AnnotationSpec.builder(SuppressWarnings.class)
@@ -306,10 +312,24 @@ final class UndertowServiceHandlerGenerator {
     private static final String QUERY_PARAMS_VAR_NAME = "queryParams";
     private static final String HEADER_PARAMS_VAR_NAME = "headerParams";
 
-    private CodeBlock endpointInvocation(EndpointDefinition endpointDefinition, List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+    private CodeBlock endpointInvocation(
+            ServiceDefinition serviceDefinition,
+            EndpointDefinition endpointDefinition,
+            List<TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper) {
         CodeBlock.Builder code = CodeBlock.builder();
 
+        // deprecated handler
+        endpointDefinition.getDeprecated().ifPresent(documentation ->
+                code.addStatement("$1N.$2N($3S, $4S, $5S, $6S, $7N)",
+                        RUNTIME_VAR_NAME,
+                        DEPRECATED_CALLBACK_VAR_NAME,
+                        serviceDefinition.getServiceName().getPackage(),
+                        serviceDefinition.getServiceName().getName(),
+                        endpointDefinition.getEndpointName(),
+                        documentation,
+                        EXCHANGE_VAR_NAME));
         // auth code
         Optional<String> authVarName = addAuthCode(code, endpointDefinition);
 

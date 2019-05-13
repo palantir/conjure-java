@@ -38,4 +38,7 @@ public interface UndertowRuntime {
 
     /** Provides the {@link AsyncRequestProcessing} used to detach execution from the request thread. */
     AsyncRequestProcessing async();
+
+    /** Provides the {@link DeprecatedCallback} to execute for each request given a deprecated endpoint. */
+    DeprecatedCallback deprecated();
 }

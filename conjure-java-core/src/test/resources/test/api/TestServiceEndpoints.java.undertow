@@ -602,6 +602,12 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         @SuppressWarnings("deprecation")
         public void handleRequest(HttpServerExchange exchange) throws IOException {
+            runtime.deprecated(
+                    "com.palantir.another",
+                    "TestService",
+                    "getBranchesDeprecated",
+                    "use getBranches instead",
+                    exchange);
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
