@@ -94,6 +94,14 @@ services:
           param: Long
         returns: Long
 
+      optionalExternalLongQuery:
+        http: GET /optionalExternalLong
+        args:
+          param:
+            param-type: query
+            type: optional<Long>
+        returns: optional<Long>
+
       notNullBody:
         http: POST /notNullBody
         args:

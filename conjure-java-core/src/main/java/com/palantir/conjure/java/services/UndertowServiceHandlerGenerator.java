@@ -678,7 +678,7 @@ final class UndertowServiceHandlerGenerator {
                 functionName,
                 paramsVarName,
                 paramId,
-                typeMapper.getClassName(getComplexType(type))));
+                typeMapper.getClassName(getComplexType(type)).box()));
     }
 
     /**

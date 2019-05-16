@@ -83,6 +83,12 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("param") long param);
 
+    @GET
+    @Path("base/optionalExternalLong")
+    Optional<Long> optionalExternalLongQuery(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("param") Optional<Long> param);
+
     @POST
     @Path("base/notNullBody")
     StringAliasExample notNullBody(
@@ -152,6 +158,11 @@ public interface EteService {
     SimpleEnum enumHeader(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Custom-Header") SimpleEnum headerParameter);
+
+    @Deprecated
+    default Optional<Long> optionalExternalLongQuery(AuthHeader authHeader) {
+        return optionalExternalLongQuery(authHeader, Optional.empty());
+    }
 
     @Deprecated
     default StringAliasExample optionalAliasOne(AuthHeader authHeader) {

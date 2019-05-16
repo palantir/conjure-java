@@ -57,6 +57,7 @@ public final class EteServiceEndpoints implements UndertowService {
                         new BinaryEndpoint(runtime, delegate),
                         new PathEndpoint(runtime, delegate),
                         new ExternalLongPathEndpoint(runtime, delegate),
+                        new OptionalExternalLongQueryEndpoint(runtime, delegate),
                         new NotNullBodyEndpoint(runtime, delegate),
                         new AliasOneEndpoint(runtime, delegate),
                         new OptionalAliasOneEndpoint(runtime, delegate),
@@ -674,6 +675,60 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "externalLongPath";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class OptionalExternalLongQueryEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Serializer<Optional<Long>> serializer;
+
+        OptionalExternalLongQueryEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<Long>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            Optional<Long> param =
+                    runtime.plainSerDe()
+                            .deserializeOptionalComplex(queryParams.get("param"), Long::valueOf);
+            Optional<Long> result = delegate.optionalExternalLongQuery(authHeader, param);
+            if (result.isPresent()) {
+                serializer.serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/base/optionalExternalLong";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "optionalExternalLongQuery";
         }
 
         @Override
