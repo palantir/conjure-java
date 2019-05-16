@@ -38,6 +38,8 @@ public interface UndertowEteService {
 
     long externalLongPath(AuthHeader authHeader, long param);
 
+    Optional<Long> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param);
+
     StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody);
 
     StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);

@@ -103,6 +103,11 @@ public class EteResource implements EteService {
     }
 
     @Override
+    public Optional<Long> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param) {
+        return param;
+    }
+
+    @Override
     public StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody) {
         return notNullBody;
     }

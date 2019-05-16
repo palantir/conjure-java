@@ -75,6 +75,11 @@ public interface EteServiceRetrofit {
     Call<Long> externalLongPath(
             @Header("Authorization") AuthHeader authHeader, @Path("param") long param);
 
+    @GET("./base/optionalExternalLong")
+    @Headers({"hr-path-template: /base/optionalExternalLong", "Accept: application/json"})
+    Call<Optional<Long>> optionalExternalLongQuery(
+            @Header("Authorization") AuthHeader authHeader, @Query("param") Optional<Long> param);
+
     @POST("./base/notNullBody")
     @Headers({"hr-path-template: /base/notNullBody", "Accept: application/json"})
     Call<StringAliasExample> notNullBody(
