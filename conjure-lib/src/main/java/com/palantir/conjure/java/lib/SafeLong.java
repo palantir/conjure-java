@@ -19,7 +19,6 @@ package com.palantir.conjure.java.lib;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
-import java.util.Comparable;
 import org.immutables.value.Value;
 
 /**
