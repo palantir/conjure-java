@@ -26,7 +26,7 @@ import org.immutables.value.Value;
  * without loss of precision.
  */
 @Value.Immutable
-public abstract class SafeLong {
+public abstract class SafeLong implements Comparable<SafeLong> {
 
     private static final long MIN_SAFE_VALUE = -(1L << 53) + 1;
     private static final long MAX_SAFE_VALUE = (1L << 53) - 1;
@@ -56,4 +56,8 @@ public abstract class SafeLong {
         return Long.toString(longValue());
     }
 
+    @Override
+    public final int compareTo(SafeLong other) {
+        return Long.compare(longValue(), other.longValue());
+    }
 }

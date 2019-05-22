@@ -25,7 +25,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.Test;
 
 public final class SafeLongTests {
@@ -82,5 +84,13 @@ public final class SafeLongTests {
     public void testToString() {
         assertThat(SafeLong.of(maxValue).toString()).isEqualTo("9007199254740991");
         assertThat(SafeLong.of(minValue).toString()).isEqualTo("-9007199254740991");
+    }
+
+    @Test
+    public void testComparable() {
+        assertThat(Stream.of(SafeLong.of(1), SafeLong.of(3), SafeLong.of(2)).max(Comparator.naturalOrder()).get())
+                .isEqualTo(SafeLong.of(3));
+        assertThat(Stream.of(SafeLong.of(1), SafeLong.of(3), SafeLong.of(2)).min(Comparator.naturalOrder()).get())
+                .isEqualTo(SafeLong.of(1));
     }
 }
