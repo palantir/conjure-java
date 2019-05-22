@@ -55,7 +55,7 @@ public abstract class SafeLong implements Comparable<SafeLong> {
     public final String toString() {
         return Long.toString(longValue());
     }
-    
+
     @Override
     public final int compareTo(SafeLong other) {
         return Long.compare(longValue(), other.longValue());
