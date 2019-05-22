@@ -60,7 +60,6 @@ public final class UnionGenerator {
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
 
     public static JavaFile generateUnionType(TypeMapper typeMapper, UnionDefinition typeDef) {
-
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName unionClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName baseClass = ClassName.get(unionClass.packageName(), unionClass.simpleName(), "Base");

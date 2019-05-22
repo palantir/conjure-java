@@ -90,7 +90,6 @@ public final class BeanBuilderGenerator {
     }
 
     private TypeSpec generate(ObjectDefinition typeDef) {
-
         Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
 

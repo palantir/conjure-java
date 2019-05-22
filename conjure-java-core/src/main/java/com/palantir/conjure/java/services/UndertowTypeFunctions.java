@@ -115,7 +115,6 @@ final class UndertowTypeFunctions {
 
     static Type toConjureTypeWithoutAliases(final Type in, final List<TypeDefinition> typeDefinitions) {
         return in.accept(new Type.Visitor<Type>() {
-
             @Override
             public Type visitPrimitive(PrimitiveType value) {
                 return in;

@@ -47,7 +47,6 @@ public final class AliasGenerator {
     public static JavaFile generateAliasType(
             TypeMapper typeMapper,
             AliasDefinition typeDef) {
-
         TypeName aliasTypeName = typeMapper.getClassName(typeDef.getAlias());
 
         String typePackage = typeDef.getTypeName().getPackage();

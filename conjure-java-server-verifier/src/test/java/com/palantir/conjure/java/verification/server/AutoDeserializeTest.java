@@ -69,7 +69,6 @@ public final class AutoDeserializeTest {
 
     @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
     public static Collection<Object[]> data() {
-
         List<Object[]> objects = new ArrayList<>();
         Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
