@@ -22,6 +22,7 @@ dependencies {
     implementation 'com.google.guava:guava'
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     implementation 'com.palantir.tracing:tracing-undertow'
+    implementation 'com.palantir.tritium:tritium-registry'
     implementation 'org.slf4j:slf4j-api'
 
     testImplementation 'com.squareup.okhttp3:okhttp'
