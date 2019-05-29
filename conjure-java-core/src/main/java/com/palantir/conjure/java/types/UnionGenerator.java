@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -92,8 +93,7 @@ public final class UnionGenerator {
                                 fieldSpec -> FieldName.of(fieldSpec.name))
                                 .collect(Collectors.toList())));
 
-        typeDef.getDocs().ifPresent(docs ->
-                typeBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+        typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         return JavaFile.builder(typePackage, typeBuilder.build())
                 .skipJavaLangImports(true)

@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
@@ -38,7 +39,6 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
-import org.apache.commons.lang3.StringUtils;
 
 public final class AliasGenerator {
 
@@ -155,7 +155,7 @@ public final class AliasGenerator {
                     .build());
         }
 
-        typeDef.getDocs().ifPresent(docs -> spec.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+        typeDef.getDocs().ifPresent(docs -> spec.addJavadoc("$L", Javadoc.render(docs)));
 
         return JavaFile.builder(typePackage, spec.build())
                 .skipJavaLangImports(true)

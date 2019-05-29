@@ -21,6 +21,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -40,7 +41,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
-import org.apache.commons.lang3.StringUtils;
 
 final class UndertowServiceInterfaceGenerator {
 
@@ -59,8 +59,7 @@ final class UndertowServiceInterfaceGenerator {
                 .addAnnotation(
                         ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceInterfaceGenerator.class));
 
-        serviceDefinition.getDocs().ifPresent(docs ->
-                serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+        serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
                 .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper))

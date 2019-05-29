@@ -26,8 +26,8 @@ import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
-import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.MapType;
@@ -265,7 +265,7 @@ public final class BeanBuilderGenerator {
         Type type = enriched.conjureDef().getType();
         boolean shouldClearFirst = false;
         return MethodSpec.methodBuilder(prefix + StringUtils.capitalize(field.name))
-                .addJavadoc(enriched.conjureDef().getDocs().map(Documentation::get).orElse(""))
+                .addJavadoc(enriched.conjureDef().getDocs().map(Javadoc::render).orElse(""))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
                 .addParameter(widenParameterIfPossible(field.type, type), field.name)
@@ -470,7 +470,7 @@ public final class BeanBuilderGenerator {
 
     private MethodSpec.Builder publicSetter(EnrichedField enriched) {
         return MethodSpec.methodBuilder(enriched.poetSpec().name)
-                .addJavadoc(enriched.conjureDef().getDocs().map(Documentation::get).orElse(""))
+                .addJavadoc(enriched.conjureDef().getDocs().map(Javadoc::render).orElse(""))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass);
     }

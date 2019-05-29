@@ -27,6 +27,7 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
 import com.palantir.conjure.spec.AuthType;
@@ -56,7 +57,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.MediaType;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,9 +108,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(Retrofit2ServiceGenerator.class));
 
-        serviceDefinition.getDocs().ifPresent(docs -> {
-            serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n"));
-        });
+        serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))

@@ -27,6 +27,7 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -68,7 +69,6 @@ import java.util.stream.IntStream;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import org.apache.commons.lang3.StringUtils;
 
 public final class JerseyServiceGenerator implements ServiceGenerator {
 
@@ -133,8 +133,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                         .build())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JerseyServiceGenerator.class));
 
-        serviceDefinition.getDocs().ifPresent(docs ->
-                serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+        serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))

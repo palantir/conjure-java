@@ -25,6 +25,7 @@ import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ObjectDefinition;
@@ -116,8 +117,7 @@ public final class BeanGenerator {
 
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
 
-        typeDef.getDocs().ifPresent(docs ->
-                typeBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+        typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         return JavaFile.builder(typePackage, typeBuilder.build())
                 .skipJavaLangImports(true)

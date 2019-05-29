@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.util.Goethe;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.squareup.javapoet.JavaFile;
@@ -50,8 +51,7 @@ public interface ServiceGenerator {
         Optional<String> depr = endpointDef.getDeprecated()
                 .map(v -> StringUtils.appendIfMissing("@deprecated " + v, "\n"));
 
-        Optional<String> docs = endpointDef.getDocs()
-                .map(v -> StringUtils.appendIfMissing(v.get(), "\n"));
+        Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
 
         StringBuilder sb = new StringBuilder();
         docs.ifPresent(sb::append);

@@ -22,6 +22,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
 import com.squareup.javapoet.ClassName;
@@ -89,8 +90,7 @@ public final class EnumGenerator {
                 .addMethod(createValueOf(thisClass, typeDef.getValues()))
                 .addMethod(generateAcceptVisitMethod(visitorClass, typeDef.getValues()));
 
-        typeDef.getDocs().ifPresent(
-                docs -> wrapper.addJavadoc("$L<p>\n", StringUtils.appendIfMissing(docs.get(), "\n")));
+        typeDef.getDocs().ifPresent(docs -> wrapper.addJavadoc("$L<p>\n", Javadoc.render(docs)));
 
         wrapper.addJavadoc(
                 "This class is used instead of a native enum to support unknown values.\n"
@@ -129,8 +129,7 @@ public final class EnumGenerator {
                 .addModifiers(Modifier.PUBLIC);
         for (EnumValueDefinition value : values) {
             TypeSpec.Builder anonymousClassBuilder = TypeSpec.anonymousClassBuilder("");
-            value.getDocs().ifPresent(docs ->
-                    anonymousClassBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+            value.getDocs().ifPresent(docs -> anonymousClassBuilder.addJavadoc("$L", Javadoc.render(docs)));
             enumBuilder.addEnumConstant(value.getValue(), anonymousClassBuilder.build());
         }
         if (withUnknown) {
