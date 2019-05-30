@@ -12,8 +12,21 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowEteService {
+    /**
+     * foo bar baz.
+     *
+     * <h2>Very Important Documentation</h2>
+     *
+     * This documentation provides a <em>list</em>:
+     *
+     * <ul>
+     *   <li>Docs rule
+     *   <li>Lists are wonderful
+     * </ul>
+     */
     String string(AuthHeader authHeader);
 
+    /** one <em>two</em> three. */
     int integer(AuthHeader authHeader);
 
     double double_(AuthHeader authHeader);

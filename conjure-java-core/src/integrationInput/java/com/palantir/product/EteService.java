@@ -26,10 +26,23 @@ import javax.ws.rs.core.StreamingOutput;
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface EteService {
+    /**
+     * foo bar baz.
+     *
+     * <h2>Very Important Documentation</h2>
+     *
+     * This documentation provides a <em>list</em>:
+     *
+     * <ul>
+     *   <li>Docs rule
+     *   <li>Lists are wonderful
+     * </ul>
+     */
     @GET
     @Path("base/string")
     String string(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
+    /** one <em>two</em> three. */
     @GET
     @Path("base/integer")
     int integer(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);

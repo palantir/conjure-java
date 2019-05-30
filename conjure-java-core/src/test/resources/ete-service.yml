@@ -41,10 +41,18 @@ services:
       string:
         http: GET /string
         returns: string
+        docs: |
+          foo bar baz.
 
+          ## Very Important Documentation
+
+          This documentation provides a _list_:
+          * Docs rule
+          * Lists are wonderful
       integer:
         http: GET /integer
         returns: integer
+        docs: one *two* three.
 
       double_:
         http: GET /double

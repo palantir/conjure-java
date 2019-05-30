@@ -21,10 +21,23 @@ import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
 public interface EteServiceRetrofit {
+    /**
+     * foo bar baz.
+     *
+     * <h2>Very Important Documentation</h2>
+     *
+     * This documentation provides a <em>list</em>:
+     *
+     * <ul>
+     *   <li>Docs rule
+     *   <li>Lists are wonderful
+     * </ul>
+     */
     @GET("./base/string")
     @Headers({"hr-path-template: /base/string", "Accept: application/json"})
     Call<String> string(@Header("Authorization") AuthHeader authHeader);
 
+    /** one <em>two</em> three. */
     @GET("./base/integer")
     @Headers({"hr-path-template: /base/integer", "Accept: application/json"})
     Call<Integer> integer(@Header("Authorization") AuthHeader authHeader);
