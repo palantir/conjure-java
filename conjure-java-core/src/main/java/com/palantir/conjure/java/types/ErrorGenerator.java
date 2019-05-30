@@ -51,7 +51,6 @@ public final class ErrorGenerator {
 
     public static Set<JavaFile> generateErrorTypes(
             TypeMapper typeMapper, List<ErrorDefinition> errorTypeNameToDef) {
-
         return splitErrorDefsByNamespace(errorTypeNameToDef)
                 .entrySet()
                 .stream()
@@ -69,7 +68,6 @@ public final class ErrorGenerator {
 
     private static Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> splitErrorDefsByNamespace(
             List<ErrorDefinition> errorTypeNameToDef) {
-
         Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> pkgToNamespacedErrorDefs =
                 Maps.newHashMap();
         errorTypeNameToDef.stream().forEach(errorDef -> {
@@ -91,7 +89,6 @@ public final class ErrorGenerator {
             String conjurePackage,
             ErrorNamespace namespace,
             List<ErrorDefinition> errorTypeDefinitions) {
-
         ClassName className = errorTypesClassName(conjurePackage, namespace);
 
         // Generate ErrorType definitions
@@ -196,7 +193,6 @@ public final class ErrorGenerator {
 
     private static void processArg(
             TypeMapper typeMapper, MethodSpec.Builder methodBuilder, FieldDefinition argDefinition, boolean isSafe) {
-
         String argName = argDefinition.getFieldName().get();
         com.squareup.javapoet.TypeName argType = typeMapper.getClassName(argDefinition.getType());
         methodBuilder.addParameter(argType, argName);

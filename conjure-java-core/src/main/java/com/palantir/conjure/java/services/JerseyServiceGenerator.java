@@ -206,7 +206,6 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
             TypeMapper argumentTypeMapper) {
-
         List<ArgumentDefinition> queryArgs = Lists.newArrayList();
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {

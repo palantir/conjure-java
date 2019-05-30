@@ -106,7 +106,6 @@ final class UndertowServiceHandlerGenerator {
 
     public JavaFile generateServiceHandler(ServiceDefinition serviceDefinition, List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper, TypeMapper returnTypeMapper) {
-
         String serviceName = serviceDefinition.getServiceName().getName();
         // class name
         ClassName serviceClass = ClassName.get(serviceDefinition.getServiceName().getPackage(),
