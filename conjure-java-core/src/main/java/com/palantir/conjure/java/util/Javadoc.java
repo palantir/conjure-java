@@ -37,7 +37,6 @@ public final class Javadoc {
             // Disable paragraph tags, prefer raw text instead. Otherwise
             // all javadoc will be wrapped in paragraphs.
             .nodeRendererFactory(context -> new CoreHtmlNodeRenderer(context) {
-
                 private boolean firstParagraph = true;
 
                 @Override
