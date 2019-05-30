@@ -40,11 +40,13 @@ public interface TestService {
 
     void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input);
 
+    /** @param datasetRid A valid dataset resource identifier. */
     Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
      *
+     * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
     @Deprecated

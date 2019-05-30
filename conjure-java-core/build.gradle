@@ -49,6 +49,7 @@ dependencies {
     compile 'javax.validation:validation-api'
     compile 'org.apache.commons:commons-lang3'
     compile 'org.slf4j:slf4j-api'
+    compile 'com.atlassian.commonmark:commonmark'
 
     testCompile('com.palantir.conjure:conjure-core') {
         exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'

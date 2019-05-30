@@ -16,8 +16,11 @@
 
 package com.palantir.conjure.java.services;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import com.palantir.conjure.java.util.Goethe;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.squareup.javapoet.JavaFile;
@@ -26,6 +29,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 public interface ServiceGenerator {
@@ -50,11 +54,15 @@ public interface ServiceGenerator {
         Optional<String> depr = endpointDef.getDeprecated()
                 .map(v -> StringUtils.appendIfMissing("@deprecated " + v, "\n"));
 
-        Optional<String> docs = endpointDef.getDocs()
-                .map(v -> StringUtils.appendIfMissing(v.get(), "\n"));
+        Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
+
+        Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDef.getArgs().stream()
+                .flatMap(argument -> Streams.stream(Javadoc.getParameterJavadoc(argument, endpointDef)))
+                .collect(Collectors.joining("\n"))));
 
         StringBuilder sb = new StringBuilder();
         docs.ifPresent(sb::append);
+        params.ifPresent(sb::append);
         depr.ifPresent(sb::append);
         return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();
     }

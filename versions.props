@@ -1,4 +1,5 @@
 ch.qos.logback:* = 1.2.3
+com.atlassian.commonmark:* = 0.12.1
 com.fasterxml.jackson.*:jackson-* = 2.9.9
 com.github.stefanbirkner:system-rules = 1.19.0
 com.google.code.findbugs:jsr305 = 3.0.2

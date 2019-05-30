@@ -22,7 +22,7 @@ import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.conjure.spec.Documentation;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.FieldDefinition;
@@ -140,7 +140,7 @@ public final class ErrorGenerator {
                         methodBuilder.addParameter(typeMapper.getClassName(arg.getType()), arg.getFieldName().get());
                         methodBuilder.addJavadoc("@param $L $L", arg.getFieldName().get(),
                                         StringUtils.appendIfMissing(
-                                                arg.getDocs().map(Documentation::get).orElse(""), "\n"));
+                                                arg.getDocs().map(Javadoc::render).orElse(""), "\n"));
                     });
 
             methodBuilder.addCode("if ($L) {", shouldThrowVar);
@@ -203,7 +203,7 @@ public final class ErrorGenerator {
         Class<?> clazz = isSafe ? SafeArg.class : UnsafeArg.class;
         methodBuilder.addCode(",\n    $T.of($S, $L)", clazz, argName, argName);
         argDefinition.getDocs().ifPresent(docs ->
-                methodBuilder.addJavadoc("@param $L $L", argName, StringUtils.appendIfMissing(docs.get(), "\n")));
+                methodBuilder.addJavadoc("@param $L $L", argName, Javadoc.render(docs)));
     }
 
     private static ClassName errorTypesClassName(String conjurePackage, ErrorNamespace namespace) {

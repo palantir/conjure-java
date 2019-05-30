@@ -26,10 +26,23 @@ import javax.ws.rs.core.StreamingOutput;
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface EteService {
+    /**
+     * foo bar baz.
+     *
+     * <h2>Very Important Documentation</h2>
+     *
+     * <p>This documentation provides a <em>list</em>:
+     *
+     * <ul>
+     *   <li>Docs rule
+     *   <li>Lists are wonderful
+     * </ul>
+     */
     @GET
     @Path("base/string")
     String string(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
+    /** one <em>two</em> three. */
     @GET
     @Path("base/integer")
     int integer(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
@@ -71,6 +84,11 @@ public interface EteService {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput binary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
+    /**
+     * Path endpoint.
+     *
+     * @param param Documentation for <code>param</code>
+     */
     @GET
     @Path("base/path/{param}")
     String path(

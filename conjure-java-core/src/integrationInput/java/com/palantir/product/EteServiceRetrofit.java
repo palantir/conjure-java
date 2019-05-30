@@ -21,10 +21,23 @@ import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
 public interface EteServiceRetrofit {
+    /**
+     * foo bar baz.
+     *
+     * <h2>Very Important Documentation</h2>
+     *
+     * <p>This documentation provides a <em>list</em>:
+     *
+     * <ul>
+     *   <li>Docs rule
+     *   <li>Lists are wonderful
+     * </ul>
+     */
     @GET("./base/string")
     @Headers({"hr-path-template: /base/string", "Accept: application/json"})
     Call<String> string(@Header("Authorization") AuthHeader authHeader);
 
+    /** one <em>two</em> three. */
     @GET("./base/integer")
     @Headers({"hr-path-template: /base/integer", "Accept: application/json"})
     Call<Integer> integer(@Header("Authorization") AuthHeader authHeader);
@@ -66,6 +79,11 @@ public interface EteServiceRetrofit {
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
 
+    /**
+     * Path endpoint.
+     *
+     * @param param Documentation for <code>param</code>
+     */
     @GET("./base/path/{param}")
     @Headers({"hr-path-template: /base/path/{param}", "Accept: application/json"})
     Call<String> path(@Header("Authorization") AuthHeader authHeader, @Path("param") String param);
