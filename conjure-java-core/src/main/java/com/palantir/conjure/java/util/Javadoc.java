@@ -16,10 +16,10 @@
 
 package com.palantir.conjure.java.util;
 
-import com.google.common.base.Preconditions;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.commonmark.node.Paragraph;
 import org.commonmark.parser.Parser;
@@ -62,10 +62,10 @@ public final class Javadoc {
         return StringUtils.appendIfMissing(renderedHtml, "\n");
     }
 
-    public static String getParameterJavadoc(ArgumentDefinition argument, EndpointDefinition endpoint) {
-        Preconditions.checkArgument(argument.getDocs().isPresent(), "Argument documentation is required");
-        String argumentName = JavaNameSanitizer.sanitizeParameterName(argument.getArgName().get(), endpoint);
-        return "@param " + argumentName + " " +  Javadoc.render(argument.getDocs().get());
+    public static Optional<String> getParameterJavadoc(ArgumentDefinition argument, EndpointDefinition endpoint) {
+        return argument.getDocs().map(docs -> "@param "
+                + JavaNameSanitizer.sanitizeParameterName(argument.getArgName().get(), endpoint) + " "
+                + Javadoc.render(argument.getDocs().get()));
     }
 
     private Javadoc() {}

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Streams;
 import com.palantir.conjure.java.util.Goethe;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -56,8 +57,7 @@ public interface ServiceGenerator {
         Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
 
         Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDef.getArgs().stream()
-                .filter(argument -> argument.getDocs().isPresent())
-                .map(argument -> Javadoc.getParameterJavadoc(argument, endpointDef))
+                .flatMap(argument -> Streams.stream(Javadoc.getParameterJavadoc(argument, endpointDef)))
                 .collect(Collectors.joining("\n"))));
 
         StringBuilder sb = new StringBuilder();
