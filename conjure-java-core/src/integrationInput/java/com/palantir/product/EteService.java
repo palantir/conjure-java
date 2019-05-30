@@ -84,6 +84,11 @@ public interface EteService {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput binary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
+    /**
+     * Path endpoint.
+     *
+     * @param param Documentation for <code>param</code>
+     */
     @GET
     @Path("base/path/{param}")
     String path(

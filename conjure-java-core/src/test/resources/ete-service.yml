@@ -93,8 +93,11 @@ services:
       path:
         http: GET /path/{param}
         args:
-          param: string
+          param:
+            type: string
+            docs: Documentation for `param`
         returns: string
+        docs: Path endpoint.
 
       externalLongPath:
         http: GET /externalLong/{param}

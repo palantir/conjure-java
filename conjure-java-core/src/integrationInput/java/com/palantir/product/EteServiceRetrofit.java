@@ -79,6 +79,11 @@ public interface EteServiceRetrofit {
     @Streaming
     Call<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
 
+    /**
+     * Path endpoint.
+     *
+     * @param param Documentation for <code>param</code>
+     */
     @GET("./base/path/{param}")
     @Headers({"hr-path-template: /base/path/{param}", "Accept: application/json"})
     Call<String> path(@Header("Authorization") AuthHeader authHeader, @Path("param") String param);

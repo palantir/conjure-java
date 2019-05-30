@@ -47,6 +47,11 @@ public interface UndertowEteService {
 
     BinaryResponseBody binary(AuthHeader authHeader);
 
+    /**
+     * Path endpoint.
+     *
+     * @param param Documentation for <code>param</code>
+     */
     String path(AuthHeader authHeader, String param);
 
     long externalLongPath(AuthHeader authHeader, long param);

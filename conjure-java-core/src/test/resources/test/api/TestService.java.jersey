@@ -94,6 +94,7 @@ public interface TestService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @NotNull NestedAliasedBinary input);
 
+    /** @param datasetRid A valid dataset resource identifier. */
     @GET
     @Path("catalog/datasets/{datasetRid}/branches")
     Set<String> getBranches(
@@ -103,6 +104,7 @@ public interface TestService {
     /**
      * Gets all branches of this dataset.
      *
+     * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
     @GET
