@@ -1,4 +1,5 @@
 # Run ./gradlew --write-locks to regenerate this file
+com.atlassian.commonmark:commonmark:0.12.1 (1 constraints: 36052a3b)
 com.fasterxml.jackson.core:jackson-annotations:2.9.9 (6 constraints: ca659407)
 com.fasterxml.jackson.core:jackson-core:2.9.9 (8 constraints: 4fa88978)
 com.fasterxml.jackson.core:jackson-databind:2.9.9 (11 constraints: eec45d47)

@@ -18,13 +18,36 @@ package com.palantir.conjure.java.util;
 
 import com.palantir.conjure.spec.Documentation;
 import org.apache.commons.lang3.StringUtils;
+import org.commonmark.node.Paragraph;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.Renderer;
+import org.commonmark.renderer.html.CoreHtmlNodeRenderer;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 /** Provides utility functionality for rendering javadoc. */
 public final class Javadoc {
 
+    private static final Parser parser = Parser.builder().build();
+    private static final Renderer renderer = HtmlRenderer.builder()
+            // Escaping existing HTML may break docs that rendered fine previously.
+            .escapeHtml(false)
+            // Disable paragraph tags, prefer raw text instead. Otherwise
+            // all javadoc will be wrapped in paragraphs.
+            .nodeRendererFactory(context -> new CoreHtmlNodeRenderer(context) {
+                @Override
+                public void visit(Paragraph paragraph) {
+                    visitChildren(paragraph);
+                }
+            })
+            .build();
+
     public static String render(Documentation documentation) {
-        return StringUtils.isBlank(documentation.get())
-                ? "" : StringUtils.appendIfMissing(documentation.get(), "\n");
+        String rawDocumentation = documentation.get();
+        if (StringUtils.isBlank(rawDocumentation)) {
+            return "";
+        }
+        String renderedHtml = renderer.render(parser.parse(rawDocumentation));
+        return StringUtils.appendIfMissing(renderedHtml, "\n");
     }
 
     private Javadoc() {}

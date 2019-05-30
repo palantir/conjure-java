@@ -37,4 +37,9 @@ public class JavadocTest {
     public void testAddsTrailingSlash() {
         assertThat(Javadoc.render(Documentation.of("Returns a Foo."))).isEqualTo("Returns a Foo.\n");
     }
+
+    @Test
+    public void testRendersMarkdown() {
+        assertThat(Javadoc.render(Documentation.of("Docs in _markdown_?"))).isEqualTo("Docs in <em>markdown</em>?\n");
+    }
 }
