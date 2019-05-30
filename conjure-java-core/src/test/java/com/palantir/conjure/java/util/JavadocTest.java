@@ -30,16 +30,33 @@ public class JavadocTest {
 
     @Test
     public void testBlankString() {
-        assertThat(Javadoc.render(Documentation.of(" "))).isEmpty();
+        assertThat(Javadoc.render(Documentation.of(" \n "))).isEmpty();
     }
 
     @Test
-    public void testAddsTrailingSlash() {
+    public void testAddsTrailingNewline() {
         assertThat(Javadoc.render(Documentation.of("Returns a Foo."))).isEqualTo("Returns a Foo.\n");
+    }
+
+    @Test
+    public void testRetainsTrailingNewline() {
+        assertThat(Javadoc.render(Documentation.of("Returns a Foo.\n"))).isEqualTo("Returns a Foo.\n");
     }
 
     @Test
     public void testRendersMarkdown() {
         assertThat(Javadoc.render(Documentation.of("Docs in _markdown_?"))).isEqualTo("Docs in <em>markdown</em>?\n");
+    }
+
+    @Test
+    public void testNewlines() {
+        assertThat(Javadoc.render(Documentation.of("Line one.\n\nLine two.")))
+                .isEqualTo("Line one.\n<p>Line two.</p>\n");
+    }
+
+    @Test
+    public void testExistingHtmlTags() {
+        assertThat(Javadoc.render(Documentation.of("Line includes <em>existing</em> html.")))
+                .isEqualTo("Line includes <em>existing</em> html.\n");
     }
 }

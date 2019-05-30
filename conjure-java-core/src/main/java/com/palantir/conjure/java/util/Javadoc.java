@@ -34,15 +34,24 @@ public final class Javadoc {
             // Disable paragraph tags, prefer raw text instead. Otherwise
             // all javadoc will be wrapped in paragraphs.
             .nodeRendererFactory(context -> new CoreHtmlNodeRenderer(context) {
+
+                private boolean firstParagraph = true;
+
                 @Override
                 public void visit(Paragraph paragraph) {
-                    visitChildren(paragraph);
+                    // Exclude the first set of paragraph tags for javadoc style.
+                    if (firstParagraph) {
+                        firstParagraph = false;
+                        visitChildren(paragraph);
+                    } else {
+                        super.visit(paragraph);
+                    }
                 }
             })
             .build();
 
     public static String render(Documentation documentation) {
-        String rawDocumentation = documentation.get();
+        String rawDocumentation = StringUtils.stripToEmpty(documentation.get());
         if (StringUtils.isBlank(rawDocumentation)) {
             return "";
         }

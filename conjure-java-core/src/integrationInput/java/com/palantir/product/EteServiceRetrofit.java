@@ -26,7 +26,7 @@ public interface EteServiceRetrofit {
      *
      * <h2>Very Important Documentation</h2>
      *
-     * This documentation provides a <em>list</em>:
+     * <p>This documentation provides a <em>list</em>:
      *
      * <ul>
      *   <li>Docs rule
