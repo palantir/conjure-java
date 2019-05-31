@@ -55,31 +55,12 @@ public class ConjureHandlerBuilderTest {
     }
 
     private Endpoint buildEndpoint(HttpString method, String template, String serviceName, String name) {
-        return new Endpoint() {
-            @Override
-            public HttpString method() {
-                return method;
-            }
-
-            @Override
-            public String template() {
-                return template;
-            }
-
-            @Override
-            public HttpHandler handler() {
-                return null;
-            }
-
-            @Override
-            public String serviceName() {
-                return serviceName;
-            }
-
-            @Override
-            public String name() {
-                return name;
-            }
-        };
+        return Endpoint.builder()
+                .method(method)
+                .template(template)
+                .serviceName(serviceName)
+                .handler(exchange -> { })
+                .name(name)
+                .build();
     }
 }
