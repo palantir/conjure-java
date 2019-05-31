@@ -24,7 +24,7 @@ public interface DeprecationCallback {
      * Called when a deprecated endpoint (whose deprecated field contains some documentation)
      * is invoked.
      */
-    void deprecation(
+    void deprecated(
             String serviceName,
             String endpointName,
             String deprecatedDoc,
