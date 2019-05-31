@@ -24,7 +24,6 @@ import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.SafeLoggable;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import org.junit.Test;
