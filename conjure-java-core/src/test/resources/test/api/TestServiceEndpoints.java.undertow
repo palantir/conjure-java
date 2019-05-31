@@ -602,8 +602,12 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         @SuppressWarnings("deprecation")
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            runtime.deprecation().deprecated(
-                    "TestService", "getBranchesDeprecated", "use getBranches instead", exchange);
+            runtime.deprecation()
+                    .deprecated(
+                            "TestService",
+                            "getBranchesDeprecated",
+                            "use getBranches instead",
+                            exchange);
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
