@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.palantir.logsafe.Preconditions;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
 
@@ -46,4 +48,92 @@ public interface Endpoint {
 
     /** Simple name of the endpoint method. This data may be used for metric instrumentation. */
     String name();
+
+    static Builder builder() {
+        return new Builder();
+    }
+
+    final class Builder {
+
+        private Builder() {}
+
+        private HttpString method;
+        private String template;
+        private HttpHandler handler;
+        private String serviceName;
+        private String name;
+
+        @CanIgnoreReturnValue
+        public Builder method(HttpString value) {
+            method = Preconditions.checkNotNull(value, "method is required");
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder template(String value) {
+            template = Preconditions.checkNotNull(value, "template is required");
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder handler(HttpHandler value) {
+            handler = Preconditions.checkNotNull(value, "handler is required");
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder serviceName(String value) {
+            serviceName = Preconditions.checkNotNull(value, "serviceName is required");
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder name(String value) {
+            name = Preconditions.checkNotNull(value, "name is required");
+            return this;
+        }
+
+        public Builder from(Endpoint endpoint) {
+            method = endpoint.method();
+            template = endpoint.template();
+            handler = endpoint.handler();
+            serviceName = endpoint.serviceName();
+            name = endpoint.name();
+            return this;
+        }
+
+        public Endpoint build() {
+            Preconditions.checkNotNull(method, "method is required");
+            Preconditions.checkNotNull(template, "template is required");
+            Preconditions.checkNotNull(handler, "handler is required");
+            Preconditions.checkNotNull(serviceName, "serviceName is required");
+            Preconditions.checkNotNull(name, "name is required");
+            return new Endpoint() {
+                @Override
+                public HttpString method() {
+                    return method;
+                }
+
+                @Override
+                public String template() {
+                    return template;
+                }
+
+                @Override
+                public HttpHandler handler() {
+                    return handler;
+                }
+
+                @Override
+                public String serviceName() {
+                    return serviceName;
+                }
+
+                @Override
+                public String name() {
+                    return name;
+                }
+            };
+        }
+    }
 }
