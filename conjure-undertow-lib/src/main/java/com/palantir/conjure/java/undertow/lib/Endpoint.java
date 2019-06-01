@@ -20,6 +20,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.logsafe.Preconditions;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
+import java.util.Optional;
 
 /**
  * An {@link Endpoint} represents a single rpc method. End points provide a location, tuple of
@@ -49,6 +50,11 @@ public interface Endpoint {
     /** Simple name of the endpoint method. This data may be used for metric instrumentation. */
     String name();
 
+    /** Is present if the method is deprecated, and contains its corresponding deprecating documentation. */
+    default Optional<String> deprecated() {
+        return Optional.empty();
+    }
+
     static Builder builder() {
         return new Builder();
     }
@@ -62,6 +68,7 @@ public interface Endpoint {
         private HttpHandler handler;
         private String serviceName;
         private String name;
+        private Optional<String> deprecated = Optional.empty();
 
         @CanIgnoreReturnValue
         public Builder method(HttpString value) {
@@ -93,12 +100,19 @@ public interface Endpoint {
             return this;
         }
 
+        @CanIgnoreReturnValue
+        public Builder deprecated(Optional<String> value) {
+            deprecated = Preconditions.checkNotNull(value, "name is required");
+            return this;
+        }
+
         public Builder from(Endpoint endpoint) {
             method = endpoint.method();
             template = endpoint.template();
             handler = endpoint.handler();
             serviceName = endpoint.serviceName();
             name = endpoint.name();
+            deprecated = endpoint.deprecated();
             return this;
         }
 
@@ -108,6 +122,7 @@ public interface Endpoint {
             Preconditions.checkNotNull(handler, "handler is required");
             Preconditions.checkNotNull(serviceName, "serviceName is required");
             Preconditions.checkNotNull(name, "name is required");
+            // no need to check for deprecated, it is always set.
             return new Endpoint() {
                 @Override
                 public HttpString method() {
@@ -132,6 +147,11 @@ public interface Endpoint {
                 @Override
                 public String name() {
                     return name;
+                }
+
+                @Override
+                public Optional<String> deprecated() {
+                    return deprecated;
                 }
             };
         }
