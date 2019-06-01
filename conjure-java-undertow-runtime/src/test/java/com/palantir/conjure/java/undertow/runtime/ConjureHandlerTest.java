@@ -23,7 +23,6 @@ import static org.mockito.Mockito.when;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
-import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
 import okhttp3.OkHttpClient;
@@ -60,32 +59,15 @@ public final class ConjureHandlerTest {
             }
         };
         HttpHandler handler = ConjureHandler.builder()
-                .endpoints(new Endpoint() {
-                    @Override
-                    public HttpString method() {
-                        return Methods.GET;
-                    }
-
-                    @Override
-                    public String template() {
-                        return "/test";
-                    }
-
-                    @Override
-                    public HttpHandler handler() {
-                        return httpHandler;
-                    }
-
-                    @Override
-                    public String serviceName() {
-                        return "TestService";
-                    }
-
-                    @Override
-                    public String name() {
-                        return "test";
-                    }
-                }).build();
+                .endpoints(Endpoint.builder()
+                        .method(Methods.GET)
+                        .template("/test")
+                        .handler(httpHandler)
+                        .serviceName("TestService")
+                        .name("test")
+                        .handler(httpHandler)
+                        .build())
+                .build();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(handler)
