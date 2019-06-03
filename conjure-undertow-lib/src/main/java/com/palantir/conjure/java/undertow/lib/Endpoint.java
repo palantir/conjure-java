@@ -102,7 +102,7 @@ public interface Endpoint {
 
         @CanIgnoreReturnValue
         public Builder deprecated(Optional<String> value) {
-            deprecated = Preconditions.checkNotNull(value, "name is required");
+            deprecated = Preconditions.checkNotNull(value, "deprecated is required");
             return this;
         }
 
