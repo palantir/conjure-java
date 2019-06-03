@@ -106,6 +106,7 @@ public interface Endpoint {
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder from(Endpoint endpoint) {
             method = endpoint.method();
             template = endpoint.template();
