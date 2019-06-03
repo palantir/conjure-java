@@ -298,6 +298,15 @@ final class UndertowServiceHandlerGenerator {
                         .addStatement("return this")
                         .build());
 
+        endpointDefinition.getDeprecated()
+                .ifPresent(documentation -> endpointBuilder
+                        .addMethod(MethodSpec.methodBuilder("deprecated")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
+                        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), ClassName.get(String.class)))
+                        .addStatement("return $1T.of($2S)", Optional.class, documentation)
+                        .build()));
+
         return endpointBuilder.build();
     }
 

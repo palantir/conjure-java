@@ -637,6 +637,11 @@ public final class TestServiceEndpoints implements UndertowService {
         public HttpHandler handler() {
             return this;
         }
+
+        @Override
+        public Optional<String> deprecated() {
+            return Optional.of("use getBranches instead");
+        }
     }
 
     private static final class ResolveBranchEndpoint implements HttpHandler, Endpoint {
