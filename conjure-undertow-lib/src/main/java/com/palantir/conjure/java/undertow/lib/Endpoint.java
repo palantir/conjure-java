@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.lib;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.logsafe.Preconditions;
+import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
 import java.util.Optional;
@@ -53,6 +54,17 @@ public interface Endpoint {
     /** Is present if the method is deprecated, and contains its corresponding deprecating documentation. */
     default Optional<String> deprecated() {
         return Optional.empty();
+    }
+
+    /**
+     * Build am {@link Endpoint} who is a copy of the current instance but whose handler
+     * has been wrapped by an {@link HandlerWrapper}.
+     */
+    default Endpoint mapHandler(HandlerWrapper wrapper) {
+        return builder()
+                .from(this)
+                .handler(wrapper.wrap(this.handler()))
+                .build();
     }
 
     static Builder builder() {
