@@ -66,6 +66,16 @@ public class ConjureBodySerDeTest {
     }
 
     @Test
+    public void testUnsupportedBinaryRequestContentType() {
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().put(Headers.CONTENT_TYPE, "application/unknown");
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(new StubEncoding("application/json")));
+        assertThatThrownBy(() -> serializers.deserializeInputStream(exchange))
+                .isInstanceOf(FrameworkException.class)
+                .hasMessageContaining("Unsupported Content-Type");
+    }
+
+    @Test
     public void testResponseContentType() throws IOException  {
         Encoding json = new StubEncoding("application/json");
         Encoding plain = new StubEncoding("text/plain");
