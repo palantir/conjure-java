@@ -107,7 +107,7 @@ public final class ConjureHandler implements HttpHandler {
 
     private Endpoint stackEndpointHandlerWrapper(Endpoint endpoint, Collection<EndpointHandlerWrapper> wrappers) {
         Endpoint current = endpoint;
-        for (EndpointHandlerWrapper wrapper : WRAPPERS_AFTER_BLOCKING) {
+        for (EndpointHandlerWrapper wrapper : wrappers) {
             current = Endpoints.mapHandler(endpoint, wrapper.wrap(endpoint));
         }
         return current;
