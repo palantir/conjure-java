@@ -17,10 +17,12 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import io.undertow.server.HandlerWrapper;
+import io.undertow.server.HttpHandler;
 
 public interface EndpointHandlerWrapper {
 
-    /** This should return the {@link HandlerWrapper} that should be applied to the {@link Endpoint#handler()}. **/
-    HandlerWrapper wrap(Endpoint endpoint);
+    /** This should return the {@link HttpHandler} that should replace the {@link HttpHandler} from the
+     * {@link Endpoint}.
+     **/
+    HttpHandler wrap(Endpoint endpoint);
 }

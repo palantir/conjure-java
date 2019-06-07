@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -65,7 +64,7 @@ public final class ConjureHandler implements HttpHandler {
         routingHandler.add(
                 endpoint.method(),
                 endpoint.template(),
-                stackedEndpointHandlerWrapper.wrap(endpoint).wrap(endpoint.handler()));
+                stackedEndpointHandlerWrapper.wrap(endpoint));
     }
 
     public static Builder builder() {
@@ -79,13 +78,13 @@ public final class ConjureHandler implements HttpHandler {
                         // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
                         // parameters. Servers which do not configure DECODE_URL will still work properly except for
                         // encoded slash values. When DECODE_URL has not been disabled, the following handler will no-op
-                        endpoint -> handler -> new URLDecodingHandler(handler, "UTF-8"),
+                        endpoint -> new URLDecodingHandler(endpoint.handler(), "UTF-8"),
                         // no-cache and web-security handlers add listeners for the response to be committed,
                         // they can be executed on the IO thread.
-                        endpoint -> handler -> Methods.GET.equals(endpoint.method())
+                        endpoint -> Methods.GET.equals(endpoint.method())
                                 // Only applies to GET methods
-                                ? new NoCachingResponseHandler(handler) : handler,
-                        endpoint -> handler -> new WebSecurityHandler(handler)
+                                ? new NoCachingResponseHandler(endpoint.handler()) : endpoint.handler(),
+                        endpoint -> new WebSecurityHandler(endpoint.handler())
                 ).reverse();
         // It is vitally important to never run blocking operations on the initial IO thread otherwise
         // the server will not process new requests. all handlers executed after BlockingHandler
@@ -94,13 +93,13 @@ public final class ConjureHandler implements HttpHandler {
         // will not propagate to the wrapped service.
         private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_AFTER_BLOCKING =
                 ImmutableList.<EndpointHandlerWrapper>of(
-                        endpoint -> handler -> new BlockingHandler(handler),
+                        endpoint -> new BlockingHandler(endpoint.handler()),
                         // Logging context and trace handler must execute prior to the exception
                         // to provide user and trace information on exceptions.
-                        endpoint -> handler -> new LoggingContextHandler(handler),
-                        endpoint -> handler -> new TracedOperationHandler(
-                                handler, endpoint.method() + " " + endpoint.template()),
-                        endpoint -> handler -> new ConjureExceptionHandler(handler)
+                        endpoint -> new LoggingContextHandler(endpoint.handler()),
+                        endpoint -> new TracedOperationHandler(
+                                endpoint.handler(), endpoint.method() + " " + endpoint.template()),
+                        endpoint -> new ConjureExceptionHandler(endpoint.handler())
                 ).reverse();
 
         private ImmutableList<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
@@ -125,7 +124,7 @@ public final class ConjureHandler implements HttpHandler {
                 Collection<EndpointHandlerWrapper> wrappers) {
             EndpointHandlerWrapper current = initial;
             for (EndpointHandlerWrapper wrapper : wrappers) {
-                current = endpoint -> handler -> wrapper.wrap(endpoint).wrap(handler);
+                current = endpoint -> handler -> wrapper.wrap(endpoint);
             }
             return current;
         }
@@ -162,7 +161,7 @@ public final class ConjureHandler implements HttpHandler {
 
         public HttpHandler build() {
             checkOverlappingPaths();
-            EndpointHandlerWrapper current = endpoint -> handler -> handler;
+            EndpointHandlerWrapper current = endpoint -> endpoint.handler();
             current = stackEndpointHandlerWrapper(current, WRAPPERS_AFTER_BLOCKING);
             current = stackEndpointHandlerWrapper(current, wrappersJustBeforeBlocking.reverse());
             current = stackEndpointHandlerWrapper(current, WRAPPERS_BEFORE_BLOCKING);

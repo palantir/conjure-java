@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 
 public final class UndertowServices {
@@ -32,7 +33,8 @@ public final class UndertowServices {
         return runtime ->
                 ImmutableList.copyOf(
                         service.endpoints(runtime).stream()
-                                .map(endpoint -> Endpoints.map(endpoint, wrapper.wrap(endpoint)))
+                                .map(endpoint ->
+                                        Endpoint.builder().from(endpoint).handler(wrapper.wrap(endpoint)).build())
                                 .collect(ImmutableList.toImmutableList()));
     }
 }
