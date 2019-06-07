@@ -18,7 +18,6 @@ package com.palantir.conjure.java.undertow.lib;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.logsafe.Preconditions;
-import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
 import java.util.Optional;
