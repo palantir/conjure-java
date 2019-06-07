@@ -109,6 +109,8 @@ public final class ConjureHandler implements HttpHandler {
         /**
          * This MUST only be used for non-blocking operations that are meant to be run on the io-thread.
          * For blocking operations, please wrap the UndertowService themselves using {@link UndertowServices#map}.
+         * If you call this multiple time, the last wrapper will be applied last, meaning it will wrap the previously
+         * added {@link EndpointHandlerWrapper}s.
          */
         public Builder addEndpointHandlerWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
             wrappersJustBeforeBlocking = ImmutableList.<EndpointHandlerWrapper>builder()
