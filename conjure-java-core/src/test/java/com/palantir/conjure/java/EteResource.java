@@ -19,6 +19,7 @@ package com.palantir.conjure.java;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.product.EteService;
+import com.palantir.product.LongAlias;
 import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.SimpleEnum;
 import com.palantir.product.StringAliasExample;
@@ -168,6 +169,12 @@ public class EteResource implements EteService {
     @Override
     public SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter) {
         return headerParameter;
+    }
+
+    @Override
+    public Optional<LongAlias> aliasLongEndpoint(
+            AuthHeader authHeader, Optional<LongAlias> input) {
+        return input;
     }
 
     interface Streaming extends StreamingOutput, BinaryResponseBody {}

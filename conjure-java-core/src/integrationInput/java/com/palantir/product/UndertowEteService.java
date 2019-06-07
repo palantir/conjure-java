@@ -87,4 +87,6 @@ public interface UndertowEteService {
             AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
     SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
+
+    Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 }

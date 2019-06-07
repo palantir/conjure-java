@@ -18,6 +18,8 @@ types:
       SimpleEnum:
         values:
           - VALUE
+      LongAlias:
+        alias: Long
 
 services:
   EmptyPathService:
@@ -198,3 +200,11 @@ services:
             param-id: Custom-Header
             type: SimpleEnum
         returns: SimpleEnum
+
+      aliasLongEndpoint:
+        http: GET /alias-long
+        args:
+          input:
+            type: optional<LongAlias>
+            param-type: query
+        returns: optional<LongAlias>

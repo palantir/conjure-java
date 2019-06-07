@@ -69,7 +69,8 @@ public final class EteServiceEndpoints implements UndertowService {
                         new EnumQueryEndpoint(runtime, delegate),
                         new EnumListQueryEndpoint(runtime, delegate),
                         new OptionalEnumQueryEndpoint(runtime, delegate),
-                        new EnumHeaderEndpoint(runtime, delegate)));
+                        new EnumHeaderEndpoint(runtime, delegate),
+                        new AliasLongEndpointEndpoint(runtime, delegate)));
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
@@ -1362,6 +1363,63 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "enumHeader";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class AliasLongEndpointEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Serializer<Optional<LongAlias>> serializer;
+
+        AliasLongEndpointEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer =
+                    runtime.bodySerDe().serializer(new TypeMarker<Optional<LongAlias>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            Optional<Long> inputRaw =
+                    runtime.plainSerDe()
+                            .deserializeOptionalComplex(queryParams.get("input"), Long::valueOf);
+            Optional<LongAlias> input =
+                    Optional.ofNullable(inputRaw.isPresent() ? LongAlias.of(inputRaw.get()) : null);
+            Optional<LongAlias> result = delegate.aliasLongEndpoint(authHeader, input);
+            if (result.isPresent()) {
+                serializer.serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/base/alias-long";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "aliasLongEndpoint";
         }
 
         @Override

@@ -35,6 +35,7 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
@@ -479,8 +480,12 @@ public final class UndertowServiceEteTest extends TestBase {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
-                .emit(def, folder.getRoot());
+        List<Path> files = ImmutableList.<Path>builder()
+                .addAll(new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
+                        .emit(def, folder.getRoot()))
+                .addAll(new ObjectGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
+                        .emit(def, folder.getRoot()))
+                .build();
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
