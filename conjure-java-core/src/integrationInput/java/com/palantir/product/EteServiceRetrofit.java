@@ -165,4 +165,10 @@ public interface EteServiceRetrofit {
     Call<SimpleEnum> enumHeader(
             @Header("Authorization") AuthHeader authHeader,
             @Header("Custom-Header") SimpleEnum headerParameter);
+
+    @GET("./base/alias-long")
+    @Headers({"hr-path-template: /base/alias-long", "Accept: application/json"})
+    Call<Optional<LongAlias>> aliasLongEndpoint(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("input") Optional<LongAlias> input);
 }

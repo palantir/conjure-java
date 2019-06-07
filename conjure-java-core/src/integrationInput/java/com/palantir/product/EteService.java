@@ -177,6 +177,12 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @HeaderParam("Custom-Header") SimpleEnum headerParameter);
 
+    @GET
+    @Path("base/alias-long")
+    Optional<LongAlias> aliasLongEndpoint(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("input") Optional<LongAlias> input);
+
     @Deprecated
     default Optional<Long> optionalExternalLongQuery(AuthHeader authHeader) {
         return optionalExternalLongQuery(authHeader, Optional.empty());
@@ -200,5 +206,10 @@ public interface EteService {
     @Deprecated
     default Optional<SimpleEnum> optionalEnumQuery(AuthHeader authHeader) {
         return optionalEnumQuery(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader) {
+        return aliasLongEndpoint(authHeader, Optional.empty());
     }
 }

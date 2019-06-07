@@ -772,7 +772,7 @@ final class UndertowServiceHandlerGenerator {
             //   * optional<alias that resolves to a primitive>
             //   * alias that follows one of these rules (recursive definition)
             Type aliasedType = UndertowTypeFunctions.getAliasedType(inType, typeDefinitions);
-            if (aliasedType.accept(TypeVisitor.IS_PRIMITIVE)) {
+            if (aliasedType.accept(TypeVisitor.IS_PRIMITIVE) || aliasedType.accept(MoreVisitors.IS_EXTERNAL)) {
                 // primitive
                 ofContent = CodeBlock.of("$1N", decodedVarName);
             } else if (aliasedType.accept(TypeVisitor.IS_OPTIONAL)) {
