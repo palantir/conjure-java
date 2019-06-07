@@ -161,11 +161,11 @@ public final class ConjureHandler implements HttpHandler {
         private EndpointHandlerWrapper stackEndpointHandlerWrapper(
                 EndpointHandlerWrapper initial,
                 Collection<EndpointHandlerWrapper> wrappers) {
-            EndpointHandlerWrapper current = initial;
-            for (EndpointHandlerWrapper wrapper : wrappers) {
-                current = endpoint -> handler -> wrapper.wrap(endpoint);
-            }
-            return current;
+            return wrappers.stream().reduce(initial,
+                    (wrapper1, wrapper2) ->
+                            endpoint -> wrapper1.wrap(Endpoint.builder()
+                                    .from(endpoint)
+                                    .handler(wrapper2.wrap(endpoint)).build()));
         }
 
         private void checkOverlappingPaths() {
