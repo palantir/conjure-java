@@ -32,43 +32,58 @@ import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.Methods;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
  * Conjure routing mechanism which can be registered as an Undertow {@link HttpHandler}.
  * This handler takes care of exception handling, tracing, and web-security headers
- * among {@link ConjureHandler#WRAPPERS other features}.
+ * among {@link ConjureHandler#WRAPPERS_BEFORE_BLOCKING features before blocking} and
+ * {@link ConjureHandler#WRAPPERS_AFTER_BLOCKING features after blocking}.
  */
 public final class ConjureHandler implements HttpHandler {
 
-    private static final ImmutableList<BiFunction<Endpoint, HttpHandler, HttpHandler>> WRAPPERS =
-            ImmutableList.<BiFunction<Endpoint, HttpHandler, HttpHandler>>of(
+    private ImmutableList<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
+            ImmutableList.of();
+
+    private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_BEFORE_BLOCKING =
+            ImmutableList.<EndpointHandlerWrapper>of(
             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
             // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
             // When DECODE_URL has not been disabled, the following handler will no-op
-            (endpoint, handler) -> new URLDecodingHandler(handler, "UTF-8"),
+            endpoint -> handler -> new URLDecodingHandler(handler, "UTF-8"),
             // no-cache and web-security handlers add listeners for the response to be committed,
             // they can be executed on the IO thread.
-            (endpoint, handler) -> Methods.GET.equals(endpoint.method())
+            endpoint -> handler -> Methods.GET.equals(endpoint.method())
                     // Only applies to GET methods
                     ? new NoCachingResponseHandler(handler) : handler,
-            (endpoint, handler) -> new WebSecurityHandler(handler),
-            // It is vitally important to never run blocking operations on the initial IO thread otherwise
-            // the server will not process new requests. all handlers executed after BlockingHandler
-            // use the larger task pool which is allowed to block. Any operation which sets thread
-            // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
-            // will not propagate to the wrapped service.
-            (endpoint, handler) -> new BlockingHandler(handler),
-            // Logging context and trace handler must execute prior to the exception
-            // to provide user and trace information on exceptions.
-            (endpoint, handler) -> new LoggingContextHandler(handler),
-            (endpoint, handler) -> new TracedOperationHandler(
-                    handler, endpoint.method() + " " + endpoint.template()),
-            (endpoint, handler) -> new ConjureExceptionHandler(handler)
+            endpoint -> handler -> new WebSecurityHandler(handler)
     ).reverse();
+    // It is vitally important to never run blocking operations on the initial IO thread otherwise
+    // the server will not process new requests. all handlers executed after BlockingHandler
+    // use the larger task pool which is allowed to block. Any operation which sets thread
+    // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
+    // will not propagate to the wrapped service.
+    private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_AFTER_BLOCKING =
+            ImmutableList.<EndpointHandlerWrapper>of(
+            endpoint -> handler -> new BlockingHandler(handler),
+    // Logging context and trace handler must execute prior to the exception
+    // to provide user and trace information on exceptions.
+            endpoint -> handler -> new LoggingContextHandler(handler),
+            endpoint -> handler -> new TracedOperationHandler(
+            handler, endpoint.method() + " " + endpoint.template()),
+            endpoint -> handler -> new ConjureExceptionHandler(handler)
+    ).reverse();
+
+    public ConjureHandler addHandlerWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
+        wrappersJustBeforeBlocking = ImmutableList.<EndpointHandlerWrapper>builder()
+                .addAll(wrappersJustBeforeBlocking)
+                .add(wrapper)
+                .build();
+        return this;
+    }
 
     private final RoutingHandler routingHandler;
 
@@ -83,11 +98,19 @@ public final class ConjureHandler implements HttpHandler {
     }
 
     private void register(Endpoint endpoint) {
-        HttpHandler current = endpoint.handler();
-        for (BiFunction<Endpoint, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
-            current = wrapper.apply(endpoint, current);
+        Endpoint current = endpoint;
+        current = stackEndpointHandlerWrapper(current, WRAPPERS_AFTER_BLOCKING);
+        current = stackEndpointHandlerWrapper(current, wrappersJustBeforeBlocking.reverse());
+        current = stackEndpointHandlerWrapper(current, WRAPPERS_BEFORE_BLOCKING);
+        routingHandler.add(endpoint.method(), endpoint.template(), current.handler());
+    }
+
+    private Endpoint stackEndpointHandlerWrapper(Endpoint endpoint, Collection<EndpointHandlerWrapper> wrappers) {
+        Endpoint current = endpoint;
+        for (EndpointHandlerWrapper wrapper : WRAPPERS_AFTER_BLOCKING) {
+            current = Endpoints.mapHandler(endpoint, wrapper.wrap(endpoint));
         }
-        routingHandler.add(endpoint.method(), endpoint.template(), current);
+        return current;
     }
 
     public static Builder builder() {

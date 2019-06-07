@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The Undertow server Conjure generator emits implementations of {@link UndertowService}
@@ -31,11 +29,4 @@ public interface UndertowService {
 
     List<Endpoint> endpoints(UndertowRuntime runtime);
 
-    default UndertowService map(EndpointWrapper wrapper) {
-        return runtime ->
-                ImmutableList.copyOf(
-                        this.endpoints(runtime).stream()
-                                .map(wrapper::wrap)
-                                .collect(Collectors.toList()));
-    }
 }

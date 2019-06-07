@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.lib;
+package com.palantir.conjure.java.undertow.runtime;
 
-public interface EndpointWrapper {
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import io.undertow.server.HandlerWrapper;
 
-    Endpoint wrap(Endpoint endpoint);
+public interface EndpointHandlerWrapper {
+
+    /** This should return the {@link HandlerWrapper} that should be applied to the {@link Endpoint#handler()}. **/
+    HandlerWrapper wrap(Endpoint endpoint);
 }

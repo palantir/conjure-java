@@ -56,17 +56,6 @@ public interface Endpoint {
         return Optional.empty();
     }
 
-    /**
-     * Build am {@link Endpoint} who is a copy of the current instance but whose handler
-     * has been wrapped by an {@link HandlerWrapper}.
-     */
-    default Endpoint mapHandler(HandlerWrapper wrapper) {
-        return builder()
-                .from(this)
-                .handler(wrapper.wrap(this.handler()))
-                .build();
-    }
-
     static Builder builder() {
         return new Builder();
     }
