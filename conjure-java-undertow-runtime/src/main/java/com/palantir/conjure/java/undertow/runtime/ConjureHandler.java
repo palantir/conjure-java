@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -105,7 +106,11 @@ public final class ConjureHandler implements HttpHandler {
         private ImmutableList<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
                 ImmutableList.of();
 
-        public Builder addHandlerWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
+        /**
+         * This MUST only be used for non-blocking operations that are meant to be run on the io-thread.
+         * For blocking operations, please wrap the UndertowService themselves using {@link UndertowServices#map}.
+         */
+        public Builder addEndpointHandlerWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
             wrappersJustBeforeBlocking = ImmutableList.<EndpointHandlerWrapper>builder()
                     .addAll(wrappersJustBeforeBlocking)
                     .add(wrapper)
