@@ -28,7 +28,7 @@ public final class Endpoints {
      * Build am {@link Endpoint} who is a copy of the {@link Endpoint} but whose handler
      * has been wrapped by an {@link HandlerWrapper}.
      */
-    public static Endpoint mapHandler(Endpoint endpoint, HandlerWrapper wrapper) {
+    public static Endpoint map(Endpoint endpoint, HandlerWrapper wrapper) {
         return Endpoint.builder()
                 .from(endpoint)
                 .handler(wrapper.wrap(endpoint.handler()))
