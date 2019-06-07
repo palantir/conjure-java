@@ -74,7 +74,7 @@ public final class ConjureHandler implements HttpHandler {
     public static final class Builder {
 
         private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_BEFORE_BLOCKING =
-                ImmutableList.<EndpointHandlerWrapper>of(
+                ImmutableList.of(
                         // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
                         // parameters. Servers which do not configure DECODE_URL will still work properly except for
                         // encoded slash values. When DECODE_URL has not been disabled, the following handler will no-op
@@ -85,14 +85,14 @@ public final class ConjureHandler implements HttpHandler {
                                 // Only applies to GET methods
                                 ? new NoCachingResponseHandler(endpoint.handler()) : endpoint.handler(),
                         endpoint -> new WebSecurityHandler(endpoint.handler())
-                ).reverse();
+                );
         // It is vitally important to never run blocking operations on the initial IO thread otherwise
         // the server will not process new requests. all handlers executed after BlockingHandler
         // use the larger task pool which is allowed to block. Any operation which sets thread
         // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
         // will not propagate to the wrapped service.
         private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_AFTER_BLOCKING =
-                ImmutableList.<EndpointHandlerWrapper>of(
+                ImmutableList.of(
                         endpoint -> new BlockingHandler(endpoint.handler()),
                         // Logging context and trace handler must execute prior to the exception
                         // to provide user and trace information on exceptions.
@@ -100,7 +100,7 @@ public final class ConjureHandler implements HttpHandler {
                         endpoint -> new TracedOperationHandler(
                                 endpoint.handler(), endpoint.method() + " " + endpoint.template()),
                         endpoint -> new ConjureExceptionHandler(endpoint.handler())
-                ).reverse();
+                );
 
         private ImmutableList<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
                 ImmutableList.of();
@@ -117,16 +117,6 @@ public final class ConjureHandler implements HttpHandler {
                     .add(wrapper)
                     .build();
             return this;
-        }
-
-        private EndpointHandlerWrapper stackEndpointHandlerWrapper(
-                EndpointHandlerWrapper initial,
-                Collection<EndpointHandlerWrapper> wrappers) {
-            EndpointHandlerWrapper current = initial;
-            for (EndpointHandlerWrapper wrapper : wrappers) {
-                current = endpoint -> handler -> wrapper.wrap(endpoint);
-            }
-            return current;
         }
 
         private final List<Endpoint> endpoints = Lists.newArrayList();
@@ -166,6 +156,16 @@ public final class ConjureHandler implements HttpHandler {
             current = stackEndpointHandlerWrapper(current, wrappersJustBeforeBlocking.reverse());
             current = stackEndpointHandlerWrapper(current, WRAPPERS_BEFORE_BLOCKING);
             return new ConjureHandler(fallback, endpoints, current);
+        }
+
+        private EndpointHandlerWrapper stackEndpointHandlerWrapper(
+                EndpointHandlerWrapper initial,
+                Collection<EndpointHandlerWrapper> wrappers) {
+            EndpointHandlerWrapper current = initial;
+            for (EndpointHandlerWrapper wrapper : wrappers) {
+                current = endpoint -> handler -> wrapper.wrap(endpoint);
+            }
+            return current;
         }
 
         private void checkOverlappingPaths() {
