@@ -23,13 +23,14 @@ import java.util.concurrent.Callable;
 
 interface UndertowConjureFilter extends HandlerWrapper {
 
-    void handle(HttpServerExchange exchange, Callable<Void> callNextHandler);
-
     @Override
     default HttpHandler wrap(HttpHandler next) {
-        return exchange -> handle(exchange, () -> {
-            next.handleRequest(exchange);
-            return null;
-        });
+        return exchange -> handle(
+                exchange,
+                () -> {
+                    next.handleRequest(exchange);
+                    return null;
+                });
     }
+    void handle(HttpServerExchange exchange, Callable<Void> callNextHandler);
 }
