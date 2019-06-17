@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.runtime;
+package com.palantir.conjure.java.undertow.lib;
 
-import com.palantir.conjure.java.undertow.lib.Endpoint;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
-import java.util.Optional;
+import io.undertow.server.HttpServerExchange;
+import java.util.concurrent.Callable;
 
-public interface EndpointHandlerWrapper {
-
-    /**
-     * This should return the {@link HandlerWrapper} that should wrap the {@link HttpHandler} from the
-     * {@link Endpoint}.
-     **/
-    Optional<HandlerWrapper> wrap(Endpoint endpoint);
+interface UndertowConjureFilter extends HandlerWrapper {
+    void handle(HttpServerExchange exchange, Callable<Void> callNextHandler);
+    default HttpHandler wrap(HttpHandler next) {
+        return exchange -> handle(exchange, () -> {
+            next.handleRequest(exchange);
+            return null;
+        });
+    }
 }
