@@ -37,7 +37,7 @@ public final class Endpoints {
 
     /**
      * Build an {@link Endpoint} who is a copy of the {@link Endpoint} but whose handler
-     * has been wrapped by an {@link HandlerWrapper}.
+     * has been wrapped by an {@link EndpointHandlerWrapper}.
      */
     public static Endpoint map(Endpoint endpoint, EndpointHandlerWrapper wrapper) {
         return Endpoint.builder()
