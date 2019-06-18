@@ -27,5 +27,5 @@ public interface EndpointHandlerWrapper {
      * This should return the {@link HandlerWrapper} that should wrap the {@link HttpHandler} from the
      * {@link Endpoint}.
      **/
-    Optional<HandlerWrapper> wrap(Endpoint endpoint);
+    Optional<HttpHandler> wrap(Endpoint endpoint);
 }

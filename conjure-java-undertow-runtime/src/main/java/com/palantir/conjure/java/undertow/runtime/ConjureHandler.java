@@ -25,7 +25,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import io.undertow.Handlers;
-import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
@@ -37,6 +36,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -66,59 +66,43 @@ public final class ConjureHandler implements HttpHandler {
         routingHandler.add(
                 endpoint.method(),
                 endpoint.template(),
-                Endpoints.map(endpoint, stackedEndpointHandlerWrapper.wrap(endpoint))
-                        .handler());
+                Endpoints.map(endpoint, stackedEndpointHandlerWrapper).handler());
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public interface DefinedEndpointHandlerWrapper extends EndpointHandlerWrapper {
-        @Override
-        default Optional<HandlerWrapper> wrap(Endpoint endpoint) {
-            return Optional.of(wrapDefined(endpoint));
-        }
-
-        HandlerWrapper wrapDefined(Endpoint endpoint);
-
-        default EndpointHandlerWrapper getSuper() {
-            return this;
-        }
-    }
-
     public static final class Builder {
 
         private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_BEFORE_BLOCKING =
-                ImmutableList.<DefinedEndpointHandlerWrapper>of(
+                ImmutableList.of(
                         // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
                         // parameters. Servers which do not configure DECODE_URL will still work properly except for
                         // encoded slash values. When DECODE_URL has not been disabled, the following handler will no-op
-                        endpoint -> handler -> new URLDecodingHandler(handler, "UTF-8"),
+                        endpoint -> Optional.of(new URLDecodingHandler(endpoint.handler(), "UTF-8")),
                         // no-cache and web-security handlers add listeners for the response to be committed,
                         // they can be executed on the IO thread.
-                        endpoint -> handler -> Methods.GET.equals(endpoint.method())
+                        endpoint -> Methods.GET.equals(endpoint.method())
                                 // Only applies to GET methods
-                                ? new NoCachingResponseHandler(handler) : handler,
-                        endpoint -> handler -> new WebSecurityHandler(handler)
-                ).stream().map(DefinedEndpointHandlerWrapper::getSuper)
-                        .collect(ImmutableList.toImmutableList());
+                                ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
+                                : Optional.empty(),
+                        endpoint -> Optional.of(new WebSecurityHandler(endpoint.handler()))
+                );
         // It is vitally important to never run blocking operations on the initial IO thread otherwise
         // the server will not process new requests. all handlers executed after BlockingHandler
         // use the larger task pool which is allowed to block. Any operation which sets thread
         // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
         // will not propagate to the wrapped service.
         private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_AFTER_BLOCKING =
-                ImmutableList.<DefinedEndpointHandlerWrapper>of(
-                        endpoint -> handler -> new BlockingHandler(handler),
+                ImmutableList.of(
+                        endpoint -> Optional.of(new BlockingHandler(endpoint.handler())),
                         // Logging context and trace handler must execute prior to the exception
                         // to provide user and trace information on exceptions.
-                        endpoint -> handler -> new LoggingContextHandler(handler),
-                        endpoint -> handler -> new TracedOperationHandler(
-                                handler, endpoint.method() + " " + endpoint.template()),
-                        endpoint -> handler -> new ConjureExceptionHandler(handler)
-                ).stream().map(DefinedEndpointHandlerWrapper::getSuper)
-                        .collect(ImmutableList.toImmutableList());
+                        endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
+                        endpoint -> Optional.of(new TracedOperationHandler(
+                                        endpoint.handler(), endpoint.method() + " " + endpoint.template())),
+                        endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())));
 
         private ImmutableList<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
                 ImmutableList.of();
@@ -183,19 +167,8 @@ public final class ConjureHandler implements HttpHandler {
                     initial,
                     (wrapper1, wrapper2) ->
                             endpoint -> {
-                                Optional<HandlerWrapper> handlerWrapper1 = wrapper1.wrap(endpoint);
-                                Optional<HandlerWrapper> handlerWrapper2 = wrapper2.wrap(endpoint);
-                                if (!handlerWrapper1.isPresent() && !handlerWrapper2.isPresent()) {
-                                    return Optional.empty();
-                                } else if (handlerWrapper1.isPresent() && !handlerWrapper2.isPresent()) {
-                                    return handlerWrapper1;
-                                } else if (!handlerWrapper1.isPresent() && handlerWrapper2.isPresent()) {
-                                    return handlerWrapper2;
-                                } else {
-                                    return Optional.of(handler ->
-                                            handlerWrapper2.get().wrap(
-                                                    handlerWrapper1.get().wrap(handler)));
-                                }
+                                Endpoint nEndpoint = Endpoints.map(endpoint, wrapper1);
+                                return Optional.of(wrapper2.wrap(nEndpoint).orElseGet(nEndpoint::handler));
                             });
         }
 

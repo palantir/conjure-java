@@ -32,7 +32,7 @@ public final class UndertowServices {
         return runtime ->
                 ImmutableList.copyOf(
                         service.endpoints(runtime).stream()
-                                .map(endpoint -> Endpoints.map(endpoint, wrapper.wrap(endpoint)))
+                                .map(endpoint -> Endpoints.map(endpoint, wrapper))
                                 .collect(ImmutableList.toImmutableList()));
     }
 }
