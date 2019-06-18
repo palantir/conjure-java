@@ -17,15 +17,24 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import io.undertow.server.HandlerWrapper;
+import io.undertow.server.ExchangeCompletionListener;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
 import java.util.Optional;
 
 public interface EndpointHandlerWrapper {
 
     /**
-     * This should return the {@link HandlerWrapper} that should wrap the {@link HttpHandler} from the
-     * {@link Endpoint}.
+     * Warning: this should be used with great care as {@link HttpHandler} are powerful and can easily be implemented
+     * incorrectly. Make sure to not forget passing the request to the next handlers through
+     * calling the endpoint's {@link HttpHandler#handleRequest(HttpServerExchange)}.
+     * This function is used to implement filter-like behavior:
+     * - Adding logic pre and post handling by the next handlers, by adding the logic before and after
+     *  {@link HttpHandler#handleRequest(HttpServerExchange)}
+     * - Adding logic post completion of the request by all handlers
+     * {@link io.undertow.server.HttpServerExchange#addExchangeCompleteListener(ExchangeCompletionListener)}
+     * - Catching and handling exceptions surrounding {@link HttpHandler#handleRequest(HttpServerExchange)} with
+     * try ... catch ... finally.
      **/
     Optional<HttpHandler> wrap(Endpoint endpoint);
 }
