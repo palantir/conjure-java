@@ -17,23 +17,11 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import io.undertow.server.HandlerWrapper;
 
 /** Utility functionality for conjure {@link Endpoint} objects. */
 public final class Endpoints {
 
     private Endpoints() {}
-
-    /**
-     * Build an {@link Endpoint} who is a copy of the {@link Endpoint} but whose handler
-     * has been wrapped by an {@link HandlerWrapper}.
-     */
-    public static Endpoint map(Endpoint endpoint, HandlerWrapper wrapper) {
-        return Endpoint.builder()
-                .from(endpoint)
-                .handler(wrapper.wrap(endpoint.handler()))
-                .build();
-    }
 
     /**
      * Build an {@link Endpoint} who is a copy of the {@link Endpoint} but whose handler
