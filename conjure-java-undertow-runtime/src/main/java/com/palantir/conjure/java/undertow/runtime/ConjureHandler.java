@@ -106,11 +106,11 @@ public final class ConjureHandler implements HttpHandler {
         /**
          * This MUST only be used for non-blocking operations that are meant to be run on the io-thread.
          * For blocking operations, please wrap the UndertowService thenmselves
-         * If you call this multiple time, the last wrapper will be applied first, meaning it will be wrapped the
+         * If you call this multiple time, the last wrapper will be applied last, meaning it will be wrapped by the
          * previously added {@link EndpointHandlerWrapper}s.
          */
-        public Builder addEndpointHandlerWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
-            wrappersJustBeforeBlocking = wrappersJustBeforeBlocking.add(wrapper);
+        public Builder addWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
+            wrappersJustBeforeBlocking.add(wrapper);
             return this;
         }
 
@@ -148,7 +148,7 @@ public final class ConjureHandler implements HttpHandler {
             checkOverlappingPaths();
             ImmutableList<EndpointHandlerWrapper> allWrappers = ImmutableList.<EndpointHandlerWrapper>builder()
                     .addAll(WRAPPERS_BEFORE_BLOCKING)
-                    .addAll(wrappersJustBeforeBlocking.build().reverse())
+                    .addAll(wrappersJustBeforeBlocking.build())
                     .addAll(WRAPPERS_AFTER_BLOCKING)
                     .build()
                     .reverse();
