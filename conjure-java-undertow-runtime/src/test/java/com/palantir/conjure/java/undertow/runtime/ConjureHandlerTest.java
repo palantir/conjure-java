@@ -106,7 +106,8 @@ public final class ConjureHandlerTest {
     public void invokesWrapperBeforeBlocking() {
         when(wrapperObserver.control()).thenReturn(1);
         execute();
-        assertThat(wrappersBeforeBlockingCallOrder).isEqualTo(ImmutableList.of(1, 2));
+        assertThat(ImmutableList.copyOf(wrappersBeforeBlockingCallOrder).reverse())
+                .isEqualTo(ImmutableList.of(1, 2));
         verify(wrapperObserver).control();
         verify(innerObserver).control();
     }

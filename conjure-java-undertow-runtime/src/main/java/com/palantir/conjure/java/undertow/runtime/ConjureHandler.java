@@ -148,7 +148,7 @@ public final class ConjureHandler implements HttpHandler {
             checkOverlappingPaths();
             ImmutableList<EndpointHandlerWrapper> allWrappers = ImmutableList.<EndpointHandlerWrapper>builder()
                     .addAll(WRAPPERS_BEFORE_BLOCKING)
-                    .addAll(wrappersJustBeforeBlocking.build())
+                    .addAll(wrappersJustBeforeBlocking.build().reverse())
                     .addAll(WRAPPERS_AFTER_BLOCKING)
                     .build()
                     .reverse();
