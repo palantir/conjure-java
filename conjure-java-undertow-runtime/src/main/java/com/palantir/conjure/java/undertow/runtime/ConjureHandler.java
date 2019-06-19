@@ -44,15 +44,12 @@ import java.util.stream.Collectors;
  */
 public final class ConjureHandler implements HttpHandler {
 
-    private final EndpointHandlerWrapper stackedEndpointHandlerWrapper;
     private final RoutingHandler routingHandler;
 
     private ConjureHandler(
             HttpHandler fallback,
-            List<Endpoint> endpoints,
-            EndpointHandlerWrapper stackedEndpointHandlerWrapper) {
+            List<Endpoint> endpoints) {
         this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
-        this.stackedEndpointHandlerWrapper = stackedEndpointHandlerWrapper;
         endpoints.forEach(this::register);
     }
 
@@ -65,7 +62,7 @@ public final class ConjureHandler implements HttpHandler {
         routingHandler.add(
                 endpoint.method(),
                 endpoint.template(),
-                Endpoints.map(endpoint, stackedEndpointHandlerWrapper).handler());
+                endpoint.handler());
     }
 
     public static Builder builder() {
@@ -155,7 +152,12 @@ public final class ConjureHandler implements HttpHandler {
                     .addAll(WRAPPERS_AFTER_BLOCKING)
                     .build()
                     .reverse();
-            return new ConjureHandler(fallback, endpoints, stackEndpointHandlerWrapper(allWrappers));
+            EndpointHandlerWrapper stackedWrapper = stackEndpointHandlerWrapper(allWrappers);
+            return new ConjureHandler(
+                    fallback,
+                    endpoints.stream()
+                            .map(endpoint -> Endpoints.map(endpoint, stackedWrapper))
+                            .collect(ImmutableList.toImmutableList()));
         }
 
         private EndpointHandlerWrapper stackEndpointHandlerWrapper(
