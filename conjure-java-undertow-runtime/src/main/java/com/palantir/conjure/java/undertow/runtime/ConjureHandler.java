@@ -103,8 +103,8 @@ public final class ConjureHandler implements HttpHandler {
                                         endpoint.handler(), endpoint.method() + " " + endpoint.template())),
                         endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())));
 
-        private ImmutableList<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
-                ImmutableList.of();
+        private ImmutableList.Builder<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
+                ImmutableList.builder();
 
         /**
          * This MUST only be used for non-blocking operations that are meant to be run on the io-thread.
@@ -113,10 +113,7 @@ public final class ConjureHandler implements HttpHandler {
          * previously added {@link EndpointHandlerWrapper}s.
          */
         public Builder addEndpointHandlerWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
-            wrappersJustBeforeBlocking = ImmutableList.<EndpointHandlerWrapper>builder()
-                    .addAll(wrappersJustBeforeBlocking)
-                    .add(wrapper)
-                    .build();
+            wrappersJustBeforeBlocking = wrappersJustBeforeBlocking.add(wrapper);
             return this;
         }
 
@@ -152,18 +149,19 @@ public final class ConjureHandler implements HttpHandler {
 
         public HttpHandler build() {
             checkOverlappingPaths();
-            EndpointHandlerWrapper current = endpoint -> Optional.empty();
-            current = stackEndpointHandlerWrapper(current, WRAPPERS_AFTER_BLOCKING.reverse());
-            current = stackEndpointHandlerWrapper(current, wrappersJustBeforeBlocking);
-            current = stackEndpointHandlerWrapper(current, WRAPPERS_BEFORE_BLOCKING.reverse());
-            return new ConjureHandler(fallback, endpoints, current);
+            ImmutableList<EndpointHandlerWrapper> allWrappers = ImmutableList.<EndpointHandlerWrapper>builder()
+                    .addAll(WRAPPERS_BEFORE_BLOCKING)
+                    .addAll(wrappersJustBeforeBlocking.build().reverse())
+                    .addAll(WRAPPERS_AFTER_BLOCKING)
+                    .build()
+                    .reverse();
+            return new ConjureHandler(fallback, endpoints, stackEndpointHandlerWrapper(allWrappers));
         }
 
         private EndpointHandlerWrapper stackEndpointHandlerWrapper(
-                EndpointHandlerWrapper initial,
                 Collection<EndpointHandlerWrapper> wrappers) {
             return wrappers.stream().reduce(
-                    initial,
+                    endpoint -> Optional.empty(),
                     (wrapper1, wrapper2) ->
                             endpoint -> {
                                 Endpoint nEndpoint = Endpoints.map(endpoint, wrapper1);
