@@ -19,7 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 
 /** Utility functionality for conjure {@link Endpoint} objects. */
-public final class Endpoints {
+final class Endpoints {
 
     private Endpoints() {}
 
