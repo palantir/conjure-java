@@ -100,7 +100,7 @@ public final class ConjureHandler implements HttpHandler {
                                         endpoint.handler(), endpoint.method() + " " + endpoint.template())),
                         endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())));
 
-        private ImmutableList.Builder<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
+        private final ImmutableList.Builder<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
                 ImmutableList.builder();
 
         /**
