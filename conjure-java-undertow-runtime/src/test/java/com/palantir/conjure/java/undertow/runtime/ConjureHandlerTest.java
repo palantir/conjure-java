@@ -82,6 +82,7 @@ public final class ConjureHandlerTest {
                         endpoint.handler().handleRequest(exchange);
                     }
                 }))
+                // check that an empty wrapper is similar in behavior to an identity wrapper
                 .addWrapperBeforeBlocking(endpoint -> Optional.empty())
                 .addWrapperBeforeBlocking(endpoint -> Optional.of(exchange -> {
                     if (exchange.isInIoThread()) {
@@ -106,6 +107,7 @@ public final class ConjureHandlerTest {
     public void invokesWrapperBeforeBlocking() {
         when(wrapperObserver.control()).thenReturn(1);
         execute();
+        //check that the first wrapper (the one that adds 1) is called before the one that adds 2.
         assertThat(ImmutableList.copyOf(wrappersBeforeBlockingCallOrder).reverse())
                 .isEqualTo(ImmutableList.of(1, 2));
         verify(wrapperObserver).control();
