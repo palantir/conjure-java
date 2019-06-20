@@ -32,7 +32,7 @@ import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.Methods;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -71,48 +71,7 @@ public final class ConjureHandler implements HttpHandler {
 
     public static final class Builder {
 
-        private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_BEFORE_BLOCKING =
-                ImmutableList.of(
-                        // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
-                        // parameters. Servers which do not configure DECODE_URL will still work properly except for
-                        // encoded slash values. When DECODE_URL has not been disabled, the following handler will no-op
-                        endpoint -> Optional.of(new URLDecodingHandler(endpoint.handler(), "UTF-8")),
-                        // no-cache and web-security handlers add listeners for the response to be committed,
-                        // they can be executed on the IO thread.
-                        endpoint -> Methods.GET.equals(endpoint.method())
-                                // Only applies to GET methods
-                                ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
-                                : Optional.empty(),
-                        endpoint -> Optional.of(new WebSecurityHandler(endpoint.handler()))
-                );
-        // It is vitally important to never run blocking operations on the initial IO thread otherwise
-        // the server will not process new requests. all handlers executed after BlockingHandler
-        // use the larger task pool which is allowed to block. Any operation which sets thread
-        // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
-        // will not propagate to the wrapped service.
-        private static final ImmutableList<EndpointHandlerWrapper> WRAPPERS_AFTER_BLOCKING =
-                ImmutableList.of(
-                        endpoint -> Optional.of(new BlockingHandler(endpoint.handler())),
-                        // Logging context and trace handler must execute prior to the exception
-                        // to provide user and trace information on exceptions.
-                        endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
-                        endpoint -> Optional.of(new TracedOperationHandler(
-                                        endpoint.handler(), endpoint.method() + " " + endpoint.template())),
-                        endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())));
-
-        private final ImmutableList.Builder<EndpointHandlerWrapper> wrappersJustBeforeBlocking =
-                ImmutableList.builder();
-
-        /**
-         * This MUST only be used for non-blocking operations that are meant to be run on the io-thread.
-         * For blocking operations, please wrap the UndertowService thenmselves
-         * If you call this multiple time, the last wrapper will be applied last, meaning it will be wrapped by the
-         * previously added {@link EndpointHandlerWrapper}s.
-         */
-        public Builder addWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
-            wrappersJustBeforeBlocking.add(wrapper);
-            return this;
-        }
+        private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
         private final List<Endpoint> endpoints = Lists.newArrayList();
         private HttpHandler fallback = ResponseCodeHandler.HANDLE_404;
@@ -144,31 +103,63 @@ public final class ConjureHandler implements HttpHandler {
             return this;
         }
 
+        /**
+         * This MUST only be used for non-blocking operations that are meant to be run on the io-thread.
+         * For blocking operations, please wrap the UndertowService themselves
+         * If you call this multiple time, the last wrapper will be applied last, meaning it will be wrapped by the
+         * previously added {@link EndpointHandlerWrapper}s.
+         */
+        @CanIgnoreReturnValue
+        public Builder addWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
+            wrappersJustBeforeBlocking.add(wrapper);
+            return this;
+        }
+
         public HttpHandler build() {
             checkOverlappingPaths();
-            ImmutableList<EndpointHandlerWrapper> allWrappers = ImmutableList.<EndpointHandlerWrapper>builder()
-                    .addAll(WRAPPERS_BEFORE_BLOCKING)
-                    .addAll(wrappersJustBeforeBlocking.build().reverse())
-                    .addAll(WRAPPERS_AFTER_BLOCKING)
+
+            ImmutableList<EndpointHandlerWrapper> wrappers = ImmutableList.<EndpointHandlerWrapper>builder()
+                    // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
+                    // parameters. Servers which do not configure DECODE_URL will still work properly except for
+                    // encoded slash values. When DECODE_URL has not been disabled, the following handler will no-op
+                    .add(endpoint -> Optional.of(new URLDecodingHandler(endpoint.handler(), "UTF-8")))
+                    // no-cache and web-security handlers add listeners for the response to be committed,
+                    // they can be executed on the IO thread.
+                    .add(endpoint -> Methods.GET.equals(endpoint.method())
+                            // Only applies to GET methods
+                            ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
+                            : Optional.empty())
+                    .add(endpoint -> Optional.of(new WebSecurityHandler(endpoint.handler())))
+                    // Apply custom non-blocking handlers just before the BlockingHandler
+                    .addAll(wrappersJustBeforeBlocking)
+                    // It is vitally important to never run blocking operations on the initial IO thread otherwise
+                    // the server will not process new requests. all handlers executed after BlockingHandler
+                    // use the larger task pool which is allowed to block. Any operation which sets thread
+                    // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
+                    // will not propagate to the wrapped service.
+                    .add(endpoint -> Optional.of(new BlockingHandler(endpoint.handler())))
+                    // Logging context and trace handler must execute prior to the exception
+                    // to provide user and trace information on exceptions.
+                    .add(endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())))
+                    .add(endpoint -> Optional.of(new TracedOperationHandler(
+                            endpoint.handler(), endpoint.method() + " " + endpoint.template())))
+                    .add(endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())))
                     .build()
                     .reverse();
-            EndpointHandlerWrapper stackedWrapper = stackEndpointHandlerWrapper(allWrappers);
+
             return new ConjureHandler(
                     fallback,
                     endpoints.stream()
-                            .map(endpoint -> Endpoints.map(endpoint, stackedWrapper))
+                            .map(endpoint -> wrap(endpoint, wrappers))
                             .collect(ImmutableList.toImmutableList()));
         }
 
-        private EndpointHandlerWrapper stackEndpointHandlerWrapper(
-                Collection<EndpointHandlerWrapper> wrappers) {
-            return wrappers.stream().reduce(
-                    endpoint -> Optional.empty(),
-                    (wrapper1, wrapper2) ->
-                            endpoint -> {
-                                Endpoint nEndpoint = Endpoints.map(endpoint, wrapper1);
-                                return Optional.of(wrapper2.wrap(nEndpoint).orElseGet(nEndpoint::handler));
-                            });
+        private Endpoint wrap(Endpoint input, List<EndpointHandlerWrapper> wrappers) {
+            Endpoint current = input;
+            for (EndpointHandlerWrapper wrapper : wrappers) {
+                current = Endpoints.map(current, wrapper);
+            }
+            return current;
         }
 
         private void checkOverlappingPaths() {

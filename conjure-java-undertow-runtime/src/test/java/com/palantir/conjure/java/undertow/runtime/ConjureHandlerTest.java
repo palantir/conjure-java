@@ -107,8 +107,7 @@ public final class ConjureHandlerTest {
         when(wrapperObserver.control()).thenReturn(1);
         execute();
         //check that the first wrapper (the one that adds 1) is called before the one that adds 2.
-        assertThat(ImmutableList.copyOf(wrappersBeforeBlockingCallOrder).reverse())
-                .isEqualTo(ImmutableList.of(1, 2));
+        assertThat(wrappersBeforeBlockingCallOrder).isEqualTo(ImmutableList.of(1, 2));
         verify(wrapperObserver).control();
         verify(innerObserver).control();
     }
