@@ -32,47 +32,23 @@ import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.Methods;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
  * Conjure routing mechanism which can be registered as an Undertow {@link HttpHandler}.
- * This handler takes care of exception handling, tracing, and web-security headers
- * among {@link ConjureHandler#WRAPPERS other features}.
+ * This handler takes care of exception handling, tracing, and web-security headers.
  */
 public final class ConjureHandler implements HttpHandler {
 
-    private static final ImmutableList<BiFunction<Endpoint, HttpHandler, HttpHandler>> WRAPPERS =
-            ImmutableList.<BiFunction<Endpoint, HttpHandler, HttpHandler>>of(
-            // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in parameters.
-            // Servers which do not configure DECODE_URL will still work properly except for encoded slash values.
-            // When DECODE_URL has not been disabled, the following handler will no-op
-            (endpoint, handler) -> new URLDecodingHandler(handler, "UTF-8"),
-            // no-cache and web-security handlers add listeners for the response to be committed,
-            // they can be executed on the IO thread.
-            (endpoint, handler) -> Methods.GET.equals(endpoint.method())
-                    // Only applies to GET methods
-                    ? new NoCachingResponseHandler(handler) : handler,
-            (endpoint, handler) -> new WebSecurityHandler(handler),
-            // It is vitally important to never run blocking operations on the initial IO thread otherwise
-            // the server will not process new requests. all handlers executed after BlockingHandler
-            // use the larger task pool which is allowed to block. Any operation which sets thread
-            // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
-            // will not propagate to the wrapped service.
-            (endpoint, handler) -> new BlockingHandler(handler),
-            // Logging context and trace handler must execute prior to the exception
-            // to provide user and trace information on exceptions.
-            (endpoint, handler) -> new LoggingContextHandler(handler),
-            (endpoint, handler) -> new TracedOperationHandler(
-                    handler, endpoint.method() + " " + endpoint.template()),
-            (endpoint, handler) -> new ConjureExceptionHandler(handler)
-    ).reverse();
-
     private final RoutingHandler routingHandler;
 
-    private ConjureHandler(HttpHandler fallback, List<Endpoint> endpoints) {
+    private ConjureHandler(
+            HttpHandler fallback,
+            List<Endpoint> endpoints) {
         this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
         endpoints.forEach(this::register);
     }
@@ -83,11 +59,10 @@ public final class ConjureHandler implements HttpHandler {
     }
 
     private void register(Endpoint endpoint) {
-        HttpHandler current = endpoint.handler();
-        for (BiFunction<Endpoint, HttpHandler, HttpHandler> wrapper : WRAPPERS) {
-            current = wrapper.apply(endpoint, current);
-        }
-        routingHandler.add(endpoint.method(), endpoint.template(), current);
+        routingHandler.add(
+                endpoint.method(),
+                endpoint.template(),
+                endpoint.handler());
     }
 
     public static Builder builder() {
@@ -95,6 +70,8 @@ public final class ConjureHandler implements HttpHandler {
     }
 
     public static final class Builder {
+
+        private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
         private final List<Endpoint> endpoints = Lists.newArrayList();
         private HttpHandler fallback = ResponseCodeHandler.HANDLE_404;
@@ -126,9 +103,65 @@ public final class ConjureHandler implements HttpHandler {
             return this;
         }
 
+        /**
+         * This MUST only be used for non-blocking operations that are meant to be run on the io-thread.
+         * For blocking operations, please wrap the UndertowService themselves
+         * If you call this multiple time, the last wrapper will be applied last, meaning it will be wrapped by the
+         * previously added {@link EndpointHandlerWrapper}s.
+         */
+        @CanIgnoreReturnValue
+        public Builder addWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
+            wrappersJustBeforeBlocking.add(wrapper);
+            return this;
+        }
+
         public HttpHandler build() {
             checkOverlappingPaths();
-            return new ConjureHandler(fallback, endpoints);
+
+            ImmutableList<EndpointHandlerWrapper> wrappers = ImmutableList.<EndpointHandlerWrapper>builder()
+                    // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
+                    // parameters. Servers which do not configure DECODE_URL will still work properly except for
+                    // encoded slash values. When DECODE_URL has not been disabled, the following handler will no-op
+                    .add(
+                            endpoint -> Optional.of(new URLDecodingHandler(endpoint.handler(), "UTF-8")),
+                            // no-cache and web-security handlers add listeners for the response to be committed,
+                            // they can be executed on the IO thread.
+                            endpoint -> Methods.GET.equals(endpoint.method())
+                                    // Only applies to GET methods
+                                    ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
+                                    : Optional.empty(),
+                            endpoint -> Optional.of(new WebSecurityHandler(endpoint.handler())))
+                    // Apply custom non-blocking handlers just before the BlockingHandler
+                    .addAll(wrappersJustBeforeBlocking)
+                    // It is vitally important to never run blocking operations on the initial IO thread otherwise
+                    // the server will not process new requests. all handlers executed after BlockingHandler
+                    // use the larger task pool which is allowed to block. Any operation which sets thread
+                    // state (e.g. SLF4J MDC or Tracer) must execute on the blocking thread otherwise state
+                    // will not propagate to the wrapped service.
+                    .add(
+                            endpoint -> Optional.of(new BlockingHandler(endpoint.handler())),
+                            // Logging context and trace handler must execute prior to the exception
+                            // to provide user and trace information on exceptions.
+                            endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
+                            endpoint -> Optional.of(new TracedOperationHandler(
+                                    endpoint.handler(), endpoint.method() + " " + endpoint.template())),
+                            endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())))
+                    .build()
+                    .reverse();
+
+            return new ConjureHandler(
+                    fallback,
+                    endpoints.stream()
+                            .map(endpoint -> wrap(endpoint, wrappers))
+                            .collect(ImmutableList.toImmutableList()));
+        }
+
+        private Endpoint wrap(Endpoint input, List<EndpointHandlerWrapper> wrappers) {
+            Endpoint current = input;
+            for (EndpointHandlerWrapper wrapper : wrappers) {
+                current = Endpoints.map(current, wrapper);
+            }
+            return current;
         }
 
         private void checkOverlappingPaths() {
