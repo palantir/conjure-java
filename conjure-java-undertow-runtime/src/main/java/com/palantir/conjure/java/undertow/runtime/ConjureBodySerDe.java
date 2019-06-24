@@ -129,7 +129,7 @@ final class ConjureBodySerDe implements BodySerDe {
 
         EncodingSerializerContainer(Encoding encoding, TypeMarker<T> token) {
             this.encoding = encoding;
-            this.serializer = encoding.serializer(token);
+            this.serializer = TracedEncoding.wrap(encoding).serializer(token);
         }
     }
 
@@ -209,7 +209,7 @@ final class ConjureBodySerDe implements BodySerDe {
 
         EncodingDeserializerContainer(Encoding encoding, TypeMarker<T> token) {
             this.encoding = encoding;
-            this.deserializer = encoding.deserializer(token);
+            this.deserializer = TracedEncoding.wrap(encoding).deserializer(token);
         }
     }
 }
