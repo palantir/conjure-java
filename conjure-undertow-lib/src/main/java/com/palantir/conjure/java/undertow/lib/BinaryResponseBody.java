@@ -22,6 +22,7 @@ import java.io.OutputStream;
 /**
  * Streamed binary response data with Content-Type <code>application/octet-stream</code>.
  */
+@FunctionalInterface
 public interface BinaryResponseBody {
 
     /**
