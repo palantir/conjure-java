@@ -69,16 +69,13 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
     private static final AttachmentKey<ListenableFuture<?>> FUTURE = AttachmentKey.create(ListenableFuture.class);
     // If the request is ended before the future has completed, cancel the future to signal that work
     // should be stopped. This occurs when clients cancel requests or connections are closed.
-    private static final ExchangeCompletionListener COMPLETION_LISTENER = (exchange, nextListener) -> {
-        try {
-            ListenableFuture<?> future = exchange.getAttachment(FUTURE);
-            if (future != null) {
-                future.cancel(INTERRUPT_ON_CANCEL);
-            }
-        } finally {
-            nextListener.proceed();
-        }
-    };
+    private static final ExchangeCompletionListener COMPLETION_LISTENER =
+            SafeExchangeCompletionListener.of(exchange -> {
+                ListenableFuture<?> future = exchange.getAttachment(FUTURE);
+                if (future != null) {
+                    future.cancel(INTERRUPT_ON_CANCEL);
+                }
+            });
 
     private final Serializer<SerializableError> exceptionSerializer = ConjureExceptions.serializer();
 
