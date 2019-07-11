@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: ConjureAsyncRequestProcessing invokes 'nextListener.proceed()' in a
+    finally block for safety. No known issues with the previous implementation.
+  links:
+  - https://github.com/palantir/conjure-java/pull/444
