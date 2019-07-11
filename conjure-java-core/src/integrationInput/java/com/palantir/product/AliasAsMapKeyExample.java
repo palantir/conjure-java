@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -217,7 +218,7 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter("strings")
+        @JsonSetter(value = "strings", nulls = Nulls.SKIP)
         public Builder strings(Map<StringAliasExample, ManyFieldExample> strings) {
             this.strings.clear();
             this.strings.putAll(Preconditions.checkNotNull(strings, "strings cannot be null"));
@@ -234,7 +235,7 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter("rids")
+        @JsonSetter(value = "rids", nulls = Nulls.SKIP)
         public Builder rids(Map<RidAliasExample, ManyFieldExample> rids) {
             this.rids.clear();
             this.rids.putAll(Preconditions.checkNotNull(rids, "rids cannot be null"));
@@ -251,7 +252,7 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter("bearertokens")
+        @JsonSetter(value = "bearertokens", nulls = Nulls.SKIP)
         public Builder bearertokens(Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
             this.bearertokens.clear();
             this.bearertokens.putAll(
@@ -271,7 +272,7 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter("integers")
+        @JsonSetter(value = "integers", nulls = Nulls.SKIP)
         public Builder integers(Map<IntegerAliasExample, ManyFieldExample> integers) {
             this.integers.clear();
             this.integers.putAll(Preconditions.checkNotNull(integers, "integers cannot be null"));
@@ -288,7 +289,7 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter("safelongs")
+        @JsonSetter(value = "safelongs", nulls = Nulls.SKIP)
         public Builder safelongs(Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
             this.safelongs.clear();
             this.safelongs.putAll(
@@ -307,7 +308,7 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter("datetimes")
+        @JsonSetter(value = "datetimes", nulls = Nulls.SKIP)
         public Builder datetimes(Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
             this.datetimes.clear();
             this.datetimes.putAll(
@@ -326,7 +327,7 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        @JsonSetter("uuids")
+        @JsonSetter(value = "uuids", nulls = Nulls.SKIP)
         public Builder uuids(Map<UuidAliasExample, ManyFieldExample> uuids) {
             this.uuids.clear();
             this.uuids.putAll(Preconditions.checkNotNull(uuids, "uuids cannot be null"));

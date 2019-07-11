@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
@@ -272,7 +273,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for optionalItem field */
-        @JsonSetter("optionalItem")
+        @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(Optional<String> optionalItem) {
             this.optionalItem =
                     Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
@@ -289,7 +290,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for items field */
-        @JsonSetter("items")
+        @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
@@ -311,7 +312,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for set field */
-        @JsonSetter("set")
+        @JsonSetter(value = "set", nulls = Nulls.SKIP)
         public Builder set(Iterable<String> set) {
             this.set.clear();
             ConjureCollections.addAll(
@@ -333,7 +334,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for map field */
-        @JsonSetter("map")
+        @JsonSetter(value = "map", nulls = Nulls.SKIP)
         public Builder map(Map<String, String> map) {
             this.map.clear();
             this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));

@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -102,7 +103,7 @@ public final class AnyMapExample {
             return this;
         }
 
-        @JsonSetter("items")
+        @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(Map<String, Object> items) {
             this.items.clear();
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));

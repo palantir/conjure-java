@@ -18,6 +18,7 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -241,9 +242,12 @@ public final class BeanBuilderGenerator {
     private MethodSpec createSetter(EnrichedField enriched) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
-        AnnotationSpec jsonSetterAnnotation = AnnotationSpec.builder(JsonSetter.class)
-                .addMember("value", "$S", enriched.fieldName().get())
-                .build();
+        AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
+                .addMember("value", "$S", enriched.fieldName().get());
+        if (isCollectionType(type)) {
+            annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
+        }
+
         boolean shouldClearFirst = true;
         MethodSpec.Builder setterBuilder = publicSetter(enriched)
                 .addParameter(widenParameterIfPossible(field.type, type), field.name)
@@ -255,7 +259,7 @@ public final class BeanBuilderGenerator {
 
         return setterBuilder
                 .addStatement("return this")
-                .addAnnotation(jsonSetterAnnotation)
+                .addAnnotation(annotationBuilder.build())
                 .build();
     }
 
@@ -493,5 +497,12 @@ public final class BeanBuilderGenerator {
             return ((ParameterizedTypeName) type).rawType;
         }
         return type;
+    }
+
+    private static boolean isCollectionType(Type type) {
+        return type.accept(TypeVisitor.IS_LIST)
+                || type.accept(TypeVisitor.IS_SET)
+                || type.accept(TypeVisitor.IS_MAP)
+                || type.accept(TypeVisitor.IS_OPTIONAL);
     }
 }

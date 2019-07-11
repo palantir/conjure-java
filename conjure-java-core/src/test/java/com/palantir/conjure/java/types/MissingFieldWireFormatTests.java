@@ -106,8 +106,11 @@ public class MissingFieldWireFormatTests {
     @Test
     public void missing_collection_fields_should_deserialize_as_empty() throws Exception {
         assertThat(mapper.readValue("{}", SetExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", SetExample.class).getItems()).isEmpty();
         assertThat(mapper.readValue("{}", ListExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", ListExample.class).getItems()).isEmpty();
         assertThat(mapper.readValue("{}", MapExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", MapExample.class).getItems()).isEmpty();
     }
 
     @Test

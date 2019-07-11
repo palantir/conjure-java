@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
@@ -153,7 +154,7 @@ public final class ExternalLongExample {
             return this;
         }
 
-        @JsonSetter("optionalExternalLong")
+        @JsonSetter(value = "optionalExternalLong", nulls = Nulls.SKIP)
         public Builder optionalExternalLong(Optional<? extends Long> optionalExternalLong) {
             this.optionalExternalLong =
                     (Optional<Long>)
@@ -170,7 +171,7 @@ public final class ExternalLongExample {
             return this;
         }
 
-        @JsonSetter("listExternalLong")
+        @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP)
         public Builder listExternalLong(Iterable<? extends Long> listExternalLong) {
             this.listExternalLong.clear();
             ConjureCollections.addAll(
