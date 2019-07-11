@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
@@ -220,7 +221,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter("num")
+        @JsonSetter(value = "num", nulls = Nulls.SKIP)
         public Builder num(OptionalDouble num) {
             this.num = Preconditions.checkNotNull(num, "num cannot be null");
             return this;
@@ -231,7 +232,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter("bool")
+        @JsonSetter(value = "bool", nulls = Nulls.SKIP)
         public Builder bool(Optional<Boolean> bool) {
             this.bool = Preconditions.checkNotNull(bool, "bool cannot be null");
             return this;
@@ -242,7 +243,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter("integer")
+        @JsonSetter(value = "integer", nulls = Nulls.SKIP)
         public Builder integer(OptionalInt integer) {
             this.integer = Preconditions.checkNotNull(integer, "integer cannot be null");
             return this;
@@ -253,7 +254,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter("safelong")
+        @JsonSetter(value = "safelong", nulls = Nulls.SKIP)
         public Builder safelong(Optional<SafeLong> safelong) {
             this.safelong = Preconditions.checkNotNull(safelong, "safelong cannot be null");
             return this;
@@ -265,7 +266,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter("rid")
+        @JsonSetter(value = "rid", nulls = Nulls.SKIP)
         public Builder rid(Optional<ResourceIdentifier> rid) {
             this.rid = Preconditions.checkNotNull(rid, "rid cannot be null");
             return this;
@@ -276,7 +277,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter("bearertoken")
+        @JsonSetter(value = "bearertoken", nulls = Nulls.SKIP)
         public Builder bearertoken(Optional<BearerToken> bearertoken) {
             this.bearertoken =
                     Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null");
@@ -290,7 +291,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter("uuid")
+        @JsonSetter(value = "uuid", nulls = Nulls.SKIP)
         public Builder uuid(Optional<UUID> uuid) {
             this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;

@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Correctly coerce null fields into empty collections
+  links:
+  - https://github.com/palantir/conjure-java/pull/446
