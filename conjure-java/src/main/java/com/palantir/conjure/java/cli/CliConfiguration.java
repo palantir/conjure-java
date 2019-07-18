@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.cli;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.FeatureFlags;
 import java.io.File;
@@ -62,9 +61,9 @@ public abstract class CliConfiguration {
 
     @Value.Check
     final void check() {
-        Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
-        Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
-        Preconditions.checkArgument(generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
+        com.palantir.logsafe.Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
+        com.palantir.logsafe.Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
+        com.palantir.logsafe.Preconditions.checkArgument(generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
                 "Must specify exactly one project to generate");
     }
 

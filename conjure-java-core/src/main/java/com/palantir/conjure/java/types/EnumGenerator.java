@@ -103,8 +103,7 @@ public final class EnumGenerator {
                         + "There is no method to access all instantiations of this class, since they cannot be known "
                         + "at compile time.\n",
                 thisClass,
-                enumClass
-        );
+                enumClass);
 
         return wrapper.build();
     }

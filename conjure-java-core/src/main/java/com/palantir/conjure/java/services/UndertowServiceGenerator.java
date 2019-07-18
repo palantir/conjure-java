@@ -56,7 +56,6 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
                 new UndertowServiceInterfaceGenerator(experimentalFeatures)
                         .generateServiceInterface(serviceDefinition, typeMapper, returnTypeMapper),
                 new UndertowServiceHandlerGenerator(experimentalFeatures)
-                        .generateServiceHandler(serviceDefinition, typeDefinitions, typeMapper, returnTypeMapper)
-        );
+                        .generateServiceHandler(serviceDefinition, typeDefinitions, typeMapper, returnTypeMapper));
     }
 }
