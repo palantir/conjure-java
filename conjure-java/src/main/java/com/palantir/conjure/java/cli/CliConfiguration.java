@@ -62,8 +62,10 @@ public abstract class CliConfiguration {
     @Value.Check
     final void check() {
         com.palantir.logsafe.Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
-        com.palantir.logsafe.Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
-        com.palantir.logsafe.Preconditions.checkArgument(generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
+        com.palantir.logsafe.Preconditions.checkArgument(outputDirectory().isDirectory(),
+                "Output must exist and be a directory");
+        com.palantir.logsafe.Preconditions.checkArgument(
+                generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
                 "Must specify exactly one project to generate");
     }
 
