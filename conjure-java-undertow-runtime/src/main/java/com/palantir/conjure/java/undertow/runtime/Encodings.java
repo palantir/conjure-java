@@ -64,12 +64,13 @@ public final class Encodings {
                     Preconditions.checkArgument(value != null, "cannot deserialize a JSON null value");
                     return value;
                 } catch (MismatchedInputException e) {
-                    throw FrameworkException.unprocessableEntity(
-                            "Failed to deserialize response stream. Syntax error?",
-                            e, SafeArg.of("type", type.getType()));
+                    throw FrameworkException.unprocessableEntity("Failed to deserialize request", e,
+                            SafeArg.of("contentType", getContentType()),
+                            SafeArg.of("type", type));
                 } catch (IOException e) {
-                    throw new SafeIoException(
-                            "Failed to deserialize response stream", e, SafeArg.of("type", type.getType()));
+                    throw new SafeIoException("Failed to deserialize request", e,
+                            SafeArg.of("contentType", getContentType()),
+                            SafeArg.of("type", type));
                 }
             };
         }
