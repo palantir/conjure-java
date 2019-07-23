@@ -365,8 +365,7 @@ final class UndertowServiceHandlerGenerator {
                     RESULT_VAR_NAME,
                     DELEGATE_VAR_NAME,
                     JavaNameSanitizer.sanitize(endpointDefinition.getEndpointName().get()),
-                    String.join(", ", methodArgs)
-            );
+                    String.join(", ", methodArgs));
         } else {
             code.addStatement("$1N.$2L($3L)",
                     DELEGATE_VAR_NAME,
@@ -595,9 +594,7 @@ final class UndertowServiceHandlerGenerator {
                                         typeMapper.getClassName(arg.getType()),
                                         paramName,
                                         createConstructorForTypeWithReference(arg.getType(), rawVarName,
-                                                typeDefinitions, typeMapper)
-                                )
-                        );
+                                                typeDefinitions, typeMapper)));
                     }
                     return CodeBlocks.of(
                             retrieveParam,
@@ -615,8 +612,7 @@ final class UndertowServiceHandlerGenerator {
                     typeMapper.getClassName(type).box(),
                     RUNTIME_VAR_NAME,
                     paramsVarName,
-                    paramId
-            );
+                    paramId);
         }
         Optional<CodeBlock> complexDeserializer = getComplexTypeStringDeserializer(
                 type, typeMapper, resultVarName, paramsVarName, paramId);
@@ -630,8 +626,7 @@ final class UndertowServiceHandlerGenerator {
                 RUNTIME_VAR_NAME,
                 deserializeFunctionName(type),
                 paramsVarName,
-                paramId
-        );
+                paramId);
     }
 
     /**

@@ -121,7 +121,7 @@ public class EteResource implements EteService {
     @Override
     public StringAliasExample optionalAliasOne(@NotNull AuthHeader authHeader,
             Optional<StringAliasExample> queryParamName) {
-        return queryParamName.orElse(StringAliasExample.of("foo"));
+        return queryParamName.orElseGet(() -> StringAliasExample.of("foo"));
     }
 
     @Override

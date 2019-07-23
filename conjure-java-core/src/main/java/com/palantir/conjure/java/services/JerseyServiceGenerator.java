@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.services;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -46,6 +45,8 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -366,7 +367,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     }
 
     private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
-        checkArgument(markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
+        Preconditions.checkArgument(markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
                 "Markers must refer to reference types.");
         return markers.stream()
                 .map(typeMapper::getClassName)
@@ -450,7 +451,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         @Override
         public CodeBlock visitDefault() {
-            throw new IllegalArgumentException("Cannot backfill non-defaultable parameter type.");
+            throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
         }
     };
 }

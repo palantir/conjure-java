@@ -11,6 +11,7 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 
 @SuppressWarnings("DesignForExtension")
 public abstract class DefaultTypeVisitor<T> implements Type.Visitor<T> {
@@ -55,6 +56,6 @@ public abstract class DefaultTypeVisitor<T> implements Type.Visitor<T> {
     }
 
     public T visitDefault() {
-        throw new IllegalStateException("Unexpected type");
+        throw new SafeIllegalStateException("Unexpected type");
     }
 }

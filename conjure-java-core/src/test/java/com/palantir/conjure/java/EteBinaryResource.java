@@ -17,6 +17,7 @@
 package com.palantir.conjure.java;
 
 import com.google.common.io.ByteStreams;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.product.EteBinaryService;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
@@ -47,7 +48,7 @@ final class EteBinaryResource implements EteBinaryService {
             byte[] data = new byte[numBytes];
             new Random().nextBytes(data);
             responseBody.write(data);
-            throw new RuntimeException("failure");
+            throw new SafeRuntimeException("failure");
         };
     }
 }

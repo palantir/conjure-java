@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.services;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
@@ -39,6 +38,7 @@ import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.util.syntacticpath.Path;
 import com.palantir.util.syntacticpath.Paths;
 import com.squareup.javapoet.AnnotationSpec;
@@ -78,7 +78,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     @SuppressWarnings("deprecation")
     public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
-        checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
+        Preconditions.checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
                         || !featureFlags.contains(FeatureFlags.RetrofitCompletableFutures),
                 "Cannot enable both the RetrofitListenableFutures and RetrofitCompletableFutures "
                         + "Conjure experimental features. Please remove one.");
