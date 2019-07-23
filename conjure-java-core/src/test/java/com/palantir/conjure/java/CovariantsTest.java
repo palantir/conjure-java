@@ -23,7 +23,7 @@ import com.palantir.product.CovariantListExample;
 import com.palantir.product.CovariantOptionalExample;
 import java.util.List;
 import java.util.Optional;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CovariantsTest {
 

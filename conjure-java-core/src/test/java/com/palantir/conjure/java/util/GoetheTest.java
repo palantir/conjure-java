@@ -21,21 +21,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import java.nio.file.Path;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class GoetheTest {
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @TempDir
+    public Path folder;
 
     @Test
     public void testFormatAndEmit() {
         JavaFile javaFile = JavaFile.builder("com.palantir.foo", TypeSpec.classBuilder("Foo")
                 .addStaticBlock(CodeBlock.builder().addStatement("type oops name = bar").build())
                 .build()).build();
-        assertThatThrownBy(() -> Goethe.formatAndEmit(javaFile, folder.getRoot().toPath()))
+        assertThatThrownBy(() -> Goethe.formatAndEmit(javaFile, folder))
                 .hasMessageContaining("Failed to format 'com.palantir.foo.Foo'")
                 .hasMessageContaining("';' expected")
                 .hasMessageContaining("" // newline to align the output

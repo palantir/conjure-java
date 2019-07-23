@@ -32,7 +32,8 @@ import com.palantir.product.EteServiceRetrofit;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -43,20 +44,23 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
+@Execution(ExecutionMode.CONCURRENT)
+@ExtendWith(DropwizardExtensionsSupport.class)
+@ResourceLock("EteServer")
 public final class Retrofit2ServiceEteTest extends TestBase {
 
-    @ClassRule
-    public static final TemporaryFolder folder = new TemporaryFolder();
-
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE =
-            new DropwizardAppRule<>(EteTestServer.class);
+    @TempDir
+    public static File folder;
+    public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(EteTestServer.class);
 
     private final EteServiceRetrofit client;
 
@@ -68,7 +72,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
                 clientConfiguration());
     }
 
-    @Ignore // string returns in Jersey should use a mandated wrapper alias type
+    @Disabled // string returns in Jersey should use a mandated wrapper alias type
     @Test
     public void retrofit2_can_retrieve_a_string_from_a_server() throws Exception {
         assertThat(client.string(AuthHeader.valueOf("authHeader")).execute().body())
@@ -99,14 +103,14 @@ public final class Retrofit2ServiceEteTest extends TestBase {
                 .isEqualTo(ResourceIdentifier.of("ri.foundry.main.dataset.1234"));
     }
 
-    @Ignore // string returns in Jersey should use a mandated wrapper alias type
+    @Disabled("string returns in Jersey should use a mandated wrapper alias type")
     @Test
     public void retrofit2_client_can_retrieve_an_optional_string_from_a_server() throws Exception {
         assertThat(client.optionalString(AuthHeader.valueOf("authHeader")).execute().body())
                 .isEqualTo(Optional.of("foo"));
     }
 
-    @Ignore // https://github.com/palantir/conjure-java-runtime/issues/668
+    @Disabled("https://github.com/palantir/conjure-java-runtime/issues/668")
     @Test
     public void retrofit2_client_can_retrieve_an_optional_empty_from_a_server() throws Exception {
         assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")).execute().body())
@@ -125,12 +129,12 @@ public final class Retrofit2ServiceEteTest extends TestBase {
                 .isEqualTo("Hello, world!");
     }
 
-    @BeforeClass
-    public static void beforeClass() throws IOException {
+    @BeforeAll
+    public static void beforeAll() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder.getRoot());
+        List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 }

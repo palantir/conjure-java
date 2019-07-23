@@ -43,6 +43,10 @@ dependencies {
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
     testCompile sourceSets.generatedUndertow.output
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine', {
+        because 'allows JUnit 3 and JUnit 4 tests to run'
+    }
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'

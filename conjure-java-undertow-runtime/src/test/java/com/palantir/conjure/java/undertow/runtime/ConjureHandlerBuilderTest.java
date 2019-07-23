@@ -26,7 +26,7 @@ import com.palantir.logsafe.SafeLoggable;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ConjureHandlerBuilderTest {
 

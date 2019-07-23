@@ -39,7 +39,8 @@ import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -55,22 +56,25 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.ResponseBody;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import retrofit2.Response;
 
+@Execution(ExecutionMode.CONCURRENT)
+@ExtendWith(DropwizardExtensionsSupport.class)
+@ResourceLock("EteServer")
 public final class JerseyServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
-    @ClassRule
-    public static final TemporaryFolder folder = new TemporaryFolder();
-
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> RULE =
-            new DropwizardAppRule<>(EteTestServer.class);
+    @TempDir
+    public static File folder;
+    public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(EteTestServer.class);
 
     private final EteService client;
     private final EteBinaryServiceRetrofit binary;
@@ -98,7 +102,7 @@ public final class JerseyServiceEteTest extends TestBase {
         assertThat(emptyPathClient.emptyPath()).isEqualTo(true);
     }
 
-    @Ignore // string returns in Jersey should use a mandated wrapper alias type
+    @Disabled("string returns in Jersey should use a mandated wrapper alias type")
     @Test
     public void client_can_retrieve_a_string_from_a_server() throws Exception {
         assertThat(client.string(AuthHeader.valueOf("authHeader")))
@@ -129,14 +133,14 @@ public final class JerseyServiceEteTest extends TestBase {
                 .isEqualTo(ResourceIdentifier.of("ri.foundry.main.dataset.1234"));
     }
 
-    @Ignore // string returns in Jersey should use a mandated wrapper alias type
+    @Disabled("string returns in Jersey should use a mandated wrapper alias type")
     @Test
     public void client_can_retrieve_an_optional_string_from_a_server() throws Exception {
         assertThat(client.optionalString(AuthHeader.valueOf("authHeader")))
                 .isEqualTo(Optional.of("foo"));
     }
 
-    @Ignore // Dropwizard returns 404 for empty optional
+    @Disabled("Dropwizard returns 404 for empty optional")
     @Test
     public void jaxrs_client_can_retrieve_an_optional_empty_from_a_server() throws Exception {
         assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")))
@@ -192,13 +196,13 @@ public final class JerseyServiceEteTest extends TestBase {
         assertThat(response.body()).isNull();
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/ete-service.yml"),
                         new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
-                .emit(def, folder.getRoot());
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 

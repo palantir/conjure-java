@@ -35,9 +35,9 @@ import java.time.Duration;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class ConjureExceptionHandlerTest {
 
@@ -48,7 +48,7 @@ public final class ConjureExceptionHandlerTest {
     private RuntimeException exception;
     private Undertow server;
 
-    @Before
+    @BeforeEach
     public void before() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
@@ -59,7 +59,7 @@ public final class ConjureExceptionHandlerTest {
         server.start();
     }
 
-    @After
+    @AfterEach
     public void after() {
         server.stop();
     }

@@ -23,7 +23,7 @@ import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.product.ExternalLongAliasOne;
 import com.palantir.product.ExternalLongAliasTwo;
 import com.palantir.product.UuidAliasExample;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AliasTests {
 

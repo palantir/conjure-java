@@ -19,7 +19,7 @@ package com.palantir.conjure.java.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.spec.Documentation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class JavadocTest {
 

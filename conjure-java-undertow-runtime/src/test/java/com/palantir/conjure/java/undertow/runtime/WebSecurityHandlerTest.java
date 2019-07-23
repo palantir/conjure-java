@@ -24,9 +24,9 @@ import java.io.IOException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class WebSecurityHandlerTest {
 
@@ -34,7 +34,7 @@ public class WebSecurityHandlerTest {
 
     private static final OkHttpClient client = new OkHttpClient.Builder().build();
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
@@ -43,7 +43,7 @@ public class WebSecurityHandlerTest {
         server.start();
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         if (server != null) {
             server.stop();
