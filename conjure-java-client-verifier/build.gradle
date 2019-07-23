@@ -33,7 +33,6 @@ dependencies {
     generatedUndertowCompile sourceSets.generatedObjects.output
 
     testCompile project(':conjure-java-core')
-    testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
@@ -44,9 +43,6 @@ dependencies {
     testCompile sourceSets.generatedJersey.output
     testCompile sourceSets.generatedUndertow.output
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine', {
-        because 'allows JUnit 3 and JUnit 4 tests to run'
-    }
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'

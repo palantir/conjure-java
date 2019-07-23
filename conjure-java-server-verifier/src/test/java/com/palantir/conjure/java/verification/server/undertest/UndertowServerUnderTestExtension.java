@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.verification.server.undertest;
 
 import com.google.common.reflect.Reflection;
-import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
@@ -26,24 +25,24 @@ import com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
-public final class UndertowServerUnderTestRule extends ExternalResource {
+public final class UndertowServerUnderTestExtension implements BeforeAllCallback, AfterAllCallback {
 
     private static final int PORT = 12346;
 
     private Undertow server;
 
     @Override
-    protected void before() {
+    public void beforeAll(ExtensionContext context) {
         UndertowAutoDeserializeService autoDeserialize = Reflection.newProxy(
                 UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
         UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
-        UndertowRuntime context = ConjureUndertowRuntime.builder().build();
-
         HttpHandler handler = ConjureHandler.builder()
-                .addAllEndpoints(service.endpoints(context))
+                .addAllEndpoints(service.endpoints(ConjureUndertowRuntime.builder().build()))
                 .build();
 
         server = Undertow.builder()
@@ -54,7 +53,7 @@ public final class UndertowServerUnderTestRule extends ExternalResource {
     }
 
     @Override
-    protected void after() {
+    public void afterAll(ExtensionContext context) {
         if (server != null) {
             server.stop();
         }

@@ -24,7 +24,10 @@ import com.palantir.product.CovariantOptionalExample;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class CovariantsTest {
 
     @Test

@@ -24,12 +24,13 @@ import com.palantir.conjure.verification.client.VerificationClientService;
 public final class VerificationClients {
     private VerificationClients() {}
 
-    public static VerificationClientService verificationClientService(VerificationClientRule verificationClientRule) {
+    public static VerificationClientService verificationClientService(
+            VerificationClientExtension verificationClientExtension) {
         return JaxRsClient.create(
                 VerificationClientService.class,
                 getUserAgent(),
                 new HostMetricsRegistry(),
-                verificationClientRule.getClientConfiguration());
+                verificationClientExtension.getClientConfiguration());
     }
 
     private static UserAgent getUserAgent() {

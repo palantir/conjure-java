@@ -56,7 +56,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
-@ResourceLock("port:12347")
 public final class AsyncRequestProcessingTest extends TestBase {
 
     @TempDir
