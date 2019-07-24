@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
@@ -44,27 +46,35 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 public final class UnionGenerator {
 
     private static final String VALUE_FIELD_NAME = "value";
     private static final String UNKNOWN_WRAPPER_CLASS_NAME = "UnknownWrapper";
-    private static final String VISIT_METHOD_NAME = "visit";
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
+
+    // If the member type is not known, a String containing the name of the unknown type is used.
+    private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
 
     public static JavaFile generateUnionType(TypeMapper typeMapper, UnionDefinition typeDef) {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName unionClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
-        ClassName baseClass = ClassName.get(unionClass.packageName(), unionClass.simpleName(), "Base");
-        ClassName visitorClass = ClassName.get(unionClass.packageName(), unionClass.simpleName(), "Visitor");
+        ClassName baseClass = unionClass.nestedClass("Base");
+        ClassName visitorClass = unionClass.nestedClass("Visitor");
+        ClassName visitorBuilderClass = unionClass.nestedClass("VisitorBuilder");
         Map<FieldName, TypeName> memberTypes = typeDef.getUnion().stream()
                 .collect(StableCollectors.toLinkedMap(
                         FieldDefinition::getFieldName,
@@ -80,7 +90,9 @@ public final class UnionGenerator {
                 .addMethod(generateGetValue(baseClass))
                 .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
                 .addMethod(generateAcceptVisitMethod(visitorClass, memberTypes.keySet()))
-                .addType(generateVisitor(visitorClass, memberTypes))
+                .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass))
+                .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes))
+                .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes))
                 .addType(generateBase(baseClass, memberTypes))
                 .addTypes(generateWrapperClasses(typeMapper, baseClass, typeDef.getUnion()))
                 .addType(generateUnknownWrapper(baseClass))
@@ -162,7 +174,7 @@ public final class UnionGenerator {
             codeBuilder.addStatement(
                     "return $1N.$2L((($3T) $4L).$4L)",
                     visitor,
-                    VISIT_METHOD_NAME + StringUtils.capitalize(memberName.get()),
+                    visitMethodName(memberName.get()),
                     wrapperClass,
                     VALUE_FIELD_NAME);
         }
@@ -190,15 +202,30 @@ public final class UnionGenerator {
                 .build();
     }
 
-    private static TypeSpec generateVisitor(ClassName visitorClass, Map<FieldName, TypeName> memberTypes) {
+    private static TypeSpec generateVisitor(
+            ClassName unionClass,
+            ClassName visitorClass,
+            Map<FieldName, TypeName> memberTypes,
+            ClassName visitorBuilderClass) {
         return TypeSpec.interfaceBuilder(visitorClass)
                 .addModifiers(Modifier.PUBLIC)
                 .addTypeVariable(TYPE_VARIABLE)
                 .addMethods(generateMemberVisitMethods(memberTypes))
                 .addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                        .addParameter(String.class, "unknownType")
+                        .addParameter(UNKNOWN_MEMBER_TYPE, "unknownType")
                         .returns(TYPE_VARIABLE)
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("builder")
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .addTypeVariable(TYPE_VARIABLE)
+                        .addStatement("return new $T<$T>()",
+                                visitorBuilderClass,
+                                TYPE_VARIABLE)
+                        .returns(ParameterizedTypeName.get(
+                                visitorStageInterfaceName(unionClass,
+                                memberTypes.keySet().iterator().next().get()),
+                                TYPE_VARIABLE))
                         .build())
                 .build();
     }
@@ -206,13 +233,264 @@ public final class UnionGenerator {
     private static List<MethodSpec> generateMemberVisitMethods(Map<FieldName, TypeName> memberTypes) {
         return memberTypes.entrySet().stream().map(entry -> {
             String variableName = variableName();
-            return MethodSpec.methodBuilder(VISIT_METHOD_NAME + StringUtils.capitalize(entry.getKey().get()))
+            return MethodSpec.methodBuilder(visitMethodName(entry.getKey().get()))
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addParameter(entry.getValue(), variableName)
                     .returns(TYPE_VARIABLE)
                     .build();
         }).collect(Collectors.toList());
     }
+
+    /**
+     * Generates the Visitor builder class.
+     *
+     * @param enclosingClass the enclosing class
+     * @param visitor the interface of the Visitor
+     * @param visitorBuilder the ClassName of the class to generate
+     * @param memberTypes mapping from member names to member types
+     * @return
+     */
+    private static TypeSpec generateVisitorBuilder(
+            ClassName enclosingClass,
+            ClassName visitor, ClassName visitorBuilder,
+            Map<FieldName, TypeName> memberTypes) {
+        TypeVariableName visitResultType = TypeVariableName.get("T");
+        return TypeSpec.classBuilder(visitorBuilder)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .addTypeVariable(visitResultType)
+                .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, memberTypes.keySet(), visitResultType))
+                .addFields(allVisitorBuilderFields(memberTypes, visitResultType))
+                .addMethods(allVisitorBuilderSetters(enclosingClass, visitor, memberTypes))
+                .build();
+    }
+
+    /**
+     * Generates setter methods for the Visitor builder. The format for the known union types is
+     *
+     * NextStage&lt;T&gt; memberName(Function&lt;MemberType, T&gt; memberVisitor) {
+     *     this.memberVisitor = memberVisitor;
+     *     return this;
+     * }
+     *
+     * And the setter for the unknown member case, which is also the last setter for the builder, looks as follows
+     *
+     * Visitor&lt;T&gt; unknown(Function&lt;String, T&gt; unknownVisitor) {
+     *     return new Visitor&lt;T&gt;() {
+     *         [methods delegating to the various visitor function objects]
+     *     }
+     * }
+     *
+     * @param unionClass The enclosing class
+     * @param visitorClass The class of the visitor being built
+     * @param memberTypes All member types of the union
+     * @return A list of setter methods
+     */
+    private static List<MethodSpec> allVisitorBuilderSetters(
+            ClassName unionClass,
+            ClassName visitorClass,
+            Map<FieldName, TypeName> memberTypes) {
+        ImmutableList.Builder<MethodSpec> setterMethods = ImmutableList.builder();
+        TypeVariableName visitResultType = TypeVariableName.get("T");
+        PeekingIterator<Map.Entry<FieldName, TypeName>> memberIter =
+                Iterators.peekingIterator(memberTypes.entrySet().iterator());
+        while (memberIter.hasNext()) {
+            Map.Entry<FieldName, TypeName> next = memberIter.next();
+            String memberFieldName = next.getKey().get();
+            TypeName memberTypeName = next.getValue();
+            String nextBuilderStage = memberIter.hasNext() ? memberIter.peek().getKey().get() : null;
+            MethodSpec.Builder setterPrototype = visitorBuilderSetterPrototype(
+                    memberFieldName,
+                    memberTypeName,
+                    visitResultType,
+                    visitorStageInterfaceName(unionClass, nextBuilderStage));
+            setterMethods.add(setterPrototype
+                    .addModifiers(Modifier.PUBLIC)
+                    .addStatement("this.$1L = $1L", visitorFieldName(memberFieldName))
+                    .addStatement("return this")
+                    .build());
+        }
+
+        setterMethods.add(visitorBuilderSetterPrototype("unknown", UNKNOWN_MEMBER_TYPE, visitResultType, visitorClass)
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("return $L",
+                        TypeSpec.anonymousClassBuilder("")
+                                .addSuperinterface(ParameterizedTypeName.get(visitorClass, visitResultType))
+                                .addMethods(allDelegatingVisitorMethods(memberTypes, visitResultType))
+                                .build())
+                .build());
+        return setterMethods.build();
+    }
+
+    /**
+     * Generate the method implementations of the Visitor built by the visitor builder. Each method has the shape
+     *
+     * T visitMemberName(MemberType value) {
+     *     return memberVisitor.apply(value);
+     * }
+     *
+     * @param memberTypeMap mapping of member names to member types
+     * @param visitorResultType The type of the result of the Visitor. (The T in Visitor&lt;T&gt;.)
+     * @return the list of all visitor method implementations, including for the unknown type
+     */
+    private static List<MethodSpec> allDelegatingVisitorMethods(
+            Map<FieldName, TypeName> memberTypeMap,
+            TypeName visitorResultType) {
+        Stream<Pair<String, TypeName>> memberTypes = memberTypeMap.entrySet().stream()
+                .map(entry -> Pair.of(entry.getKey().get(), entry.getValue()));
+        Pair<String, TypeName> unknownType = Pair.of("unknown", UNKNOWN_MEMBER_TYPE);
+        return Stream.concat(memberTypes, Stream.of(unknownType))
+                .map(type -> MethodSpec.methodBuilder(visitMethodName(type.getKey()))
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(type.getValue(), variableName())
+                        .addStatement("return $L.apply($L)", visitorFieldName(type.getKey()), variableName())
+                        .returns(visitorResultType)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Generates all the interface types for the different stages. The pattern is the following:
+     *
+     * interface Stage1&lt;T&gt; { Stage2&lt;T&gt; member1(...) }
+     * interface Stage2&lt;T&gt; { Stage3&lt;T&gt; member2(...) }
+     * interface Stage3&lt;T&gt; { Visitor&lt;T&gt; member3(...) }
+     *
+     * @param enclosingClass  the enclosing class
+     * @param memberNames the names of all union members
+     * @param typeVar the result type of the visitor (the T in Visitor&lt;T&gt;)
+     * @return all interfaces for the various Visitor builder stages, including the last stage for the unknown case
+     */
+    private static List<TypeName> allVisitorBuilderStages(
+            ClassName enclosingClass,
+            Collection<FieldName> memberNames,
+            TypeVariableName typeVar) {
+        return Stream.concat(memberNames.stream().map(FieldName::get),
+                             Stream.of((String) null)) // unknown case
+                .map(stageName -> visitorStageInterfaceName(enclosingClass, stageName))
+                .map(stageType -> ParameterizedTypeName.get(stageType, typeVar))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Generate all fields in the Visitor builder, on the following format:
+     *
+     * Function&lt;MemberType1, T&gt; member1Visitor;
+     * Function&lt;MemberType2, T&gt; member2Visitor;
+     * Function&lt;MemberType3, T&gt; member3Visitor;
+     *
+     * Note, there is no field for the unknown case.
+     *
+     * @param memberTypes mapping of member names to member types
+     * @param visitResultType the type of the result of a visit. (The T in Visitor&lt;T&gt;.)
+     * @return a list of all visitor builder fields
+     */
+    private static List<FieldSpec> allVisitorBuilderFields(
+            Map<FieldName, TypeName> memberTypes,
+            TypeVariableName visitResultType) {
+        return memberTypes.entrySet().stream()
+                .map(entry -> FieldSpec.builder(
+                        visitorObjectTypeName(entry.getValue().box(), visitResultType),
+                        visitorFieldName(entry.getKey().get()),
+                        Modifier.PRIVATE).build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Generates the name of the interface of a visitor builder stage.
+     *
+     * @param unionClass the enclosing class
+     * @param stageName the name of the stage (name of the member)
+     * @return the name of the interface of the given builder stage
+     */
+    private static ClassName visitorStageInterfaceName(ClassName unionClass, String stageName) {
+        String namePrefix = stageName != null
+                ? StringUtils.capitalize(stageName)
+                : "Unknown";
+        return unionClass.nestedClass(namePrefix + "StageVisitorBuilder");
+    }
+
+    /**
+     * Convenience method for generating a Function&lt;MemberType, T&gt; used for fields and setters of the visitor
+     * builder.
+     *
+     * @param memberType the type of the member
+     * @param visitResultType the visit result type (the T in Visitor&lt;T&gt;.)
+     * @return the function object type for a visit method
+     */
+    private static TypeName visitorObjectTypeName(TypeName memberType, TypeName visitResultType) {
+        return ParameterizedTypeName.get(
+                ClassName.get(Function.class),
+                memberType.box(),
+                visitResultType);
+    }
+
+    /**
+     * Generate all interfaces for the various Visitor builder stages.
+     *
+     * @param unionClass the enclosing class
+     * @param visitorClass the class name of the visitor
+     * @param memberTypes mapping from member names to member types
+     * @return list of interfaces for all visitor builder stages
+     */
+    private static List<TypeSpec> generateVisitorBuilderStageInterfaces(
+            ClassName unionClass,
+            ClassName visitorClass,
+            Map<FieldName, TypeName> memberTypes) {
+
+        // Prepare pairs of stage names and types...
+        List<Pair<String, TypeName>> stagesNamesAndTypes = new ArrayList<>();
+        for (Map.Entry<FieldName, TypeName> entry : memberTypes.entrySet()) {
+            stagesNamesAndTypes.add(Pair.of(entry.getKey().get(), entry.getValue()));
+        }
+        // ...including for the unknown case
+        stagesNamesAndTypes.add(Pair.of("unknown", UNKNOWN_MEMBER_TYPE));
+
+        // Create one interface per stage
+        TypeVariableName visitResultType = TypeVariableName.get("T");
+        List<TypeSpec> interfaces = new ArrayList<>();
+        PeekingIterator<Pair<String, TypeName>> memberIter = Iterators.peekingIterator(stagesNamesAndTypes.iterator());
+        while (memberIter.hasNext()) {
+            Pair<String, TypeName> member = memberIter.next();
+            String memberName = member.getLeft();
+            TypeName memberType = member.getRight();
+            ClassName nextBuilderStage = memberIter.hasNext()
+                    ? visitorStageInterfaceName(unionClass, memberIter.peek().getLeft())
+                    : visitorClass;
+            interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(unionClass, memberName))
+                    .addTypeVariable(visitResultType)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addMethod(visitorBuilderSetterPrototype(memberName, memberType, visitResultType, nextBuilderStage)
+                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                            .build())
+                    .build());
+        }
+
+        return interfaces;
+    }
+
+    /**
+     * Generates a prototype for a Visitor builder setter, that can be turned into an interface method declaration or an
+     * implementation of such interface method. The signature of the returned builder is
+     *
+     *   NextStage&lt;T&gt; memberName(Function&lt;MemberType, T&gt; memberVisitor)
+     *
+     * @param memberName the name of the member for the setter
+     * @param memberType the type of the member for the setter
+     * @param visitResultType the type of the visitor result (the T in Visitor&lt;T&lt;)
+     * @param nextBuilderStage the interface of the next builder stage
+     * @return a method builder, prepared with the signature of a visitor builder setter
+     */
+    private static MethodSpec.Builder visitorBuilderSetterPrototype(
+            String memberName,
+            TypeName memberType,
+            TypeName visitResultType,
+            ClassName nextBuilderStage) {
+        TypeName visitorObject = visitorObjectTypeName(memberType, visitResultType);
+        return MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
+                .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName)).build())
+                .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
+    }
+
 
     private static TypeSpec generateBase(ClassName baseClass, Map<FieldName, TypeName> memberTypes) {
         ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
@@ -291,13 +569,13 @@ public final class UnionGenerator {
         ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
         ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type").build();
-        ParameterSpec annotatedTypeParameter = ParameterSpec.builder(String.class, "type")
+        ParameterSpec annotatedTypeParameter = ParameterSpec.builder(UNKNOWN_MEMBER_TYPE, "type")
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class).addMember("value", "\"type\"").build())
                 .build();
 
         ClassName wrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
         List<FieldSpec> fields = ImmutableList.of(
-                FieldSpec.builder(String.class, "type", Modifier.PRIVATE, Modifier.FINAL).build(),
+                FieldSpec.builder(UNKNOWN_MEMBER_TYPE, "type", Modifier.PRIVATE, Modifier.FINAL).build(),
                 FieldSpec.builder(genericMapType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
@@ -329,7 +607,7 @@ public final class UnionGenerator {
                         .addModifiers(Modifier.PRIVATE)
                         .addAnnotation(AnnotationSpec.builder(JsonProperty.class).build())
                         .addStatement("return type")
-                        .returns(String.class)
+                        .returns(UNKNOWN_MEMBER_TYPE)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("getValue")
                         .addModifiers(Modifier.PRIVATE)
@@ -363,6 +641,14 @@ public final class UnionGenerator {
 
     private static ClassName peerWrapperClass(ClassName peerClass, FieldName memberTypeName) {
         return peerClass.peerClass(StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
+    }
+
+    private static String visitMethodName(String fieldName) {
+        return "visit" + StringUtils.capitalize(fieldName);
+    }
+
+    private static String visitorFieldName(String memberName) {
+        return memberName + "Visitor";
     }
 
     private static String variableName() {

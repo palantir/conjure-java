@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import javax.annotation.Generated;
 
 /** A type which can either be a StringExample, a set of strings, or an integer. */
@@ -124,6 +125,140 @@ public final class UnionTypeExample {
         T visitInterface(int value);
 
         T visitUnknown(String unknownType);
+
+        static <T> StringExampleStageVisitorBuilder<T> builder() {
+            return new VisitorBuilder<T>();
+        }
+    }
+
+    private static class VisitorBuilder<T>
+            implements StringExampleStageVisitorBuilder<T>,
+                    SetStageVisitorBuilder<T>,
+                    ThisFieldIsAnIntegerStageVisitorBuilder<T>,
+                    AlsoAnIntegerStageVisitorBuilder<T>,
+                    IfStageVisitorBuilder<T>,
+                    NewStageVisitorBuilder<T>,
+                    InterfaceStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T> {
+        private Function<StringExample, T> stringExampleVisitor;
+
+        private Function<Set<String>, T> setVisitor;
+
+        private Function<Integer, T> thisFieldIsAnIntegerVisitor;
+
+        private Function<Integer, T> alsoAnIntegerVisitor;
+
+        private Function<Integer, T> ifVisitor;
+
+        private Function<Integer, T> newVisitor;
+
+        private Function<Integer, T> interfaceVisitor;
+
+        public SetStageVisitorBuilder<T> stringExample(
+                Function<StringExample, T> stringExampleVisitor) {
+            this.stringExampleVisitor = stringExampleVisitor;
+            return this;
+        }
+
+        public ThisFieldIsAnIntegerStageVisitorBuilder<T> set(Function<Set<String>, T> setVisitor) {
+            this.setVisitor = setVisitor;
+            return this;
+        }
+
+        public AlsoAnIntegerStageVisitorBuilder<T> thisFieldIsAnInteger(
+                Function<Integer, T> thisFieldIsAnIntegerVisitor) {
+            this.thisFieldIsAnIntegerVisitor = thisFieldIsAnIntegerVisitor;
+            return this;
+        }
+
+        public IfStageVisitorBuilder<T> alsoAnInteger(Function<Integer, T> alsoAnIntegerVisitor) {
+            this.alsoAnIntegerVisitor = alsoAnIntegerVisitor;
+            return this;
+        }
+
+        public NewStageVisitorBuilder<T> if_(Function<Integer, T> ifVisitor) {
+            this.ifVisitor = ifVisitor;
+            return this;
+        }
+
+        public InterfaceStageVisitorBuilder<T> new_(Function<Integer, T> newVisitor) {
+            this.newVisitor = newVisitor;
+            return this;
+        }
+
+        public UnknownStageVisitorBuilder<T> interface_(Function<Integer, T> interfaceVisitor) {
+            this.interfaceVisitor = interfaceVisitor;
+            return this;
+        }
+
+        public Visitor<T> unknown(Function<String, T> unknownVisitor) {
+            return new Visitor<T>() {
+                public T visitStringExample(StringExample value) {
+                    return stringExampleVisitor.apply(value);
+                }
+
+                public T visitSet(Set<String> value) {
+                    return setVisitor.apply(value);
+                }
+
+                public T visitThisFieldIsAnInteger(int value) {
+                    return thisFieldIsAnIntegerVisitor.apply(value);
+                }
+
+                public T visitAlsoAnInteger(int value) {
+                    return alsoAnIntegerVisitor.apply(value);
+                }
+
+                public T visitIf(int value) {
+                    return ifVisitor.apply(value);
+                }
+
+                public T visitNew(int value) {
+                    return newVisitor.apply(value);
+                }
+
+                public T visitInterface(int value) {
+                    return interfaceVisitor.apply(value);
+                }
+
+                public T visitUnknown(String value) {
+                    return unknownVisitor.apply(value);
+                }
+            };
+        }
+    }
+
+    public interface StringExampleStageVisitorBuilder<T> {
+        SetStageVisitorBuilder<T> stringExample(Function<StringExample, T> stringExampleVisitor);
+    }
+
+    public interface SetStageVisitorBuilder<T> {
+        ThisFieldIsAnIntegerStageVisitorBuilder<T> set(Function<Set<String>, T> setVisitor);
+    }
+
+    public interface ThisFieldIsAnIntegerStageVisitorBuilder<T> {
+        AlsoAnIntegerStageVisitorBuilder<T> thisFieldIsAnInteger(
+                Function<Integer, T> thisFieldIsAnIntegerVisitor);
+    }
+
+    public interface AlsoAnIntegerStageVisitorBuilder<T> {
+        IfStageVisitorBuilder<T> alsoAnInteger(Function<Integer, T> alsoAnIntegerVisitor);
+    }
+
+    public interface IfStageVisitorBuilder<T> {
+        NewStageVisitorBuilder<T> if_(Function<Integer, T> ifVisitor);
+    }
+
+    public interface NewStageVisitorBuilder<T> {
+        InterfaceStageVisitorBuilder<T> new_(Function<Integer, T> newVisitor);
+    }
+
+    public interface InterfaceStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> interface_(Function<Integer, T> interfaceVisitor);
+    }
+
+    public interface UnknownStageVisitorBuilder<T> {
+        Visitor<T> unknown(Function<String, T> unknownVisitor);
     }
 
     @JsonTypeInfo(
