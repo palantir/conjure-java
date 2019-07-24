@@ -436,7 +436,6 @@ public final class UnionGenerator {
             ClassName unionClass,
             ClassName visitorClass,
             Map<FieldName, TypeName> memberTypes) {
-
         // Prepare pairs of stage names and types...
         List<Pair<String, TypeName>> stagesNamesAndTypes = new ArrayList<>();
         for (Map.Entry<FieldName, TypeName> entry : memberTypes.entrySet()) {
