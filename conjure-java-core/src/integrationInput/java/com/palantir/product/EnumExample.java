@@ -75,6 +75,10 @@ public final class EnumExample {
         }
     }
 
+    public static EnumExample[] values() {
+        return new EnumExample[] {ONE, TWO, ONE_HUNDRED};
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         switch (value) {
             case ONE:

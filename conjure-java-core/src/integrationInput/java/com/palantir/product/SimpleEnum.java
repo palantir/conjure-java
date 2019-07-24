@@ -63,6 +63,10 @@ public final class SimpleEnum {
         }
     }
 
+    public static SimpleEnum[] values() {
+        return new SimpleEnum[] {VALUE};
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         switch (value) {
             case VALUE:

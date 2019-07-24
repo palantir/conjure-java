@@ -31,6 +31,14 @@ public class EnumTests {
     }
 
     @Test
+    public void testValueInvertability() {
+        for (EnumExample val : EnumExample.values()) {
+            assertThat(EnumExample.valueOf(val.toString())).isEqualTo(val);
+            assertThat(EnumExample.valueOf(val.get().name())).isEqualTo(val);
+        }
+    }
+
+    @Test
     public void testValueOfProducesSameInstance() {
         assertThat(EnumExample.valueOf("ONE")).isSameAs(EnumExample.ONE);
     }
