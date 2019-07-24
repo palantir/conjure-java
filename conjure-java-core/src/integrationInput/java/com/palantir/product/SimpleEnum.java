@@ -2,6 +2,7 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.conjure.java.lib.ConjureEnum;
 import com.palantir.logsafe.Preconditions;
 import java.util.Locale;
 import javax.annotation.Generated;
@@ -18,7 +19,7 @@ import javax.annotation.Generated;
  * compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
-public final class SimpleEnum {
+public final class SimpleEnum implements ConjureEnum<SimpleEnum> {
     public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
 
     private final Value value;

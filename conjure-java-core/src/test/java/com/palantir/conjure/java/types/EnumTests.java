@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.conjure.java.lib.ConjureEnum;
 import com.palantir.product.EnumExample;
 import org.junit.Test;
 
@@ -59,6 +60,15 @@ public class EnumTests {
     @Test
     public void testNullValidationUsesSafeLoggable() {
         assertThatLoggableExceptionThrownBy(() -> EnumExample.valueOf(null)).hasLogMessage("value cannot be null");
+    }
+
+    @Test
+    public void testInterfaceMethods() {
+        assertThat(EnumExample.values()).isEqualTo(ConjureEnum.values(EnumExample.class));
+        for (EnumExample val : ConjureEnum.values(EnumExample.class)) {
+            assertThat(ConjureEnum.valueOf(val.toString(), EnumExample.class)).isEqualTo(val);
+            assertThat(ConjureEnum.valueOf(val.get().name(), EnumExample.class)).isEqualTo(val);
+        }
     }
 
     private enum Visitor implements EnumExample.Visitor<String> {
