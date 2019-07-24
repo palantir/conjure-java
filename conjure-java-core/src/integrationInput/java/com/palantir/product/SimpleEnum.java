@@ -3,6 +3,9 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import javax.annotation.Generated;
 
@@ -20,6 +23,9 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 public final class SimpleEnum {
     public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
+
+    public static final List<SimpleEnum> VALUES =
+            Collections.unmodifiableList(Arrays.asList(VALUE));
 
     private final Value value;
 
@@ -63,8 +69,8 @@ public final class SimpleEnum {
         }
     }
 
-    public static SimpleEnum[] values() {
-        return new SimpleEnum[] {VALUE};
+    public static List<SimpleEnum> values() {
+        return VALUES;
     }
 
     public <T> T accept(Visitor<T> visitor) {
