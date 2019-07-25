@@ -19,7 +19,7 @@ import javax.annotation.Generated;
  * compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
-public final class SimpleEnum implements ConjureEnum<SimpleEnum> {
+public final class SimpleEnum implements ConjureEnum<SimpleEnum.Value> {
     public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
 
     private final Value value;
@@ -31,6 +31,7 @@ public final class SimpleEnum implements ConjureEnum<SimpleEnum> {
         this.string = string;
     }
 
+    @Override
     public Value get() {
         return this.value;
     }
@@ -62,10 +63,6 @@ public final class SimpleEnum implements ConjureEnum<SimpleEnum> {
             default:
                 return new SimpleEnum(Value.UNKNOWN, upperCasedValue);
         }
-    }
-
-    public static SimpleEnum[] values() {
-        return new SimpleEnum[] {VALUE};
     }
 
     public <T> T accept(Visitor<T> visitor) {

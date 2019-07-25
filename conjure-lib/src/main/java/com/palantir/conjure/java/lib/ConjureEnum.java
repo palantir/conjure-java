@@ -21,19 +21,17 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * This is the common interface for all Conjure-generated Enum types.
  */
-public interface ConjureEnum<E extends ConjureEnum<E>> {
+public interface ConjureEnum<E extends Enum<E>> {
 
-    /**
-     * This method is intended to function roughly equivalently to {@link Enum#valueOf(Class, String)} for
-     * Conjure-generated enum types.
-     */
+    E get();
+
     @SuppressWarnings("unchecked")
-    static <T extends ConjureEnum<T>> T valueOf(String value,
-                                                Class<T> conjureEnumClass) {
+    static <E extends Enum<E>, T extends ConjureEnum<E>> T valueOf(E enumValue,
+                                                                   Class<T> conjureEnumClass) {
         // Reflection and casts are safe here, since all Conjure-generated enums will have a valueOf method.
         // Tests on the generators will verify that this works.
         try {
-            return (T) conjureEnumClass.getMethod("valueOf", String.class).invoke(null, value);
+            return (T) conjureEnumClass.getMethod("valueOf", String.class).invoke(null, enumValue.name());
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Conjure error: unable to find valueOf method.", e);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -41,18 +39,4 @@ public interface ConjureEnum<E extends ConjureEnum<E>> {
         }
     }
 
-    /**
-     * This method is intended to function roughly equivalently to {@link Class#getEnumConstants()} for
-     * Conjure-generated enum types.
-     */
-    @SuppressWarnings("unchecked")
-    static <T extends ConjureEnum<T>> T[] values(Class<T> conjureEnumClass) {
-        try {
-            return (T[]) conjureEnumClass.getMethod("values").invoke(null);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Conjure error: unable to find values method.", e);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Conjure error: unable to call values method.", e);
-        }
-    }
 }

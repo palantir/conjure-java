@@ -26,7 +26,6 @@ import com.palantir.conjure.java.lib.ConjureEnum;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
-import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -37,10 +36,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -69,7 +66,7 @@ public final class EnumGenerator {
     private static TypeSpec createSafeEnum(
             EnumDefinition typeDef, ClassName thisClass, ClassName enumClass, ClassName visitorClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
-                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(ConjureEnum.class), thisClass))
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(ConjureEnum.class), enumClass))
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addType(createEnum(enumClass, typeDef.getValues(), true))
@@ -80,6 +77,7 @@ public final class EnumGenerator {
                 .addMethod(createConstructor(enumClass))
                 .addMethod(MethodSpec.methodBuilder("get")
                         .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
                         .returns(enumClass)
                         .addStatement("return this.value")
                         .build())
@@ -93,7 +91,6 @@ public final class EnumGenerator {
                 .addMethod(createEquals(thisClass))
                 .addMethod(createHashCode())
                 .addMethod(createValueOf(thisClass, typeDef.getValues()))
-                .addMethod(createValues(thisClass, typeDef.getValues()))
                 .addMethod(generateAcceptVisitMethod(visitorClass, typeDef.getValues()));
 
         typeDef.getDocs().ifPresent(docs -> wrapper.addJavadoc("$L<p>\n", Javadoc.render(docs)));
@@ -243,18 +240,6 @@ public final class EnumGenerator {
                 // uppercase param for backwards compatibility
                 .addStatement("String upperCasedValue = $N.toUpperCase($T.ROOT)", param, Locale.class)
                 .addCode(parser.build())
-                .build();
-    }
-
-    private static MethodSpec createValues(ClassName thisClass, Collection<EnumValueDefinition> values) {
-        String valDeclaration = values.stream()
-                .map(EnumValueDefinition::getValue)
-                .collect(Collectors.joining(", "));
-
-        return MethodSpec.methodBuilder("values")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(ArrayTypeName.of(thisClass))
-                .addStatement("return new $T[]{" + valDeclaration + "}", thisClass)
                 .build();
     }
 

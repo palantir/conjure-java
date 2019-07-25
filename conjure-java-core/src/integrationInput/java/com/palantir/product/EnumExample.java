@@ -21,7 +21,7 @@ import javax.annotation.Generated;
  * compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
-public final class EnumExample implements ConjureEnum<EnumExample> {
+public final class EnumExample implements ConjureEnum<EnumExample.Value> {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
     public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
@@ -38,6 +38,7 @@ public final class EnumExample implements ConjureEnum<EnumExample> {
         this.string = string;
     }
 
+    @Override
     public Value get() {
         return this.value;
     }
@@ -74,10 +75,6 @@ public final class EnumExample implements ConjureEnum<EnumExample> {
             default:
                 return new EnumExample(Value.UNKNOWN, upperCasedValue);
         }
-    }
-
-    public static EnumExample[] values() {
-        return new EnumExample[] {ONE, TWO, ONE_HUNDRED};
     }
 
     public <T> T accept(Visitor<T> visitor) {
