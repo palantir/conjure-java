@@ -139,7 +139,8 @@ public final class UnionTypeExample {
                     IfStageVisitorBuilder<T>,
                     NewStageVisitorBuilder<T>,
                     InterfaceStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T> {
+                    UnknownStageVisitorBuilder<T>,
+                    CompletedStageVisitorBuilder<T> {
         private Function<StringExample, T> stringExampleVisitor;
 
         private Function<Set<String>, T> setVisitor;
@@ -154,44 +155,60 @@ public final class UnionTypeExample {
 
         private Function<Integer, T> interfaceVisitor;
 
+        private Function<String, T> unknownVisitor;
+
         public SetStageVisitorBuilder<T> stringExample(
                 Function<StringExample, T> stringExampleVisitor) {
+            Preconditions.checkNotNull(stringExampleVisitor, "stringExampleVisitor cannot be null");
             this.stringExampleVisitor = stringExampleVisitor;
             return this;
         }
 
         public ThisFieldIsAnIntegerStageVisitorBuilder<T> set(Function<Set<String>, T> setVisitor) {
+            Preconditions.checkNotNull(setVisitor, "setVisitor cannot be null");
             this.setVisitor = setVisitor;
             return this;
         }
 
         public AlsoAnIntegerStageVisitorBuilder<T> thisFieldIsAnInteger(
                 Function<Integer, T> thisFieldIsAnIntegerVisitor) {
+            Preconditions.checkNotNull(
+                    thisFieldIsAnIntegerVisitor, "thisFieldIsAnIntegerVisitor cannot be null");
             this.thisFieldIsAnIntegerVisitor = thisFieldIsAnIntegerVisitor;
             return this;
         }
 
         public IfStageVisitorBuilder<T> alsoAnInteger(Function<Integer, T> alsoAnIntegerVisitor) {
+            Preconditions.checkNotNull(alsoAnIntegerVisitor, "alsoAnIntegerVisitor cannot be null");
             this.alsoAnIntegerVisitor = alsoAnIntegerVisitor;
             return this;
         }
 
         public NewStageVisitorBuilder<T> if_(Function<Integer, T> ifVisitor) {
+            Preconditions.checkNotNull(ifVisitor, "ifVisitor cannot be null");
             this.ifVisitor = ifVisitor;
             return this;
         }
 
         public InterfaceStageVisitorBuilder<T> new_(Function<Integer, T> newVisitor) {
+            Preconditions.checkNotNull(newVisitor, "newVisitor cannot be null");
             this.newVisitor = newVisitor;
             return this;
         }
 
         public UnknownStageVisitorBuilder<T> interface_(Function<Integer, T> interfaceVisitor) {
+            Preconditions.checkNotNull(interfaceVisitor, "interfaceVisitor cannot be null");
             this.interfaceVisitor = interfaceVisitor;
             return this;
         }
 
-        public Visitor<T> unknown(Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownVisitor;
+            return this;
+        }
+
+        public Visitor<T> build() {
             return new Visitor<T>() {
                 public T visitStringExample(StringExample value) {
                     return stringExampleVisitor.apply(value);
@@ -258,7 +275,11 @@ public final class UnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Visitor<T> unknown(Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor);
+    }
+
+    public interface CompletedStageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 
     @JsonTypeInfo(

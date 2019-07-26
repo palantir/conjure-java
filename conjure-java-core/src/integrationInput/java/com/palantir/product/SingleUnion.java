@@ -80,15 +80,26 @@ public final class SingleUnion {
     }
 
     private static class VisitorBuilder<T>
-            implements FooStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T> {
+            implements FooStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T>,
+                    CompletedStageVisitorBuilder<T> {
         private Function<String, T> fooVisitor;
 
+        private Function<String, T> unknownVisitor;
+
         public UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
+            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
             this.fooVisitor = fooVisitor;
             return this;
         }
 
-        public Visitor<T> unknown(Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownVisitor;
+            return this;
+        }
+
+        public Visitor<T> build() {
             return new Visitor<T>() {
                 public T visitFoo(String value) {
                     return fooVisitor.apply(value);
@@ -106,7 +117,11 @@ public final class SingleUnion {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Visitor<T> unknown(Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor);
+    }
+
+    public interface CompletedStageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 
     @JsonTypeInfo(

@@ -99,29 +99,41 @@ public final class Union {
             implements FooStageVisitorBuilder<T>,
                     BarStageVisitorBuilder<T>,
                     BazStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T> {
+                    UnknownStageVisitorBuilder<T>,
+                    CompletedStageVisitorBuilder<T> {
         private Function<String, T> fooVisitor;
 
         private Function<Integer, T> barVisitor;
 
         private Function<Long, T> bazVisitor;
 
+        private Function<String, T> unknownVisitor;
+
         public BarStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
+            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
             this.fooVisitor = fooVisitor;
             return this;
         }
 
         public BazStageVisitorBuilder<T> bar(Function<Integer, T> barVisitor) {
+            Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
             this.barVisitor = barVisitor;
             return this;
         }
 
         public UnknownStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor) {
+            Preconditions.checkNotNull(bazVisitor, "bazVisitor cannot be null");
             this.bazVisitor = bazVisitor;
             return this;
         }
 
-        public Visitor<T> unknown(Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownVisitor;
+            return this;
+        }
+
+        public Visitor<T> build() {
             return new Visitor<T>() {
                 public T visitFoo(String value) {
                     return fooVisitor.apply(value);
@@ -155,7 +167,11 @@ public final class Union {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Visitor<T> unknown(Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor);
+    }
+
+    public interface CompletedStageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 
     @JsonTypeInfo(
