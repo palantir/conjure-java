@@ -66,7 +66,7 @@ final class UndertowTypeFunctions {
     // "alias: integer", the returned type will be the type for "integer". The provided type must be an alias
     // (reference) type.
     static Type getAliasedType(Type type, List<TypeDefinition> typeDefinitions) {
-        Preconditions.checkArgument(isAliasType(type));
+        com.palantir.logsafe.Preconditions.checkArgument(isAliasType(type));
         return getAliasedType(type.accept(
                 new AbstractTypeVisitor<com.palantir.conjure.spec.TypeName>() {
                     @Override
@@ -219,7 +219,7 @@ final class UndertowTypeFunctions {
         Preconditions.checkArgument(isAsync(endpoint, flags),
                 "Endpoint must be async", SafeArg.of("endpoint", endpoint));
         return ParameterizedTypeName.get(ClassName.get(ListenableFuture.class),
-                endpoint.getReturns().map(mapper::getClassName).orElse(ClassName.get(Void.class)).box());
+                endpoint.getReturns().map(mapper::getClassName).orElseGet(() -> ClassName.get(Void.class)).box());
     }
 
     @Beta

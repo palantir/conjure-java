@@ -62,8 +62,7 @@ public final class ErrorGenerator {
                                         typeMapper,
                                         entry.getKey(),
                                         innerEntry.getKey(),
-                                        innerEntry.getValue()))
-                ).collect(Collectors.toSet());
+                                        innerEntry.getValue()))).collect(Collectors.toSet());
     }
 
     private static Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> splitErrorDefsByNamespace(

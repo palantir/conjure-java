@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import com.google.common.io.ByteStreams;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.product.UndertowEteBinaryService;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
@@ -47,7 +48,7 @@ final class UndertowBinaryResource implements UndertowEteBinaryService {
             byte[] data = new byte[numBytes];
             new Random().nextBytes(data);
             responseBody.write(data);
-            throw new RuntimeException("failure");
+            throw new SafeRuntimeException("failure");
         };
     }
 }
