@@ -21,18 +21,25 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import io.undertow.server.ExchangeCompletionListener;
 import io.undertow.server.HttpServerExchange;
 import java.util.function.Consumer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class SafeExchangeCompletionListenerTest {
 
     private static final HttpServerExchange exchange = HttpServerExchanges.createStub();
 
+    @Mock
+    private ExchangeCompletionListener.NextListener nextListener;
+
+    @Mock
+    private Consumer<HttpServerExchange> action;
+
     @Test
     public void test_normalExecution() {
-        ExchangeCompletionListener.NextListener nextListener =
-                Mockito.mock(ExchangeCompletionListener.NextListener.class);
-        @SuppressWarnings("unchecked") Consumer<HttpServerExchange> action = Mockito.mock(Consumer.class);
         ExchangeCompletionListener listener = SafeExchangeCompletionListener.of(action);
         listener.exchangeEvent(exchange, nextListener);
         Mockito.verify(action).accept(exchange);
@@ -42,9 +49,6 @@ public class SafeExchangeCompletionListenerTest {
 
     @Test
     public void test_throwsRuntimeException() {
-        ExchangeCompletionListener.NextListener nextListener =
-                Mockito.mock(ExchangeCompletionListener.NextListener.class);
-        @SuppressWarnings("unchecked") Consumer<HttpServerExchange> action = Mockito.mock(Consumer.class);
         Mockito.doThrow(new SafeIllegalArgumentException()).when(action).accept(exchange);
         ExchangeCompletionListener listener = SafeExchangeCompletionListener.of(action);
         listener.exchangeEvent(exchange, nextListener);
@@ -55,9 +59,6 @@ public class SafeExchangeCompletionListenerTest {
 
     @Test
     public void test_throwsError() {
-        ExchangeCompletionListener.NextListener nextListener =
-                Mockito.mock(ExchangeCompletionListener.NextListener.class);
-        @SuppressWarnings("unchecked") Consumer<HttpServerExchange> action = Mockito.mock(Consumer.class);
         Mockito.doThrow(new NoClassDefFoundError("com.palantir.Example")).when(action).accept(exchange);
         ExchangeCompletionListener listener = SafeExchangeCompletionListener.of(action);
         listener.exchangeEvent(exchange, nextListener);
