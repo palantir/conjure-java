@@ -28,8 +28,11 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Stream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+@Execution(ExecutionMode.CONCURRENT)
 public final class SafeLongTests {
 
     private static final long maxValue = 9007199254740991L;

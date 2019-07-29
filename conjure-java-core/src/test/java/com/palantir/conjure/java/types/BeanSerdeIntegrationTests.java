@@ -5,6 +5,7 @@
 package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -21,15 +22,12 @@ import com.palantir.product.SafeLongExample;
 import com.palantir.product.SetExample;
 import java.io.IOException;
 import java.util.Map;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+@Execution(ExecutionMode.CONCURRENT)
 public final class BeanSerdeIntegrationTests {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private static final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
 
     @Test
@@ -63,10 +61,10 @@ public final class BeanSerdeIntegrationTests {
     }
 
     @Test
-    public void testSafeLongExampleSerde_tooLarge() throws Exception {
-        expectedException.expect(JsonMappingException.class);
-        expectedException.expectMessage("number must be safely representable in javascript");
-        testSerde("{\"safeLongValue\": 9007199254740992}", SafeLongExample.class);
+    public void testSafeLongExampleSerde_tooLarge() {
+        assertThatThrownBy(() -> testSerde("{\"safeLongValue\": 9007199254740992}", SafeLongExample.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("number must be safely representable in javascript");
     }
 
     @Test

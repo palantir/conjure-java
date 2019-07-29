@@ -49,17 +49,16 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public final class AsyncRequestProcessingTest extends TestBase {
 
-    @ClassRule
-    public static final TemporaryFolder folder = new TemporaryFolder();
+    @TempDir
+    public static File folder;
 
     private static final ObjectMapper CLIENT_MAPPER = ObjectMappers.newClientObjectMapper();
 
@@ -68,17 +67,16 @@ public final class AsyncRequestProcessingTest extends TestBase {
     private ListeningScheduledExecutorService executor;
     private Undertow server;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/async-request-processing-test.yml")));
         List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(
-                FeatureFlags.UndertowListenableFutures, FeatureFlags.UndertowServicePrefix))
-                .emit(def, folder.getRoot());
+                FeatureFlags.UndertowListenableFutures, FeatureFlags.UndertowServicePrefix)).emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
-    @Before
+    @BeforeEach
     public void before() {
         executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
         UndertowRuntime context = ConjureUndertowRuntime.builder()
@@ -100,7 +98,7 @@ public final class AsyncRequestProcessingTest extends TestBase {
         server.start();
     }
 
-    @After
+    @AfterEach
     public void after() throws InterruptedException {
         executor.shutdownNow();
         server.stop();

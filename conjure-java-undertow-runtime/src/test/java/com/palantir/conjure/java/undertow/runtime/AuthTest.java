@@ -26,7 +26,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public final class AuthTest {

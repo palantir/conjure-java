@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import io.undertow.server.HttpHandler;
 import java.util.Collections;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 public class LoggingContextHandlerTest {

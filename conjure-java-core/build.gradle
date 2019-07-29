@@ -62,9 +62,9 @@ dependencies {
     testCompile 'com.palantir.safe-logging:preconditions-assertj'
     testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'io.dropwizard:dropwizard-testing'
-    testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 
     integrationInputCompile project(':conjure-lib')
     integrationInputCompile project(':conjure-undertow-lib')

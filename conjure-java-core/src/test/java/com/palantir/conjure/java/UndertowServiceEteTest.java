@@ -76,18 +76,22 @@ import java.util.Optional;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import retrofit2.Response;
 
+@Execution(ExecutionMode.CONCURRENT)
+@ResourceLock("port:8080")
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
-    @ClassRule
-    public static final TemporaryFolder folder = new TemporaryFolder();
+    @TempDir
+    public static File folder;
 
     private static Undertow server;
 
@@ -115,7 +119,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 clientConfiguration());
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void before() {
         UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
@@ -136,7 +140,7 @@ public final class UndertowServiceEteTest extends TestBase {
         server.start();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() {
         if (server != null) {
             server.stop();
@@ -475,16 +479,16 @@ public final class UndertowServiceEteTest extends TestBase {
         assertThat(client.enumHeader(AuthHeader.valueOf("authHeader"), SimpleEnum.VALUE)).isEqualTo(SimpleEnum.VALUE);
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml")));
         List<Path> files = ImmutableList.<Path>builder()
                 .addAll(new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
-                        .emit(def, folder.getRoot()))
+                        .emit(def, folder))
                 .addAll(new ObjectGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
-                        .emit(def, folder.getRoot()))
+                        .emit(def, folder))
                 .build();
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }

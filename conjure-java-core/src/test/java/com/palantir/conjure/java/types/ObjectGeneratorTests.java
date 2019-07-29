@@ -18,23 +18,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public final class ObjectGeneratorTests {
 
     private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @TempDir
+    public File tempDir;
 
     @Test
     public void testObjectGenerator_allExamples() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-types.yml")));
         List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes))
-                .emit(def, folder.getRoot());
+                .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
@@ -44,7 +43,7 @@ public final class ObjectGeneratorTests {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
         List<Path> files = new ObjectGenerator(Collections.emptySet())
-                .emit(def, folder.getRoot());
+                .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
@@ -56,7 +55,7 @@ public final class ObjectGeneratorTests {
                         new File("src/test/resources/example-conjure-imports.yml"),
                         new File("src/test/resources/example-types.yml"),
                         new File("src/test/resources/example-service.yml")));
-        File src = folder.newFolder("src");
+        File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
         ObjectGenerator generator = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes));
         generator.emit(conjure, src);
 
@@ -75,14 +74,14 @@ public final class ObjectGeneratorTests {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-errors.yml")));
         List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes))
-                .emit(def, folder.getRoot());
+                .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
 
     private void assertThatFilesAreTheSame(List<Path> files, String referenceFilesFolder) throws IOException {
         for (Path file : files) {
-            Path relativized = folder.getRoot().toPath().relativize(file);
+            Path relativized = tempDir.toPath().relativize(file);
             Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
                 // help make shrink-wrapping output sane

@@ -30,14 +30,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+@Execution(ExecutionMode.CONCURRENT)
 public final class Retrofit2ServiceGeneratorTests extends TestBase {
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @TempDir
+    public File folder;
 
     @Test
     public void testCompositionVanilla() throws IOException {
@@ -45,7 +47,7 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
                 ImmutableList.of(new File("src/test/resources/example-service.yml")));
 
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of())
-                .emit(def, folder.getRoot());
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit");
     }
 
@@ -55,7 +57,7 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
                 ImmutableList.of(new File("src/test/resources/example-service.yml")));
 
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitCompletableFutures))
-                .emit(def, folder.getRoot());
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit_completable_future");
     }
 
@@ -65,7 +67,7 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
                 ImmutableList.of(new File("src/test/resources/example-service.yml")));
 
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitListenableFutures))
-                .emit(def, folder.getRoot());
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit_listenable_future");
     }
 
@@ -77,7 +79,7 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
                         new File("src/test/resources/example-types.yml"),
                         new File("src/test/resources/example-service.yml")));
 
-        File src = folder.newFolder("src");
+        File src = Files.createDirectory(folder.toPath().resolve("src")).toFile();
         Retrofit2ServiceGenerator generator = new Retrofit2ServiceGenerator(ImmutableSet.of());
         generator.emit(conjure, src);
 

@@ -33,14 +33,14 @@ import java.util.Optional;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public final class ConjureHandlerTest {
 
     private static final OkHttpClient client = new OkHttpClient.Builder().build();
@@ -58,7 +58,7 @@ public final class ConjureHandlerTest {
 
     private List<Integer> wrappersBeforeBlockingCallOrder;
 
-    @Before
+    @BeforeEach
     public void before() {
         wrappersBeforeBlockingCallOrder = Lists.newArrayList();
         HttpHandler httpHandler = exchange -> {
@@ -97,7 +97,7 @@ public final class ConjureHandlerTest {
         server.start();
     }
 
-    @After
+    @AfterEach
     public void after() {
         server.stop();
     }

@@ -19,99 +19,92 @@ package com.palantir.conjure.java.verification.server;
 import com.google.common.io.Resources;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.verification.server.undertest.JerseyServerUnderTestApplication;
-import com.palantir.conjure.java.verification.server.undertest.JerseyServerUnderTestConfiguration;
-import com.palantir.conjure.java.verification.server.undertest.UndertowServerUnderTestRule;
+import com.palantir.conjure.java.verification.server.undertest.UndertowServerUnderTestExtension;
 import com.palantir.conjure.verification.client.EndpointName;
+import com.palantir.conjure.verification.client.PositiveAndNegativeTestCases;
 import com.palantir.conjure.verification.client.VerificationClientRequest;
 import com.palantir.conjure.verification.client.VerificationClientService;
-import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
 import org.junit.Assume;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(Parameterized.class)
+@ExtendWith(DropwizardExtensionsSupport.class)
+@Execution(ExecutionMode.CONCURRENT)
 public final class AutoDeserializeTest {
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
 
-    @ClassRule
-    public static final DropwizardAppRule<JerseyServerUnderTestConfiguration> jerseyServerUnderTestRule =
-            new DropwizardAppRule<>(JerseyServerUnderTestApplication.class,
-                    Resources.getResource("config.yml").getPath());
+    public static final DropwizardAppExtension<?> jerseyServerUnderTestExtension = new DropwizardAppExtension<>(
+            JerseyServerUnderTestApplication.class, Resources.getResource("config.yml").getPath());
 
-    @ClassRule
-    public static final UndertowServerUnderTestRule undertowServerUnderTestRule = new UndertowServerUnderTestRule();
+    @RegisterExtension
+    public static final UndertowServerUnderTestExtension undertowServerUnderTest =
+            new UndertowServerUnderTestExtension();
 
-    @ClassRule
-    public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
+    @RegisterExtension
+    public static final VerificationClientExtension VERIFICATION_CLIENT_EXTENSION = new VerificationClientExtension();
+
     private static final VerificationClientService verificationService = VerificationClients.verificationClientService(
-            verificationClientRule);
+            VERIFICATION_CLIENT_EXTENSION);
 
-    @Parameterized.Parameter(0)
-    public EndpointName endpointName;
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
+    @MethodSource("getTestCases")
+    public @interface AutoDeserializeTestCases { }
 
-    @Parameterized.Parameter(1)
-    public int index;
-
-    @Parameterized.Parameter(2)
-    public boolean shouldSucceed;
-
-    @Parameterized.Parameter(3)
-    public String jsonString;
-
-    @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
-    public static Collection<Object[]> data() {
-        List<Object[]> objects = new ArrayList<>();
-        Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
+    public static Stream<Arguments> getTestCases() {
+        return Cases.TEST_CASES.getAutoDeserialize().entrySet().stream().flatMap(testCase -> {
+            EndpointName endpointName = testCase.getKey();
+            PositiveAndNegativeTestCases positiveAndNegativeTestCases = testCase.getValue();
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-            IntStream.range(0, positiveSize).forEach(i -> objects.add(new Object[] {
-                    endpointName, i, true,
-                    positiveAndNegativeTestCases.getPositive().get(i)}));
-
-            IntStream.range(0, negativeSize).forEach(i -> objects.add(new Object[] {
-                    endpointName, positiveSize + i, false,
-                    positiveAndNegativeTestCases.getNegative().get(i)}));
+            return Stream.concat(
+                    IntStream.range(0, positiveSize).mapToObj(i1 ->
+                            Arguments.of(endpointName, i1, true, positiveAndNegativeTestCases.getPositive().get(i1))),
+                    IntStream.range(0, negativeSize).mapToObj(i -> Arguments.of(
+                            endpointName, positiveSize + i, false, positiveAndNegativeTestCases.getNegative().get(i))));
         });
-        return objects;
     }
 
-    @Test
-    public void runJerseyTestCase() throws Exception {
-        runTestCase(jerseyServerUnderTestRule.getLocalPort());
+    @AutoDeserializeTestCases
+    public void runJerseyTestCase(
+            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
+        runTestCase(endpointName, index, shouldSucceed, jsonString, jerseyServerUnderTestExtension.getLocalPort());
     }
 
-    @Test
-    public void runUndertowTestCase() throws Exception {
-        runTestCase(undertowServerUnderTestRule.getLocalPort());
+    @AutoDeserializeTestCases
+    public void runUndertowTestCase(
+            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
+        runTestCase(
+                endpointName, index, shouldSucceed, jsonString, undertowServerUnderTest.getLocalPort());
     }
 
-    public void runTestCase(int port) throws Exception {
+    public void runTestCase(
+            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString, int port) {
         Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
-        System.out.println(String.format("Test case %s: Invoking %s(%s), expected %s",
-                index,
-                endpointName,
-                jsonString,
-                shouldSucceed ? "success" : "failure"));
-
         if (shouldSucceed) {
-            expectSuccess(port);
+            expectSuccess(endpointName, index, port);
         } else {
-            expectFailure(port);
+            expectFailure(endpointName, index, port);
         }
     }
 
-    private void expectSuccess(int port) throws Exception {
+    private void expectSuccess(EndpointName endpointName, int index, int port) {
         try {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
@@ -124,7 +117,7 @@ public final class AutoDeserializeTest {
         }
     }
 
-    private void expectFailure(int port) {
+    private void expectFailure(EndpointName endpointName, int index, int port) {
         Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)

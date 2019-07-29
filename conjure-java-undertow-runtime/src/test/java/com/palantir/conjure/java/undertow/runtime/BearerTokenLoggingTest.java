@@ -28,9 +28,9 @@ import io.undertow.util.Methods;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 public class BearerTokenLoggingTest {
@@ -67,7 +67,7 @@ public class BearerTokenLoggingTest {
 
     private HttpHandler handler;
 
-    @Before
+    @BeforeEach
     public void before() {
         MDC.clear();
         delegateRunnable.set(null);
@@ -79,7 +79,7 @@ public class BearerTokenLoggingTest {
         });
     }
 
-    @After
+    @AfterEach
     public void after() {
         MDC.clear();
     }

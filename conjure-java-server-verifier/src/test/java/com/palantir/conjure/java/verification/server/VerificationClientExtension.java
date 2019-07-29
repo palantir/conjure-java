@@ -30,16 +30,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Spins up the 'verification-client' executable which will bind to port 8000, and tears it down at the end of the test.
  */
-public final class VerificationClientRule extends ExternalResource {
+public final class VerificationClientExtension implements BeforeAllCallback, AfterAllCallback {
 
-    private static final Logger log = LoggerFactory.getLogger(VerificationClientRule.class);
+    private static final Logger log = LoggerFactory.getLogger(VerificationClientExtension.class);
     private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
             .trustStorePath(Paths.get("../conjure-java-core/var/security/truststore.jks"))
             .build();
@@ -56,7 +58,7 @@ public final class VerificationClientRule extends ExternalResource {
     }
 
     @Override
-    public void before() throws Exception {
+    public void beforeAll(ExtensionContext context) throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder(
                 "build/verification/verifier",
                 "build/test-cases/test-cases.json",
@@ -102,7 +104,7 @@ public final class VerificationClientRule extends ExternalResource {
     }
 
     @Override
-    protected void after() {
+    public void afterAll(ExtensionContext context) {
         process.destroyForcibly();
         try {
             process.waitFor(5, TimeUnit.SECONDS);

@@ -5,6 +5,7 @@
 package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,16 +36,13 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
+@Execution(ExecutionMode.CONCURRENT)
 public final class WireFormatTests {
-
     private final ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testPresentCollectionFieldsDeserializeWithElements() throws Exception {
@@ -285,10 +283,10 @@ public final class WireFormatTests {
     }
 
     @Test
-    public void testUnionType_noType() throws Exception {
-        String noType = "{\"typ\":\"unknown\",\"value\":5}";
-        expectedException.expect(JsonMappingException.class);
-        mapper.readValue(noType, UnionTypeExample.class);
+    public void testUnionType_noType() {
+        assertThatThrownBy(() ->
+                mapper.readValue("{\"typ\":\"unknown\",\"value\":5}", UnionTypeExample.class))
+                .isInstanceOf(JsonMappingException.class);
     }
 
     @Test

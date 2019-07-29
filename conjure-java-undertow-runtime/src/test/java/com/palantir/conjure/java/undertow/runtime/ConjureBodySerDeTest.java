@@ -28,7 +28,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 import java.io.IOException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ConjureBodySerDeTest {
 

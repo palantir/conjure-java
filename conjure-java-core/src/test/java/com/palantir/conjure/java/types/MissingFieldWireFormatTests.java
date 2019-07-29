@@ -28,7 +28,7 @@ import com.palantir.product.SafeLongExample;
 import com.palantir.product.SetExample;
 import com.palantir.product.StringExample;
 import com.palantir.product.UuidExample;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MissingFieldWireFormatTests {
 

@@ -25,10 +25,10 @@ dependencies {
     compile 'javax.annotation:javax.annotation-api'
     compile 'javax.ws.rs:javax.ws.rs-api'
 
-    testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
     testCompile 'com.palantir.safe-logging:preconditions-assertj'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'

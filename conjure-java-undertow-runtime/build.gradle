@@ -28,9 +28,10 @@ dependencies {
     // Required for tests using the slf4j MDC which is not implemented in slf4j-simple
     testImplementation 'ch.qos.logback:logback-classic'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
-    testImplementation 'junit:junit'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
