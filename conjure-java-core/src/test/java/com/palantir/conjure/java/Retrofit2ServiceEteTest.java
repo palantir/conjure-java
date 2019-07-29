@@ -55,7 +55,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 
 @Execution(ExecutionMode.CONCURRENT)
 @ExtendWith(DropwizardExtensionsSupport.class)
-@ResourceLock("EteServer")
+@ResourceLock("port:8080")
 public final class Retrofit2ServiceEteTest extends TestBase {
 
     @TempDir

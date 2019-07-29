@@ -68,7 +68,7 @@ import retrofit2.Response;
 
 @Execution(ExecutionMode.CONCURRENT)
 @ExtendWith(DropwizardExtensionsSupport.class)
-@ResourceLock("EteServer")
+@ResourceLock("port:8080")
 public final class JerseyServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 

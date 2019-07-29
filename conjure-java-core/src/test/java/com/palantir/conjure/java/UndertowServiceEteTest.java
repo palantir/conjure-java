@@ -86,7 +86,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import retrofit2.Response;
 
 @Execution(ExecutionMode.CONCURRENT)
-@ResourceLock("EteServer")
+@ResourceLock("port:8080")
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
