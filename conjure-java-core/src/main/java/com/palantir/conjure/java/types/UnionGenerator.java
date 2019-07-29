@@ -52,9 +52,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.DoubleFunction;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -379,7 +382,7 @@ public final class UnionGenerator {
         Stream<NameTypePair> memberTypes = memberTypeMap.entrySet().stream().map(NameTypePair::fromMapEntry);
         return Stream.concat(memberTypes, Stream.of(NameTypePair.UNKNOWN))
                 .map(field -> FieldSpec.builder(
-                        visitorObjectTypeName(field.type.box(), visitResultType),
+                        visitorObjectTypeName(field.type, visitResultType),
                         visitorFieldName(field.memberName),
                         Modifier.PRIVATE).build())
                 .collect(Collectors.toList());
@@ -395,10 +398,16 @@ public final class UnionGenerator {
      * visitor builder.
      */
     private static TypeName visitorObjectTypeName(TypeName memberType, TypeName visitResultType) {
-        return ParameterizedTypeName.get(
-                ClassName.get(Function.class),
-                memberType.box(),
-                visitResultType);
+        if (memberType.equals(TypeName.INT)) {
+            return ParameterizedTypeName.get(ClassName.get(IntFunction.class), visitResultType);
+        } else if (memberType.equals(TypeName.DOUBLE)) {
+            return ParameterizedTypeName.get(ClassName.get(DoubleFunction.class), visitResultType);
+        } else {
+            return ParameterizedTypeName.get(
+                    ClassName.get(Function.class),
+                    memberType.box(),
+                    visitResultType);
+        }
     }
 
     /** Generate all interfaces for the various visitor builder stages. */
@@ -451,6 +460,7 @@ public final class UnionGenerator {
         TypeName visitorObject = visitorObjectTypeName(memberType, visitResultType);
         return MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
                 .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName))
+                        .addAnnotation(Nonnull.class)
                         .build())
                 .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
     }

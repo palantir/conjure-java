@@ -15,7 +15,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 /** A type which can either be a StringExample, a set of strings, or an integer. */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
@@ -145,64 +147,67 @@ public final class UnionTypeExample {
 
         private Function<Set<String>, T> setVisitor;
 
-        private Function<Integer, T> thisFieldIsAnIntegerVisitor;
+        private IntFunction<T> thisFieldIsAnIntegerVisitor;
 
-        private Function<Integer, T> alsoAnIntegerVisitor;
+        private IntFunction<T> alsoAnIntegerVisitor;
 
-        private Function<Integer, T> ifVisitor;
+        private IntFunction<T> ifVisitor;
 
-        private Function<Integer, T> newVisitor;
+        private IntFunction<T> newVisitor;
 
-        private Function<Integer, T> interfaceVisitor;
+        private IntFunction<T> interfaceVisitor;
 
         private Function<String, T> unknownVisitor;
 
         public SetStageVisitorBuilder<T> stringExample(
-                Function<StringExample, T> stringExampleVisitor) {
+                @Nonnull Function<StringExample, T> stringExampleVisitor) {
             Preconditions.checkNotNull(stringExampleVisitor, "stringExampleVisitor cannot be null");
             this.stringExampleVisitor = stringExampleVisitor;
             return this;
         }
 
-        public ThisFieldIsAnIntegerStageVisitorBuilder<T> set(Function<Set<String>, T> setVisitor) {
+        public ThisFieldIsAnIntegerStageVisitorBuilder<T> set(
+                @Nonnull Function<Set<String>, T> setVisitor) {
             Preconditions.checkNotNull(setVisitor, "setVisitor cannot be null");
             this.setVisitor = setVisitor;
             return this;
         }
 
         public AlsoAnIntegerStageVisitorBuilder<T> thisFieldIsAnInteger(
-                Function<Integer, T> thisFieldIsAnIntegerVisitor) {
+                @Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor) {
             Preconditions.checkNotNull(
                     thisFieldIsAnIntegerVisitor, "thisFieldIsAnIntegerVisitor cannot be null");
             this.thisFieldIsAnIntegerVisitor = thisFieldIsAnIntegerVisitor;
             return this;
         }
 
-        public IfStageVisitorBuilder<T> alsoAnInteger(Function<Integer, T> alsoAnIntegerVisitor) {
+        public IfStageVisitorBuilder<T> alsoAnInteger(
+                @Nonnull IntFunction<T> alsoAnIntegerVisitor) {
             Preconditions.checkNotNull(alsoAnIntegerVisitor, "alsoAnIntegerVisitor cannot be null");
             this.alsoAnIntegerVisitor = alsoAnIntegerVisitor;
             return this;
         }
 
-        public NewStageVisitorBuilder<T> if_(Function<Integer, T> ifVisitor) {
+        public NewStageVisitorBuilder<T> if_(@Nonnull IntFunction<T> ifVisitor) {
             Preconditions.checkNotNull(ifVisitor, "ifVisitor cannot be null");
             this.ifVisitor = ifVisitor;
             return this;
         }
 
-        public InterfaceStageVisitorBuilder<T> new_(Function<Integer, T> newVisitor) {
+        public InterfaceStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor) {
             Preconditions.checkNotNull(newVisitor, "newVisitor cannot be null");
             this.newVisitor = newVisitor;
             return this;
         }
 
-        public UnknownStageVisitorBuilder<T> interface_(Function<Integer, T> interfaceVisitor) {
+        public UnknownStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor) {
             Preconditions.checkNotNull(interfaceVisitor, "interfaceVisitor cannot be null");
             this.interfaceVisitor = interfaceVisitor;
             return this;
         }
 
-        public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(
+                @Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -246,36 +251,38 @@ public final class UnionTypeExample {
     }
 
     public interface StringExampleStageVisitorBuilder<T> {
-        SetStageVisitorBuilder<T> stringExample(Function<StringExample, T> stringExampleVisitor);
+        SetStageVisitorBuilder<T> stringExample(
+                @Nonnull Function<StringExample, T> stringExampleVisitor);
     }
 
     public interface SetStageVisitorBuilder<T> {
-        ThisFieldIsAnIntegerStageVisitorBuilder<T> set(Function<Set<String>, T> setVisitor);
+        ThisFieldIsAnIntegerStageVisitorBuilder<T> set(
+                @Nonnull Function<Set<String>, T> setVisitor);
     }
 
     public interface ThisFieldIsAnIntegerStageVisitorBuilder<T> {
         AlsoAnIntegerStageVisitorBuilder<T> thisFieldIsAnInteger(
-                Function<Integer, T> thisFieldIsAnIntegerVisitor);
+                @Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor);
     }
 
     public interface AlsoAnIntegerStageVisitorBuilder<T> {
-        IfStageVisitorBuilder<T> alsoAnInteger(Function<Integer, T> alsoAnIntegerVisitor);
+        IfStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor);
     }
 
     public interface IfStageVisitorBuilder<T> {
-        NewStageVisitorBuilder<T> if_(Function<Integer, T> ifVisitor);
+        NewStageVisitorBuilder<T> if_(@Nonnull IntFunction<T> ifVisitor);
     }
 
     public interface NewStageVisitorBuilder<T> {
-        InterfaceStageVisitorBuilder<T> new_(Function<Integer, T> newVisitor);
+        InterfaceStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor);
     }
 
     public interface InterfaceStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> interface_(Function<Integer, T> interfaceVisitor);
+        UnknownStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
     }
 
     public interface CompletedStageVisitorBuilder<T> {

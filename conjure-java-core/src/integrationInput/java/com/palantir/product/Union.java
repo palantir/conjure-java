@@ -14,7 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class Union {
@@ -103,31 +105,32 @@ public final class Union {
                     CompletedStageVisitorBuilder<T> {
         private Function<String, T> fooVisitor;
 
-        private Function<Integer, T> barVisitor;
+        private IntFunction<T> barVisitor;
 
         private Function<Long, T> bazVisitor;
 
         private Function<String, T> unknownVisitor;
 
-        public BarStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
+        public BarStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor) {
             Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
             this.fooVisitor = fooVisitor;
             return this;
         }
 
-        public BazStageVisitorBuilder<T> bar(Function<Integer, T> barVisitor) {
+        public BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor) {
             Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
             this.barVisitor = barVisitor;
             return this;
         }
 
-        public UnknownStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor) {
+        public UnknownStageVisitorBuilder<T> baz(@Nonnull Function<Long, T> bazVisitor) {
             Preconditions.checkNotNull(bazVisitor, "bazVisitor cannot be null");
             this.bazVisitor = bazVisitor;
             return this;
         }
 
-        public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(
+                @Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -155,19 +158,19 @@ public final class Union {
     }
 
     public interface FooStageVisitorBuilder<T> {
-        BarStageVisitorBuilder<T> foo(Function<String, T> fooVisitor);
+        BarStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor);
     }
 
     public interface BarStageVisitorBuilder<T> {
-        BazStageVisitorBuilder<T> bar(Function<Integer, T> barVisitor);
+        BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor);
     }
 
     public interface BazStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor);
+        UnknownStageVisitorBuilder<T> baz(@Nonnull Function<Long, T> bazVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
     }
 
     public interface CompletedStageVisitorBuilder<T> {
