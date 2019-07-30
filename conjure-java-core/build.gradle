@@ -61,6 +61,7 @@ dependencies {
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
     testCompile 'com.palantir.safe-logging:preconditions-assertj'
     testCompile 'com.palantir.conjure.java.runtime:keystores'
+    testCompile 'com.palantir.tracing:tracing'
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'

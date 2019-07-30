@@ -25,15 +25,24 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
+import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.client.config.ClientConfigurations;
+import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
+import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.product.AsyncRequestProcessingTestService;
 import com.palantir.product.AsyncRequestProcessingTestServiceEndpoints;
+import com.palantir.tracing.Tracer;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import java.io.File;
@@ -61,18 +70,26 @@ public final class AsyncRequestProcessingTest extends TestBase {
     public static File folder;
 
     private static final ObjectMapper CLIENT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
+            .trustStorePath(Paths.get("var/security/truststore.jks"))
+            .build();
 
     private static final int PORT = 12347;
 
     private ListeningScheduledExecutorService executor;
     private Undertow server;
+    private AsyncRequestProcessingTestService client;
 
     @BeforeAll
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/async-request-processing-test.yml")));
-        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(
-                FeatureFlags.UndertowListenableFutures, FeatureFlags.UndertowServicePrefix)).emit(def, folder);
+        List<Path> files = ImmutableList.<Path>builder()
+                .addAll(new UndertowServiceGenerator(
+                        ImmutableSet.of(FeatureFlags.UndertowListenableFutures, FeatureFlags.UndertowServicePrefix))
+                        .emit(def, folder))
+                .addAll(new JerseyServiceGenerator(ImmutableSet.of()).emit(def, folder))
+                .build();
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
@@ -96,6 +113,13 @@ public final class AsyncRequestProcessingTest extends TestBase {
                         .build())
                 .build();
         server.start();
+        client = JaxRsClient.create(AsyncRequestProcessingTestService.class,
+                UserAgent.of(UserAgent.Agent.of("test", "develop")),
+                new HostMetricsRegistry(),
+                ClientConfigurations.of(
+                        ImmutableList.of("http://localhost:" + PORT + "/"),
+                        SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
+                        SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION)));
     }
 
     @AfterEach
@@ -194,6 +218,26 @@ public final class AsyncRequestProcessingTest extends TestBase {
             assertThat(response).matches(resp -> resp.code() == 200);
             assertThat(response.header(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
             assertThat(new String(response.body().bytes(), StandardCharsets.UTF_8)).isEqualTo("Hello");
+        }
+    }
+
+    @Test
+    public void testAsyncOperationHasTraceId_immediateResult() {
+        Tracer.fastStartSpan("test");
+        try {
+            assertThat(client.futureTraceId(OptionalInt.empty())).asString().isEqualTo(Tracer.getTraceId());
+        } finally {
+            Tracer.fastCompleteSpan();
+        }
+    }
+
+    @Test
+    public void testAsyncOperationHasTraceId_delayedResult() {
+        Tracer.fastStartSpan("test");
+        try {
+            assertThat(client.futureTraceId(OptionalInt.of(100))).asString().isEqualTo(Tracer.getTraceId());
+        } finally {
+            Tracer.fastCompleteSpan();
         }
     }
 

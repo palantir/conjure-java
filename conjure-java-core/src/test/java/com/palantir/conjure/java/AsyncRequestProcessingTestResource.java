@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
@@ -24,6 +25,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.product.UndertowAsyncRequestProcessingTestService;
+import com.palantir.tracing.Tracer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -71,5 +73,26 @@ final class AsyncRequestProcessingTestResource implements UndertowAsyncRequestPr
     public ListenableFuture<Optional<BinaryResponseBody>> binary(Optional<String> stringValue) {
         return executor.submit(() -> stringValue.map(string -> responseBody ->
                 responseBody.write(string.getBytes(StandardCharsets.UTF_8))));
+    }
+
+    @Override
+    public ListenableFuture<Object> futureTraceId(OptionalInt delayMillis) {
+        if (delayMillis.isPresent()) {
+            int delay = delayMillis.getAsInt();
+            return Futures.transform(
+                    executor.schedule(() -> { }, delay, TimeUnit.MILLISECONDS),
+                    ignored -> new LazyTraceValue(),
+                    MoreExecutors.directExecutor());
+        } else {
+            return Futures.immediateFuture(new LazyTraceValue());
+        }
+    }
+
+    private static final class LazyTraceValue {
+
+        @JsonValue
+        public String traceId() {
+            return Tracer.getTraceId();
+        }
     }
 }

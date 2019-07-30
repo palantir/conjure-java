@@ -15,4 +15,6 @@ public interface UndertowAsyncRequestProcessingTestService {
     ListenableFuture<Void> failedFuture(OptionalInt delayMillis);
 
     ListenableFuture<Optional<BinaryResponseBody>> binary(Optional<String> stringValue);
+
+    ListenableFuture<Object> futureTraceId(OptionalInt delayMillis);
 }

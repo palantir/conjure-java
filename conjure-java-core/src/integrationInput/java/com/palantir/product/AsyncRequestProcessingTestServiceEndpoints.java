@@ -43,7 +43,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
                         new DelayEndpoint(runtime, delegate),
                         new ThrowsInHandlerEndpoint(runtime, delegate),
                         new FailedFutureEndpoint(runtime, delegate),
-                        new BinaryEndpoint(runtime, delegate)));
+                        new BinaryEndpoint(runtime, delegate),
+                        new FutureTraceIdEndpoint(runtime, delegate)));
     }
 
     private static final class DelayEndpoint
@@ -250,6 +251,61 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         @Override
         public String name() {
             return "binary";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class FutureTraceIdEndpoint
+            implements HttpHandler, Endpoint, ReturnValueWriter<Object> {
+        private final UndertowRuntime runtime;
+
+        private final UndertowAsyncRequestProcessingTestService delegate;
+
+        private final Serializer<Object> serializer;
+
+        FutureTraceIdEndpoint(
+                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Object>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            OptionalInt delayMillis =
+                    runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("delayMillis"));
+            ListenableFuture<Object> result = delegate.futureTraceId(delayMillis);
+            runtime.async().register(result, this, exchange);
+        }
+
+        @Override
+        public void write(Object result, HttpServerExchange exchange) throws IOException {
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/async/future-trace";
+        }
+
+        @Override
+        public String serviceName() {
+            return "AsyncRequestProcessingTestService";
+        }
+
+        @Override
+        public String name() {
+            return "futureTraceId";
         }
 
         @Override
