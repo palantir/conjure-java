@@ -57,7 +57,6 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -459,9 +458,7 @@ public final class UnionGenerator {
             ClassName nextBuilderStage) {
         TypeName visitorObject = visitorObjectTypeName(memberType, visitResultType);
         return MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
-                .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName))
-                        .addAnnotation(Nonnull.class)
-                        .build())
+                .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName)).build())
                 .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
     }
 

@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class SingleUnion {
@@ -88,14 +87,13 @@ public final class SingleUnion {
 
         private Function<String, T> unknownVisitor;
 
-        public UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor) {
+        public UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
             Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
             this.fooVisitor = fooVisitor;
             return this;
         }
 
-        public CompletedStageVisitorBuilder<T> unknown(
-                @Nonnull Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -115,11 +113,11 @@ public final class SingleUnion {
     }
 
     public interface FooStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor);
+        UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor);
     }
 
     public interface CompletedStageVisitorBuilder<T> {
