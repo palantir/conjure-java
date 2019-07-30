@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Undertow async result exceptions are logged with the correct traceId
+  links:
+  - https://github.com/palantir/conjure-java/pull/473
