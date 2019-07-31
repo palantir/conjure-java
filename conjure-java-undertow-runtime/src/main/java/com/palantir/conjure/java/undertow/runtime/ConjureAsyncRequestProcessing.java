@@ -150,25 +150,10 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
     }
 
     private HttpHandler wrapCallback(HttpHandler action, DeferredTracer tracer) {
-        return new DeferredTracerHandler(new ConjureExceptionHandler(action, exceptionSerializer), tracer);
-    }
-
-    private static final class DeferredTracerHandler implements HttpHandler {
-
-        private final HttpHandler next;
-        private final DeferredTracer tracer;
-
-        DeferredTracerHandler(HttpHandler next, DeferredTracer tracer) {
-            this.next = next;
-            this.tracer = tracer;
-        }
-
-        @Override
-        public void handleRequest(HttpServerExchange exchange) throws Exception {
-            tracer.withTrace(() -> {
-                next.handleRequest(exchange);
-                return null;
-            });
-        }
+        HttpHandler next = new ConjureExceptionHandler(action, exceptionSerializer);
+        return exchange -> tracer.withTrace(() -> {
+            next.handleRequest(exchange);
+            return null;
+        });
     }
 }
