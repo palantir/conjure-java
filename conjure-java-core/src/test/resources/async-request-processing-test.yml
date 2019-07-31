@@ -31,3 +31,11 @@ services:
             param-type: query
             type: optional<string>
         returns: optional<binary>
+
+      futureTraceId:
+        http: GET /future-trace
+        args:
+          delayMillis:
+            param-type: query
+            type: optional<integer>
+        returns: any

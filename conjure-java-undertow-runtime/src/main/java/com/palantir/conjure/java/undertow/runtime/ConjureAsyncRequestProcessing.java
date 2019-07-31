@@ -25,6 +25,7 @@ import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.tracing.DeferredTracer;
 import io.undertow.server.ExchangeCompletionListener;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -133,18 +134,26 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
         //    after this Endpoints HttpHandler returns. Otherwise an unlucky future could race
         //    HttpServerExchange.isInCall transitioning from true -> false, causing hte dispatch task not
         //    to execute.
+        DeferredTracer tracer = new DeferredTracer("Undertow: Async Result");
         exchange.dispatch(() -> Futures.addCallback(future, new FutureCallback<T>() {
             @Override
             public void onSuccess(@Nullable T result) {
-                exchange.dispatch(new ConjureExceptionHandler(serverExchange ->
-                        returnValueWriter.write(result, exchange), exceptionSerializer));
+                exchange.dispatch(wrapCallback(serverExchange -> returnValueWriter.write(result, exchange), tracer));
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                exchange.dispatch(new ConjureExceptionHandler(serverExchange -> ConjureExceptions.handle(
-                        serverExchange, exceptionSerializer, throwable), exceptionSerializer));
+                exchange.dispatch(wrapCallback(serverExchange -> ConjureExceptions.handle(
+                        serverExchange, exceptionSerializer, throwable), tracer));
             }
         }, DIRECT_EXECUTOR));
+    }
+
+    private HttpHandler wrapCallback(HttpHandler action, DeferredTracer tracer) {
+        HttpHandler next = new ConjureExceptionHandler(action, exceptionSerializer);
+        return exchange -> tracer.withTrace(() -> {
+            next.handleRequest(exchange);
+            return null;
+        });
     }
 }
