@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.ConjureEnum;
+import com.palantir.conjure.java.lib.WrappedConjureEnum;
 import com.palantir.logsafe.Preconditions;
 import java.util.Locale;
 import javax.annotation.Generated;
@@ -21,7 +22,7 @@ import javax.annotation.Generated;
  * compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
-public final class EnumExample implements ConjureEnum<EnumExample.Value> {
+public final class EnumExample implements ConjureEnum<EnumExample, EnumExample.Value> {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
     public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
@@ -91,7 +92,7 @@ public final class EnumExample implements ConjureEnum<EnumExample.Value> {
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
-    public enum Value {
+    public enum Value implements WrappedConjureEnum<Value, EnumExample> {
         ONE,
 
         TWO,
@@ -99,7 +100,12 @@ public final class EnumExample implements ConjureEnum<EnumExample.Value> {
         /** Value of 100. */
         ONE_HUNDRED,
 
-        UNKNOWN
+        UNKNOWN;
+
+        @Override
+        public EnumExample toWrapper() {
+            return EnumExample.valueOf(name().toUpperCase(Locale.ROOT));
+        }
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")

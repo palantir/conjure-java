@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.lib.ConjureEnum;
+import com.palantir.conjure.java.lib.WrappedConjureEnum;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
@@ -66,10 +67,10 @@ public final class EnumGenerator {
     private static TypeSpec createSafeEnum(
             EnumDefinition typeDef, ClassName thisClass, ClassName enumClass, ClassName visitorClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
-                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(ConjureEnum.class), enumClass))
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(ConjureEnum.class), thisClass, enumClass))
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addType(createEnum(enumClass, typeDef.getValues(), true))
+                .addType(createEnum(enumClass, thisClass, typeDef.getValues(), true))
                 .addType(createVisitor(visitorClass, typeDef.getValues()))
                 .addField(enumClass, VALUE_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
                 .addField(ClassName.get(String.class), STRING_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
@@ -125,15 +126,27 @@ public final class EnumGenerator {
                 });
     }
 
-    private static TypeSpec createEnum(ClassName enumClass, Iterable<EnumValueDefinition> values, boolean withUnknown) {
+    private static TypeSpec createEnum(ClassName enumClass,
+            ClassName outerClass,
+            Iterable<EnumValueDefinition> values,
+            boolean withUnknown) {
         TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(enumClass.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(WrappedConjureEnum.class),
+                        enumClass,
+                        outerClass))
                 .addModifiers(Modifier.PUBLIC);
         for (EnumValueDefinition value : values) {
             TypeSpec.Builder anonymousClassBuilder = TypeSpec.anonymousClassBuilder("");
             value.getDocs().ifPresent(docs -> anonymousClassBuilder.addJavadoc("$L", Javadoc.render(docs)));
             enumBuilder.addEnumConstant(value.getValue(), anonymousClassBuilder.build());
         }
+        enumBuilder.addMethod(MethodSpec.methodBuilder("toWrapper")
+            .addModifiers(Modifier.PUBLIC)
+            .addAnnotation(Override.class)
+            .returns(outerClass)
+            .addStatement("return $T.valueOf(name().toUpperCase($T.ROOT))", outerClass, Locale.class)
+            .build());
         if (withUnknown) {
             enumBuilder.addEnumConstant("UNKNOWN");
         } else {

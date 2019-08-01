@@ -17,14 +17,14 @@
 package com.palantir.conjure.java.lib;
 
 /**
- * This is the common interface for all Conjure-generated Enum types.
+ * Represents a native Java enum that is the underlying value of a {@link ConjureEnum}.
  */
-public interface ConjureEnum<T extends ConjureEnum<T, E>, E extends Enum<E> & WrappedConjureEnum<E, T>> {
+public interface WrappedConjureEnum<E extends Enum<E> & WrappedConjureEnum<E, T>, T extends ConjureEnum<T, E>> {
     /**
-     * Gets the underlying value enum for this wrapped value.
+     * Returns the wrapped
      *
-     * In general, if {@code t} is a {@code ConjureEnum}, then {@code t.get().toWrapper().equals(t)}. The exception
-     * to this is if {@code t.get() == UNKNOWN}.
+     * This method satisfies the contract that if {@code e} is a {@code WrappedConjureEnum}, then {@code e.toWrapped()
+     * .get() == e}.
      */
-    E get();
+    T toWrapper();
 }

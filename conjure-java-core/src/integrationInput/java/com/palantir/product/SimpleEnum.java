@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.ConjureEnum;
+import com.palantir.conjure.java.lib.WrappedConjureEnum;
 import com.palantir.logsafe.Preconditions;
 import java.util.Locale;
 import javax.annotation.Generated;
@@ -19,7 +20,7 @@ import javax.annotation.Generated;
  * compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
-public final class SimpleEnum implements ConjureEnum<SimpleEnum.Value> {
+public final class SimpleEnum implements ConjureEnum<SimpleEnum, SimpleEnum.Value> {
     public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
 
     private final Value value;
@@ -75,10 +76,15 @@ public final class SimpleEnum implements ConjureEnum<SimpleEnum.Value> {
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
-    public enum Value {
+    public enum Value implements WrappedConjureEnum<Value, SimpleEnum> {
         VALUE,
 
-        UNKNOWN
+        UNKNOWN;
+
+        @Override
+        public SimpleEnum toWrapper() {
+            return SimpleEnum.valueOf(name().toUpperCase(Locale.ROOT));
+        }
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")

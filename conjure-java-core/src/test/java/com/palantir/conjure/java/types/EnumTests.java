@@ -19,7 +19,6 @@ package com.palantir.conjure.java.types;
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.conjure.java.lib.ConjureEnum;
 import com.palantir.product.EnumExample;
 import org.junit.Test;
 
@@ -34,7 +33,7 @@ public class EnumTests {
     @Test
     public void testValueInvertability() {
         for (EnumExample.Value val : EnumExample.Value.class.getEnumConstants()) {
-            assertThat(ConjureEnum.valueOf(val, EnumExample.class).get()).isEqualTo(val);
+            assertThat(val.toWrapper().get()).isEqualTo(val);
         }
     }
 
