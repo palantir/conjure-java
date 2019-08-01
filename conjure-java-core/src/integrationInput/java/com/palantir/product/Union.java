@@ -91,15 +91,15 @@ public final class Union {
 
         T visitUnknown(String unknownType);
 
-        static <T> FooStageVisitorBuilder<T> builder() {
+        static <T> BarStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
         }
     }
 
     private static class VisitorBuilder<T>
-            implements FooStageVisitorBuilder<T>,
-                    BarStageVisitorBuilder<T>,
+            implements BarStageVisitorBuilder<T>,
                     BazStageVisitorBuilder<T>,
+                    FooStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
                     CompletedStageVisitorBuilder<T> {
         private Function<String, T> fooVisitor;
@@ -110,21 +110,21 @@ public final class Union {
 
         private Function<String, T> unknownVisitor;
 
-        public BarStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
-            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
-            this.fooVisitor = fooVisitor;
-            return this;
-        }
-
         public BazStageVisitorBuilder<T> bar(IntFunction<T> barVisitor) {
             Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
             this.barVisitor = barVisitor;
             return this;
         }
 
-        public UnknownStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor) {
+        public FooStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor) {
             Preconditions.checkNotNull(bazVisitor, "bazVisitor cannot be null");
             this.bazVisitor = bazVisitor;
+            return this;
+        }
+
+        public UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
+            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
+            this.fooVisitor = fooVisitor;
             return this;
         }
 
@@ -155,16 +155,16 @@ public final class Union {
         }
     }
 
-    public interface FooStageVisitorBuilder<T> {
-        BarStageVisitorBuilder<T> foo(Function<String, T> fooVisitor);
-    }
-
     public interface BarStageVisitorBuilder<T> {
         BazStageVisitorBuilder<T> bar(IntFunction<T> barVisitor);
     }
 
     public interface BazStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor);
+        FooStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor);
+    }
+
+    public interface FooStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {

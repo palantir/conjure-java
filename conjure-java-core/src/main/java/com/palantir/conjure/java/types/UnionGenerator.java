@@ -47,7 +47,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -226,7 +226,7 @@ public final class UnionGenerator {
                                 TYPE_VARIABLE)
                         .returns(ParameterizedTypeName.get(
                                 visitorStageInterfaceName(unionClass,
-                                memberTypes.keySet().iterator().next().get()),
+                                        stagesNameTypePairs(memberTypes).findFirst().get().memberName),
                                 TYPE_VARIABLE))
                         .build())
                 .build();
@@ -253,7 +253,7 @@ public final class UnionGenerator {
         return TypeSpec.classBuilder(visitorBuilder)
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                 .addTypeVariable(visitResultType)
-                .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, memberTypeMap.keySet(), visitResultType))
+                .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, memberTypeMap, visitResultType))
                 .addFields(allVisitorBuilderFields(memberTypeMap, visitResultType))
                 .addMethods(allVisitorBuilderSetters(enclosingClass, visitResultType, memberTypeMap))
                 .addMethod(builderBuildMethod(visitor, visitResultType, memberTypeMap))
@@ -275,9 +275,8 @@ public final class UnionGenerator {
             TypeName visitResultType,
             Map<FieldName, TypeName> memberTypeMap) {
         ImmutableList.Builder<MethodSpec> setterMethods = ImmutableList.builder();
-        Stream<NameTypePair> memberTypes = memberTypeMap.entrySet().stream().map(NameTypePair::fromMapEntry);
-        PeekingIterator<NameTypePair> memberIter =
-                Iterators.peekingIterator(Stream.concat(memberTypes, Stream.of(NameTypePair.UNKNOWN)).iterator());
+        Stream<NameTypePair> memberTypes = stagesNameTypePairs(memberTypeMap);
+        PeekingIterator<NameTypePair> memberIter = Iterators.peekingIterator(memberTypes.iterator());
         while (memberIter.hasNext()) {
             NameTypePair pair = memberIter.next();
             String nextBuilderStage = memberIter.hasNext() ? memberIter.peek().memberName : COMPLETED;
@@ -344,22 +343,12 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Generates all the interface types for the different stages. The pattern is the following:
-     *
-     * <pre>
-     * interface Member1Stage&lt;T&gt; { Member2Stage&lt;T&gt; member1(...) }
-     * interface Member2Stage&lt;T&gt; { Member3Stage&lt;T&gt; member2(...) }
-     * interface Member3Stage&lt;T&gt; { UnknownStage&lt;T&gt; member3(...) }
-     * interface UnknownStage&lt;T&gt; { CompletedStage&lt;T&gt; unknown(...) }
-     * interface CompletedStage&lt;T&gt; { Visitor&lt;T&gt; build(...) }
-     * </pre>
-     */
+    /** Generates all the interface type names for the different vistior builder stages. */
     private static List<TypeName> allVisitorBuilderStages(
             ClassName enclosingClass,
-            Collection<FieldName> memberNames,
+            Map<FieldName, TypeName> memberTypeMap,
             TypeVariableName visitResultType) {
-        return Stream.concat(memberNames.stream().map(FieldName::get), Stream.of("unknown", COMPLETED))
+        return Stream.concat(stagesNameTypePairs(memberTypeMap).map(p -> p.memberName), Stream.of(COMPLETED))
                 .map(stageName -> visitorStageInterfaceName(enclosingClass, stageName))
                 .map(stageType -> ParameterizedTypeName.get(stageType, visitResultType))
                 .collect(Collectors.toList());
@@ -409,30 +398,38 @@ public final class UnionGenerator {
         }
     }
 
-    /** Generate all interfaces for the various visitor builder stages. */
+    /**
+     * Generate all interfaces for the various visitor builder stages on the following pattern.
+     *
+     * <pre>
+     * interface Member1Stage&lt;T&gt; { Member2Stage&lt;T&gt; member1(...) }
+     * interface Member2Stage&lt;T&gt; { Member3Stage&lt;T&gt; member2(...) }
+     * interface Member3Stage&lt;T&gt; { UnknownStage&lt;T&gt; member3(...) }
+     * interface UnknownStage&lt;T&gt; { CompletedStage&lt;T&gt; unknown(...) }
+     * interface CompletedStage&lt;T&gt; { Visitor&lt;T&gt; build(...) }
+     * </pre>
+     */
     private static List<TypeSpec> generateVisitorBuilderStageInterfaces(
-            ClassName unionClass,
+            ClassName enclosingClass,
             ClassName visitorClass,
             Map<FieldName, TypeName> memberTypes) {
-        Stream<NameTypePair> stagesNamesAndTypes = Stream.concat(
-                memberTypes.entrySet().stream().map(NameTypePair::fromMapEntry),
-                Stream.of(NameTypePair.UNKNOWN));
+        Stream<NameTypePair> stagesNamesAndTypes = stagesNameTypePairs(memberTypes);
         TypeVariableName visitResultType = TypeVariableName.get("T");
         List<TypeSpec> interfaces = new ArrayList<>();
         PeekingIterator<NameTypePair> memberIter = Iterators.peekingIterator(stagesNamesAndTypes.iterator());
         while (memberIter.hasNext()) {
             NameTypePair member = memberIter.next();
             String nextBuilderStageName = memberIter.hasNext() ? memberIter.peek().memberName : COMPLETED;
-            interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(unionClass, member.memberName))
+            interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, member.memberName))
                     .addTypeVariable(visitResultType)
                     .addModifiers(Modifier.PUBLIC)
                     .addMethod(visitorBuilderSetterPrototype(member.memberName, member.type, visitResultType,
-                            visitorStageInterfaceName(unionClass, nextBuilderStageName))
+                            visitorStageInterfaceName(enclosingClass, nextBuilderStageName))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .build())
                     .build());
         }
-        interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(unionClass, COMPLETED))
+        interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, COMPLETED))
                 .addTypeVariable(visitResultType)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethod(MethodSpec.methodBuilder("build")
@@ -441,6 +438,13 @@ public final class UnionGenerator {
                         .build())
                 .build());
         return interfaces;
+    }
+
+    private static Stream<NameTypePair> stagesNameTypePairs(Map<FieldName, TypeName> memberTypes) {
+        return Stream.concat(
+                memberTypes.entrySet().stream().map(NameTypePair::fromMapEntry)
+                        .sorted(Comparator.comparing(p -> p.memberName)),
+                Stream.of(NameTypePair.UNKNOWN));
     }
 
     /**
