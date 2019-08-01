@@ -142,11 +142,11 @@ public final class EnumGenerator {
             enumBuilder.addEnumConstant(value.getValue(), anonymousClassBuilder.build());
         }
         enumBuilder.addMethod(MethodSpec.methodBuilder("toWrapper")
-            .addModifiers(Modifier.PUBLIC)
-            .addAnnotation(Override.class)
-            .returns(outerClass)
-            .addStatement("return $T.valueOf(name().toUpperCase($T.ROOT))", outerClass, Locale.class)
-            .build());
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(outerClass)
+                .addStatement("return $T.valueOf(name().toUpperCase($T.ROOT))", outerClass, Locale.class)
+                .build());
         if (withUnknown) {
             enumBuilder.addEnumConstant("UNKNOWN");
         } else {
