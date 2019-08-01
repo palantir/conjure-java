@@ -21,7 +21,7 @@ package com.palantir.conjure.java.lib;
  */
 public interface WrappedConjureEnum<E extends Enum<E> & WrappedConjureEnum<E, T>, T extends ConjureEnum<T, E>> {
     /**
-     * Returns the wrapped
+     * Returns the wrapped Conjure-generated enum corresponding to this enum entry.
      *
      * This method satisfies the contract that if {@code e} is a {@code WrappedConjureEnum}, then {@code e.toWrapped()
      * .get() == e}.
