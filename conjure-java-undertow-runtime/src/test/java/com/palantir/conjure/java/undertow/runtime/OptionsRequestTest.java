@@ -49,7 +49,7 @@ public final class OptionsRequestTest {
                 .setHandler(ConjureHandler.builder()
                         .endpoints(endpoint(Methods.GET, "/first"))
                         .endpoints(endpoint(Methods.POST, "/first"))
-                        .endpoints(endpoint(Methods.PUT, "/second/{param}"))
+                        .endpoints(endpoint(Methods.PUT, "/second/{p1}/and/{p2}"))
                         .build())
                 .build();
         server.start();
@@ -76,7 +76,7 @@ public final class OptionsRequestTest {
 
     @Test
     public void test_parameterized() {
-        Response response = execute("/second/paramValue");
+        Response response = execute("/second/paramValue/and/secondParam");
         assertThat(response.code()).isEqualTo(204);
         assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("PUT");
     }
