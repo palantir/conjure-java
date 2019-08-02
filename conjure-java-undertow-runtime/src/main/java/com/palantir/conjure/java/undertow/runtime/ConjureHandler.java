@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -24,6 +25,7 @@ import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -57,8 +59,7 @@ public final class ConjureHandler implements HttpHandler {
     }
 
     private void registerOptionsEndpoints(List<Endpoint> endpoints) {
-        ImmutableSetMultimap<String, HttpString> pathToMethod = endpoints.stream()
-                .filter(endpoint -> !Methods.OPTIONS.equals(endpoint.method()))
+        ImmutableSetMultimap<String, HttpString> pathToConfiguredMethods = endpoints.stream()
                 .collect(ImmutableSetMultimap.toImmutableSetMultimap(
                         endpoint -> normalizeTemplate(endpoint.template()),
                         Endpoint::method));
@@ -66,8 +67,10 @@ public final class ConjureHandler implements HttpHandler {
         // instead of using setInvalidMethodHandler.
         RoutingHandler optionalRoutingHandler = Handlers.routing()
                 .setFallbackHandler(ResponseCodeHandler.HANDLE_405);
-        pathToMethod.keySet().forEach(normalizedPath -> optionalRoutingHandler.add(Methods.OPTIONS, normalizedPath,
-                new WebSecurityHandler(new OptionsHandler(pathToMethod.get(normalizedPath)))));
+
+        pathToConfiguredMethods.asMap()
+                .forEach((normalizedPath, methods) -> optionalRoutingHandler.add(Methods.OPTIONS, normalizedPath,
+                        new WebSecurityHandler(new OptionsHandler(ImmutableSet.copyOf(methods)))));
         routingHandler.setInvalidMethodHandler(optionalRoutingHandler);
     }
 
@@ -89,6 +92,12 @@ public final class ConjureHandler implements HttpHandler {
 
     public static final class Builder {
 
+        private static final ImmutableSet<HttpString> ALLOWED_METHODS = ImmutableSet.of(
+                Methods.GET,
+                Methods.PUT,
+                Methods.POST,
+                Methods.DELETE);
+
         private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
         private final List<Endpoint> endpoints = Lists.newArrayList();
@@ -98,7 +107,15 @@ public final class ConjureHandler implements HttpHandler {
 
         @CanIgnoreReturnValue
         public Builder endpoints(Endpoint value) {
-            endpoints.add(Preconditions.checkNotNull(value, "Value is required"));
+            Preconditions.checkNotNull(value, "Value is required");
+            if (!ALLOWED_METHODS.contains(value.method())) {
+                throw new SafeIllegalStateException("Endpoint method is not recognized",
+                        SafeArg.of("method", value.method()),
+                        SafeArg.of("template", value.template()),
+                        SafeArg.of("service", value.serviceName()),
+                        SafeArg.of("name", value.name()));
+            }
+            endpoints.add(value);
             return this;
         }
 
