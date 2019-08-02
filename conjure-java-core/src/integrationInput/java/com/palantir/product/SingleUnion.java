@@ -13,6 +13,7 @@ import com.palantir.logsafe.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
@@ -72,6 +73,55 @@ public final class SingleUnion {
         T visitFoo(String value);
 
         T visitUnknown(String unknownType);
+
+        static <T> FooStageVisitorBuilder<T> builder() {
+            return new VisitorBuilder<T>();
+        }
+    }
+
+    private static class VisitorBuilder<T>
+            implements FooStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T>,
+                    CompletedStageVisitorBuilder<T> {
+        private Function<String, T> fooVisitor;
+
+        private Function<String, T> unknownVisitor;
+
+        public UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
+            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
+            this.fooVisitor = fooVisitor;
+            return this;
+        }
+
+        public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownVisitor;
+            return this;
+        }
+
+        public Visitor<T> build() {
+            return new Visitor<T>() {
+                public T visitFoo(String value) {
+                    return fooVisitor.apply(value);
+                }
+
+                public T visitUnknown(String value) {
+                    return unknownVisitor.apply(value);
+                }
+            };
+        }
+    }
+
+    public interface FooStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor);
+    }
+
+    public interface UnknownStageVisitorBuilder<T> {
+        CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor);
+    }
+
+    public interface CompletedStageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 
     @JsonTypeInfo(

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Adds a visitor builder for union type visitors.
+  links:
+  - https://github.com/palantir/conjure-java/pull/465

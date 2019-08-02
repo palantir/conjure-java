@@ -13,6 +13,8 @@ import com.palantir.logsafe.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
@@ -88,6 +90,89 @@ public final class Union {
         T visitBaz(long value);
 
         T visitUnknown(String unknownType);
+
+        static <T> BarStageVisitorBuilder<T> builder() {
+            return new VisitorBuilder<T>();
+        }
+    }
+
+    private static class VisitorBuilder<T>
+            implements BarStageVisitorBuilder<T>,
+                    BazStageVisitorBuilder<T>,
+                    FooStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T>,
+                    CompletedStageVisitorBuilder<T> {
+        private Function<String, T> fooVisitor;
+
+        private IntFunction<T> barVisitor;
+
+        private Function<Long, T> bazVisitor;
+
+        private Function<String, T> unknownVisitor;
+
+        public BazStageVisitorBuilder<T> bar(IntFunction<T> barVisitor) {
+            Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
+            this.barVisitor = barVisitor;
+            return this;
+        }
+
+        public FooStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor) {
+            Preconditions.checkNotNull(bazVisitor, "bazVisitor cannot be null");
+            this.bazVisitor = bazVisitor;
+            return this;
+        }
+
+        public UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
+            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
+            this.fooVisitor = fooVisitor;
+            return this;
+        }
+
+        public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownVisitor;
+            return this;
+        }
+
+        public Visitor<T> build() {
+            return new Visitor<T>() {
+                public T visitFoo(String value) {
+                    return fooVisitor.apply(value);
+                }
+
+                public T visitBar(int value) {
+                    return barVisitor.apply(value);
+                }
+
+                public T visitBaz(long value) {
+                    return bazVisitor.apply(value);
+                }
+
+                public T visitUnknown(String value) {
+                    return unknownVisitor.apply(value);
+                }
+            };
+        }
+    }
+
+    public interface BarStageVisitorBuilder<T> {
+        BazStageVisitorBuilder<T> bar(IntFunction<T> barVisitor);
+    }
+
+    public interface BazStageVisitorBuilder<T> {
+        FooStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor);
+    }
+
+    public interface FooStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor);
+    }
+
+    public interface UnknownStageVisitorBuilder<T> {
+        CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor);
+    }
+
+    public interface CompletedStageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 
     @JsonTypeInfo(
