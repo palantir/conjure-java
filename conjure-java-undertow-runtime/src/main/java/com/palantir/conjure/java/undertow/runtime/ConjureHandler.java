@@ -17,12 +17,15 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -31,6 +34,7 @@ import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.server.handlers.URLDecodingHandler;
+import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +55,23 @@ public final class ConjureHandler implements HttpHandler {
             List<Endpoint> endpoints) {
         this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
         endpoints.forEach(this::register);
+        registerOptionsEndpoints(endpoints);
+    }
+
+    private void registerOptionsEndpoints(List<Endpoint> endpoints) {
+        ImmutableSetMultimap<String, HttpString> pathToConfiguredMethods = endpoints.stream()
+                .collect(ImmutableSetMultimap.toImmutableSetMultimap(
+                        endpoint -> normalizeTemplate(endpoint.template()),
+                        Endpoint::method));
+        // Once UNDERTOW-1581 is fixed we should register OPTIONS handling directly with routingHandler
+        // instead of using setInvalidMethodHandler.
+        RoutingHandler optionalRoutingHandler = Handlers.routing()
+                .setFallbackHandler(ResponseCodeHandler.HANDLE_405);
+
+        pathToConfiguredMethods.asMap()
+                .forEach((normalizedPath, methods) -> optionalRoutingHandler.add(Methods.OPTIONS, normalizedPath,
+                        new WebSecurityHandler(new OptionsHandler(ImmutableSet.copyOf(methods)))));
+        routingHandler.setInvalidMethodHandler(optionalRoutingHandler);
     }
 
     @Override
@@ -71,6 +92,12 @@ public final class ConjureHandler implements HttpHandler {
 
     public static final class Builder {
 
+        private static final ImmutableSet<HttpString> ALLOWED_METHODS = ImmutableSet.of(
+                Methods.GET,
+                Methods.PUT,
+                Methods.POST,
+                Methods.DELETE);
+
         private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
         private final List<Endpoint> endpoints = Lists.newArrayList();
@@ -80,7 +107,15 @@ public final class ConjureHandler implements HttpHandler {
 
         @CanIgnoreReturnValue
         public Builder endpoints(Endpoint value) {
-            endpoints.add(Preconditions.checkNotNull(value, "Value is required"));
+            Preconditions.checkNotNull(value, "Value is required");
+            if (!ALLOWED_METHODS.contains(value.method())) {
+                throw new SafeIllegalStateException("Endpoint method is not recognized",
+                        SafeArg.of("method", value.method()),
+                        SafeArg.of("template", value.template()),
+                        SafeArg.of("service", value.serviceName()),
+                        SafeArg.of("name", value.name()));
+            }
+            endpoints.add(value);
             return this;
         }
 
@@ -170,7 +205,7 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> String.format(
                                     "%s: %s",
                                     endpoint.method(),
-                                    endpoint.template().replaceAll("\\{.*?\\}", "{param}"))))
+                                    normalizeTemplate(endpoint.template()))))
                     .entrySet()
                     .stream().filter(groups -> groups.getValue().size() > 1)
                     .map(entry -> {
@@ -185,5 +220,9 @@ public final class ConjureHandler implements HttpHandler {
                         SafeArg.of("duplicates", duplicates));
             }
         }
+    }
+
+    private static String normalizeTemplate(String template) {
+        return template.replaceAll("\\{.*?\\}", "{param}");
     }
 }

@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableList;
@@ -24,6 +25,8 @@ import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.SafeLoggable;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import org.junit.jupiter.api.Test;
@@ -49,8 +52,36 @@ public class ConjureHandlerBuilderTest {
                                         "GET: /foo/{param}/foo/{param}: "
                                                 + "serviceName1.bar, serviceName1.bar2, serviceName2.bar",
                                         "POST: /foo: serviceName1.bar, serviceName2.bar")))));
+    }
 
+    @Test
+    public void testAddEndpoint_options() {
+        assertThatLoggableExceptionThrownBy(() -> ConjureHandler.builder()
+                .endpoints(Endpoint.builder()
+                        .name("name")
+                        .serviceName("service")
+                        .handler(ResponseCodeHandler.HANDLE_200)
+                        .method(Methods.OPTIONS)
+                        .template("/template")
+                        .build()))
+                .isInstanceOf(SafeIllegalStateException.class)
+                .hasLogMessage("Endpoint method is not recognized")
+                .containsArgs(SafeArg.of("method", Methods.OPTIONS));
+    }
 
+    @Test
+    public void testAddEndpoint_trace() {
+        assertThatLoggableExceptionThrownBy(() -> ConjureHandler.builder()
+                .endpoints(Endpoint.builder()
+                        .name("name")
+                        .serviceName("service")
+                        .handler(ResponseCodeHandler.HANDLE_200)
+                        .method(Methods.TRACE)
+                        .template("/template")
+                        .build()))
+                .isInstanceOf(SafeIllegalStateException.class)
+                .hasLogMessage("Endpoint method is not recognized")
+                .containsArgs(SafeArg.of("method", Methods.TRACE));
     }
 
     private Endpoint buildEndpoint(HttpString method, String template, String serviceName, String name) {
