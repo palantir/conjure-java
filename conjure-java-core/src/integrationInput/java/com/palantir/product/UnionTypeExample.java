@@ -132,7 +132,7 @@ public final class UnionTypeExample {
         }
     }
 
-    private static class VisitorBuilder<T>
+    private static final class VisitorBuilder<T>
             implements AlsoAnIntegerStageVisitorBuilder<T>,
                     IfStageVisitorBuilder<T>,
                     InterfaceStageVisitorBuilder<T>,

@@ -96,7 +96,7 @@ public final class Union {
         }
     }
 
-    private static class VisitorBuilder<T>
+    private static final class VisitorBuilder<T>
             implements BarStageVisitorBuilder<T>,
                     BazStageVisitorBuilder<T>,
                     FooStageVisitorBuilder<T>,

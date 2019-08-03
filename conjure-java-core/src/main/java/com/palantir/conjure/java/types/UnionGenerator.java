@@ -251,7 +251,7 @@ public final class UnionGenerator {
             Map<FieldName, TypeName> memberTypeMap) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         return TypeSpec.classBuilder(visitorBuilder)
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addTypeVariable(visitResultType)
                 .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, memberTypeMap, visitResultType))
                 .addFields(allVisitorBuilderFields(memberTypeMap, visitResultType))

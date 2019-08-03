@@ -79,7 +79,7 @@ public final class SingleUnion {
         }
     }
 
-    private static class VisitorBuilder<T>
+    private static final class VisitorBuilder<T>
             implements FooStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
                     CompletedStageVisitorBuilder<T> {
