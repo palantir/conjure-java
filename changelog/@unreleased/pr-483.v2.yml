@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Adds @Override annotations to union type visitor builder methods.
+  links:
+  - https://github.com/palantir/conjure-java/pull/483
