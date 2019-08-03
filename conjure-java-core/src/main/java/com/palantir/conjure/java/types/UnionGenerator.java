@@ -251,7 +251,7 @@ public final class UnionGenerator {
             Map<FieldName, TypeName> memberTypeMap) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         return TypeSpec.classBuilder(visitorBuilder)
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addTypeVariable(visitResultType)
                 .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, memberTypeMap, visitResultType))
                 .addFields(allVisitorBuilderFields(memberTypeMap, visitResultType))
@@ -287,6 +287,7 @@ public final class UnionGenerator {
                     visitorStageInterfaceName(unionClass, nextBuilderStage));
             setterMethods.add(setterPrototype
                     .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
                     .addStatement("$L", Expressions.requireNonNull(visitorFieldName(pair.memberName),
                             String.format("%s cannot be null", visitorFieldName(pair.memberName))))
                     .addStatement("this.$1L = $1L", visitorFieldName(pair.memberName))
@@ -312,6 +313,7 @@ public final class UnionGenerator {
         return MethodSpec.methodBuilder("build")
                 .returns(ParameterizedTypeName.get(visitorClass, visitResultType))
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
                 .addStatement("return $L",
                         TypeSpec.anonymousClassBuilder("")
                                 .addSuperinterface(ParameterizedTypeName.get(visitorClass, visitResultType))
@@ -336,6 +338,7 @@ public final class UnionGenerator {
         return Stream.concat(memberTypes, Stream.of(NameTypePair.UNKNOWN))
                 .map(pair -> MethodSpec.methodBuilder(visitMethodName(pair.memberName))
                         .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
                         .addParameter(pair.type, variableName())
                         .addStatement("return $L.apply($L)", visitorFieldName(pair.memberName), variableName())
                         .returns(visitorResultType)
