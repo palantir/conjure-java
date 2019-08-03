@@ -110,44 +110,53 @@ public final class Union {
 
         private Function<String, T> unknownVisitor;
 
+        @Override
         public BazStageVisitorBuilder<T> bar(IntFunction<T> barVisitor) {
             Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
             this.barVisitor = barVisitor;
             return this;
         }
 
+        @Override
         public FooStageVisitorBuilder<T> baz(Function<Long, T> bazVisitor) {
             Preconditions.checkNotNull(bazVisitor, "bazVisitor cannot be null");
             this.bazVisitor = bazVisitor;
             return this;
         }
 
+        @Override
         public UnknownStageVisitorBuilder<T> foo(Function<String, T> fooVisitor) {
             Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
             this.fooVisitor = fooVisitor;
             return this;
         }
 
+        @Override
         public CompletedStageVisitorBuilder<T> unknown(Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
         }
 
+        @Override
         public Visitor<T> build() {
             return new Visitor<T>() {
+                @Override
                 public T visitFoo(String value) {
                     return fooVisitor.apply(value);
                 }
 
+                @Override
                 public T visitBar(int value) {
                     return barVisitor.apply(value);
                 }
 
+                @Override
                 public T visitBaz(long value) {
                     return bazVisitor.apply(value);
                 }
 
+                @Override
                 public T visitUnknown(String value) {
                     return unknownVisitor.apply(value);
                 }
