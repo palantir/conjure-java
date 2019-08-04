@@ -102,11 +102,11 @@ public final class Union {
                     FooStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
                     CompletedStageVisitorBuilder<T> {
-        private Function<String, T> fooVisitor;
-
         private IntFunction<T> barVisitor;
 
         private Function<Long, T> bazVisitor;
+
+        private Function<String, T> fooVisitor;
 
         private Function<String, T> unknownVisitor;
 
@@ -140,12 +140,11 @@ public final class Union {
 
         @Override
         public Visitor<T> build() {
+            final IntFunction<T> barVisitor = this.barVisitor;
+            final Function<Long, T> bazVisitor = this.bazVisitor;
+            final Function<String, T> fooVisitor = this.fooVisitor;
+            final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
-                @Override
-                public T visitFoo(String value) {
-                    return fooVisitor.apply(value);
-                }
-
                 @Override
                 public T visitBar(int value) {
                     return barVisitor.apply(value);
@@ -154,6 +153,11 @@ public final class Union {
                 @Override
                 public T visitBaz(long value) {
                     return bazVisitor.apply(value);
+                }
+
+                @Override
+                public T visitFoo(String value) {
+                    return fooVisitor.apply(value);
                 }
 
                 @Override
