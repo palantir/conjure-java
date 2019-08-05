@@ -103,6 +103,8 @@ public final class SingleUnion {
 
         @Override
         public Visitor<T> build() {
+            final Function<String, T> fooVisitor = this.fooVisitor;
+            final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitFoo(String value) {

@@ -226,7 +226,7 @@ public final class UnionGenerator {
                                 TYPE_VARIABLE)
                         .returns(ParameterizedTypeName.get(
                                 visitorStageInterfaceName(unionClass,
-                                        stagesNameTypePairs(memberTypes).findFirst().get().memberName),
+                                        sortedStageNameTypePairs(memberTypes).findFirst().get().memberName),
                                 TYPE_VARIABLE))
                         .build())
                 .build();
@@ -271,11 +271,11 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<MethodSpec> allVisitorBuilderSetters(
-            ClassName unionClass,
+            ClassName enclosingClass,
             TypeName visitResultType,
             Map<FieldName, TypeName> memberTypeMap) {
         ImmutableList.Builder<MethodSpec> setterMethods = ImmutableList.builder();
-        Stream<NameTypePair> memberTypes = stagesNameTypePairs(memberTypeMap);
+        Stream<NameTypePair> memberTypes = sortedStageNameTypePairs(memberTypeMap);
         PeekingIterator<NameTypePair> memberIter = Iterators.peekingIterator(memberTypes.iterator());
         while (memberIter.hasNext()) {
             NameTypePair pair = memberIter.next();
@@ -284,7 +284,7 @@ public final class UnionGenerator {
                     pair.memberName,
                     pair.type,
                     visitResultType,
-                    visitorStageInterfaceName(unionClass, nextBuilderStage));
+                    visitorStageInterfaceName(enclosingClass, nextBuilderStage));
             setterMethods.add(setterPrototype
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override.class)
@@ -310,15 +310,22 @@ public final class UnionGenerator {
             ClassName visitorClass,
             TypeName visitResultType,
             Map<FieldName, TypeName> memberTypeMap) {
-        return MethodSpec.methodBuilder("build")
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("build")
                 .returns(ParameterizedTypeName.get(visitorClass, visitResultType))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Override.class)
-                .addStatement("return $L",
-                        TypeSpec.anonymousClassBuilder("")
-                                .addSuperinterface(ParameterizedTypeName.get(visitorClass, visitResultType))
-                                .addMethods(allDelegatingVisitorMethods(memberTypeMap, visitResultType))
-                                .build())
+                .addAnnotation(Override.class);
+
+        // Add statements to copy over visitor handlers to local immutable variables.
+        sortedStageNameTypePairs(memberTypeMap)
+                .forEach(nameType -> builder.addStatement("final $1T $2L = this.$2L",
+                        visitorObjectTypeName(nameType.type, visitResultType),
+                        visitorFieldName(nameType.memberName)));
+
+        return builder.addStatement("return $L",
+                TypeSpec.anonymousClassBuilder("")
+                        .addSuperinterface(ParameterizedTypeName.get(visitorClass, visitResultType))
+                        .addMethods(allDelegatingVisitorMethods(memberTypeMap, visitResultType))
+                        .build())
                 .build();
     }
 
@@ -334,8 +341,7 @@ public final class UnionGenerator {
     private static List<MethodSpec> allDelegatingVisitorMethods(
             Map<FieldName, TypeName> memberTypeMap,
             TypeName visitorResultType) {
-        Stream<NameTypePair> memberTypes = memberTypeMap.entrySet().stream().map(NameTypePair::fromMapEntry);
-        return Stream.concat(memberTypes, Stream.of(NameTypePair.UNKNOWN))
+        return sortedStageNameTypePairs(memberTypeMap)
                 .map(pair -> MethodSpec.methodBuilder(visitMethodName(pair.memberName))
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
@@ -346,12 +352,12 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
-    /** Generates all the interface type names for the different vistior builder stages. */
+    /** Generates all the interface type names for the different visitor builder stages. */
     private static List<TypeName> allVisitorBuilderStages(
             ClassName enclosingClass,
             Map<FieldName, TypeName> memberTypeMap,
             TypeVariableName visitResultType) {
-        return Stream.concat(stagesNameTypePairs(memberTypeMap).map(p -> p.memberName), Stream.of(COMPLETED))
+        return Stream.concat(sortedStageNameTypePairs(memberTypeMap).map(p -> p.memberName), Stream.of(COMPLETED))
                 .map(stageName -> visitorStageInterfaceName(enclosingClass, stageName))
                 .map(stageType -> ParameterizedTypeName.get(stageType, visitResultType))
                 .collect(Collectors.toList());
@@ -370,8 +376,7 @@ public final class UnionGenerator {
     private static List<FieldSpec> allVisitorBuilderFields(
             Map<FieldName, TypeName> memberTypeMap,
             TypeVariableName visitResultType) {
-        Stream<NameTypePair> memberTypes = memberTypeMap.entrySet().stream().map(NameTypePair::fromMapEntry);
-        return Stream.concat(memberTypes, Stream.of(NameTypePair.UNKNOWN))
+        return sortedStageNameTypePairs(memberTypeMap)
                 .map(field -> FieldSpec.builder(
                         visitorObjectTypeName(field.type, visitResultType),
                         visitorFieldName(field.memberName),
@@ -380,8 +385,8 @@ public final class UnionGenerator {
     }
 
     /** Generates the name of the interface of a visitor builder stage. */
-    private static ClassName visitorStageInterfaceName(ClassName unionClass, String stageName) {
-        return unionClass.nestedClass(StringUtils.capitalize(stageName) + "StageVisitorBuilder");
+    private static ClassName visitorStageInterfaceName(ClassName enclosingClass, String stageName) {
+        return enclosingClass.nestedClass(StringUtils.capitalize(stageName) + "StageVisitorBuilder");
     }
 
     /**
@@ -416,10 +421,10 @@ public final class UnionGenerator {
             ClassName enclosingClass,
             ClassName visitorClass,
             Map<FieldName, TypeName> memberTypes) {
-        Stream<NameTypePair> stagesNamesAndTypes = stagesNameTypePairs(memberTypes);
         TypeVariableName visitResultType = TypeVariableName.get("T");
         List<TypeSpec> interfaces = new ArrayList<>();
-        PeekingIterator<NameTypePair> memberIter = Iterators.peekingIterator(stagesNamesAndTypes.iterator());
+        PeekingIterator<NameTypePair> memberIter =
+                Iterators.peekingIterator(sortedStageNameTypePairs(memberTypes).iterator());
         while (memberIter.hasNext()) {
             NameTypePair member = memberIter.next();
             String nextBuilderStageName = memberIter.hasNext() ? memberIter.peek().memberName : COMPLETED;
@@ -443,9 +448,9 @@ public final class UnionGenerator {
         return interfaces;
     }
 
-    private static Stream<NameTypePair> stagesNameTypePairs(Map<FieldName, TypeName> memberTypes) {
+    private static Stream<NameTypePair> sortedStageNameTypePairs(Map<FieldName, TypeName> memberTypes) {
         return Stream.concat(
-                memberTypes.entrySet().stream().map(NameTypePair::fromMapEntry)
+                memberTypes.entrySet().stream().map(entry -> new NameTypePair(entry.getKey().get(), entry.getValue()))
                         .sorted(Comparator.comparing(p -> p.memberName)),
                 Stream.of(NameTypePair.UNKNOWN));
     }
@@ -644,10 +649,6 @@ public final class UnionGenerator {
         private NameTypePair(String memberName, TypeName type) {
             this.memberName = memberName;
             this.type = type;
-        }
-
-        private static NameTypePair fromMapEntry(Map.Entry<FieldName, TypeName> entry) {
-            return new NameTypePair(entry.getKey().get(), entry.getValue());
         }
     }
 }

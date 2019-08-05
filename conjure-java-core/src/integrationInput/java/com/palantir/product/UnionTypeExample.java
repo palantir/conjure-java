@@ -142,19 +142,19 @@ public final class UnionTypeExample {
                     ThisFieldIsAnIntegerStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
                     CompletedStageVisitorBuilder<T> {
-        private Function<StringExample, T> stringExampleVisitor;
-
-        private Function<Set<String>, T> setVisitor;
-
-        private IntFunction<T> thisFieldIsAnIntegerVisitor;
-
         private IntFunction<T> alsoAnIntegerVisitor;
 
         private IntFunction<T> ifVisitor;
 
+        private IntFunction<T> interfaceVisitor;
+
         private IntFunction<T> newVisitor;
 
-        private IntFunction<T> interfaceVisitor;
+        private Function<Set<String>, T> setVisitor;
+
+        private Function<StringExample, T> stringExampleVisitor;
+
+        private IntFunction<T> thisFieldIsAnIntegerVisitor;
 
         private Function<String, T> unknownVisitor;
 
@@ -219,22 +219,15 @@ public final class UnionTypeExample {
 
         @Override
         public Visitor<T> build() {
+            final IntFunction<T> alsoAnIntegerVisitor = this.alsoAnIntegerVisitor;
+            final IntFunction<T> ifVisitor = this.ifVisitor;
+            final IntFunction<T> interfaceVisitor = this.interfaceVisitor;
+            final IntFunction<T> newVisitor = this.newVisitor;
+            final Function<Set<String>, T> setVisitor = this.setVisitor;
+            final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
+            final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
+            final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
-                @Override
-                public T visitStringExample(StringExample value) {
-                    return stringExampleVisitor.apply(value);
-                }
-
-                @Override
-                public T visitSet(Set<String> value) {
-                    return setVisitor.apply(value);
-                }
-
-                @Override
-                public T visitThisFieldIsAnInteger(int value) {
-                    return thisFieldIsAnIntegerVisitor.apply(value);
-                }
-
                 @Override
                 public T visitAlsoAnInteger(int value) {
                     return alsoAnIntegerVisitor.apply(value);
@@ -246,13 +239,28 @@ public final class UnionTypeExample {
                 }
 
                 @Override
+                public T visitInterface(int value) {
+                    return interfaceVisitor.apply(value);
+                }
+
+                @Override
                 public T visitNew(int value) {
                     return newVisitor.apply(value);
                 }
 
                 @Override
-                public T visitInterface(int value) {
-                    return interfaceVisitor.apply(value);
+                public T visitSet(Set<String> value) {
+                    return setVisitor.apply(value);
+                }
+
+                @Override
+                public T visitStringExample(StringExample value) {
+                    return stringExampleVisitor.apply(value);
+                }
+
+                @Override
+                public T visitThisFieldIsAnInteger(int value) {
+                    return thisFieldIsAnIntegerVisitor.apply(value);
                 }
 
                 @Override

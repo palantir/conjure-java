@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Copies union type visitor builder fields to local variables to ensure immutability.
+  links:
+  - https://github.com/palantir/conjure-java/pull/485
