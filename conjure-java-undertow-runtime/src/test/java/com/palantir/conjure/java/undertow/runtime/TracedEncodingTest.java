@@ -29,7 +29,7 @@ import com.palantir.tracing.api.SpanObserver;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 public class TracedEncodingTest {
