@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: conjure-undertow endpoints provide tracing spans around body serde.
+  links:
+  - https://github.com/palantir/conjure-java/pull/425
