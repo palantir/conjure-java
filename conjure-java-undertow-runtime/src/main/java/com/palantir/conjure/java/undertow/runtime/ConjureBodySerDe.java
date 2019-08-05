@@ -25,6 +25,7 @@ import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.tracing.Tracer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
@@ -65,7 +66,12 @@ final class ConjureBodySerDe implements BodySerDe {
     public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
         Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
-        value.write(exchange.getOutputStream());
+        Tracer.fastStartSpan("Undertow: serialize binary");
+        try {
+            value.write(exchange.getOutputStream());
+        } finally {
+            Tracer.fastCompleteSpan();
+        }
     }
 
     @Override
@@ -129,7 +135,7 @@ final class ConjureBodySerDe implements BodySerDe {
 
         EncodingSerializerContainer(Encoding encoding, TypeMarker<T> token) {
             this.encoding = encoding;
-            this.serializer = encoding.serializer(token);
+            this.serializer = TracedEncoding.wrap(encoding).serializer(token);
         }
     }
 
@@ -209,7 +215,7 @@ final class ConjureBodySerDe implements BodySerDe {
 
         EncodingDeserializerContainer(Encoding encoding, TypeMarker<T> token) {
             this.encoding = encoding;
-            this.deserializer = encoding.deserializer(token);
+            this.deserializer = TracedEncoding.wrap(encoding).deserializer(token);
         }
     }
 }
