@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services;
 
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
@@ -27,34 +28,51 @@ import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.ParameterOrder;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HttpPath;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.MapType;
+import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
+import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.spec.SetType;
+import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.util.syntacticpath.Path;
 import com.palantir.util.syntacticpath.Paths;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
@@ -114,6 +132,12 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toList()));
 
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+                .map(endpoint -> generateCompatibilityBackfillServiceMethods(
+                        endpoint, returnTypeMapper, argumentTypeMapper))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
@@ -169,9 +193,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
         getAuthParameter(endpointDef.getAuth()).ifPresent(methodBuilder::addParameter);
 
-        methodBuilder.addParameters(endpointDef.getArgs().stream()
-                .map(arg -> createEndpointParameter(argumentTypeMapper, encodedPathArgs, arg))
-                .collect(Collectors.toList()));
+        methodBuilder.addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs));
 
         return methodBuilder.build();
     }
@@ -203,6 +225,100 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             }
         }
         return HttpPath.of("/" + Joiner.on("/").join(newSegments));
+    }
+
+    /** Provides a linear expansion of optional query arguments to improve Java back-compat. */
+    private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper) {
+        Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
+        List<ArgumentDefinition> queryArgs = Lists.newArrayList();
+
+        for (ArgumentDefinition arg : endpointDef.getArgs()) {
+            if (arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
+                    && arg.getType().accept(TYPE_DEFAULTABLE_PREDICATE)) {
+                queryArgs.add(arg);
+            }
+        }
+
+        List<MethodSpec> alternateMethods = Lists.newArrayList();
+        for (int i = 0; i < queryArgs.size(); i++) {
+            alternateMethods.add(createCompatibilityBackfillMethod(
+                    endpointDef,
+                    returnTypeMapper,
+                    argumentTypeMapper,
+                    encodedPathArgs,
+                    queryArgs.subList(i, queryArgs.size())));
+        }
+
+        return alternateMethods;
+    }
+
+    private MethodSpec createCompatibilityBackfillMethod(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper,
+            Set<ArgumentName> encodedPathArgs,
+            List<ArgumentDefinition> extraArgs) {
+        // ensure the correct ordering of parameters by creating the complete sorted parameter list
+        List<ParameterSpec> sortedParams = createServiceMethodParameters(
+                endpointDef, argumentTypeMapper, encodedPathArgs);
+        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
+                extraArgs.stream()
+                        .filter(arg -> arg.getArgName().get().equals(param.name))
+                        .findFirst())
+                .collect(Collectors.toList());
+
+        // omit extraArgs from the back fill method signature
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+                .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
+                .addAnnotation(Deprecated.class)
+                .addParameters(IntStream.range(0, sortedParams.size())
+                        .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
+                        .mapToObj(sortedParams::get)
+                        .collect(Collectors.toList()));
+
+        endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
+
+        // replace extraArgs with default values when invoking the complete method
+        StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
+        List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
+            Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
+            if (maybeArgDef.isPresent()) {
+                sb.append("$L, ");
+                return maybeArgDef.get().getType().accept(TYPE_DEFAULT_VALUE);
+            } else {
+                sb.append("$N, ");
+                return sortedParams.get(i);
+            }
+        }).collect(Collectors.toList());
+        // trim the end
+        sb.setLength(sb.length() - 2);
+        sb.append(")");
+
+        ImmutableList<Object> methodCallArgs = ImmutableList.builder()
+                .add(endpointDef.getEndpointName().get())
+                .addAll(values)
+                .build();
+
+        methodBuilder.addStatement(sb.toString(), methodCallArgs.toArray(new Object[0]));
+
+        return methodBuilder.build();
+    }
+
+    private List<ParameterSpec> createServiceMethodParameters(
+            EndpointDefinition endpointDef,
+            TypeMapper typeMapper,
+            Set<ArgumentName> encodedPathArgs) {
+        List<ParameterSpec> parameterSpecs = new ArrayList<>();
+
+        Optional<AuthType> auth = endpointDef.getAuth();
+        getAuthParameter(auth).ifPresent(parameterSpecs::add);
+
+        ParameterOrder.sorted(endpointDef.getArgs()).forEach(def ->
+                parameterSpecs.add(createEndpointParameter(typeMapper, encodedPathArgs, def)));
+        return ImmutableList.copyOf(parameterSpecs);
     }
 
     private ParameterSpec createEndpointParameter(
@@ -279,5 +395,69 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         }
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
+
+    /** Indicates whether a particular type has a defaultable value. */
+    private static final Type.Visitor<Boolean> TYPE_DEFAULTABLE_PREDICATE = new DefaultTypeVisitor<Boolean>() {
+        @Override
+        public Boolean visitOptional(OptionalType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitList(ListType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitSet(SetType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitMap(MapType value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitDefault() {
+            return false;
+        }
+    };
+
+    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new DefaultTypeVisitor<CodeBlock>() {
+        @Override
+        public CodeBlock visitOptional(OptionalType value) {
+            if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
+                PrimitiveType primitiveType = value.getItemType().accept(TypeVisitor.PRIMITIVE);
+                // special handling for primitive optionals with Java 8
+                if (primitiveType.equals(PrimitiveType.DOUBLE)) {
+                    return CodeBlock.of("$T.empty()", OptionalDouble.class);
+                } else if (primitiveType.equals(PrimitiveType.INTEGER)) {
+                    return CodeBlock.of("$T.empty()", OptionalInt.class);
+                }
+            }
+            return CodeBlock.of("$T.empty()", Optional.class);
+        }
+
+        @Override
+        public CodeBlock visitList(ListType value) {
+            return CodeBlock.of("$T.emptyList()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitSet(SetType value) {
+            return CodeBlock.of("$T.emptySet()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitMap(MapType value) {
+            return CodeBlock.of("$T.emptyMap()", Collections.class);
+        }
+
+        @Override
+        public CodeBlock visitDefault() {
+            throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
+        }
+    };
 
 }
