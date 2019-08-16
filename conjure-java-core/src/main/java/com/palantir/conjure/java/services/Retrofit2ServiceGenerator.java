@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.services;
 
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -96,7 +95,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     @SuppressWarnings("deprecation")
     public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
-        Preconditions.checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
+        Preconditions.checkArgument(
+                !featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
                         || !featureFlags.contains(FeatureFlags.RetrofitCompletableFutures),
                 "Cannot enable both the RetrofitListenableFutures and RetrofitCompletableFutures "
                         + "Conjure experimental features. Please remove one.");
@@ -120,7 +120,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .collect(Collectors.toSet());
     }
 
-    private JavaFile generateService(ServiceDefinition serviceDefinition,
+    private JavaFile generateService(
+            ServiceDefinition serviceDefinition,
             TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
@@ -225,7 +226,9 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         return HttpPath.of("/" + Joiner.on("/").join(newSegments));
     }
 
-    /** Provides a linear expansion of optional query arguments to improve Java back-compat. */
+    /**
+     * Provides a linear expansion of optional query arguments to improve Java back-compat.
+     */
     private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
@@ -259,6 +262,9 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             TypeMapper argumentTypeMapper,
             Set<ArgumentName> encodedPathArgs,
             List<ArgumentDefinition> extraArgs) {
+        TypeName returnType = endpointDef.getReturns()
+                .map(returnTypeMapper::getClassName)
+                .orElse(ClassName.VOID);
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
         List<ParameterSpec> sortedParams = createServiceMethodParameters(
                 endpointDef, argumentTypeMapper, encodedPathArgs);
@@ -277,7 +283,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .mapToObj(sortedParams::get)
                         .collect(Collectors.toList()));
 
-        endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
+        endpointDef.getReturns()
+                .ifPresent(type -> methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box())));
 
         // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
@@ -394,7 +401,9 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
 
-    /** Indicates whether a particular type has a defaultable value. */
+    /**
+     * Indicates whether a particular type has a defaultable value.
+     */
     private static final Type.Visitor<Boolean> TYPE_DEFAULTABLE_PREDICATE = new DefaultTypeVisitor<Boolean>() {
         @Override
         public Boolean visitOptional(OptionalType value) {
@@ -457,5 +466,4 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
         }
     };
-
 }

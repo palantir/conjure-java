@@ -192,7 +192,7 @@ public interface TestServiceRetrofit {
             @Query("maybeDouble") OptionalDouble maybeDouble);
 
     @Deprecated
-    default int testQueryParams(
+    default Call<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
             @Query("implicit") ResourceIdentifier implicit,
@@ -208,7 +208,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    default int testQueryParams(
+    default Call<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
             @Query("implicit") ResourceIdentifier implicit,
@@ -225,7 +225,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    default int testQueryParams(
+    default Call<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
             @Query("implicit") ResourceIdentifier implicit,
