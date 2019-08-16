@@ -191,8 +191,6 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
         methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box()));
 
-        getAuthParameter(endpointDef.getAuth()).ifPresent(methodBuilder::addParameter);
-
         methodBuilder.addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs));
 
         return methodBuilder.build();
