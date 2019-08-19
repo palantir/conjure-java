@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Initialize `_userAgent` MDC key with the requesting User-Agent
+  links:
+  - https://github.com/palantir/conjure-java/pull/503
