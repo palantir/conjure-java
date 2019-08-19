@@ -151,9 +151,9 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
 
     private HttpHandler wrapCallback(HttpHandler action, DeferredTracer tracer) {
         HttpHandler next = new ConjureExceptionHandler(action, exceptionSerializer);
-        return exchange -> tracer.withTrace(() -> {
+        return new LoggingContextHandler(exchange -> tracer.withTrace(() -> {
             next.handleRequest(exchange);
             return null;
-        });
+        }));
     }
 }

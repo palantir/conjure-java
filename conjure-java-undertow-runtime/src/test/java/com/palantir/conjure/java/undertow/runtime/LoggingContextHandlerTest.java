@@ -20,6 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
@@ -48,6 +51,37 @@ public class LoggingContextHandlerTest {
     public void testValuesSetInHandlerAreCleared() throws Exception {
         HttpHandler handler = new LoggingContextHandler(exchange -> MDC.put("foo", "bar"));
         handler.handleRequest(HttpServerExchanges.createStub());
+        assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
+    }
+
+    @Test
+    public void testUserAgent_standardHeader() throws Exception {
+        HttpHandler handler = new LoggingContextHandler(exchange ->
+                assertThat(MDC.get("_userAgent")).isEqualTo("agent"));
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().put(Headers.USER_AGENT, "agent");
+        handler.handleRequest(exchange);
+        assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
+    }
+
+    @Test
+    public void testUserAgent_fetchAgentHeader() throws Exception {
+        HttpHandler handler = new LoggingContextHandler(exchange ->
+                assertThat(MDC.get("_userAgent")).isEqualTo("agent"));
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().put(HttpString.tryFromString("Fetch-User-Agent"), "agent");
+        handler.handleRequest(exchange);
+        assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
+    }
+
+    @Test
+    public void testUserAgent_prefersFetchAgentHeader() throws Exception {
+        HttpHandler handler = new LoggingContextHandler(exchange ->
+                assertThat(MDC.get("_userAgent")).isEqualTo("fetchUserAgent"));
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().put(Headers.USER_AGENT, "userAgent");
+        exchange.getRequestHeaders().put(HttpString.tryFromString("Fetch-User-Agent"), "fetchUserAgent");
+        handler.handleRequest(exchange);
         assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
     }
 }
