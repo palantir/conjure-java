@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.verification.server.undertest;
 
+import com.google.common.collect.Iterables;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
@@ -25,13 +26,12 @@ import com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
+import java.net.InetSocketAddress;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 public final class UndertowServerUnderTestExtension implements BeforeAllCallback, AfterAllCallback {
-
-    private static final int PORT = 12346;
 
     private Undertow server;
 
@@ -46,7 +46,7 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
                 .build();
 
         server = Undertow.builder()
-                .addHttpListener(PORT, "0.0.0.0")
+                .addHttpListener(0, "0.0.0.0")
                 .setHandler(Handlers.path().addPrefixPath("/test/api", handler))
                 .build();
         server.start();
@@ -60,6 +60,6 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
     }
 
     public int getLocalPort() {
-        return PORT;
+        return ((InetSocketAddress) Iterables.getOnlyElement(server.getListenerInfo()).getAddress()).getPort();
     }
 }
