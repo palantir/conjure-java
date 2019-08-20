@@ -7,6 +7,7 @@ import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -38,8 +39,8 @@ public interface TestServiceRetrofit {
     @Headers({"hr-path-template: /catalog/datasets", "Accept: application/json"})
     CompletableFuture<Dataset> createDataset(
             @Header("Authorization") AuthHeader authHeader,
-            @Body CreateDatasetRequest request,
-            @Header("Test-Header") String testHeaderArg);
+            @Header("Test-Header") String testHeaderArg,
+            @Body CreateDatasetRequest request);
 
     @GET("./catalog/datasets/{datasetRid}")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}", "Accept: application/json"})
@@ -145,12 +146,12 @@ public interface TestServiceRetrofit {
     @Headers({"hr-path-template: /catalog/test-query-params", "Accept: application/json"})
     CompletableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
-            @Body String query,
             @Query("different") ResourceIdentifier something,
-            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @Query("implicit") ResourceIdentifier implicit,
+            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @Query("setEnd") Set<String> setEnd,
-            @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
+            @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
+            @Body String query);
 
     @POST("./catalog/test-no-response-query-params")
     @Headers({
@@ -159,12 +160,12 @@ public interface TestServiceRetrofit {
     })
     CompletableFuture<Void> testNoResponseQueryParams(
             @Header("Authorization") AuthHeader authHeader,
-            @Body String query,
             @Query("different") ResourceIdentifier something,
-            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @Query("implicit") ResourceIdentifier implicit,
+            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @Query("setEnd") Set<String> setEnd,
-            @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd);
+            @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
+            @Body String query);
 
     @GET("./catalog/boolean")
     @Headers({"hr-path-template: /catalog/boolean", "Accept: application/json"})
@@ -189,4 +190,106 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Query("maybeInteger") OptionalInt maybeInteger,
             @Query("maybeDouble") OptionalDouble maybeDouble);
+
+    @Deprecated
+    default CompletableFuture<Integer> testQueryParams(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("different") ResourceIdentifier something,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Body String query) {
+        return testQueryParams(
+                authHeader,
+                something,
+                implicit,
+                Optional.empty(),
+                Collections.emptySet(),
+                Optional.empty(),
+                query);
+    }
+
+    @Deprecated
+    default CompletableFuture<Integer> testQueryParams(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("different") ResourceIdentifier something,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
+            @Body String query) {
+        return testQueryParams(
+                authHeader,
+                something,
+                implicit,
+                optionalMiddle,
+                Collections.emptySet(),
+                Optional.empty(),
+                query);
+    }
+
+    @Deprecated
+    default CompletableFuture<Integer> testQueryParams(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("different") ResourceIdentifier something,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
+            @Query("setEnd") Set<String> setEnd,
+            @Body String query) {
+        return testQueryParams(
+                authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
+    }
+
+    @Deprecated
+    default void testNoResponseQueryParams(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("different") ResourceIdentifier something,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Body String query) {
+        testNoResponseQueryParams(
+                authHeader,
+                something,
+                implicit,
+                Optional.empty(),
+                Collections.emptySet(),
+                Optional.empty(),
+                query);
+    }
+
+    @Deprecated
+    default void testNoResponseQueryParams(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("different") ResourceIdentifier something,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
+            @Body String query) {
+        testNoResponseQueryParams(
+                authHeader,
+                something,
+                implicit,
+                optionalMiddle,
+                Collections.emptySet(),
+                Optional.empty(),
+                query);
+    }
+
+    @Deprecated
+    default void testNoResponseQueryParams(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("different") ResourceIdentifier something,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Query("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
+            @Query("setEnd") Set<String> setEnd,
+            @Body String query) {
+        testNoResponseQueryParams(
+                authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
+    }
+
+    @Deprecated
+    default void testOptionalIntegerAndDouble(@Header("Authorization") AuthHeader authHeader) {
+        testOptionalIntegerAndDouble(authHeader, OptionalInt.empty(), OptionalDouble.empty());
+    }
+
+    @Deprecated
+    default void testOptionalIntegerAndDouble(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("maybeInteger") OptionalInt maybeInteger) {
+        testOptionalIntegerAndDouble(authHeader, maybeInteger, OptionalDouble.empty());
+    }
 }

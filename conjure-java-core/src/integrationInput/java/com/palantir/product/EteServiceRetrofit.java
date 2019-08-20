@@ -5,6 +5,7 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -171,4 +172,39 @@ public interface EteServiceRetrofit {
     Call<Optional<LongAlias>> aliasLongEndpoint(
             @Header("Authorization") AuthHeader authHeader,
             @Query("input") Optional<LongAlias> input);
+
+    @Deprecated
+    default Call<Optional<Long>> optionalExternalLongQuery(
+            @Header("Authorization") AuthHeader authHeader) {
+        return optionalExternalLongQuery(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default Call<StringAliasExample> optionalAliasOne(
+            @Header("Authorization") AuthHeader authHeader) {
+        return optionalAliasOne(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default Call<Optional<StringAliasExample>> optionalQueryExternalImport(
+            @Header("Authorization") AuthHeader authHeader) {
+        return optionalQueryExternalImport(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default Call<List<SimpleEnum>> enumListQuery(@Header("Authorization") AuthHeader authHeader) {
+        return enumListQuery(authHeader, Collections.emptyList());
+    }
+
+    @Deprecated
+    default Call<Optional<SimpleEnum>> optionalEnumQuery(
+            @Header("Authorization") AuthHeader authHeader) {
+        return optionalEnumQuery(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default Call<Optional<LongAlias>> aliasLongEndpoint(
+            @Header("Authorization") AuthHeader authHeader) {
+        return aliasLongEndpoint(authHeader, Optional.empty());
+    }
 }

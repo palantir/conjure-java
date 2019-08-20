@@ -1,0 +1,5 @@
+type: break
+break:
+  description: Match parameter order between jax-rs and retrofit clients
+  links:
+  - https://github.com/palantir/conjure-java/pull/499

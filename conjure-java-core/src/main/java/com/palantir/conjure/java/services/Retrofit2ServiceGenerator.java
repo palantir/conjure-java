@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.services;
 
-
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
@@ -27,6 +27,7 @@ import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
 import com.palantir.conjure.spec.AuthType;
@@ -49,12 +50,15 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
@@ -114,6 +118,12 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toList()));
 
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+                .map(endpoint -> generateCompatibilityBackfillServiceMethods(
+                        endpoint, returnTypeMapper, argumentTypeMapper))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList()));
+
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
@@ -167,11 +177,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
         methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box()));
 
-        getAuthParameter(endpointDef.getAuth()).ifPresent(methodBuilder::addParameter);
-
-        methodBuilder.addParameters(endpointDef.getArgs().stream()
-                .map(arg -> createEndpointParameter(argumentTypeMapper, encodedPathArgs, arg))
-                .collect(Collectors.toList()));
+        methodBuilder.addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs));
 
         return methodBuilder.build();
     }
@@ -203,6 +209,106 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             }
         }
         return HttpPath.of("/" + Joiner.on("/").join(newSegments));
+    }
+
+    /**
+     * Provides a linear expansion of optional query arguments to improve Java back-compat.
+     */
+    private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper) {
+        Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
+        List<ArgumentDefinition> queryArgs = Lists.newArrayList();
+
+        for (ArgumentDefinition arg : endpointDef.getArgs()) {
+            if (arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
+                    && arg.getType().accept(DefaultableTypeVisitor.INSTANCE)) {
+                queryArgs.add(arg);
+            }
+        }
+
+        List<MethodSpec> alternateMethods = Lists.newArrayList();
+        for (int i = 0; i < queryArgs.size(); i++) {
+            alternateMethods.add(createCompatibilityBackfillMethod(
+                    endpointDef,
+                    returnTypeMapper,
+                    argumentTypeMapper,
+                    encodedPathArgs,
+                    queryArgs.subList(i, queryArgs.size())));
+        }
+
+        return alternateMethods;
+    }
+
+    private MethodSpec createCompatibilityBackfillMethod(
+            EndpointDefinition endpointDef,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper,
+            Set<ArgumentName> encodedPathArgs,
+            List<ArgumentDefinition> extraArgs) {
+        TypeName returnType = endpointDef.getReturns()
+                .map(returnTypeMapper::getClassName)
+                .orElse(ClassName.VOID);
+        // ensure the correct ordering of parameters by creating the complete sorted parameter list
+        List<ParameterSpec> sortedParams = createServiceMethodParameters(
+                endpointDef, argumentTypeMapper, encodedPathArgs);
+        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
+                extraArgs.stream()
+                        .filter(arg -> arg.getArgName().get().equals(param.name))
+                        .findFirst())
+                .collect(Collectors.toList());
+
+        // omit extraArgs from the back fill method signature
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+                .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
+                .addAnnotation(Deprecated.class)
+                .addParameters(IntStream.range(0, sortedParams.size())
+                        .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
+                        .mapToObj(sortedParams::get)
+                        .collect(Collectors.toList()));
+
+        endpointDef.getReturns()
+                .ifPresent(type -> methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box())));
+
+        // replace extraArgs with default values when invoking the complete method
+        StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
+        List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
+            Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
+            if (maybeArgDef.isPresent()) {
+                sb.append("$L, ");
+                return maybeArgDef.get().getType().accept(DefaultTypeValueVisitor.INSTANCE);
+            } else {
+                sb.append("$N, ");
+                return sortedParams.get(i);
+            }
+        }).collect(Collectors.toList());
+        // trim the end
+        sb.setLength(sb.length() - 2);
+        sb.append(")");
+
+        ImmutableList<Object> methodCallArgs = ImmutableList.builder()
+                .add(endpointDef.getEndpointName().get())
+                .addAll(values)
+                .build();
+
+        methodBuilder.addStatement(sb.toString(), methodCallArgs.toArray(new Object[0]));
+
+        return methodBuilder.build();
+    }
+
+    private List<ParameterSpec> createServiceMethodParameters(
+            EndpointDefinition endpointDef,
+            TypeMapper typeMapper,
+            Set<ArgumentName> encodedPathArgs) {
+        List<ParameterSpec> parameterSpecs = new ArrayList<>();
+
+        Optional<AuthType> auth = endpointDef.getAuth();
+        getAuthParameter(auth).ifPresent(parameterSpecs::add);
+
+        ParameterOrder.sorted(endpointDef.getArgs()).forEach(def ->
+                parameterSpecs.add(createEndpointParameter(typeMapper, encodedPathArgs, def)));
+        return ImmutableList.copyOf(parameterSpecs);
     }
 
     private ParameterSpec createEndpointParameter(
