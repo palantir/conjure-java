@@ -82,8 +82,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     @SuppressWarnings("deprecation")
     public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
-        Preconditions.checkArgument(
-                !featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
+        Preconditions.checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
                         || !featureFlags.contains(FeatureFlags.RetrofitCompletableFutures),
                 "Cannot enable both the RetrofitListenableFutures and RetrofitCompletableFutures "
                         + "Conjure experimental features. Please remove one.");
@@ -107,8 +106,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .collect(Collectors.toSet());
     }
 
-    private JavaFile generateService(
-            ServiceDefinition serviceDefinition,
+    private JavaFile generateService(ServiceDefinition serviceDefinition,
             TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
