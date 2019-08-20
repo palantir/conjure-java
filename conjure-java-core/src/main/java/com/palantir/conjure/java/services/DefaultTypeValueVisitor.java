@@ -69,7 +69,6 @@ enum DefaultTypeValueVisitor implements Type.Visitor<CodeBlock> {
         throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
     }
 
-
     @Override
     public CodeBlock visitReference(TypeName value) {
         throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
