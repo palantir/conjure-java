@@ -28,32 +28,22 @@ import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.ParameterOrder;
-import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HttpPath;
-import com.palantir.conjure.spec.ListType;
-import com.palantir.conjure.spec.MapType;
-import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
-import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.conjure.spec.SetType;
-import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
-import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.util.syntacticpath.Path;
 import com.palantir.util.syntacticpath.Paths;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -62,11 +52,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -238,7 +225,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {
             if (arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
-                    && arg.getType().accept(TYPE_DEFAULTABLE_PREDICATE)) {
+                    && arg.getType().accept(DefaultableTypeVisitor.INSTANCE)) {
                 queryArgs.add(arg);
             }
         }
@@ -292,7 +279,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
             if (maybeArgDef.isPresent()) {
                 sb.append("$L, ");
-                return maybeArgDef.get().getType().accept(TYPE_DEFAULT_VALUE);
+                return maybeArgDef.get().getType().accept(DefaultTypeValueVisitor.INSTANCE);
             } else {
                 sb.append("$N, ");
                 return sortedParams.get(i);
@@ -400,70 +387,4 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         }
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
-
-    /**
-     * Indicates whether a particular type has a defaultable value.
-     */
-    private static final Type.Visitor<Boolean> TYPE_DEFAULTABLE_PREDICATE = new DefaultTypeVisitor<Boolean>() {
-        @Override
-        public Boolean visitOptional(OptionalType value) {
-            return true;
-        }
-
-        @Override
-        public Boolean visitList(ListType value) {
-            return true;
-        }
-
-        @Override
-        public Boolean visitSet(SetType value) {
-            return true;
-        }
-
-        @Override
-        public Boolean visitMap(MapType value) {
-            return true;
-        }
-
-        @Override
-        public Boolean visitDefault() {
-            return false;
-        }
-    };
-
-    private static final Type.Visitor<CodeBlock> TYPE_DEFAULT_VALUE = new DefaultTypeVisitor<CodeBlock>() {
-        @Override
-        public CodeBlock visitOptional(OptionalType value) {
-            if (value.getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
-                PrimitiveType primitiveType = value.getItemType().accept(TypeVisitor.PRIMITIVE);
-                // special handling for primitive optionals with Java 8
-                if (primitiveType.equals(PrimitiveType.DOUBLE)) {
-                    return CodeBlock.of("$T.empty()", OptionalDouble.class);
-                } else if (primitiveType.equals(PrimitiveType.INTEGER)) {
-                    return CodeBlock.of("$T.empty()", OptionalInt.class);
-                }
-            }
-            return CodeBlock.of("$T.empty()", Optional.class);
-        }
-
-        @Override
-        public CodeBlock visitList(ListType value) {
-            return CodeBlock.of("$T.emptyList()", Collections.class);
-        }
-
-        @Override
-        public CodeBlock visitSet(SetType value) {
-            return CodeBlock.of("$T.emptySet()", Collections.class);
-        }
-
-        @Override
-        public CodeBlock visitMap(MapType value) {
-            return CodeBlock.of("$T.emptyMap()", Collections.class);
-        }
-
-        @Override
-        public CodeBlock visitDefault() {
-            throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
-        }
-    };
 }
