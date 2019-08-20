@@ -387,4 +387,5 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         }
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
+
 }
