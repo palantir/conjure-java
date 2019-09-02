@@ -18,7 +18,7 @@ import javax.annotation.Generated;
 public final class BearerTokenExample {
     private final BearerToken bearerTokenValue;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private BearerTokenExample(BearerToken bearerTokenValue) {
         validateFields(bearerTokenValue);

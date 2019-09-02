@@ -19,7 +19,7 @@ import javax.annotation.Generated;
 public final class BinaryExample {
     private final ByteBuffer binary;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private BinaryExample(ByteBuffer binary) {
         validateFields(binary);

@@ -21,7 +21,7 @@ import javax.annotation.Generated;
 public final class AnyMapExample {
     private final Map<String, Object> items;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private AnyMapExample(Map<String, Object> items) {
         validateFields(items);

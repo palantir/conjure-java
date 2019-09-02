@@ -17,7 +17,7 @@ import javax.annotation.Generated;
 public final class StringExample {
     private final String string;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private StringExample(String string) {
         validateFields(string);

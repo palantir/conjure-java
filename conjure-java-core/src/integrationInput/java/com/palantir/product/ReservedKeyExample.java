@@ -25,7 +25,7 @@ public final class ReservedKeyExample {
 
     private final int memoizedHashCode_;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private ReservedKeyExample(
             String package_,

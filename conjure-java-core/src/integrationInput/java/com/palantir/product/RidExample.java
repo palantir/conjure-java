@@ -18,7 +18,7 @@ import javax.annotation.Generated;
 public final class RidExample {
     private final ResourceIdentifier ridValue;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private RidExample(ResourceIdentifier ridValue) {
         validateFields(ridValue);

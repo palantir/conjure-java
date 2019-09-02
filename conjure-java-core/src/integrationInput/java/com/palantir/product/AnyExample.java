@@ -17,7 +17,7 @@ import javax.annotation.Generated;
 public final class AnyExample {
     private final Object any;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private AnyExample(Object any) {
         validateFields(any);

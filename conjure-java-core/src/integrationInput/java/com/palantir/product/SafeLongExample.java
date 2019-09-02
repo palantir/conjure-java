@@ -18,7 +18,7 @@ import javax.annotation.Generated;
 public final class SafeLongExample {
     private final SafeLong safeLongValue;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private SafeLongExample(SafeLong safeLongValue) {
         validateFields(safeLongValue);

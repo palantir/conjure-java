@@ -37,7 +37,7 @@ public final class PrimitiveOptionalsExample {
 
     private final Optional<UUID> uuid;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private PrimitiveOptionalsExample(
             OptionalDouble num,

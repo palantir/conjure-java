@@ -19,7 +19,7 @@ import javax.annotation.Generated;
 public final class CovariantOptionalExample {
     private final Optional<Object> item;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private CovariantOptionalExample(Optional<Object> item) {
         validateFields(item);

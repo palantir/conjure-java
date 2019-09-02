@@ -16,7 +16,7 @@ import javax.annotation.Generated;
 public final class DoubleExample {
     private final double doubleValue;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private DoubleExample(double doubleValue) {
         this.doubleValue = doubleValue;

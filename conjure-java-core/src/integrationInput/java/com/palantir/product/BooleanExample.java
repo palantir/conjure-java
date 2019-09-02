@@ -16,7 +16,7 @@ import javax.annotation.Generated;
 public final class BooleanExample {
     private final boolean coin;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private BooleanExample(boolean coin) {
         this.coin = coin;

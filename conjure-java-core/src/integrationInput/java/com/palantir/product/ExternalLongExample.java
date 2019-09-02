@@ -25,7 +25,7 @@ public final class ExternalLongExample {
 
     private final List<Long> listExternalLong;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private ExternalLongExample(
             long externalLong, Optional<Long> optionalExternalLong, List<Long> listExternalLong) {

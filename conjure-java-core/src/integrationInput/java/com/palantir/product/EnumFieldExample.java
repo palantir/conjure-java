@@ -17,7 +17,7 @@ import javax.annotation.Generated;
 public final class EnumFieldExample {
     private final EnumExample enum_;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private EnumFieldExample(EnumExample enum_) {
         validateFields(enum_);

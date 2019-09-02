@@ -18,7 +18,7 @@ import javax.annotation.Generated;
 public final class UuidExample {
     private final UUID uuid;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private UuidExample(UUID uuid) {
         validateFields(uuid);

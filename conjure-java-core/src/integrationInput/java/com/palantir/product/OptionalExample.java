@@ -19,7 +19,7 @@ import javax.annotation.Generated;
 public final class OptionalExample {
     private final Optional<String> item;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private OptionalExample(Optional<String> item) {
         validateFields(item);

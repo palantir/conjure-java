@@ -16,7 +16,7 @@ import javax.annotation.Generated;
 public final class IntegerExample {
     private final int integer;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private IntegerExample(int integer) {
         this.integer = integer;
