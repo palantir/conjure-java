@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import javax.annotation.Generated;
 
 @JsonDeserialize(builder = CovariantOptionalExample.Builder.class)
@@ -126,7 +127,7 @@ public final class CovariantOptionalExample {
         public Builder item(Optional<?> item) {
             this.item =
                     Preconditions.checkNotNull(item, "item cannot be null")
-                            .map(_item -> (Object) _item);
+                            .map(Function.identity());
             return this;
         }
 
@@ -139,7 +140,7 @@ public final class CovariantOptionalExample {
         public Builder setItem(Optional<? extends Set<StringAliasExample>> setItem) {
             this.setItem =
                     Preconditions.checkNotNull(setItem, "setItem cannot be null")
-                            .map(_setItem -> (Set<StringAliasExample>) _setItem);
+                            .map(Function.identity());
             return this;
         }
 

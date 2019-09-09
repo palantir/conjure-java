@@ -60,6 +60,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -336,16 +337,14 @@ public final class BeanBuilderGenerator {
                     .build();
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
-            String parameterName = enriched.poetSpec().name;
             CodeBlock nullCheckedValue = Expressions.requireNonNull(
                     spec.name, enriched.fieldName().get() + " cannot be null");
 
             if (isWidenableContainedType(optionalType.getItemType())) {
-                // covariant optionals need to be narrowed to invariant type before assignment
-                Type innerType = optionalType.getItemType();
+                // we need to capture covariant type before assignment to invariant inner variable
                 return CodeBlock.builder()
-                        .addStatement("this.$1N = $2L.map(_$3L -> ($4T) _$3L)",
-                                spec.name, nullCheckedValue, parameterName, typeMapper.getClassName(innerType).box())
+                        .addStatement("this.$1N = $2L.map($3T.identity())",
+                                spec.name, nullCheckedValue, Function.class)
                         .build();
             } else {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);

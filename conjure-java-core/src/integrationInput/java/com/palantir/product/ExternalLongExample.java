@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.annotation.Generated;
 
 @JsonDeserialize(builder = ExternalLongExample.Builder.class)
@@ -159,7 +160,7 @@ public final class ExternalLongExample {
             this.optionalExternalLong =
                     Preconditions.checkNotNull(
                                     optionalExternalLong, "optionalExternalLong cannot be null")
-                            .map(_optionalExternalLong -> (Long) _optionalExternalLong);
+                            .map(Function.identity());
             return this;
         }
 
