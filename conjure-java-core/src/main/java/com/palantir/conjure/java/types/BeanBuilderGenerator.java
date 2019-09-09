@@ -341,7 +341,8 @@ public final class BeanBuilderGenerator {
                     spec.name, enriched.fieldName().get() + " cannot be null");
 
             if (isWidenableContainedType(optionalType.getItemType())) {
-                // we need to capture covariant type before assignment to invariant inner variable
+                // we capture covariant type via generic Function#identity mapping before assignment to bind
+                // the resultant optional to the invariant inner variable type
                 return CodeBlock.builder()
                         .addStatement("this.$1N = $2L.map($3T.identity())",
                                 spec.name, nullCheckedValue, Function.class)
