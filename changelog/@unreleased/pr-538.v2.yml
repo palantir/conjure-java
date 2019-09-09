@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: No warning-generating typecast is present in the setter methods for optional fields.
+  links:
+  - https://github.com/palantir/conjure-java/pull/538
