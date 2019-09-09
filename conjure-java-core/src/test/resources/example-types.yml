@@ -46,6 +46,7 @@ types:
       CovariantOptionalExample:
         fields:
           item: optional<any>
+          setItem: optional<set<StringAliasExample>>
       ListExample:
         fields:
           items: list<string>

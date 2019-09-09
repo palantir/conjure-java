@@ -336,6 +336,7 @@ public final class BeanBuilderGenerator {
                     .build();
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
+            String parameterName = enriched.poetSpec().name;
             CodeBlock nullCheckedValue = Expressions.requireNonNull(
                     spec.name, enriched.fieldName().get() + " cannot be null");
 
@@ -343,8 +344,8 @@ public final class BeanBuilderGenerator {
                 // covariant optionals need to be narrowed to invariant type before assignment
                 Type innerType = optionalType.getItemType();
                 return CodeBlock.builder()
-                        .addStatement("this.$1N = ($3T<$4T>) $2L",
-                                spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType).box())
+                        .addStatement("this.$1N = $2L.map(_$3L -> ($4T) _$3L)",
+                                spec.name, nullCheckedValue, parameterName, typeMapper.getClassName(innerType).box())
                         .build();
             } else {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
