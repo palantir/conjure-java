@@ -53,25 +53,23 @@ public final class ConjureHandler implements HttpHandler {
     private ConjureHandler(
             HttpHandler fallback,
             List<Endpoint> endpoints) {
-        this.routingHandler = Handlers.routing().setFallbackHandler(fallback);
+        this.routingHandler = Handlers.routing()
+                .setFallbackHandler(fallback)
+                // The method may be valid for another handlers, the
+                // fallback handler will be used instead of 405 status.
+                .setInvalidMethodHandler(null);
         endpoints.forEach(this::register);
-        registerOptionsEndpoints(endpoints);
+        registerOptionsEndpoints(routingHandler, endpoints);
     }
 
-    private void registerOptionsEndpoints(List<Endpoint> endpoints) {
-        ImmutableSetMultimap<String, HttpString> pathToConfiguredMethods = endpoints.stream()
+    private static void registerOptionsEndpoints(RoutingHandler routingHandler, List<Endpoint> endpoints) {
+        endpoints.stream()
                 .collect(ImmutableSetMultimap.toImmutableSetMultimap(
                         endpoint -> normalizeTemplate(endpoint.template()),
-                        Endpoint::method));
-        // Once UNDERTOW-1581 is fixed we should register OPTIONS handling directly with routingHandler
-        // instead of using setInvalidMethodHandler.
-        RoutingHandler optionalRoutingHandler = Handlers.routing()
-                .setFallbackHandler(ResponseCodeHandler.HANDLE_405);
-
-        pathToConfiguredMethods.asMap()
-                .forEach((normalizedPath, methods) -> optionalRoutingHandler.add(Methods.OPTIONS, normalizedPath,
+                        Endpoint::method))
+                .asMap()
+                .forEach((normalizedPath, methods) -> routingHandler.add(Methods.OPTIONS, normalizedPath,
                         new WebSecurityHandler(new OptionsHandler(ImmutableSet.copyOf(methods)))));
-        routingHandler.setInvalidMethodHandler(optionalRoutingHandler);
     }
 
     @Override

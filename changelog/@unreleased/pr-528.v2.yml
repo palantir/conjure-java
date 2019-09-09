@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Take advantage of the fix for UNDERTOW-1581 for cleaner options handling
+  links:
+  - https://github.com/palantir/conjure-java/pull/528
