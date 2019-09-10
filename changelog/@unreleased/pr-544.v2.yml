@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Invalid requests to conjure-undertow result in 4xx responses, not 500
+  links:
+  - https://github.com/palantir/conjure-java/pull/544
