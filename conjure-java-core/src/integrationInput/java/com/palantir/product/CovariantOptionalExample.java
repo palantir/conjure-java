@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 import javax.annotation.Generated;
 
 @JsonDeserialize(builder = CovariantOptionalExample.Builder.class)
@@ -19,16 +21,25 @@ import javax.annotation.Generated;
 public final class CovariantOptionalExample {
     private final Optional<Object> item;
 
+    private final Optional<Set<StringAliasExample>> setItem;
+
     private volatile int memoizedHashCode;
 
-    private CovariantOptionalExample(Optional<Object> item) {
-        validateFields(item);
+    private CovariantOptionalExample(
+            Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
+        validateFields(item, setItem);
         this.item = item;
+        this.setItem = setItem;
     }
 
     @JsonProperty("item")
     public Optional<Object> getItem() {
         return this.item;
+    }
+
+    @JsonProperty("setItem")
+    public Optional<Set<StringAliasExample>> getSetItem() {
+        return this.setItem;
     }
 
     @Override
@@ -39,13 +50,13 @@ public final class CovariantOptionalExample {
     }
 
     private boolean equalTo(CovariantOptionalExample other) {
-        return this.item.equals(other.item);
+        return this.item.equals(other.item) && this.setItem.equals(other.setItem);
     }
 
     @Override
     public int hashCode() {
         if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(item);
+            memoizedHashCode = Objects.hash(item, setItem);
         }
         return memoizedHashCode;
     }
@@ -57,17 +68,23 @@ public final class CovariantOptionalExample {
                 .append("item")
                 .append(": ")
                 .append(item)
+                .append(", ")
+                .append("setItem")
+                .append(": ")
+                .append(setItem)
                 .append('}')
                 .toString();
     }
 
-    public static CovariantOptionalExample of(Object item) {
-        return builder().item(Optional.of(item)).build();
+    public static CovariantOptionalExample of(Object item, Set<StringAliasExample> setItem) {
+        return builder().item(Optional.of(item)).setItem(Optional.of(setItem)).build();
     }
 
-    private static void validateFields(Optional<Object> item) {
+    private static void validateFields(
+            Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, item, "item");
+        missingFields = addFieldIfMissing(missingFields, setItem, "setItem");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set",
@@ -80,7 +97,7 @@ public final class CovariantOptionalExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(1);
+                missingFields = new ArrayList<>(2);
             }
             missingFields.add(fieldName);
         }
@@ -96,16 +113,21 @@ public final class CovariantOptionalExample {
     public static final class Builder {
         private Optional<Object> item = Optional.empty();
 
+        private Optional<Set<StringAliasExample>> setItem = Optional.empty();
+
         private Builder() {}
 
         public Builder from(CovariantOptionalExample other) {
             item(other.getItem());
+            setItem(other.getSetItem());
             return this;
         }
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
         public Builder item(Optional<?> item) {
-            this.item = (Optional<Object>) Preconditions.checkNotNull(item, "item cannot be null");
+            this.item =
+                    Preconditions.checkNotNull(item, "item cannot be null")
+                            .map(Function.identity());
             return this;
         }
 
@@ -114,8 +136,22 @@ public final class CovariantOptionalExample {
             return this;
         }
 
+        @JsonSetter(value = "setItem", nulls = Nulls.SKIP)
+        public Builder setItem(Optional<? extends Set<StringAliasExample>> setItem) {
+            this.setItem =
+                    Preconditions.checkNotNull(setItem, "setItem cannot be null")
+                            .map(Function.identity());
+            return this;
+        }
+
+        public Builder setItem(Set<StringAliasExample> setItem) {
+            this.setItem =
+                    Optional.of(Preconditions.checkNotNull(setItem, "setItem cannot be null"));
+            return this;
+        }
+
         public CovariantOptionalExample build() {
-            return new CovariantOptionalExample(item);
+            return new CovariantOptionalExample(item, setItem);
         }
     }
 }

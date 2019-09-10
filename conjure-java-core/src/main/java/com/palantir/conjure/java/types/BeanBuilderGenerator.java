@@ -60,6 +60,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -340,11 +341,11 @@ public final class BeanBuilderGenerator {
                     spec.name, enriched.fieldName().get() + " cannot be null");
 
             if (isWidenableContainedType(optionalType.getItemType())) {
-                // covariant optionals need to be narrowed to invariant type before assignment
-                Type innerType = optionalType.getItemType();
+                // we capture covariant type via generic Function#identity mapping before assignment to bind
+                // the resultant optional to the invariant inner variable type
                 return CodeBlock.builder()
-                        .addStatement("this.$1N = ($3T<$4T>) $2L",
-                                spec.name, nullCheckedValue, Optional.class, typeMapper.getClassName(innerType).box())
+                        .addStatement("this.$1N = $2L.map($3T.identity())",
+                                spec.name, nullCheckedValue, Function.class)
                         .build();
             } else {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
