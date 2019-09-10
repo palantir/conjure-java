@@ -22,7 +22,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import java.io.ByteArrayInputStream;
@@ -31,21 +35,81 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-public final class EncodingsTest {
+final class EncodingsTest {
 
     private final Encoding json = Encodings.json();
 
     // TODO(rfink): Wire tests for JSON serializer
 
     @Test
-    public void json_deserialize_throwsDeserializationErrorsAsIllegalArgumentException() {
+    void json_deserialize_throwsDeserializationErrorsAsIllegalArgumentException() {
         assertThatThrownBy(() -> deserialize(asStream("\"2018-08-bogus\""), new TypeMarker<OffsetDateTime>() {}))
                 .isInstanceOf(FrameworkException.class)
                 .hasMessageContaining("Failed to deserialize")
                 .matches(exception -> ((FrameworkException) exception).getStatusCode() == 422, "Expected 422 status");
+    }
+
+    @Test
+    void json_deserialize_missingField() {
+        assertThatThrownBy(() -> deserialize(asStream("{\"value\":null}"), new TypeMarker<SimpleObject>() {}))
+                .isInstanceOf(FrameworkException.class)
+                .hasMessageContaining("Failed to deserialize")
+                .matches(exception -> ((FrameworkException) exception).getStatusCode() == 422, "Expected 422 status");
+    }
+
+    /** Approximation of a generated bean object. */
+    @JsonDeserialize(builder = SimpleObject.Builder.class)
+    public static final class SimpleObject {
+
+        private String value;
+
+        private SimpleObject(String value) {
+            this.value = Preconditions.checkNotNull(value, "value");
+        }
+
+        @JsonProperty("value")
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+            SimpleObject that = (SimpleObject) other;
+            return value.equals(that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String value;
+
+            @JsonSetter("value")
+            public Builder value(String val) {
+                this.value = Preconditions.checkNotNull(val, "value");
+                return this;
+            }
+
+            public SimpleObject build() {
+                return new SimpleObject(value);
+            }
+        }
     }
 
     @Test
