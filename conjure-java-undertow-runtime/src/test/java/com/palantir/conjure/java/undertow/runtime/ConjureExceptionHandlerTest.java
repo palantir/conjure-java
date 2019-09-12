@@ -97,6 +97,27 @@ public final class ConjureExceptionHandlerTest {
     }
 
     @Test
+    public void handles403RemoteException() throws IOException {
+        SerializableError remoteError = SerializableError.forException(
+                new ServiceException(ErrorType.PERMISSION_DENIED, SafeArg.of("foo", "bar")));
+        exception = new RemoteException(remoteError, ErrorType.PERMISSION_DENIED.httpErrorCode());
+        Response response = execute();
+
+        // Propagates errorInstanceId and does not change error code and name
+        // Does not propagate args
+        SerializableError expectedPropagatedError = SerializableError.builder()
+                .errorCode(ErrorType.PERMISSION_DENIED.code().toString())
+                .errorName(ErrorType.PERMISSION_DENIED.name())
+                .errorInstanceId(remoteError.errorInstanceId())
+                .build();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
+
+        assertThat(response.body().string()).isEqualTo(stream.toString());
+        assertThat(response.code()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
+    }
+
+    @Test
     public void handlesQosExceptionThrottleWithoutDuration() throws IOException {
         exception = QosException.throttle();
         Response response = execute();
