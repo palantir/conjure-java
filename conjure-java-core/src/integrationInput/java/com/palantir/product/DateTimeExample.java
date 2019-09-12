@@ -50,13 +50,7 @@ public final class DateTimeExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("DateTimeExample")
-                .append('{')
-                .append("datetime")
-                .append(": ")
-                .append(datetime)
-                .append('}')
-                .toString();
+        return "DateTimeExample{datetime: " + datetime + '}';
     }
 
     public static DateTimeExample of(OffsetDateTime datetime) {

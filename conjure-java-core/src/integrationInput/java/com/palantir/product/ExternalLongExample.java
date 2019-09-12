@@ -73,21 +73,13 @@ public final class ExternalLongExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("ExternalLongExample")
-                .append('{')
-                .append("externalLong")
-                .append(": ")
-                .append(externalLong)
-                .append(", ")
-                .append("optionalExternalLong")
-                .append(": ")
-                .append(optionalExternalLong)
-                .append(", ")
-                .append("listExternalLong")
-                .append(": ")
-                .append(listExternalLong)
-                .append('}')
-                .toString();
+        return "ExternalLongExample{externalLong: "
+                + externalLong
+                + ", optionalExternalLong: "
+                + optionalExternalLong
+                + ", listExternalLong: "
+                + listExternalLong
+                + '}';
     }
 
     public static ExternalLongExample of(

@@ -50,13 +50,7 @@ public final class BearerTokenExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("BearerTokenExample")
-                .append('{')
-                .append("bearerTokenValue")
-                .append(": ")
-                .append(bearerTokenValue)
-                .append('}')
-                .toString();
+        return "BearerTokenExample{bearerTokenValue: " + bearerTokenValue + '}';
     }
 
     public static BearerTokenExample of(BearerToken bearerTokenValue) {

@@ -63,17 +63,7 @@ public final class CovariantOptionalExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("CovariantOptionalExample")
-                .append('{')
-                .append("item")
-                .append(": ")
-                .append(item)
-                .append(", ")
-                .append("setItem")
-                .append(": ")
-                .append(setItem)
-                .append('}')
-                .toString();
+        return "CovariantOptionalExample{item: " + item + ", setItem: " + setItem + '}';
     }
 
     public static CovariantOptionalExample of(Object item, Set<StringAliasExample> setItem) {

@@ -47,13 +47,7 @@ public final class IntegerExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("IntegerExample")
-                .append('{')
-                .append("integer")
-                .append(": ")
-                .append(integer)
-                .append('}')
-                .toString();
+        return "IntegerExample{integer: " + integer + '}';
     }
 
     public static IntegerExample of(int integer) {

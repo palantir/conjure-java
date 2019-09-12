@@ -52,13 +52,7 @@ public final class MapExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("MapExample")
-                .append('{')
-                .append("items")
-                .append(": ")
-                .append(items)
-                .append('}')
-                .toString();
+        return "MapExample{items: " + items + '}';
     }
 
     public static MapExample of(Map<String, String> items) {

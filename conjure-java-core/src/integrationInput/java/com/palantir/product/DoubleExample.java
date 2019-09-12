@@ -46,13 +46,7 @@ public final class DoubleExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("DoubleExample")
-                .append('{')
-                .append("doubleValue")
-                .append(": ")
-                .append(doubleValue)
-                .append('}')
-                .toString();
+        return "DoubleExample{doubleValue: " + doubleValue + '}';
     }
 
     public static DoubleExample of(double doubleValue) {

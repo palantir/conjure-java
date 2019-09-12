@@ -49,13 +49,7 @@ public final class EnumFieldExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("EnumFieldExample")
-                .append('{')
-                .append("enum")
-                .append(": ")
-                .append(enum_)
-                .append('}')
-                .toString();
+        return "EnumFieldExample{enum: " + enum_ + '}';
     }
 
     public static EnumFieldExample of(EnumExample enum_) {

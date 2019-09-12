@@ -101,13 +101,7 @@ public final class UnionTypeExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("UnionTypeExample")
-                .append('{')
-                .append("value")
-                .append(": ")
-                .append(value)
-                .append('}')
-                .toString();
+        return "UnionTypeExample{value: " + value + '}';
     }
 
     public interface Visitor<T> {
@@ -359,13 +353,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("StringExampleWrapper")
-                    .append('{')
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "StringExampleWrapper{value: " + value + '}';
         }
     }
 
@@ -400,13 +388,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("SetWrapper")
-                    .append('{')
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "SetWrapper{value: " + value + '}';
         }
     }
 
@@ -443,13 +425,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("ThisFieldIsAnIntegerWrapper")
-                    .append('{')
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "ThisFieldIsAnIntegerWrapper{value: " + value + '}';
         }
     }
 
@@ -486,13 +462,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("AlsoAnIntegerWrapper")
-                    .append('{')
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "AlsoAnIntegerWrapper{value: " + value + '}';
         }
     }
 
@@ -527,13 +497,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("IfWrapper")
-                    .append('{')
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "IfWrapper{value: " + value + '}';
         }
     }
 
@@ -568,13 +532,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("NewWrapper")
-                    .append('{')
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "NewWrapper{value: " + value + '}';
         }
     }
 
@@ -610,13 +568,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("InterfaceWrapper")
-                    .append('{')
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "InterfaceWrapper{value: " + value + '}';
         }
     }
 
@@ -674,17 +626,7 @@ public final class UnionTypeExample {
 
         @Override
         public String toString() {
-            return new StringBuilder("UnknownWrapper")
-                    .append('{')
-                    .append("type")
-                    .append(": ")
-                    .append(type)
-                    .append(", ")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "UnknownWrapper{type: " + type + ", value: " + value + '}';
         }
     }
 }

@@ -70,21 +70,13 @@ public final class ListExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("ListExample")
-                .append('{')
-                .append("items")
-                .append(": ")
-                .append(items)
-                .append(", ")
-                .append("primitiveItems")
-                .append(": ")
-                .append(primitiveItems)
-                .append(", ")
-                .append("doubleItems")
-                .append(": ")
-                .append(doubleItems)
-                .append('}')
-                .toString();
+        return "ListExample{items: "
+                + items
+                + ", primitiveItems: "
+                + primitiveItems
+                + ", doubleItems: "
+                + doubleItems
+                + '}';
     }
 
     public static ListExample of(

@@ -116,37 +116,21 @@ public final class AliasAsMapKeyExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("AliasAsMapKeyExample")
-                .append('{')
-                .append("strings")
-                .append(": ")
-                .append(strings)
-                .append(", ")
-                .append("rids")
-                .append(": ")
-                .append(rids)
-                .append(", ")
-                .append("bearertokens")
-                .append(": ")
-                .append(bearertokens)
-                .append(", ")
-                .append("integers")
-                .append(": ")
-                .append(integers)
-                .append(", ")
-                .append("safelongs")
-                .append(": ")
-                .append(safelongs)
-                .append(", ")
-                .append("datetimes")
-                .append(": ")
-                .append(datetimes)
-                .append(", ")
-                .append("uuids")
-                .append(": ")
-                .append(uuids)
-                .append('}')
-                .toString();
+        return "AliasAsMapKeyExample{strings: "
+                + strings
+                + ", rids: "
+                + rids
+                + ", bearertokens: "
+                + bearertokens
+                + ", integers: "
+                + integers
+                + ", safelongs: "
+                + safelongs
+                + ", datetimes: "
+                + datetimes
+                + ", uuids: "
+                + uuids
+                + '}';
     }
 
     private static void validateFields(

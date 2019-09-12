@@ -51,13 +51,7 @@ public final class OptionalExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("OptionalExample")
-                .append('{')
-                .append("item")
-                .append(": ")
-                .append(item)
-                .append('}')
-                .toString();
+        return "OptionalExample{item: " + item + '}';
     }
 
     public static OptionalExample of(String item) {

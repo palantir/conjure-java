@@ -50,13 +50,7 @@ public final class SafeLongExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("SafeLongExample")
-                .append('{')
-                .append("safeLongValue")
-                .append(": ")
-                .append(safeLongValue)
-                .append('}')
-                .toString();
+        return "SafeLongExample{safeLongValue: " + safeLongValue + '}';
     }
 
     public static SafeLongExample of(SafeLong safeLongValue) {

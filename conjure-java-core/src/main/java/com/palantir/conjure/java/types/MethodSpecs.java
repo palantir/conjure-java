@@ -28,6 +28,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collector;
 import javax.lang.model.element.Modifier;
@@ -88,19 +89,15 @@ public final class MethodSpecs {
                 .collect(joining(CodeBlock.of(", "))));
     }
 
-    public static MethodSpec createToString(String thisClassName, Collection<FieldName> fieldNames) {
+    public static MethodSpec createToString(String thisClassName, List<FieldName> fieldNames) {
         CodeBlock returnStatement = fieldNames.isEmpty()
                 ? CodeBlock.builder().addStatement("return $S", thisClassName + "{}").build()
                 : CodeBlock.builder()
-                        .add("return new $T($S).append('{')\n", StringBuilder.class, thisClassName)
+                        .add("return $S\n", thisClassName + '{' + fieldNames.get(0).get() + ": ")
                         .indent()
                         .indent()
-                        .add(CodeBlocks.of(fieldNames.stream()
-                                .map(MethodSpecs::createAppendStatement)
-                                .collect(joining(CodeBlock.of(".append(\", \")")))))
-                        .unindent()
-                        .add(".append('}')\n")
-                        .addStatement(".toString()")
+                        .add(toStringConcatenation(fieldNames))
+                        .addStatement(" + '}'")
                         .unindent()
                         .build();
 
@@ -112,13 +109,17 @@ public final class MethodSpecs {
                 .build();
     }
 
-    private static CodeBlock createAppendStatement(FieldName fieldName) {
-        return CodeBlock.builder()
-                .add(".append($S)", fieldName.get())
-                .add(".append(\": \")")
-                .add(".append($N)", JavaNameSanitizer.sanitize(fieldName))
-                .add("\n")
-                .build();
+    private static CodeBlock toStringConcatenation(List<FieldName> fieldNames) {
+        CodeBlock.Builder builder = CodeBlock.builder();
+        for (int i = 0; i < fieldNames.size(); i++) {
+            FieldName fieldName = fieldNames.get(i);
+            if (i != 0) {
+                // The name of the first field is included with the class name, see createToString.
+                builder.add(" + $S", ", " + fieldName.get() + ": ");
+            }
+            builder.add(" + $N", JavaNameSanitizer.sanitize(fieldName));
+        }
+        return builder.build();
     }
 
     private static CodeBlock createEqualsToStatement(Collection<FieldSpec> fields) {

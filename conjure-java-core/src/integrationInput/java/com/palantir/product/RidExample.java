@@ -49,13 +49,7 @@ public final class RidExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("RidExample")
-                .append('{')
-                .append("ridValue")
-                .append(": ")
-                .append(ridValue)
-                .append('}')
-                .toString();
+        return "RidExample{ridValue: " + ridValue + '}';
     }
 
     public static RidExample of(ResourceIdentifier ridValue) {
