@@ -33,7 +33,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xnio.IoUtils;
@@ -119,14 +118,12 @@ final class ConjureExceptions {
     }
 
     private static ErrorType mapRemoteExceptionErrorType(RemoteException exception) {
-        Status status = Status.fromStatusCode(exception.getStatus());
-
-        if (status.getStatusCode() == 403) {
+        if (exception.getStatus() == 403) {
             log.info("Encountered a remote permission denied exception."
                             + " Mapping to a default permission denied exception before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                     SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("statusCode", status.getStatusCode()),
+                    SafeArg.of("statusCode", exception.getStatus()),
                     exception);
 
             return ErrorType.PERMISSION_DENIED;
@@ -135,7 +132,7 @@ final class ConjureExceptions {
             log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                     SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("statusCode", status.getStatusCode()),
+                    SafeArg.of("statusCode", exception.getStatus()),
                     exception);
 
             return ErrorType.INTERNAL;
