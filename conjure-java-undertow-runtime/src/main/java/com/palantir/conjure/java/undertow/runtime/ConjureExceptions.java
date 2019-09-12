@@ -99,20 +99,14 @@ final class ConjureExceptions {
     }
 
     // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
-    // We forward these exceptions, but change the ErrorType to INTERNAL, i.e., the problem is now
+    // We forward these exceptions, but change the ErrorType to INTERNAL unless it was a 403, i.e., the problem is now
     // considered internal to *this* service rather than the originating service. This means in particular
     // that Conjure errors are defined only local to a given service and these error types don't
     // propagate through other services.
     private static void remoteException(
             HttpServerExchange exchange, Serializer<SerializableError> serializer, RemoteException exception) {
-        // log at WARN instead of ERROR because although this indicates an issue in a remote server
-        log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
-                SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
-                SafeArg.of("errorName", exception.getError().errorName()),
-                SafeArg.of("statusCode", exception.getStatus()),
-                exception);
 
-        ErrorType errorType = ErrorType.INTERNAL;
+        ErrorType errorType = mapRemoteExceptionErrorType(exception);
         writeResponse(exchange,
                 Optional.of(SerializableError.builder()
                         .errorName(errorType.name())
@@ -121,6 +115,28 @@ final class ConjureExceptions {
                         .build()),
                 errorType.httpErrorCode(),
                 serializer);
+    }
+
+    private static ErrorType mapRemoteExceptionErrorType(RemoteException exception) {
+        if (exception.getStatus() == 403) {
+            log.info("Encountered a remote permission denied exception."
+                            + " Mapping to a default permission denied exception before propagating",
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    SafeArg.of("statusCode", exception.getStatus()),
+                    exception);
+
+            return ErrorType.PERMISSION_DENIED;
+        } else {
+            // log at WARN instead of ERROR because this indicates an issue in a remote server
+            log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    SafeArg.of("statusCode", exception.getStatus()),
+                    exception);
+
+            return ErrorType.INTERNAL;
+        }
     }
 
     private static void illegalArgumentException(

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Undertow Services propagate 403s.
+  links:
+  - https://github.com/palantir/conjure-java/pull/552
