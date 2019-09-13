@@ -38,10 +38,12 @@ public final class DoubleExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(doubleValue);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.doubleValue);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

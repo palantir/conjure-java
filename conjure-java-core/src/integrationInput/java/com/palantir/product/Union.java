@@ -68,7 +68,7 @@ public final class Union {
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return Objects.hash(this.value);
     }
 
     @Override
@@ -227,7 +227,7 @@ public final class Union {
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return Objects.hash(this.value);
         }
 
         @Override
@@ -268,7 +268,7 @@ public final class Union {
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return Objects.hash(this.value);
         }
 
         @Override
@@ -309,7 +309,7 @@ public final class Union {
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return Objects.hash(this.value);
         }
 
         @Override
@@ -373,7 +373,7 @@ public final class Union {
 
         @Override
         public int hashCode() {
-            return Objects.hash(type, value);
+            return Objects.hash(this.type, this.value);
         }
 
         @Override

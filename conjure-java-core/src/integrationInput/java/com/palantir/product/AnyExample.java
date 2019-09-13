@@ -40,10 +40,12 @@ public final class AnyExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(any);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.any);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

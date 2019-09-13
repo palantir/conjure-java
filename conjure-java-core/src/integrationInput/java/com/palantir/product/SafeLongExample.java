@@ -42,10 +42,12 @@ public final class SafeLongExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(safeLongValue);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.safeLongValue);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

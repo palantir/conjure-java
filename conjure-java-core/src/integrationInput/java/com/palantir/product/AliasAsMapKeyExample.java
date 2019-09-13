@@ -106,12 +106,20 @@ public final class AliasAsMapKeyExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode =
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result =
                     Objects.hash(
-                            strings, rids, bearertokens, integers, safelongs, datetimes, uuids);
+                            this.strings,
+                            this.rids,
+                            this.bearertokens,
+                            this.integers,
+                            this.safelongs,
+                            this.datetimes,
+                            this.uuids);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

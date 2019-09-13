@@ -62,10 +62,12 @@ public final class ListExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(items, primitiveItems, doubleItems);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.items, this.primitiveItems, this.doubleItems);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

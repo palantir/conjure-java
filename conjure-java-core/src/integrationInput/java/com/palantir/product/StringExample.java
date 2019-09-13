@@ -40,10 +40,12 @@ public final class StringExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(string);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.string);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

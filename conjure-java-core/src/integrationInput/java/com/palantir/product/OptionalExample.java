@@ -43,10 +43,12 @@ public final class OptionalExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(item);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.item);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

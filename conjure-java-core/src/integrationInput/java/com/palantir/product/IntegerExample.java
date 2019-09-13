@@ -39,10 +39,12 @@ public final class IntegerExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(integer);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.integer);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

@@ -55,10 +55,12 @@ public final class CovariantOptionalExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(item, setItem);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.item, this.setItem);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

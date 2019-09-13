@@ -42,10 +42,12 @@ public final class BearerTokenExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(bearerTokenValue);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.bearerTokenValue);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

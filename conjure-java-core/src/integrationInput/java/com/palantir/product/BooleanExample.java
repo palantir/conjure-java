@@ -39,10 +39,12 @@ public final class BooleanExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(coin);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.coin);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

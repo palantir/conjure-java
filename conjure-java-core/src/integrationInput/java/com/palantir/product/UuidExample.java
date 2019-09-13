@@ -41,10 +41,12 @@ public final class UuidExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(uuid);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.uuid);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

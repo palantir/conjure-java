@@ -41,10 +41,12 @@ public final class EnumFieldExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(enum_);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.enum_);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override
