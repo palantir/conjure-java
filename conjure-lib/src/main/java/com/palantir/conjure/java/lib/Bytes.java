@@ -115,14 +115,14 @@ public final class Bytes {
 
     static final class Serializer extends JsonSerializer<Bytes> {
         @Override
-        public void serialize(Bytes value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(Bytes value, JsonGenerator gen, SerializerProvider unused) throws IOException {
             gen.writeBinary(value.safe);
         }
     }
 
     static final class Deserializer extends JsonDeserializer<Bytes> {
         @Override
-        public Bytes deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+        public Bytes deserialize(JsonParser parser, DeserializationContext unused) throws IOException {
             // Avoid making a copy of the value from jackson
             return new Bytes(parser.getBinaryValue());
         }
