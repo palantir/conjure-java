@@ -18,8 +18,6 @@ import javax.annotation.Generated;
 public final class SafeLongExample {
     private final SafeLong safeLongValue;
 
-    private volatile int memoizedHashCode;
-
     private SafeLongExample(SafeLong safeLongValue) {
         validateFields(safeLongValue);
         this.safeLongValue = safeLongValue;
@@ -42,10 +40,7 @@ public final class SafeLongExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(safeLongValue);
-        }
-        return memoizedHashCode;
+        return Objects.hashCode(this.safeLongValue);
     }
 
     @Override

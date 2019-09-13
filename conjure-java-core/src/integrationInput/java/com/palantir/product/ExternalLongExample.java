@@ -65,10 +65,14 @@ public final class ExternalLongExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(externalLong, optionalExternalLong, listExternalLong);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result =
+                    Objects.hash(
+                            this.externalLong, this.optionalExternalLong, this.listExternalLong);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

@@ -18,8 +18,6 @@ import javax.annotation.Generated;
 public final class BinaryExample {
     private final Bytes binary;
 
-    private volatile int memoizedHashCode;
-
     private BinaryExample(Bytes binary) {
         validateFields(binary);
         this.binary = binary;
@@ -41,10 +39,7 @@ public final class BinaryExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(binary);
-        }
-        return memoizedHashCode;
+        return Objects.hashCode(this.binary);
     }
 
     @Override

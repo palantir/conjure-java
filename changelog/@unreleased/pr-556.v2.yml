@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Fix volatile memoizedHashCode access in generated code
+  links:
+  - https://github.com/palantir/conjure-java/pull/556

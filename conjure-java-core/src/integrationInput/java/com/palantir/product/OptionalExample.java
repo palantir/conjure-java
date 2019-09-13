@@ -19,8 +19,6 @@ import javax.annotation.Generated;
 public final class OptionalExample {
     private final Optional<String> item;
 
-    private volatile int memoizedHashCode;
-
     private OptionalExample(Optional<String> item) {
         validateFields(item);
         this.item = item;
@@ -43,10 +41,7 @@ public final class OptionalExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(item);
-        }
-        return memoizedHashCode;
+        return Objects.hashCode(this.item);
     }
 
     @Override

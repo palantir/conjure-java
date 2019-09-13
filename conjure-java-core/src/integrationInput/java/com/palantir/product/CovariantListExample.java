@@ -53,10 +53,12 @@ public final class CovariantListExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(items, externalItems);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hash(this.items, this.externalItems);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

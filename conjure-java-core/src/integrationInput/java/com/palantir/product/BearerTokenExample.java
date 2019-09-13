@@ -18,8 +18,6 @@ import javax.annotation.Generated;
 public final class BearerTokenExample {
     private final BearerToken bearerTokenValue;
 
-    private volatile int memoizedHashCode;
-
     private BearerTokenExample(BearerToken bearerTokenValue) {
         validateFields(bearerTokenValue);
         this.bearerTokenValue = bearerTokenValue;
@@ -42,10 +40,7 @@ public final class BearerTokenExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(bearerTokenValue);
-        }
-        return memoizedHashCode;
+        return Objects.hashCode(this.bearerTokenValue);
     }
 
     @Override

@@ -18,8 +18,6 @@ import javax.annotation.Generated;
 public final class UuidExample {
     private final UUID uuid;
 
-    private volatile int memoizedHashCode;
-
     private UuidExample(UUID uuid) {
         validateFields(uuid);
         this.uuid = uuid;
@@ -41,10 +39,7 @@ public final class UuidExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(uuid);
-        }
-        return memoizedHashCode;
+        return Objects.hashCode(this.uuid);
     }
 
     @Override

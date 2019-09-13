@@ -192,6 +192,8 @@ types:
             type: integer
           memoizedHashCode:
             type: integer
+          result:
+            type: integer
       Union:
         union:
           foo: string

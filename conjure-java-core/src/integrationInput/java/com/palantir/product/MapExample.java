@@ -44,10 +44,12 @@ public final class MapExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(items);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = Objects.hashCode(this.items);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

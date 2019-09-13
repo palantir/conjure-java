@@ -55,7 +55,7 @@ public final class SingleUnion {
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return Objects.hashCode(this.value);
     }
 
     @Override
@@ -166,7 +166,7 @@ public final class SingleUnion {
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return Objects.hashCode(this.value);
         }
 
         @Override
@@ -230,7 +230,7 @@ public final class SingleUnion {
 
         @Override
         public int hashCode() {
-            return Objects.hash(type, value);
+            return Objects.hash(this.type, this.value);
         }
 
         @Override

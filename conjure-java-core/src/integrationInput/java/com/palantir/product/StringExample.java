@@ -17,8 +17,6 @@ import javax.annotation.Generated;
 public final class StringExample {
     private final String string;
 
-    private volatile int memoizedHashCode;
-
     private StringExample(String string) {
         validateFields(string);
         this.string = string;
@@ -40,10 +38,7 @@ public final class StringExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(string);
-        }
-        return memoizedHashCode;
+        return Objects.hashCode(this.string);
     }
 
     @Override
