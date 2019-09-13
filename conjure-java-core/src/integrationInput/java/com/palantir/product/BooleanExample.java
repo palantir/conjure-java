@@ -90,7 +90,9 @@ public final class BooleanExample {
         }
 
         private static List<String> addFieldIfMissing(
-                List<String> prev, boolean initialized, String fieldName) {
+                List<String> prev,
+                boolean initialized,
+                String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {

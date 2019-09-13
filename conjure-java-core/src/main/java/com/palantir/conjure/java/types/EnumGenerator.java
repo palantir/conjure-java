@@ -63,7 +63,10 @@ public final class EnumGenerator {
     }
 
     private static TypeSpec createSafeEnum(
-            EnumDefinition typeDef, ClassName thisClass, ClassName enumClass, ClassName visitorClass) {
+            EnumDefinition typeDef,
+            ClassName thisClass,
+            ClassName enumClass,
+            ClassName visitorClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -108,16 +111,25 @@ public final class EnumGenerator {
         return wrapper.build();
     }
 
-    private static Iterable<FieldSpec> createConstants(Iterable<EnumValueDefinition> values,
-            ClassName thisClass, ClassName enumClass) {
+    private static Iterable<FieldSpec> createConstants(
+            Iterable<EnumValueDefinition> values,
+            ClassName thisClass,
+            ClassName enumClass) {
         return Iterables.transform(values,
                 v -> {
-                    FieldSpec.Builder fieldSpec = FieldSpec.builder(thisClass, v.getValue(),
-                            Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                            .initializer(CodeBlock.of("new $1T($2T.$3N, $4S)", thisClass, enumClass,
-                                    v.getValue(), v.getValue()));
-                    v.getDocs().ifPresent(
-                            docs -> fieldSpec.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+                    FieldSpec.Builder fieldSpec = FieldSpec.builder(thisClass,
+                            v.getValue(),
+                            Modifier.PUBLIC,
+                            Modifier.STATIC,
+                            Modifier.FINAL)
+                            .initializer(CodeBlock.of("new $1T($2T.$3N, $4S)",
+                                    thisClass,
+                                    enumClass,
+                                    v.getValue(),
+                                    v.getValue()));
+                    v.getDocs()
+                            .ifPresent(
+                                    docs -> fieldSpec.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
                     return fieldSpec.build();
                 });
     }
@@ -166,8 +178,9 @@ public final class EnumGenerator {
             MethodSpec.Builder methodSpecBuilder = MethodSpec.methodBuilder(getVisitorMethodName(value))
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .returns(TYPE_VARIABLE);
-            value.getDocs().ifPresent(docs ->
-                    methodSpecBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+            value.getDocs()
+                    .ifPresent(
+                            docs -> methodSpecBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
             methods.add(methodSpecBuilder.build());
         }
         return methods.build();
@@ -248,7 +261,8 @@ public final class EnumGenerator {
                 .addParameter(other)
                 .returns(TypeName.BOOLEAN)
                 .addStatement("return (this == $1N) || ($1N instanceof $2T && this.string.equals((($2T) $1N).string))",
-                        other, thisClass)
+                        other,
+                        thisClass)
                 .build();
     }
 

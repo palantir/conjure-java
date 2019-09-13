@@ -77,12 +77,14 @@ public final class CovariantListExample {
     }
 
     public static CovariantListExample of(
-            List<Object> items, List<ExampleExternalReference> externalItems) {
+            List<Object> items,
+            List<ExampleExternalReference> externalItems) {
         return builder().items(items).externalItems(externalItems).build();
     }
 
     private static void validateFields(
-            List<Object> items, List<ExampleExternalReference> externalItems) {
+            List<Object> items,
+            List<ExampleExternalReference> externalItems) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, externalItems, "externalItems");
@@ -94,7 +96,9 @@ public final class CovariantListExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -128,13 +132,15 @@ public final class CovariantListExample {
         public Builder items(Iterable<?> items) {
             this.items.clear();
             ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+                    this.items,
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(Iterable<?> items) {
             ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+                    this.items,
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 

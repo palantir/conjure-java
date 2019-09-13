@@ -51,7 +51,9 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     public JavaFile generateServiceInterface(
-            ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+            ServiceDefinition serviceDefinition,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
                 (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName())
@@ -61,7 +63,8 @@ final class UndertowServiceInterfaceGenerator {
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
-        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints()
+                .stream()
                 .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper))
                 .collect(Collectors.toList()));
 
@@ -86,7 +89,9 @@ final class UndertowServiceInterfaceGenerator {
 
         if (UndertowTypeFunctions.isAsync(endpointDef, experimentalFeatures)) {
             methodBuilder.returns(UndertowTypeFunctions.getAsyncReturnType(
-                    endpointDef, returnTypeMapper, experimentalFeatures));
+                    endpointDef,
+                    returnTypeMapper,
+                    experimentalFeatures));
         } else {
             endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
         }
@@ -97,30 +102,33 @@ final class UndertowServiceInterfaceGenerator {
     private List<ParameterSpec> createServiceMethodParameters(EndpointDefinition endpointDef, TypeMapper typeMapper) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
-        endpointDef.getAuth().ifPresent(
-                authType -> parameterSpecs.add(authType.accept(new AuthType.Visitor<ParameterSpec>() {
-                    @Override
-                    public ParameterSpec visitHeader(HeaderAuthType value) {
-                        return ParameterSpec.builder(ClassName.get(AuthHeader.class), "authHeader").build();
-                    }
+        endpointDef.getAuth()
+                .ifPresent(
+                        authType -> parameterSpecs.add(authType.accept(new AuthType.Visitor<ParameterSpec>() {
+                            @Override
+                            public ParameterSpec visitHeader(HeaderAuthType value) {
+                                return ParameterSpec.builder(ClassName.get(AuthHeader.class), "authHeader").build();
+                            }
 
-                    @Override
-                    public ParameterSpec visitCookie(CookieAuthType value) {
-                        return ParameterSpec.builder(ClassName.get(BearerToken.class), "cookieToken").build();
-                    }
+                            @Override
+                            public ParameterSpec visitCookie(CookieAuthType value) {
+                                return ParameterSpec.builder(ClassName.get(BearerToken.class), "cookieToken").build();
+                            }
 
-                    @Override
-                    public ParameterSpec visitUnknown(String unknownType) {
-                        throw new IllegalStateException("unknown auth type: " + unknownType);
-                    }
-                })));
+                            @Override
+                            public ParameterSpec visitUnknown(String unknownType) {
+                                throw new IllegalStateException("unknown auth type: " + unknownType);
+                            }
+                        })));
         List<ArgumentDefinition> sortedArgList = ParameterOrder.sorted(endpointDef.getArgs());
         sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, endpointDef)));
 
         return ImmutableList.copyOf(parameterSpecs);
     }
 
-    private ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
+    private ParameterSpec createServiceMethodParameterArg(
+            TypeMapper typeMapper,
+            ArgumentDefinition def,
             EndpointDefinition endpoint) {
         return ParameterSpec.builder(typeMapper.getClassName(def.getType()),
                 JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint)).build();

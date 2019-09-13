@@ -92,7 +92,8 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         private final UndertowEteBinaryService delegate;
 
         GetOptionalBinaryPresentEndpoint(
-                UndertowRuntime runtime, UndertowEteBinaryService delegate) {
+                UndertowRuntime runtime,
+                UndertowEteBinaryService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }

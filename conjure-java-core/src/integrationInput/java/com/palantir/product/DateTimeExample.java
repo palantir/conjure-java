@@ -76,7 +76,9 @@ public final class DateTimeExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {

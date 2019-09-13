@@ -181,7 +181,9 @@ public final class AliasAsMapKeyExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -354,7 +356,13 @@ public final class AliasAsMapKeyExample {
 
         public AliasAsMapKeyExample build() {
             return new AliasAsMapKeyExample(
-                    strings, rids, bearertokens, integers, safelongs, datetimes, uuids);
+                    strings,
+                    rids,
+                    bearertokens,
+                    integers,
+                    safelongs,
+                    datetimes,
+                    uuids);
         }
     }
 }

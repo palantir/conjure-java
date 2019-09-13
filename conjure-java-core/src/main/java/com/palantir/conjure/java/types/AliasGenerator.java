@@ -84,7 +84,9 @@ public final class AliasGenerator {
                         .build());
 
         Optional<CodeBlock> maybeValueOfFactoryMethod = valueOfFactoryMethod(
-                typeDef.getAlias(), aliasTypeName, typeMapper);
+                typeDef.getAlias(),
+                aliasTypeName,
+                typeMapper);
         if (maybeValueOfFactoryMethod.isPresent()) {
             spec.addMethod(MethodSpec.methodBuilder("valueOf")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -108,8 +110,10 @@ public final class AliasGenerator {
                 .addStatement("return new $T(value)", thisClass)
                 .build());
 
-        if (typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE) && typeDef.getAlias().accept(
-                TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE)) {
+        if (typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE) && typeDef.getAlias()
+                .accept(
+                        TypeVisitor.PRIMITIVE)
+                .equals(PrimitiveType.DOUBLE)) {
             CodeBlock codeBlock = CodeBlock.builder()
                     .addStatement("return new $T((double) value)", thisClass)
                     .build();
@@ -171,25 +175,32 @@ public final class AliasGenerator {
                 && !conjureType.accept(TypeVisitor.IS_ANY)
                 && !conjureType.accept(TypeVisitor.IS_BINARY)) {
             return Optional.of(valueOfFactoryMethodForPrimitive(
-                    conjureType.accept(TypeVisitor.PRIMITIVE), aliasTypeName));
+                    conjureType.accept(TypeVisitor.PRIMITIVE),
+                    aliasTypeName));
         } else if (conjureType.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
             return typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
                     .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
                     .flatMap(type -> valueOfFactoryMethod(
-                            type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper)
-                            .map(ignored -> {
-                                ClassName className = ClassName.get(
-                                        type.getTypeName().getPackage(), type.getTypeName().getName());
-                                return CodeBlock.builder()
-                                        .addStatement("return of($T.valueOf(value))", className).build();
-                            }));
+                            type.getAlias(),
+                            typeMapper.getClassName(type.getAlias()),
+                            typeMapper)
+                                    .map(ignored -> {
+                                        ClassName className = ClassName.get(
+                                                type.getTypeName().getPackage(),
+                                                type.getTypeName().getName());
+                                        return CodeBlock.builder()
+                                                .addStatement("return of($T.valueOf(value))", className)
+                                                .build();
+                                    }));
         } else if (conjureType.accept(MoreVisitors.IS_EXTERNAL)) {
             ExternalReference reference = conjureType.accept(MoreVisitors.EXTERNAL);
             // Only generate valueOf methods for external type imports if the fallback type is valid
             if (valueOfFactoryMethod(reference.getFallback(),
-                    typeMapper.getClassName(reference.getFallback()), typeMapper).isPresent()
-                    && hasValueOfFactory(reference.getExternalReference()) && aliasTypeName.isPrimitive()) {
+                    typeMapper.getClassName(reference.getFallback()),
+                    typeMapper).isPresent()
+                    && hasValueOfFactory(reference.getExternalReference())
+                    && aliasTypeName.isPrimitive()) {
                 return Optional.of(CodeBlock.builder()
                         .addStatement("return of($T.valueOf(value))", aliasTypeName.box())
                         .build());
@@ -205,24 +216,30 @@ public final class AliasGenerator {
                 return CodeBlock.builder().addStatement("return of(value)").build();
             case DOUBLE:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseDouble(value))", aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseDouble(value))", aliasTypeName.box())
+                        .build();
             case INTEGER:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseInt(value))", aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseInt(value))", aliasTypeName.box())
+                        .build();
             case BOOLEAN:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseBoolean(value))", aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseBoolean(value))", aliasTypeName.box())
+                        .build();
             case SAFELONG:
             case RID:
             case BEARERTOKEN:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.valueOf(value))", aliasTypeName).build();
+                        .addStatement("return of($T.valueOf(value))", aliasTypeName)
+                        .build();
             case UUID:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.fromString(value))", aliasTypeName).build();
+                        .addStatement("return of($T.fromString(value))", aliasTypeName)
+                        .build();
             case DATETIME:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parse(value))", aliasTypeName).build();
+                        .addStatement("return of($T.parse(value))", aliasTypeName)
+                        .build();
             case BINARY:
             case ANY:
             case UNKNOWN:

@@ -1083,7 +1083,8 @@ public final class EteServiceEndpoints implements UndertowService {
             Optional<StringAliasExample> query =
                     runtime.plainSerDe()
                             .deserializeOptionalComplex(
-                                    queryParams.get("query"), StringAliasExample::valueOf);
+                                    queryParams.get("query"),
+                                    StringAliasExample::valueOf);
             Optional<StringAliasExample> result =
                     delegate.optionalQueryExternalImport(authHeader, query);
             if (result.isPresent()) {
@@ -1182,7 +1183,8 @@ public final class EteServiceEndpoints implements UndertowService {
             SimpleEnum queryParamName =
                     runtime.plainSerDe()
                             .deserializeComplex(
-                                    queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                                    queryParams.get("queryParamName"),
+                                    SimpleEnum::valueOf);
             SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
@@ -1233,7 +1235,8 @@ public final class EteServiceEndpoints implements UndertowService {
             List<SimpleEnum> queryParamName =
                     runtime.plainSerDe()
                             .deserializeComplexList(
-                                    queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                                    queryParams.get("queryParamName"),
+                                    SimpleEnum::valueOf);
             List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
@@ -1285,7 +1288,8 @@ public final class EteServiceEndpoints implements UndertowService {
             Optional<SimpleEnum> queryParamName =
                     runtime.plainSerDe()
                             .deserializeOptionalComplex(
-                                    queryParams.get("queryParamName"), SimpleEnum::valueOf);
+                                    queryParams.get("queryParamName"),
+                                    SimpleEnum::valueOf);
             Optional<SimpleEnum> result = delegate.optionalEnumQuery(authHeader, queryParamName);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
@@ -1340,7 +1344,8 @@ public final class EteServiceEndpoints implements UndertowService {
             SimpleEnum headerParameter =
                     runtime.plainSerDe()
                             .deserializeComplex(
-                                    headerParams.get("Custom-Header"), SimpleEnum::valueOf);
+                                    headerParams.get("Custom-Header"),
+                                    SimpleEnum::valueOf);
             SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
             serializer.serialize(result, exchange);
         }

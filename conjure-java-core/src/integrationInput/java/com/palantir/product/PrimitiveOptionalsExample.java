@@ -186,7 +186,9 @@ public final class PrimitiveOptionalsExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -314,7 +316,13 @@ public final class PrimitiveOptionalsExample {
 
         public PrimitiveOptionalsExample build() {
             return new PrimitiveOptionalsExample(
-                    num, bool, integer, safelong, rid, bearertoken, uuid);
+                    num,
+                    bool,
+                    integer,
+                    safelong,
+                    rid,
+                    bearertoken,
+                    uuid);
         }
     }
 }

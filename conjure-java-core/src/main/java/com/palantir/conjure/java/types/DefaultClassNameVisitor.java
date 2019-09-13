@@ -123,7 +123,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
                 return ClassName.get(SafeLong.class);
             case BINARY:
                 return featureFlags.contains(FeatureFlags.UseImmutableBytes)
-                        ? ClassName.get(Bytes.class) : ClassName.get(ByteBuffer.class);
+                        ? ClassName.get(Bytes.class)
+                        : ClassName.get(ByteBuffer.class);
             case ANY:
                 return ClassName.get(Object.class);
             case BOOLEAN:

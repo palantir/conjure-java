@@ -29,7 +29,9 @@ public final class ExternalLongExample {
     private volatile int memoizedHashCode;
 
     private ExternalLongExample(
-            long externalLong, Optional<Long> optionalExternalLong, List<Long> listExternalLong) {
+            long externalLong,
+            Optional<Long> optionalExternalLong,
+            List<Long> listExternalLong) {
         validateFields(optionalExternalLong, listExternalLong);
         this.externalLong = externalLong;
         this.optionalExternalLong = optionalExternalLong;
@@ -69,7 +71,9 @@ public final class ExternalLongExample {
         if (result == 0) {
             result =
                     Objects.hash(
-                            this.externalLong, this.optionalExternalLong, this.listExternalLong);
+                            this.externalLong,
+                            this.optionalExternalLong,
+                            this.listExternalLong);
             memoizedHashCode = result;
         }
         return result;
@@ -95,7 +99,9 @@ public final class ExternalLongExample {
     }
 
     public static ExternalLongExample of(
-            long externalLong, Long optionalExternalLong, List<Long> listExternalLong) {
+            long externalLong,
+            Long optionalExternalLong,
+            List<Long> listExternalLong) {
         return builder()
                 .externalLong(externalLong)
                 .optionalExternalLong(Optional.of(optionalExternalLong))
@@ -104,7 +110,8 @@ public final class ExternalLongExample {
     }
 
     private static void validateFields(
-            Optional<Long> optionalExternalLong, List<Long> listExternalLong) {
+            Optional<Long> optionalExternalLong,
+            List<Long> listExternalLong) {
         List<String> missingFields = null;
         missingFields =
                 addFieldIfMissing(missingFields, optionalExternalLong, "optionalExternalLong");
@@ -117,7 +124,9 @@ public final class ExternalLongExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -163,7 +172,8 @@ public final class ExternalLongExample {
         public Builder optionalExternalLong(Optional<? extends Long> optionalExternalLong) {
             this.optionalExternalLong =
                     Preconditions.checkNotNull(
-                                    optionalExternalLong, "optionalExternalLong cannot be null")
+                            optionalExternalLong,
+                            "optionalExternalLong cannot be null")
                             .map(Function.identity());
             return this;
         }
@@ -172,7 +182,8 @@ public final class ExternalLongExample {
             this.optionalExternalLong =
                     Optional.of(
                             Preconditions.checkNotNull(
-                                    optionalExternalLong, "optionalExternalLong cannot be null"));
+                                    optionalExternalLong,
+                                    "optionalExternalLong cannot be null"));
             return this;
         }
 
@@ -182,7 +193,8 @@ public final class ExternalLongExample {
             ConjureCollections.addAll(
                     this.listExternalLong,
                     Preconditions.checkNotNull(
-                            listExternalLong, "listExternalLong cannot be null"));
+                            listExternalLong,
+                            "listExternalLong cannot be null"));
             return this;
         }
 
@@ -190,7 +202,8 @@ public final class ExternalLongExample {
             ConjureCollections.addAll(
                     this.listExternalLong,
                     Preconditions.checkNotNull(
-                            listExternalLong, "listExternalLong cannot be null"));
+                            listExternalLong,
+                            "listExternalLong cannot be null"));
             return this;
         }
 
@@ -211,7 +224,9 @@ public final class ExternalLongExample {
         }
 
         private static List<String> addFieldIfMissing(
-                List<String> prev, boolean initialized, String fieldName) {
+                List<String> prev,
+                boolean initialized,
+                String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {

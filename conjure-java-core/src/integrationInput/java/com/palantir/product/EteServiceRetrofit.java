@@ -92,17 +92,20 @@ public interface EteServiceRetrofit {
     @GET("./base/externalLong/{param}")
     @Headers({"hr-path-template: /base/externalLong/{param}", "Accept: application/json"})
     Call<Long> externalLongPath(
-            @Header("Authorization") AuthHeader authHeader, @Path("param") long param);
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("param") long param);
 
     @GET("./base/optionalExternalLong")
     @Headers({"hr-path-template: /base/optionalExternalLong", "Accept: application/json"})
     Call<Optional<Long>> optionalExternalLongQuery(
-            @Header("Authorization") AuthHeader authHeader, @Query("param") Optional<Long> param);
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("param") Optional<Long> param);
 
     @POST("./base/notNullBody")
     @Headers({"hr-path-template: /base/notNullBody", "Accept: application/json"})
     Call<StringAliasExample> notNullBody(
-            @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
+            @Header("Authorization") AuthHeader authHeader,
+            @Body StringAliasExample notNullBody);
 
     @GET("./base/aliasOne")
     @Headers({"hr-path-template: /base/aliasOne", "Accept: application/json"})
@@ -125,7 +128,8 @@ public interface EteServiceRetrofit {
     @POST("./base/external/notNullBody")
     @Headers({"hr-path-template: /base/external/notNullBody", "Accept: application/json"})
     Call<StringAliasExample> notNullBodyExternalImport(
-            @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
+            @Header("Authorization") AuthHeader authHeader,
+            @Body StringAliasExample notNullBody);
 
     @POST("./base/external/optional-body")
     @Headers({"hr-path-template: /base/external/optional-body", "Accept: application/json"})

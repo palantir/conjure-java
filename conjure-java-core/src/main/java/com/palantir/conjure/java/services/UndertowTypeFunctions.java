@@ -76,7 +76,8 @@ final class UndertowTypeFunctions {
                 }), typeDefinitions).get();
     }
 
-    static Optional<Type> getAliasedType(com.palantir.conjure.spec.TypeName typeName,
+    static Optional<Type> getAliasedType(
+            com.palantir.conjure.spec.TypeName typeName,
             List<TypeDefinition> typeDefinitions) {
         // return type definition for the provided alias type
         TypeDefinition typeDefinition = typeDefinitions.stream().filter(typeDef -> {
@@ -161,7 +162,6 @@ final class UndertowTypeFunctions {
         });
     }
 
-
     static final GetTypeVisitor<PrimitiveType> PRIMITIVE_VISITOR = new GetTypeVisitor<PrimitiveType>() {
         @Override
         public PrimitiveType visitPrimitive(PrimitiveType value) {
@@ -210,14 +210,18 @@ final class UndertowTypeFunctions {
     static boolean isAsync(EndpointDefinition endpoint, Set<FeatureFlags> flags) {
         return flags.contains(FeatureFlags.UndertowListenableFutures)
                 || (flags.contains(FeatureFlags.ExperimentalUndertowAsyncMarkers)
-                && endpoint.getMarkers().stream().anyMatch(marker ->
-                marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)));
+                        && endpoint.getMarkers()
+                                .stream()
+                                .anyMatch(marker -> marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)));
     }
 
     static ParameterizedTypeName getAsyncReturnType(
-            EndpointDefinition endpoint, TypeMapper mapper, Set<FeatureFlags> flags) {
+            EndpointDefinition endpoint,
+            TypeMapper mapper,
+            Set<FeatureFlags> flags) {
         Preconditions.checkArgument(isAsync(endpoint, flags),
-                "Endpoint must be async", SafeArg.of("endpoint", endpoint));
+                "Endpoint must be async",
+                SafeArg.of("endpoint", endpoint));
         return ParameterizedTypeName.get(ClassName.get(ListenableFuture.class),
                 endpoint.getReturns().map(mapper::getClassName).orElseGet(() -> ClassName.get(Void.class)).box());
     }

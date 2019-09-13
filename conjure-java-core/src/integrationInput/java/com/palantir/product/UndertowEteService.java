@@ -63,19 +63,24 @@ public interface UndertowEteService {
     StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);
 
     StringAliasExample optionalAliasOne(
-            AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
+            AuthHeader authHeader,
+            Optional<StringAliasExample> queryParamName);
 
     NestedStringAliasExample aliasTwo(
-            AuthHeader authHeader, NestedStringAliasExample queryParamName);
+            AuthHeader authHeader,
+            NestedStringAliasExample queryParamName);
 
     StringAliasExample notNullBodyExternalImport(
-            AuthHeader authHeader, StringAliasExample notNullBody);
+            AuthHeader authHeader,
+            StringAliasExample notNullBody);
 
     Optional<StringAliasExample> optionalBodyExternalImport(
-            AuthHeader authHeader, Optional<StringAliasExample> body);
+            AuthHeader authHeader,
+            Optional<StringAliasExample> body);
 
     Optional<StringAliasExample> optionalQueryExternalImport(
-            AuthHeader authHeader, Optional<StringAliasExample> query);
+            AuthHeader authHeader,
+            Optional<StringAliasExample> query);
 
     void noReturn(AuthHeader authHeader);
 
@@ -84,7 +89,8 @@ public interface UndertowEteService {
     List<SimpleEnum> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
 
     Optional<SimpleEnum> optionalEnumQuery(
-            AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
+            AuthHeader authHeader,
+            Optional<SimpleEnum> queryParamName);
 
     SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 

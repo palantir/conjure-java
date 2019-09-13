@@ -27,7 +27,9 @@ public final class ListExample {
     private volatile int memoizedHashCode;
 
     private ListExample(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
+            List<String> items,
+            List<Integer> primitiveItems,
+            List<Double> doubleItems) {
         validateFields(items, primitiveItems, doubleItems);
         this.items = Collections.unmodifiableList(items);
         this.primitiveItems = Collections.unmodifiableList(primitiveItems);
@@ -90,7 +92,9 @@ public final class ListExample {
     }
 
     public static ListExample of(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
+            List<String> items,
+            List<Integer> primitiveItems,
+            List<Double> doubleItems) {
         return builder()
                 .items(items)
                 .primitiveItems(primitiveItems)
@@ -99,7 +103,9 @@ public final class ListExample {
     }
 
     private static void validateFields(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
+            List<String> items,
+            List<Integer> primitiveItems,
+            List<Double> doubleItems) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, primitiveItems, "primitiveItems");
@@ -112,7 +118,9 @@ public final class ListExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -149,13 +157,15 @@ public final class ListExample {
         public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+                    this.items,
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(Iterable<String> items) {
             ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+                    this.items,
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 

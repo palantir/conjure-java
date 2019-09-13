@@ -134,14 +134,14 @@ public final class UnionTypeExample {
 
     private static final class VisitorBuilder<T>
             implements AlsoAnIntegerStageVisitorBuilder<T>,
-                    IfStageVisitorBuilder<T>,
-                    InterfaceStageVisitorBuilder<T>,
-                    NewStageVisitorBuilder<T>,
-                    SetStageVisitorBuilder<T>,
-                    StringExampleStageVisitorBuilder<T>,
-                    ThisFieldIsAnIntegerStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T>,
-                    CompletedStageVisitorBuilder<T> {
+            IfStageVisitorBuilder<T>,
+            InterfaceStageVisitorBuilder<T>,
+            NewStageVisitorBuilder<T>,
+            SetStageVisitorBuilder<T>,
+            StringExampleStageVisitorBuilder<T>,
+            ThisFieldIsAnIntegerStageVisitorBuilder<T>,
+            UnknownStageVisitorBuilder<T>,
+            CompletedStageVisitorBuilder<T> {
         private IntFunction<T> alsoAnIntegerVisitor;
 
         private IntFunction<T> ifVisitor;
@@ -205,7 +205,8 @@ public final class UnionTypeExample {
         public UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(
                 IntFunction<T> thisFieldIsAnIntegerVisitor) {
             Preconditions.checkNotNull(
-                    thisFieldIsAnIntegerVisitor, "thisFieldIsAnIntegerVisitor cannot be null");
+                    thisFieldIsAnIntegerVisitor,
+                    "thisFieldIsAnIntegerVisitor cannot be null");
             this.thisFieldIsAnIntegerVisitor = thisFieldIsAnIntegerVisitor;
             return this;
         }
@@ -315,13 +316,13 @@ public final class UnionTypeExample {
             visible = true,
             defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
-        @JsonSubTypes.Type(StringExampleWrapper.class),
-        @JsonSubTypes.Type(SetWrapper.class),
-        @JsonSubTypes.Type(ThisFieldIsAnIntegerWrapper.class),
-        @JsonSubTypes.Type(AlsoAnIntegerWrapper.class),
-        @JsonSubTypes.Type(IfWrapper.class),
-        @JsonSubTypes.Type(NewWrapper.class),
-        @JsonSubTypes.Type(InterfaceWrapper.class)
+            @JsonSubTypes.Type(StringExampleWrapper.class),
+            @JsonSubTypes.Type(SetWrapper.class),
+            @JsonSubTypes.Type(ThisFieldIsAnIntegerWrapper.class),
+            @JsonSubTypes.Type(AlsoAnIntegerWrapper.class),
+            @JsonSubTypes.Type(IfWrapper.class),
+            @JsonSubTypes.Type(NewWrapper.class),
+            @JsonSubTypes.Type(InterfaceWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {}

@@ -108,7 +108,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         private final UndertowAsyncRequestProcessingTestService delegate;
 
         ThrowsInHandlerEndpoint(
-                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+                UndertowRuntime runtime,
+                UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
@@ -157,7 +158,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         private final UndertowAsyncRequestProcessingTestService delegate;
 
         FailedFutureEndpoint(
-                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+                UndertowRuntime runtime,
+                UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
@@ -209,7 +211,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         private final UndertowAsyncRequestProcessingTestService delegate;
 
         BinaryEndpoint(
-                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+                UndertowRuntime runtime,
+                UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
@@ -268,7 +271,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         private final Serializer<Object> serializer;
 
         FutureTraceIdEndpoint(
-                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+                UndertowRuntime runtime,
+                UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Object>() {});

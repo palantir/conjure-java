@@ -135,13 +135,15 @@ public final class BeanBuilderGenerator {
         for (EnrichedField field : primitives) {
             String name = deriveFieldInitializedName(field);
             builder.addStatement("missingFields = addFieldIfMissing(missingFields, $N, $S)",
-                    name, field.fieldName().get());
+                    name,
+                    field.fieldName().get());
         }
 
         builder.beginControlFlow("if (missingFields != null)")
                 .addStatement("throw new $T(\"Some required fields have not been set\","
-                                + " $T.of(\"missingFields\", missingFields))",
-                        SafeIllegalArgumentException.class, SafeArg.class)
+                        + " $T.of(\"missingFields\", missingFields))",
+                        SafeIllegalArgumentException.class,
+                        SafeArg.class)
                 .endControlFlow();
 
         return builder.build();
@@ -322,14 +324,17 @@ public final class BeanBuilderGenerator {
                     : addStatement;
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             CodeBlock addStatement = CodeBlocks.statement(
-                    "this.$1N.putAll($2L)", spec.name,
+                    "this.$1N.putAll($2L)",
+                    spec.name,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
             return shouldClearFirst ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
                     : addStatement;
         } else if (isByteBuffer(type)) {
             return CodeBlock.builder()
-                    .addStatement("$L", Expressions.requireNonNull(
-                            spec.name, enriched.fieldName().get() + " cannot be null"))
+                    .addStatement("$L",
+                            Expressions.requireNonNull(
+                                    spec.name,
+                                    enriched.fieldName().get() + " cannot be null"))
                     .addStatement("this.$1N = $2T.allocate($1N.remaining()).put($1N.duplicate())",
                             spec.name,
                             ByteBuffer.class)
@@ -338,14 +343,17 @@ public final class BeanBuilderGenerator {
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
             CodeBlock nullCheckedValue = Expressions.requireNonNull(
-                    spec.name, enriched.fieldName().get() + " cannot be null");
+                    spec.name,
+                    enriched.fieldName().get() + " cannot be null");
 
             if (isWidenableContainedType(optionalType.getItemType())) {
                 // we capture covariant type via generic Function#identity mapping before assignment to bind
                 // the resultant optional to the invariant inner variable type
                 return CodeBlock.builder()
                         .addStatement("this.$1N = $2L.map($3T.identity())",
-                                spec.name, nullCheckedValue, Function.class)
+                                spec.name,
+                                nullCheckedValue,
+                                Function.class)
                         .build();
             } else {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
@@ -406,16 +414,20 @@ public final class BeanBuilderGenerator {
         FieldSpec spec = enriched.poetSpec();
         if (isPrimitiveOptional(type)) {
             return CodeBlocks.statement("this.$1N = $2T.of($1N)",
-                    enriched.poetSpec().name, asRawType(typeMapper.getClassName(Type.optional(type))));
+                    enriched.poetSpec().name,
+                    asRawType(typeMapper.getClassName(Type.optional(type))));
         } else {
             return CodeBlocks.statement("this.$1N = $2T.of($3L)",
-                    spec.name, Optional.class,
+                    spec.name,
+                    Optional.class,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
         }
     }
 
     private static final EnumSet<PrimitiveType.Value> OPTIONAL_PRIMITIVES = EnumSet.of(
-            PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
+            PrimitiveType.Value.INTEGER,
+            PrimitiveType.Value.DOUBLE,
+            PrimitiveType.Value.BOOLEAN);
 
     /**
      * Check if the optionalType contains a primitive boolean, double or integer.
@@ -451,7 +463,6 @@ public final class BeanBuilderGenerator {
             }
         });
     }
-
 
     private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {
         FieldSpec field = enriched.poetSpec();

@@ -81,8 +81,8 @@ public final class SingleUnion {
 
     private static final class VisitorBuilder<T>
             implements FooStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T>,
-                    CompletedStageVisitorBuilder<T> {
+            UnknownStageVisitorBuilder<T>,
+            CompletedStageVisitorBuilder<T> {
         private Function<String, T> fooVisitor;
 
         private Function<String, T> unknownVisitor;

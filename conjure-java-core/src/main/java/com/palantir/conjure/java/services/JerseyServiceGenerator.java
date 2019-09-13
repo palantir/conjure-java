@@ -86,7 +86,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 : BINARY_RETURN_TYPE_OUTPUT;
 
         TypeName optionalBinaryReturnType = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse)
-                ? BINARY_RETURN_TYPE_RESPONSE : OPTIONAL_BINARY_RETURN_TYPE;
+                ? BINARY_RETURN_TYPE_RESPONSE
+                : OPTIONAL_BINARY_RETURN_TYPE;
 
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
@@ -102,13 +103,16 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                         new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags),
                         BINARY_ARGUMENT_TYPE));
 
-        return conjureDefinition.getServices().stream()
+        return conjureDefinition.getServices()
+                .stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toSet());
     }
 
-    private JavaFile generateService(ServiceDefinition serviceDefinition,
-            TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+    private JavaFile generateService(
+            ServiceDefinition serviceDefinition,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Consumes"))
@@ -124,12 +128,15 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
-        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints()
+                .stream()
                 .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toList()));
 
-        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper,
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints()
+                .stream()
+                .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint,
+                        returnTypeMapper,
                         argumentTypeMapper))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList()));
@@ -159,8 +166,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         String httpPath = rawHttpPath.startsWith("/") ? rawHttpPath.substring(1) : rawHttpPath;
         if (!httpPath.isEmpty()) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
-                        .addMember("value", "$S", httpPath)
-                        .build());
+                    .addMember("value", "$S", httpPath)
+                    .build());
         }
 
         if (returnType.equals(BINARY_RETURN_TYPE_OUTPUT) || returnType.equals(BINARY_RETURN_TYPE_RESPONSE)
@@ -170,7 +177,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                     .build());
         }
 
-        boolean consumesTypeIsBinary = endpointDef.getArgs().stream()
+        boolean consumesTypeIsBinary = endpointDef.getArgs()
+                .stream()
                 .map(ArgumentDefinition::getType)
                 .map(argumentTypeMapper::getClassName)
                 .anyMatch(BINARY_ARGUMENT_TYPE::equals);
@@ -181,11 +189,13 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                     .build());
         }
 
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
-                ClassName.get("java.lang", "Deprecated")));
+        endpointDef.getDeprecated()
+                .ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
+                        ClassName.get("java.lang", "Deprecated")));
 
-        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(
-                content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerator.getJavaDoc(endpointDef)
+                .ifPresent(
+                        content -> methodBuilder.addJavadoc("$L", content));
 
         return methodBuilder.build();
     }
@@ -223,8 +233,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             List<ArgumentDefinition> extraArgs) {
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
         List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, argumentTypeMapper, false);
-        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
-                extraArgs.stream()
+        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream()
+                .map(param -> extraArgs.stream()
                         .filter(arg -> arg.getArgName().get().equals(param.name))
                         .findFirst())
                 .collect(Collectors.toList());
@@ -275,15 +285,18 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         Optional<AuthType> auth = endpointDef.getAuth();
         createAuthParameter(auth, withAnnotations).ifPresent(parameterSpecs::add);
 
-        ParameterOrder.sorted(endpointDef.getArgs()).forEach(def ->
-                parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations)));
+        ParameterOrder.sorted(endpointDef.getArgs())
+                .forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations)));
         return ImmutableList.copyOf(parameterSpecs);
     }
 
-    private ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
+    private ParameterSpec createServiceMethodParameterArg(
+            TypeMapper typeMapper,
+            ArgumentDefinition def,
             boolean withAnnotations) {
         ParameterSpec.Builder param = ParameterSpec.builder(
-                typeMapper.getClassName(def.getType()), def.getArgName().get());
+                typeMapper.getClassName(def.getType()),
+                def.getArgName().get());
         if (withAnnotations) {
             getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
             param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
@@ -318,7 +331,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         ParameterSpec.Builder paramSpec = ParameterSpec.builder(tokenClassName, paramName);
         if (withAnnotations) {
             paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
-                    .addMember("value", "$S", tokenName).build());
+                    .addMember("value", "$S", tokenName)
+                    .build());
             if (featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }

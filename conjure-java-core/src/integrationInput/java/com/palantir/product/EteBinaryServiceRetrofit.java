@@ -19,7 +19,8 @@ public interface EteBinaryServiceRetrofit {
     @Headers({"hr-path-template: /binary", "Accept: application/octet-stream"})
     @Streaming
     Call<ResponseBody> postBinary(
-            @Header("Authorization") AuthHeader authHeader, @Body RequestBody body);
+            @Header("Authorization") AuthHeader authHeader,
+            @Body RequestBody body);
 
     @GET("./binary/optional/present")
     @Headers({"hr-path-template: /binary/optional/present", "Accept: application/octet-stream"})
@@ -36,5 +37,6 @@ public interface EteBinaryServiceRetrofit {
     @Headers({"hr-path-template: /binary/failure", "Accept: application/octet-stream"})
     @Streaming
     Call<ResponseBody> getBinaryFailure(
-            @Header("Authorization") AuthHeader authHeader, @Query("numBytes") int numBytes);
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("numBytes") int numBytes);
 }

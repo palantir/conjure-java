@@ -56,7 +56,8 @@ public interface ServiceGenerator {
 
         Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
 
-        Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDef.getArgs().stream()
+        Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDef.getArgs()
+                .stream()
                 .flatMap(argument -> Streams.stream(Javadoc.getParameterJavadoc(argument, endpointDef)))
                 .collect(Collectors.joining("\n"))));
 

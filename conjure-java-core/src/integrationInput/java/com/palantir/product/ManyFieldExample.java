@@ -206,7 +206,9 @@ public final class ManyFieldExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -294,7 +296,8 @@ public final class ManyFieldExample {
             this.optionalItem =
                     Optional.of(
                             Preconditions.checkNotNull(
-                                    optionalItem, "optionalItem cannot be null"));
+                                    optionalItem,
+                                    "optionalItem cannot be null"));
             return this;
         }
 
@@ -303,14 +306,16 @@ public final class ManyFieldExample {
         public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+                    this.items,
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         /** docs for items field */
         public Builder addAllItems(Iterable<String> items) {
             ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+                    this.items,
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -325,14 +330,16 @@ public final class ManyFieldExample {
         public Builder set(Iterable<String> set) {
             this.set.clear();
             ConjureCollections.addAll(
-                    this.set, Preconditions.checkNotNull(set, "set cannot be null"));
+                    this.set,
+                    Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
         /** docs for set field */
         public Builder addAllSet(Iterable<String> set) {
             ConjureCollections.addAll(
-                    this.set, Preconditions.checkNotNull(set, "set cannot be null"));
+                    this.set,
+                    Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
@@ -382,7 +389,9 @@ public final class ManyFieldExample {
         }
 
         private static List<String> addFieldIfMissing(
-                List<String> prev, boolean initialized, String fieldName) {
+                List<String> prev,
+                boolean initialized,
+                String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {
@@ -396,7 +405,14 @@ public final class ManyFieldExample {
         public ManyFieldExample build() {
             validatePrimitiveFieldsHaveBeenInitialized();
             return new ManyFieldExample(
-                    string, integer, doubleValue, optionalItem, items, set, map, alias);
+                    string,
+                    integer,
+                    doubleValue,
+                    optionalItem,
+                    items,
+                    set,
+                    map,
+                    alias);
         }
     }
 }

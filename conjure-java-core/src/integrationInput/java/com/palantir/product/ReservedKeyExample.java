@@ -139,7 +139,9 @@ public final class ReservedKeyExample {
     }
 
     private static void validateFields(
-            String package_, String interface_, String fieldNameWithDashes) {
+            String package_,
+            String interface_,
+            String fieldNameWithDashes) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, package_, "package");
         missingFields = addFieldIfMissing(missingFields, interface_, "interface");
@@ -153,7 +155,9 @@ public final class ReservedKeyExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -217,7 +221,8 @@ public final class ReservedKeyExample {
         public Builder fieldNameWithDashes(String fieldNameWithDashes) {
             this.fieldNameWithDashes =
                     Preconditions.checkNotNull(
-                            fieldNameWithDashes, "field-name-with-dashes cannot be null");
+                            fieldNameWithDashes,
+                            "field-name-with-dashes cannot be null");
             return this;
         }
 
@@ -251,7 +256,9 @@ public final class ReservedKeyExample {
                             "primitve-field-name-with-dashes");
             missingFields =
                     addFieldIfMissing(
-                            missingFields, _memoizedHashCode_Initialized, "memoizedHashCode");
+                            missingFields,
+                            _memoizedHashCode_Initialized,
+                            "memoizedHashCode");
             missingFields = addFieldIfMissing(missingFields, _resultInitialized, "result");
             if (missingFields != null) {
                 throw new SafeIllegalArgumentException(
@@ -261,7 +268,9 @@ public final class ReservedKeyExample {
         }
 
         private static List<String> addFieldIfMissing(
-                List<String> prev, boolean initialized, String fieldName) {
+                List<String> prev,
+                boolean initialized,
+                String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {

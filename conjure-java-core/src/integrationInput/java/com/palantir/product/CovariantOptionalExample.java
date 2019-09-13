@@ -26,7 +26,8 @@ public final class CovariantOptionalExample {
     private volatile int memoizedHashCode;
 
     private CovariantOptionalExample(
-            Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
+            Optional<Object> item,
+            Optional<Set<StringAliasExample>> setItem) {
         validateFields(item, setItem);
         this.item = item;
         this.setItem = setItem;
@@ -83,7 +84,8 @@ public final class CovariantOptionalExample {
     }
 
     private static void validateFields(
-            Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
+            Optional<Object> item,
+            Optional<Set<StringAliasExample>> setItem) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, item, "item");
         missingFields = addFieldIfMissing(missingFields, setItem, "setItem");
@@ -95,7 +97,9 @@ public final class CovariantOptionalExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {

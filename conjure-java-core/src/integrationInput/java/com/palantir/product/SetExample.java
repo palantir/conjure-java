@@ -92,7 +92,9 @@ public final class SetExample {
     }
 
     private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+            List<String> prev,
+            Object fieldValue,
+            String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -126,13 +128,15 @@ public final class SetExample {
         public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+                    this.items,
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(Iterable<String> items) {
             ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+                    this.items,
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 

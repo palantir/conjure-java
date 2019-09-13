@@ -98,10 +98,10 @@ public final class Union {
 
     private static final class VisitorBuilder<T>
             implements BarStageVisitorBuilder<T>,
-                    BazStageVisitorBuilder<T>,
-                    FooStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T>,
-                    CompletedStageVisitorBuilder<T> {
+            BazStageVisitorBuilder<T>,
+            FooStageVisitorBuilder<T>,
+            UnknownStageVisitorBuilder<T>,
+            CompletedStageVisitorBuilder<T> {
         private IntFunction<T> barVisitor;
 
         private Function<Long, T> bazVisitor;
@@ -194,9 +194,9 @@ public final class Union {
             visible = true,
             defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
-        @JsonSubTypes.Type(FooWrapper.class),
-        @JsonSubTypes.Type(BarWrapper.class),
-        @JsonSubTypes.Type(BazWrapper.class)
+            @JsonSubTypes.Type(FooWrapper.class),
+            @JsonSubTypes.Type(BarWrapper.class),
+            @JsonSubTypes.Type(BazWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {}
