@@ -18,8 +18,6 @@ import javax.annotation.Generated;
 public final class RidExample {
     private final ResourceIdentifier ridValue;
 
-    private volatile int memoizedHashCode;
-
     private RidExample(ResourceIdentifier ridValue) {
         validateFields(ridValue);
         this.ridValue = ridValue;
@@ -41,10 +39,7 @@ public final class RidExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(ridValue);
-        }
-        return memoizedHashCode;
+        return Objects.hashCode(this.ridValue);
     }
 
     @Override

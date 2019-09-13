@@ -128,12 +128,21 @@ public final class ManyFieldExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode =
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result =
                     Objects.hash(
-                            string, integer, doubleValue, optionalItem, items, set, map, alias);
+                            this.string,
+                            this.integer,
+                            this.doubleValue,
+                            this.optionalItem,
+                            this.items,
+                            this.set,
+                            this.map,
+                            this.alias);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override

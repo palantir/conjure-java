@@ -8,15 +8,12 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Generated;
 
 @JsonDeserialize(builder = BooleanExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class BooleanExample {
     private final boolean coin;
-
-    private volatile int memoizedHashCode;
 
     private BooleanExample(boolean coin) {
         this.coin = coin;
@@ -39,10 +36,7 @@ public final class BooleanExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(coin);
-        }
-        return memoizedHashCode;
+        return Boolean.hashCode(this.coin);
     }
 
     @Override

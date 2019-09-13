@@ -8,15 +8,12 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Generated;
 
 @JsonDeserialize(builder = IntegerExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class IntegerExample {
     private final int integer;
-
-    private volatile int memoizedHashCode;
 
     private IntegerExample(int integer) {
         this.integer = integer;
@@ -39,10 +36,7 @@ public final class IntegerExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(integer);
-        }
-        return memoizedHashCode;
+        return Integer.hashCode(this.integer);
     }
 
     @Override

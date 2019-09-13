@@ -25,6 +25,8 @@ public final class ReservedKeyExample {
 
     private final int memoizedHashCode_;
 
+    private final int result;
+
     private volatile int memoizedHashCode;
 
     private ReservedKeyExample(
@@ -32,13 +34,15 @@ public final class ReservedKeyExample {
             String interface_,
             String fieldNameWithDashes,
             int primitveFieldNameWithDashes,
-            int memoizedHashCode_) {
+            int memoizedHashCode_,
+            int result) {
         validateFields(package_, interface_, fieldNameWithDashes);
         this.package_ = package_;
         this.interface_ = interface_;
         this.fieldNameWithDashes = fieldNameWithDashes;
         this.primitveFieldNameWithDashes = primitveFieldNameWithDashes;
         this.memoizedHashCode_ = memoizedHashCode_;
+        this.result = result;
     }
 
     @JsonProperty("package")
@@ -66,6 +70,11 @@ public final class ReservedKeyExample {
         return this.memoizedHashCode_;
     }
 
+    @JsonProperty("result")
+    public int getResult() {
+        return this.result;
+    }
+
     @Override
     public boolean equals(Object other) {
         return this == other
@@ -77,21 +86,25 @@ public final class ReservedKeyExample {
                 && this.interface_.equals(other.interface_)
                 && this.fieldNameWithDashes.equals(other.fieldNameWithDashes)
                 && this.primitveFieldNameWithDashes == other.primitveFieldNameWithDashes
-                && this.memoizedHashCode_ == other.memoizedHashCode_;
+                && this.memoizedHashCode_ == other.memoizedHashCode_
+                && this.result == other.result;
     }
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode =
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result =
                     Objects.hash(
-                            package_,
-                            interface_,
-                            fieldNameWithDashes,
-                            primitveFieldNameWithDashes,
-                            memoizedHashCode_);
+                            this.package_,
+                            this.interface_,
+                            this.fieldNameWithDashes,
+                            this.primitveFieldNameWithDashes,
+                            this.memoizedHashCode_,
+                            this.result);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override
@@ -106,6 +119,8 @@ public final class ReservedKeyExample {
                 + primitveFieldNameWithDashes
                 + ", memoizedHashCode: "
                 + memoizedHashCode_
+                + ", result: "
+                + result
                 + '}';
     }
 
@@ -152,9 +167,13 @@ public final class ReservedKeyExample {
 
         private int memoizedHashCode_;
 
+        private int result;
+
         private boolean _primitveFieldNameWithDashesInitialized = false;
 
         private boolean _memoizedHashCode_Initialized = false;
+
+        private boolean _resultInitialized = false;
 
         private Builder() {}
 
@@ -164,6 +183,7 @@ public final class ReservedKeyExample {
             fieldNameWithDashes(other.getFieldNameWithDashes());
             primitveFieldNameWithDashes(other.getPrimitveFieldNameWithDashes());
             memoizedHashCode_(other.getMemoizedHashCode());
+            result(other.getResult());
             return this;
         }
 
@@ -201,6 +221,13 @@ public final class ReservedKeyExample {
             return this;
         }
 
+        @JsonSetter("result")
+        public Builder result(int result) {
+            this.result = result;
+            this._resultInitialized = true;
+            return this;
+        }
+
         private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields =
@@ -211,6 +238,7 @@ public final class ReservedKeyExample {
             missingFields =
                     addFieldIfMissing(
                             missingFields, _memoizedHashCode_Initialized, "memoizedHashCode");
+            missingFields = addFieldIfMissing(missingFields, _resultInitialized, "result");
             if (missingFields != null) {
                 throw new SafeIllegalArgumentException(
                         "Some required fields have not been set",
@@ -223,7 +251,7 @@ public final class ReservedKeyExample {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {
-                    missingFields = new ArrayList<>(2);
+                    missingFields = new ArrayList<>(3);
                 }
                 missingFields.add(fieldName);
             }
@@ -237,7 +265,8 @@ public final class ReservedKeyExample {
                     interface_,
                     fieldNameWithDashes,
                     primitveFieldNameWithDashes,
-                    memoizedHashCode_);
+                    memoizedHashCode_,
+                    result);
         }
     }
 }

@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.spec.FieldName;
 import com.squareup.javapoet.ClassName;
@@ -63,7 +64,7 @@ public final class MethodSpecs {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.INT)
-                .addStatement("return $1T.$2N($3L)", Objects.class, "hash", getHashInput(fields))
+                .addStatement("return $L", computeHashCode(fields))
                 .build();
     }
 
@@ -76,11 +77,26 @@ public final class MethodSpecs {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.INT)
-                .beginControlFlow("if (memoizedHashCode == 0)")
-                .addStatement("memoizedHashCode = $1T.$2N($3L)", Objects.class, "hash", getHashInput(fields))
+                // Single volatile read
+                .addStatement("int result = memoizedHashCode")
+                .beginControlFlow("if (result == 0)")
+                .addStatement("result = $L", computeHashCode(fields))
+                // Single volatile write
+                .addStatement("memoizedHashCode = result")
                 .endControlFlow()
-                .addStatement("return memoizedHashCode")
+                .addStatement("return result")
                 .build());
+    }
+
+    private static CodeBlock computeHashCode(Collection<FieldSpec> fields) {
+        if (fields.size() == 1) {
+            FieldSpec fieldSpec = Iterables.getOnlyElement(fields);
+            if (fieldSpec.type.isPrimitive()) {
+                return CodeBlock.of("$1T.$2N($3L)", fieldSpec.type.box(), "hashCode", createHashInput(fieldSpec));
+            }
+            return CodeBlock.of("$1T.$2N($3L)", Objects.class, "hashCode", createHashInput(fieldSpec));
+        }
+        return CodeBlock.of("$1T.$2N($3L)", Objects.class, "hash", getHashInput(fields));
     }
 
     private static CodeBlock getHashInput(Collection<FieldSpec> fields) {
@@ -147,10 +163,11 @@ public final class MethodSpecs {
 
     private static CodeBlock createHashInput(FieldSpec field) {
         if (field.type.equals(ClassName.get(OffsetDateTime.class))) {
-            return CodeBlock.of("$N.toInstant()", field);
+            return CodeBlock.of("$N.toInstant()", "this." + field.name);
         }
 
-        return CodeBlock.of("$N", field);
+        // Use 'this.' to avoid collisions with local variables
+        return CodeBlock.of("$N", "this." + field.name);
     }
 
     private static <T> Collector<T, ArrayList<T>, ArrayList<T>> joining(T delim) {

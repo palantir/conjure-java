@@ -21,14 +21,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
+import com.palantir.conjure.spec.OptionalType;
+import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -83,7 +90,11 @@ public final class BeanGenerator {
             typeBuilder
                     .addMethod(MethodSpecs.createEquals(objectClass))
                     .addMethod(MethodSpecs.createEqualTo(objectClass, poetFields));
-            MethodSpecs.addCachedHashCode(typeBuilder, poetFields);
+            if (useCachedHashCode(fields)) {
+                MethodSpecs.addCachedHashCode(typeBuilder, poetFields);
+            } else {
+                typeBuilder.addMethod(MethodSpecs.createHashCode(poetFields));
+            }
         }
 
         typeBuilder.addMethod(MethodSpecs.createToString(typeDef.getTypeName().getName(),
@@ -123,6 +134,14 @@ public final class BeanGenerator {
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static boolean useCachedHashCode(Collection<EnrichedField> fields) {
+        if (fields.size() == 1) {
+            EnrichedField field = Iterables.getOnlyElement(fields);
+            return field.conjureDef().getType().accept(FieldRequiresMemoizedHashCode.INSTANCE);
+        }
+        return true;
     }
 
     private static FieldSpec createSingletonField(ClassName objectClass) {
@@ -334,5 +353,44 @@ public final class BeanGenerator {
     public static String asGetterName(String fieldName) {
         String lowerCamelCaseName = CaseConverter.toCase(fieldName, CaseConverter.Case.LOWER_CAMEL_CASE);
         return "get" + StringUtils.capitalize(lowerCamelCaseName);
+    }
+
+    /**
+     * Any types we generate directly will produce an efficient hashCode, but collections may be large,
+     * and we must traverse through optionals.
+     */
+    private static final class FieldRequiresMemoizedHashCode extends DefaultTypeVisitor<Boolean> {
+        private static final DefaultTypeVisitor<Boolean> INSTANCE = new FieldRequiresMemoizedHashCode();
+
+        @Override
+        public Boolean visitOptional(OptionalType value) {
+            return value.getItemType().accept(INSTANCE);
+        }
+
+        @Override
+        public Boolean visitList(ListType value) {
+            return Boolean.TRUE;
+        }
+
+        @Override
+        public Boolean visitSet(SetType value) {
+            return Boolean.TRUE;
+        }
+
+        @Override
+        public Boolean visitMap(MapType value) {
+            return Boolean.TRUE;
+        }
+
+        @Override
+        public Boolean visitPrimitive(PrimitiveType value) {
+            // datetime hashing is special, the instant is hashed rather than the time itself.
+            return PrimitiveType.DATETIME.equals(value);
+        }
+
+        @Override
+        public Boolean visitDefault() {
+            return Boolean.FALSE;
+        }
     }
 }

@@ -111,10 +111,20 @@ public final class PrimitiveOptionalsExample {
 
     @Override
     public int hashCode() {
-        if (memoizedHashCode == 0) {
-            memoizedHashCode = Objects.hash(num, bool, integer, safelong, rid, bearertoken, uuid);
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result =
+                    Objects.hash(
+                            this.num,
+                            this.bool,
+                            this.integer,
+                            this.safelong,
+                            this.rid,
+                            this.bearertoken,
+                            this.uuid);
+            memoizedHashCode = result;
         }
-        return memoizedHashCode;
+        return result;
     }
 
     @Override
