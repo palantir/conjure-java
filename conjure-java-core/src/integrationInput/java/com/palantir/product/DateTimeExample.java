@@ -44,7 +44,7 @@ public final class DateTimeExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.datetime.toInstant());
+            result = Objects.hashCode(this.datetime.toInstant());
             memoizedHashCode = result;
         }
         return result;

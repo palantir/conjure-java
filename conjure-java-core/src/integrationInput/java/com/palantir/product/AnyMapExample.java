@@ -46,7 +46,7 @@ public final class AnyMapExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.items);
+            result = Objects.hashCode(this.items);
             memoizedHashCode = result;
         }
         return result;

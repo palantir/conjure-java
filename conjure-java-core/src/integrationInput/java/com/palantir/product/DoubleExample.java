@@ -8,15 +8,12 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Generated;
 
 @JsonDeserialize(builder = DoubleExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class DoubleExample {
     private final double doubleValue;
-
-    private volatile int memoizedHashCode;
 
     private DoubleExample(double doubleValue) {
         this.doubleValue = doubleValue;
@@ -38,12 +35,7 @@ public final class DoubleExample {
 
     @Override
     public int hashCode() {
-        int result = memoizedHashCode;
-        if (result == 0) {
-            result = Objects.hash(this.doubleValue);
-            memoizedHashCode = result;
-        }
-        return result;
+        return Double.hashCode(this.doubleValue);
     }
 
     @Override

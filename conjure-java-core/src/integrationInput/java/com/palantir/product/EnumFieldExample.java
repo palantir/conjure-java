@@ -17,8 +17,6 @@ import javax.annotation.Generated;
 public final class EnumFieldExample {
     private final EnumExample enum_;
 
-    private volatile int memoizedHashCode;
-
     private EnumFieldExample(EnumExample enum_) {
         validateFields(enum_);
         this.enum_ = enum_;
@@ -41,12 +39,7 @@ public final class EnumFieldExample {
 
     @Override
     public int hashCode() {
-        int result = memoizedHashCode;
-        if (result == 0) {
-            result = Objects.hash(this.enum_);
-            memoizedHashCode = result;
-        }
-        return result;
+        return Objects.hashCode(this.enum_);
     }
 
     @Override

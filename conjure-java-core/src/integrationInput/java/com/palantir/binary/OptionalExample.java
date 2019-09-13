@@ -20,8 +20,6 @@ import javax.annotation.Generated;
 public final class OptionalExample {
     private final Optional<ByteBuffer> item;
 
-    private volatile int memoizedHashCode;
-
     private OptionalExample(Optional<ByteBuffer> item) {
         validateFields(item);
         this.item = item;
@@ -44,12 +42,7 @@ public final class OptionalExample {
 
     @Override
     public int hashCode() {
-        int result = memoizedHashCode;
-        if (result == 0) {
-            result = Objects.hash(this.item);
-            memoizedHashCode = result;
-        }
-        return result;
+        return Objects.hashCode(this.item);
     }
 
     @Override
