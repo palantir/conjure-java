@@ -129,37 +129,21 @@ public final class PrimitiveOptionalsExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("PrimitiveOptionalsExample")
-                .append('{')
-                .append("num")
-                .append(": ")
-                .append(num)
-                .append(", ")
-                .append("bool")
-                .append(": ")
-                .append(bool)
-                .append(", ")
-                .append("integer")
-                .append(": ")
-                .append(integer)
-                .append(", ")
-                .append("safelong")
-                .append(": ")
-                .append(safelong)
-                .append(", ")
-                .append("rid")
-                .append(": ")
-                .append(rid)
-                .append(", ")
-                .append("bearertoken")
-                .append(": ")
-                .append(bearertoken)
-                .append(", ")
-                .append("uuid")
-                .append(": ")
-                .append(uuid)
-                .append('}')
-                .toString();
+        return "PrimitiveOptionalsExample{num: "
+                + num
+                + ", bool: "
+                + bool
+                + ", integer: "
+                + integer
+                + ", safelong: "
+                + safelong
+                + ", rid: "
+                + rid
+                + ", bearertoken: "
+                + bearertoken
+                + ", uuid: "
+                + uuid
+                + '}';
     }
 
     private static void validateFields(

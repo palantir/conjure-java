@@ -41,13 +41,7 @@ public final class BooleanExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("BooleanExample")
-                .append('{')
-                .append("coin")
-                .append(": ")
-                .append(coin)
-                .append('}')
-                .toString();
+        return "BooleanExample{coin: " + coin + '}';
     }
 
     public static BooleanExample of(boolean coin) {

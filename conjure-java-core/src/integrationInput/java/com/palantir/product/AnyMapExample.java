@@ -54,13 +54,7 @@ public final class AnyMapExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("AnyMapExample")
-                .append('{')
-                .append("items")
-                .append(": ")
-                .append(items)
-                .append('}')
-                .toString();
+        return "AnyMapExample{items: " + items + '}';
     }
 
     public static AnyMapExample of(Map<String, Object> items) {

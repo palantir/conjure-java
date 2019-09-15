@@ -63,17 +63,7 @@ public final class CovariantListExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("CovariantListExample")
-                .append('{')
-                .append("items")
-                .append(": ")
-                .append(items)
-                .append(", ")
-                .append("externalItems")
-                .append(": ")
-                .append(externalItems)
-                .append('}')
-                .toString();
+        return "CovariantListExample{items: " + items + ", externalItems: " + externalItems + '}';
     }
 
     public static CovariantListExample of(

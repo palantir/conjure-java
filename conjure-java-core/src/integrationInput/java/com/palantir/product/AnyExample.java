@@ -43,13 +43,7 @@ public final class AnyExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("AnyExample")
-                .append('{')
-                .append("any")
-                .append(": ")
-                .append(any)
-                .append('}')
-                .toString();
+        return "AnyExample{any: " + any + '}';
     }
 
     public static AnyExample of(Object any) {

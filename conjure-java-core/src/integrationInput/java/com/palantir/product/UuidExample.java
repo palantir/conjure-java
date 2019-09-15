@@ -44,13 +44,7 @@ public final class UuidExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("UuidExample")
-                .append('{')
-                .append("uuid")
-                .append(": ")
-                .append(uuid)
-                .append('}')
-                .toString();
+        return "UuidExample{uuid: " + uuid + '}';
     }
 
     public static UuidExample of(UUID uuid) {
