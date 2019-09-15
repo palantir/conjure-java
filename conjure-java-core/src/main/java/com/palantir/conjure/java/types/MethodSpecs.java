@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.types;
 
+import static com.palantir.logsafe.Preconditions.checkState;
+
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.spec.FieldName;
@@ -105,37 +107,33 @@ public final class MethodSpecs {
                 .collect(joining(CodeBlock.of(", "))));
     }
 
-    public static MethodSpec createToString(String thisClassName, List<FieldName> fieldNames) {
-        CodeBlock returnStatement = fieldNames.isEmpty()
-                ? CodeBlock.builder().addStatement("return $S", thisClassName + "{}").build()
-                : CodeBlock.builder()
-                        .add("return $S\n", thisClassName + '{' + fieldNames.get(0).get() + ": ")
-                        .indent()
-                        .indent()
-                        .add(toStringConcatenation(fieldNames))
-                        .addStatement(" + '}'")
-                        .unindent()
-                        .build();
-
+    static MethodSpec createToString(String thisClassName, List<FieldName> fieldNames) {
         return MethodSpec.methodBuilder("toString")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(String.class))
-                .addCode(returnStatement)
+                .addCode(fieldNames.isEmpty()
+                        ? CodeBlock.builder().addStatement("return $S", thisClassName + "{}").build()
+                        : CodeBlock.builder()
+                                .addStatement("return $L", toStringConcatenation(thisClassName, fieldNames))
+                                .build())
                 .build();
     }
 
-    private static CodeBlock toStringConcatenation(List<FieldName> fieldNames) {
-        CodeBlock.Builder builder = CodeBlock.builder();
+    private static CodeBlock toStringConcatenation(String thisClassName, List<FieldName> fieldNames) {
+        checkState(!fieldNames.isEmpty(),
+                "String concatenation is only necessary if there are fields");
+        CodeBlock.Builder builder = CodeBlock.builder()
+                .add("$S\n", thisClassName + '{' + fieldNames.get(0).get() + ": ");
         for (int i = 0; i < fieldNames.size(); i++) {
             FieldName fieldName = fieldNames.get(i);
+            // The name of the first field is included with the class name
             if (i != 0) {
-                // The name of the first field is included with the class name, see createToString.
                 builder.add(" + $S", ", " + fieldName.get() + ": ");
             }
             builder.add(" + $N", JavaNameSanitizer.sanitize(fieldName));
         }
-        return builder.build();
+        return builder.add(" + '}'").build();
     }
 
     private static CodeBlock createEqualsToStatement(Collection<FieldSpec> fields) {
