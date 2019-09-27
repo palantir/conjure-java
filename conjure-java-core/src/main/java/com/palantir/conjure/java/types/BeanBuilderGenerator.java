@@ -435,12 +435,12 @@ public final class BeanBuilderGenerator {
             }
 
             @Override
-            public Boolean visitOptional(OptionalType value) {
+            public Boolean visitOptional(OptionalType _value) {
                 return false;
             }
 
             @Override
-            public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
+            public Boolean visitReference(com.palantir.conjure.spec.TypeName _value) {
                 return false;
             }
 

@@ -22,7 +22,7 @@ public final class MoreVisitors {
 
     private static class IsExternalType extends IsTypeVisitor {
         @Override
-        public Boolean visitExternal(ExternalReference value) {
+        public Boolean visitExternal(ExternalReference _value) {
             return true;
         }
     }
@@ -36,7 +36,7 @@ public final class MoreVisitors {
 
     private static class IsInternalReference extends IsTypeVisitor {
         @Override
-        public Boolean visitReference(TypeName value) {
+        public Boolean visitReference(TypeName _value) {
             return true;
         }
     }
@@ -44,42 +44,42 @@ public final class MoreVisitors {
     /** Copied from {@link com.palantir.conjure.visitor.TypeVisitor.IsTypeVisitor}. */
     private static class IsTypeVisitor implements Type.Visitor<Boolean> {
         @Override
-        public Boolean visitPrimitive(PrimitiveType value) {
+        public Boolean visitPrimitive(PrimitiveType _value) {
             return false;
         }
 
         @Override
-        public Boolean visitOptional(OptionalType value) {
+        public Boolean visitOptional(OptionalType _value) {
             return false;
         }
 
         @Override
-        public Boolean visitList(ListType value) {
+        public Boolean visitList(ListType _value) {
             return false;
         }
 
         @Override
-        public Boolean visitSet(SetType value) {
+        public Boolean visitSet(SetType _value) {
             return false;
         }
 
         @Override
-        public Boolean visitMap(MapType value) {
+        public Boolean visitMap(MapType _value) {
             return false;
         }
 
         @Override
-        public Boolean visitReference(TypeName value) {
+        public Boolean visitReference(TypeName _value) {
             return false;
         }
 
         @Override
-        public Boolean visitExternal(ExternalReference value) {
+        public Boolean visitExternal(ExternalReference _value) {
             return false;
         }
 
         @Override
-        public Boolean visitUnknown(String unknownType) {
+        public Boolean visitUnknown(String _unknownType) {
             return false;
         }
     }

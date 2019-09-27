@@ -58,7 +58,7 @@ public final class VerificationClientExtension implements BeforeAllCallback, Aft
     }
 
     @Override
-    public void beforeAll(ExtensionContext context) throws Exception {
+    public void beforeAll(ExtensionContext _context) throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder(
                 "build/verification/verifier",
                 "build/test-cases/test-cases.json",
@@ -104,7 +104,7 @@ public final class VerificationClientExtension implements BeforeAllCallback, Aft
     }
 
     @Override
-    public void afterAll(ExtensionContext context) {
+    public void afterAll(ExtensionContext _context) {
         process.destroyForcibly();
         try {
             process.waitFor(5, TimeUnit.SECONDS);

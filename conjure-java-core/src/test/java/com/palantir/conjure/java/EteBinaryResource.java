@@ -28,22 +28,22 @@ import javax.ws.rs.core.StreamingOutput;
 
 final class EteBinaryResource implements EteBinaryService {
     @Override
-    public StreamingOutput postBinary(AuthHeader authHeader, InputStream body) {
+    public StreamingOutput postBinary(AuthHeader _authHeader, InputStream body) {
         return output -> output.write(ByteStreams.toByteArray(body));
     }
 
     @Override
-    public Optional<StreamingOutput> getOptionalBinaryPresent(AuthHeader authHeader) {
+    public Optional<StreamingOutput> getOptionalBinaryPresent(AuthHeader _authHeader) {
         return Optional.of(out -> out.write("Hello World!".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override
-    public Optional<StreamingOutput> getOptionalBinaryEmpty(AuthHeader authHeader) {
+    public Optional<StreamingOutput> getOptionalBinaryEmpty(AuthHeader _authHeader) {
         return Optional.empty();
     }
 
     @Override
-    public StreamingOutput getBinaryFailure(AuthHeader authHeader, int numBytes) {
+    public StreamingOutput getBinaryFailure(AuthHeader _authHeader, int numBytes) {
         return responseBody -> {
             byte[] data = new byte[numBytes];
             new Random().nextBytes(data);

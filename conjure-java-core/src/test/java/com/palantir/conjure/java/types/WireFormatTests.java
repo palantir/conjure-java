@@ -425,7 +425,7 @@ public final class WireFormatTests {
         }
 
         @Override
-        public Integer visitUnknown(String unknownType) {
+        public Integer visitUnknown(String _unknownType) {
             return 0;
         }
 

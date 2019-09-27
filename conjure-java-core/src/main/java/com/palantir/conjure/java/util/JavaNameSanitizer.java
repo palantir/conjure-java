@@ -51,12 +51,12 @@ public final class JavaNameSanitizer {
         Optional<String> maybeAuthParamName = endpoint.getAuth()
                 .map(authType -> authType.accept(new AuthType.Visitor<String>() {
                     @Override
-                    public String visitHeader(HeaderAuthType header) {
+                    public String visitHeader(HeaderAuthType _header) {
                         return "authHeader";
                     }
 
                     @Override
-                    public String visitCookie(CookieAuthType cookie) {
+                    public String visitCookie(CookieAuthType _cookie) {
                         return "cookieToken";
                     }
 

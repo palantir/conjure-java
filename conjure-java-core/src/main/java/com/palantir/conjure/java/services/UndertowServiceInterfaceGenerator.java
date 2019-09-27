@@ -100,12 +100,12 @@ final class UndertowServiceInterfaceGenerator {
         endpointDef.getAuth().ifPresent(
                 authType -> parameterSpecs.add(authType.accept(new AuthType.Visitor<ParameterSpec>() {
                     @Override
-                    public ParameterSpec visitHeader(HeaderAuthType value) {
+                    public ParameterSpec visitHeader(HeaderAuthType _value) {
                         return ParameterSpec.builder(ClassName.get(AuthHeader.class), "authHeader").build();
                     }
 
                     @Override
-                    public ParameterSpec visitCookie(CookieAuthType value) {
+                    public ParameterSpec visitCookie(CookieAuthType _value) {
                         return ParameterSpec.builder(ClassName.get(BearerToken.class), "cookieToken").build();
                     }
 

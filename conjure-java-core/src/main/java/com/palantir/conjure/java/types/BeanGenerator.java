@@ -368,17 +368,17 @@ public final class BeanGenerator {
         }
 
         @Override
-        public Boolean visitList(ListType value) {
+        public Boolean visitList(ListType _value) {
             return Boolean.TRUE;
         }
 
         @Override
-        public Boolean visitSet(SetType value) {
+        public Boolean visitSet(SetType _value) {
             return Boolean.TRUE;
         }
 
         @Override
-        public Boolean visitMap(MapType value) {
+        public Boolean visitMap(MapType _value) {
             return Boolean.TRUE;
         }
 

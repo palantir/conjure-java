@@ -450,7 +450,7 @@ final class UndertowServiceHandlerGenerator {
 
         return endpointDefinition.getAuth().get().accept(new AuthType.Visitor<Optional<String>>() {
             @Override
-            public Optional<String> visitHeader(HeaderAuthType value) {
+            public Optional<String> visitHeader(HeaderAuthType _value) {
                 // header auth
                 code.addStatement("$1T $2N = $3N.auth().header($4N)",
                         AuthHeader.class, AUTH_HEADER_VAR_NAME, RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
@@ -458,7 +458,7 @@ final class UndertowServiceHandlerGenerator {
             }
 
             @Override
-            public Optional<String> visitCookie(CookieAuthType value) {
+            public Optional<String> visitCookie(CookieAuthType _value) {
                 code.addStatement("$1T $2N = $3N.auth().cookie($4N, $5S)",
                         BearerToken.class,
                         COOKIE_TOKEN_VAR_NAME,
@@ -640,17 +640,17 @@ final class UndertowServiceHandlerGenerator {
             Type type, TypeMapper typeMapper, String resultVarName, String paramsVarName, String paramId) {
         return type.accept(new DefaultTypeVisitor<Optional<String>>() {
             @Override
-            public Optional<String> visitExternal(ExternalReference value) {
+            public Optional<String> visitExternal(ExternalReference _value) {
                 return Optional.of("deserializeComplex");
             }
 
             @Override
-            public Optional<String> visitReference(com.palantir.conjure.spec.TypeName value) {
+            public Optional<String> visitReference(com.palantir.conjure.spec.TypeName _value) {
                 return Optional.of("deserializeComplex");
             }
 
             @Override
-            public Optional<String> visitPrimitive(PrimitiveType value) {
+            public Optional<String> visitPrimitive(PrimitiveType _value) {
                 return Optional.empty();
             }
 

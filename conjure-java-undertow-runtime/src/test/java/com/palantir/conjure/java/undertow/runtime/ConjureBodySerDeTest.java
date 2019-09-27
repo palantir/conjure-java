@@ -120,7 +120,7 @@ public class ConjureBodySerDeTest {
         }
 
         @Override
-        public <T> Serializer<T> serializer(TypeMarker<T> type) {
+        public <T> Serializer<T> serializer(TypeMarker<T> _type) {
             return (value, output) -> {
                 // nop
             };

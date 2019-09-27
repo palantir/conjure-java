@@ -35,7 +35,7 @@ import javax.net.ssl.X509TrustManager;
 
 public final class EteTestServer extends Application<Configuration> {
     @Override
-    public void run(Configuration configuration, Environment environment) {
+    public void run(Configuration _configuration, Environment environment) {
         environment.getApplicationContext().setContextPath("/test-example/*");
         environment.jersey().setUrlPattern("/api/*");
         environment.jersey().register(new JacksonJsonProvider(ObjectMappers.newServerObjectMapper()));
