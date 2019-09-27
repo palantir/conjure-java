@@ -81,12 +81,7 @@ public final class Bytes {
 
     @Override
     public String toString() {
-        return new StringBuilder("Bytes")
-                .append('{')
-                .append("size: ")
-                .append(safe.length)
-                .append('}')
-                .toString();
+        return "Bytes{size: " + safe.length + '}';
     }
 
     /** Constructs a new {@link Bytes} from the provided array. */
@@ -115,14 +110,14 @@ public final class Bytes {
 
     static final class Serializer extends JsonSerializer<Bytes> {
         @Override
-        public void serialize(Bytes value, JsonGenerator gen, SerializerProvider unused) throws IOException {
+        public void serialize(Bytes value, JsonGenerator gen, SerializerProvider _serializer) throws IOException {
             gen.writeBinary(value.safe);
         }
     }
 
     static final class Deserializer extends JsonDeserializer<Bytes> {
         @Override
-        public Bytes deserialize(JsonParser parser, DeserializationContext unused) throws IOException {
+        public Bytes deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
             // Avoid making a copy of the value from jackson
             return new Bytes(parser.getBinaryValue());
         }
