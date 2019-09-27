@@ -43,13 +43,7 @@ public final class StringExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("StringExample")
-                .append('{')
-                .append("string")
-                .append(": ")
-                .append(string)
-                .append('}')
-                .toString();
+        return "StringExample{string: " + string + '}';
     }
 
     public static StringExample of(String string) {

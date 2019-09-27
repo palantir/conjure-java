@@ -60,13 +60,7 @@ public final class SingleUnion {
 
     @Override
     public String toString() {
-        return new StringBuilder("SingleUnion")
-                .append('{')
-                .append("value")
-                .append(": ")
-                .append(value)
-                .append('}')
-                .toString();
+        return "SingleUnion{value: " + value + '}';
     }
 
     public interface Visitor<T> {
@@ -171,13 +165,7 @@ public final class SingleUnion {
 
         @Override
         public String toString() {
-            return new StringBuilder("FooWrapper")
-                    .append('{')
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "FooWrapper{value: " + value + '}';
         }
     }
 
@@ -235,17 +223,7 @@ public final class SingleUnion {
 
         @Override
         public String toString() {
-            return new StringBuilder("UnknownWrapper")
-                    .append('{')
-                    .append("type")
-                    .append(": ")
-                    .append(type)
-                    .append(", ")
-                    .append("value")
-                    .append(": ")
-                    .append(value)
-                    .append('}')
-                    .toString();
+            return "UnknownWrapper{type: " + type + ", value: " + value + '}';
         }
     }
 }

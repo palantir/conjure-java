@@ -147,41 +147,23 @@ public final class ManyFieldExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("ManyFieldExample")
-                .append('{')
-                .append("string")
-                .append(": ")
-                .append(string)
-                .append(", ")
-                .append("integer")
-                .append(": ")
-                .append(integer)
-                .append(", ")
-                .append("doubleValue")
-                .append(": ")
-                .append(doubleValue)
-                .append(", ")
-                .append("optionalItem")
-                .append(": ")
-                .append(optionalItem)
-                .append(", ")
-                .append("items")
-                .append(": ")
-                .append(items)
-                .append(", ")
-                .append("set")
-                .append(": ")
-                .append(set)
-                .append(", ")
-                .append("map")
-                .append(": ")
-                .append(map)
-                .append(", ")
-                .append("alias")
-                .append(": ")
-                .append(alias)
-                .append('}')
-                .toString();
+        return "ManyFieldExample{string: "
+                + string
+                + ", integer: "
+                + integer
+                + ", doubleValue: "
+                + doubleValue
+                + ", optionalItem: "
+                + optionalItem
+                + ", items: "
+                + items
+                + ", set: "
+                + set
+                + ", map: "
+                + map
+                + ", alias: "
+                + alias
+                + '}';
     }
 
     private static void validateFields(

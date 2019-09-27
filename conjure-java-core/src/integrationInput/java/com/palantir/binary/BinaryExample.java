@@ -45,13 +45,7 @@ public final class BinaryExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("BinaryExample")
-                .append('{')
-                .append("binary")
-                .append(": ")
-                .append(binary)
-                .append('}')
-                .toString();
+        return "BinaryExample{binary: " + binary + '}';
     }
 
     public static BinaryExample of(ByteBuffer binary) {

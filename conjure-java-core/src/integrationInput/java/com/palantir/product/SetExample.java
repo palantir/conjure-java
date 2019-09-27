@@ -63,17 +63,7 @@ public final class SetExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("SetExample")
-                .append('{')
-                .append("items")
-                .append(": ")
-                .append(items)
-                .append(", ")
-                .append("doubleItems")
-                .append(": ")
-                .append(doubleItems)
-                .append('}')
-                .toString();
+        return "SetExample{items: " + items + ", doubleItems: " + doubleItems + '}';
     }
 
     public static SetExample of(Set<String> items, Set<Double> doubleItems) {

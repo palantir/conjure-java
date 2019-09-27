@@ -109,33 +109,19 @@ public final class ReservedKeyExample {
 
     @Override
     public String toString() {
-        return new StringBuilder("ReservedKeyExample")
-                .append('{')
-                .append("package")
-                .append(": ")
-                .append(package_)
-                .append(", ")
-                .append("interface")
-                .append(": ")
-                .append(interface_)
-                .append(", ")
-                .append("field-name-with-dashes")
-                .append(": ")
-                .append(fieldNameWithDashes)
-                .append(", ")
-                .append("primitve-field-name-with-dashes")
-                .append(": ")
-                .append(primitveFieldNameWithDashes)
-                .append(", ")
-                .append("memoizedHashCode")
-                .append(": ")
-                .append(memoizedHashCode_)
-                .append(", ")
-                .append("result")
-                .append(": ")
-                .append(result)
-                .append('}')
-                .toString();
+        return "ReservedKeyExample{package: "
+                + package_
+                + ", interface: "
+                + interface_
+                + ", field-name-with-dashes: "
+                + fieldNameWithDashes
+                + ", primitve-field-name-with-dashes: "
+                + primitveFieldNameWithDashes
+                + ", memoizedHashCode: "
+                + memoizedHashCode_
+                + ", result: "
+                + result
+                + '}';
     }
 
     private static void validateFields(
