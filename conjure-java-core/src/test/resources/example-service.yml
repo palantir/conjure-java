@@ -118,6 +118,17 @@ services:
              - Safe
         returns: AliasedString
 
+      getForStrings:
+        http: GET /datasets/{datasetRid}/strings
+        args:
+          datasetRid:
+            type: rid
+            markers:
+              - Safe
+          strings:
+            type: set<AliasedString>
+            param-type: query
+
       uploadRawData:
         http: POST /datasets/upload-raw
         args:

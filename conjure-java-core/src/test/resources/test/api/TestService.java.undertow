@@ -36,6 +36,9 @@ public interface TestService {
 
     AliasedString getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    void getForStrings(
+            AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
+
     void uploadRawData(AuthHeader authHeader, InputStream input);
 
     void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input);

@@ -81,6 +81,13 @@ public interface TestService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
+    @GET
+    @Path("catalog/datasets/{datasetRid}/strings")
+    void getForStrings(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid,
+            @QueryParam("strings") Set<AliasedString> strings);
+
     @POST
     @Path("catalog/datasets/upload-raw")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
@@ -173,6 +180,11 @@ public interface TestService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("maybeInteger") OptionalInt maybeInteger,
             @QueryParam("maybeDouble") OptionalDouble maybeDouble);
+
+    @Deprecated
+    default void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+        getForStrings(authHeader, datasetRid, Collections.emptySet());
+    }
 
     @Deprecated
     default int testQueryParams(

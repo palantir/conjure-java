@@ -57,6 +57,7 @@ public final class TestServiceEndpoints implements UndertowService {
                         new GetAliasedRawDataEndpoint(runtime, delegate),
                         new MaybeGetRawDataEndpoint(runtime, delegate),
                         new GetAliasedStringEndpoint(runtime, delegate),
+                        new GetForStringsEndpoint(runtime, delegate),
                         new UploadRawDataEndpoint(runtime, delegate),
                         new UploadAliasedRawDataEndpoint(runtime, delegate),
                         new GetBranchesEndpoint(runtime, delegate),
@@ -433,6 +434,60 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "getAliasedString";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetForStringsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetForStringsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers()
+                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            Set<String> stringsRaw =
+                    runtime.plainSerDe().deserializeStringSet(queryParams.get("strings"));
+            Set<AliasedString> strings =
+                    runtime.plainSerDe().deserializeComplexSet(stringsRaw, AliasedString::valueOf);
+            delegate.getForStrings(authHeader, datasetRid, strings);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/strings";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getForStrings";
         }
 
         @Override

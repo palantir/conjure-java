@@ -53,6 +53,8 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.AnnotationSpec;
@@ -737,9 +739,10 @@ final class UndertowServiceHandlerGenerator {
 
     /*
      * Returns a CodeBlock that constructs the given type given the provided variable that holds the decoded value for
-     * the type. inType must be a type that resolves to (primitive|optional<primitive>) and must use an alias type
-     * somewhere in its type definition. This means that inType must be one of the following:
+     * the type. inType must be a type that resolves to (primitive|optional<primitive>|collection<primitive>) and must
+     *  use an alias type somewhere in its type definition. This means that inType must be one of the following:
      * - optional<alias that resolves to a primitive>
+     * - set/list<alias that resolves to a primitive>
      * - alias of a primitive
      * - alias of an optional<primitive>
      * - alias of an optional<alias that resolves to a primitive>
@@ -748,7 +751,7 @@ final class UndertowServiceHandlerGenerator {
      * An "alias that resolves to a primitive" is either an alias of a primitive or an alias of an alias that follows
      * these rules (recursive definition).
      */
-    private static CodeBlock createConstructorForTypeWithReference(Type inType, String decodedVarName,
+    private CodeBlock createConstructorForTypeWithReference(Type inType, String decodedVarName,
             List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
         // "in" must be 1 of 2 types: optional<alias that resolves to a primitive> or alias
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
@@ -757,7 +760,7 @@ final class UndertowServiceHandlerGenerator {
             return CodeBlock.of("$1T.ofNullable($2N.isPresent() ? $3L : null)", Optional.class, decodedVarName,
                     createConstructorForTypeWithReference(typeOfOptional, decodedVarName + ".get()", typeDefinitions,
                             typeMapper));
-        } else {
+        } else if (inType.accept(TypeVisitor.IS_REFERENCE)) {
             // alias
             CodeBlock ofContent;
 
@@ -785,11 +788,30 @@ final class UndertowServiceHandlerGenerator {
                             typeMapper);
                 }
             } else {
-                // alias
+                // recurse
                 ofContent = createConstructorForTypeWithReference(aliasedType, decodedVarName, typeDefinitions,
                         typeMapper);
             }
             return CodeBlock.of("$1T.of($2L)", typeMapper.getClassName(inType), ofContent);
+        } else if (inType.accept(TypeVisitor.IS_LIST)) {
+            // TODO: unify with getComplexTypeStringDeserializer
+            return CodeBlock.of(
+                    "$1N.plainSerDe().deserializeComplexList($2N, $3T::valueOf)",
+                    RUNTIME_VAR_NAME,
+                    decodedVarName,
+                    typeMapper.getClassName(getComplexType(inType)).box());
+        } else if (inType.accept(TypeVisitor.IS_SET)) {
+            // TODO: unify with getComplexTypeStringDeserializer
+            return CodeBlock.of(
+                    "$1N.plainSerDe().deserializeComplexSet($2N, $3T::valueOf)",
+                    RUNTIME_VAR_NAME,
+                    decodedVarName,
+                    typeMapper.getClassName(getComplexType(inType)).box());
+        } else {
+            throw new SafeIllegalArgumentException(
+                    "Unexpected input type when generating constructor for aliased type",
+                    SafeArg.of("inputType", inType),
+                    SafeArg.of("varName", decodedVarName));
         }
     }
 

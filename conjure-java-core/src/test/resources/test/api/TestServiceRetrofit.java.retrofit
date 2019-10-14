@@ -87,6 +87,16 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
+    @GET("./catalog/datasets/{datasetRid}/strings")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/strings",
+        "Accept: application/json"
+    })
+    Call<Void> getForStrings(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid,
+            @Query("strings") Set<AliasedString> strings);
+
     @POST("./catalog/datasets/upload-raw")
     @Headers({"hr-path-template: /catalog/datasets/upload-raw", "Accept: application/json"})
     Call<Void> uploadRawData(
@@ -190,6 +200,13 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Query("maybeInteger") OptionalInt maybeInteger,
             @Query("maybeDouble") OptionalDouble maybeDouble);
+
+    @Deprecated
+    default void getForStrings(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid) {
+        getForStrings(authHeader, datasetRid, Collections.emptySet());
+    }
 
     @Deprecated
     default Call<Integer> testQueryParams(
