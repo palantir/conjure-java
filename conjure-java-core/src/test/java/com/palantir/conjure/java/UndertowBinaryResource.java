@@ -28,22 +28,22 @@ import java.util.Random;
 
 final class UndertowBinaryResource implements UndertowEteBinaryService {
     @Override
-    public BinaryResponseBody postBinary(AuthHeader authHeader, InputStream body) {
+    public BinaryResponseBody postBinary(AuthHeader _authHeader, InputStream body) {
         return output -> output.write(ByteStreams.toByteArray(body));
     }
 
     @Override
-    public Optional<BinaryResponseBody> getOptionalBinaryPresent(AuthHeader authHeader) {
+    public Optional<BinaryResponseBody> getOptionalBinaryPresent(AuthHeader _authHeader) {
         return Optional.of(out -> out.write("Hello World!".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override
-    public Optional<BinaryResponseBody> getOptionalBinaryEmpty(AuthHeader authHeader) {
+    public Optional<BinaryResponseBody> getOptionalBinaryEmpty(AuthHeader _authHeader) {
         return Optional.empty();
     }
 
     @Override
-    public BinaryResponseBody getBinaryFailure(AuthHeader authHeader, int numBytes) {
+    public BinaryResponseBody getBinaryFailure(AuthHeader _authHeader, int numBytes) {
         return responseBody -> {
             byte[] data = new byte[numBytes];
             new Random().nextBytes(data);

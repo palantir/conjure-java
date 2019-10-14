@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
  */
 final class EchoResourceInvocationHandler extends AbstractInvocationHandler {
     @Override
-    protected Object handleInvocation(Object proxy, Method method, Object[] args) {
+    protected Object handleInvocation(Object _proxy, Method method, Object[] args) {
         Preconditions.checkArgument(args.length == 1, "Expected single argument. Method: %s", method);
         return com.palantir.logsafe.Preconditions.checkNotNull(args[0], "Null values are not allowed");
     }

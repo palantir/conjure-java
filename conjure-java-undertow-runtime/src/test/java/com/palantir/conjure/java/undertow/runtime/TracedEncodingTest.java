@@ -88,12 +88,12 @@ public class TracedEncodingTest {
     private static final class StubEncoding implements Encoding {
 
         @Override
-        public <T> Serializer<T> serializer(TypeMarker<T> type) {
+        public <T> Serializer<T> serializer(TypeMarker<T> _type) {
             return (value, output) -> { };
         }
 
         @Override
-        public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
+        public <T> Deserializer<T> deserializer(TypeMarker<T> _type) {
             return input -> null;
         }
 
@@ -103,7 +103,7 @@ public class TracedEncodingTest {
         }
 
         @Override
-        public boolean supportsContentType(String contentType) {
+        public boolean supportsContentType(String _contentType) {
             return true;
         }
     }

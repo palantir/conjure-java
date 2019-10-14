@@ -37,3 +37,4 @@ org.javassist:javassist = 3.22.0-GA
 org.mockito:* = 3.1.0
 org.slf4j:* = 1.7.25
 org.junit.jupiter:* = 5.5.2
+org.junit.vintage:* = 5.4.2

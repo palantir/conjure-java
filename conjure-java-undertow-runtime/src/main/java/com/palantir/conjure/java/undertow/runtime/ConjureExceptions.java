@@ -215,17 +215,17 @@ final class ConjureExceptions {
 
     private static final QosException.Visitor<Integer> QOS_EXCEPTION_STATUS_CODE = new QosException.Visitor<Integer>() {
         @Override
-        public Integer visit(QosException.Throttle exception) {
+        public Integer visit(QosException.Throttle _exception) {
             return 429;
         }
 
         @Override
-        public Integer visit(QosException.RetryOther exception) {
+        public Integer visit(QosException.RetryOther _exception) {
             return 308;
         }
 
         @Override
-        public Integer visit(QosException.Unavailable exception) {
+        public Integer visit(QosException.Unavailable _exception) {
             return 503;
         }
     };
@@ -247,7 +247,7 @@ final class ConjureExceptions {
                 }
 
                 @Override
-                public Consumer<HttpServerExchange> visit(QosException.Unavailable exception) {
+                public Consumer<HttpServerExchange> visit(QosException.Unavailable _exception) {
                     return exchange -> {
 
                     };

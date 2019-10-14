@@ -80,3 +80,8 @@ dependencies {
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
 }
+
+tasks.withType(JavaCompile) {
+    // this complains about the integrationInput directory
+    options.errorprone.errorproneArgs += '-Xep:StrictUnusedVariable:OFF'
+}

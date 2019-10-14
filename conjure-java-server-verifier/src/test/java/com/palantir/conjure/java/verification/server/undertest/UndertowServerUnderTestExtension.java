@@ -36,7 +36,7 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
     private Undertow server;
 
     @Override
-    public void beforeAll(ExtensionContext context) {
+    public void beforeAll(ExtensionContext _context) {
         UndertowAutoDeserializeService autoDeserialize = Reflection.newProxy(
                 UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
         UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
@@ -53,7 +53,7 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
     }
 
     @Override
-    public void afterAll(ExtensionContext context) {
+    public void afterAll(ExtensionContext _context) {
         if (server != null) {
             server.stop();
         }

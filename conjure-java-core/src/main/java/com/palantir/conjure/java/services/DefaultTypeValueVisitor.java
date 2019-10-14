@@ -50,37 +50,37 @@ enum DefaultTypeValueVisitor implements Type.Visitor<CodeBlock> {
     }
 
     @Override
-    public CodeBlock visitList(ListType value) {
+    public CodeBlock visitList(ListType _value) {
         return CodeBlock.of("$T.emptyList()", Collections.class);
     }
 
     @Override
-    public CodeBlock visitSet(SetType value) {
+    public CodeBlock visitSet(SetType _value) {
         return CodeBlock.of("$T.emptySet()", Collections.class);
     }
 
     @Override
-    public CodeBlock visitMap(MapType value) {
+    public CodeBlock visitMap(MapType _value) {
         return CodeBlock.of("$T.emptyMap()", Collections.class);
     }
 
     @Override
-    public CodeBlock visitPrimitive(PrimitiveType value) {
+    public CodeBlock visitPrimitive(PrimitiveType _value) {
         throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
     }
 
     @Override
-    public CodeBlock visitReference(TypeName value) {
+    public CodeBlock visitReference(TypeName _value) {
         throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
     }
 
     @Override
-    public CodeBlock visitExternal(ExternalReference value) {
+    public CodeBlock visitExternal(ExternalReference _value) {
         throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
     }
 
     @Override
-    public CodeBlock visitUnknown(String unknownType) {
+    public CodeBlock visitUnknown(String _unknownType) {
         throw new SafeIllegalArgumentException("Cannot backfill non-defaultable parameter type.");
     }
 }

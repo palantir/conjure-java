@@ -143,8 +143,7 @@ public final class JerseyServiceEteTest extends TestBase {
     @Disabled("Dropwizard returns 404 for empty optional")
     @Test
     public void jaxrs_client_can_retrieve_an_optional_empty_from_a_server() throws Exception {
-        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")))
-                .isEqualTo(Optional.empty());
+        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader"))).isNotPresent();
     }
 
     @Test

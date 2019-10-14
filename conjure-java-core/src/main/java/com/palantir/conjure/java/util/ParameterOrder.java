@@ -37,27 +37,27 @@ public final class ParameterOrder {
     /** Produces an ordering for ParamaterType of Header, Path, Query, Body. */
     private static final ParameterType.Visitor<Integer> PARAM_SORT_ORDER = new ParameterType.Visitor<Integer>() {
         @Override
-        public Integer visitBody(BodyParameterType value) {
+        public Integer visitBody(BodyParameterType _value) {
             return 30;
         }
 
         @Override
-        public Integer visitHeader(HeaderParameterType value) {
+        public Integer visitHeader(HeaderParameterType _value) {
             return 0;
         }
 
         @Override
-        public Integer visitPath(PathParameterType value) {
+        public Integer visitPath(PathParameterType _value) {
             return 10;
         }
 
         @Override
-        public Integer visitQuery(QueryParameterType value) {
+        public Integer visitQuery(QueryParameterType _value) {
             return 20;
         }
 
         @Override
-        public Integer visitUnknown(String unknownType) {
+        public Integer visitUnknown(String _unknownType) {
             return -1;
         }
     };
@@ -68,22 +68,22 @@ public final class ParameterOrder {
      */
     private static final Type.Visitor<Integer> TYPE_SORT_ORDER = new DefaultTypeVisitor<Integer>() {
         @Override
-        public Integer visitOptional(OptionalType value) {
+        public Integer visitOptional(OptionalType _value) {
             return 1;
         }
 
         @Override
-        public Integer visitList(ListType value) {
+        public Integer visitList(ListType _value) {
             return 1;
         }
 
         @Override
-        public Integer visitSet(SetType value) {
+        public Integer visitSet(SetType _value) {
             return 1;
         }
 
         @Override
-        public Integer visitMap(MapType value) {
+        public Integer visitMap(MapType _value) {
             return 1;
         }
 

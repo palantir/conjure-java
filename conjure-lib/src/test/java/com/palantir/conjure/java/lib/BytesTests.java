@@ -109,14 +109,14 @@ public final class BytesTests {
 
         ByteBuffer output = immutable.asReadOnlyByteBuffer();
         assertThat(output.get()).isEqualTo((byte) 0);
-        assertThat(output.remaining()).isEqualTo(0);
+        assertThat(output.remaining()).isZero();
 
         assertThat(immutable.asReadOnlyByteBuffer().remaining()).isEqualTo(1);
     }
 
     @Test
     public void testGetSize() {
-        assertThat(Bytes.from(new byte[0]).size()).isEqualTo(0);
+        assertThat(Bytes.from(new byte[0]).size()).isZero();
         assertThat(Bytes.from(new byte[10]).size()).isEqualTo(10);
     }
 

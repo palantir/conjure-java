@@ -98,7 +98,7 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_optional_field_should_deserialize_as_empty() throws Exception {
-        assertThat(mapper.readValue("{\"item\":null}", OptionalExample.class).getItem().isPresent()).isFalse();
+        assertThat(mapper.readValue("{\"item\":null}", OptionalExample.class).getItem()).isNotPresent();
     }
 
     @Test

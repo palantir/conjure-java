@@ -16,42 +16,42 @@ import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 @SuppressWarnings("DesignForExtension")
 public abstract class DefaultTypeVisitor<T> implements Type.Visitor<T> {
     @Override
-    public T visitPrimitive(PrimitiveType value) {
+    public T visitPrimitive(PrimitiveType _value) {
         return visitDefault();
     }
 
     @Override
-    public T visitOptional(OptionalType value) {
+    public T visitOptional(OptionalType _value) {
         return visitDefault();
     }
 
     @Override
-    public T visitList(ListType value) {
+    public T visitList(ListType _value) {
         return visitDefault();
     }
 
     @Override
-    public T visitSet(SetType value) {
+    public T visitSet(SetType _value) {
         return visitDefault();
     }
 
     @Override
-    public T visitMap(MapType value) {
+    public T visitMap(MapType _value) {
         return visitDefault();
     }
 
     @Override
-    public T visitReference(com.palantir.conjure.spec.TypeName value) {
+    public T visitReference(com.palantir.conjure.spec.TypeName _value) {
         return visitDefault();
     }
 
     @Override
-    public T visitExternal(ExternalReference value) {
+    public T visitExternal(ExternalReference _value) {
         return visitDefault();
     }
 
     @Override
-    public T visitUnknown(String unknownType) {
+    public T visitUnknown(String _unknownType) {
         return visitDefault();
     }
 

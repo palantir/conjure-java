@@ -47,7 +47,7 @@ final class UndertowTypeFunctions {
     static boolean isAliasType(Type type) {
         return type.accept(new IsTypeVisitor() {
             @Override
-            public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
+            public Boolean visitReference(com.palantir.conjure.spec.TypeName _value) {
                 return true;
             }
         });
@@ -116,7 +116,7 @@ final class UndertowTypeFunctions {
     static Type toConjureTypeWithoutAliases(final Type in, final List<TypeDefinition> typeDefinitions) {
         return in.accept(new Type.Visitor<Type>() {
             @Override
-            public Type visitPrimitive(PrimitiveType value) {
+            public Type visitPrimitive(PrimitiveType _value) {
                 return in;
             }
 
@@ -150,12 +150,12 @@ final class UndertowTypeFunctions {
             }
 
             @Override
-            public Type visitExternal(ExternalReference value) {
+            public Type visitExternal(ExternalReference _value) {
                 return in;
             }
 
             @Override
-            public Type visitUnknown(String unknownType) {
+            public Type visitUnknown(String _unknownType) {
                 return in;
             }
         });
@@ -178,7 +178,7 @@ final class UndertowTypeFunctions {
 
     private abstract static class GetTypeVisitor<T> extends DefaultTypeVisitor<T> {
         @Override
-        public T visitUnknown(String unknownType) {
+        public T visitUnknown(String _unknownType) {
             throw new UnsupportedOperationException();
         }
     }
