@@ -178,7 +178,7 @@ public final class ConjureExceptionHandlerTest {
     }
 
     @Test
-    public void doesNotHandleErrors() throws IOException {
+    public void handlesErrorWithoutSendingResponseBody() throws IOException {
         server.stop();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")

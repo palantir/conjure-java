@@ -65,7 +65,7 @@ final class ConjureExceptions {
         } else if (throwable instanceof FrameworkException) {
             frameworkException(exchange, serializer, (FrameworkException) throwable);
         } else if (throwable instanceof Error) {
-            throw (Error) throwable;
+            error(exchange, serializer, (Error) throwable);
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
             log(exception);
@@ -159,6 +159,15 @@ final class ConjureExceptions {
         ServiceException exception = new ServiceException(errorType, frameworkException);
         log(exception);
         writeResponse(exchange, Optional.of(SerializableError.forException(exception)), statusCode, serializer);
+    }
+
+    private static void error(HttpServerExchange exchange, Serializer<SerializableError> serializer, Error error) {
+        // log errors in order to associate the log line with the correct traceId but
+        // avoid doing work beyond setting a 500 response code, no response body is sent.
+        log.error("Error handling request", error);
+        // The writeResponse method terminates responses if data has already been sent to clients
+        // do not interpret partial data as a full response.
+        writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode(), serializer);
     }
 
     private static void writeResponse(
