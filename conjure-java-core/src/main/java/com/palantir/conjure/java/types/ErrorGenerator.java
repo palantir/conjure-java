@@ -180,10 +180,10 @@ public final class ErrorGenerator {
             methodBuilder.addCode(", cause");
         }
 
-        entry.getSafeArgs().stream().forEach(arg ->
+        entry.getSafeArgs().forEach(arg ->
                 processArg(typeMapper, methodBuilder, arg, true));
 
-        entry.getUnsafeArgs().stream().forEach(arg ->
+        entry.getUnsafeArgs().forEach(arg ->
                 processArg(typeMapper, methodBuilder, arg, false));
         methodBuilder.addCode(");");
 

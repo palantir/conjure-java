@@ -195,8 +195,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void jaxrs_client_can_retrieve_an_optional_empty_from_a_server() throws Exception {
-        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")))
-                .isEqualTo(Optional.empty());
+        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader"))).isNotPresent();
     }
 
     @Test
@@ -331,8 +330,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testExternalImportOptionalEmptyQueryParameter() {
-        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
-                .isEqualTo(Optional.empty());
+        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty())).isNotPresent();
     }
 
     @Test
@@ -343,8 +341,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testExternalImportOptionalEmptyBody() {
-        assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
-                .isEqualTo(Optional.empty());
+        assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty())).isNotPresent();
     }
 
     @Test
@@ -464,8 +461,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testOptionalEnumQueryParameterEmpty() {
-        assertThat(client.optionalEnumQuery(AuthHeader.valueOf("authHeader"), Optional.empty()))
-                .isEqualTo(Optional.empty());
+        assertThat(client.optionalEnumQuery(AuthHeader.valueOf("authHeader"), Optional.empty())).isNotPresent();
     }
 
     @Test

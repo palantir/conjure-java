@@ -279,7 +279,7 @@ public final class WireFormatTests {
         String serializedUnionTypeUnknown = "{\"type\":\"unknown\",\"value\":5}";
         UnionTypeExample unionTypeUnknown = mapper.readValue(serializedUnionTypeUnknown, UnionTypeExample.class);
         assertThat(mapper.writeValueAsString(unionTypeUnknown)).isEqualTo(serializedUnionTypeUnknown);
-        assertThat(unionTypeUnknown.accept(new TestVisitor())).isEqualTo(0);
+        assertThat(unionTypeUnknown.accept(new TestVisitor())).isZero();
     }
 
     @Test

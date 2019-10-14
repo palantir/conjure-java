@@ -113,8 +113,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
     @Disabled("https://github.com/palantir/conjure-java-runtime/issues/668")
     @Test
     public void retrofit2_client_can_retrieve_an_optional_empty_from_a_server() throws Exception {
-        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")).execute().body())
-                .isEqualTo(Optional.empty());
+        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")).execute().body()).isNotPresent();
     }
 
     @Test

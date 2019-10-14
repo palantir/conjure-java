@@ -100,7 +100,7 @@ public class MissingFieldWireFormatTests {
 
     @Test
     public void missing_optional_field_should_deserialize_as_empty() throws Exception {
-        assertThat(mapper.readValue("{}", OptionalExample.class).getItem().isPresent()).isFalse();
+        assertThat(mapper.readValue("{}", OptionalExample.class).getItem()).isNotPresent();
     }
 
     @Test
