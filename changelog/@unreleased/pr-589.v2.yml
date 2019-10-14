@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Errors are logged from the ConjureExceptions class to provide more
+    helpful metadata for debugging, and making the safe parts of the stack trace available
+    in the log pipeline.
+  links:
+  - https://github.com/palantir/conjure-java/pull/589
