@@ -330,7 +330,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testExternalImportOptionalEmptyQueryParameter() {
-        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty())).isNotPresent();
+        assertThat(client.optionalQueryExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
+                .isNotPresent();
     }
 
     @Test
@@ -341,7 +342,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testExternalImportOptionalEmptyBody() {
-        assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty())).isNotPresent();
+        assertThat(client.optionalBodyExternalImport(AuthHeader.valueOf("authHeader"), Optional.empty()))
+                .isNotPresent();
     }
 
     @Test
