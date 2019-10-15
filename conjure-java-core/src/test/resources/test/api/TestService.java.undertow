@@ -85,4 +85,7 @@ public interface TestService {
 
     void testOptionalIntegerAndDouble(
             AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
+
+    void getForStrings(
+            AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 }

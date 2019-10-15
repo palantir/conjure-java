@@ -33,6 +33,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -175,6 +176,16 @@ public class EteResource implements EteService {
     public Optional<LongAlias> aliasLongEndpoint(
             AuthHeader _authHeader, Optional<LongAlias> input) {
         return input;
+    }
+
+    @Override
+    public void complexQueryParameters(
+            AuthHeader _authHeader,
+            ResourceIdentifier _datasetRid,
+            Set<StringAliasExample> _strings,
+            Set<Long> _longs,
+            Set<Integer> _ints) {
+        // nop
     }
 
     interface Streaming extends StreamingOutput, BinaryResponseBody {}

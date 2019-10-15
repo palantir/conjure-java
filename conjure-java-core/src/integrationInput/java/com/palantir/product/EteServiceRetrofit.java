@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -173,6 +174,15 @@ public interface EteServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Query("input") Optional<LongAlias> input);
 
+    @GET("./base/datasets/{datasetRid}/strings")
+    @Headers({"hr-path-template: /base/datasets/{datasetRid}/strings", "Accept: application/json"})
+    Call<Void> complexQueryParameters(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid,
+            @Query("strings") Set<StringAliasExample> strings,
+            @Query("longs") Set<Long> longs,
+            @Query("ints") Set<Integer> ints);
+
     @Deprecated
     default Call<Optional<Long>> optionalExternalLongQuery(
             @Header("Authorization") AuthHeader authHeader) {
@@ -206,5 +216,35 @@ public interface EteServiceRetrofit {
     default Call<Optional<LongAlias>> aliasLongEndpoint(
             @Header("Authorization") AuthHeader authHeader) {
         return aliasLongEndpoint(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default void complexQueryParameters(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid) {
+        complexQueryParameters(
+                authHeader,
+                datasetRid,
+                Collections.emptySet(),
+                Collections.emptySet(),
+                Collections.emptySet());
+    }
+
+    @Deprecated
+    default void complexQueryParameters(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid,
+            @Query("strings") Set<StringAliasExample> strings) {
+        complexQueryParameters(
+                authHeader, datasetRid, strings, Collections.emptySet(), Collections.emptySet());
+    }
+
+    @Deprecated
+    default void complexQueryParameters(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid,
+            @Query("strings") Set<StringAliasExample> strings,
+            @Query("longs") Set<Long> longs) {
+        complexQueryParameters(authHeader, datasetRid, strings, longs, Collections.emptySet());
     }
 }

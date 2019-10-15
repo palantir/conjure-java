@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -183,6 +184,15 @@ public interface EteService {
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("input") Optional<LongAlias> input);
 
+    @GET
+    @Path("base/datasets/{datasetRid}/strings")
+    void complexQueryParameters(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @PathParam("datasetRid") ResourceIdentifier datasetRid,
+            @QueryParam("strings") Set<StringAliasExample> strings,
+            @QueryParam("longs") Set<Long> longs,
+            @QueryParam("ints") Set<Integer> ints);
+
     @Deprecated
     default Optional<Long> optionalExternalLongQuery(AuthHeader authHeader) {
         return optionalExternalLongQuery(authHeader, Optional.empty());
@@ -211,5 +221,31 @@ public interface EteService {
     @Deprecated
     default Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader) {
         return aliasLongEndpoint(authHeader, Optional.empty());
+    }
+
+    @Deprecated
+    default void complexQueryParameters(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+        complexQueryParameters(
+                authHeader,
+                datasetRid,
+                Collections.emptySet(),
+                Collections.emptySet(),
+                Collections.emptySet());
+    }
+
+    @Deprecated
+    default void complexQueryParameters(
+            AuthHeader authHeader, ResourceIdentifier datasetRid, Set<StringAliasExample> strings) {
+        complexQueryParameters(
+                authHeader, datasetRid, strings, Collections.emptySet(), Collections.emptySet());
+    }
+
+    @Deprecated
+    default void complexQueryParameters(
+            AuthHeader authHeader,
+            ResourceIdentifier datasetRid,
+            Set<StringAliasExample> strings,
+            Set<Long> longs) {
+        complexQueryParameters(authHeader, datasetRid, strings, longs, Collections.emptySet());
     }
 }

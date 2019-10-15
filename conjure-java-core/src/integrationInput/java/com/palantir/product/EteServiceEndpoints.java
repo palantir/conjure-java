@@ -26,6 +26,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -70,7 +71,8 @@ public final class EteServiceEndpoints implements UndertowService {
                         new EnumListQueryEndpoint(runtime, delegate),
                         new OptionalEnumQueryEndpoint(runtime, delegate),
                         new EnumHeaderEndpoint(runtime, delegate),
-                        new AliasLongEndpointEndpoint(runtime, delegate)));
+                        new AliasLongEndpointEndpoint(runtime, delegate),
+                        new ComplexQueryParametersEndpoint(runtime, delegate)));
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
@@ -1420,6 +1422,62 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "aliasLongEndpoint";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ComplexQueryParametersEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        ComplexQueryParametersEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            Set<StringAliasExample> strings =
+                    runtime.plainSerDe()
+                            .deserializeComplexSet(
+                                    queryParams.get("strings"), StringAliasExample::valueOf);
+            Set<Long> longs =
+                    runtime.plainSerDe()
+                            .deserializeComplexSet(queryParams.get("longs"), Long::valueOf);
+            Set<Integer> ints = runtime.plainSerDe().deserializeIntegerSet(queryParams.get("ints"));
+            delegate.complexQueryParameters(authHeader, datasetRid, strings, longs, ints);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/base/datasets/{datasetRid}/strings";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "complexQueryParameters";
         }
 
         @Override

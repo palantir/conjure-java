@@ -191,6 +191,16 @@ public interface TestServiceRetrofit {
             @Query("maybeInteger") OptionalInt maybeInteger,
             @Query("maybeDouble") OptionalDouble maybeDouble);
 
+    @GET("./catalog/datasets/{datasetRid}/strings")
+    @Headers({
+        "hr-path-template: /catalog/datasets/{datasetRid}/strings",
+        "Accept: application/json"
+    })
+    Call<Void> getForStrings(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid,
+            @Query("strings") Set<AliasedString> strings);
+
     @Deprecated
     default Call<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
@@ -291,5 +301,12 @@ public interface TestServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Query("maybeInteger") OptionalInt maybeInteger) {
         testOptionalIntegerAndDouble(authHeader, maybeInteger, OptionalDouble.empty());
+    }
+
+    @Deprecated
+    default void getForStrings(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid) {
+        getForStrings(authHeader, datasetRid, Collections.emptySet());
     }
 }

@@ -62,11 +62,16 @@ final class UndertowTypeFunctions {
         });
     }
 
+    static boolean isCollectionType(Type type) {
+        return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET);
+    }
+
     // Returns the type that the given alias type refers to. For example, if the input type is defined as
     // "alias: integer", the returned type will be the type for "integer". The provided type must be an alias
     // (reference) type.
     static Type getAliasedType(Type type, List<TypeDefinition> typeDefinitions) {
-        com.palantir.logsafe.Preconditions.checkArgument(isAliasType(type));
+        com.palantir.logsafe.Preconditions.checkArgument(isAliasType(type),
+                "Expected an alias", SafeArg.of("type", type));
         return getAliasedType(type.accept(
                 new AbstractTypeVisitor<com.palantir.conjure.spec.TypeName>() {
                     @Override
