@@ -1,5 +1,5 @@
-type: improvement
-improvement:
+type: fix
+fix:
   description: Fix conjure-undertow handling complex query parameter collections
   links:
   - https://github.com/palantir/conjure-java/pull/595
