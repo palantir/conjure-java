@@ -208,3 +208,18 @@ services:
             type: optional<LongAlias>
             param-type: query
         returns: optional<LongAlias>
+
+      complexQueryParameters:
+        http: GET /datasets/{datasetRid}/strings
+        args:
+          datasetRid:
+            type: rid
+          strings:
+            type: set<StringAliasExample>
+            param-type: query
+          longs:
+            type: set<Long>
+            param-type: query
+          ints:
+            type: set<integer>
+            param-type: query

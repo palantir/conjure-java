@@ -577,9 +577,11 @@ final class UndertowServiceHandlerGenerator {
                             typeDefinitions);
                     String paramName = sanitizeVarName(arg.getArgName().get(), endpoint);
                     final CodeBlock retrieveParam;
-                    if (normalizedType.equals(arg.getType())) {
-                        // type does not contain any aliases
-                        retrieveParam = decodePlainParameterCodeBlock(normalizedType, typeMapper, paramName,
+                    if (normalizedType.equals(arg.getType())
+                            // Collections of alias types are handled the same way as external imports
+                            || UndertowTypeFunctions.isCollectionType(arg.getType())) {
+                        // type is not an alias or optional of an alias
+                        retrieveParam = decodePlainParameterCodeBlock(arg.getType(), typeMapper, paramName,
                                 paramsVarName,
                                 toParamId.apply(arg));
                     } else {

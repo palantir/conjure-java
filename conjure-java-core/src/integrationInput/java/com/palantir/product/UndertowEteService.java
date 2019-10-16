@@ -8,6 +8,7 @@ import com.palantir.tokens.auth.BearerToken;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
@@ -89,4 +90,11 @@ public interface UndertowEteService {
     SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
     Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
+
+    void complexQueryParameters(
+            AuthHeader authHeader,
+            ResourceIdentifier datasetRid,
+            Set<StringAliasExample> strings,
+            Set<Long> longs,
+            Set<Integer> ints);
 }

@@ -251,3 +251,14 @@ services:
           maybeDouble:
             type: optional<double>
             param-type: query
+
+      getForStrings:
+        http: GET /datasets/{datasetRid}/strings
+        args:
+          datasetRid:
+            type: rid
+            markers:
+              - Safe
+          strings:
+            type: set<AliasedString>
+            param-type: query

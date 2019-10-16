@@ -69,7 +69,8 @@ public final class TestServiceEndpoints implements UndertowService {
                         new TestDoubleEndpoint(runtime, delegate),
                         new TestIntegerEndpoint(runtime, delegate),
                         new TestPostOptionalEndpoint(runtime, delegate),
-                        new TestOptionalIntegerAndDoubleEndpoint(runtime, delegate)));
+                        new TestOptionalIntegerAndDoubleEndpoint(runtime, delegate),
+                        new GetForStringsEndpoint(runtime, delegate)));
     }
 
     private static final class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
@@ -1122,6 +1123,60 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "testOptionalIntegerAndDouble";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetForStringsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetForStringsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid =
+                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers()
+                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            Set<AliasedString> strings =
+                    runtime.plainSerDe()
+                            .deserializeComplexSet(
+                                    queryParams.get("strings"), AliasedString::valueOf);
+            delegate.getForStrings(authHeader, datasetRid, strings);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/strings";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getForStrings";
         }
 
         @Override
