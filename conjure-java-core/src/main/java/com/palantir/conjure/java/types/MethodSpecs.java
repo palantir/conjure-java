@@ -45,8 +45,7 @@ public final class MethodSpecs {
                 .addAnnotation(Override.class)
                 .addParameter(other)
                 .returns(TypeName.BOOLEAN)
-                .addStatement("return this == $1N || ($1N instanceof $2T && equalTo(($2T) $1N))",
-                        other, thisClass)
+                .addStatement("return this == $1N || ($1N instanceof $2T && equalTo(($2T) $1N))", other, thisClass)
                 .build();
     }
 
@@ -71,8 +70,8 @@ public final class MethodSpecs {
     }
 
     public static void addCachedHashCode(TypeSpec.Builder typeBuilder, Collection<FieldSpec> fields) {
-        FieldSpec.Builder hashFieldSpec = FieldSpec.builder(TypeName.INT, "memoizedHashCode",
-                Modifier.PRIVATE, Modifier.VOLATILE);
+        FieldSpec.Builder hashFieldSpec =
+                FieldSpec.builder(TypeName.INT, "memoizedHashCode", Modifier.PRIVATE, Modifier.VOLATILE);
         typeBuilder.addField(hashFieldSpec.build());
 
         typeBuilder.addMethod(MethodSpec.methodBuilder("hashCode")
@@ -102,9 +101,7 @@ public final class MethodSpecs {
     }
 
     private static CodeBlock getHashInput(Collection<FieldSpec> fields) {
-        return CodeBlocks.of(fields.stream()
-                .map(MethodSpecs::createHashInput)
-                .collect(joining(CodeBlock.of(", "))));
+        return CodeBlocks.of(fields.stream().map(MethodSpecs::createHashInput).collect(joining(CodeBlock.of(", "))));
     }
 
     static MethodSpec createToString(String thisClassName, List<FieldName> fieldNames) {
@@ -112,19 +109,19 @@ public final class MethodSpecs {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(String.class))
-                .addCode(fieldNames.isEmpty()
-                        ? CodeBlock.builder().addStatement("return $S", thisClassName + "{}").build()
-                        : CodeBlock.builder()
-                                .addStatement("return $L", toStringConcatenation(thisClassName, fieldNames))
-                                .build())
+                .addCode(
+                        fieldNames.isEmpty()
+                                ? CodeBlock.builder().addStatement("return $S", thisClassName + "{}").build()
+                                : CodeBlock.builder()
+                                        .addStatement("return $L", toStringConcatenation(thisClassName, fieldNames))
+                                        .build())
                 .build();
     }
 
     private static CodeBlock toStringConcatenation(String thisClassName, List<FieldName> fieldNames) {
-        checkState(!fieldNames.isEmpty(),
-                "String concatenation is only necessary if there are fields");
-        CodeBlock.Builder builder = CodeBlock.builder()
-                .add("$S\n", thisClassName + '{' + fieldNames.get(0).get() + ": ");
+        checkState(!fieldNames.isEmpty(), "String concatenation is only necessary if there are fields");
+        CodeBlock.Builder builder =
+                CodeBlock.builder().add("$S\n", thisClassName + '{' + fieldNames.get(0).get() + ": ");
         for (int i = 0; i < fieldNames.size(); i++) {
             FieldName fieldName = fieldNames.get(i);
             // The name of the first field is included with the class name
@@ -141,9 +138,8 @@ public final class MethodSpecs {
             return CodeBlock.of("$L", true);
         }
 
-        return CodeBlocks.of(fields.stream()
-                .map(MethodSpecs::createEqualsStatement)
-                .collect(joining(CodeBlock.of(" && "))));
+        return CodeBlocks.of(
+                fields.stream().map(MethodSpecs::createEqualsStatement).collect(joining(CodeBlock.of(" && "))));
     }
 
     private static CodeBlock createEqualsStatement(FieldSpec field) {
@@ -169,7 +165,8 @@ public final class MethodSpecs {
     }
 
     private static <T> Collector<T, ArrayList<T>, ArrayList<T>> joining(T delim) {
-        return Collector.of(ArrayList::new,
+        return Collector.of(
+                ArrayList::new,
                 (list, element) -> {
                     if (!list.isEmpty()) {
                         list.add(delim);
@@ -186,5 +183,4 @@ public final class MethodSpecs {
     }
 
     private MethodSpecs() {}
-
 }

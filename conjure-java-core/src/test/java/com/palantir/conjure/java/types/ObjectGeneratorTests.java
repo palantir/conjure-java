@@ -25,36 +25,32 @@ public final class ObjectGeneratorTests {
 
     private static final String REFERENCE_FILES_FOLDER = "src/integrationInput/java";
 
-    @TempDir
-    public File tempDir;
+    @TempDir public File tempDir;
 
     @Test
     public void testObjectGenerator_allExamples() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/example-types.yml")));
-        List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes))
-                .emit(def, tempDir);
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
+        List<Path> files =
+                new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes)).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
 
     @Test
     public void testObjectGenerator_byteBufferCompatibility() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
-        List<Path> files = new ObjectGenerator(Collections.emptySet())
-                .emit(def, tempDir);
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
+        List<Path> files = new ObjectGenerator(Collections.emptySet()).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
 
     @Test
     public void testConjureImports() throws IOException {
-        ConjureDefinition conjure = Conjure.parse(
-                ImmutableList.of(
-                        new File("src/test/resources/example-conjure-imports.yml"),
-                        new File("src/test/resources/example-types.yml"),
-                        new File("src/test/resources/example-service.yml")));
+        ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
+                new File("src/test/resources/example-conjure-imports.yml"),
+                new File("src/test/resources/example-types.yml"),
+                new File("src/test/resources/example-service.yml")));
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
         ObjectGenerator generator = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes));
         generator.emit(conjure, src);
@@ -64,17 +60,15 @@ public final class ObjectGeneratorTests {
                 .contains("import com.palantir.product.StringExample;");
 
         // Imported files are not generated.
-        assertThat(new File(src, "com/palantir/foundry/catalog/api/datasets/BackingFileSystem.java"))
-                .doesNotExist();
+        assertThat(new File(src, "com/palantir/foundry/catalog/api/datasets/BackingFileSystem.java")).doesNotExist();
         assertThat(new File(src, "test/api/StringExample.java")).doesNotExist();
     }
 
     @Test
     public void testConjureErrors() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/example-errors.yml")));
-        List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes))
-                .emit(def, tempDir);
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-errors.yml")));
+        List<Path> files =
+                new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes)).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }

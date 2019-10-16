@@ -39,8 +39,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 @Execution(ExecutionMode.CONCURRENT)
 public final class UndertowServiceGeneratorTests extends TestBase {
-    @TempDir
-    public File tempDir;
+    @TempDir public File tempDir;
 
     private static String compiledFileContent(File srcDir, String clazz) throws IOException {
         return new String(Files.readAllBytes(Paths.get(srcDir.getPath(), clazz)), StandardCharsets.UTF_8);
@@ -58,11 +57,10 @@ public final class UndertowServiceGeneratorTests extends TestBase {
 
     @Test
     public void testConjureImports() throws IOException {
-        ConjureDefinition conjure = Conjure.parse(
-                ImmutableList.of(
-                        new File("src/test/resources/example-conjure-imports.yml"),
-                        new File("src/test/resources/example-types.yml"),
-                        new File("src/test/resources/example-service.yml")));
+        ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
+                new File("src/test/resources/example-conjure-imports.yml"),
+                new File("src/test/resources/example-types.yml"),
+                new File("src/test/resources/example-service.yml")));
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
         ServiceGenerator generator = new UndertowServiceGenerator(Collections.emptySet());
         generator.emit(conjure, src);
@@ -74,28 +72,26 @@ public final class UndertowServiceGeneratorTests extends TestBase {
 
     @Test
     public void testBinaryReturnInputStream() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/example-binary.yml")));
-        List<Path> files = new UndertowServiceGenerator(Collections.emptySet())
-                .emit(def, tempDir);
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary.yml")));
+        List<Path> files = new UndertowServiceGenerator(Collections.emptySet()).emit(def, tempDir);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.binary");
     }
 
     @Test
     public void testEndpointWithNameCollisions() throws IOException {
-        ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/dangerous-name-service.yml")));
+        ConjureDefinition conjure =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/dangerous-name-service.yml")));
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
-        ServiceGenerator generator = new UndertowServiceGenerator(
-                Collections.singleton(FeatureFlags.UndertowServicePrefix));
+        ServiceGenerator generator =
+                new UndertowServiceGenerator(Collections.singleton(FeatureFlags.UndertowServicePrefix));
         List<Path> files = generator.emit(conjure, src);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
     @Test
     public void testIndividualMethodAsync() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
         List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.ExperimentalUndertowAsyncMarkers))
                 .emit(def, tempDir);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.async");
@@ -103,19 +99,16 @@ public final class UndertowServiceGeneratorTests extends TestBase {
 
     @Test
     public void testIndividualMethodAsyncWithoutFlag() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
         // Without FeatureFlags.ExperimentalUndertowAsyncMarkers this should generate blocking methods
-        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of())
-                .emit(def, tempDir);
-        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow");
-    }
-
-    private void testServiceGeneration(String conjureFile) throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
         List<Path> files = new UndertowServiceGenerator(ImmutableSet.of()).emit(def, tempDir);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow");
     }
 
+    private void testServiceGeneration(String conjureFile) throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
+        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of()).emit(def, tempDir);
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow");
+    }
 }

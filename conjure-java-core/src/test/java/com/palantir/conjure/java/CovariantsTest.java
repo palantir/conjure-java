@@ -35,9 +35,7 @@ public class CovariantsTest {
         String value = "foo";
         Optional<String> maybeValue = Optional.of(value);
 
-        CovariantOptionalExample covExample = CovariantOptionalExample.builder()
-                .item(maybeValue)
-                .build();
+        CovariantOptionalExample covExample = CovariantOptionalExample.builder().item(maybeValue).build();
         // without covariants item would be Optional<Optional<String>>
         assertThat(covExample.getItem()).isEqualTo(maybeValue);
     }
@@ -50,10 +48,8 @@ public class CovariantsTest {
         Integer otherValue = 1;
         List<Integer> otherValues = ImmutableList.of(otherValue);
 
-        CovariantListExample covExample = CovariantListExample.builder()
-                .addAllItems(values)
-                .addAllItems(otherValues)
-                .build();
+        CovariantListExample covExample =
+                CovariantListExample.builder().addAllItems(values).addAllItems(otherValues).build();
         // without covariants item would be Optional<Optional<String>>
         assertThat(covExample.getItems()).isEqualTo(ImmutableList.of(value, otherValue));
     }

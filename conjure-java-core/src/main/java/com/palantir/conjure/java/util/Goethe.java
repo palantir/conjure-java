@@ -66,10 +66,16 @@ public final class Goethe {
         try {
             List<String> lines = Splitter.on('\n').splitToList(unformattedSource);
             StringBuilder failureText = new StringBuilder();
-            failureText.append("Failed to format '")
-                    .append(file.packageName).append('.').append(file.typeSpec.name).append("'\n");
+            failureText
+                    .append("Failed to format '")
+                    .append(file.packageName)
+                    .append('.')
+                    .append(file.typeSpec.name)
+                    .append("'\n");
             for (FormatterDiagnostic formatterDiagnostic : formatterDiagnostics) {
-                failureText.append(formatterDiagnostic.message()).append("\n")
+                failureText
+                        .append(formatterDiagnostic.message())
+                        .append("\n")
                         // Diagnostic values are one-indexed, while our list is zero-indexed.
                         .append(lines.get(formatterDiagnostic.line() - 1))
                         .append('\n')
@@ -89,8 +95,10 @@ public final class Goethe {
      * Implementation taken from JavaPoet's {@link JavaFile#writeTo(File)}.
      */
     private static Path getFilePath(JavaFile file, Path baseDir) throws IOException {
-        Preconditions.checkArgument(Files.notExists(baseDir) || Files.isDirectory(baseDir),
-                "path %s exists but is not a directory.", baseDir);
+        Preconditions.checkArgument(
+                Files.notExists(baseDir) || Files.isDirectory(baseDir),
+                "path %s exists but is not a directory.",
+                baseDir);
         Path outputDirectory = baseDir;
         if (!file.packageName.isEmpty()) {
             for (String packageComponent : Splitter.on(".").split(file.packageName)) {

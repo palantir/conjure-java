@@ -86,29 +86,23 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 : BINARY_RETURN_TYPE_OUTPUT;
 
         TypeName optionalBinaryReturnType = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse)
-                ? BINARY_RETURN_TYPE_RESPONSE : OPTIONAL_BINARY_RETURN_TYPE;
+                ? BINARY_RETURN_TYPE_RESPONSE
+                : OPTIONAL_BINARY_RETURN_TYPE;
 
-        TypeMapper returnTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(),
-                new ReturnTypeClassNameVisitor(
-                        conjureDefinition.getTypes(),
-                        binaryReturnType,
-                        optionalBinaryReturnType,
-                        featureFlags));
+        TypeMapper returnTypeMapper = new TypeMapper(conjureDefinition.getTypes(), new ReturnTypeClassNameVisitor(
+                conjureDefinition.getTypes(), binaryReturnType, optionalBinaryReturnType, featureFlags));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(),
-                new SpecializeBinaryClassNameVisitor(
-                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags),
-                        BINARY_ARGUMENT_TYPE));
+                conjureDefinition.getTypes(), new SpecializeBinaryClassNameVisitor(
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags), BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toSet());
     }
 
-    private JavaFile generateService(ServiceDefinition serviceDefinition,
-            TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+    private JavaFile generateService(
+            ServiceDefinition serviceDefinition, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Consumes"))
@@ -129,8 +123,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 .collect(Collectors.toList()));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper,
-                        argumentTypeMapper))
+                .map(endpoint -> generateCompatibilityBackfillServiceMethods(
+                        endpoint, returnTypeMapper, argumentTypeMapper))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList()));
 
@@ -141,12 +135,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     }
 
     private MethodSpec generateServiceMethod(
-            EndpointDefinition endpointDef,
-            TypeMapper returnTypeMapper,
-            TypeMapper argumentTypeMapper) {
-        TypeName returnType = endpointDef.getReturns()
-                .map(returnTypeMapper::getClassName)
-                .orElse(ClassName.VOID);
+            EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+        TypeName returnType = endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -159,11 +149,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         String httpPath = rawHttpPath.startsWith("/") ? rawHttpPath.substring(1) : rawHttpPath;
         if (!httpPath.isEmpty()) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
-                        .addMember("value", "$S", httpPath)
-                        .build());
+                    .addMember("value", "$S", httpPath)
+                    .build());
         }
 
-        if (returnType.equals(BINARY_RETURN_TYPE_OUTPUT) || returnType.equals(BINARY_RETURN_TYPE_RESPONSE)
+        if (returnType.equals(BINARY_RETURN_TYPE_OUTPUT)
+                || returnType.equals(BINARY_RETURN_TYPE_RESPONSE)
                 || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Produces"))
                     .addMember("value", "$T.APPLICATION_OCTET_STREAM", ClassName.get("javax.ws.rs.core", "MediaType"))
@@ -181,20 +172,17 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                     .build());
         }
 
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
-                ClassName.get("java.lang", "Deprecated")));
+        endpointDef.getDeprecated().ifPresent(
+                deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(
-                content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         return methodBuilder.build();
     }
 
     /** Provides a linear expansion of optional query arguments to improve Java back-compat. */
     private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
-            EndpointDefinition endpointDef,
-            TypeMapper returnTypeMapper,
-            TypeMapper argumentTypeMapper) {
+            EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         List<ArgumentDefinition> queryArgs = Lists.newArrayList();
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {
@@ -207,10 +195,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         List<MethodSpec> alternateMethods = Lists.newArrayList();
         for (int i = 0; i < queryArgs.size(); i++) {
             alternateMethods.add(createCompatibilityBackfillMethod(
-                    endpointDef,
-                    returnTypeMapper,
-                    argumentTypeMapper,
-                    queryArgs.subList(i, queryArgs.size())));
+                    endpointDef, returnTypeMapper, argumentTypeMapper, queryArgs.subList(i, queryArgs.size())));
         }
 
         return alternateMethods;
@@ -223,10 +208,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             List<ArgumentDefinition> extraArgs) {
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
         List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, argumentTypeMapper, false);
-        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
-                extraArgs.stream()
-                        .filter(arg -> arg.getArgName().get().equals(param.name))
-                        .findFirst())
+        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream()
+                .map(param -> extraArgs.stream().filter(arg -> arg.getArgName().get().equals(param.name)).findFirst())
                 .collect(Collectors.toList());
 
         // omit extraArgs from the back fill method signature
@@ -242,24 +225,24 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
-        List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
-            Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
-            if (maybeArgDef.isPresent()) {
-                sb.append("$L, ");
-                return maybeArgDef.get().getType().accept(DefaultTypeValueVisitor.INSTANCE);
-            } else {
-                sb.append("$N, ");
-                return sortedParams.get(i);
-            }
-        }).collect(Collectors.toList());
+        List<Object> values = IntStream.range(0, sortedParams.size())
+                .mapToObj(i -> {
+                    Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
+                    if (maybeArgDef.isPresent()) {
+                        sb.append("$L, ");
+                        return maybeArgDef.get().getType().accept(DefaultTypeValueVisitor.INSTANCE);
+                    } else {
+                        sb.append("$N, ");
+                        return sortedParams.get(i);
+                    }
+                })
+                .collect(Collectors.toList());
         // trim the end
         sb.setLength(sb.length() - 2);
         sb.append(")");
 
-        ImmutableList<Object> methodCallArgs = ImmutableList.builder()
-                .add(endpointDef.getEndpointName().get())
-                .addAll(values)
-                .build();
+        ImmutableList<Object> methodCallArgs =
+                ImmutableList.builder().add(endpointDef.getEndpointName().get()).addAll(values).build();
 
         methodBuilder.addStatement(sb.toString(), methodCallArgs.toArray(new Object[0]));
 
@@ -267,23 +250,21 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     }
 
     private List<ParameterSpec> createServiceMethodParameters(
-            EndpointDefinition endpointDef,
-            TypeMapper typeMapper,
-            boolean withAnnotations) {
+            EndpointDefinition endpointDef, TypeMapper typeMapper, boolean withAnnotations) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
         Optional<AuthType> auth = endpointDef.getAuth();
         createAuthParameter(auth, withAnnotations).ifPresent(parameterSpecs::add);
 
-        ParameterOrder.sorted(endpointDef.getArgs()).forEach(def ->
-                parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations)));
+        ParameterOrder.sorted(endpointDef.getArgs())
+                .forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations)));
         return ImmutableList.copyOf(parameterSpecs);
     }
 
-    private ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
-            boolean withAnnotations) {
-        ParameterSpec.Builder param = ParameterSpec.builder(
-                typeMapper.getClassName(def.getType()), def.getArgName().get());
+    private ParameterSpec createServiceMethodParameterArg(
+            TypeMapper typeMapper, ArgumentDefinition def, boolean withAnnotations) {
+        ParameterSpec.Builder param =
+                ParameterSpec.builder(typeMapper.getClassName(def.getType()), def.getArgName().get());
         if (withAnnotations) {
             getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
             param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
@@ -317,8 +298,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         ParameterSpec.Builder paramSpec = ParameterSpec.builder(tokenClassName, paramName);
         if (withAnnotations) {
-            paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
-                    .addMember("value", "$S", tokenName).build());
+            paramSpec.addAnnotation(
+                    AnnotationSpec.builder(annotationClassName).addMember("value", "$S", tokenName).build());
             if (featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }
@@ -330,23 +311,25 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         AnnotationSpec.Builder annotationSpecBuilder;
         ParameterType paramType = def.getParamType();
         if (paramType.accept(ParameterTypeVisitor.IS_PATH)) {
-            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "PathParam"))
-                    .addMember("value", "$S", def.getArgName().get());
+            annotationSpecBuilder =
+                    AnnotationSpec.builder(ClassName.get("javax.ws.rs", "PathParam"))
+                            .addMember("value", "$S", def.getArgName().get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_QUERY)) {
             ParameterId paramId = paramType.accept(ParameterTypeVisitor.QUERY).getParamId();
-            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "QueryParam"))
-                    .addMember("value", "$S", paramId.get());
+            annotationSpecBuilder =
+                    AnnotationSpec.builder(ClassName.get("javax.ws.rs", "QueryParam"))
+                            .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_HEADER)) {
             ParameterId paramId = paramType.accept(ParameterTypeVisitor.HEADER).getParamId();
-            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "HeaderParam"))
-                    .addMember("value", "$S", paramId.get());
+            annotationSpecBuilder =
+                    AnnotationSpec.builder(ClassName.get("javax.ws.rs", "HeaderParam"))
+                            .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
             if (def.getType().accept(TypeVisitor.IS_OPTIONAL)
                     || !featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 return Optional.empty();
             }
-            annotationSpecBuilder = AnnotationSpec
-                    .builder(NOT_NULL);
+            annotationSpecBuilder = AnnotationSpec.builder(NOT_NULL);
         } else {
             throw new IllegalStateException("Unrecognized argument type: " + def.getParamType());
         }
@@ -355,7 +338,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     }
 
     private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
-        Preconditions.checkArgument(markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
+        Preconditions.checkArgument(
+                markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
                 "Markers must refer to reference types.");
         return markers.stream()
                 .map(typeMapper::getClassName)

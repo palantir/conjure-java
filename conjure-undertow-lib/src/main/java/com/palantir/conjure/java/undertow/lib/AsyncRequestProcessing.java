@@ -21,15 +21,12 @@ import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 
 /**
- * Provides functionality to process requests asynchronously. This decouples the lifecycle of a request
- * from the execution of the handler method.
+ * Provides functionality to process requests asynchronously. This decouples the lifecycle of a request from the
+ * execution of the handler method.
  */
 public interface AsyncRequestProcessing {
 
     /** Registers a {@link ListenableFuture future} with the provided {@link HttpServerExchange request}. */
-    <T> void register(
-            ListenableFuture<T> future,
-            ReturnValueWriter<T> returnValueWriter,
-            HttpServerExchange exchange) throws IOException;
-
+    <T> void register(ListenableFuture<T> future, ReturnValueWriter<T> returnValueWriter, HttpServerExchange exchange)
+            throws IOException;
 }

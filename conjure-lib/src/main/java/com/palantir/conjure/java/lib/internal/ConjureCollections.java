@@ -19,8 +19,8 @@ package com.palantir.conjure.java.lib.internal;
 import java.util.Collection;
 
 /**
- * Utility functions for conjure. Consumers should prefer to use something like
- * guava instead of using these functions directly.
+ * Utility functions for conjure. Consumers should prefer to use something like guava instead of using these functions
+ * directly.
  */
 public final class ConjureCollections {
 

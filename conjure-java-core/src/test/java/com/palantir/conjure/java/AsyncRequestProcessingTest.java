@@ -66,13 +66,11 @@ import org.junit.jupiter.api.io.TempDir;
 
 public final class AsyncRequestProcessingTest extends TestBase {
 
-    @TempDir
-    public static File folder;
+    @TempDir public static File folder;
 
     private static final ObjectMapper CLIENT_MAPPER = ObjectMappers.newClientObjectMapper();
-    private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
-            .trustStorePath(Paths.get("var/security/truststore.jks"))
-            .build();
+    private static final SslConfiguration TRUST_STORE_CONFIGURATION =
+            new SslConfiguration.Builder().trustStorePath(Paths.get("var/security/truststore.jks")).build();
 
     private static final int PORT = 12347;
 
@@ -82,11 +80,11 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     @BeforeAll
     public static void beforeClass() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/async-request-processing-test.yml")));
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/async-request-processing-test.yml")));
         List<Path> files = ImmutableList.<Path>builder()
-                .addAll(new UndertowServiceGenerator(
-                        ImmutableSet.of(FeatureFlags.UndertowListenableFutures, FeatureFlags.UndertowServicePrefix))
+                .addAll(new UndertowServiceGenerator(ImmutableSet.of(
+                                FeatureFlags.UndertowListenableFutures, FeatureFlags.UndertowServicePrefix))
                         .emit(def, folder))
                 .addAll(new JerseyServiceGenerator(ImmutableSet.of()).emit(def, folder))
                 .build();
@@ -101,25 +99,29 @@ public final class AsyncRequestProcessingTest extends TestBase {
                 .asyncTimeout(Duration.ofSeconds(1))
                 .build();
 
-        server = Undertow.builder()
-                .setServerOption(UndertowOptions.DECODE_URL, false)
-                .addHttpListener(PORT, "0.0.0.0")
-                .setHandler(ConjureHandler.builder()
-                        .addAllEndpoints(ImmutableList.of(AsyncRequestProcessingTestServiceEndpoints.of(
-                                new AsyncRequestProcessingTestResource(executor)))
-                                .stream()
-                                .flatMap(service -> service.endpoints(context).stream())
-                                .collect(ImmutableList.toImmutableList()))
-                        .build())
-                .build();
+        server =
+                Undertow.builder()
+                        .setServerOption(UndertowOptions.DECODE_URL, false)
+                        .addHttpListener(PORT, "0.0.0.0")
+                        .setHandler(ConjureHandler.builder()
+                                .addAllEndpoints(
+                                        ImmutableList.of(AsyncRequestProcessingTestServiceEndpoints.of(
+                                                        new AsyncRequestProcessingTestResource(executor)))
+                                                .stream()
+                                                .flatMap(service -> service.endpoints(context).stream())
+                                                .collect(ImmutableList.toImmutableList()))
+                                .build())
+                        .build();
         server.start();
-        client = JaxRsClient.create(AsyncRequestProcessingTestService.class,
-                UserAgent.of(UserAgent.Agent.of("test", "develop")),
-                new HostMetricsRegistry(),
-                ClientConfigurations.of(
-                        ImmutableList.of("http://localhost:" + PORT + "/"),
-                        SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
-                        SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION)));
+        client =
+                JaxRsClient.create(
+                        AsyncRequestProcessingTestService.class,
+                        UserAgent.of(UserAgent.Agent.of("test", "develop")),
+                        new HostMetricsRegistry(),
+                        ClientConfigurations.of(
+                                ImmutableList.of("http://localhost:" + PORT + "/"),
+                                SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
+                                SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION)));
     }
 
     @AfterEach
@@ -164,10 +166,9 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     @Test
     public void testExceptionThrownInHandlerMethod() throws IOException {
-        try (Response response = client().newCall(new Request.Builder()
-                .get()
-                .url("http://localhost:" + PORT + "/async/throws")
-                .build()).execute()) {
+        try (Response response = client().newCall(
+                        new Request.Builder().get().url("http://localhost:" + PORT + "/async/throws").build())
+                .execute()) {
             assertThat(response).matches(resp -> resp.code() == ErrorType.CONFLICT.httpErrorCode());
             SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
             assertThat(error.errorCode()).isEqualTo("CONFLICT");
@@ -176,10 +177,9 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     @Test
     public void testFailedFuture() throws IOException {
-        try (Response response = client().newCall(new Request.Builder()
-                .get()
-                .url("http://localhost:" + PORT + "/async/failed-future")
-                .build()).execute()) {
+        try (Response response = client().newCall(
+                        new Request.Builder().get().url("http://localhost:" + PORT + "/async/failed-future").build())
+                .execute()) {
             assertThat(response).matches(resp -> resp.code() == ErrorType.CONFLICT.httpErrorCode());
             SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
             assertThat(error.errorCode()).isEqualTo("CONFLICT");
@@ -189,9 +189,10 @@ public final class AsyncRequestProcessingTest extends TestBase {
     @Test
     public void testFailedFutureAsyncDelay() throws IOException {
         try (Response response = client().newCall(new Request.Builder()
-                .get()
-                .url("http://localhost:" + PORT + "/async/failed-future?delayMillis=100")
-                .build()).execute()) {
+                        .get()
+                        .url("http://localhost:" + PORT + "/async/failed-future?delayMillis=100")
+                        .build())
+                .execute()) {
             assertThat(response).matches(resp -> resp.code() == ErrorType.CONFLICT.httpErrorCode());
             SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
             assertThat(error.errorCode()).isEqualTo("CONFLICT");
@@ -200,10 +201,9 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     @Test
     public void testAsyncOptionalBinaryNotPresent() throws IOException {
-        try (Response response = client().newCall(new Request.Builder()
-                .get()
-                .url("http://localhost:" + PORT + "/async/binary")
-                .build()).execute()) {
+        try (Response response = client().newCall(
+                        new Request.Builder().get().url("http://localhost:" + PORT + "/async/binary").build())
+                .execute()) {
             assertThat(response).matches(resp -> resp.code() == 204);
             assertThat(response.header(HttpHeaders.CONTENT_TYPE)).isNull();
         }
@@ -212,9 +212,10 @@ public final class AsyncRequestProcessingTest extends TestBase {
     @Test
     public void testAsyncOptionalBinaryPresent() throws IOException {
         try (Response response = client().newCall(new Request.Builder()
-                .get()
-                .url("http://localhost:" + PORT + "/async/binary?stringValue=Hello")
-                .build()).execute()) {
+                        .get()
+                        .url("http://localhost:" + PORT + "/async/binary?stringValue=Hello")
+                        .build())
+                .execute()) {
             assertThat(response).matches(resp -> resp.code() == 200);
             assertThat(response.header(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
             assertThat(new String(response.body().bytes(), StandardCharsets.UTF_8)).isEqualTo("Hello");
@@ -244,8 +245,11 @@ public final class AsyncRequestProcessingTest extends TestBase {
     private static Response requestToDelayEndpoint(OptionalInt delay) {
         Request request = new Request.Builder()
                 .get()
-                .url("http://localhost:" + PORT + "/async/delay"
-                        + (delay.isPresent() ? "?delayMillis=" + delay.getAsInt() : ""))
+                .url(
+                        "http://localhost:"
+                                + PORT
+                                + "/async/delay"
+                                + (delay.isPresent() ? "?delayMillis=" + delay.getAsInt() : ""))
                 .build();
         try {
             return client().newCall(request).execute();
@@ -255,9 +259,6 @@ public final class AsyncRequestProcessingTest extends TestBase {
     }
 
     private static OkHttpClient client() {
-        return new OkHttpClient.Builder()
-                .retryOnConnectionFailure(false)
-                .cache(null)
-                .build();
+        return new OkHttpClient.Builder().retryOnConnectionFailure(false).cache(null).build();
     }
 }

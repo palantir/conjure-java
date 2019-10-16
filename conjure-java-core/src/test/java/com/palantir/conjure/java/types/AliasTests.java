@@ -29,9 +29,8 @@ public class AliasTests {
 
     @Test
     public void testNullValueSafeLoggable() {
-        assertThatThrownBy(() -> UuidAliasExample.of(null))
-                .isInstanceOf(SafeNullPointerException.class)
-                .hasMessage("value cannot be null");
+        assertThatThrownBy(() -> UuidAliasExample.of(null)).isInstanceOf(SafeNullPointerException.class).hasMessage(
+                "value cannot be null");
     }
 
     @Test

@@ -67,13 +67,13 @@ public final class Encodings {
                     // JsonMappingException includes both MismatchedInputException and InvalidDefinitionException
                     // which is important for us to detect when both parsing fails (in jackson code) and when object
                     // validation (setter null checks) fail in our objects.
-                    throw FrameworkException.unprocessableEntity("Failed to deserialize request", e,
-                            SafeArg.of("contentType", getContentType()),
-                            SafeArg.of("type", type));
+                    throw FrameworkException.unprocessableEntity(
+                            "Failed to deserialize request", e, SafeArg.of("contentType", getContentType()), SafeArg.of(
+                                    "type", type));
                 } catch (IOException e) {
-                    throw new SafeIoException("Failed to deserialize request", e,
-                            SafeArg.of("contentType", getContentType()),
-                            SafeArg.of("type", type));
+                    throw new SafeIoException(
+                            "Failed to deserialize request", e, SafeArg.of("contentType", getContentType()), SafeArg.of(
+                                    "type", type));
                 }
             };
         }
@@ -130,8 +130,8 @@ public final class Encodings {
     }
 
     /**
-     * Work around a CBORGenerator bug.
-     * For more information: https://github.com/FasterXML/jackson-dataformats-binary/issues/155
+     * Work around a CBORGenerator bug. For more information:
+     * https://github.com/FasterXML/jackson-dataformats-binary/issues/155
      */
     private static final class ShieldingOutputStream extends FilterOutputStream {
         ShieldingOutputStream(OutputStream out) {

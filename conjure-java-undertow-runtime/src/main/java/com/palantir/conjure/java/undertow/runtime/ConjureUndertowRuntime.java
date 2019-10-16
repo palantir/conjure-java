@@ -29,9 +29,7 @@ import com.palantir.logsafe.Preconditions;
 import java.time.Duration;
 import java.util.List;
 
-/**
- * {@link ConjureUndertowRuntime} provides functionality required by generated handlers.
- */
+/** {@link ConjureUndertowRuntime} provides functionality required by generated handlers. */
 public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     private final BodySerDe bodySerDe;
@@ -40,8 +38,11 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final AsyncRequestProcessing async;
 
     private ConjureUndertowRuntime(Builder builder) {
-        this.bodySerDe = new ConjureBodySerDe(builder.encodings.isEmpty()
-                ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
+        this.bodySerDe =
+                new ConjureBodySerDe(
+                        builder.encodings.isEmpty()
+                                ? ImmutableList.of(Encodings.json(), Encodings.cbor())
+                                : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout);
@@ -60,7 +61,6 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     public PlainSerDe plainSerDe() {
         return ConjurePlainSerDe.INSTANCE;
     }
-
 
     @Override
     public MarkerCallback markers() {

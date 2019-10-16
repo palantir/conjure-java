@@ -42,9 +42,9 @@ final class ConjureBodySerDe implements BodySerDe {
     private final List<Encoding> encodings;
 
     /**
-     * Selects the first (based on input order) of the provided encodings that
-     * {@link Encoding#supportsContentType supports} the serialization format {@link Headers#ACCEPT accepted}
-     * by a given request, or the first serializer if no such serializer can be found.
+     * Selects the first (based on input order) of the provided encodings that {@link Encoding#supportsContentType
+     * supports} the serialization format {@link Headers#ACCEPT accepted} by a given request, or the first serializer if
+     * no such serializer can be found.
      */
     ConjureBodySerDe(List<Encoding> encodings) {
         // Defensive copy
@@ -81,8 +81,8 @@ final class ConjureBodySerDe implements BodySerDe {
             throw new SafeIllegalArgumentException("Request is missing Content-Type header");
         }
         if (!contentType.startsWith(BINARY_CONTENT_TYPE)) {
-            throw FrameworkException.unsupportedMediaType("Unsupported Content-Type",
-                    SafeArg.of("Content-Type", contentType));
+            throw FrameworkException.unsupportedMediaType(
+                    "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
         }
         return exchange.getInputStream();
     }
@@ -93,9 +93,9 @@ final class ConjureBodySerDe implements BodySerDe {
         private final List<EncodingSerializerContainer<T>> encodings;
 
         EncodingSerializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
-            this.encodings = encodings.stream()
-                    .map(encoding -> new EncodingSerializerContainer<>(encoding, token))
-                    .collect(ImmutableList.toImmutableList());
+            this.encodings =
+                    encodings.stream().map(encoding -> new EncodingSerializerContainer<>(encoding, token)).collect(
+                            ImmutableList.toImmutableList());
             this.defaultEncoding = this.encodings.get(0);
         }
 
@@ -146,9 +146,9 @@ final class ConjureBodySerDe implements BodySerDe {
         private final TypeMarker<T> marker;
 
         EncodingDeserializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
-            this.encodings = encodings.stream()
-                    .map(encoding -> new EncodingDeserializerContainer<>(encoding, token))
-                    .collect(ImmutableList.toImmutableList());
+            this.encodings =
+                    encodings.stream().map(encoding -> new EncodingDeserializerContainer<>(encoding, token)).collect(
+                            ImmutableList.toImmutableList());
             this.optionalType = TypeMarkers.isOptional(token);
             this.marker = token;
         }
@@ -203,8 +203,8 @@ final class ConjureBodySerDe implements BodySerDe {
                     return container;
                 }
             }
-            throw FrameworkException.unsupportedMediaType("Unsupported Content-Type",
-                    SafeArg.of("Content-Type", contentType));
+            throw FrameworkException.unsupportedMediaType(
+                    "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
         }
     }
 

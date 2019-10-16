@@ -50,12 +50,13 @@ public final class ConjureExceptionHandlerTest {
 
     @BeforeEach
     public void before() {
-        server = Undertow.builder()
-                .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
-                    throw exception;
-                })))
-                .build();
+        server =
+                Undertow.builder()
+                        .addHttpListener(12345, "localhost")
+                        .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
+                            throw exception;
+                        })))
+                        .build();
         server.start();
     }
 
@@ -68,16 +69,15 @@ public final class ConjureExceptionHandlerTest {
     public void handlesServiceException() throws IOException {
         exception = new ServiceException(ErrorType.CONFLICT, SafeArg.of("foo", "bar"));
         Response response = execute();
-        assertThat(response.body().string())
-                .contains("{\"errorCode\":\"CONFLICT\"")
-                .contains("\"parameters\":{\"foo\":\"bar\"}}");
+        assertThat(response.body().string()).contains("{\"errorCode\":\"CONFLICT\"").contains(
+                "\"parameters\":{\"foo\":\"bar\"}}");
         assertThat(response.code()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
     }
 
     @Test
     public void handlesRemoteException() throws IOException {
-        SerializableError remoteError = SerializableError.forException(
-                new ServiceException(ErrorType.CONFLICT, SafeArg.of("foo", "bar")));
+        SerializableError remoteError =
+                SerializableError.forException(new ServiceException(ErrorType.CONFLICT, SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.CONFLICT.httpErrorCode());
         Response response = execute();
 
@@ -134,8 +134,7 @@ public final class ConjureExceptionHandlerTest {
         Response response = execute();
 
         assertThat(response.code()).isEqualTo(429);
-        assertThat(response.headers().toMultimap())
-                .containsEntry("Retry-After", ImmutableList.of("120"));
+        assertThat(response.headers().toMultimap()).containsEntry("Retry-After", ImmutableList.of("120"));
         assertThat(response.body().string()).isEmpty();
     }
 
@@ -145,8 +144,7 @@ public final class ConjureExceptionHandlerTest {
         Response response = execute();
 
         assertThat(response.code()).isEqualTo(308);
-        assertThat(response.headers().toMultimap())
-                .containsEntry("Location", ImmutableList.of("http://foo"));
+        assertThat(response.headers().toMultimap()).containsEntry("Location", ImmutableList.of("http://foo"));
         assertThat(response.body().string()).isEmpty();
     }
 
@@ -163,8 +161,7 @@ public final class ConjureExceptionHandlerTest {
     public void handlesIllegalArgumentException() throws IOException {
         exception = new IllegalArgumentException("Foo");
         Response response = execute();
-        assertThat(response.body().string())
-                .contains("{\"errorCode\":\"INVALID_ARGUMENT\"");
+        assertThat(response.body().string()).contains("{\"errorCode\":\"INVALID_ARGUMENT\"");
         assertThat(response.code()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
     }
 
@@ -172,20 +169,20 @@ public final class ConjureExceptionHandlerTest {
     public void handlesRuntimeException() throws IOException {
         exception = new RuntimeException("Foo");
         Response response = execute();
-        assertThat(response.body().string())
-                .contains("{\"errorCode\":\"INTERNAL\"");
+        assertThat(response.body().string()).contains("{\"errorCode\":\"INTERNAL\"");
         assertThat(response.code()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
     }
 
     @Test
     public void doesNotHandleErrors() throws IOException {
         server.stop();
-        server = Undertow.builder()
-                .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
-                    throw new Error();
-                })))
-                .build();
+        server =
+                Undertow.builder()
+                        .addHttpListener(12345, "localhost")
+                        .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
+                            throw new Error();
+                        })))
+                        .build();
         server.start();
 
         Response response = execute();
@@ -194,10 +191,7 @@ public final class ConjureExceptionHandlerTest {
     }
 
     private static Response execute() {
-        Request request = new Request.Builder()
-                .get()
-                .url("http://localhost:12345")
-                .build();
+        Request request = new Request.Builder().get().url("http://localhost:12345").build();
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {

@@ -23,16 +23,19 @@ import java.util.List;
 final class MarkerCallbacks {
 
     /**
-     * Builds a {@link MarkerCallback} from the provided {@link ParamMarker parameter markers}.
-     * Pre-compute callbacks here rather than iteration each time a marked parameter is encountered.
+     * Builds a {@link MarkerCallback} from the provided {@link ParamMarker parameter markers}. Pre-compute callbacks
+     * here rather than iteration each time a marked parameter is encountered.
      */
     static MarkerCallback fold(List<ParamMarker> paramMarkers) {
-        return paramMarkers.stream().reduce(
-                (markerClass, parameterName, parameterValue, exchange) -> { },
-                (paramMarker1, paramMarker2) -> (markerClass, parameterName, parameterValue, exchange) -> {
-                    paramMarker1.mark(markerClass, parameterName, parameterValue, exchange);
-                    paramMarker2.mark(markerClass, parameterName, parameterValue, exchange);
-                })::mark;
+        ParamMarker initialState = (markerClass, parameterName, parameterValue, exchange) -> {};
+        return paramMarkers.stream().reduce(initialState, MarkerCallbacks::combine)::mark;
+    }
+
+    private static ParamMarker combine(ParamMarker paramMarker1, ParamMarker paramMarker2) {
+        return (markerClass, parameterName, parameterValue, exchange) -> {
+            paramMarker1.mark(markerClass, parameterName, parameterValue, exchange);
+            paramMarker2.mark(markerClass, parameterName, parameterValue, exchange);
+        };
     }
 
     private MarkerCallbacks() {}

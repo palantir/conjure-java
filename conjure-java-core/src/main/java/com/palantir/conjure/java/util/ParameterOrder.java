@@ -93,13 +93,11 @@ public final class ParameterOrder {
         }
     };
 
-    private static final Comparator<ArgumentDefinition> COMPARATOR = Comparator.comparing(o ->
-            o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER));
+    private static final Comparator<ArgumentDefinition> COMPARATOR =
+            Comparator.comparing(o -> o.getParamType().accept(PARAM_SORT_ORDER) + o.getType().accept(TYPE_SORT_ORDER));
 
     public static List<ArgumentDefinition> sorted(List<ArgumentDefinition> input) {
-        return input.stream()
-                .sorted(COMPARATOR)
-                .collect(ImmutableList.toImmutableList());
+        return input.stream().sorted(COMPARATOR).collect(ImmutableList.toImmutableList());
     }
 
     private ParameterOrder() {}

@@ -27,20 +27,20 @@ import org.junit.jupiter.api.io.TempDir;
 
 public class GoetheTest {
 
-    @TempDir
-    public Path folder;
+    @TempDir public Path folder;
 
     @Test
     public void testFormatAndEmit() {
         JavaFile javaFile = JavaFile.builder("com.palantir.foo", TypeSpec.classBuilder("Foo")
-                .addStaticBlock(CodeBlock.builder().addStatement("type oops name = bar").build())
-                .build()).build();
+                        .addStaticBlock(CodeBlock.builder().addStatement("type oops name = bar").build())
+                        .build())
+                .build();
         assertThatThrownBy(() -> Goethe.formatAndEmit(javaFile, folder))
                 .hasMessageContaining("Failed to format 'com.palantir.foo.Foo'")
                 .hasMessageContaining("';' expected")
-                .hasMessageContaining("" // newline to align the output
-                        + "    type oops name = bar;\n"
-                        + "            ^");
+                .hasMessageContaining(
+                        "" // newline to align the output
+                                + "    type oops name = bar;\n"
+                                + "            ^");
     }
-
 }

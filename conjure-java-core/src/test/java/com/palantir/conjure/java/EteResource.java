@@ -119,8 +119,8 @@ public class EteResource implements EteService {
     }
 
     @Override
-    public StringAliasExample optionalAliasOne(@NotNull AuthHeader _authHeader,
-            Optional<StringAliasExample> queryParamName) {
+    public StringAliasExample optionalAliasOne(
+            @NotNull AuthHeader _authHeader, Optional<StringAliasExample> queryParamName) {
         return queryParamName.orElseGet(() -> StringAliasExample.of("foo"));
     }
 
@@ -135,14 +135,14 @@ public class EteResource implements EteService {
     }
 
     @Override
-    public Optional<StringAliasExample> optionalBodyExternalImport(AuthHeader _authHeader,
-            Optional<StringAliasExample> body) {
+    public Optional<StringAliasExample> optionalBodyExternalImport(
+            AuthHeader _authHeader, Optional<StringAliasExample> body) {
         return body;
     }
 
     @Override
-    public Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader _authHeader,
-            Optional<StringAliasExample> query) {
+    public Optional<StringAliasExample> optionalQueryExternalImport(
+            AuthHeader _authHeader, Optional<StringAliasExample> query) {
         return query;
     }
 
@@ -172,8 +172,7 @@ public class EteResource implements EteService {
     }
 
     @Override
-    public Optional<LongAlias> aliasLongEndpoint(
-            AuthHeader _authHeader, Optional<LongAlias> input) {
+    public Optional<LongAlias> aliasLongEndpoint(AuthHeader _authHeader, Optional<LongAlias> input) {
         return input;
     }
 

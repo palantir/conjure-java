@@ -51,8 +51,8 @@ public interface ServiceGenerator {
     }
 
     static Optional<String> getJavaDoc(EndpointDefinition endpointDef) {
-        Optional<String> depr = endpointDef.getDeprecated()
-                .map(v -> StringUtils.appendIfMissing("@deprecated " + v, "\n"));
+        Optional<String> depr =
+                endpointDef.getDeprecated().map(v -> StringUtils.appendIfMissing("@deprecated " + v, "\n"));
 
         Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
 

@@ -23,9 +23,8 @@ import io.undertow.util.HttpString;
 import java.util.Optional;
 
 /**
- * An {@link Endpoint} represents a single rpc method. End points provide a location, tuple of
- * {@link Endpoint#method()} and {@link Endpoint#template()}, as well as an implementation, the
- * {@link Endpoint#handler()}.
+ * An {@link Endpoint} represents a single rpc method. End points provide a location, tuple of {@link Endpoint#method()}
+ * and {@link Endpoint#template()}, as well as an implementation, the {@link Endpoint#handler()}.
  */
 public interface Endpoint {
 
@@ -33,11 +32,17 @@ public interface Endpoint {
     HttpString method();
 
     /**
-     * Conjure formatted http path template.
-     * For example, this may take the form <pre>/ping</pre> or <pre>/object/{objectId}</pre>.
-     * For more information, see the
-     * <a href="https://palantir.github.io/conjure/#/docs/spec/conjure_definitions?id=pathstring">
-     * specification for conjure path strings</a>.
+     * Conjure formatted http path template. For example, this may take the form
+     *
+     * <pre>/ping</pre>
+     *
+     * or
+     *
+     * <pre>/object/{objectId}</pre>
+     *
+     * . For more information, see the <a
+     * href="https://palantir.github.io/conjure/#/docs/spec/conjure_definitions?id=pathstring">specification for conjure
+     * path strings</a>.
      */
     String template();
 

@@ -532,8 +532,7 @@ enum ConjurePlainSerDe implements PlainSerDe {
     }
 
     @Override
-    public <T> Optional<T> deserializeOptionalComplex(
-            @Nullable Iterable<String> in, Function<String, T> factory) {
+    public <T> Optional<T> deserializeOptionalComplex(@Nullable Iterable<String> in, Function<String, T> factory) {
         return deserializeOptionalString(in).map(factory);
     }
 
@@ -583,8 +582,8 @@ enum ConjurePlainSerDe implements PlainSerDe {
         }
         int size = Iterables.size(input);
         if (includeValues) {
-            throw new SafeIllegalArgumentException("Expected one element",
-                    SafeArg.of("size", size), UnsafeArg.of("received", input));
+            throw new SafeIllegalArgumentException(
+                    "Expected one element", SafeArg.of("size", size), UnsafeArg.of("received", input));
         } else {
             throw new SafeIllegalArgumentException("Expected one element", SafeArg.of("size", size));
         }

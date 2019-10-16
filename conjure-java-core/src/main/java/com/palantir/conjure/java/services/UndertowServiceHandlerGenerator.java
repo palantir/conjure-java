@@ -104,11 +104,15 @@ final class UndertowServiceHandlerGenerator {
         this.experimentalFeatures = experimentalFeatures;
     }
 
-    public JavaFile generateServiceHandler(ServiceDefinition serviceDefinition, List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+    public JavaFile generateServiceHandler(
+            ServiceDefinition serviceDefinition,
+            List<TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper) {
         String serviceName = serviceDefinition.getServiceName().getName();
         // class name
-        ClassName serviceClass = ClassName.get(serviceDefinition.getServiceName().getPackage(),
+        ClassName serviceClass = ClassName.get(
+                serviceDefinition.getServiceName().getPackage(),
                 (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
         TypeSpec.Builder factory = TypeSpec.classBuilder(serviceName + "Factory")
@@ -116,8 +120,7 @@ final class UndertowServiceHandlerGenerator {
 
         // addFields
         factory.addField(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
-        factory.addField(ClassName.get(UndertowRuntime.class), RUNTIME_VAR_NAME,
-                Modifier.PRIVATE, Modifier.FINAL);
+        factory.addField(ClassName.get(UndertowRuntime.class), RUNTIME_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL);
         // addConstructor
         factory.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
@@ -127,14 +130,17 @@ final class UndertowServiceHandlerGenerator {
                 .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME)
                 .build());
 
-        ClassName serviceType = ClassName.get(serviceDefinition.getServiceName().getPackage(),
+        ClassName serviceType = ClassName.get(
+                serviceDefinition.getServiceName().getPackage(),
                 serviceDefinition.getServiceName().getName() + "Endpoints");
 
         CodeBlock endpointBlock = CodeBlock.builder().build();
         for (EndpointDefinition e : serviceDefinition.getEndpoints()) {
-            CodeBlock nextBlock = CodeBlock.of("new $1T($2N, $3N)",
+            CodeBlock nextBlock = CodeBlock.of(
+                    "new $1T($2N, $3N)",
                     endpointToHandlerType(serviceDefinition.getServiceName(), e.getEndpointName()),
-                    RUNTIME_VAR_NAME, DELEGATE_VAR_NAME);
+                    RUNTIME_VAR_NAME,
+                    DELEGATE_VAR_NAME);
             endpointBlock = endpointBlock.isEmpty() ? nextBlock : CodeBlock.of("$1L, $2L", endpointBlock, nextBlock);
         }
 
@@ -159,12 +165,14 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
                         .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
-                        .addStatement("return $1T.unmodifiableList($2T.asList($3L))",
-                                Collections.class, Arrays.class, endpointBlock)
+                        .addStatement(
+                                "return $1T.unmodifiableList($2T.asList($3L))",
+                                Collections.class,
+                                Arrays.class,
+                                endpointBlock)
                         .build())
-                .addTypes(Lists.transform(serviceDefinition.getEndpoints(),
-                        e -> generateEndpointHandler(e, serviceDefinition, serviceClass, typeDefinitions, typeMapper,
-                                returnTypeMapper)))
+                .addTypes(Lists.transform(serviceDefinition.getEndpoints(), e -> generateEndpointHandler(
+                        e, serviceDefinition, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
                 .build();
 
         return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), endpoints)
@@ -174,8 +182,8 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private TypeName endpointToHandlerType(com.palantir.conjure.spec.TypeName serviceName, EndpointName name) {
-        return ClassName.get(serviceName.getPackage(), serviceName.getName() + "Endpoints",
-                endpointToHandlerClassName(name));
+        return ClassName.get(
+                serviceName.getPackage(), serviceName.getName() + "Endpoints", endpointToHandlerClassName(name));
     }
 
     private String endpointToHandlerClassName(EndpointName name) {
@@ -197,9 +205,7 @@ final class UndertowServiceHandlerGenerator {
                 .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
 
         endpointDefinition.getDeprecated().ifPresent(deprecatedDocsValue -> handleMethodBuilder.addAnnotation(
-                AnnotationSpec.builder(SuppressWarnings.class)
-                        .addMember("value", "$S", "deprecation")
-                        .build()));
+                AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "deprecation").build()));
 
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
                 .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
@@ -207,15 +213,14 @@ final class UndertowServiceHandlerGenerator {
                 .addStatement("this.$1N = $1N", RUNTIME_VAR_NAME)
                 .addStatement("this.$1N = $1N", DELEGATE_VAR_NAME);
 
-        TypeSpec.Builder endpointBuilder =
-                TypeSpec.classBuilder(endpointToHandlerClassName(endpointDefinition.getEndpointName()))
-                        .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                        .addSuperinterface(HttpHandler.class)
-                        .addSuperinterface(Endpoint.class)
-                        .addField(FieldSpec.builder(
-                                UndertowRuntime.class, RUNTIME_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
-                        .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE,
-                                Modifier.FINAL).build());
+        TypeSpec.Builder endpointBuilder = TypeSpec.classBuilder(
+                        endpointToHandlerClassName(endpointDefinition.getEndpointName()))
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .addSuperinterface(HttpHandler.class)
+                .addSuperinterface(Endpoint.class)
+                .addField(FieldSpec.builder(UndertowRuntime.class, RUNTIME_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                        .build())
+                .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
 
         getBodyParamTypeArgument(endpointDefinition.getArgs())
                 .map(ArgumentDefinition::getType)
@@ -225,10 +230,12 @@ final class UndertowServiceHandlerGenerator {
                 .map(TypeName::box)
                 .ifPresent(typeName -> {
                     TypeName type = ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
-                    endpointBuilder.addField(FieldSpec.builder(
-                            type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
-                    ctorBuilder.addStatement("this.$1N = $2N.bodySerDe().deserializer(new $3T() {})",
-                            DESERIALIZER_VAR_NAME, RUNTIME_VAR_NAME,
+                    endpointBuilder.addField(
+                            FieldSpec.builder(type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                    ctorBuilder.addStatement(
+                            "this.$1N = $2N.bodySerDe().deserializer(new $3T() {})",
+                            DESERIALIZER_VAR_NAME,
+                            RUNTIME_VAR_NAME,
                             ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
                 });
 
@@ -236,23 +243,24 @@ final class UndertowServiceHandlerGenerator {
             if (!UndertowTypeFunctions.isOptionalBinary(returnType) && !returnType.accept(TypeVisitor.IS_BINARY)) {
                 TypeName typeName = returnTypeMapper.getClassName(returnType).box();
                 TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
-                endpointBuilder.addField(FieldSpec.builder(type,
-                        SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
-                ctorBuilder.addStatement("this.$1N = $2N.bodySerDe().serializer(new $3T() {})", SERIALIZER_VAR_NAME,
-                        RUNTIME_VAR_NAME, ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
+                endpointBuilder.addField(
+                        FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                ctorBuilder.addStatement(
+                        "this.$1N = $2N.bodySerDe().serializer(new $3T() {})",
+                        SERIALIZER_VAR_NAME,
+                        RUNTIME_VAR_NAME,
+                        ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
             }
         });
 
-        endpointBuilder
-                .addMethod(ctorBuilder.build())
-                .addMethod(handleMethodBuilder.build());
+        endpointBuilder.addMethod(ctorBuilder.build()).addMethod(handleMethodBuilder.build());
 
         if (UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures)) {
             ParameterizedTypeName type = UndertowTypeFunctions.getAsyncReturnType(
                     endpointDefinition, returnTypeMapper, experimentalFeatures);
             TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
-            endpointBuilder.addSuperinterface(ParameterizedTypeName.get(
-                    ClassName.get(ReturnValueWriter.class), resultType));
+            endpointBuilder.addSuperinterface(
+                    ParameterizedTypeName.get(ClassName.get(ReturnValueWriter.class), resultType));
 
             endpointBuilder.addMethod(MethodSpec.methodBuilder("write")
                     .addModifiers(Modifier.PUBLIC)
@@ -264,7 +272,8 @@ final class UndertowServiceHandlerGenerator {
                     .build());
         }
 
-        endpointBuilder.addMethod(MethodSpec.methodBuilder("method")
+        endpointBuilder
+                .addMethod(MethodSpec.methodBuilder("method")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(HttpString.class)
@@ -298,9 +307,8 @@ final class UndertowServiceHandlerGenerator {
                         .addStatement("return this")
                         .build());
 
-        endpointDefinition.getDeprecated()
-                .ifPresent(documentation -> endpointBuilder
-                        .addMethod(MethodSpec.methodBuilder("deprecated")
+        endpointDefinition.getDeprecated().ifPresent(
+                documentation -> endpointBuilder.addMethod(MethodSpec.methodBuilder("deprecated")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), ClassName.get(String.class)))
@@ -314,8 +322,11 @@ final class UndertowServiceHandlerGenerator {
     private static final String QUERY_PARAMS_VAR_NAME = "queryParams";
     private static final String HEADER_PARAMS_VAR_NAME = "headerParams";
 
-    private CodeBlock endpointInvocation(EndpointDefinition endpointDefinition, List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+    private CodeBlock endpointInvocation(
+            EndpointDefinition endpointDefinition,
+            List<TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper) {
         CodeBlock.Builder code = CodeBlock.builder();
 
         // auth code
@@ -326,10 +337,15 @@ final class UndertowServiceHandlerGenerator {
             String paramName = sanitizeVarName(bodyParam.getArgName().get(), endpointDefinition);
             if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
                 // TODO(ckozak): Support aliased and optional binary types
-                code.addStatement("$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
-                        InputStream.class, paramName, RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
+                code.addStatement(
+                        "$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
+                        InputStream.class,
+                        paramName,
+                        RUNTIME_VAR_NAME,
+                        EXCHANGE_VAR_NAME);
             } else {
-                code.addStatement("$1T $2N = $3N.deserialize($4N)",
+                code.addStatement(
+                        "$1T $2N = $3N.deserialize($4N)",
                         typeMapper.getClassName(bodyParam.getType()).box(),
                         paramName,
                         DESERIALIZER_VAR_NAME,
@@ -349,15 +365,15 @@ final class UndertowServiceHandlerGenerator {
 
         List<String> methodArgs = new ArrayList<>();
         authVarName.ifPresent(methodArgs::add);
-        methodArgs.addAll(ParameterOrder.sorted(
-                endpointDefinition.getArgs()).stream()
+        methodArgs.addAll(ParameterOrder.sorted(endpointDefinition.getArgs()).stream()
                 .map(arg -> arg.getArgName().get())
                 .map(arg -> sanitizeVarName(arg, endpointDefinition))
                 .collect(Collectors.toList()));
 
         boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures);
         if (async || endpointDefinition.getReturns().isPresent()) {
-            code.addStatement("$1T $2N = $3N.$4L($5L)",
+            code.addStatement(
+                    "$1T $2N = $3N.$4L($5L)",
                     async
                             ? UndertowTypeFunctions.getAsyncReturnType(
                                     endpointDefinition, returnTypeMapper, experimentalFeatures)
@@ -367,14 +383,12 @@ final class UndertowServiceHandlerGenerator {
                     JavaNameSanitizer.sanitize(endpointDefinition.getEndpointName().get()),
                     String.join(", ", methodArgs));
         } else {
-            code.addStatement("$1N.$2L($3L)",
-                    DELEGATE_VAR_NAME,
-                    endpointDefinition.getEndpointName(),
-                    String.join(", ", methodArgs));
+            code.addStatement("$1N.$2L($3L)", DELEGATE_VAR_NAME, endpointDefinition.getEndpointName(), String.join(
+                    ", ", methodArgs));
         }
         if (UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures)) {
-            code.add(CodeBlocks.statement("$1N.async().register($2N, this, $3N)",
-                    RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME));
+            code.add(CodeBlocks.statement(
+                    "$1N.async().register($2N, this, $3N)", RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME));
         } else {
             code.add(generateReturnValueCodeBlock(endpointDefinition, typeDefinitions));
         }
@@ -391,27 +405,35 @@ final class UndertowServiceHandlerGenerator {
             if (UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions)
                     .accept(TypeVisitor.IS_OPTIONAL)) {
                 CodeBlock serializer = UndertowTypeFunctions.isOptionalBinary(returnType)
-                        ? CodeBlock.builder().add("$1N.bodySerDe().serialize($2N.get(), $3N)",
-                        RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME).build()
-                        : CodeBlock.builder().add("$1N.serialize($2N, $3N)",
-                                SERIALIZER_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME).build();
+                        ? CodeBlock.builder()
+                                .add(
+                                        "$1N.bodySerDe().serialize($2N.get(), $3N)",
+                                        RUNTIME_VAR_NAME,
+                                        RESULT_VAR_NAME,
+                                        EXCHANGE_VAR_NAME)
+                                .build()
+                        : CodeBlock.builder()
+                                .add("$1N.serialize($2N, $3N)", SERIALIZER_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME)
+                                .build();
                 // For optional<>: set response code to 204/NO_CONTENT if result is absent
-                code.add(
-                        CodeBlock.builder()
-                                .beginControlFlow("if ($1L)",
-                                        createIsOptionalPresentCall(returnType, RESULT_VAR_NAME, typeDefinitions))
-                                .addStatement(serializer)
-                                .nextControlFlow("else")
-                                .addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class)
-                                .endControlFlow()
-                                .build());
+                code.add(CodeBlock.builder()
+                        .beginControlFlow(
+                                "if ($1L)", createIsOptionalPresentCall(returnType, RESULT_VAR_NAME, typeDefinitions))
+                        .addStatement(serializer)
+                        .nextControlFlow("else")
+                        .addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class)
+                        .endControlFlow()
+                        .build());
             } else {
                 if (returnType.accept(TypeVisitor.IS_BINARY)) {
-                    code.addStatement("$1N.bodySerDe().serialize($2N, $3N)",
-                            RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME);
+                    code.addStatement(
+                            "$1N.bodySerDe().serialize($2N, $3N)",
+                            RUNTIME_VAR_NAME,
+                            RESULT_VAR_NAME,
+                            EXCHANGE_VAR_NAME);
                 } else {
-                    code.addStatement("$1N.serialize($2N, $3N)",
-                            SERIALIZER_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME);
+                    code.addStatement(
+                            "$1N.serialize($2N, $3N)", SERIALIZER_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME);
                 }
             }
         } else {
@@ -428,8 +450,9 @@ final class UndertowServiceHandlerGenerator {
             // Variable may be sanitized
             String variableName,
             TypeMapper typeMapper) {
-        return CodeBlocks.of(markers.stream().map(marker ->
-                CodeBlock.of("$1N.markers().param($2S, $3S, $4N, $5N);",
+        return CodeBlocks.of(markers.stream()
+                .map(marker -> CodeBlock.of(
+                        "$1N.markers().param($2S, $3S, $4N, $5N);",
                         RUNTIME_VAR_NAME,
                         typeMapper.getClassName(marker).box(),
                         paramName,
@@ -440,26 +463,28 @@ final class UndertowServiceHandlerGenerator {
 
     // Adds code for authorization. Returns an optional that contains the name of the variable that contains the
     // deserialized optional parameter.
-    private Optional<String> addAuthCode(
-            CodeBlock.Builder code,
-            EndpointDefinition endpointDefinition) {
+    private Optional<String> addAuthCode(CodeBlock.Builder code, EndpointDefinition endpointDefinition) {
         if (!endpointDefinition.getAuth().isPresent()) {
             return Optional.empty();
         }
-
 
         return endpointDefinition.getAuth().get().accept(new AuthType.Visitor<Optional<String>>() {
             @Override
             public Optional<String> visitHeader(HeaderAuthType _value) {
                 // header auth
-                code.addStatement("$1T $2N = $3N.auth().header($4N)",
-                        AuthHeader.class, AUTH_HEADER_VAR_NAME, RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME);
+                code.addStatement(
+                        "$1T $2N = $3N.auth().header($4N)",
+                        AuthHeader.class,
+                        AUTH_HEADER_VAR_NAME,
+                        RUNTIME_VAR_NAME,
+                        EXCHANGE_VAR_NAME);
                 return Optional.of(AUTH_HEADER_VAR_NAME);
             }
 
             @Override
             public Optional<String> visitCookie(CookieAuthType _value) {
-                code.addStatement("$1T $2N = $3N.auth().cookie($4N, $5S)",
+                code.addStatement(
+                        "$1T $2N = $3N.auth().cookie($4N, $5S)",
                         BearerToken.class,
                         COOKIE_TOKEN_VAR_NAME,
                         RUNTIME_VAR_NAME,
@@ -481,11 +506,14 @@ final class UndertowServiceHandlerGenerator {
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasPathArgument(endpointDefinition.getArgs())) {
-            code.addStatement("$1T<$2T, $2T> $3N = $4N.getAttachment($5T.ATTACHMENT_KEY).getParameters()",
-                    Map.class, String.class, PATH_PARAMS_VAR_NAME, EXCHANGE_VAR_NAME,
+            code.addStatement(
+                    "$1T<$2T, $2T> $3N = $4N.getAttachment($5T.ATTACHMENT_KEY).getParameters()",
+                    Map.class,
+                    String.class,
+                    PATH_PARAMS_VAR_NAME,
+                    EXCHANGE_VAR_NAME,
                     io.undertow.util.PathTemplateMatch.class);
-            code.add(
-                    generatePathParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper));
+            code.add(generatePathParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper));
         }
     }
 
@@ -495,7 +523,9 @@ final class UndertowServiceHandlerGenerator {
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasHeaderArgument(endpointDefinition.getArgs())) {
-            code.addStatement("$1T $2N = $3N.getRequestHeaders()", io.undertow.util.HeaderMap.class,
+            code.addStatement(
+                    "$1T $2N = $3N.getRequestHeaders()",
+                    io.undertow.util.HeaderMap.class,
                     HEADER_PARAMS_VAR_NAME,
                     EXCHANGE_VAR_NAME);
             code.add(generateHeaderParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper));
@@ -508,9 +538,12 @@ final class UndertowServiceHandlerGenerator {
             List<TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasQueryArgument(endpointDefinition.getArgs())) {
-            code.addStatement("$1T $2N = $3N.getQueryParameters()",
-                    ParameterizedTypeName.get(ClassName.get(Map.class), TypeName.get(String.class),
-                            ParameterizedTypeName.get(Deque.class, String.class)), QUERY_PARAMS_VAR_NAME,
+            code.addStatement(
+                    "$1T $2N = $3N.getQueryParameters()",
+                    ParameterizedTypeName.get(
+                            ClassName.get(Map.class), TypeName.get(String.class), ParameterizedTypeName.get(
+                                    Deque.class, String.class)),
+                    QUERY_PARAMS_VAR_NAME,
                     EXCHANGE_VAR_NAME);
             code.add(generateQueryParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper));
         }
@@ -528,9 +561,8 @@ final class UndertowServiceHandlerGenerator {
         return Iterables.any(args, arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_HEADER));
     }
 
-    private CodeBlock generatePathParameterCodeBlock(EndpointDefinition endpoint,
-            List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+    private CodeBlock generatePathParameterCodeBlock(
+            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_PATH,
@@ -540,9 +572,8 @@ final class UndertowServiceHandlerGenerator {
                 typeMapper);
     }
 
-    private CodeBlock generateQueryParameterCodeBlock(EndpointDefinition endpoint,
-            List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+    private CodeBlock generateQueryParameterCodeBlock(
+            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_QUERY,
@@ -552,13 +583,14 @@ final class UndertowServiceHandlerGenerator {
                 typeMapper);
     }
 
-    private CodeBlock generateHeaderParameterCodeBlock(EndpointDefinition endpoint,
-            List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+    private CodeBlock generateHeaderParameterCodeBlock(
+            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_HEADER,
                 HEADER_PARAMS_VAR_NAME,
-                arg -> arg.getParamType().accept(ParameterTypeVisitor.HEADER).getParamId().get(), typeDefinitions,
+                arg -> arg.getParamType().accept(ParameterTypeVisitor.HEADER).getParamId().get(),
+                typeDefinitions,
                 typeMapper);
     }
 
@@ -572,38 +604,37 @@ final class UndertowServiceHandlerGenerator {
         return CodeBlocks.of(endpoint.getArgs().stream()
                 .filter(param -> param.getParamType().accept(paramTypeVisitor))
                 .map(arg -> {
-                    Type normalizedType = UndertowTypeFunctions.toConjureTypeWithoutAliases(
-                            arg.getType(),
-                            typeDefinitions);
+                    Type normalizedType =
+                            UndertowTypeFunctions.toConjureTypeWithoutAliases(arg.getType(), typeDefinitions);
                     String paramName = sanitizeVarName(arg.getArgName().get(), endpoint);
                     final CodeBlock retrieveParam;
                     if (normalizedType.equals(arg.getType())) {
                         // type does not contain any aliases
-                        retrieveParam = decodePlainParameterCodeBlock(normalizedType, typeMapper, paramName,
-                                paramsVarName,
-                                toParamId.apply(arg));
+                        retrieveParam =
+                                decodePlainParameterCodeBlock(
+                                        normalizedType, typeMapper, paramName, paramsVarName, toParamId.apply(arg));
                     } else {
                         // type contains aliases: decode raw value and then construct real value from raw one
                         String rawVarName = arg.getArgName().get() + "Raw";
-                        retrieveParam = CodeBlocks.of(
-                                decodePlainParameterCodeBlock(normalizedType, typeMapper, rawVarName,
-                                        paramsVarName,
-                                        toParamId.apply(arg)),
-                                CodeBlocks.statement(
-                                        "$1T $2N = $3L",
-                                        typeMapper.getClassName(arg.getType()),
-                                        paramName,
-                                        createConstructorForTypeWithReference(arg.getType(), rawVarName,
-                                                typeDefinitions, typeMapper)));
+                        retrieveParam =
+                                CodeBlocks.of(
+                                        decodePlainParameterCodeBlock(
+                                        normalizedType, typeMapper, rawVarName, paramsVarName, toParamId.apply(arg)),
+                                        CodeBlocks.statement(
+                                                "$1T $2N = $3L",
+                                                typeMapper.getClassName(arg.getType()),
+                                                paramName,
+                                                createConstructorForTypeWithReference(
+                                                        arg.getType(), rawVarName, typeDefinitions, typeMapper)));
                     }
-                    return CodeBlocks.of(
-                            retrieveParam,
-                            generateParamMarkers(arg.getMarkers(), arg.getArgName().get(), paramName, typeMapper));
-                }).collect(Collectors.toList()));
+                    return CodeBlocks.of(retrieveParam, generateParamMarkers(
+                            arg.getMarkers(), arg.getArgName().get(), paramName, typeMapper));
+                })
+                .collect(Collectors.toList()));
     }
 
-    private CodeBlock decodePlainParameterCodeBlock(Type type, TypeMapper typeMapper, String resultVarName,
-            String paramsVarName, String paramId) {
+    private CodeBlock decodePlainParameterCodeBlock(
+            Type type, TypeMapper typeMapper, String resultVarName, String paramsVarName, String paramId) {
         if (type.accept(MoreVisitors.IS_EXTERNAL)) {
             return CodeBlocks.statement(
                     "$1T $2N = $3T.valueOf($4N.plainSerDe().deserializeString($5N.get($6S)))",
@@ -614,8 +645,8 @@ final class UndertowServiceHandlerGenerator {
                     paramsVarName,
                     paramId);
         }
-        Optional<CodeBlock> complexDeserializer = getComplexTypeStringDeserializer(
-                type, typeMapper, resultVarName, paramsVarName, paramId);
+        Optional<CodeBlock> complexDeserializer =
+                getComplexTypeStringDeserializer(type, typeMapper, resultVarName, paramsVarName, paramId);
         if (complexDeserializer.isPresent()) {
             return complexDeserializer.get();
         }
@@ -633,87 +664,93 @@ final class UndertowServiceHandlerGenerator {
      * Generates a deserializer block decoding strings using conjure plain encoding from header, query, and path
      * parameters to complex types.
      *
-     * We consider complex types to be anything that is neither a primitive nor contained primitive,
-     * For example enum types and external imports.
+     * <p>We consider complex types to be anything that is neither a primitive nor contained primitive, For example enum
+     * types and external imports.
      */
     private Optional<CodeBlock> getComplexTypeStringDeserializer(
             Type type, TypeMapper typeMapper, String resultVarName, String paramsVarName, String paramId) {
         return type.accept(new DefaultTypeVisitor<Optional<String>>() {
-            @Override
-            public Optional<String> visitExternal(ExternalReference _value) {
-                return Optional.of("deserializeComplex");
-            }
+                    @Override
+                    public Optional<String> visitExternal(ExternalReference _value) {
+                        return Optional.of("deserializeComplex");
+                    }
 
-            @Override
-            public Optional<String> visitReference(com.palantir.conjure.spec.TypeName _value) {
-                return Optional.of("deserializeComplex");
-            }
+                    @Override
+                    public Optional<String> visitReference(com.palantir.conjure.spec.TypeName _value) {
+                        return Optional.of("deserializeComplex");
+                    }
 
-            @Override
-            public Optional<String> visitPrimitive(PrimitiveType _value) {
-                return Optional.empty();
-            }
+                    @Override
+                    public Optional<String> visitPrimitive(PrimitiveType _value) {
+                        return Optional.empty();
+                    }
 
-            @Override
-            public Optional<String> visitList(ListType value) {
-                return value.getItemType().accept(this).map(ignored -> "deserializeComplexList");
-            }
+                    @Override
+                    public Optional<String> visitList(ListType value) {
+                        return value.getItemType().accept(this).map(ignored -> "deserializeComplexList");
+                    }
 
-            @Override
-            public Optional<String> visitSet(SetType value) {
-                return value.getItemType().accept(this).map(ignored -> "deserializeComplexSet");
-            }
+                    @Override
+                    public Optional<String> visitSet(SetType value) {
+                        return value.getItemType().accept(this).map(ignored -> "deserializeComplexSet");
+                    }
 
-            @Override
-            public Optional<String> visitOptional(OptionalType value) {
-                return value.getItemType().accept(this).map(ignored -> "deserializeOptionalComplex");
-            }
+                    @Override
+                    public Optional<String> visitOptional(OptionalType value) {
+                        return value.getItemType().accept(this).map(ignored -> "deserializeOptionalComplex");
+                    }
 
-            @Override
-            public Optional<String> visitDefault() {
-                return Optional.empty();
-            }
-        }).map(functionName -> CodeBlocks.statement(
-                "$1T $2N = $3N.plainSerDe().$4L($5N.get($6S), $7T::valueOf)",
-                typeMapper.getClassName(type),
-                resultVarName,
-                RUNTIME_VAR_NAME,
-                functionName,
-                paramsVarName,
-                paramId,
-                typeMapper.getClassName(getComplexType(type)).box()));
+                    @Override
+                    public Optional<String> visitDefault() {
+                        return Optional.empty();
+                    }
+                })
+                .map(functionName -> CodeBlocks.statement(
+                        "$1T $2N = $3N.plainSerDe().$4L($5N.get($6S), $7T::valueOf)",
+                        typeMapper.getClassName(type),
+                        resultVarName,
+                        RUNTIME_VAR_NAME,
+                        functionName,
+                        paramsVarName,
+                        paramId,
+                        typeMapper.getClassName(getComplexType(type)).box()));
     }
 
     /**
-     * Gets the complex type either matching, or contained by <pre>type</pre>.
+     * Gets the complex type either matching, or contained by
      *
-     * We consider complex types to be anything that is neither a primitive nor contained primitive,
-     * For example enum types and external imports.
+     * <pre>type</pre>
+     *
+     * .
+     *
+     * <p>We consider complex types to be anything that is neither a primitive nor contained primitive, For example enum
+     * types and external imports.
      */
     private Type getComplexType(Type type) {
         // No need to handle the map type because it is not allowed in string
         // values like headers, path, or query parameters.
         return type.accept(new DefaultTypeVisitor<Optional<Type>>() {
-            @Override
-            public Optional<Type> visitList(ListType value) {
-                return Optional.of(value.getItemType());
-            }
+                    @Override
+                    public Optional<Type> visitList(ListType value) {
+                        return Optional.of(value.getItemType());
+                    }
 
-            @Override
-            public Optional<Type> visitSet(SetType value) {
-                return Optional.of(value.getItemType());
-            }
+                    @Override
+                    public Optional<Type> visitSet(SetType value) {
+                        return Optional.of(value.getItemType());
+                    }
 
-            @Override
-            public Optional<Type> visitOptional(OptionalType value) {
-                return Optional.of(value.getItemType());
-            }
+                    @Override
+                    public Optional<Type> visitOptional(OptionalType value) {
+                        return Optional.of(value.getItemType());
+                    }
 
-            @Override
-            public Optional<Type> visitDefault() {
-                return Optional.empty();
-            }
-        }).orElse(type);
+                    @Override
+                    public Optional<Type> visitDefault() {
+                        return Optional.empty();
+                    }
+                })
+                .orElse(type);
     }
 
     /**
@@ -721,8 +758,8 @@ final class UndertowServiceHandlerGenerator {
      * provided type is empty. inType must be a type that is either an optional or an alias that resolves to an
      * optional.
      */
-    private static CodeBlock createIsOptionalPresentCall(Type inType, String varName,
-            List<TypeDefinition> typeDefinitions) {
+    private static CodeBlock createIsOptionalPresentCall(
+            Type inType, String varName, List<TypeDefinition> typeDefinitions) {
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // current type is optional type: call isPresent
             return CodeBlock.of("$1N.isPresent()", varName);
@@ -748,15 +785,18 @@ final class UndertowServiceHandlerGenerator {
      * An "alias that resolves to a primitive" is either an alias of a primitive or an alias of an alias that follows
      * these rules (recursive definition).
      */
-    private static CodeBlock createConstructorForTypeWithReference(Type inType, String decodedVarName,
-            List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+    private static CodeBlock createConstructorForTypeWithReference(
+            Type inType, String decodedVarName, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
         // "in" must be 1 of 2 types: optional<alias that resolves to a primitive> or alias
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // optional<alias that resolves to a primitive>
             Type typeOfOptional = inType.accept(TypeVisitor.OPTIONAL).getItemType();
-            return CodeBlock.of("$1T.ofNullable($2N.isPresent() ? $3L : null)", Optional.class, decodedVarName,
-                    createConstructorForTypeWithReference(typeOfOptional, decodedVarName + ".get()", typeDefinitions,
-                            typeMapper));
+            return CodeBlock.of(
+                    "$1T.ofNullable($2N.isPresent() ? $3L : null)",
+                    Optional.class,
+                    decodedVarName,
+                    createConstructorForTypeWithReference(
+                            typeOfOptional, decodedVarName + ".get()", typeDefinitions, typeMapper));
         } else {
             // alias
             CodeBlock ofContent;
@@ -781,13 +821,14 @@ final class UndertowServiceHandlerGenerator {
                     ofContent = CodeBlock.of("$1N", decodedVarName);
                 } else {
                     // optional<alias that resolves to primitive>
-                    ofContent = createConstructorForTypeWithReference(aliasedType, decodedVarName, typeDefinitions,
-                            typeMapper);
+                    ofContent =
+                            createConstructorForTypeWithReference(
+                                    aliasedType, decodedVarName, typeDefinitions, typeMapper);
                 }
             } else {
                 // alias
-                ofContent = createConstructorForTypeWithReference(aliasedType, decodedVarName, typeDefinitions,
-                        typeMapper);
+                ofContent =
+                        createConstructorForTypeWithReference(aliasedType, decodedVarName, typeDefinitions, typeMapper);
             }
             return CodeBlock.of("$1T.of($2L)", typeMapper.getClassName(inType), ofContent);
         }
@@ -795,8 +836,8 @@ final class UndertowServiceHandlerGenerator {
 
     private static String deserializeFunctionName(Type type) {
         if (type.accept(TypeVisitor.IS_PRIMITIVE)) {
-            return "deserialize" + UndertowTypeFunctions.primitiveTypeName(
-                    type.accept(UndertowTypeFunctions.PRIMITIVE_VISITOR));
+            return "deserialize"
+                    + UndertowTypeFunctions.primitiveTypeName(type.accept(UndertowTypeFunctions.PRIMITIVE_VISITOR));
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)
                 && type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
             PrimitiveType innerPrimitiveType = type.accept(UndertowTypeFunctions.OPTIONAL_VISITOR).getItemType().accept(
@@ -816,9 +857,8 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private Optional<ArgumentDefinition> getBodyParamTypeArgument(List<ArgumentDefinition> args) {
-        return args.stream()
-                .filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY))
-                .collect(MoreCollectors.toOptional());
+        return args.stream().filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY)).collect(
+                MoreCollectors.toOptional());
     }
 
     private static String sanitizeVarName(String input, EndpointDefinition endpoint) {

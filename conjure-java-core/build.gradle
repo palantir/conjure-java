@@ -88,6 +88,7 @@ tasks.withType(JavaCompile) {
 
 spotless {
     java {
+        // these are generated files which we check-in to do snapshot testing, don't want them reformatted!
         targetExclude 'src/integrationInput/**'
     }
 }

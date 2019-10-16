@@ -76,9 +76,8 @@ public final class BeanGenerator {
 
         Collection<EnrichedField> fields = createFields(typeMapper, typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(fields);
-        Collection<EnrichedField> nonPrimitiveEnrichedFields = fields.stream()
-                .filter(field -> !field.isPrimitive())
-                .collect(Collectors.toList());
+        Collection<EnrichedField> nonPrimitiveEnrichedFields =
+                fields.stream().filter(field -> !field.isPrimitive()).collect(Collectors.toList());
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -87,9 +86,8 @@ public final class BeanGenerator {
                 .addMethods(createGetters(fields, featureFlags));
 
         if (!poetFields.isEmpty()) {
-            typeBuilder
-                    .addMethod(MethodSpecs.createEquals(objectClass))
-                    .addMethod(MethodSpecs.createEqualTo(objectClass, poetFields));
+            typeBuilder.addMethod(MethodSpecs.createEquals(objectClass)).addMethod(
+                    MethodSpecs.createEqualTo(objectClass, poetFields));
             if (useCachedHashCode(fields)) {
                 MethodSpecs.addCachedHashCode(typeBuilder, poetFields);
             } else {
@@ -97,7 +95,8 @@ public final class BeanGenerator {
             }
         }
 
-        typeBuilder.addMethod(MethodSpecs.createToString(typeDef.getTypeName().getName(),
+        typeBuilder.addMethod(MethodSpecs.createToString(
+                typeDef.getTypeName().getName(),
                 fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList())));
 
         if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
@@ -105,22 +104,20 @@ public final class BeanGenerator {
         }
 
         if (!nonPrimitiveEnrichedFields.isEmpty()) {
-            typeBuilder
-                    .addMethod(createValidateFields(nonPrimitiveEnrichedFields))
-                    .addMethod(createAddFieldIfMissing(nonPrimitiveEnrichedFields.size()));
+            typeBuilder.addMethod(createValidateFields(nonPrimitiveEnrichedFields)).addMethod(
+                    createAddFieldIfMissing(nonPrimitiveEnrichedFields.size()));
         }
 
         if (poetFields.isEmpty()) {
             // Need to add JsonSerialize annotation which indicates that the empty bean serializer should be used to
             // serialize this class. Without this annotation no serializer will be set for this class, thus preventing
             // serialization.
-            typeBuilder
-                    .addAnnotation(JsonSerialize.class)
-                    .addField(createSingletonField(objectClass));
+            typeBuilder.addAnnotation(JsonSerialize.class).addField(createSingletonField(objectClass));
         } else {
             typeBuilder
                     .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                            .addMember("builder", "$T.class", builderClass).build())
+                            .addMember("builder", "$T.class", builderClass)
+                            .build())
                     .addMethod(createBuilder(builderClass))
                     .addType(BeanBuilderGenerator.generate(
                             typeMapper, objectClass, builderClass, typeDef, featureFlags));
@@ -130,10 +127,7 @@ public final class BeanGenerator {
 
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
-        return JavaFile.builder(typePackage, typeBuilder.build())
-                .skipJavaLangImports(true)
-                .indent("    ")
-                .build();
+        return JavaFile.builder(typePackage, typeBuilder.build()).skipJavaLangImports(true).indent("    ").build();
     }
 
     private static boolean useCachedHashCode(Collection<EnrichedField> fields) {
@@ -145,27 +139,26 @@ public final class BeanGenerator {
     }
 
     private static FieldSpec createSingletonField(ClassName objectClass) {
-        return FieldSpec
-                .builder(objectClass, SINGLETON_INSTANCE_NAME, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+        return FieldSpec.builder(
+                        objectClass, SINGLETON_INSTANCE_NAME, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .initializer("new $T()", objectClass)
                 .build();
     }
 
-    private static Collection<EnrichedField> createFields(
-            TypeMapper typeMapper, List<FieldDefinition> fields) {
+    private static Collection<EnrichedField> createFields(TypeMapper typeMapper, List<FieldDefinition> fields) {
         return fields.stream()
                 .map(e -> EnrichedField.of(e.getFieldName(), e, FieldSpec.builder(
-                        // fields are guarded against using reserved keywords
-                        typeMapper.getClassName(e.getType()),
-                        JavaNameSanitizer.sanitize(e.getFieldName()),
-                        Modifier.PRIVATE, Modifier.FINAL)
+                                // fields are guarded against using reserved keywords
+                                typeMapper.getClassName(e.getType()),
+                                JavaNameSanitizer.sanitize(e.getFieldName()),
+                                Modifier.PRIVATE,
+                                Modifier.FINAL)
                         .build()))
                 .collect(Collectors.toList());
     }
 
     private static MethodSpec createConstructor(Collection<EnrichedField> fields, Collection<FieldSpec> poetFields) {
-        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PRIVATE);
+        MethodSpec.Builder builder = MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE);
 
         Collection<FieldSpec> nonPrimitivePoetFields = Collections2.filter(poetFields, f -> !f.type.isPrimitive());
         if (!nonPrimitivePoetFields.isEmpty()) {
@@ -199,9 +192,8 @@ public final class BeanGenerator {
 
     private static Collection<MethodSpec> createGetters(
             Collection<EnrichedField> fields, Set<FeatureFlags> featureFlags) {
-        return fields.stream()
-                .map(field -> BeanGenerator.createGetter(field, featureFlags))
-                .collect(Collectors.toList());
+        return fields.stream().map(field -> BeanGenerator.createGetter(field, featureFlags)).collect(
+                Collectors.toList());
     }
 
     private static MethodSpec createGetter(EnrichedField field, Set<FeatureFlags> featureFlags) {
@@ -219,14 +211,14 @@ public final class BeanGenerator {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);
         }
 
-        field.conjureDef().getDocs().ifPresent(docs ->
-                getterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+        field.conjureDef().getDocs().ifPresent(
+                docs -> getterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
         return getterBuilder.build();
     }
 
     private static MethodSpec createValidateFields(Collection<EnrichedField> fields) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("validateFields")
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC);
+        MethodSpec.Builder builder =
+                MethodSpec.methodBuilder("validateFields").addModifiers(Modifier.PRIVATE, Modifier.STATIC);
 
         builder.addStatement("$T missingFields = null", ParameterizedTypeName.get(List.class, String.class));
         for (EnrichedField field : fields) {
@@ -236,24 +228,22 @@ public final class BeanGenerator {
                     "missingFields = addFieldIfMissing(missingFields, $N, $S)", spec, field.fieldName().get());
         }
 
-        builder
-                .beginControlFlow("if (missingFields != null)")
-                .addStatement("throw new $T(\"Some required fields have not been set\","
+        builder.beginControlFlow("if (missingFields != null)")
+                .addStatement(
+                        "throw new $T(\"Some required fields have not been set\","
                                 + " $T.of(\"missingFields\", missingFields))",
-                        SafeIllegalArgumentException.class, SafeArg.class)
+                        SafeIllegalArgumentException.class,
+                        SafeArg.class)
                 .endControlFlow();
         return builder.build();
     }
 
     private static MethodSpec createStaticFactoryMethod(Collection<FieldSpec> fields, ClassName objectClass) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(objectClass);
+        MethodSpec.Builder builder =
+                MethodSpec.methodBuilder("of").addModifiers(Modifier.PUBLIC, Modifier.STATIC).returns(objectClass);
 
         if (fields.isEmpty()) {
-            builder
-                    .addAnnotation(JsonCreator.class)
-                    .addCode("return $L;", SINGLETON_INSTANCE_NAME);
+            builder.addAnnotation(JsonCreator.class).addCode("return $L;", SINGLETON_INSTANCE_NAME);
         } else {
             builder.addCode("return builder()");
             for (FieldSpec spec : fields) {
@@ -317,9 +307,7 @@ public final class BeanGenerator {
         return ((ParameterizedTypeName) spec.type).rawType.simpleName().equals("Optional");
     }
 
-    /**
-     * Note, this is an implementation detail shared between {@link BeanBuilderGenerator} and {@link BeanGenerator}.
-     */
+    /** Note, this is an implementation detail shared between {@link BeanBuilderGenerator} and {@link BeanGenerator}. */
     @Value.Immutable
     interface EnrichedField {
         @Value.Parameter
@@ -356,8 +344,8 @@ public final class BeanGenerator {
     }
 
     /**
-     * Any types we generate directly will produce an efficient hashCode, but collections may be large,
-     * and we must traverse through optionals.
+     * Any types we generate directly will produce an efficient hashCode, but collections may be large, and we must
+     * traverse through optionals.
      */
     private static final class FieldRequiresMemoizedHashCode extends DefaultTypeVisitor<Boolean> {
         private static final DefaultTypeVisitor<Boolean> INSTANCE = new FieldRequiresMemoizedHashCode();

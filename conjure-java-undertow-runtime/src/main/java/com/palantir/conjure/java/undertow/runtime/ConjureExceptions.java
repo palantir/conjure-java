@@ -38,14 +38,14 @@ import org.slf4j.LoggerFactory;
 import org.xnio.IoUtils;
 
 /**
- * Maps caught {@link Throwable} instances into HTTP responses. The result is written into the
- * {@link HttpServerExchange exchange's} response, and an appropriate HTTP status code is set.
+ * Maps caught {@link Throwable} instances into HTTP responses. The result is written into the {@link HttpServerExchange
+ * exchange's} response, and an appropriate HTTP status code is set.
  */
 final class ConjureExceptions {
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
 
-    private ConjureExceptions() { }
+    private ConjureExceptions() {}
 
     static Serializer<SerializableError> serializer() {
         // Exceptions should always be serialized using JSON
@@ -91,11 +91,7 @@ final class ConjureExceptions {
             HttpServerExchange exchange, Serializer<SerializableError> serializer, QosException exception) {
         exception.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
         log.debug("Possible quality-of-service intervention", exception);
-        writeResponse(
-                exchange,
-                Optional.empty(),
-                exception.accept(QOS_EXCEPTION_STATUS_CODE),
-                serializer);
+        writeResponse(exchange, Optional.empty(), exception.accept(QOS_EXCEPTION_STATUS_CODE), serializer);
     }
 
     // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
@@ -107,7 +103,8 @@ final class ConjureExceptions {
             HttpServerExchange exchange, Serializer<SerializableError> serializer, RemoteException exception) {
 
         ErrorType errorType = mapRemoteExceptionErrorType(exception);
-        writeResponse(exchange,
+        writeResponse(
+                exchange,
                 Optional.of(SerializableError.builder()
                         .errorName(errorType.name())
                         .errorCode(errorType.code().toString())
@@ -119,7 +116,8 @@ final class ConjureExceptions {
 
     private static ErrorType mapRemoteExceptionErrorType(RemoteException exception) {
         if (exception.getStatus() == 403) {
-            log.info("Encountered a remote permission denied exception."
+            log.info(
+                    "Encountered a remote permission denied exception."
                             + " Mapping to a default permission denied exception before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                     SafeArg.of("errorName", exception.getError().errorName()),
@@ -129,7 +127,8 @@ final class ConjureExceptions {
             return ErrorType.PERMISSION_DENIED;
         } else {
             // log at WARN instead of ERROR because this indicates an issue in a remote server
-            log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
+            log.warn(
+                    "Encountered a remote exception. Mapping to an internal error before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                     SafeArg.of("errorName", exception.getError().errorName()),
                     SafeArg.of("statusCode", exception.getStatus()),
@@ -201,12 +200,14 @@ final class ConjureExceptions {
 
     private static void log(ServiceException exception) {
         if (exception.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
-            log.info("Error handling request",
+            log.info(
+                    "Error handling request",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
                     SafeArg.of("errorName", exception.getErrorType().name()),
                     exception);
         } else {
-            log.error("Error handling request",
+            log.error(
+                    "Error handling request",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
                     SafeArg.of("errorName", exception.getErrorType().name()),
                     exception);
@@ -230,8 +231,8 @@ final class ConjureExceptions {
         }
     };
 
-    private static final QosException.Visitor<Consumer<HttpServerExchange>>
-            QOS_EXCEPTION_HEADERS = new QosException.Visitor<Consumer<HttpServerExchange>>() {
+    private static final QosException.Visitor<Consumer<HttpServerExchange>> QOS_EXCEPTION_HEADERS =
+            new QosException.Visitor<Consumer<HttpServerExchange>>() {
                 @Override
                 public Consumer<HttpServerExchange> visit(QosException.Throttle exception) {
                     return exchange -> exception.getRetryAfter().ifPresent(duration -> {
@@ -248,9 +249,7 @@ final class ConjureExceptions {
 
                 @Override
                 public Consumer<HttpServerExchange> visit(QosException.Unavailable _exception) {
-                    return exchange -> {
-
-                    };
+                    return exchange -> {};
                 }
             };
 }

@@ -53,8 +53,8 @@ final class UndertowServiceInterfaceGenerator {
     public JavaFile generateServiceInterface(
             ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
-                (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
-                        + serviceDefinition.getServiceName().getName())
+                        (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
+                                + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(
                         ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceInterfaceGenerator.class));
@@ -72,9 +72,7 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     private MethodSpec generateServiceInterfaceMethod(
-            EndpointDefinition endpointDef,
-            TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            EndpointDefinition endpointDef, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
         String methodName = JavaNameSanitizer.sanitize(endpointDef.getEndpointName().get());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -85,8 +83,8 @@ final class UndertowServiceInterfaceGenerator {
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         if (UndertowTypeFunctions.isAsync(endpointDef, experimentalFeatures)) {
-            methodBuilder.returns(UndertowTypeFunctions.getAsyncReturnType(
-                    endpointDef, returnTypeMapper, experimentalFeatures));
+            methodBuilder.returns(
+                    UndertowTypeFunctions.getAsyncReturnType(endpointDef, returnTypeMapper, experimentalFeatures));
         } else {
             endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
         }
@@ -120,9 +118,10 @@ final class UndertowServiceInterfaceGenerator {
         return ImmutableList.copyOf(parameterSpecs);
     }
 
-    private ParameterSpec createServiceMethodParameterArg(TypeMapper typeMapper, ArgumentDefinition def,
-            EndpointDefinition endpoint) {
-        return ParameterSpec.builder(typeMapper.getClassName(def.getType()),
-                JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint)).build();
+    private ParameterSpec createServiceMethodParameterArg(
+            TypeMapper typeMapper, ArgumentDefinition def, EndpointDefinition endpoint) {
+        return ParameterSpec.builder(typeMapper.getClassName(def.getType()), JavaNameSanitizer.sanitizeParameterName(
+                        def.getArgName().get(), endpoint))
+                .build();
     }
 }

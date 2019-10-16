@@ -73,10 +73,11 @@ public class BearerTokenLoggingTest {
         delegateRunnable.set(null);
         exchange = HttpServerExchanges.createStub();
         exchange.setRequestMethod(Methods.GET);
-        handler = new LoggingContextHandler(httpServerExchange -> {
-            CONTEXT.auth().header(httpServerExchange);
-            delegate.handleRequest(httpServerExchange);
-        });
+        handler =
+                new LoggingContextHandler(httpServerExchange -> {
+                    CONTEXT.auth().header(httpServerExchange);
+                    delegate.handleRequest(httpServerExchange);
+                });
     }
 
     @AfterEach
@@ -102,12 +103,13 @@ public class BearerTokenLoggingTest {
 
     @Test
     public void testCookieAuth() throws Exception {
-        handler = new LoggingContextHandler(httpServerExchange -> {
-            CONTEXT.auth().cookie(httpServerExchange, "PALANTIR_TOKEN");
-            assertThat(MDC.get("userId")).isEqualTo(USER_ID);
-            assertThat(MDC.get("sessionId")).isEqualTo(SESSION_ID);
-            assertThat(MDC.get("tokenId")).isNull();
-        });
+        handler =
+                new LoggingContextHandler(httpServerExchange -> {
+                    CONTEXT.auth().cookie(httpServerExchange, "PALANTIR_TOKEN");
+                    assertThat(MDC.get("userId")).isEqualTo(USER_ID);
+                    assertThat(MDC.get("sessionId")).isEqualTo(SESSION_ID);
+                    assertThat(MDC.get("tokenId")).isNull();
+                });
         exchange.getRequestCookies().put("PALANTIR_TOKEN", new CookieImpl("PALANTIR_TOKEN", SESSION_TOKEN));
         handler.handleRequest(exchange);
         assertMdcUnset();
@@ -133,8 +135,9 @@ public class BearerTokenLoggingTest {
         runTest(INVALID_PAYLOAD_TOKEN, null, null, null);
     }
 
-    private void runTest(String authHeader,
-            @Nullable String userId, @Nullable String sessionId, @Nullable String tokenId) throws Exception {
+    private void runTest(
+            String authHeader, @Nullable String userId, @Nullable String sessionId, @Nullable String tokenId)
+            throws Exception {
         exchange.getRequestHeaders().put(Headers.AUTHORIZATION, authHeader);
         AtomicBoolean invoked = new AtomicBoolean();
         delegateRunnable.set(() -> {

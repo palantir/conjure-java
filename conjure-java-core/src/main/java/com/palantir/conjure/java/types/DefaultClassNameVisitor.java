@@ -53,9 +53,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     private final Set<FeatureFlags> featureFlags;
 
     public DefaultClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlags> featureFlags) {
-        this.typesByName = types.stream()
-                .map(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME))
-                .collect(Collectors.toSet());
+        this.typesByName =
+                types.stream().map(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME)).collect(Collectors.toSet());
         this.featureFlags = featureFlags;
     }
 
@@ -67,7 +66,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
 
     @Override
     public TypeName visitMap(MapType type) {
-        return ParameterizedTypeName.get(ClassName.get(java.util.Map.class),
+        return ParameterizedTypeName.get(
+                ClassName.get(java.util.Map.class),
                 type.getKeyType().accept(this).box(),
                 type.getValueType().accept(this).box());
     }
@@ -123,7 +123,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
                 return ClassName.get(SafeLong.class);
             case BINARY:
                 return featureFlags.contains(FeatureFlags.UseImmutableBytes)
-                        ? ClassName.get(Bytes.class) : ClassName.get(ByteBuffer.class);
+                        ? ClassName.get(Bytes.class)
+                        : ClassName.get(ByteBuffer.class);
             case ANY:
                 return ClassName.get(Object.class);
             case BOOLEAN:

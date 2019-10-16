@@ -34,8 +34,7 @@ import picocli.CommandLine;
 
 public final class ConjureJavaCliTest {
 
-    @TempDir
-    public File tempDir;
+    @TempDir public File tempDir;
     private File targetFile;
 
     @BeforeEach
@@ -45,17 +44,9 @@ public final class ConjureJavaCliTest {
 
     @Test
     public void correctlyParseArguments() {
-        String[] args = {
-                "generate",
-                targetFile.getAbsolutePath(),
-                tempDir.getAbsolutePath(),
-                "--objects"
-        };
-        CliConfiguration expectedConfiguration = CliConfiguration.builder()
-                .input(targetFile)
-                .outputDirectory(tempDir)
-                .generateObjects(true)
-                .build();
+        String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects"};
+        CliConfiguration expectedConfiguration =
+                CliConfiguration.builder().input(targetFile).outputDirectory(tempDir).generateObjects(true).build();
         ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
@@ -63,14 +54,14 @@ public final class ConjureJavaCliTest {
     @Test
     public void parseFeatureFlags() {
         String[] args = {
-                "generate",
-                targetFile.getAbsolutePath(),
-                tempDir.getAbsolutePath(),
-                "--objects",
-                "--retrofitCompletableFutures",
-                "--jerseyBinaryAsResponse",
-                "--requireNotNullAuthAndBodyParams",
-                "--useImmutableBytes"
+            "generate",
+            targetFile.getAbsolutePath(),
+            tempDir.getAbsolutePath(),
+            "--objects",
+            "--retrofitCompletableFutures",
+            "--jerseyBinaryAsResponse",
+            "--requireNotNullAuthAndBodyParams",
+            "--useImmutableBytes"
         };
         CliConfiguration expectedConfiguration = CliConfiguration.builder()
                 .input(targetFile)
@@ -88,18 +79,9 @@ public final class ConjureJavaCliTest {
 
     @Test
     public void doesNotThrowWhenUnexpectedFeature() {
-        String[] args = {
-                "generate",
-                targetFile.getAbsolutePath(),
-                tempDir.getAbsolutePath(),
-                "--objects",
-                "--foo"
-        };
-        CliConfiguration expectedConfiguration = CliConfiguration.builder()
-                .input(targetFile)
-                .outputDirectory(tempDir)
-                .generateObjects(true)
-                .build();
+        String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects", "--foo"};
+        CliConfiguration expectedConfiguration =
+                CliConfiguration.builder().input(targetFile).outputDirectory(tempDir).generateObjects(true).build();
         ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
@@ -122,7 +104,7 @@ public final class ConjureJavaCliTest {
 
     @Test
     public void throwsWhenMissingGeneratorFlags() {
-        String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath() };
+        String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath()};
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Must specify exactly one project to generate");
@@ -130,13 +112,7 @@ public final class ConjureJavaCliTest {
 
     @Test
     public void throwsWhenTooManyGeneratorFlags() {
-        String[] args = {
-                "generate",
-                targetFile.getAbsolutePath(),
-                tempDir.getAbsolutePath(),
-                "--objects",
-                "--jersey"
-        };
+        String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects", "--jersey"};
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Must specify exactly one project to generate");
@@ -145,25 +121,24 @@ public final class ConjureJavaCliTest {
     @Test
     public void generatesCode() throws Exception {
         String[] args = {
-                "generate",
-                "src/test/resources/conjure-api.json",
-                tempDir.getAbsolutePath(),
-                "--objects",
-                "--useImmutableBytes"
+            "generate",
+            "src/test/resources/conjure-api.json",
+            tempDir.getAbsolutePath(),
+            "--objects",
+            "--useImmutableBytes"
         };
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream recordingStream = new PrintStream(baos);
 
         CommandLine.run(new ConjureJavaCli(), recordingStream, args);
-        assertThat(
-                new File(tempDir, "com/palantir/conjure/spec/ConjureDefinition.java").isFile()).isTrue();
+        assertThat(new File(tempDir, "com/palantir/conjure/spec/ConjureDefinition.java").isFile()).isTrue();
         assertThat(baos.toString()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 
     @Test
     public void throwsWhenInvalidDefinition() throws Exception {
-        String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects" };
+        String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects"};
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Error parsing definition");
@@ -172,12 +147,7 @@ public final class ConjureJavaCliTest {
     @Test
     @Disabled("Unable to capture output")
     public void writesWarningWhenBytesIsDisabled() throws IOException {
-        String[] args = {
-                "generate",
-                "src/test/resources/conjure-api.json",
-                tempDir.getAbsolutePath(),
-                "--objects"
-        };
+        String[] args = {"generate", "src/test/resources/conjure-api.json", tempDir.getAbsolutePath(), "--objects"};
         CommandLine.run(new ConjureJavaCli(), args);
         // assertThat(systemErr.getLog()).contains("[WARNING] Using deprecated ByteBuffer");
     }
@@ -185,12 +155,7 @@ public final class ConjureJavaCliTest {
     @Test
     @Disabled("Unable to capture output")
     public void doesNotWriteWarningWhenObjectsAreNotGenerated() throws IOException {
-        String[] args = {
-                "generate",
-                "src/test/resources/conjure-api.json",
-                tempDir.getAbsolutePath(),
-                "--jersey"
-        };
+        String[] args = {"generate", "src/test/resources/conjure-api.json", tempDir.getAbsolutePath(), "--jersey"};
         CommandLine.run(new ConjureJavaCli(), args);
         // assertThat(systemErr.getLog()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }

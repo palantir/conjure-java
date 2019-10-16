@@ -37,18 +37,19 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
 
     @Override
     public void beforeAll(ExtensionContext _context) {
-        UndertowAutoDeserializeService autoDeserialize = Reflection.newProxy(
-                UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
+        UndertowAutoDeserializeService autoDeserialize =
+                Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
         UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
         HttpHandler handler = ConjureHandler.builder()
                 .addAllEndpoints(service.endpoints(ConjureUndertowRuntime.builder().build()))
                 .build();
 
-        server = Undertow.builder()
-                .addHttpListener(0, "0.0.0.0")
-                .setHandler(Handlers.path().addPrefixPath("/test/api", handler))
-                .build();
+        server =
+                Undertow.builder()
+                        .addHttpListener(0, "0.0.0.0")
+                        .setHandler(Handlers.path().addPrefixPath("/test/api", handler))
+                        .build();
         server.start();
     }
 
