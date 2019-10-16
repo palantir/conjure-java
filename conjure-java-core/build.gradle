@@ -85,3 +85,9 @@ tasks.withType(JavaCompile) {
     // this complains about the integrationInput directory
     options.errorprone.errorproneArgs += '-Xep:StrictUnusedVariable:OFF'
 }
+
+spotless {
+    java {
+        targetExclude 'src/integrationInput/**'
+    }
+}
