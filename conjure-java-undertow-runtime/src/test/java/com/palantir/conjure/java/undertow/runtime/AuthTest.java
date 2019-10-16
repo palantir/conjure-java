@@ -28,6 +28,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 import org.junit.jupiter.api.Test;
 
+
 public final class AuthTest {
 
     private static final UndertowRuntime CONTEXT = ConjureUndertowRuntime.builder().build();

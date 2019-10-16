@@ -72,50 +72,59 @@ import retrofit2.Response;
 public final class JerseyServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
-    @TempDir public static File folder;
+    @TempDir
+    public static File folder;
     public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(EteTestServer.class);
 
     private final EteService client;
     private final EteBinaryServiceRetrofit binary;
 
     public JerseyServiceEteTest() {
-        client =
-                JaxRsClient.create(
-                        EteService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        binary =
-                Retrofit2Client.create(
-                        EteBinaryServiceRetrofit.class,
-                        clientUserAgent(),
-                        new HostMetricsRegistry(),
-                        clientConfiguration());
+        client = JaxRsClient.create(
+                EteService.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
+        binary = Retrofit2Client.create(
+                EteBinaryServiceRetrofit.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
     }
 
     @Test
     public void jaxrs_client_can_make_a_call_to_an_empty_path() throws Exception {
         EmptyPathService emptyPathClient = JaxRsClient.create(
-                EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+                EmptyPathService.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
         assertThat(emptyPathClient.emptyPath()).isEqualTo(true);
     }
 
     @Disabled("string returns in Jersey should use a mandated wrapper alias type")
     @Test
     public void client_can_retrieve_a_string_from_a_server() throws Exception {
-        assertThat(client.string(AuthHeader.valueOf("authHeader"))).isEqualTo("Hello, world!");
+        assertThat(client.string(AuthHeader.valueOf("authHeader")))
+                .isEqualTo("Hello, world!");
     }
 
     @Test
     public void client_can_retrieve_a_double_from_a_server() throws Exception {
-        assertThat(client.double_(AuthHeader.valueOf("authHeader"))).isEqualTo(1 / 3d);
+        assertThat(client.double_(AuthHeader.valueOf("authHeader")))
+                .isEqualTo(1 / 3d);
     }
 
     @Test
     public void client_can_retrieve_a_boolean_from_a_server() throws Exception {
-        assertThat(client.boolean_(AuthHeader.valueOf("authHeader"))).isEqualTo(true);
+        assertThat(client.boolean_(AuthHeader.valueOf("authHeader")))
+                .isEqualTo(true);
     }
 
     @Test
     public void client_can_retrieve_a_safelong_from_a_server() throws Exception {
-        assertThat(client.safelong(AuthHeader.valueOf("authHeader"))).isEqualTo(SafeLong.of(12345));
+        assertThat(client.safelong(AuthHeader.valueOf("authHeader")))
+                .isEqualTo(SafeLong.of(12345));
     }
 
     @Test
@@ -127,7 +136,8 @@ public final class JerseyServiceEteTest extends TestBase {
     @Disabled("string returns in Jersey should use a mandated wrapper alias type")
     @Test
     public void client_can_retrieve_an_optional_string_from_a_server() throws Exception {
-        assertThat(client.optionalString(AuthHeader.valueOf("authHeader"))).isEqualTo(Optional.of("foo"));
+        assertThat(client.optionalString(AuthHeader.valueOf("authHeader")))
+                .isEqualTo(Optional.of("foo"));
     }
 
     @Disabled("Dropwizard returns 404 for empty optional")
@@ -146,14 +156,18 @@ public final class JerseyServiceEteTest extends TestBase {
     public void java_url_client_receives_ok_with_complete_request() throws IOException {
         HttpURLConnection httpUrlConnection = preparePostRequest();
         httpUrlConnection.setRequestProperty("Authorization", "Bearer authheader");
-        sendPostRequestData(httpUrlConnection, CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
+        sendPostRequestData(
+                httpUrlConnection,
+                CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
         assertThat(httpUrlConnection.getResponseCode()).isEqualTo(200);
     }
 
     @Test
     public void java_url_client_receives_bad_request_without_authheader() throws IOException {
         HttpURLConnection httpUrlConnection = preparePostRequest();
-        sendPostRequestData(httpUrlConnection, CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
+        sendPostRequestData(
+                httpUrlConnection,
+                CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
         assertThat(httpUrlConnection.getResponseCode()).isEqualTo(400);
     }
 
@@ -183,8 +197,9 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @BeforeAll
     public static void beforeClass() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/ete-service.yml"),
+                        new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));

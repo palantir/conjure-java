@@ -37,15 +37,14 @@ public class NoCachingResponseHandlerTest {
 
     @BeforeAll
     public static void beforeClass() {
-        server =
-                Undertow.builder()
-                        .addHttpListener(12345, "localhost")
-                        .setHandler(new NoCachingResponseHandler(exchange -> {
-                            if (exchange.getQueryParameters().containsKey("override")) {
-                                exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "custom override");
-                            }
-                        }))
-                        .build();
+        server = Undertow.builder()
+                .addHttpListener(12345, "localhost")
+                .setHandler(new NoCachingResponseHandler(exchange -> {
+                    if (exchange.getQueryParameters().containsKey("override")) {
+                        exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "custom override");
+                    }
+                }))
+                .build();
         server.start();
     }
 
@@ -58,8 +57,8 @@ public class NoCachingResponseHandlerTest {
 
     @Test
     public void testCacheControl() throws IOException {
-        try (Response response =
-                client.newCall(new Request.Builder().get().url("http://localhost:12345").build()).execute()) {
+        try (Response response = client.newCall(new Request.Builder()
+                .get().url("http://localhost:12345").build()).execute()) {
             assertThat(response.header(HttpHeaders.CACHE_CONTROL)).isEqualTo("no-cache, no-store, must-revalidate");
         }
     }

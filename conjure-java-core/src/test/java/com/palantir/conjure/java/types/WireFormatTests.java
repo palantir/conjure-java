@@ -54,7 +54,8 @@ public final class WireFormatTests {
 
     @Test
     public void double_alias_should_deserialize_nan() throws IOException {
-        assertThat(mapper.readValue("\"NaN\"", DoubleAliasExample.class).get()).isNaN();
+        assertThat(mapper.readValue("\"NaN\"", DoubleAliasExample.class).get())
+                .isNaN();
     }
 
     @Test
@@ -78,7 +79,8 @@ public final class WireFormatTests {
 
     @Test
     public void double_nan_fields_should_be_serialized_as_a_string() throws Exception {
-        assertThat(mapper.writeValueAsString(DoubleExample.of(Double.NaN))).isEqualTo("{\"doubleValue\":\"NaN\"}");
+        assertThat(mapper.writeValueAsString(DoubleExample.of(Double.NaN)))
+                .isEqualTo("{\"doubleValue\":\"NaN\"}");
     }
 
     @Test
@@ -95,21 +97,22 @@ public final class WireFormatTests {
 
     @Test
     public void testBinaryFieldsDeserializeFromBase64_legacy() throws Exception {
-        assertThat(mapper.readValue("{\"binary\": \"AAEC\"}", com.palantir.binary.BinaryExample.class).getBinary())
+        assertThat(mapper.readValue("{\"binary\": \"AAEC\"}",
+                com.palantir.binary.BinaryExample.class).getBinary())
                 .isEqualTo(ByteBuffer.wrap(new byte[] {0, 1, 2}));
     }
 
     @Test
     public void testBinaryFieldsSerializeToBase64() throws Exception {
-        assertThat(mapper.writeValueAsString(BinaryExample.builder().binary(Bytes.from(new byte[] {0, 1, 2})).build()))
+        assertThat(mapper.writeValueAsString(
+                BinaryExample.builder().binary(Bytes.from(new byte[] {0, 1, 2})).build()))
                 .isEqualTo("{\"binary\":\"AAEC\"}");
     }
 
     @Test
     public void testBinaryFieldsSerializeToBase64_legacy() throws Exception {
-        assertThat(mapper.writeValueAsString(com.palantir.binary.BinaryExample.builder()
-                        .binary(ByteBuffer.wrap(new byte[] {0, 1, 2}))
-                        .build()))
+        assertThat(mapper.writeValueAsString(
+                com.palantir.binary.BinaryExample.builder().binary(ByteBuffer.wrap(new byte[] {0, 1, 2})).build()))
                 .isEqualTo("{\"binary\":\"AAEC\"}");
     }
 
@@ -127,14 +130,15 @@ public final class WireFormatTests {
 
     @Test
     public void testBinaryAliasFieldsSerializeToBase64() throws Exception {
-        assertThat(mapper.writeValueAsString(BinaryAliasExample.of(Bytes.from(new byte[] {0, 1, 2}))))
+        assertThat(mapper.writeValueAsString(
+                BinaryAliasExample.of(Bytes.from(new byte[] {0, 1, 2}))))
                 .isEqualTo("\"AAEC\"");
     }
 
     @Test
     public void testBinaryAliasFieldsSerializeToBase64_legacy() throws Exception {
         assertThat(mapper.writeValueAsString(
-                        com.palantir.binary.BinaryAliasExample.of(ByteBuffer.wrap(new byte[] {0, 1, 2}))))
+                com.palantir.binary.BinaryAliasExample.of(ByteBuffer.wrap(new byte[] {0, 1, 2}))))
                 .isEqualTo("\"AAEC\"");
     }
 
@@ -145,8 +149,10 @@ public final class WireFormatTests {
         assertThat(SetExample.builder().items("a").items("c").build())
                 .isNotEqualTo(SetExample.builder().items("b").items("a").build());
 
-        assertThat(OptionalExample.builder().item("a").build()).isEqualTo(OptionalExample.builder().item("a").build());
-        assertThat(OptionalExample.builder().build()).isEqualTo(OptionalExample.builder().build());
+        assertThat(OptionalExample.builder().item("a").build())
+                .isEqualTo(OptionalExample.builder().item("a").build());
+        assertThat(OptionalExample.builder().build())
+                .isEqualTo(OptionalExample.builder().build());
         assertThat(OptionalExample.builder().item("a").build())
                 .isNotEqualTo(OptionalExample.builder().item("b").build());
     }
@@ -224,7 +230,8 @@ public final class WireFormatTests {
         assertThat(IntegerAliasExample.of(103).hashCode()).isEqualTo(IntegerAliasExample.of(103).hashCode());
         assertThat(DoubleAliasExample.of(10.3).hashCode()).isEqualTo(DoubleAliasExample.of(10.3).hashCode());
         Bytes bytes = Bytes.from(new byte[] {0, 1, 2});
-        assertThat(BinaryAliasExample.of(bytes).hashCode()).isEqualTo(BinaryAliasExample.of(bytes).hashCode());
+        assertThat(BinaryAliasExample.of(bytes).hashCode())
+                .isEqualTo(BinaryAliasExample.of(bytes).hashCode());
     }
 
     @Test
@@ -277,24 +284,26 @@ public final class WireFormatTests {
 
     @Test
     public void testUnionType_noType() {
-        assertThatThrownBy(() -> mapper.readValue("{\"typ\":\"unknown\",\"value\":5}", UnionTypeExample.class))
+        assertThatThrownBy(() ->
+                mapper.readValue("{\"typ\":\"unknown\",\"value\":5}", UnionTypeExample.class))
                 .isInstanceOf(JsonMappingException.class);
     }
 
     @Test
     public void testDateTime_roundTrip() throws Exception {
         String serialized = "{\"datetime\":\"2017-01-02T03:04:05.000000006Z\"}";
-        DateTimeExample deserialized =
-                DateTimeExample.of(OffsetDateTime.of(2017, 1, 2, 3, 4, 5, 6, ZoneOffset.of("Z")));
+        DateTimeExample deserialized = DateTimeExample.of(
+                OffsetDateTime.of(2017, 1, 2, 3, 4, 5, 6, ZoneOffset.of("Z")));
         assertThat(mapper.writeValueAsString(deserialized)).isEqualTo(serialized);
         assertThat(mapper.readValue(serialized, DateTimeExample.class)).isEqualTo(deserialized);
     }
 
     @Test
     public void testDateTime_with_explicit_zoneId_is_iso_compliant() throws Exception {
-        DateTimeExample deserialized =
-                DateTimeExample.of(OffsetDateTime.of(2017, 1, 2, 3, 4, 5, 0, ZoneOffset.of("+1")));
-        assertThat(mapper.writeValueAsString(deserialized)).isEqualTo("{\"datetime\":\"2017-01-02T03:04:05+01:00\"}");
+        DateTimeExample deserialized = DateTimeExample.of(
+                OffsetDateTime.of(2017, 1, 2, 3, 4, 5, 0, ZoneOffset.of("+1")));
+        assertThat(mapper.writeValueAsString(deserialized))
+                .isEqualTo("{\"datetime\":\"2017-01-02T03:04:05+01:00\"}");
     }
 
     @Test
@@ -324,7 +333,6 @@ public final class WireFormatTests {
         assertThat(mapper.readValue("{\"datetime\":\"2017-01-02T03:04:05.000000Z\"}", DateTimeExample.class))
                 .isEqualTo(secondsOnly);
     }
-
     @Test
     public void testDateTimeType_equality() throws Exception {
         OffsetDateTime aa = OffsetDateTime.parse("2017-01-02T03:04:05.000000006Z");
@@ -344,7 +352,8 @@ public final class WireFormatTests {
 
     @Test
     public void double_alias_should_serialize_with_decimal_point() throws Exception {
-        assertThat(mapper.writeValueAsString(DoubleAliasExample.of(100L))).isEqualTo("100.0");
+        assertThat(mapper.writeValueAsString(DoubleAliasExample.of(100L)))
+                .isEqualTo("100.0");
     }
 
     @Test
@@ -434,5 +443,7 @@ public final class WireFormatTests {
         public Integer visitIf(int value) {
             return value;
         }
+
     }
+
 }

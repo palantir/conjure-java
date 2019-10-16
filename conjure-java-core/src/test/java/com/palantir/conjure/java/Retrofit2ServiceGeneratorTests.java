@@ -38,19 +38,23 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 @Execution(ExecutionMode.CONCURRENT)
 public final class Retrofit2ServiceGeneratorTests extends TestBase {
 
-    @TempDir public File folder;
+    @TempDir
+    public File folder;
 
     @Test
     public void testCompositionVanilla() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-service.yml")));
 
-        List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder);
+        List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of())
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit");
     }
 
     @Test
     public void testCompositionCompletableFuture() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-service.yml")));
 
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitCompletableFutures))
                 .emit(def, folder);
@@ -59,7 +63,8 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
 
     @Test
     public void testCompositionListenableFuture() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
+        ConjureDefinition def = Conjure.parse(
+                ImmutableList.of(new File("src/test/resources/example-service.yml")));
 
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitListenableFutures))
                 .emit(def, folder);
@@ -68,10 +73,11 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
 
     @Test
     public void testConjureImports() throws IOException {
-        ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/example-conjure-imports.yml"),
-                new File("src/test/resources/example-types.yml"),
-                new File("src/test/resources/example-service.yml")));
+        ConjureDefinition conjure = Conjure.parse(
+                ImmutableList.of(
+                        new File("src/test/resources/example-conjure-imports.yml"),
+                        new File("src/test/resources/example-types.yml"),
+                        new File("src/test/resources/example-service.yml")));
 
         File src = Files.createDirectory(folder.toPath().resolve("src")).toFile();
         Retrofit2ServiceGenerator generator = new Retrofit2ServiceGenerator(ImmutableSet.of());
@@ -85,4 +91,5 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
     private static String compiledFileContent(File srcDir, String clazz) throws IOException {
         return new String(Files.readAllBytes(Paths.get(srcDir.getPath(), clazz)), StandardCharsets.UTF_8);
     }
+
 }

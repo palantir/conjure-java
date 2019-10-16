@@ -51,8 +51,8 @@ public class TracedEncodingTest {
     public void testSerializerOperationName() throws IOException {
         Tracer.setSampler(AlwaysSampler.INSTANCE);
         Tracer.getAndClearTrace();
-        Encoding.Serializer<String> serializer =
-                TracedEncoding.wrap(new StubEncoding()).serializer(new TypeMarker<String>() {});
+        Encoding.Serializer<String> serializer = TracedEncoding.wrap(new StubEncoding())
+                .serializer(new TypeMarker<String>() {});
         SpanObserver mockObserver = mock(SpanObserver.class);
         Tracer.subscribe("test", mockObserver);
         try {
@@ -70,8 +70,8 @@ public class TracedEncodingTest {
     public void testDeserializerOperationName() throws IOException {
         Tracer.setSampler(AlwaysSampler.INSTANCE);
         Tracer.getAndClearTrace();
-        Encoding.Deserializer<String> deserializer =
-                TracedEncoding.wrap(new StubEncoding()).deserializer(new TypeMarker<String>() {});
+        Encoding.Deserializer<String> deserializer = TracedEncoding.wrap(new StubEncoding())
+                .deserializer(new TypeMarker<String>() {});
         SpanObserver mockObserver = mock(SpanObserver.class);
         Tracer.subscribe("test", mockObserver);
         try {
@@ -89,7 +89,7 @@ public class TracedEncodingTest {
 
         @Override
         public <T> Serializer<T> serializer(TypeMarker<T> _type) {
-            return (value, output) -> {};
+            return (value, output) -> { };
         }
 
         @Override

@@ -90,7 +90,8 @@ import retrofit2.Response;
 public final class UndertowServiceEteTest extends TestBase {
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
-    @TempDir public static File folder;
+    @TempDir
+    public static File folder;
 
     private static Undertow server;
 
@@ -101,41 +102,41 @@ public final class UndertowServiceEteTest extends TestBase {
     private final EteBinaryServiceRetrofit binaryClient;
 
     public UndertowServiceEteTest() {
-        client =
-                JaxRsClient.create(
-                        EteService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        retrofitClient =
-                Retrofit2Client.create(
-                        EteServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        binaryClient =
-                Retrofit2Client.create(
-                        EteBinaryServiceRetrofit.class,
-                        clientUserAgent(),
-                        new HostMetricsRegistry(),
-                        clientConfiguration());
+        client = JaxRsClient.create(
+                EteService.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
+        retrofitClient = Retrofit2Client.create(
+                EteServiceRetrofit.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
+        binaryClient = Retrofit2Client.create(
+                EteBinaryServiceRetrofit.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
     }
 
     @BeforeAll
     public static void before() {
         UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
-        HttpHandler handler = ConjureHandler.builder()
-                .addAllEndpoints(
-                        ImmutableList.of(
-                                        EteServiceEndpoints.of(new UndertowEteResource()),
-                                        EmptyPathServiceEndpoints.of(() -> true),
-                                        EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
-                                .stream()
-                                .flatMap(service -> service.endpoints(context).stream())
-                                .collect(ImmutableList.toImmutableList()))
+        HttpHandler handler = ConjureHandler.builder().addAllEndpoints(ImmutableList.of(
+                EteServiceEndpoints.of(new UndertowEteResource()),
+                EmptyPathServiceEndpoints.of(() -> true),
+                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
+                .stream()
+                .flatMap(service -> service.endpoints(context).stream())
+                .collect(ImmutableList.toImmutableList()))
                 .build();
 
-        server =
-                Undertow.builder()
-                        .setServerOption(UndertowOptions.DECODE_URL, false)
-                        .addHttpListener(8080, "0.0.0.0")
-                        .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
-                        .build();
+        server = Undertow.builder()
+                .setServerOption(UndertowOptions.DECODE_URL, false)
+                .addHttpListener(8080, "0.0.0.0")
+                .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
+                .build();
         server.start();
     }
 
@@ -149,28 +150,35 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void jaxrs_client_can_make_a_call_to_an_empty_path() throws Exception {
         EmptyPathService emptyPathClient = JaxRsClient.create(
-                EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+                EmptyPathService.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
         assertThat(emptyPathClient.emptyPath()).isEqualTo(true);
     }
 
     @Test
     public void client_can_retrieve_a_string_from_a_server() throws Exception {
-        assertThat(client.string(AuthHeader.valueOf("authHeader"))).isEqualTo("Hello, world!");
+        assertThat(client.string(AuthHeader.valueOf("authHeader")))
+                .isEqualTo("Hello, world!");
     }
 
     @Test
     public void client_can_retrieve_a_double_from_a_server() throws Exception {
-        assertThat(client.double_(AuthHeader.valueOf("authHeader"))).isEqualTo(1 / 3d);
+        assertThat(client.double_(AuthHeader.valueOf("authHeader")))
+                .isEqualTo(1 / 3d);
     }
 
     @Test
     public void client_can_retrieve_a_boolean_from_a_server() throws Exception {
-        assertThat(client.boolean_(AuthHeader.valueOf("authHeader"))).isEqualTo(true);
+        assertThat(client.boolean_(AuthHeader.valueOf("authHeader")))
+                .isEqualTo(true);
     }
 
     @Test
     public void client_can_retrieve_a_safelong_from_a_server() throws Exception {
-        assertThat(client.safelong(AuthHeader.valueOf("authHeader"))).isEqualTo(SafeLong.of(12345));
+        assertThat(client.safelong(AuthHeader.valueOf("authHeader")))
+                .isEqualTo(SafeLong.of(12345));
     }
 
     @Test
@@ -181,7 +189,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void client_can_retrieve_an_optional_string_from_a_server() throws Exception {
-        assertThat(client.optionalString(AuthHeader.valueOf("authHeader"))).isEqualTo(Optional.of("foo"));
+        assertThat(client.optionalString(AuthHeader.valueOf("authHeader")))
+                .isEqualTo(Optional.of("foo"));
     }
 
     @Test
@@ -204,14 +213,18 @@ public final class UndertowServiceEteTest extends TestBase {
     public void java_url_client_receives_ok_with_complete_request() throws IOException {
         HttpURLConnection httpUrlConnection = preparePostRequest();
         httpUrlConnection.setRequestProperty("Authorization", "Bearer authheader");
-        sendPostRequestData(httpUrlConnection, CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
+        sendPostRequestData(
+                httpUrlConnection,
+                CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
         assertThat(httpUrlConnection.getResponseCode()).isEqualTo(200);
     }
 
     @Test
     public void java_url_client_receives_bad_request_without_authheader() throws IOException {
         HttpURLConnection httpUrlConnection = preparePostRequest();
-        sendPostRequestData(httpUrlConnection, CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
+        sendPostRequestData(
+                httpUrlConnection,
+                CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
         assertThat(httpUrlConnection.getResponseCode()).isEqualTo(400);
     }
 
@@ -247,8 +260,8 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testCborContent() throws Exception {
         ObjectMapper cborMapper = ObjectMappers.newCborClientObjectMapper();
         // postString method
-        HttpURLConnection connection =
-                (HttpURLConnection) new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        HttpURLConnection connection = (HttpURLConnection)
+                new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/cbor");
@@ -269,8 +282,8 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testContentLengthSet() throws Exception {
         // postString method
-        HttpURLConnection connection =
-                (HttpURLConnection) new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        HttpURLConnection connection = (HttpURLConnection)
+                new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -288,10 +301,8 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testBinaryPost() throws Exception {
         byte[] expected = "Hello, World".getBytes(StandardCharsets.UTF_8);
-        Response<ResponseBody> response = binaryClient
-                .postBinary(AuthHeader.valueOf("authHeader"), RequestBody.create(
-                        MediaType.parse("application/octet-stream"), expected))
-                .execute();
+        Response<ResponseBody> response = binaryClient.postBinary(AuthHeader.valueOf("authHeader"),
+                RequestBody.create(MediaType.parse("application/octet-stream"), expected)).execute();
         try (ResponseBody body = response.body()) {
             assertThat(response.isSuccessful()).isTrue();
             assertThat(body.contentType()).isEqualTo(MediaType.parse("application/octet-stream"));
@@ -362,23 +373,21 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testUnknownContentType() {
-        assertThatThrownBy(() -> binaryClient
-                        .postBinary(AuthHeader.valueOf("authHeader"), RequestBody.create(
-                                MediaType.parse("application/unsupported"), new byte[] {1, 2, 3}))
-                        .execute())
+        assertThatThrownBy(() -> binaryClient.postBinary(AuthHeader.valueOf("authHeader"),
+                RequestBody.create(MediaType.parse("application/unsupported"), new byte[] {1, 2, 3})).execute())
                 .isInstanceOf(RemoteException.class)
                 .hasMessageContaining("INVALID_ARGUMENT");
     }
 
     @Test
-    public void testSlashesInPathParam() throws IOException {
+    public void testSlashesInPathParam() throws IOException  {
         String expected = "foo/bar/baz/%2F";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
         assertThat(retrofitClient.path(AuthHeader.valueOf("bearer"), expected).execute().body()).isEqualTo(expected);
     }
 
     @Test
-    public void testPlusInPathParam() throws IOException {
+    public void testPlusInPathParam() throws IOException  {
         String expected = "foo+bar";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
         assertThat(retrofitClient.path(AuthHeader.valueOf("bearer"), expected).execute().body()).isEqualTo(expected);
@@ -393,8 +402,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testBinaryOptionalEmptyResponse() throws Exception {
-        Response<ResponseBody> response =
-                binaryClient.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")).execute();
+        Response<ResponseBody> response = binaryClient
+                .getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")).execute();
         assertThat(response.code()).isEqualTo(204);
         assertThat(response.headers().get(HttpHeaders.CONTENT_TYPE)).isNull();
         assertThat(response.body()).isNull();
@@ -402,8 +411,8 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testBinaryOptionalPresentResponse() throws Exception {
-        Response<ResponseBody> response =
-                binaryClient.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")).execute();
+        Response<ResponseBody> response = binaryClient
+                .getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")).execute();
         assertThat(response.code()).isEqualTo(200);
         assertThat(response.headers().get(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
         assertThat(response.body().string()).isEqualTo("Hello World!");
@@ -411,12 +420,9 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testBinaryServerSideFailureAfterManyBytesSent() throws Exception {
-        Response<ResponseBody> response = binaryClient
-                .getBinaryFailure(
-                        AuthHeader.valueOf("authHeader"),
-                        // Write more bytes than one buffer
-                        20000)
-                .execute();
+        Response<ResponseBody> response = binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"),
+                // Write more bytes than one buffer
+                20000).execute();
         try (ResponseBody body = response.body()) {
             assertThatThrownBy(() -> ByteStreams.copy(body.byteStream(), ByteStreams.nullOutputStream()))
                     .isInstanceOf(IOException.class);
@@ -474,11 +480,13 @@ public final class UndertowServiceEteTest extends TestBase {
     @BeforeAll
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
+                new File("src/test/resources/ete-service.yml"),
+                new File("src/test/resources/ete-binary.yml")));
         List<Path> files = ImmutableList.<Path>builder()
                 .addAll(new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
                         .emit(def, folder))
-                .addAll(new ObjectGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix)).emit(def, folder))
+                .addAll(new ObjectGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
+                        .emit(def, folder))
                 .build();
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }

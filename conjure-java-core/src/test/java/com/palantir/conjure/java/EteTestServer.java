@@ -56,9 +56,11 @@ public final class EteTestServer extends Application<Configuration> {
             SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
 
     public static ClientConfiguration clientConfiguration() {
-        return ClientConfiguration.builder()
-                .from(ClientConfigurations.of(
-                        ImmutableList.of("http://localhost:8080/test-example/api"), SSL_SOCKET_FACTORY, TRUST_MANAGER))
+        return ClientConfiguration.builder().from(
+                ClientConfigurations.of(
+                        ImmutableList.of("http://localhost:8080/test-example/api"),
+                        SSL_SOCKET_FACTORY,
+                        TRUST_MANAGER))
                 // Disable retries to avoid spinning unnecessarily on negative tests
                 .maxNumRetries(0)
                 .build();

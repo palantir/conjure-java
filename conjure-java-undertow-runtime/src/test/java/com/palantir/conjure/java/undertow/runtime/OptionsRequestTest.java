@@ -35,22 +35,23 @@ import org.junit.jupiter.api.Test;
 
 public final class OptionsRequestTest {
 
-    private static final OkHttpClient client =
-            new OkHttpClient.Builder().followRedirects(false).retryOnConnectionFailure(false).build();
+    private static final OkHttpClient client = new OkHttpClient.Builder()
+            .followRedirects(false)
+            .retryOnConnectionFailure(false)
+            .build();
 
     private Undertow server;
 
     @BeforeEach
     public void before() {
-        server =
-                Undertow.builder()
-                        .addHttpListener(12346, "localhost")
-                        .setHandler(ConjureHandler.builder()
-                                .endpoints(endpoint(Methods.GET, "/first"))
-                                .endpoints(endpoint(Methods.POST, "/first"))
-                                .endpoints(endpoint(Methods.PUT, "/second/{p1}/and/{p2}"))
-                                .build())
-                        .build();
+        server = Undertow.builder()
+                .addHttpListener(12346, "localhost")
+                .setHandler(ConjureHandler.builder()
+                        .endpoints(endpoint(Methods.GET, "/first"))
+                        .endpoints(endpoint(Methods.POST, "/first"))
+                        .endpoints(endpoint(Methods.PUT, "/second/{p1}/and/{p2}"))
+                        .build())
+                .build();
         server.start();
     }
 
@@ -81,7 +82,10 @@ public final class OptionsRequestTest {
     }
 
     private static Response execute(String path) {
-        Request request = new Request.Builder().method("OPTIONS", null).url("http://localhost:12346" + path).build();
+        Request request = new Request.Builder()
+                .method("OPTIONS", null)
+                .url("http://localhost:12346" + path)
+                .build();
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {

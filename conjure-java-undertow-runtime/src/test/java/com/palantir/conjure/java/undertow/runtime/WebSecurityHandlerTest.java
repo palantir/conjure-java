@@ -36,11 +36,10 @@ public class WebSecurityHandlerTest {
 
     @BeforeAll
     public static void beforeClass() {
-        server =
-                Undertow.builder()
-                        .addHttpListener(12345, "localhost")
-                        .setHandler(new WebSecurityHandler(exchange -> {}))
-                        .build();
+        server = Undertow.builder()
+                .addHttpListener(12345, "localhost")
+                .setHandler(new WebSecurityHandler(exchange -> { }))
+                .build();
         server.start();
     }
 
@@ -53,8 +52,8 @@ public class WebSecurityHandlerTest {
 
     @Test
     public void testWebSecurityHeaders() throws IOException {
-        try (Response response =
-                client.newCall(new Request.Builder().get().url("http://localhost:12345").build()).execute()) {
+        try (Response response = client.newCall(new Request.Builder()
+                .get().url("http://localhost:12345").build()).execute()) {
             validateCommonResponseHeaders(response);
             assertThat(response.header("X-Content-Security-Policy")).isNull();
         }
@@ -71,22 +70,18 @@ public class WebSecurityHandlerTest {
     }
 
     private void testFallbackSecurityPolicyHeader(String userAgent) throws IOException {
-        try (Response response = client.newCall(new Request.Builder()
-                        .get()
-                        .url("http://localhost:12345")
-                        .header(HttpHeaders.USER_AGENT, userAgent)
-                        .build())
-                .execute()) {
+        try (Response response = client.newCall(new Request.Builder().get().url("http://localhost:12345")
+                .header(HttpHeaders.USER_AGENT, userAgent).build()).execute()) {
             validateCommonResponseHeaders(response);
-            assertThat(response.header("X-Content-Security-Policy")).isEqualTo(
-                    "default-src 'self'; img-src 'self' data:; "
+            assertThat(response.header("X-Content-Security-Policy"))
+                    .isEqualTo("default-src 'self'; img-src 'self' data:; "
                             + "style-src 'self' 'unsafe-inline'; frame-ancestors 'self';");
         }
     }
 
     private void validateCommonResponseHeaders(Response response) {
-        assertThat(response.header(HttpHeaders.CONTENT_SECURITY_POLICY)).isEqualTo(
-                "default-src 'self'; img-src 'self' data:; "
+        assertThat(response.header(HttpHeaders.CONTENT_SECURITY_POLICY))
+                .isEqualTo("default-src 'self'; img-src 'self' data:; "
                         + "style-src 'self' 'unsafe-inline'; frame-ancestors 'self';");
         assertThat(response.header(HttpHeaders.REFERRER_POLICY)).isEqualTo("strict-origin-when-cross-origin");
         assertThat(response.header(HttpHeaders.X_CONTENT_TYPE_OPTIONS)).isEqualTo("nosniff");

@@ -21,4 +21,5 @@ import com.palantir.product.UndertowEteService;
 /**
  * {@link EteResource} cannot implement {@link UndertowEteService} without confusing Dropwizard hibernate validators.
  */
-public final class UndertowEteResource extends EteResource implements UndertowEteService {}
+public final class UndertowEteResource extends EteResource implements UndertowEteService {
+}

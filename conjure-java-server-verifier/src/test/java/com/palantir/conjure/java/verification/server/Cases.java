@@ -30,9 +30,10 @@ import javax.annotation.Nullable;
 
 public final class Cases {
 
-    public static final ServerTestCases TEST_CASES = deserializeTestCases(new File("build/test-cases/test-cases.json"));
-    private static final IgnoredServerTestCases IGNORED_TEST_CASES =
-            deserializeIgnoredServerTestCases(new File("src/test/resources/ignored-test-cases.yml"));
+    public static final ServerTestCases TEST_CASES = deserializeTestCases(
+            new File("build/test-cases/test-cases.json"));
+    private static final IgnoredServerTestCases IGNORED_TEST_CASES = deserializeIgnoredServerTestCases(
+            new File("src/test/resources/ignored-test-cases.yml"));
 
     private Cases() {}
 
@@ -40,11 +41,11 @@ public final class Cases {
         try {
             return new ObjectMapper()
                     .registerModule(new Jdk8Module())
-                    .readValue(file, com.palantir.conjure.verification.client.TestCases.class)
-                    .getServer();
+                    .readValue(file, com.palantir.conjure.verification.client.TestCases.class).getServer();
         } catch (IOException e) {
             throw new RuntimeException(
-                    String.format("Unable to read %s, you may need to run ./gradlew copyTestCases", file), e);
+                    String.format("Unable to read %s, you may need to run ./gradlew copyTestCases", file),
+                    e);
         }
     }
 
@@ -52,10 +53,11 @@ public final class Cases {
         try {
             return new ObjectMapper(new YAMLFactory())
                     .registerModule(new Jdk8Module())
-                    .readValue(file, IgnoredTestCases.class)
-                    .getServer();
+                    .readValue(file, IgnoredTestCases.class).getServer();
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Unable to read %s", file), e);
+            throw new RuntimeException(
+                    String.format("Unable to read %s", file),
+                    e);
         }
     }
 

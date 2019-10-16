@@ -29,14 +29,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class MarkerCallbackTest {
 
-    @Mock private ParamMarker paramMarker;
+    @Mock
+    private ParamMarker paramMarker;
     private HttpServerExchange exchange;
     private UndertowRuntime runtime;
 
     @BeforeEach
     public void before() {
         exchange = HttpServerExchanges.createStub();
-        runtime = ConjureUndertowRuntime.builder().paramMarker(paramMarker).build();
+        runtime = ConjureUndertowRuntime.builder()
+                .paramMarker(paramMarker)
+                .build();
     }
 
     @Test

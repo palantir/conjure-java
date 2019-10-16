@@ -23,8 +23,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 /**
- * Simple {@link InvocationHandler} implementing all methods of {@link AutoDeserializeService} by returning the single
- * parameter.
+ * Simple {@link InvocationHandler} implementing all methods of {@link AutoDeserializeService} by returning the
+ * single parameter.
  */
 final class EchoResourceInvocationHandler extends AbstractInvocationHandler {
     @Override

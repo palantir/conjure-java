@@ -76,8 +76,8 @@ public final class BeanSerdeIntegrationTests {
 
     @Test
     public void testEnumKeyDeserialization() throws IOException {
-        Map<EnumExample, String> value =
-                mapper.readValue("{\"TWO\": \"foo\"}", new TypeReference<Map<EnumExample, String>>() {});
+        Map<EnumExample, String> value = mapper.readValue("{\"TWO\": \"foo\"}",
+                new TypeReference<Map<EnumExample, String>>() {});
         assertThat(Iterables.getOnlyElement(value.keySet()).get()).isEqualTo(EnumExample.Value.TWO);
     }
 
@@ -88,4 +88,5 @@ public final class BeanSerdeIntegrationTests {
 
         assertThat(deserialized).isEqualTo(example);
     }
+
 }

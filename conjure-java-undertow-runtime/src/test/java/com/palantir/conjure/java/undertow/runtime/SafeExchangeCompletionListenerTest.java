@@ -32,9 +32,11 @@ public class SafeExchangeCompletionListenerTest {
 
     private static final HttpServerExchange exchange = HttpServerExchanges.createStub();
 
-    @Mock private ExchangeCompletionListener.NextListener nextListener;
+    @Mock
+    private ExchangeCompletionListener.NextListener nextListener;
 
-    @Mock private Consumer<HttpServerExchange> action;
+    @Mock
+    private Consumer<HttpServerExchange> action;
 
     @Test
     public void test_normalExecution() {

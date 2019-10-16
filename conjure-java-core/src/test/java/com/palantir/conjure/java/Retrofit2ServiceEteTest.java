@@ -58,36 +58,43 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 @ResourceLock("port:8080")
 public final class Retrofit2ServiceEteTest extends TestBase {
 
-    @TempDir public static File folder;
+    @TempDir
+    public static File folder;
     public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(EteTestServer.class);
 
     private final EteServiceRetrofit client;
 
     public Retrofit2ServiceEteTest() {
-        client =
-                Retrofit2Client.create(
-                        EteServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+        client = Retrofit2Client.create(
+                EteServiceRetrofit.class,
+                clientUserAgent(),
+                new HostMetricsRegistry(),
+                clientConfiguration());
     }
 
     @Disabled // string returns in Jersey should use a mandated wrapper alias type
     @Test
     public void retrofit2_can_retrieve_a_string_from_a_server() throws Exception {
-        assertThat(client.string(AuthHeader.valueOf("authHeader")).execute().body()).isEqualTo("Hello, world!");
+        assertThat(client.string(AuthHeader.valueOf("authHeader")).execute().body())
+                .isEqualTo("Hello, world!");
     }
 
     @Test
     public void retrofit2_client_can_retrieve_a_double_from_a_server() throws Exception {
-        assertThat(client.double_(AuthHeader.valueOf("authHeader")).execute().body()).isEqualTo(1 / 3d);
+        assertThat(client.double_(AuthHeader.valueOf("authHeader")).execute().body())
+                .isEqualTo(1 / 3d);
     }
 
     @Test
     public void retrofit2_client_can_retrieve_a_boolean_from_a_server() throws Exception {
-        assertThat(client.boolean_(AuthHeader.valueOf("authHeader")).execute().body()).isEqualTo(true);
+        assertThat(client.boolean_(AuthHeader.valueOf("authHeader")).execute().body())
+                .isEqualTo(true);
     }
 
     @Test
     public void retrofit2_client_can_retrieve_a_safelong_from_a_server() throws Exception {
-        assertThat(client.safelong(AuthHeader.valueOf("authHeader")).execute().body()).isEqualTo(SafeLong.of(12345));
+        assertThat(client.safelong(AuthHeader.valueOf("authHeader")).execute().body())
+                .isEqualTo(SafeLong.of(12345));
     }
 
     @Test
@@ -124,7 +131,8 @@ public final class Retrofit2ServiceEteTest extends TestBase {
     @BeforeAll
     public static void beforeAll() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
+                new File("src/test/resources/ete-service.yml"),
+                new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
