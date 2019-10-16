@@ -23,6 +23,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.ServerConnection;
 import io.undertow.server.protocol.http.HttpServerConnection;
 import io.undertow.util.HeaderMap;
+import io.undertow.util.Methods;
 import io.undertow.util.Protocols;
 import org.xnio.OptionMap;
 import org.xnio.StreamConnection;
@@ -56,6 +57,7 @@ public final class HttpServerExchanges {
         HttpServerExchange httpServerExchange =
                 new HttpServerExchange(connection, new HeaderMap(), new HeaderMap(), 200);
         httpServerExchange.setProtocol(Protocols.HTTP_1_1);
+        httpServerExchange.setRequestMethod(Methods.GET);
         httpServerExchange.startBlocking();
         return httpServerExchange;
     }

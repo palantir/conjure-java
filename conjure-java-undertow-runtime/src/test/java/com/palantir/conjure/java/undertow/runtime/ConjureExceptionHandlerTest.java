@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -24,9 +25,11 @@ import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -178,7 +181,7 @@ public final class ConjureExceptionHandlerTest {
     }
 
     @Test
-    public void doesNotHandleErrors() throws IOException {
+    public void handlesErrorWithoutSendingResponseBody() throws IOException {
         server.stop();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
@@ -191,6 +194,15 @@ public final class ConjureExceptionHandlerTest {
         Response response = execute();
         assertThat(response.body().string()).isEmpty();
         assertThat(response.code()).isEqualTo(500);
+    }
+
+    @Test
+    public void handlesErrorWithoutRethrowing() {
+        HttpHandler handler = new ConjureExceptionHandler(exchange -> {
+            throw new Error();
+        });
+        assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))
+                .doesNotThrowAnyException();
     }
 
     private static Response execute() {
