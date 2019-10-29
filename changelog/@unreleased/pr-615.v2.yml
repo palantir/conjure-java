@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: '`ConjureExceptionHandler` now propagates 401 responses.'
+  links:
+  - https://github.com/palantir/conjure-java/pull/615
