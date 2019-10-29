@@ -118,7 +118,16 @@ final class ConjureExceptions {
     }
 
     private static ErrorType mapRemoteExceptionErrorType(RemoteException exception) {
-        if (exception.getStatus() == 403) {
+        if (exception.getStatus() == 401) {
+            log.info("Encountered a remote unauthorized exception."
+                            + " Mapping to a default unauthorized exception before propagating",
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    SafeArg.of("statusCode", exception.getStatus()),
+                    exception);
+
+            return ErrorType.UNAUTHORIZED;
+        } else if (exception.getStatus() == 403) {
             log.info("Encountered a remote permission denied exception."
                             + " Mapping to a default permission denied exception before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
