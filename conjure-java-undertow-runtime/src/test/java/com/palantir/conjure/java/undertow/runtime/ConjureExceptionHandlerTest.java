@@ -100,6 +100,27 @@ public final class ConjureExceptionHandlerTest {
     }
 
     @Test
+    public void handles401RemoteException() throws IOException {
+        SerializableError remoteError = SerializableError.forException(
+                new ServiceException(ErrorType.UNAUTHORIZED, SafeArg.of("foo", "bar")));
+        exception = new RemoteException(remoteError, ErrorType.UNAUTHORIZED.httpErrorCode());
+        Response response = execute();
+
+        // Propagates errorInstanceId and does not change error code and name
+        // Does not propagate args
+        SerializableError expectedPropagatedError = SerializableError.builder()
+                .errorCode(ErrorType.UNAUTHORIZED.code().toString())
+                .errorName(ErrorType.UNAUTHORIZED.name())
+                .errorInstanceId(remoteError.errorInstanceId())
+                .build();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
+
+        assertThat(response.body().string()).isEqualTo(stream.toString());
+        assertThat(response.code()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
+    }
+
+    @Test
     public void handles403RemoteException() throws IOException {
         SerializableError remoteError = SerializableError.forException(
                 new ServiceException(ErrorType.PERMISSION_DENIED, SafeArg.of("foo", "bar")));
