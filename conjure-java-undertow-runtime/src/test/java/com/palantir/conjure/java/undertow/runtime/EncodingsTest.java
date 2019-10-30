@@ -65,9 +65,9 @@ final class EncodingsTest {
     void json_deserialize_invalidToken() {
         assertThatThrownBy(() -> deserialize(asStream("{\"invalid\"}"),
                 new TypeMarker<SimpleObject>() {}))
-                .isInstanceOf(FrameworkException.class)
-                .hasMessageContaining("Failed to deserialize")
-                .matches(exception -> ((FrameworkException) exception).getStatusCode() == 422, "Expected 422 status");
+                // SafeIllegalArgumentException is mapped to a 400 response status
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("Failed to parse request due to malformed content");
     }
 
     /** Approximation of a generated bean object. */

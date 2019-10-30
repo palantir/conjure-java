@@ -26,6 +26,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -64,12 +65,17 @@ public final class Encodings {
                     // Bad input should result in a 4XX response status, throw IAE rather than NPE.
                     Preconditions.checkArgument(value != null, "cannot deserialize a JSON null value");
                     return value;
-                } catch (JsonMappingException | JsonParseException e) {
+                } catch (JsonMappingException e) {
                     // JsonMappingException includes both MismatchedInputException and InvalidDefinitionException
                     // which is important for us to detect when both parsing fails (in jackson code) and when object
                     // validation (setter null checks) fail in our objects.
-                    // JsonParseException is thrown when the input cannot be parsed as JSON, for example '{"value"}'.
                     throw FrameworkException.unprocessableEntity("Failed to deserialize request", e,
+                            SafeArg.of("contentType", getContentType()),
+                            SafeArg.of("type", type));
+                } catch (JsonParseException e) {
+                    // JsonParseException is thrown when the input cannot be parsed as JSON, for example '{"value"}'.
+                    throw new SafeIllegalArgumentException("Failed to parse request due to malformed content",
+                            e,
                             SafeArg.of("contentType", getContentType()),
                             SafeArg.of("type", type));
                 } catch (IOException e) {
