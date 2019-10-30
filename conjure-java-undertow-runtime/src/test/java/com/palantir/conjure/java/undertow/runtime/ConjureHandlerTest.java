@@ -22,12 +22,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.Methods;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.OkHttpClient;
@@ -60,7 +60,7 @@ public final class ConjureHandlerTest {
 
     @BeforeEach
     public void before() {
-        wrappersBeforeBlockingCallOrder = Lists.newArrayList();
+        wrappersBeforeBlockingCallOrder = new ArrayList<>();
         HttpHandler httpHandler = exchange -> {
             if (wrapperObserver.control() > 0) {
                 innerObserver.control();

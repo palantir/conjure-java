@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java.types;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.palantir.conjure.java.util.Goethe;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
@@ -25,13 +23,15 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.squareup.javapoet.JavaFile;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 public interface TypeGenerator {
 
     default Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        Set<JavaFile> files = Sets.newLinkedHashSet();
+        Set<JavaFile> files = new LinkedHashSet<>();
 
         // Generate java files for type definitions
         generateTypes(conjureDefinition.getTypes()).forEach(files::add);
@@ -47,7 +47,7 @@ public interface TypeGenerator {
      * the instance's service and type generators.
      */
     default List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
-        List<Path> emittedPaths = Lists.newArrayList();
+        List<Path> emittedPaths = new ArrayList<>();
         generate(conjureDefinition).forEach(f -> {
             Path emittedPath = Goethe.formatAndEmit(f, outputDir.toPath());
             emittedPaths.add(emittedPath);

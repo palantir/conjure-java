@@ -19,7 +19,6 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.logsafe.Preconditions;
@@ -98,7 +97,7 @@ public final class ConjureHandler implements HttpHandler {
 
         private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
-        private final List<Endpoint> endpoints = Lists.newArrayList();
+        private final List<Endpoint> endpoints = new ArrayList<>();
         private HttpHandler fallback = ResponseCodeHandler.HANDLE_404;
 
         private Builder() { }

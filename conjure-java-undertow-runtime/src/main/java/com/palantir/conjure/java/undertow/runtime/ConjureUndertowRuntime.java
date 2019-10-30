@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
@@ -27,6 +26,7 @@ import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,8 +80,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     public static final class Builder {
 
         private Duration asyncTimeout = Duration.ofMinutes(3);
-        private final List<Encoding> encodings = Lists.newArrayList();
-        private final List<ParamMarker> paramMarkers = Lists.newArrayList();
+        private final List<Encoding> encodings = new ArrayList<>();
+        private final List<ParamMarker> paramMarkers = new ArrayList<>();
 
         private Builder() {}
 
