@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -25,6 +26,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -68,6 +70,12 @@ public final class Encodings {
                     // which is important for us to detect when both parsing fails (in jackson code) and when object
                     // validation (setter null checks) fail in our objects.
                     throw FrameworkException.unprocessableEntity("Failed to deserialize request", e,
+                            SafeArg.of("contentType", getContentType()),
+                            SafeArg.of("type", type));
+                } catch (JsonParseException e) {
+                    // JsonParseException is thrown when the input cannot be parsed as JSON, for example '{"value"}'.
+                    throw new SafeIllegalArgumentException("Failed to parse request due to malformed content",
+                            e,
                             SafeArg.of("contentType", getContentType()),
                             SafeArg.of("type", type));
                 } catch (IOException e) {

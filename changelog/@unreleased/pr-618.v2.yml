@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Produce a 4xx response when the request is not valid json
+  links:
+  - https://github.com/palantir/conjure-java/pull/618
