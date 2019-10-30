@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.types;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -36,6 +35,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,14 +67,12 @@ public final class ErrorGenerator {
 
     private static Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> splitErrorDefsByNamespace(
             List<ErrorDefinition> errorTypeNameToDef) {
-        Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> pkgToNamespacedErrorDefs =
-                Maps.newHashMap();
+        Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> pkgToNamespacedErrorDefs = new HashMap<>();
         errorTypeNameToDef.stream().forEach(errorDef -> {
             String errorPkg = errorDef.getErrorName().getPackage();
-            pkgToNamespacedErrorDefs.computeIfAbsent(errorPkg, key -> Maps.newHashMap());
+            pkgToNamespacedErrorDefs.computeIfAbsent(errorPkg, key -> new HashMap<>());
 
-            Map<ErrorNamespace, List<ErrorDefinition>> namespacedErrorDefs =
-                    pkgToNamespacedErrorDefs.get(errorPkg);
+            Map<ErrorNamespace, List<ErrorDefinition>> namespacedErrorDefs = pkgToNamespacedErrorDefs.get(errorPkg);
             ErrorNamespace namespace = errorDef.getNamespace();
             // TODO(rfink): Use Multimap?
             namespacedErrorDefs.computeIfAbsent(namespace, key -> new ArrayList<>());

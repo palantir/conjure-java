@@ -19,7 +19,6 @@ package com.palantir.conjure.java.services;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
@@ -197,7 +196,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     }
 
     private HttpPath replaceEncodedPathArgs(HttpPath httpPath) {
-        List<String> newSegments = Lists.newArrayList();
+        List<String> newSegments = new ArrayList<>();
         Pattern pattern = Pattern.compile("\\{([^:]+):(.*)}");
         Path path = Paths.get(httpPath.get());
         for (String segment : path.getSegments()) {
@@ -219,7 +218,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             TypeMapper returnTypeMapper,
             TypeMapper argumentTypeMapper) {
         Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
-        List<ArgumentDefinition> queryArgs = Lists.newArrayList();
+        List<ArgumentDefinition> queryArgs = new ArrayList<>();
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {
             if (arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
@@ -228,7 +227,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             }
         }
 
-        List<MethodSpec> alternateMethods = Lists.newArrayList();
+        List<MethodSpec> alternateMethods = new ArrayList<>();
         for (int i = 0; i < queryArgs.size(); i++) {
             alternateMethods.add(createCompatibilityBackfillMethod(
                     endpointDef,

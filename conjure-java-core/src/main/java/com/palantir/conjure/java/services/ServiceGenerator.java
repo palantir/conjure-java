@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.services;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.palantir.conjure.java.util.Goethe;
 import com.palantir.conjure.java.util.Javadoc;
@@ -26,6 +25,7 @@ import com.palantir.conjure.spec.EndpointDefinition;
 import com.squareup.javapoet.JavaFile;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -42,7 +42,7 @@ public interface ServiceGenerator {
      * the instance's service and type generators.
      */
     default List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
-        List<Path> emittedPaths = Lists.newArrayList();
+        List<Path> emittedPaths = new ArrayList<>();
         generate(conjureDefinition).forEach(f -> {
             Path emittedPath = Goethe.formatAndEmit(f, outputDir.toPath());
             emittedPaths.add(emittedPath);
