@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -63,10 +64,11 @@ public final class Encodings {
                     // Bad input should result in a 4XX response status, throw IAE rather than NPE.
                     Preconditions.checkArgument(value != null, "cannot deserialize a JSON null value");
                     return value;
-                } catch (JsonMappingException e) {
+                } catch (JsonMappingException | JsonParseException e) {
                     // JsonMappingException includes both MismatchedInputException and InvalidDefinitionException
                     // which is important for us to detect when both parsing fails (in jackson code) and when object
                     // validation (setter null checks) fail in our objects.
+                    // JsonParseException is thrown when the input cannot be parsed as JSON, for example '{"value"}'.
                     throw FrameworkException.unprocessableEntity("Failed to deserialize request", e,
                             SafeArg.of("contentType", getContentType()),
                             SafeArg.of("type", type));
