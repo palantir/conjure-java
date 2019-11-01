@@ -135,7 +135,7 @@ public final class SingleUnion {
     private interface Base {}
 
     @JsonTypeName("foo")
-    private static class FooWrapper implements Base {
+    private static final class FooWrapper implements Base {
         private final String value;
 
         @JsonCreator
@@ -174,7 +174,7 @@ public final class SingleUnion {
             include = JsonTypeInfo.As.EXISTING_PROPERTY,
             property = "type",
             visible = true)
-    private static class UnknownWrapper implements Base {
+    private static final class UnknownWrapper implements Base {
         private final String type;
 
         private final Map<String, Object> value;

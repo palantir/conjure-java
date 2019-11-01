@@ -514,7 +514,7 @@ public final class UnionGenerator {
                     FieldSpec.builder(memberType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
 
             TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                     .addSuperinterface(baseClass)
                     .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
                             .addMember("value", "$S", memberName.get())
@@ -561,7 +561,7 @@ public final class UnionGenerator {
                 FieldSpec.builder(UNKNOWN_MEMBER_TYPE, "type", Modifier.PRIVATE, Modifier.FINAL).build(),
                 FieldSpec.builder(genericMapType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(baseClass)
                 .addAnnotation(AnnotationSpec.builder(JsonTypeInfo.class)
                         .addMember("use", "JsonTypeInfo.Id.NAME")

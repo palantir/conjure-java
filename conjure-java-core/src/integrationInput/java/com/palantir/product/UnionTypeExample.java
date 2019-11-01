@@ -321,7 +321,7 @@ public final class UnionTypeExample {
     private interface Base {}
 
     @JsonTypeName("stringExample")
-    private static class StringExampleWrapper implements Base {
+    private static final class StringExampleWrapper implements Base {
         private final StringExample value;
 
         @JsonCreator
@@ -358,7 +358,7 @@ public final class UnionTypeExample {
     }
 
     @JsonTypeName("set")
-    private static class SetWrapper implements Base {
+    private static final class SetWrapper implements Base {
         private final Set<String> value;
 
         @JsonCreator
@@ -393,7 +393,7 @@ public final class UnionTypeExample {
     }
 
     @JsonTypeName("thisFieldIsAnInteger")
-    private static class ThisFieldIsAnIntegerWrapper implements Base {
+    private static final class ThisFieldIsAnIntegerWrapper implements Base {
         private final int value;
 
         @JsonCreator
@@ -430,7 +430,7 @@ public final class UnionTypeExample {
     }
 
     @JsonTypeName("alsoAnInteger")
-    private static class AlsoAnIntegerWrapper implements Base {
+    private static final class AlsoAnIntegerWrapper implements Base {
         private final int value;
 
         @JsonCreator
@@ -467,7 +467,7 @@ public final class UnionTypeExample {
     }
 
     @JsonTypeName("if")
-    private static class IfWrapper implements Base {
+    private static final class IfWrapper implements Base {
         private final int value;
 
         @JsonCreator
@@ -502,7 +502,7 @@ public final class UnionTypeExample {
     }
 
     @JsonTypeName("new")
-    private static class NewWrapper implements Base {
+    private static final class NewWrapper implements Base {
         private final int value;
 
         @JsonCreator
@@ -537,7 +537,7 @@ public final class UnionTypeExample {
     }
 
     @JsonTypeName("interface")
-    private static class InterfaceWrapper implements Base {
+    private static final class InterfaceWrapper implements Base {
         private final int value;
 
         @JsonCreator
@@ -577,7 +577,7 @@ public final class UnionTypeExample {
             include = JsonTypeInfo.As.EXISTING_PROPERTY,
             property = "type",
             visible = true)
-    private static class UnknownWrapper implements Base {
+    private static final class UnknownWrapper implements Base {
         private final String type;
 
         private final Map<String, Object> value;

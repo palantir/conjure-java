@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Union wrapper types are final
+  links:
+  - https://github.com/palantir/conjure-java/pull/626
