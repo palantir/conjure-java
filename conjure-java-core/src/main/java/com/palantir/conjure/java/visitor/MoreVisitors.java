@@ -20,21 +20,21 @@ public final class MoreVisitors {
     public static final ExternalType EXTERNAL = new ExternalType();
     public static final IsInternalReference IS_INTERNAL_REFERENCE = new IsInternalReference();
 
-    private static class IsExternalType extends IsTypeVisitor {
+    private static final class IsExternalType extends IsTypeVisitor {
         @Override
         public Boolean visitExternal(ExternalReference _value) {
             return true;
         }
     }
 
-    private static class ExternalType extends DefaultTypeVisitor<ExternalReference> {
+    private static final class ExternalType extends DefaultTypeVisitor<ExternalReference> {
         @Override
         public ExternalReference visitExternal(ExternalReference value) {
             return value;
         }
     }
 
-    private static class IsInternalReference extends IsTypeVisitor {
+    private static final class IsInternalReference extends IsTypeVisitor {
         @Override
         public Boolean visitReference(TypeName _value) {
             return true;

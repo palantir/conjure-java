@@ -28,7 +28,7 @@ import java.util.List;
 
 public abstract class TestBase {
 
-    protected static final String readFromFile(Path file) {
+    protected static String readFromFile(Path file) {
         try {
             return new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
         } catch (IOException e) {
