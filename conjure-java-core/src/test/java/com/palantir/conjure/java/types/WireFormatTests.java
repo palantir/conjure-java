@@ -403,7 +403,7 @@ public final class WireFormatTests {
         assertThat(uuidA.hashCode()).isNotEqualTo(uuidB.hashCode());
     }
 
-    private static class TestVisitor implements UnionTypeExample.Visitor<Integer> {
+    private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
         @Override
         public Integer visitStringExample(StringExample stringExampleValue) {
             return stringExampleValue.getString().length();
