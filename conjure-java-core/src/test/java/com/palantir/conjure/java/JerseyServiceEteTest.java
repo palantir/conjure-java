@@ -99,7 +99,7 @@ public final class JerseyServiceEteTest extends TestBase {
                 clientUserAgent(),
                 new HostMetricsRegistry(),
                 clientConfiguration());
-        assertThat(emptyPathClient.emptyPath()).isEqualTo(true);
+        assertThat(emptyPathClient.emptyPath()).isTrue();
     }
 
     @Disabled("string returns in Jersey should use a mandated wrapper alias type")
@@ -117,8 +117,7 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @Test
     public void client_can_retrieve_a_boolean_from_a_server() throws Exception {
-        assertThat(client.boolean_(AuthHeader.valueOf("authHeader")))
-                .isEqualTo(true);
+        assertThat(client.boolean_(AuthHeader.valueOf("authHeader"))).isTrue();
     }
 
     @Test
