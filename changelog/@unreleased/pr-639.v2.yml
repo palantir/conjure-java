@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Unbox primitive types when generating `of` factory method
+  links:
+  - https://github.com/palantir/conjure-java/pull/639
