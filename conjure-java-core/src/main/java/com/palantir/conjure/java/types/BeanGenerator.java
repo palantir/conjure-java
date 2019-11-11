@@ -47,6 +47,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -306,7 +307,8 @@ public final class BeanGenerator {
         if (!isOptional(spec)) {
             return spec.type;
         }
-        return ((ParameterizedTypeName) spec.type).typeArguments.get(0);
+        TypeName typeName = ((ParameterizedTypeName) spec.type).typeArguments.get(0);
+        return typeName.isBoxedPrimitive() ? typeName.unbox() : typeName;
     }
 
     private static boolean isOptional(FieldSpec spec) {
