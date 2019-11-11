@@ -71,7 +71,7 @@ public final class BeanSerdeIntegrationTests {
     public void testIgnoreProperties() throws Exception {
         // Important for ensuring additive changes don't affect clients adversely
         BooleanExample boolExample = mapper.readValue("{\"coin\": true, \"ignored\": \"field\"}", BooleanExample.class);
-        assertThat(boolExample.getCoin()).isEqualTo(true);
+        assertThat(boolExample.getCoin()).isTrue();
     }
 
     @Test
