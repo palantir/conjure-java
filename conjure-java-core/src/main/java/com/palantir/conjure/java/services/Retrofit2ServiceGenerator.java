@@ -249,8 +249,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .mapToObj(sortedParams::get)
                         .collect(Collectors.toList()));
 
-        endpointDef.getReturns()
-                .ifPresent(type -> methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box())));
+        endpointDef.getReturns().ifPresent(type ->
+            methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box())));
 
         // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
