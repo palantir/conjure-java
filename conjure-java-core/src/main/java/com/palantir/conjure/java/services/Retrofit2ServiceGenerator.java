@@ -38,7 +38,6 @@ import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
-import com.palantir.logsafe.Preconditions;
 import com.palantir.util.syntacticpath.Path;
 import com.palantir.util.syntacticpath.Paths;
 import com.squareup.javapoet.AnnotationSpec;
@@ -65,10 +64,8 @@ import org.slf4j.LoggerFactory;
 
 public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
-    private static final ClassName COMPLETABLE_FUTURE_TYPE = ClassName.get("java.util.concurrent", "CompletableFuture");
     private static final ClassName LISTENABLE_FUTURE_TYPE = ClassName.get(
             "com.google.common.util.concurrent", "ListenableFuture");
-    private static final ClassName CALL_TYPE = ClassName.get("retrofit2", "Call");
     private static final String AUTH_HEADER_NAME = "Authorization";
 
     private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get("okhttp3", "RequestBody");
@@ -78,13 +75,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private final Set<FeatureFlags> featureFlags;
 
-    @SuppressWarnings("deprecation")
     public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
-        Preconditions.checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
-                        || !featureFlags.contains(FeatureFlags.RetrofitCompletableFutures),
-                "Cannot enable both the RetrofitListenableFutures and RetrofitCompletableFutures "
-                        + "Conjure experimental features. Please remove one.");
     }
 
     @Override
@@ -105,7 +97,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .collect(Collectors.toSet());
     }
 
-    private JavaFile generateService(ServiceDefinition serviceDefinition,
+    private JavaFile generateService(
+            ServiceDefinition serviceDefinition,
             TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
@@ -131,17 +124,6 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private String serviceName(ServiceDefinition serviceDefinition) {
         return serviceDefinition.getServiceName().getName() + "Retrofit";
-    }
-
-    @SuppressWarnings("deprecation")
-    private ClassName getReturnType() {
-        if (featureFlags.contains(FeatureFlags.RetrofitCompletableFutures)) {
-            return COMPLETABLE_FUTURE_TYPE;
-        } else if (featureFlags.contains(FeatureFlags.RetrofitListenableFutures)) {
-            return LISTENABLE_FUTURE_TYPE;
-        } else {
-            return CALL_TYPE;
-        }
     }
 
     private MethodSpec generateServiceMethod(
@@ -174,7 +156,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(
                 content -> methodBuilder.addJavadoc("$L", content));
 
-        methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box()));
+        methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box()));
 
         methodBuilder.addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs));
 
@@ -268,7 +250,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .collect(Collectors.toList()));
 
         endpointDef.getReturns()
-                .ifPresent(type -> methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box())));
+                .ifPresent(type -> methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box())));
 
         // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
@@ -384,5 +366,4 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         }
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
-
 }

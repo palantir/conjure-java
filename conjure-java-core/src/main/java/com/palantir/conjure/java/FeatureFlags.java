@@ -18,28 +18,11 @@ package com.palantir.conjure.java;
 
 import com.google.common.annotations.Beta;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
 public enum FeatureFlags {
-    /**
-     * Instructs the {@link Retrofit2ServiceGenerator} to generate service
-     * endpoints returning {@link java.util.concurrent.CompletableFuture} instead of {@code Call<>} objects.
-     * Incompatible with {@link FeatureFlags#RetrofitListenableFutures}.
-     * @deprecated please use {@link FeatureFlags#RetrofitListenableFutures}
-     */
-    @Deprecated
-    RetrofitCompletableFutures,
-
-    /**
-     * Instructs the {@link Retrofit2ServiceGenerator} to generate service
-     * endpoints returning {@link com.google.common.util.concurrent.ListenableFuture} instead of {@code Call<>} objects.
-     * Incompatible with {@link FeatureFlags#RetrofitCompletableFutures}.
-     */
-    RetrofitListenableFutures,
-
     /**
      * Instructs the {@link JerseyServiceGenerator} to generate binary response endpoints with the {@link Response}
      * type.
