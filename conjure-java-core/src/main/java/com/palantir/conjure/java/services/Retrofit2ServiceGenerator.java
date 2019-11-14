@@ -99,7 +99,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private JavaFile generateService(
             ServiceDefinition serviceDefinition,
-            TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(Retrofit2ServiceGenerator.class));
