@@ -410,16 +410,17 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testBinaryOptionalEmptyResponse() {
-        ResponseBody response = Futures.getUnchecked(binaryClient
+        Optional<ResponseBody> response = Futures.getUnchecked(binaryClient
                 .getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")));
-        assertThat(response).isNull();
+        assertThat(response).isNotPresent();
     }
 
     @Test
     public void testBinaryOptionalPresentResponse() throws Exception {
-        ResponseBody response = Futures.getUnchecked(binaryClient
+        Optional<ResponseBody> response = Futures.getUnchecked(binaryClient
                 .getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")));
-        assertThat(response.string()).isEqualTo("Hello World!");
+        assertThat(response).isPresent();
+        assertThat(response.get().string()).isEqualTo("Hello World!");
     }
 
     @Test

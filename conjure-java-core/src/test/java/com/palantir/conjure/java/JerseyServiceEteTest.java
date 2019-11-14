@@ -55,6 +55,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -179,16 +180,18 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @Test
     public void test_optionalBinary_present() throws IOException {
-        ResponseBody response = Futures.getUnchecked(
+        Optional<ResponseBody> response = Futures.getUnchecked(
                 binary.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")));
-        assertThat(response.string()).isEqualTo("Hello World!");
+        assertThat(response).isPresent();
+        assertThat(response.get().contentType()).isEqualTo(MediaType.get("application/octet-stream"));
+        assertThat(response.get().string()).isEqualTo("Hello World!");
     }
 
     @Test
-    public void test_optionalBinary_empty() {
-        ResponseBody response =
+    public void test_optionalBinary_empty() throws IOException {
+        Optional<ResponseBody> response =
                 Futures.getUnchecked(binary.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")));
-        assertThat(response).isNull();
+        assertThat(response).isNotPresent();
     }
 
     @BeforeAll
