@@ -152,7 +152,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .addMember("value", "$S", "Accept: " + getReturnMediaType(returnType))
                         .build());
 
-        if (returnType.equals(BINARY_RETURN_TYPE)) {
+        if (returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming")).build());
         }
 
