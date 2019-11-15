@@ -1,0 +1,7 @@
+type: feature
+feature:
+  description: Add `StrictObjects` feature flag to generate objects that will fail
+    to deserialize unknown properties. Users will still be able to ignore unknown
+    properties by configuring their object mapper to do so
+  links:
+  - https://github.com/palantir/conjure-java/pull/644
