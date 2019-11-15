@@ -196,7 +196,7 @@ public final class WireFormatTests {
 
     @Test
     public void testIgnoreUnknownValuesDuringDeserialization() throws Exception {
-        assertThat(mapper.readValue("{\"fake\": \"fake\"}", OptionalExample.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue("{\"fake\": \"fake\"}", OptionalExample.class))
                 .isEqualTo(OptionalExample.builder().build());
     }
 

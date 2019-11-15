@@ -83,10 +83,9 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_double_field_should_throw() {
-        assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{\"double\":null}", DoubleExample.class))
-                .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessageContaining("Some required fields have not been set")
-                .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("doubleValue")));
+        assertThatThrownBy(() -> mapper.readValue("{\"doubleValue\":null}", DoubleExample.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("Cannot map `null` into type double");
     }
 
     @Test
@@ -103,9 +102,9 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_collection_fields_should_deserialize_as_empty() throws Exception {
-        assertThat(mapper.readValue("{\"foo\":null}", SetExample.class).getItems()).isEmpty();
-        assertThat(mapper.readValue("{\"foo\":null}", ListExample.class).getItems()).isEmpty();
-        assertThat(mapper.readValue("{\"foo\":null}", MapExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", SetExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", ListExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", MapExample.class).getItems()).isEmpty();
     }
 
     @Test

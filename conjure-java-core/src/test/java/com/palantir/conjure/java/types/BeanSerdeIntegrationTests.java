@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.product.BearerTokenExample;
@@ -69,8 +70,11 @@ public final class BeanSerdeIntegrationTests {
 
     @Test
     public void testIgnoreProperties() throws Exception {
+        assertThatThrownBy(() -> mapper.readValue("{\"coin\": true, \"ignored\": \"field\"}", BooleanExample.class))
+            .isInstanceOf(UnrecognizedPropertyException.class);
         // Important for ensuring additive changes don't affect clients adversely
-        BooleanExample boolExample = mapper.readValue("{\"coin\": true, \"ignored\": \"field\"}", BooleanExample.class);
+        BooleanExample boolExample = ObjectMappers.newClientObjectMapper()
+                .readValue("{\"coin\": true, \"ignored\": \"field\"}", BooleanExample.class);
         assertThat(boolExample.getCoin()).isTrue();
     }
 
