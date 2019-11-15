@@ -19,6 +19,7 @@ package com.palantir.conjure.java;
 import com.google.common.annotations.Beta;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
+import com.palantir.conjure.java.types.ObjectGenerator;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 
@@ -75,4 +76,10 @@ public enum FeatureFlags {
      */
     @Beta
     ExperimentalUndertowAsyncMarkers,
+
+    /**
+     * Instructs the {@link ObjectGenerator} to not generate objects that fail to deserialize if unknown fields
+     * are encountered.
+     */
+    StrictObjects,
 }
