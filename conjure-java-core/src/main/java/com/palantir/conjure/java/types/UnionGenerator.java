@@ -72,10 +72,7 @@ public final class UnionGenerator {
     // If the member type is not known, a String containing the name of the unknown type is used.
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
 
-    public static JavaFile generateUnionType(
-            TypeMapper typeMapper,
-            UnionDefinition typeDef,
-            Set<FeatureFlags> featureFlags) {
+    public static JavaFile generateUnionType(TypeMapper typeMapper, UnionDefinition typeDef) {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName unionClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName baseClass = unionClass.nestedClass("Base");
@@ -99,7 +96,7 @@ public final class UnionGenerator {
                 .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass))
                 .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes))
                 .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes))
-                .addType(generateBase(baseClass, memberTypes, featureFlags.contains(FeatureFlags.StrictObjects)))
+                .addType(generateBase(baseClass, memberTypes))
                 .addTypes(generateWrapperClasses(typeMapper, baseClass, typeDef.getUnion()))
                 .addType(generateUnknownWrapper(baseClass))
                 .addMethod(generateEquals(unionClass))
@@ -479,8 +476,7 @@ public final class UnionGenerator {
     }
 
 
-    private static TypeSpec generateBase(
-            ClassName baseClass, Map<FieldName, TypeName> memberTypes, boolean strictObjects) {
+    private static TypeSpec generateBase(ClassName baseClass, Map<FieldName, TypeName> memberTypes) {
         ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
         TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass)
                 .addModifiers(Modifier.PRIVATE)
@@ -498,10 +494,8 @@ public final class UnionGenerator {
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
         subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
         baseBuilder.addAnnotation(annotationBuilder.build());
-        if (!strictObjects) {
-            baseBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
-                    .addMember("ignoreUnknown", "$L", true).build());
-        }
+        baseBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+                .addMember("ignoreUnknown", "$L", true).build());
 
         return baseBuilder.build();
     }
