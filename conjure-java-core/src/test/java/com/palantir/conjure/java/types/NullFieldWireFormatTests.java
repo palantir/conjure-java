@@ -4,16 +4,12 @@
 
 package com.palantir.conjure.java.types;
 
-import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.product.AnyExample;
 import com.palantir.product.BearerTokenExample;
 import com.palantir.product.BinaryExample;

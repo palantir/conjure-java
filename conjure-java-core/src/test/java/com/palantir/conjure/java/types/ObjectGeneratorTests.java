@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.FeatureFlags;
-import com.palantir.conjure.java.TestBase;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;
