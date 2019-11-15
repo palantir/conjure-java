@@ -7,8 +7,10 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.TestBase;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +34,8 @@ public final class ObjectGeneratorTests {
     public void testObjectGenerator_allExamples() throws IOException {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-types.yml")));
-        List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes))
-                .emit(def, tempDir);
+        List<Path> files = new ObjectGenerator(
+                ImmutableSet.of(FeatureFlags.UseImmutableBytes, FeatureFlags.StrictObjects)).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }

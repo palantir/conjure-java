@@ -1,6 +1,5 @@
 package com.palantir.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -101,7 +100,6 @@ public final class CovariantOptionalExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         private Optional<Object> item = Optional.empty();
 
