@@ -122,6 +122,11 @@ public final class ConjureJavaCli implements Runnable {
                         + "processing")
         private boolean undertowListenableFutures;
 
+        @CommandLine.Option(names = "--strictObjects",
+                defaultValue = "false",
+                description = "Generate POJOs that by default will fail to deserialize unknown fields")
+        private boolean strictObjects;
+
         @Beta
         @CommandLine.Option(
                 names = "--experimentalUndertowAsyncMarkers",
@@ -188,6 +193,7 @@ public final class ConjureJavaCli implements Runnable {
                     .useImmutableBytes(useImmutableBytes)
                     .undertowListenableFutures(undertowListenableFutures)
                     .experimentalUndertowAsyncMarkers(experimentalUndertowAsyncMarkers)
+                    .strictObjects(strictObjects)
                     .build();
         }
 

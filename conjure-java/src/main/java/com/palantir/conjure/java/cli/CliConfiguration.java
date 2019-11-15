@@ -105,5 +105,9 @@ public abstract class CliConfiguration {
         Builder experimentalUndertowAsyncMarkers(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.ExperimentalUndertowAsyncMarkers) : this;
         }
+
+        Builder strictObjects(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.StrictObjects) : this;
+        }
     }
 }
