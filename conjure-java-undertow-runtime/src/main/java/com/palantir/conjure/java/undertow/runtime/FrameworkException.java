@@ -28,9 +28,9 @@ import java.util.List;
 final class FrameworkException extends RuntimeException implements SafeLoggable {
 
     private static final ErrorType UNPROCESSABLE_ENTITY = ErrorType.create(
-            ErrorType.Code.CUSTOM_CLIENT, "Conjure:UnprocessableEntity");
+            ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnprocessableEntity");
     private static final ErrorType UNSUPPORTED_MEDIA_TYPE = ErrorType.create(
-            ErrorType.Code.CUSTOM_CLIENT, "Conjure:UnsupportedMediaType");
+            ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnsupportedMediaType");
 
     private final String logMessage;
     private final List<Arg<?>> arguments;

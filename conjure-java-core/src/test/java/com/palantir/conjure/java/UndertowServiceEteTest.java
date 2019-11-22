@@ -251,7 +251,7 @@ public final class UndertowServiceEteTest extends TestBase {
         try (InputStream responseBody = httpUrlConnection.getErrorStream()) {
             SerializableError error = CLIENT_OBJECT_MAPPER.readValue(responseBody, SerializableError.class);
             assertThat(error.errorCode()).isEqualTo("INVALID_ARGUMENT");
-            assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+            assertThat(error.errorName()).isEqualTo("Conjure:UnprocessableEntity");
         }
     }
 
