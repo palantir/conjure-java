@@ -46,9 +46,9 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
     private static Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
     private static Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
     private static final ErrorType MISSING_CREDENTIAL_ERROR_TYPE = ErrorType.create(
-            ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredential");
+            ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials");
     private static final ErrorType MALFORMED_CREDENTIAL_ERROR_TYPE = ErrorType.create(
-            ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredential");
+            ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials");
 
     private final PlainSerDe plainSerDe;
 

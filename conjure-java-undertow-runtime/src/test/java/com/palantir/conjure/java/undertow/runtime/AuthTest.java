@@ -16,10 +16,10 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import static com.palantir.conjure.java.api.testing.Assertions.assertThatServiceExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.tokens.auth.AuthHeader;
@@ -44,18 +44,16 @@ public final class AuthTest {
     @Test
     public void testAuthHeaderNotPresent() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        assertThatThrownBy(() -> CONTEXT.auth().header(exchange))
-                .isInstanceOf(ServiceException.class)
-                .hasMessage("ServiceException: UNAUTHORIZED (Conjure:MissingCredential)");
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().header(exchange))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials"));
     }
 
     @Test
     public void testAuthHeaderEmptyValue() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "");
-        assertThatThrownBy(() -> CONTEXT.auth().header(exchange))
-                .isInstanceOf(ServiceException.class)
-                .hasMessage("ServiceException: UNAUTHORIZED (Conjure:MalformedCredential)");
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().header(exchange))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
 
     @Test
@@ -63,12 +61,10 @@ public final class AuthTest {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer foo");
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer bar");
-        assertThatThrownBy(() -> CONTEXT.auth().header(exchange))
-                .isInstanceOf(ServiceException.class)
-                .hasMessageContaining("ServiceException: UNAUTHORIZED (Conjure:MalformedCredential)");
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().header(exchange))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
 
-    //delete
     @Test
     public void testParseAuthCookie() {
         BearerToken expected = BearerToken.valueOf("token");
@@ -81,9 +77,8 @@ public final class AuthTest {
     @Test
     public void testAuthCookieNotPresent() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        assertThatThrownBy(() -> CONTEXT.auth().cookie(exchange, "any"))
-                .isInstanceOf(ServiceException.class)
-                .hasMessage("ServiceException: UNAUTHORIZED (Conjure:MissingCredential)");
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().cookie(exchange, "any"))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials"));
     }
 
     @Test
@@ -91,8 +86,7 @@ public final class AuthTest {
         String cookieName = "Auth-Token";
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestCookies().put(cookieName, new CookieImpl(cookieName, ""));
-        assertThatThrownBy(() -> CONTEXT.auth().cookie(exchange, cookieName))
-                .isInstanceOf(ServiceException.class)
-                .hasMessage("ServiceException: UNAUTHORIZED (Conjure:MalformedCredential)");
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().cookie(exchange, cookieName))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
 }
