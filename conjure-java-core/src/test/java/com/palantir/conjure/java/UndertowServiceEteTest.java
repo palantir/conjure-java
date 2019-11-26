@@ -219,12 +219,12 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    public void java_url_client_receives_bad_request_without_authheader() throws IOException {
+    public void java_url_client_receives_unauthorized_without_authheader() throws IOException {
         HttpURLConnection httpUrlConnection = preparePostRequest();
         sendPostRequestData(
                 httpUrlConnection,
                 CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
-        assertThat(httpUrlConnection.getResponseCode()).isEqualTo(400);
+        assertThat(httpUrlConnection.getResponseCode()).isEqualTo(401);
     }
 
     @Test
@@ -251,7 +251,7 @@ public final class UndertowServiceEteTest extends TestBase {
         try (InputStream responseBody = httpUrlConnection.getErrorStream()) {
             SerializableError error = CLIENT_OBJECT_MAPPER.readValue(responseBody, SerializableError.class);
             assertThat(error.errorCode()).isEqualTo("INVALID_ARGUMENT");
-            assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+            assertThat(error.errorName()).isEqualTo("Conjure:UnprocessableEntity");
         }
     }
 

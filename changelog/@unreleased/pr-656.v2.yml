@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: |-
+    Missing credentials result in 401 UNAUTHORIZED responses from conjure-undertow
+    Previously we responded with a 400 bad request status, which isn't as accurate as we would like.
+  links:
+  - https://github.com/palantir/conjure-java/pull/656

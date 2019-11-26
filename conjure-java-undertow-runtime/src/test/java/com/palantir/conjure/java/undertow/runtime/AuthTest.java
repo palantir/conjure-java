@@ -16,18 +16,18 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import static com.palantir.conjure.java.api.testing.Assertions.assertThatServiceExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.Headers;
 import org.junit.jupiter.api.Test;
-
 
 public final class AuthTest {
 
@@ -44,9 +44,16 @@ public final class AuthTest {
     @Test
     public void testAuthHeaderNotPresent() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        assertThatThrownBy(() -> CONTEXT.auth().header(exchange))
-                .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("One Authorization header value is required");
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().header(exchange))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials"));
+    }
+
+    @Test
+    public void testAuthHeaderEmptyValue() {
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "");
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().header(exchange))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
 
     @Test
@@ -54,8 +61,32 @@ public final class AuthTest {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer foo");
         exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer bar");
-        assertThatThrownBy(() -> CONTEXT.auth().header(exchange))
-                .isInstanceOf(SafeIllegalArgumentException.class)
-                .hasMessage("One Authorization header value is required");
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().header(exchange))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
+    }
+
+    @Test
+    public void testParseAuthCookie() {
+        BearerToken expected = BearerToken.valueOf("token");
+        String cookieName = "Auth-Token";
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestCookies().put(cookieName, new CookieImpl(cookieName, "token"));
+        assertThat(CONTEXT.auth().cookie(exchange, cookieName)).isEqualTo(expected);
+    }
+
+    @Test
+    public void testAuthCookieNotPresent() {
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().cookie(exchange, "any"))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials"));
+    }
+
+    @Test
+    public void testAuthCookieEmptyValue() {
+        String cookieName = "Auth-Token";
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestCookies().put(cookieName, new CookieImpl(cookieName, ""));
+        assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().cookie(exchange, cookieName))
+                .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
 }
