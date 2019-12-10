@@ -25,7 +25,8 @@ public final class IntegerAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof IntegerAliasExample && this.value == ((IntegerAliasExample) other).value);
+                || (other instanceof IntegerAliasExample
+                        && this.value == ((IntegerAliasExample) other).value);
     }
 
     @Override

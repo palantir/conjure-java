@@ -54,11 +54,13 @@ public final class AnyExample {
         missingFields = addFieldIfMissing(missingFields, any, "any");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set",
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(
+            List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {

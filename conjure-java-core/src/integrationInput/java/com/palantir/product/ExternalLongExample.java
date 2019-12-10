@@ -27,7 +27,8 @@ public final class ExternalLongExample {
 
     private volatile int memoizedHashCode;
 
-    private ExternalLongExample(long externalLong, Optional<Long> optionalExternalLong, List<Long> listExternalLong) {
+    private ExternalLongExample(
+            long externalLong, Optional<Long> optionalExternalLong, List<Long> listExternalLong) {
         validateFields(optionalExternalLong, listExternalLong);
         this.externalLong = externalLong;
         this.optionalExternalLong = optionalExternalLong;
@@ -51,7 +52,8 @@ public final class ExternalLongExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof ExternalLongExample && equalTo((ExternalLongExample) other));
+        return this == other
+                || (other instanceof ExternalLongExample && equalTo((ExternalLongExample) other));
     }
 
     private boolean equalTo(ExternalLongExample other) {
@@ -64,7 +66,9 @@ public final class ExternalLongExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.externalLong, this.optionalExternalLong, this.listExternalLong);
+            result =
+                    Objects.hash(
+                            this.externalLong, this.optionalExternalLong, this.listExternalLong);
             memoizedHashCode = result;
         }
         return result;
@@ -81,7 +85,8 @@ public final class ExternalLongExample {
                 + '}';
     }
 
-    public static ExternalLongExample of(long externalLong, long optionalExternalLong, List<Long> listExternalLong) {
+    public static ExternalLongExample of(
+            long externalLong, long optionalExternalLong, List<Long> listExternalLong) {
         return builder()
                 .externalLong(externalLong)
                 .optionalExternalLong(Optional.of(optionalExternalLong))
@@ -89,17 +94,21 @@ public final class ExternalLongExample {
                 .build();
     }
 
-    private static void validateFields(Optional<Long> optionalExternalLong, List<Long> listExternalLong) {
+    private static void validateFields(
+            Optional<Long> optionalExternalLong, List<Long> listExternalLong) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, optionalExternalLong, "optionalExternalLong");
+        missingFields =
+                addFieldIfMissing(missingFields, optionalExternalLong, "optionalExternalLong");
         missingFields = addFieldIfMissing(missingFields, listExternalLong, "listExternalLong");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set",
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(
+            List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -142,15 +151,18 @@ public final class ExternalLongExample {
 
         @JsonSetter(value = "optionalExternalLong", nulls = Nulls.SKIP)
         public Builder optionalExternalLong(Optional<? extends Long> optionalExternalLong) {
-            this.optionalExternalLong = Preconditions.checkNotNull(
-                            optionalExternalLong, "optionalExternalLong cannot be null")
-                    .map(Function.identity());
+            this.optionalExternalLong =
+                    Preconditions.checkNotNull(
+                                    optionalExternalLong, "optionalExternalLong cannot be null")
+                            .map(Function.identity());
             return this;
         }
 
         public Builder optionalExternalLong(long optionalExternalLong) {
-            this.optionalExternalLong = Optional.of(
-                    Preconditions.checkNotNull(optionalExternalLong, "optionalExternalLong cannot be null"));
+            this.optionalExternalLong =
+                    Optional.of(
+                            Preconditions.checkNotNull(
+                                    optionalExternalLong, "optionalExternalLong cannot be null"));
             return this;
         }
 
@@ -159,14 +171,16 @@ public final class ExternalLongExample {
             this.listExternalLong.clear();
             ConjureCollections.addAll(
                     this.listExternalLong,
-                    Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
+                    Preconditions.checkNotNull(
+                            listExternalLong, "listExternalLong cannot be null"));
             return this;
         }
 
         public Builder addAllListExternalLong(Iterable<? extends Long> listExternalLong) {
             ConjureCollections.addAll(
                     this.listExternalLong,
-                    Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
+                    Preconditions.checkNotNull(
+                            listExternalLong, "listExternalLong cannot be null"));
             return this;
         }
 
@@ -177,14 +191,17 @@ public final class ExternalLongExample {
 
         private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
-            missingFields = addFieldIfMissing(missingFields, _externalLongInitialized, "externalLong");
+            missingFields =
+                    addFieldIfMissing(missingFields, _externalLongInitialized, "externalLong");
             if (missingFields != null) {
                 throw new SafeIllegalArgumentException(
-                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+                        "Some required fields have not been set",
+                        SafeArg.of("missingFields", missingFields));
             }
         }
 
-        private static List<String> addFieldIfMissing(List<String> prev, boolean initialized, String fieldName) {
+        private static List<String> addFieldIfMissing(
+                List<String> prev, boolean initialized, String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {

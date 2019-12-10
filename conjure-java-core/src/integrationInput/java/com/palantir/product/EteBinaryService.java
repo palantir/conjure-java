@@ -24,22 +24,27 @@ public interface EteBinaryService {
     @Path("binary")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    StreamingOutput postBinary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull InputStream body);
+    StreamingOutput postBinary(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @NotNull InputStream body);
 
     @GET
     @Path("binary/optional/present")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    Optional<StreamingOutput> getOptionalBinaryPresent(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+    Optional<StreamingOutput> getOptionalBinaryPresent(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("binary/optional/empty")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    Optional<StreamingOutput> getOptionalBinaryEmpty(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+    Optional<StreamingOutput> getOptionalBinaryEmpty(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     /** Throws an exception after partially writing a binary response. */
     @GET
     @Path("binary/failure")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput getBinaryFailure(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @QueryParam("numBytes") int numBytes);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("numBytes") int numBytes);
 }

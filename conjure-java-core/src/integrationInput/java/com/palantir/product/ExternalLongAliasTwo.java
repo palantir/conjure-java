@@ -26,7 +26,8 @@ public final class ExternalLongAliasTwo {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof ExternalLongAliasTwo && this.value.equals(((ExternalLongAliasTwo) other).value));
+                || (other instanceof ExternalLongAliasTwo
+                        && this.value.equals(((ExternalLongAliasTwo) other).value));
     }
 
     @Override

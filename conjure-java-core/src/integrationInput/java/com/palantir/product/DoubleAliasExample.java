@@ -25,7 +25,8 @@ public final class DoubleAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof DoubleAliasExample && this.value == ((DoubleAliasExample) other).value);
+                || (other instanceof DoubleAliasExample
+                        && this.value == ((DoubleAliasExample) other).value);
     }
 
     @Override
@@ -57,7 +58,8 @@ public final class DoubleAliasExample {
             case "-Infinity":
                 return DoubleAliasExample.of(Double.NEGATIVE_INFINITY);
             default:
-                throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
+                throw new IllegalArgumentException(
+                        "Cannot deserialize string into double: " + value);
         }
     }
 }

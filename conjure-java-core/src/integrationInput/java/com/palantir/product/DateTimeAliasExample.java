@@ -27,7 +27,8 @@ public final class DateTimeAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof DateTimeAliasExample && this.value.equals(((DateTimeAliasExample) other).value));
+                || (other instanceof DateTimeAliasExample
+                        && this.value.equals(((DateTimeAliasExample) other).value));
     }
 
     @Override

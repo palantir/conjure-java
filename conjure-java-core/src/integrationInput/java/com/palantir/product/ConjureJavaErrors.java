@@ -21,7 +21,8 @@ public final class ConjureJavaErrors {
     }
 
     /**
-     * Throws a {@link ServiceException} of type JavaCompilationFailed when {@code shouldThrow} is true.
+     * Throws a {@link ServiceException} of type JavaCompilationFailed when {@code shouldThrow} is
+     * true.
      *
      * @param shouldThrow Cause the method to throw when true
      */

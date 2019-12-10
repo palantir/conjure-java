@@ -29,7 +29,8 @@ public final class BearerTokenExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof BearerTokenExample && equalTo((BearerTokenExample) other));
+        return this == other
+                || (other instanceof BearerTokenExample && equalTo((BearerTokenExample) other));
     }
 
     private boolean equalTo(BearerTokenExample other) {
@@ -55,11 +56,13 @@ public final class BearerTokenExample {
         missingFields = addFieldIfMissing(missingFields, bearerTokenValue, "bearerTokenValue");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set",
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(
+            List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -87,7 +90,8 @@ public final class BearerTokenExample {
 
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(BearerToken bearerTokenValue) {
-            this.bearerTokenValue = Preconditions.checkNotNull(bearerTokenValue, "bearerTokenValue cannot be null");
+            this.bearerTokenValue =
+                    Preconditions.checkNotNull(bearerTokenValue, "bearerTokenValue cannot be null");
             return this;
         }
 

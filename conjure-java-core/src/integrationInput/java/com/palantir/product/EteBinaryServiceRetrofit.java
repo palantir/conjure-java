@@ -18,7 +18,8 @@ public interface EteBinaryServiceRetrofit {
     @POST("./binary")
     @Headers({"hr-path-template: /binary", "Accept: application/octet-stream"})
     @Streaming
-    Call<ResponseBody> postBinary(@Header("Authorization") AuthHeader authHeader, @Body RequestBody body);
+    Call<ResponseBody> postBinary(
+            @Header("Authorization") AuthHeader authHeader, @Body RequestBody body);
 
     @GET("./binary/optional/present")
     @Headers({"hr-path-template: /binary/optional/present", "Accept: application/octet-stream"})

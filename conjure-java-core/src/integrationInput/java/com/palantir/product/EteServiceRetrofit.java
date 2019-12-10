@@ -92,7 +92,8 @@ public interface EteServiceRetrofit {
 
     @GET("./base/externalLong/{param}")
     @Headers({"hr-path-template: /base/externalLong/{param}", "Accept: application/json"})
-    Call<Long> externalLongPath(@Header("Authorization") AuthHeader authHeader, @Path("param") long param);
+    Call<Long> externalLongPath(
+            @Header("Authorization") AuthHeader authHeader, @Path("param") long param);
 
     @GET("./base/optionalExternalLong")
     @Headers({"hr-path-template: /base/optionalExternalLong", "Accept: application/json"})
@@ -107,7 +108,8 @@ public interface EteServiceRetrofit {
     @GET("./base/aliasOne")
     @Headers({"hr-path-template: /base/aliasOne", "Accept: application/json"})
     Call<StringAliasExample> aliasOne(
-            @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") StringAliasExample queryParamName);
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") StringAliasExample queryParamName);
 
     @GET("./base/optionalAliasOne")
     @Headers({"hr-path-template: /base/optionalAliasOne", "Accept: application/json"})
@@ -129,12 +131,14 @@ public interface EteServiceRetrofit {
     @POST("./base/external/optional-body")
     @Headers({"hr-path-template: /base/external/optional-body", "Accept: application/json"})
     Call<Optional<StringAliasExample>> optionalBodyExternalImport(
-            @Header("Authorization") AuthHeader authHeader, @Body Optional<StringAliasExample> body);
+            @Header("Authorization") AuthHeader authHeader,
+            @Body Optional<StringAliasExample> body);
 
     @POST("./base/external/optional-query")
     @Headers({"hr-path-template: /base/external/optional-query", "Accept: application/json"})
     Call<Optional<StringAliasExample>> optionalQueryExternalImport(
-            @Header("Authorization") AuthHeader authHeader, @Query("query") Optional<StringAliasExample> query);
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("query") Optional<StringAliasExample> query);
 
     @POST("./base/no-return")
     @Headers({"hr-path-template: /base/no-return", "Accept: application/json"})
@@ -143,12 +147,14 @@ public interface EteServiceRetrofit {
     @GET("./base/enum/query")
     @Headers({"hr-path-template: /base/enum/query", "Accept: application/json"})
     Call<SimpleEnum> enumQuery(
-            @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") SimpleEnum queryParamName);
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") SimpleEnum queryParamName);
 
     @GET("./base/enum/list/query")
     @Headers({"hr-path-template: /base/enum/list/query", "Accept: application/json"})
     Call<List<SimpleEnum>> enumListQuery(
-            @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") List<SimpleEnum> queryParamName);
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("queryParamName") List<SimpleEnum> queryParamName);
 
     @GET("./base/enum/optional/query")
     @Headers({"hr-path-template: /base/enum/optional/query", "Accept: application/json"})
@@ -159,12 +165,14 @@ public interface EteServiceRetrofit {
     @GET("./base/enum/header")
     @Headers({"hr-path-template: /base/enum/header", "Accept: application/json"})
     Call<SimpleEnum> enumHeader(
-            @Header("Authorization") AuthHeader authHeader, @Header("Custom-Header") SimpleEnum headerParameter);
+            @Header("Authorization") AuthHeader authHeader,
+            @Header("Custom-Header") SimpleEnum headerParameter);
 
     @GET("./base/alias-long")
     @Headers({"hr-path-template: /base/alias-long", "Accept: application/json"})
     Call<Optional<LongAlias>> aliasLongEndpoint(
-            @Header("Authorization") AuthHeader authHeader, @Query("input") Optional<LongAlias> input);
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("input") Optional<LongAlias> input);
 
     @GET("./base/datasets/{datasetRid}/strings")
     @Headers({"hr-path-template: /base/datasets/{datasetRid}/strings", "Accept: application/json"})
@@ -176,12 +184,14 @@ public interface EteServiceRetrofit {
             @Query("ints") Set<Integer> ints);
 
     @Deprecated
-    default Call<Optional<Long>> optionalExternalLongQuery(@Header("Authorization") AuthHeader authHeader) {
+    default Call<Optional<Long>> optionalExternalLongQuery(
+            @Header("Authorization") AuthHeader authHeader) {
         return optionalExternalLongQuery(authHeader, Optional.empty());
     }
 
     @Deprecated
-    default Call<StringAliasExample> optionalAliasOne(@Header("Authorization") AuthHeader authHeader) {
+    default Call<StringAliasExample> optionalAliasOne(
+            @Header("Authorization") AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());
     }
 
@@ -197,20 +207,27 @@ public interface EteServiceRetrofit {
     }
 
     @Deprecated
-    default Call<Optional<SimpleEnum>> optionalEnumQuery(@Header("Authorization") AuthHeader authHeader) {
+    default Call<Optional<SimpleEnum>> optionalEnumQuery(
+            @Header("Authorization") AuthHeader authHeader) {
         return optionalEnumQuery(authHeader, Optional.empty());
     }
 
     @Deprecated
-    default Call<Optional<LongAlias>> aliasLongEndpoint(@Header("Authorization") AuthHeader authHeader) {
+    default Call<Optional<LongAlias>> aliasLongEndpoint(
+            @Header("Authorization") AuthHeader authHeader) {
         return aliasLongEndpoint(authHeader, Optional.empty());
     }
 
     @Deprecated
     default void complexQueryParameters(
-            @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid) {
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("datasetRid") ResourceIdentifier datasetRid) {
         complexQueryParameters(
-                authHeader, datasetRid, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+                authHeader,
+                datasetRid,
+                Collections.emptySet(),
+                Collections.emptySet(),
+                Collections.emptySet());
     }
 
     @Deprecated
@@ -218,7 +235,8 @@ public interface EteServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
             @Query("strings") Set<StringAliasExample> strings) {
-        complexQueryParameters(authHeader, datasetRid, strings, Collections.emptySet(), Collections.emptySet());
+        complexQueryParameters(
+                authHeader, datasetRid, strings, Collections.emptySet(), Collections.emptySet());
     }
 
     @Deprecated

@@ -27,7 +27,8 @@ import javax.annotation.Generated;
 public final class AsyncRequestProcessingTestServiceEndpoints implements UndertowService {
     private final UndertowAsyncRequestProcessingTestService delegate;
 
-    private AsyncRequestProcessingTestServiceEndpoints(UndertowAsyncRequestProcessingTestService delegate) {
+    private AsyncRequestProcessingTestServiceEndpoints(
+            UndertowAsyncRequestProcessingTestService delegate) {
         this.delegate = delegate;
     }
 
@@ -37,15 +38,17 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(
-                new DelayEndpoint(runtime, delegate),
-                new ThrowsInHandlerEndpoint(runtime, delegate),
-                new FailedFutureEndpoint(runtime, delegate),
-                new BinaryEndpoint(runtime, delegate),
-                new FutureTraceIdEndpoint(runtime, delegate)));
+        return Collections.unmodifiableList(
+                Arrays.asList(
+                        new DelayEndpoint(runtime, delegate),
+                        new ThrowsInHandlerEndpoint(runtime, delegate),
+                        new FailedFutureEndpoint(runtime, delegate),
+                        new BinaryEndpoint(runtime, delegate),
+                        new FutureTraceIdEndpoint(runtime, delegate)));
     }
 
-    private static final class DelayEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+    private static final class DelayEndpoint
+            implements HttpHandler, Endpoint, ReturnValueWriter<String> {
         private final UndertowRuntime runtime;
 
         private final UndertowAsyncRequestProcessingTestService delegate;
@@ -61,7 +64,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            OptionalInt delayMillis = runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("delayMillis"));
+            OptionalInt delayMillis =
+                    runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("delayMillis"));
             ListenableFuture<String> result = delegate.delay(delayMillis);
             runtime.async().register(result, this, exchange);
         }
@@ -97,12 +101,14 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         }
     }
 
-    private static final class ThrowsInHandlerEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<Void> {
+    private static final class ThrowsInHandlerEndpoint
+            implements HttpHandler, Endpoint, ReturnValueWriter<Void> {
         private final UndertowRuntime runtime;
 
         private final UndertowAsyncRequestProcessingTestService delegate;
 
-        ThrowsInHandlerEndpoint(UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+        ThrowsInHandlerEndpoint(
+                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
@@ -144,12 +150,14 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         }
     }
 
-    private static final class FailedFutureEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<Void> {
+    private static final class FailedFutureEndpoint
+            implements HttpHandler, Endpoint, ReturnValueWriter<Void> {
         private final UndertowRuntime runtime;
 
         private final UndertowAsyncRequestProcessingTestService delegate;
 
-        FailedFutureEndpoint(UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+        FailedFutureEndpoint(
+                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
@@ -157,7 +165,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            OptionalInt delayMillis = runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("delayMillis"));
+            OptionalInt delayMillis =
+                    runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("delayMillis"));
             ListenableFuture<Void> result = delegate.failedFuture(delayMillis);
             runtime.async().register(result, this, exchange);
         }
@@ -199,7 +208,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
 
         private final UndertowAsyncRequestProcessingTestService delegate;
 
-        BinaryEndpoint(UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+        BinaryEndpoint(
+                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
@@ -214,7 +224,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         }
 
         @Override
-        public void write(Optional<BinaryResponseBody> result, HttpServerExchange exchange) throws IOException {
+        public void write(Optional<BinaryResponseBody> result, HttpServerExchange exchange)
+                throws IOException {
             if (result.isPresent()) {
                 runtime.bodySerDe().serialize(result.get(), exchange);
             } else {
@@ -248,14 +259,16 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         }
     }
 
-    private static final class FutureTraceIdEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<Object> {
+    private static final class FutureTraceIdEndpoint
+            implements HttpHandler, Endpoint, ReturnValueWriter<Object> {
         private final UndertowRuntime runtime;
 
         private final UndertowAsyncRequestProcessingTestService delegate;
 
         private final Serializer<Object> serializer;
 
-        FutureTraceIdEndpoint(UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+        FutureTraceIdEndpoint(
+                UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Object>() {});
@@ -264,7 +277,8 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            OptionalInt delayMillis = runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("delayMillis"));
+            OptionalInt delayMillis =
+                    runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("delayMillis"));
             ListenableFuture<Object> result = delegate.futureTraceId(delayMillis);
             runtime.async().register(result, this, exchange);
         }
