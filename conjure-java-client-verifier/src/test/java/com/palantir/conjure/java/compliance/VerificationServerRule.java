@@ -46,9 +46,9 @@ public final class VerificationServerRule extends ExternalResource {
     @Override
     public void before() throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder(
-                "build/verification/verifier",
-                "build/test-cases/test-cases.json",
-                "build/test-cases/verification-api.json")
+                        "build/verification/verifier",
+                        "build/test-cases/test-cases.json",
+                        "build/test-cases/verification-api.json")
                 .redirectErrorStream(true)
                 .redirectOutput(Redirect.PIPE);
 
@@ -65,8 +65,8 @@ public final class VerificationServerRule extends ExternalResource {
     private static void blockUntilServerStarted(InputStream inputStream) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
-                    StandardCharsets.UTF_8))) {
+            try (BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
                 while (true) {
                     String line = reader.readLine();
                     if (line == null) {
