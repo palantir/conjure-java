@@ -25,6 +25,7 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
@@ -46,7 +47,8 @@ final class ConjureExceptions {
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
 
-    private static final Meter internalErrorMeter = ConjureServerMetrics
+    private static final Meter internalErrorMeter =
+            ConjureServerMetrics.of(SharedTaggedMetricRegistries.getSingleton()).internalerrorAll();
 
     private ConjureExceptions() { }
 
