@@ -1,0 +1,12 @@
+options:
+  javaPackage: com.palantir.conjure.java.undertow.runtime
+  javaVisibility: packagePrivate
+namespaces:
+  server.response:
+    shortName: ConjureServer
+    docs: Metrics produced by Conjure Undertow servers
+    metrics:
+      internalerror.all:
+        type: meter
+        docs: |
+          Meter of the number of non-RemoteException internal exceptions produced by this server.

@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -45,6 +46,8 @@ final class ConjureExceptions {
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
 
+    private static final Meter internalErrorMeter = ConjureServerMetrics
+
     private ConjureExceptions() { }
 
     static Serializer<SerializableError> serializer() {
@@ -69,6 +72,7 @@ final class ConjureExceptions {
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
             log(exception);
+            internalErrorMeter.mark();
             writeResponse(
                     exchange,
                     Optional.of(SerializableError.forException(exception)),
@@ -80,6 +84,9 @@ final class ConjureExceptions {
     private static void serviceException(
             HttpServerExchange exchange, Serializer<SerializableError> serializer, ServiceException exception) {
         log(exception);
+        if (exception.getErrorType().httpErrorCode() == 500) {
+            internalErrorMeter.mark();
+        }
         writeResponse(
                 exchange,
                 Optional.of(SerializableError.forException(exception)),
@@ -174,6 +181,7 @@ final class ConjureExceptions {
         // log errors in order to associate the log line with the correct traceId but
         // avoid doing work beyond setting a 500 response code, no response body is sent.
         log.error("Error handling request", error);
+        internalErrorMeter.mark();
         // The writeResponse method terminates responses if data has already been sent to clients
         // do not interpret partial data as a full response.
         writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode(), serializer);
