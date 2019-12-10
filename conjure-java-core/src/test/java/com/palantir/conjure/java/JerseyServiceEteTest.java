@@ -183,7 +183,6 @@ public final class JerseyServiceEteTest extends TestBase {
         Optional<ResponseBody> response = Futures.getUnchecked(
                 binary.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")));
         assertThat(response).isPresent();
-        assertThat(response.get().contentType()).isEqualTo(MediaType.get("application/octet-stream"));
         assertThat(response.get().string()).isEqualTo("Hello World!");
     }
 
