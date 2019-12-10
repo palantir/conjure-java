@@ -25,6 +25,7 @@ dependencies {
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     implementation 'com.palantir.tracing:tracing-undertow'
     implementation 'org.slf4j:slf4j-api'
+    implementation 'io.dropwizard.metrics:metrics-core'
 
     testImplementation 'com.squareup.okhttp3:okhttp'
     // Required for tests using the slf4j MDC which is not implemented in slf4j-simple
@@ -34,6 +35,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.mockito:mockito-junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'io.dropwizard.metrics:metrics-core'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
