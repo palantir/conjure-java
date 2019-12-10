@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -74,57 +75,57 @@ public final class Retrofit2ServiceEteTest extends TestBase {
 
     @Disabled // string returns in Jersey should use a mandated wrapper alias type
     @Test
-    public void retrofit2_can_retrieve_a_string_from_a_server() throws Exception {
-        assertThat(client.string(AuthHeader.valueOf("authHeader")).execute().body())
+    public void retrofit2_can_retrieve_a_string_from_a_server() {
+        assertThat(Futures.getUnchecked(client.string(AuthHeader.valueOf("authHeader"))))
                 .isEqualTo("Hello, world!");
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_a_double_from_a_server() throws Exception {
-        assertThat(client.double_(AuthHeader.valueOf("authHeader")).execute().body())
+    public void retrofit2_client_can_retrieve_a_double_from_a_server() {
+        assertThat(Futures.getUnchecked(client.double_(AuthHeader.valueOf("authHeader"))))
                 .isEqualTo(1 / 3d);
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_a_boolean_from_a_server() throws Exception {
-        assertThat(client.boolean_(AuthHeader.valueOf("authHeader")).execute().body())
+    public void retrofit2_client_can_retrieve_a_boolean_from_a_server() {
+        assertThat(Futures.getUnchecked(client.boolean_(AuthHeader.valueOf("authHeader"))))
                 .isEqualTo(true);
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_a_safelong_from_a_server() throws Exception {
-        assertThat(client.safelong(AuthHeader.valueOf("authHeader")).execute().body())
+    public void retrofit2_client_can_retrieve_a_safelong_from_a_server() {
+        assertThat(Futures.getUnchecked(client.safelong(AuthHeader.valueOf("authHeader"))))
                 .isEqualTo(SafeLong.of(12345));
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_an_rid_from_a_server() throws Exception {
-        assertThat(client.rid(AuthHeader.valueOf("authHeader")).execute().body())
+    public void retrofit2_client_can_retrieve_an_rid_from_a_server() {
+        assertThat(Futures.getUnchecked(client.rid(AuthHeader.valueOf("authHeader"))))
                 .isEqualTo(ResourceIdentifier.of("ri.foundry.main.dataset.1234"));
     }
 
     @Disabled("string returns in Jersey should use a mandated wrapper alias type")
     @Test
-    public void retrofit2_client_can_retrieve_an_optional_string_from_a_server() throws Exception {
-        assertThat(client.optionalString(AuthHeader.valueOf("authHeader")).execute().body())
+    public void retrofit2_client_can_retrieve_an_optional_string_from_a_server() {
+        assertThat(Futures.getUnchecked(client.optionalString(AuthHeader.valueOf("authHeader"))))
                 .isEqualTo(Optional.of("foo"));
     }
 
     @Disabled("https://github.com/palantir/conjure-java-runtime/issues/668")
     @Test
-    public void retrofit2_client_can_retrieve_an_optional_empty_from_a_server() throws Exception {
-        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader")).execute().body()).isNotPresent();
+    public void retrofit2_client_can_retrieve_an_optional_empty_from_a_server() {
+        assertThat(Futures.getUnchecked(client.optionalEmpty(AuthHeader.valueOf("authHeader")))).isNotPresent();
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_a_date_time_from_a_server() throws Exception {
-        assertThat(client.datetime(AuthHeader.valueOf("authHeader")).execute().body())
+    public void retrofit2_client_can_retrieve_a_date_time_from_a_server() {
+        assertThat(Futures.getUnchecked(client.datetime(AuthHeader.valueOf("authHeader"))))
                 .isEqualTo(OffsetDateTime.ofInstant(Instant.ofEpochMilli(1234), ZoneId.from(ZoneOffset.UTC)));
     }
 
     @Test
-    public void retrofit2_client_can_retrieve_binary_data_from_a_server() throws Exception {
-        assertThat(client.binary(AuthHeader.valueOf("authHeader")).execute().body().string())
+    public void retrofit2_client_can_retrieve_binary_data_from_a_server() throws IOException {
+        assertThat(Futures.getUnchecked(client.binary(AuthHeader.valueOf("authHeader"))).string())
                 .isEqualTo("Hello, world!");
     }
 

@@ -52,26 +52,6 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
     }
 
     @Test
-    public void testCompositionCompletableFuture() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/example-service.yml")));
-
-        List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitCompletableFutures))
-                .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit_completable_future");
-    }
-
-    @Test
-    public void testCompositionListenableFuture() throws IOException {
-        ConjureDefinition def = Conjure.parse(
-                ImmutableList.of(new File("src/test/resources/example-service.yml")));
-
-        List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of(FeatureFlags.RetrofitListenableFutures))
-                .emit(def, folder);
-        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit_listenable_future");
-    }
-
-    @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(
                 ImmutableList.of(

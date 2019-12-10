@@ -90,16 +90,6 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate retrofit interfaces for streaming/async clients")
         private boolean generateRetrofit;
 
-        @CommandLine.Option(names = "--retrofitCompletableFutures",
-                defaultValue = "false",
-                description = "Generate retrofit services which return Java8 CompletableFuture instead of OkHttp Call")
-        private boolean retrofitCompletableFutures;
-
-        @CommandLine.Option(names = "--retrofitListenableFutures",
-                defaultValue = "false",
-                description = "Generate retrofit services which return Guava ListenableFuture instead of OkHttp Call")
-        private boolean retrofitListenableFutures;
-
         @CommandLine.Option(names = "--jerseyBinaryAsResponse",
                 defaultValue = "false",
                 description = "Generate jersey interfaces which return Response instead of StreamingOutput")
@@ -185,8 +175,6 @@ public final class ConjureJavaCli implements Runnable {
                     .generateObjects(generateObjects)
                     .generateRetrofit(generateRetrofit)
                     .generateUndertow(generateUndertow)
-                    .retrofitCompletableFutures(retrofitCompletableFutures)
-                    .retrofitListenableFutures(retrofitListenableFutures)
                     .jerseyBinaryAsResponse(jerseyBinaryAsReponse)
                     .notNullAuthAndBody(notNullAuthAndBody)
                     .undertowServicePrefix(undertowServicePrefix)

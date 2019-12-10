@@ -77,7 +77,6 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .featureFlags(ImmutableSet.of(
-                        FeatureFlags.RetrofitCompletableFutures,
                         FeatureFlags.JerseyBinaryAsResponse,
                         FeatureFlags.RequireNotNullAuthAndBodyParams,
                         FeatureFlags.UseImmutableBytes))

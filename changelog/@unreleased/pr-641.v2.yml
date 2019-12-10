@@ -1,0 +1,6 @@
+type: break
+break:
+  description: Retrofit generated interfaces always return ListenableFuture and never
+    Call nor CompletableFuture.
+  links:
+  - https://github.com/palantir/conjure-java/pull/641

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.cli;
 
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.logsafe.Preconditions;
 import java.io.File;
 import java.util.Set;
 import org.immutables.value.Value;
@@ -61,10 +62,10 @@ public abstract class CliConfiguration {
 
     @Value.Check
     final void check() {
-        com.palantir.logsafe.Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
-        com.palantir.logsafe.Preconditions.checkArgument(outputDirectory().isDirectory(),
+        Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
+        Preconditions.checkArgument(outputDirectory().isDirectory(),
                 "Output must exist and be a directory");
-        com.palantir.logsafe.Preconditions.checkArgument(
+        Preconditions.checkArgument(
                 generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
                 "Must specify exactly one project to generate");
     }
@@ -74,14 +75,6 @@ public abstract class CliConfiguration {
     }
 
     public static final class Builder extends ImmutableCliConfiguration.Builder {
-        Builder retrofitCompletableFutures(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.RetrofitCompletableFutures) : this;
-        }
-
-        Builder retrofitListenableFutures(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.RetrofitListenableFutures) : this;
-        }
-
         Builder jerseyBinaryAsResponse(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.JerseyBinaryAsResponse) : this;
         }
