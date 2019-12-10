@@ -55,7 +55,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
