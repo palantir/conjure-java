@@ -24,6 +24,12 @@ sourceSets {
     }
 }
 
+spotless {
+    java {
+        targetExclude sourceSets.integrationInput.allJava
+    }
+}
+
 idea {
     module {
         testSourceDirs += sourceSets.integrationInput.java.srcDirs
