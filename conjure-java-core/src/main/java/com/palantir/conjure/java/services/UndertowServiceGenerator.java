@@ -38,20 +38,22 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         return conjureDefinition.getServices().stream()
-                .flatMap(serviceDef -> generateService(serviceDef, conjureDefinition.getTypes(),
-                        new TypeMapper(
-                                conjureDefinition.getTypes(),
-                                new UndertowRequestBodyClassNameVisitor(
-                                        conjureDefinition.getTypes(), experimentalFeatures)),
-                        new TypeMapper(
-                                conjureDefinition.getTypes(),
-                                new UndertowReturnValueClassNameVisitor(
-                                        conjureDefinition.getTypes(), experimentalFeatures)))
-                        .stream()).collect(Collectors.toSet());
+                .flatMap(serviceDef -> generateService(
+                        serviceDef,
+                        conjureDefinition.getTypes(),
+                        new TypeMapper(conjureDefinition.getTypes(), new UndertowRequestBodyClassNameVisitor(
+                                conjureDefinition.getTypes(), experimentalFeatures)),
+                        new TypeMapper(conjureDefinition.getTypes(), new UndertowReturnValueClassNameVisitor(
+                                conjureDefinition.getTypes(), experimentalFeatures)))
+                        .stream())
+                .collect(Collectors.toSet());
     }
 
-    private List<JavaFile> generateService(ServiceDefinition serviceDefinition, List<TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+    private List<JavaFile> generateService(
+            ServiceDefinition serviceDefinition,
+            List<TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper) {
         return ImmutableList.of(
                 new UndertowServiceInterfaceGenerator(experimentalFeatures)
                         .generateServiceInterface(serviceDefinition, typeMapper, returnTypeMapper),
