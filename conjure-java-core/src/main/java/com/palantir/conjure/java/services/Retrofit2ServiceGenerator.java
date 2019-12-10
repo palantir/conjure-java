@@ -70,6 +70,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get("okhttp3", "RequestBody");
     private static final ClassName BINARY_RETURN_TYPE = ClassName.get("okhttp3", "ResponseBody");
+    private static final TypeName OPTIONAL_BINARY_RETURN_TYPE = ParameterizedTypeName.get(
+            ClassName.get(Optional.class), ClassName.get("okhttp3", "ResponseBody"));
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
 
@@ -83,7 +85,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new ReturnTypeClassNameVisitor(conjureDefinition.getTypes(), BINARY_RETURN_TYPE, BINARY_RETURN_TYPE,
+                new ReturnTypeClassNameVisitor(
+                        conjureDefinition.getTypes(),
+                        BINARY_RETURN_TYPE,
+                        OPTIONAL_BINARY_RETURN_TYPE,
                         featureFlags));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
@@ -147,7 +152,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .addMember("value", "$S", "Accept: " + getReturnMediaType(returnType))
                         .build());
 
-        if (returnType.equals(BINARY_RETURN_TYPE)) {
+        if (returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming")).build());
         }
 
@@ -349,7 +354,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     }
 
     private static String getReturnMediaType(TypeName returnType) {
-        return returnType.equals(BINARY_RETURN_TYPE)
+        return returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)
                 ? MediaType.APPLICATION_OCTET_STREAM
                 : MediaType.APPLICATION_JSON;
     }

@@ -1,0 +1,7 @@
+type: break
+break:
+  description: Generate `optional<binary>` field as `Optional<ResponseBody>` in retrofit
+    interfaces. Users don't have to worry about getting nullable ResponseBody value
+    type.
+  links:
+  - https://github.com/palantir/conjure-java/pull/643
