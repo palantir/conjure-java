@@ -24,8 +24,7 @@ public final class CovariantOptionalExample {
 
     private volatile int memoizedHashCode;
 
-    private CovariantOptionalExample(
-            Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
+    private CovariantOptionalExample(Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
         validateFields(item, setItem);
         this.item = item;
         this.setItem = setItem;
@@ -44,8 +43,7 @@ public final class CovariantOptionalExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof CovariantOptionalExample
-                        && equalTo((CovariantOptionalExample) other));
+                || (other instanceof CovariantOptionalExample && equalTo((CovariantOptionalExample) other));
     }
 
     private boolean equalTo(CovariantOptionalExample other) {
@@ -71,20 +69,17 @@ public final class CovariantOptionalExample {
         return builder().item(Optional.of(item)).setItem(Optional.of(setItem)).build();
     }
 
-    private static void validateFields(
-            Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
+    private static void validateFields(Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, item, "item");
         missingFields = addFieldIfMissing(missingFields, setItem, "setItem");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -115,9 +110,7 @@ public final class CovariantOptionalExample {
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
         public Builder item(Optional<?> item) {
-            this.item =
-                    Preconditions.checkNotNull(item, "item cannot be null")
-                            .map(Function.identity());
+            this.item = Preconditions.checkNotNull(item, "item cannot be null").map(Function.identity());
             return this;
         }
 
@@ -128,15 +121,12 @@ public final class CovariantOptionalExample {
 
         @JsonSetter(value = "setItem", nulls = Nulls.SKIP)
         public Builder setItem(Optional<? extends Set<StringAliasExample>> setItem) {
-            this.setItem =
-                    Preconditions.checkNotNull(setItem, "setItem cannot be null")
-                            .map(Function.identity());
+            this.setItem = Preconditions.checkNotNull(setItem, "setItem cannot be null").map(Function.identity());
             return this;
         }
 
         public Builder setItem(Set<StringAliasExample> setItem) {
-            this.setItem =
-                    Optional.of(Preconditions.checkNotNull(setItem, "setItem cannot be null"));
+            this.setItem = Optional.of(Preconditions.checkNotNull(setItem, "setItem cannot be null"));
             return this;
         }
 

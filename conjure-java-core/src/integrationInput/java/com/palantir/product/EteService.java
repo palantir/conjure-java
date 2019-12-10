@@ -92,27 +92,21 @@ public interface EteService {
      */
     @GET
     @Path("base/path/{param}")
-    String path(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("param") String param);
+    String path(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @PathParam("param") String param);
 
     @GET
     @Path("base/externalLong/{param}")
-    long externalLongPath(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("param") long param);
+    long externalLongPath(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @PathParam("param") long param);
 
     @GET
     @Path("base/optionalExternalLong")
     Optional<Long> optionalExternalLongQuery(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @QueryParam("param") Optional<Long> param);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @QueryParam("param") Optional<Long> param);
 
     @POST
     @Path("base/notNullBody")
     StringAliasExample notNullBody(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @NotNull StringAliasExample notNullBody);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull StringAliasExample notNullBody);
 
     @GET
     @Path("base/aliasOne")
@@ -135,14 +129,12 @@ public interface EteService {
     @POST
     @Path("base/external/notNullBody")
     StringAliasExample notNullBodyExternalImport(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @NotNull StringAliasExample notNullBody);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull StringAliasExample notNullBody);
 
     @POST
     @Path("base/external/optional-body")
     Optional<StringAliasExample> optionalBodyExternalImport(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            Optional<StringAliasExample> body);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, Optional<StringAliasExample> body);
 
     @POST
     @Path("base/external/optional-query")
@@ -226,26 +218,18 @@ public interface EteService {
     @Deprecated
     default void complexQueryParameters(AuthHeader authHeader, ResourceIdentifier datasetRid) {
         complexQueryParameters(
-                authHeader,
-                datasetRid,
-                Collections.emptySet(),
-                Collections.emptySet(),
-                Collections.emptySet());
+                authHeader, datasetRid, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
     }
 
     @Deprecated
     default void complexQueryParameters(
             AuthHeader authHeader, ResourceIdentifier datasetRid, Set<StringAliasExample> strings) {
-        complexQueryParameters(
-                authHeader, datasetRid, strings, Collections.emptySet(), Collections.emptySet());
+        complexQueryParameters(authHeader, datasetRid, strings, Collections.emptySet(), Collections.emptySet());
     }
 
     @Deprecated
     default void complexQueryParameters(
-            AuthHeader authHeader,
-            ResourceIdentifier datasetRid,
-            Set<StringAliasExample> strings,
-            Set<Long> longs) {
+            AuthHeader authHeader, ResourceIdentifier datasetRid, Set<StringAliasExample> strings, Set<Long> longs) {
         complexQueryParameters(authHeader, datasetRid, strings, longs, Collections.emptySet());
     }
 }

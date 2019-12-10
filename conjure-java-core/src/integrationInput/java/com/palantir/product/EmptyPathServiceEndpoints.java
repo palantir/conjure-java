@@ -29,8 +29,7 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(
-                Arrays.asList(new EmptyPathEndpoint(runtime, delegate)));
+        return Collections.unmodifiableList(Arrays.asList(new EmptyPathEndpoint(runtime, delegate)));
     }
 
     private static final class EmptyPathEndpoint implements HttpHandler, Endpoint {

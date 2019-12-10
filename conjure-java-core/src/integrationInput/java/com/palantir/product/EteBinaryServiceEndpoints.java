@@ -34,12 +34,11 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(
-                Arrays.asList(
-                        new PostBinaryEndpoint(runtime, delegate),
-                        new GetOptionalBinaryPresentEndpoint(runtime, delegate),
-                        new GetOptionalBinaryEmptyEndpoint(runtime, delegate),
-                        new GetBinaryFailureEndpoint(runtime, delegate)));
+        return Collections.unmodifiableList(Arrays.asList(
+                new PostBinaryEndpoint(runtime, delegate),
+                new GetOptionalBinaryPresentEndpoint(runtime, delegate),
+                new GetOptionalBinaryEmptyEndpoint(runtime, delegate),
+                new GetBinaryFailureEndpoint(runtime, delegate)));
     }
 
     private static final class PostBinaryEndpoint implements HttpHandler, Endpoint {
@@ -91,8 +90,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         private final UndertowEteBinaryService delegate;
 
-        GetOptionalBinaryPresentEndpoint(
-                UndertowRuntime runtime, UndertowEteBinaryService delegate) {
+        GetOptionalBinaryPresentEndpoint(UndertowRuntime runtime, UndertowEteBinaryService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
         }
