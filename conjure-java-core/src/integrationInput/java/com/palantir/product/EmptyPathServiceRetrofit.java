@@ -1,7 +1,7 @@
 package com.palantir.product;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import javax.annotation.Generated;
-import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 
@@ -9,5 +9,5 @@ import retrofit2.http.Headers;
 public interface EmptyPathServiceRetrofit {
     @GET("./")
     @Headers({"hr-path-template: /", "Accept: application/json"})
-    Call<Boolean> emptyPath();
+    ListenableFuture<Boolean> emptyPath();
 }

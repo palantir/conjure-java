@@ -12,7 +12,7 @@ convenience, but users must assume responsibility for adapting their code when d
 
 ## Usage
 
-The recommended way to use conjure-java is via a build tool like [gradle-conjure](https://github.com/palantir/gradle-conjure). However, if you don't want to use gradle-conjure, there is also an executable which conforms to [RFC 002](https://github.com/palantir/conjure/blob/develop/rfc/002-contract-for-conjure-generators.md),  published on [bintray](https://bintray.com/palantir/releases/conjure-java).
+The recommended way to use conjure-java is via a build tool like [gradle-conjure](https://github.com/palantir/gradle-conjure). However, if you don't want to use gradle-conjure, there is also an executable which conforms to [RFC 002](https://palantir.github.io/conjure/#/docs/rfc/002-contract-for-conjure-generators),  published on [bintray](https://bintray.com/palantir/releases/conjure-java).
 
     Usage: conjure-java generate [...options] <input> <output>
 

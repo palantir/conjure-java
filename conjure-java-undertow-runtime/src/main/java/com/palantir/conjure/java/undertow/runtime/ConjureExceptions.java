@@ -173,8 +173,7 @@ final class ConjureExceptions {
             Serializer<SerializableError> serializer,
             FrameworkException frameworkException) {
         int statusCode = frameworkException.getStatusCode();
-        ErrorType errorType = statusCode / 100 == 4 ? ErrorType.INVALID_ARGUMENT : ErrorType.INTERNAL;
-        ServiceException exception = new ServiceException(errorType, frameworkException);
+        ServiceException exception = new ServiceException(frameworkException.getErrorType(), frameworkException);
         log(exception);
         writeResponse(exchange, Optional.of(SerializableError.forException(exception)), statusCode, serializer);
     }

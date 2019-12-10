@@ -1,5 +1,6 @@
 package com.palantir.another;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.NestedAliasedBinary;
@@ -16,7 +17,6 @@ import java.util.Set;
 import javax.annotation.Generated;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
@@ -32,19 +32,19 @@ public interface TestServiceRetrofit {
     /** Returns a mapping from file system id to backing file system configuration. */
     @GET("./catalog/fileSystems")
     @Headers({"hr-path-template: /catalog/fileSystems", "Accept: application/json"})
-    Call<Map<String, BackingFileSystem>> getFileSystems(
+    ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(
             @Header("Authorization") AuthHeader authHeader);
 
     @POST("./catalog/datasets")
     @Headers({"hr-path-template: /catalog/datasets", "Accept: application/json"})
-    Call<Dataset> createDataset(
+    ListenableFuture<Dataset> createDataset(
             @Header("Authorization") AuthHeader authHeader,
             @Header("Test-Header") String testHeaderArg,
             @Body CreateDatasetRequest request);
 
     @GET("./catalog/datasets/{datasetRid}")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}", "Accept: application/json"})
-    Call<Optional<Dataset>> getDataset(
+    ListenableFuture<Optional<Dataset>> getDataset(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
@@ -54,7 +54,7 @@ public interface TestServiceRetrofit {
         "Accept: application/octet-stream"
     })
     @Streaming
-    Call<ResponseBody> getRawData(
+    ListenableFuture<ResponseBody> getRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
@@ -64,7 +64,7 @@ public interface TestServiceRetrofit {
         "Accept: application/octet-stream"
     })
     @Streaming
-    Call<ResponseBody> getAliasedRawData(
+    ListenableFuture<ResponseBody> getAliasedRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
@@ -74,7 +74,7 @@ public interface TestServiceRetrofit {
         "Accept: application/octet-stream"
     })
     @Streaming
-    Call<ResponseBody> maybeGetRawData(
+    ListenableFuture<Optional<ResponseBody>> maybeGetRawData(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
@@ -83,18 +83,18 @@ public interface TestServiceRetrofit {
         "hr-path-template: /catalog/datasets/{datasetRid}/string-aliased",
         "Accept: application/json"
     })
-    Call<AliasedString> getAliasedString(
+    ListenableFuture<AliasedString> getAliasedString(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @POST("./catalog/datasets/upload-raw")
     @Headers({"hr-path-template: /catalog/datasets/upload-raw", "Accept: application/json"})
-    Call<Void> uploadRawData(
+    ListenableFuture<Void> uploadRawData(
             @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
 
     @POST("./catalog/datasets/upload-raw-aliased")
     @Headers({"hr-path-template: /catalog/datasets/upload-raw-aliased", "Accept: application/json"})
-    Call<Void> uploadAliasedRawData(
+    ListenableFuture<Void> uploadAliasedRawData(
             @Header("Authorization") AuthHeader authHeader, @Body NestedAliasedBinary input);
 
     /** @param datasetRid A valid dataset resource identifier. */
@@ -103,7 +103,7 @@ public interface TestServiceRetrofit {
         "hr-path-template: /catalog/datasets/{datasetRid}/branches",
         "Accept: application/json"
     })
-    Call<Set<String>> getBranches(
+    ListenableFuture<Set<String>> getBranches(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
@@ -119,7 +119,7 @@ public interface TestServiceRetrofit {
         "Accept: application/json"
     })
     @Deprecated
-    Call<Set<String>> getBranchesDeprecated(
+    ListenableFuture<Set<String>> getBranchesDeprecated(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
@@ -128,7 +128,7 @@ public interface TestServiceRetrofit {
         "hr-path-template: /catalog/datasets/{datasetRid}/branches/{branch}/resolve",
         "Accept: application/json"
     })
-    Call<Optional<String>> resolveBranch(
+    ListenableFuture<Optional<String>> resolveBranch(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
             @Path(value = "branch", encoded = true) String branch);
@@ -138,13 +138,13 @@ public interface TestServiceRetrofit {
         "hr-path-template: /catalog/datasets/{datasetRid}/testParam",
         "Accept: application/json"
     })
-    Call<Optional<String>> testParam(
+    ListenableFuture<Optional<String>> testParam(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @POST("./catalog/test-query-params")
     @Headers({"hr-path-template: /catalog/test-query-params", "Accept: application/json"})
-    Call<Integer> testQueryParams(
+    ListenableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
             @Query("implicit") ResourceIdentifier implicit,
@@ -158,7 +158,7 @@ public interface TestServiceRetrofit {
         "hr-path-template: /catalog/test-no-response-query-params",
         "Accept: application/json"
     })
-    Call<Void> testNoResponseQueryParams(
+    ListenableFuture<Void> testNoResponseQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
             @Query("implicit") ResourceIdentifier implicit,
@@ -169,24 +169,24 @@ public interface TestServiceRetrofit {
 
     @GET("./catalog/boolean")
     @Headers({"hr-path-template: /catalog/boolean", "Accept: application/json"})
-    Call<Boolean> testBoolean(@Header("Authorization") AuthHeader authHeader);
+    ListenableFuture<Boolean> testBoolean(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./catalog/double")
     @Headers({"hr-path-template: /catalog/double", "Accept: application/json"})
-    Call<Double> testDouble(@Header("Authorization") AuthHeader authHeader);
+    ListenableFuture<Double> testDouble(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./catalog/integer")
     @Headers({"hr-path-template: /catalog/integer", "Accept: application/json"})
-    Call<Integer> testInteger(@Header("Authorization") AuthHeader authHeader);
+    ListenableFuture<Integer> testInteger(@Header("Authorization") AuthHeader authHeader);
 
     @POST("./catalog/optional")
     @Headers({"hr-path-template: /catalog/optional", "Accept: application/json"})
-    Call<Optional<String>> testPostOptional(
+    ListenableFuture<Optional<String>> testPostOptional(
             @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
 
     @GET("./catalog/optional-integer-double")
     @Headers({"hr-path-template: /catalog/optional-integer-double", "Accept: application/json"})
-    Call<Void> testOptionalIntegerAndDouble(
+    ListenableFuture<Void> testOptionalIntegerAndDouble(
             @Header("Authorization") AuthHeader authHeader,
             @Query("maybeInteger") OptionalInt maybeInteger,
             @Query("maybeDouble") OptionalDouble maybeDouble);
@@ -196,13 +196,13 @@ public interface TestServiceRetrofit {
         "hr-path-template: /catalog/datasets/{datasetRid}/strings",
         "Accept: application/json"
     })
-    Call<Void> getForStrings(
+    ListenableFuture<Void> getForStrings(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
             @Query("strings") Set<AliasedString> strings);
 
     @Deprecated
-    default Call<Integer> testQueryParams(
+    default ListenableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
             @Query("implicit") ResourceIdentifier implicit,
@@ -218,7 +218,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    default Call<Integer> testQueryParams(
+    default ListenableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
             @Query("implicit") ResourceIdentifier implicit,
@@ -235,7 +235,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    default Call<Integer> testQueryParams(
+    default ListenableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
             @Query("implicit") ResourceIdentifier implicit,

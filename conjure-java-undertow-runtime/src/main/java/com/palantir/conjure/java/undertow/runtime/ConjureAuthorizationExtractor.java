@@ -16,13 +16,15 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
-import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import com.palantir.tokens.auth.UnverifiedJsonWebToken;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
 import java.util.Optional;
@@ -38,6 +40,16 @@ import org.slf4j.MDC;
  */
 final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
 
+    private static final String USER_ID_KEY = "userId";
+    private static final String SESSION_ID_KEY = "sessionId";
+    private static final String TOKEN_ID_KEY = "tokenId";
+    private static Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
+    private static Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
+    private static final ErrorType MISSING_CREDENTIAL_ERROR_TYPE = ErrorType.create(
+            ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials");
+    private static final ErrorType MALFORMED_CREDENTIAL_ERROR_TYPE = ErrorType.create(
+            ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials");
+
     private final PlainSerDe plainSerDe;
 
     ConjureAuthorizationExtractor(PlainSerDe plainSerDe) {
@@ -50,12 +62,8 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
      */
     @Override
     public AuthHeader header(HttpServerExchange exchange) {
-        HeaderValues authorization = exchange.getRequestHeaders().get(Headers.AUTHORIZATION);
-        // Do not use Iterables.getOnlyElement because it includes values in the exception message.
-        // We do not want credential material logged to disk, even if it's marked unsafe.
-        Preconditions.checkArgument(authorization != null && authorization.size() == 1,
-                "One Authorization header value is required");
-        return setState(exchange, AuthHeader.valueOf(authorization.get(0)));
+        AuthHeader authHeader = parseAuthHeader(exchange);
+        return setState(exchange, authHeader);
     }
 
     /**
@@ -64,15 +72,18 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
      */
     @Override
     public BearerToken cookie(HttpServerExchange exchange, String cookieName) {
-        return setState(exchange,
-                plainSerDe.deserializeBearerToken(exchange.getRequestCookies().get(cookieName).getValue()));
+        Cookie cookie = exchange.getRequestCookies().get(cookieName);
+        if (cookie == null) {
+            throw new ServiceException(MISSING_CREDENTIAL_ERROR_TYPE);
+        }
+        try {
+            return setState(
+                    exchange,
+                    plainSerDe.deserializeBearerToken(cookie.getValue()));
+        } catch (RuntimeException e) {
+            throw new ServiceException(MALFORMED_CREDENTIAL_ERROR_TYPE, e);
+        }
     }
-
-    private static final String USER_ID_KEY = "userId";
-    private static final String SESSION_ID_KEY = "sessionId";
-    private static final String TOKEN_ID_KEY = "tokenId";
-    private static Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
-    private static Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
 
     /**
      * Attempts to extract a {@link UnverifiedJsonWebToken JSON Web Token} from the
@@ -95,5 +106,22 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
     private static AuthHeader setState(HttpServerExchange exchange, AuthHeader authHeader) {
         setState(exchange, authHeader.getBearerToken());
         return authHeader;
+    }
+
+    private static AuthHeader parseAuthHeader(HttpServerExchange exchange) {
+        HeaderValues authorization = exchange.getRequestHeaders().get(Headers.AUTHORIZATION);
+        // Do not use Iterables.getOnlyElement because it includes values in the exception message.
+        // We do not want credential material logged to disk, even if it's marked unsafe.
+        if (authorization == null) {
+            throw new ServiceException(MISSING_CREDENTIAL_ERROR_TYPE);
+        }
+        if (authorization.size() != 1) {
+            throw new ServiceException(MALFORMED_CREDENTIAL_ERROR_TYPE);
+        }
+        try {
+            return AuthHeader.valueOf(authorization.get(0));
+        } catch (RuntimeException e) {
+            throw new ServiceException(MALFORMED_CREDENTIAL_ERROR_TYPE, e);
+        }
     }
 }

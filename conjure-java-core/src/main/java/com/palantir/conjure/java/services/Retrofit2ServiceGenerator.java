@@ -38,7 +38,6 @@ import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
-import com.palantir.logsafe.Preconditions;
 import com.palantir.util.syntacticpath.Path;
 import com.palantir.util.syntacticpath.Paths;
 import com.squareup.javapoet.AnnotationSpec;
@@ -65,33 +64,31 @@ import org.slf4j.LoggerFactory;
 
 public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
-    private static final ClassName COMPLETABLE_FUTURE_TYPE = ClassName.get("java.util.concurrent", "CompletableFuture");
     private static final ClassName LISTENABLE_FUTURE_TYPE = ClassName.get(
             "com.google.common.util.concurrent", "ListenableFuture");
-    private static final ClassName CALL_TYPE = ClassName.get("retrofit2", "Call");
     private static final String AUTH_HEADER_NAME = "Authorization";
 
     private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get("okhttp3", "RequestBody");
     private static final ClassName BINARY_RETURN_TYPE = ClassName.get("okhttp3", "ResponseBody");
+    private static final TypeName OPTIONAL_BINARY_RETURN_TYPE = ParameterizedTypeName.get(
+            ClassName.get(Optional.class), ClassName.get("okhttp3", "ResponseBody"));
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
 
     private final Set<FeatureFlags> featureFlags;
 
-    @SuppressWarnings("deprecation")
     public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
-        Preconditions.checkArgument(!featureFlags.contains(FeatureFlags.RetrofitListenableFutures)
-                        || !featureFlags.contains(FeatureFlags.RetrofitCompletableFutures),
-                "Cannot enable both the RetrofitListenableFutures and RetrofitCompletableFutures "
-                        + "Conjure experimental features. Please remove one.");
     }
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new ReturnTypeClassNameVisitor(conjureDefinition.getTypes(), BINARY_RETURN_TYPE, BINARY_RETURN_TYPE,
+                new ReturnTypeClassNameVisitor(
+                        conjureDefinition.getTypes(),
+                        BINARY_RETURN_TYPE,
+                        OPTIONAL_BINARY_RETURN_TYPE,
                         featureFlags));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
@@ -105,8 +102,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .collect(Collectors.toSet());
     }
 
-    private JavaFile generateService(ServiceDefinition serviceDefinition,
-            TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+    private JavaFile generateService(
+            ServiceDefinition serviceDefinition,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(Retrofit2ServiceGenerator.class));
@@ -133,17 +132,6 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         return serviceDefinition.getServiceName().getName() + "Retrofit";
     }
 
-    @SuppressWarnings("deprecation")
-    private ClassName getReturnType() {
-        if (featureFlags.contains(FeatureFlags.RetrofitCompletableFutures)) {
-            return COMPLETABLE_FUTURE_TYPE;
-        } else if (featureFlags.contains(FeatureFlags.RetrofitListenableFutures)) {
-            return LISTENABLE_FUTURE_TYPE;
-        } else {
-            return CALL_TYPE;
-        }
-    }
-
     private MethodSpec generateServiceMethod(
             EndpointDefinition endpointDef,
             TypeMapper returnTypeMapper,
@@ -164,7 +152,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .addMember("value", "$S", "Accept: " + getReturnMediaType(returnType))
                         .build());
 
-        if (returnType.equals(BINARY_RETURN_TYPE)) {
+        if (returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming")).build());
         }
 
@@ -174,7 +162,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(
                 content -> methodBuilder.addJavadoc("$L", content));
 
-        methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box()));
+        methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box()));
 
         methodBuilder.addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs));
 
@@ -267,8 +255,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .mapToObj(sortedParams::get)
                         .collect(Collectors.toList()));
 
-        endpointDef.getReturns()
-                .ifPresent(type -> methodBuilder.returns(ParameterizedTypeName.get(getReturnType(), returnType.box())));
+        endpointDef.getReturns().ifPresent(type ->
+                methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box())));
 
         // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
@@ -366,7 +354,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     }
 
     private static String getReturnMediaType(TypeName returnType) {
-        return returnType.equals(BINARY_RETURN_TYPE)
+        return returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)
                 ? MediaType.APPLICATION_OCTET_STREAM
                 : MediaType.APPLICATION_JSON;
     }
@@ -384,5 +372,4 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         }
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
     }
-
 }

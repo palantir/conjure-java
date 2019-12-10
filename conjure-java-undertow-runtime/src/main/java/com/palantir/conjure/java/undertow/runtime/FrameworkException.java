@@ -17,6 +17,8 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CompileTimeConstant;
+import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeLoggable;
 import io.undertow.util.StatusCodes;
@@ -25,23 +27,31 @@ import java.util.List;
 /** Internal type to signal a conjure protocol-level failure with a specific response code. */
 final class FrameworkException extends RuntimeException implements SafeLoggable {
 
+    private static final ErrorType UNPROCESSABLE_ENTITY = ErrorType.create(
+            ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnprocessableEntity");
+    private static final ErrorType UNSUPPORTED_MEDIA_TYPE = ErrorType.create(
+            ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnsupportedMediaType");
+
     private final String logMessage;
     private final List<Arg<?>> arguments;
     private final int statusCode;
+    private final ErrorType errorType;
 
-    private FrameworkException(String message, int statusCode, Throwable cause, Arg<?>... args) {
+    private FrameworkException(String message, ErrorType errorType, int statusCode, Throwable cause, Arg<?>... args) {
         super(renderMessage(message, args), cause);
         this.logMessage = message;
         this.arguments = ImmutableList.copyOf(args);
         this.statusCode = statusCode;
+        this.errorType = errorType;
     }
 
-    static FrameworkException unprocessableEntity(String message, Throwable cause, Arg<?>... args) {
-        return new FrameworkException(message, StatusCodes.UNPROCESSABLE_ENTITY, cause, args);
+    static FrameworkException unprocessableEntity(
+            @CompileTimeConstant String message, Throwable cause, Arg<?>... args) {
+        return new FrameworkException(message, UNPROCESSABLE_ENTITY, StatusCodes.UNPROCESSABLE_ENTITY, cause, args);
     }
 
-    static FrameworkException unsupportedMediaType(String message, Arg<?>... args) {
-        return new FrameworkException(message, StatusCodes.UNSUPPORTED_MEDIA_TYPE, null, args);
+    static FrameworkException unsupportedMediaType(@CompileTimeConstant String message, Arg<?>... args) {
+        return new FrameworkException(message, UNSUPPORTED_MEDIA_TYPE, StatusCodes.UNSUPPORTED_MEDIA_TYPE, null, args);
     }
 
     @Override
@@ -56,6 +66,10 @@ final class FrameworkException extends RuntimeException implements SafeLoggable 
 
     int getStatusCode() {
         return statusCode;
+    }
+
+    ErrorType getErrorType() {
+        return errorType;
     }
 
     private static String renderMessage(String message, Arg<?>... args) {
