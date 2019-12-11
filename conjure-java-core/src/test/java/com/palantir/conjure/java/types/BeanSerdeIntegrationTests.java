@@ -55,6 +55,16 @@ public final class BeanSerdeIntegrationTests {
     }
 
     @Test
+    public void testListOptionalItems() throws Exception {
+        String json = "{\"optionalItems\": [null]}";
+        ListExample example = mapper.readValue(json, ListExample.class);
+        assertThat(example.getOptionalItems()).isNotEmpty();
+        String serialized = mapper.writeValueAsString(example);
+        ListExample deserialized = mapper.readValue(serialized, ListExample.class);
+        assertThat(deserialized).isEqualTo(example);
+    }
+
+    @Test
     public void testMapExampleSerde() throws Exception {
         testSerde("{\"items\": {\"one\": \"eins\", \"two\": \"二\"}}", MapExample.class);
     }
@@ -64,6 +74,17 @@ public final class BeanSerdeIntegrationTests {
         assertThatThrownBy(() -> mapper.readValue("{\"items\": {\"one\": null } }", MapExample.class))
                 .isInstanceOf(InvalidNullException.class);
     }
+
+    @Test
+    public void testMapOptionalItems() throws Exception {
+        String json = "{\"optionalItems\": { \"one\": null } }";
+        MapExample example = mapper.readValue(json, MapExample.class);
+        assertThat(example.getOptionalItems()).isNotEmpty();
+        String serialized = mapper.writeValueAsString(example);
+        MapExample deserialized = mapper.readValue(serialized, MapExample.class);
+        assertThat(deserialized).isEqualTo(example);
+    }
+
 
     @Test
     public void testSafeLongExampleSerde() throws Exception {

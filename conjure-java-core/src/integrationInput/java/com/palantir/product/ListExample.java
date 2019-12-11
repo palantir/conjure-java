@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Generated;
 
 @JsonDeserialize(builder = ListExample.Builder.class)
@@ -23,14 +24,20 @@ public final class ListExample {
 
     private final List<Double> doubleItems;
 
+    private final List<Optional<String>> optionalItems;
+
     private volatile int memoizedHashCode;
 
     private ListExample(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
-        validateFields(items, primitiveItems, doubleItems);
+            List<String> items,
+            List<Integer> primitiveItems,
+            List<Double> doubleItems,
+            List<Optional<String>> optionalItems) {
+        validateFields(items, primitiveItems, doubleItems, optionalItems);
         this.items = Collections.unmodifiableList(items);
         this.primitiveItems = Collections.unmodifiableList(primitiveItems);
         this.doubleItems = Collections.unmodifiableList(doubleItems);
+        this.optionalItems = Collections.unmodifiableList(optionalItems);
     }
 
     @JsonProperty("items")
@@ -48,6 +55,11 @@ public final class ListExample {
         return this.doubleItems;
     }
 
+    @JsonProperty("optionalItems")
+    public List<Optional<String>> getOptionalItems() {
+        return this.optionalItems;
+    }
+
     @Override
     public boolean equals(Object other) {
         return this == other || (other instanceof ListExample && equalTo((ListExample) other));
@@ -56,14 +68,17 @@ public final class ListExample {
     private boolean equalTo(ListExample other) {
         return this.items.equals(other.items)
                 && this.primitiveItems.equals(other.primitiveItems)
-                && this.doubleItems.equals(other.doubleItems);
+                && this.doubleItems.equals(other.doubleItems)
+                && this.optionalItems.equals(other.optionalItems);
     }
 
     @Override
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.items, this.primitiveItems, this.doubleItems);
+            result =
+                    Objects.hash(
+                            this.items, this.primitiveItems, this.doubleItems, this.optionalItems);
             memoizedHashCode = result;
         }
         return result;
@@ -77,24 +92,21 @@ public final class ListExample {
                 + primitiveItems
                 + ", doubleItems: "
                 + doubleItems
+                + ", optionalItems: "
+                + optionalItems
                 + '}';
     }
 
-    public static ListExample of(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
-        return builder()
-                .items(items)
-                .primitiveItems(primitiveItems)
-                .doubleItems(doubleItems)
-                .build();
-    }
-
     private static void validateFields(
-            List<String> items, List<Integer> primitiveItems, List<Double> doubleItems) {
+            List<String> items,
+            List<Integer> primitiveItems,
+            List<Double> doubleItems,
+            List<Optional<String>> optionalItems) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, primitiveItems, "primitiveItems");
         missingFields = addFieldIfMissing(missingFields, doubleItems, "doubleItems");
+        missingFields = addFieldIfMissing(missingFields, optionalItems, "optionalItems");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set",
@@ -107,7 +119,7 @@ public final class ListExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(3);
+                missingFields = new ArrayList<>(4);
             }
             missingFields.add(fieldName);
         }
@@ -126,12 +138,15 @@ public final class ListExample {
 
         private List<Double> doubleItems = new ArrayList<>();
 
+        private List<Optional<String>> optionalItems = new ArrayList<>();
+
         private Builder() {}
 
         public Builder from(ListExample other) {
             items(other.getItems());
             primitiveItems(other.getPrimitiveItems());
             doubleItems(other.getDoubleItems());
+            optionalItems(other.getOptionalItems());
             return this;
         }
 
@@ -196,8 +211,29 @@ public final class ListExample {
             return this;
         }
 
+        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
+        public Builder optionalItems(Iterable<Optional<String>> optionalItems) {
+            this.optionalItems.clear();
+            ConjureCollections.addAll(
+                    this.optionalItems,
+                    Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
+            return this;
+        }
+
+        public Builder addAllOptionalItems(Iterable<Optional<String>> optionalItems) {
+            ConjureCollections.addAll(
+                    this.optionalItems,
+                    Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
+            return this;
+        }
+
+        public Builder optionalItems(Optional<String> optionalItems) {
+            this.optionalItems.add(optionalItems);
+            return this;
+        }
+
         public ListExample build() {
-            return new ListExample(items, primitiveItems, doubleItems);
+            return new ListExample(items, primitiveItems, doubleItems, optionalItems);
         }
     }
 }

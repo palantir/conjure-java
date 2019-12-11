@@ -52,6 +52,7 @@ types:
           items: list<string>
           primitiveItems: list<integer>
           doubleItems: list<double>
+          optionalItems: list<optional<string>>
       CovariantListExample:
         fields:
           items: list<any>
@@ -63,6 +64,7 @@ types:
       MapExample:
         fields:
           items: map<string, string>
+          optionalItems: map<string, optional<string>>
       EnumExample:
         docs: |
           This enumerates the numbers 1:2 also 100.
