@@ -26,6 +26,8 @@ public final class ListExample {
 
     private final List<Optional<String>> optionalItems;
 
+    private final List<OptionalAlias> aliasOptionalItems;
+
     private final List<List<String>> nestedItems;
 
     private volatile int memoizedHashCode;
@@ -35,12 +37,15 @@ public final class ListExample {
             List<Integer> primitiveItems,
             List<Double> doubleItems,
             List<Optional<String>> optionalItems,
+            List<OptionalAlias> aliasOptionalItems,
             List<List<String>> nestedItems) {
-        validateFields(items, primitiveItems, doubleItems, optionalItems, nestedItems);
+        validateFields(
+                items, primitiveItems, doubleItems, optionalItems, aliasOptionalItems, nestedItems);
         this.items = Collections.unmodifiableList(items);
         this.primitiveItems = Collections.unmodifiableList(primitiveItems);
         this.doubleItems = Collections.unmodifiableList(doubleItems);
         this.optionalItems = Collections.unmodifiableList(optionalItems);
+        this.aliasOptionalItems = Collections.unmodifiableList(aliasOptionalItems);
         this.nestedItems = Collections.unmodifiableList(nestedItems);
     }
 
@@ -64,6 +69,11 @@ public final class ListExample {
         return this.optionalItems;
     }
 
+    @JsonProperty("aliasOptionalItems")
+    public List<OptionalAlias> getAliasOptionalItems() {
+        return this.aliasOptionalItems;
+    }
+
     @JsonProperty("nestedItems")
     public List<List<String>> getNestedItems() {
         return this.nestedItems;
@@ -79,6 +89,7 @@ public final class ListExample {
                 && this.primitiveItems.equals(other.primitiveItems)
                 && this.doubleItems.equals(other.doubleItems)
                 && this.optionalItems.equals(other.optionalItems)
+                && this.aliasOptionalItems.equals(other.aliasOptionalItems)
                 && this.nestedItems.equals(other.nestedItems);
     }
 
@@ -92,6 +103,7 @@ public final class ListExample {
                             this.primitiveItems,
                             this.doubleItems,
                             this.optionalItems,
+                            this.aliasOptionalItems,
                             this.nestedItems);
             memoizedHashCode = result;
         }
@@ -108,6 +120,8 @@ public final class ListExample {
                 + doubleItems
                 + ", optionalItems: "
                 + optionalItems
+                + ", aliasOptionalItems: "
+                + aliasOptionalItems
                 + ", nestedItems: "
                 + nestedItems
                 + '}';
@@ -118,12 +132,14 @@ public final class ListExample {
             List<Integer> primitiveItems,
             List<Double> doubleItems,
             List<Optional<String>> optionalItems,
+            List<OptionalAlias> aliasOptionalItems,
             List<List<String>> nestedItems) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, primitiveItems, "primitiveItems");
         missingFields = addFieldIfMissing(missingFields, doubleItems, "doubleItems");
         missingFields = addFieldIfMissing(missingFields, optionalItems, "optionalItems");
+        missingFields = addFieldIfMissing(missingFields, aliasOptionalItems, "aliasOptionalItems");
         missingFields = addFieldIfMissing(missingFields, nestedItems, "nestedItems");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
@@ -137,7 +153,7 @@ public final class ListExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(5);
+                missingFields = new ArrayList<>(6);
             }
             missingFields.add(fieldName);
         }
@@ -158,6 +174,8 @@ public final class ListExample {
 
         private List<Optional<String>> optionalItems = new ArrayList<>();
 
+        private List<OptionalAlias> aliasOptionalItems = new ArrayList<>();
+
         private List<List<String>> nestedItems = new ArrayList<>();
 
         private Builder() {}
@@ -167,6 +185,7 @@ public final class ListExample {
             primitiveItems(other.getPrimitiveItems());
             doubleItems(other.getDoubleItems());
             optionalItems(other.getOptionalItems());
+            aliasOptionalItems(other.getAliasOptionalItems());
             nestedItems(other.getNestedItems());
             return this;
         }
@@ -232,7 +251,7 @@ public final class ListExample {
             return this;
         }
 
-        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP)
+        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder optionalItems(Iterable<Optional<String>> optionalItems) {
             this.optionalItems.clear();
             ConjureCollections.addAll(
@@ -250,6 +269,29 @@ public final class ListExample {
 
         public Builder optionalItems(Optional<String> optionalItems) {
             this.optionalItems.add(optionalItems);
+            return this;
+        }
+
+        @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
+        public Builder aliasOptionalItems(Iterable<OptionalAlias> aliasOptionalItems) {
+            this.aliasOptionalItems.clear();
+            ConjureCollections.addAll(
+                    this.aliasOptionalItems,
+                    Preconditions.checkNotNull(
+                            aliasOptionalItems, "aliasOptionalItems cannot be null"));
+            return this;
+        }
+
+        public Builder addAllAliasOptionalItems(Iterable<OptionalAlias> aliasOptionalItems) {
+            ConjureCollections.addAll(
+                    this.aliasOptionalItems,
+                    Preconditions.checkNotNull(
+                            aliasOptionalItems, "aliasOptionalItems cannot be null"));
+            return this;
+        }
+
+        public Builder aliasOptionalItems(OptionalAlias aliasOptionalItems) {
+            this.aliasOptionalItems.add(aliasOptionalItems);
             return this;
         }
 
@@ -275,7 +317,13 @@ public final class ListExample {
         }
 
         public ListExample build() {
-            return new ListExample(items, primitiveItems, doubleItems, optionalItems, nestedItems);
+            return new ListExample(
+                    items,
+                    primitiveItems,
+                    doubleItems,
+                    optionalItems,
+                    aliasOptionalItems,
+                    nestedItems);
         }
     }
 }
