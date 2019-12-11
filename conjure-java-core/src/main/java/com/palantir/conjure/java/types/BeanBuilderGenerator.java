@@ -42,6 +42,7 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -554,7 +555,7 @@ public final class BeanBuilderGenerator {
 
             @Override
             public Boolean visitUnknown(String unknownType) {
-                return null;
+                throw new SafeIllegalStateException("Encountered unknown type", SafeArg.of("type", unknownType));
             }
         });
     }
