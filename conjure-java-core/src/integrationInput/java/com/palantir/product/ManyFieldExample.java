@@ -279,7 +279,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for items field */
-        @JsonSetter(value = "items", nulls = Nulls.SKIP)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
@@ -301,7 +301,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for set field */
-        @JsonSetter(value = "set", nulls = Nulls.SKIP)
+        @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder set(Iterable<String> set) {
             this.set.clear();
             ConjureCollections.addAll(
@@ -323,7 +323,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for map field */
-        @JsonSetter(value = "map", nulls = Nulls.SKIP)
+        @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(Map<String, String> map) {
             this.map.clear();
             this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));

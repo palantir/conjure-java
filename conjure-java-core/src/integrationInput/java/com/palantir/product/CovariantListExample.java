@@ -112,7 +112,7 @@ public final class CovariantListExample {
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(Iterable<?> items) {
             this.items.clear();
             ConjureCollections.addAll(
@@ -131,7 +131,7 @@ public final class CovariantListExample {
             return this;
         }
 
-        @JsonSetter(value = "externalItems", nulls = Nulls.SKIP)
+        @JsonSetter(value = "externalItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder externalItems(Iterable<? extends ExampleExternalReference> externalItems) {
             this.externalItems.clear();
             ConjureCollections.addAll(

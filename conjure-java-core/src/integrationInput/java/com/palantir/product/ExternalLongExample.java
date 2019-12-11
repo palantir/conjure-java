@@ -166,7 +166,7 @@ public final class ExternalLongExample {
             return this;
         }
 
-        @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP)
+        @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder listExternalLong(Iterable<? extends Long> listExternalLong) {
             this.listExternalLong.clear();
             ConjureCollections.addAll(

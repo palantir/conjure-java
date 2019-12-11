@@ -110,7 +110,7 @@ public final class SetExample {
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
@@ -129,7 +129,7 @@ public final class SetExample {
             return this;
         }
 
-        @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP)
+        @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(Iterable<Double> doubleItems) {
             this.doubleItems.clear();
             ConjureCollections.addAll(

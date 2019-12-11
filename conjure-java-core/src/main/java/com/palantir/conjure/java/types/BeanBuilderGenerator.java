@@ -29,16 +29,21 @@ import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
+import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -198,7 +203,8 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields) {
-        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(enrichedFields,
+        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(
+                enrichedFields,
                 enrichedField -> CodeBlocks.statement(
                         "$1N(other.$2N())",
                         enrichedField.poetSpec().name,
@@ -247,8 +253,15 @@ public final class BeanBuilderGenerator {
         Type type = enriched.conjureDef().getType();
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
                 .addMember("value", "$S", enriched.fieldName().get());
-        if (isCollectionType(type)) {
+        if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
+        } else if (isCollectionType(type)) {
+            annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
+            if (isOptionalInnerType(type)) {
+                annotationBuilder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
+            } else if (featureFlags.contains(FeatureFlags.NonNullCollections)) {
+                annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
+            }
         }
 
         boolean shouldClearFirst = true;
@@ -454,7 +467,6 @@ public final class BeanBuilderGenerator {
         });
     }
 
-
     private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {
         FieldSpec field = enriched.poetSpec();
         return publicSetter(enriched)
@@ -505,7 +517,55 @@ public final class BeanBuilderGenerator {
     private static boolean isCollectionType(Type type) {
         return type.accept(TypeVisitor.IS_LIST)
                 || type.accept(TypeVisitor.IS_SET)
-                || type.accept(TypeVisitor.IS_MAP)
-                || type.accept(TypeVisitor.IS_OPTIONAL);
+                || type.accept(TypeVisitor.IS_MAP);
+    }
+
+    private boolean isOptionalInnerType(Type type) {
+        return type.accept(new Type.Visitor<Boolean>() {
+            @Override
+            public Boolean visitPrimitive(PrimitiveType value) {
+                return false;
+            }
+
+            @Override
+            public Boolean visitOptional(OptionalType value) {
+                return true;
+            }
+
+            @Override
+            public Boolean visitList(ListType value) {
+                return isOptionalInnerType(value.getItemType());
+            }
+
+            @Override
+            public Boolean visitSet(SetType value) {
+                return value.getItemType().accept(TypeVisitor.IS_OPTIONAL);
+            }
+
+            @Override
+            public Boolean visitMap(MapType value) {
+                return isOptionalInnerType(value.getValueType());
+            }
+
+            @Override
+            public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
+                return typeMapper.getType(value)
+                        .map(typeDef -> typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)
+                                && typeDef.accept(TypeDefinitionVisitor.ALIAS)
+                                .getAlias()
+                                .accept(TypeVisitor.IS_OPTIONAL))
+                        .orElse(false);
+            }
+
+            @Override
+            public Boolean visitExternal(ExternalReference value) {
+                return false;
+            }
+
+            @Override
+            public Boolean visitUnknown(String unknownType) {
+                throw new SafeIllegalStateException("Encountered unknown type", SafeArg.of("type", unknownType));
+            }
+        });
     }
 }

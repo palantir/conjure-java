@@ -7,19 +7,19 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class StringAliasTwo {
-    private final Optional<StringAliasOne> value;
+public final class OptionalAlias {
+    private final Optional<String> value;
 
-    private StringAliasTwo(Optional<StringAliasOne> value) {
+    private OptionalAlias(Optional<String> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private StringAliasTwo() {
+    private OptionalAlias() {
         this(Optional.empty());
     }
 
     @JsonValue
-    public Optional<StringAliasOne> get() {
+    public Optional<String> get() {
         return value;
     }
 
@@ -31,8 +31,8 @@ public final class StringAliasTwo {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof StringAliasTwo
-                        && this.value.equals(((StringAliasTwo) other).value));
+                || (other instanceof OptionalAlias
+                        && this.value.equals(((OptionalAlias) other).value));
     }
 
     @Override
@@ -41,7 +41,7 @@ public final class StringAliasTwo {
     }
 
     @JsonCreator
-    public static StringAliasTwo of(Optional<StringAliasOne> value) {
-        return new StringAliasTwo(value);
+    public static OptionalAlias of(Optional<String> value) {
+        return new OptionalAlias(value);
     }
 }

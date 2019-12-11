@@ -34,7 +34,12 @@ public final class ObjectGeneratorTests {
         ConjureDefinition def = Conjure.parse(
                 ImmutableList.of(new File("src/test/resources/example-types.yml")));
         List<Path> files = new ObjectGenerator(
-                ImmutableSet.of(FeatureFlags.UseImmutableBytes, FeatureFlags.StrictObjects)).emit(def, tempDir);
+                ImmutableSet.of(
+                        FeatureFlags.UseImmutableBytes,
+                        FeatureFlags.StrictObjects,
+                        FeatureFlags.NonNullCollections)).emit(
+                def,
+                tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
