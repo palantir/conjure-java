@@ -65,4 +65,9 @@ public enum FeatureFlags {
      * are encountered.
      */
     StrictObjects,
+
+    /**
+     * Instructs the {@link ObjectGenerator} to generate objects that fail to deserialize collections with null values.
+     */
+    NonNullCollections,
 }

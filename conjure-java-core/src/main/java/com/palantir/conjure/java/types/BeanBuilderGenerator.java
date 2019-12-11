@@ -249,6 +249,9 @@ public final class BeanBuilderGenerator {
                 .addMember("value", "$S", enriched.fieldName().get());
         if (isCollectionType(type)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
+            if (featureFlags.contains(FeatureFlags.NonNullCollections)) {
+                annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
+            }
         }
 
         boolean shouldClearFirst = true;

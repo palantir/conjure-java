@@ -102,5 +102,9 @@ public abstract class CliConfiguration {
         Builder strictObjects(boolean flag) {
             return flag ? addFeatureFlags(FeatureFlags.StrictObjects) : this;
         }
+
+        Builder nonNullCollections(boolean flag) {
+            return flag ? addFeatureFlags(FeatureFlags.NonNullCollections) : this;
+        }
     }
 }

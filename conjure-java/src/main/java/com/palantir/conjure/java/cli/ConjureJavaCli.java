@@ -117,6 +117,11 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate POJOs that by default will fail to deserialize unknown fields")
         private boolean strictObjects;
 
+        @CommandLine.Option(names = "--nonNullCollections",
+                defaultValue = "false",
+                description = "Generate POJOs that by default will fail to deserialize collections with null values")
+        private boolean nonNullCollections;
+
         @Beta
         @CommandLine.Option(
                 names = "--experimentalUndertowAsyncMarkers",
@@ -182,6 +187,7 @@ public final class ConjureJavaCli implements Runnable {
                     .undertowListenableFutures(undertowListenableFutures)
                     .experimentalUndertowAsyncMarkers(experimentalUndertowAsyncMarkers)
                     .strictObjects(strictObjects)
+                    .nonNullCollections(nonNullCollections)
                     .build();
         }
 
