@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: Add `NonNullCollections` feature flag to generate objects that will
+    fail to deserialize collections with null values.
+  links:
+  - https://github.com/palantir/conjure-java/pull/676
