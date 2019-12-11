@@ -113,7 +113,7 @@ public final class CovariantOptionalExample {
             return this;
         }
 
-        @JsonSetter(value = "item", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "item", nulls = Nulls.SKIP)
         public Builder item(Optional<?> item) {
             this.item =
                     Preconditions.checkNotNull(item, "item cannot be null")
@@ -126,7 +126,7 @@ public final class CovariantOptionalExample {
             return this;
         }
 
-        @JsonSetter(value = "setItem", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "setItem", nulls = Nulls.SKIP)
         public Builder setItem(Optional<? extends Set<StringAliasExample>> setItem) {
             this.setItem =
                     Preconditions.checkNotNull(setItem, "setItem cannot be null")

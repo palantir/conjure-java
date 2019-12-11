@@ -253,9 +253,11 @@ public final class BeanBuilderGenerator {
         Type type = enriched.conjureDef().getType();
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
                 .addMember("value", "$S", enriched.fieldName().get());
-        if (isCollectionType(type)) {
+        if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
-            if (!type.accept(TypeVisitor.IS_OPTIONAL) && isOptionalInnerType(type)) {
+        } else if (isCollectionType(type)) {
+            annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
+            if (isOptionalInnerType(type)) {
                 annotationBuilder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
             } else if (featureFlags.contains(FeatureFlags.NonNullCollections)) {
                 annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
@@ -515,8 +517,7 @@ public final class BeanBuilderGenerator {
     private static boolean isCollectionType(Type type) {
         return type.accept(TypeVisitor.IS_LIST)
                 || type.accept(TypeVisitor.IS_SET)
-                || type.accept(TypeVisitor.IS_MAP)
-                || type.accept(TypeVisitor.IS_OPTIONAL);
+                || type.accept(TypeVisitor.IS_MAP);
     }
 
     private boolean isOptionalInnerType(Type type) {

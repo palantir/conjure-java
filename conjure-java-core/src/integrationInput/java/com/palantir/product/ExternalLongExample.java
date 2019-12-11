@@ -149,7 +149,7 @@ public final class ExternalLongExample {
             return this;
         }
 
-        @JsonSetter(value = "optionalExternalLong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "optionalExternalLong", nulls = Nulls.SKIP)
         public Builder optionalExternalLong(Optional<? extends Long> optionalExternalLong) {
             this.optionalExternalLong =
                     Preconditions.checkNotNull(

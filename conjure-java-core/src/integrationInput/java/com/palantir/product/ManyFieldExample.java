@@ -262,7 +262,7 @@ public final class ManyFieldExample {
         }
 
         /** docs for optionalItem field */
-        @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(Optional<String> optionalItem) {
             this.optionalItem =
                     Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");

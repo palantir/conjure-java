@@ -109,6 +109,7 @@ public final class AliasGenerator {
                 .addStatement("return new $T(value)", thisClass)
                 .build());
 
+        // Generate a default constructor so that Jackson can construct a default instance when coercing from null
         if (typeDef.getAlias().accept(TypeVisitor.IS_OPTIONAL)) {
             spec.addMethod(createDefaultConstructor(aliasTypeName));
         }
