@@ -55,6 +55,12 @@ public final class BeanSerdeIntegrationTests {
     }
 
     @Test
+    public void testListFailsOnNestedNulls() {
+        assertThatThrownBy(() -> mapper.readValue("{\"nestedItems\": [[null]]}", ListExample.class))
+                .isInstanceOf(InvalidNullException.class);
+    }
+
+    @Test
     public void testListOptionalItems() throws Exception {
         String json = "{\"optionalItems\": [null]}";
         ListExample example = mapper.readValue(json, ListExample.class);

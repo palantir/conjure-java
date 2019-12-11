@@ -53,6 +53,7 @@ types:
           primitiveItems: list<integer>
           doubleItems: list<double>
           optionalItems: list<optional<string>>
+          nestedItems: list<list<string>>
       CovariantListExample:
         fields:
           items: list<any>
