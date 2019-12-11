@@ -129,7 +129,7 @@ public final class MapExample {
             return this;
         }
 
-        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
+        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP)
         public Builder optionalItems(Map<String, Optional<String>> optionalItems) {
             this.optionalItems.clear();
             this.optionalItems.putAll(

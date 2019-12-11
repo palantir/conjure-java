@@ -253,9 +253,7 @@ public final class BeanBuilderGenerator {
                 .addMember("value", "$S", enriched.fieldName().get());
         if (isCollectionType(type)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
-            if (isOptionalInnerType(type)) {
-                annotationBuilder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
-            } else if (featureFlags.contains(FeatureFlags.NonNullCollections)) {
+            if (featureFlags.contains(FeatureFlags.NonNullCollections) && !isOptionalInnerType(type)) {
                 annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
             }
         }

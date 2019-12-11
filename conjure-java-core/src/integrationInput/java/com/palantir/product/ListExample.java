@@ -211,7 +211,7 @@ public final class ListExample {
             return this;
         }
 
-        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
+        @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP)
         public Builder optionalItems(Iterable<Optional<String>> optionalItems) {
             this.optionalItems.clear();
             ConjureCollections.addAll(
