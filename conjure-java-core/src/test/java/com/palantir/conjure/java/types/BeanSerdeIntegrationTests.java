@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.serialization.ObjectMappers;
@@ -37,13 +38,31 @@ public final class BeanSerdeIntegrationTests {
     }
 
     @Test
+    public void testSetFailsOnNulls() {
+        assertThatThrownBy(() -> mapper.readValue("{\"items\": [null}", SetExample.class))
+                .isInstanceOf(InvalidNullException.class);
+    }
+
+    @Test
     public void testListExampleSerde() throws Exception {
         testSerde("{\"items\": [\"one\", \"two\"]}", ListExample.class);
     }
 
     @Test
+    public void testListFailsOnNulls() {
+        assertThatThrownBy(() -> mapper.readValue("{\"items\": [null]}", ListExample.class))
+                .isInstanceOf(InvalidNullException.class);
+    }
+
+    @Test
     public void testMapExampleSerde() throws Exception {
         testSerde("{\"items\": {\"one\": \"eins\", \"two\": \"二\"}}", MapExample.class);
+    }
+
+    @Test
+    public void testMapFailsOnNullValue() {
+        assertThatThrownBy(() -> mapper.readValue("{\"items\": {\"one\": null } }", MapExample.class))
+                .isInstanceOf(InvalidNullException.class);
     }
 
     @Test
@@ -71,7 +90,7 @@ public final class BeanSerdeIntegrationTests {
     @Test
     public void testIgnoreProperties() throws Exception {
         assertThatThrownBy(() -> mapper.readValue("{\"coin\": true, \"ignored\": \"field\"}", BooleanExample.class))
-            .isInstanceOf(UnrecognizedPropertyException.class);
+                .isInstanceOf(UnrecognizedPropertyException.class);
         // Important for ensuring additive changes don't affect clients adversely
         BooleanExample boolExample = ObjectMappers.newClientObjectMapper()
                 .readValue("{\"coin\": true, \"ignored\": \"field\"}", BooleanExample.class);
@@ -80,7 +99,8 @@ public final class BeanSerdeIntegrationTests {
 
     @Test
     public void testEnumKeyDeserialization() throws IOException {
-        Map<EnumExample, String> value = mapper.readValue("{\"TWO\": \"foo\"}",
+        Map<EnumExample, String> value = mapper.readValue(
+                "{\"TWO\": \"foo\"}",
                 new TypeReference<Map<EnumExample, String>>() {});
         assertThat(Iterables.getOnlyElement(value.keySet()).get()).isEqualTo(EnumExample.Value.TWO);
     }
@@ -92,5 +112,4 @@ public final class BeanSerdeIntegrationTests {
 
         assertThat(deserialized).isEqualTo(example);
     }
-
 }

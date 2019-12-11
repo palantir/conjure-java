@@ -97,7 +97,7 @@ public final class MapExample {
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(Map<String, String> items) {
             this.items.clear();
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));

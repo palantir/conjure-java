@@ -213,7 +213,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter(value = "num", nulls = Nulls.SKIP)
+        @JsonSetter(value = "num", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder num(OptionalDouble num) {
             this.num = Preconditions.checkNotNull(num, "num cannot be null");
             return this;
@@ -224,7 +224,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter(value = "bool", nulls = Nulls.SKIP)
+        @JsonSetter(value = "bool", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder bool(Optional<Boolean> bool) {
             this.bool = Preconditions.checkNotNull(bool, "bool cannot be null");
             return this;
@@ -235,7 +235,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter(value = "integer", nulls = Nulls.SKIP)
+        @JsonSetter(value = "integer", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder integer(OptionalInt integer) {
             this.integer = Preconditions.checkNotNull(integer, "integer cannot be null");
             return this;
@@ -246,7 +246,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter(value = "safelong", nulls = Nulls.SKIP)
+        @JsonSetter(value = "safelong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safelong(Optional<SafeLong> safelong) {
             this.safelong = Preconditions.checkNotNull(safelong, "safelong cannot be null");
             return this;
@@ -258,7 +258,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter(value = "rid", nulls = Nulls.SKIP)
+        @JsonSetter(value = "rid", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder rid(Optional<ResourceIdentifier> rid) {
             this.rid = Preconditions.checkNotNull(rid, "rid cannot be null");
             return this;
@@ -269,7 +269,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter(value = "bearertoken", nulls = Nulls.SKIP)
+        @JsonSetter(value = "bearertoken", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder bearertoken(Optional<BearerToken> bearertoken) {
             this.bearertoken =
                     Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null");
@@ -283,7 +283,7 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
-        @JsonSetter(value = "uuid", nulls = Nulls.SKIP)
+        @JsonSetter(value = "uuid", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder uuid(Optional<UUID> uuid) {
             this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;

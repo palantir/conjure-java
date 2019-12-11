@@ -89,7 +89,7 @@ public final class OptionalExample {
             return this;
         }
 
-        @JsonSetter(value = "item", nulls = Nulls.SKIP)
+        @JsonSetter(value = "item", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder item(Optional<String> item) {
             this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;

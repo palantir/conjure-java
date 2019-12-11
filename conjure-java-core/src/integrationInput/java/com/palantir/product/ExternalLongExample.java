@@ -149,7 +149,7 @@ public final class ExternalLongExample {
             return this;
         }
 
-        @JsonSetter(value = "optionalExternalLong", nulls = Nulls.SKIP)
+        @JsonSetter(value = "optionalExternalLong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder optionalExternalLong(Optional<? extends Long> optionalExternalLong) {
             this.optionalExternalLong =
                     Preconditions.checkNotNull(
@@ -166,7 +166,7 @@ public final class ExternalLongExample {
             return this;
         }
 
-        @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP)
+        @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder listExternalLong(Iterable<? extends Long> listExternalLong) {
             this.listExternalLong.clear();
             ConjureCollections.addAll(
