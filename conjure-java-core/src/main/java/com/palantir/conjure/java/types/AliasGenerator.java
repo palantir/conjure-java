@@ -33,6 +33,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.lang.reflect.Method;
@@ -108,6 +109,10 @@ public final class AliasGenerator {
                 .addStatement("return new $T(value)", thisClass)
                 .build());
 
+        if (typeDef.getAlias().accept(TypeVisitor.IS_OPTIONAL)) {
+            spec.addMethod(createDefaultConstructor(aliasTypeName));
+        }
+
         if (typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE) && typeDef.getAlias().accept(
                 TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE)) {
             CodeBlock codeBlock = CodeBlock.builder()
@@ -159,6 +164,15 @@ public final class AliasGenerator {
         return JavaFile.builder(typePackage, spec.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
+                .build();
+    }
+
+    private static MethodSpec createDefaultConstructor(TypeName aliasTypeName) {
+        return MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PRIVATE)
+                .addStatement("this($T.empty())", aliasTypeName instanceof ParameterizedTypeName
+                        ? Optional.class
+                        : aliasTypeName)
                 .build();
     }
 

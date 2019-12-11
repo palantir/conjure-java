@@ -39,6 +39,7 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -254,7 +255,9 @@ public final class BeanBuilderGenerator {
                 .addMember("value", "$S", enriched.fieldName().get());
         if (isCollectionType(type)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
-            if (featureFlags.contains(FeatureFlags.NonNullCollections) && !isOptionalInnerType(type)) {
+            if (!type.accept(TypeVisitor.IS_OPTIONAL) && isOptionalInnerType(type)) {
+                annotationBuilder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
+            } else if (featureFlags.contains(FeatureFlags.NonNullCollections)) {
                 annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
             }
         }
@@ -516,7 +519,7 @@ public final class BeanBuilderGenerator {
                 || type.accept(TypeVisitor.IS_OPTIONAL);
     }
 
-    private static boolean isOptionalInnerType(Type type) {
+    private boolean isOptionalInnerType(Type type) {
         return type.accept(new Type.Visitor<Boolean>() {
             @Override
             public Boolean visitPrimitive(PrimitiveType value) {
@@ -525,12 +528,12 @@ public final class BeanBuilderGenerator {
 
             @Override
             public Boolean visitOptional(OptionalType value) {
-                return value.getItemType().accept(TypeVisitor.IS_OPTIONAL);
+                return true;
             }
 
             @Override
             public Boolean visitList(ListType value) {
-                return value.getItemType().accept(TypeVisitor.IS_OPTIONAL);
+                return isOptionalInnerType(value.getItemType());
             }
 
             @Override
@@ -540,12 +543,17 @@ public final class BeanBuilderGenerator {
 
             @Override
             public Boolean visitMap(MapType value) {
-                return value.getValueType().accept(TypeVisitor.IS_OPTIONAL);
+                return isOptionalInnerType(value.getValueType());
             }
 
             @Override
             public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
-                return false;
+                return typeMapper.getType(value)
+                        .map(typeDef -> typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)
+                                && typeDef.accept(TypeDefinitionVisitor.ALIAS)
+                                .getAlias()
+                                .accept(TypeVisitor.IS_OPTIONAL))
+                        .orElse(false);
             }
 
             @Override
