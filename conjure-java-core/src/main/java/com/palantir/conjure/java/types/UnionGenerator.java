@@ -300,11 +300,13 @@ public final class UnionGenerator {
     /**
      * Generates the build method for the visitor builder. The result looks as follows:
      *
-     * Visitor&lt;T&gt; build() {
-     *     return new Visitor&lt;T&gt;() {
+     * <pre>
+     * Visitor<T> build() {
+     *     return new Visitor<T>() {
      *         [methods delegating to the various visitor function objects]
      *     }
      * }
+     * </pre>
      */
     private static MethodSpec builderBuildMethod(
             ClassName visitorClass,
