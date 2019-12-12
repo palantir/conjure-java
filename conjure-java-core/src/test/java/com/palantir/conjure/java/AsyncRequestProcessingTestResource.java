@@ -44,7 +44,7 @@ final class AsyncRequestProcessingTestResource implements UndertowAsyncRequestPr
         if (delayMillis.isPresent()) {
             int delay = delayMillis.getAsInt();
             return Futures.transform(
-                    executor.schedule(() -> { }, delay, TimeUnit.MILLISECONDS),
+                    executor.schedule(() -> {}, delay, TimeUnit.MILLISECONDS),
                     ignored -> "Completed after " + delay + "ms",
                     MoreExecutors.directExecutor());
         } else {
@@ -61,7 +61,7 @@ final class AsyncRequestProcessingTestResource implements UndertowAsyncRequestPr
     public ListenableFuture<Void> failedFuture(OptionalInt delayMillis) {
         if (delayMillis.isPresent()) {
             return Futures.transformAsync(
-                    executor.schedule(() -> { }, delayMillis.getAsInt(), TimeUnit.MILLISECONDS),
+                    executor.schedule(() -> {}, delayMillis.getAsInt(), TimeUnit.MILLISECONDS),
                     input -> Futures.immediateFailedFuture(new ServiceException(ErrorType.CONFLICT)),
                     MoreExecutors.directExecutor());
         } else {
@@ -71,8 +71,8 @@ final class AsyncRequestProcessingTestResource implements UndertowAsyncRequestPr
 
     @Override
     public ListenableFuture<Optional<BinaryResponseBody>> binary(Optional<String> stringValue) {
-        return executor.submit(() -> stringValue.map(string -> responseBody ->
-                responseBody.write(string.getBytes(StandardCharsets.UTF_8))));
+        return executor.submit(() ->
+                stringValue.map(string -> responseBody -> responseBody.write(string.getBytes(StandardCharsets.UTF_8))));
     }
 
     @Override
@@ -80,7 +80,7 @@ final class AsyncRequestProcessingTestResource implements UndertowAsyncRequestPr
         if (delayMillis.isPresent()) {
             int delay = delayMillis.getAsInt();
             return Futures.transform(
-                    executor.schedule(() -> { }, delay, TimeUnit.MILLISECONDS),
+                    executor.schedule(() -> {}, delay, TimeUnit.MILLISECONDS),
                     ignored -> new LazyTraceValue(),
                     MoreExecutors.directExecutor());
         } else {

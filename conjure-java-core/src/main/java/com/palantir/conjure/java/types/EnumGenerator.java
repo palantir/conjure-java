@@ -108,18 +108,16 @@ public final class EnumGenerator {
         return wrapper.build();
     }
 
-    private static Iterable<FieldSpec> createConstants(Iterable<EnumValueDefinition> values,
-            ClassName thisClass, ClassName enumClass) {
-        return Iterables.transform(values,
-                v -> {
-                    FieldSpec.Builder fieldSpec = FieldSpec.builder(thisClass, v.getValue(),
-                            Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                            .initializer(CodeBlock.of("new $1T($2T.$3N, $4S)", thisClass, enumClass,
-                                    v.getValue(), v.getValue()));
-                    v.getDocs().ifPresent(
-                            docs -> fieldSpec.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
-                    return fieldSpec.build();
-                });
+    private static Iterable<FieldSpec> createConstants(
+            Iterable<EnumValueDefinition> values, ClassName thisClass, ClassName enumClass) {
+        return Iterables.transform(values, v -> {
+            FieldSpec.Builder fieldSpec = FieldSpec.builder(
+                            thisClass, v.getValue(), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                    .initializer(
+                            CodeBlock.of("new $1T($2T.$3N, $4S)", thisClass, enumClass, v.getValue(), v.getValue()));
+            v.getDocs().ifPresent(docs -> fieldSpec.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+            return fieldSpec.build();
+        });
     }
 
     private static TypeSpec createEnum(ClassName enumClass, Iterable<EnumValueDefinition> values, boolean withUnknown) {
@@ -177,10 +175,12 @@ public final class EnumGenerator {
         CodeBlock.Builder switchBlock = CodeBlock.builder();
         switchBlock.beginControlFlow("switch (value)");
         for (EnumValueDefinition value : values) {
-            switchBlock.add("case $N:\n", value.getValue())
+            switchBlock
+                    .add("case $N:\n", value.getValue())
                     .addStatement("return visitor.$L()", getVisitorMethodName(value));
         }
-        switchBlock.add("default:\n")
+        switchBlock
+                .add("default:\n")
                 .addStatement("return visitor.$1L(string)", VISIT_UNKNOWN_METHOD_NAME)
                 .endControlFlow();
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
@@ -214,8 +214,7 @@ public final class EnumGenerator {
     private static MethodSpec createValueOf(ClassName thisClass, Iterable<EnumValueDefinition> values) {
         ParameterSpec param = ParameterSpec.builder(ClassName.get(String.class), "value").build();
 
-        CodeBlock.Builder parser = CodeBlock.builder()
-                .beginControlFlow("switch (upperCasedValue)");
+        CodeBlock.Builder parser = CodeBlock.builder().beginControlFlow("switch (upperCasedValue)");
         for (EnumValueDefinition value : values) {
             parser.add("case $S:\n", value.getValue())
                     .indent()
@@ -247,8 +246,10 @@ public final class EnumGenerator {
                 .addAnnotation(Override.class)
                 .addParameter(other)
                 .returns(TypeName.BOOLEAN)
-                .addStatement("return (this == $1N) || ($1N instanceof $2T && this.string.equals((($2T) $1N).string))",
-                        other, thisClass)
+                .addStatement(
+                        "return (this == $1N) || ($1N instanceof $2T && this.string.equals((($2T) $1N).string))",
+                        other,
+                        thisClass)
                 .build();
     }
 
@@ -260,5 +261,4 @@ public final class EnumGenerator {
                 .addStatement("return this.string.hashCode()")
                 .build();
     }
-
 }

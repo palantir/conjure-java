@@ -39,9 +39,7 @@ public final class TypeMapper {
 
     public TypeMapper(List<TypeDefinition> types, ClassNameVisitor classNameVisitor) {
         this.types = types.stream()
-                .collect(Collectors.toMap(
-                        t -> t.accept(TypeDefinitionVisitor.TYPE_NAME),
-                        Function.identity()));
+                .collect(Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
         this.classNameVisitor = classNameVisitor;
     }
 

@@ -32,9 +32,7 @@ public final class JavaNameSanitizer {
 
     private static final ImmutableSet<String> RESERVED_FIELD_NAMES = ImmutableSet.of("memoizedHashCode");
 
-    /**
-     * Sanitizes the given {@link FieldName} for use as a java specifier.
-     */
+    /** Sanitizes the given {@link FieldName} for use as a java specifier. */
     public static String sanitize(FieldName fieldName) {
         String identifier = CaseConverter.toCase(fieldName.get(), CaseConverter.Case.LOWER_CAMEL_CASE);
         return sanitizeFieldName(identifier);
@@ -63,8 +61,7 @@ public final class JavaNameSanitizer {
                     @Override
                     public String visitUnknown(String unknownType) {
                         throw new SafeIllegalArgumentException(
-                                "Unknown auth type",
-                                SafeArg.of("authType", unknownType));
+                                "Unknown auth type", SafeArg.of("authType", unknownType));
                     }
                 }));
         if (maybeAuthParamName.isPresent() && maybeAuthParamName.get().equals(value)) {
