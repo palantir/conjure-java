@@ -48,9 +48,8 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
             TypeName optionalBinaryTypeName,
             Set<FeatureFlags> featureFlags) {
         this.delegate = new DefaultClassNameVisitor(types, featureFlags);
-        this.types = types.stream().collect(Collectors.toMap(
-                t -> t.accept(TypeDefinitionVisitor.TYPE_NAME),
-                Function.identity()));
+        this.types = types.stream()
+                .collect(Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
         this.binaryClassName = binaryClassName;
         this.optionalBinaryTypeName = optionalBinaryTypeName;
     }
