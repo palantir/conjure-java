@@ -35,9 +35,7 @@ public class CovariantsTest {
         String value = "foo";
         Optional<String> maybeValue = Optional.of(value);
 
-        CovariantOptionalExample covExample = CovariantOptionalExample.builder()
-                .item(maybeValue)
-                .build();
+        CovariantOptionalExample covExample = CovariantOptionalExample.builder().item(maybeValue).build();
         // without covariants item would be Optional<Optional<String>>
         assertThat(covExample.getItem()).isEqualTo(maybeValue);
     }

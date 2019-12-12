@@ -37,7 +37,8 @@ public interface TypeGenerator {
         generateTypes(conjureDefinition.getTypes()).forEach(files::add);
 
         // Generate java files for error definitions
-        generateErrors(conjureDefinition.getTypes(), conjureDefinition.getErrors()).forEach(files::add);
+        generateErrors(conjureDefinition.getTypes(), conjureDefinition.getErrors())
+                .forEach(files::add);
 
         return files;
     }

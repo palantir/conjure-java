@@ -77,10 +77,7 @@ public final class BeanBuilderGenerator {
     private final Set<FeatureFlags> featureFlags;
 
     private BeanBuilderGenerator(
-            TypeMapper typeMapper,
-            ClassName builderClass,
-            ClassName objectClass,
-            Set<FeatureFlags> featureFlags) {
+            TypeMapper typeMapper, ClassName builderClass, ClassName objectClass, Set<FeatureFlags> featureFlags) {
         this.typeMapper = typeMapper;
         this.builderClass = builderClass;
         this.objectClass = objectClass;
@@ -93,7 +90,8 @@ public final class BeanBuilderGenerator {
             ClassName builderClass,
             ObjectDefinition typeDef,
             Set<FeatureFlags> featureFlags) {
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, featureFlags).generate(typeDef);
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, featureFlags)
+                .generate(typeDef);
     }
 
     private TypeSpec generate(ObjectDefinition typeDef) {
@@ -112,26 +110,22 @@ public final class BeanBuilderGenerator {
                 .addMethod(createBuild(enrichedFields, poetFields));
 
         if (!featureFlags.contains(FeatureFlags.StrictObjects)) {
-            builder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
-                    .addMember("ignoreUnknown", "$L", true)
-                    .build());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(JsonIgnoreProperties.class).addMember("ignoreUnknown", "$L", true).build());
         }
 
         return builder.build();
     }
 
     private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {
-        List<EnrichedField> primitives = enrichedFields.stream()
-                .filter(EnrichedField::isPrimitive)
-                .collect(Collectors.toList());
+        List<EnrichedField> primitives =
+                enrichedFields.stream().filter(EnrichedField::isPrimitive).collect(Collectors.toList());
 
         if (primitives.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return ImmutableList.of(
-                createValidateFieldsMethod(primitives),
-                createAddFieldIfMissing(primitives.size()));
+        return ImmutableList.of(createValidateFieldsMethod(primitives), createAddFieldIfMissing(primitives.size()));
     }
 
     private static MethodSpec createValidateFieldsMethod(List<EnrichedField> primitives) {
@@ -141,14 +135,16 @@ public final class BeanBuilderGenerator {
         builder.addStatement("$T missingFields = null", ParameterizedTypeName.get(List.class, String.class));
         for (EnrichedField field : primitives) {
             String name = deriveFieldInitializedName(field);
-            builder.addStatement("missingFields = addFieldIfMissing(missingFields, $N, $S)",
-                    name, field.fieldName().get());
+            builder.addStatement(
+                    "missingFields = addFieldIfMissing(missingFields, $N, $S)", name, field.fieldName().get());
         }
 
         builder.beginControlFlow("if (missingFields != null)")
-                .addStatement("throw new $T(\"Some required fields have not been set\","
+                .addStatement(
+                        "throw new $T(\"Some required fields have not been set\","
                                 + " $T.of(\"missingFields\", missingFields))",
-                        SafeIllegalArgumentException.class, SafeArg.class)
+                        SafeIllegalArgumentException.class,
+                        SafeArg.class)
                 .endControlFlow();
 
         return builder.build();
@@ -157,8 +153,7 @@ public final class BeanBuilderGenerator {
     private static MethodSpec createAddFieldIfMissing(int fieldCount) {
         ParameterizedTypeName listOfStringType = ParameterizedTypeName.get(List.class, String.class);
         ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev").build();
-        ParameterSpec fieldValueParam =
-                ParameterSpec.builder(TypeName.BOOLEAN, "initialized").build();
+        ParameterSpec fieldValueParam = ParameterSpec.builder(TypeName.BOOLEAN, "initialized").build();
         ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
 
         return MethodSpec.methodBuilder("addFieldIfMissing")
@@ -181,10 +176,9 @@ public final class BeanBuilderGenerator {
     private Collection<FieldSpec> primitivesInitializedFields(Collection<EnrichedField> enrichedFields) {
         return enrichedFields.stream()
                 .filter(EnrichedField::isPrimitive)
-                .map(field -> FieldSpec.builder(
-                        TypeName.BOOLEAN,
-                        deriveFieldInitializedName(field),
-                        Modifier.PRIVATE).initializer("false").build())
+                .map(field -> FieldSpec.builder(TypeName.BOOLEAN, deriveFieldInitializedName(field), Modifier.PRIVATE)
+                        .initializer("false")
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -193,9 +187,7 @@ public final class BeanBuilderGenerator {
     }
 
     private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
-        return fields.stream()
-                .map(e -> createField(e.getFieldName(), e))
-                .collect(Collectors.toList());
+        return fields.stream().map(e -> createField(e.getFieldName(), e)).collect(Collectors.toList());
     }
 
     private static MethodSpec createConstructor() {
@@ -203,12 +195,8 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields) {
-        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(
-                enrichedFields,
-                enrichedField -> CodeBlocks.statement(
-                        "$1N(other.$2N())",
-                        enrichedField.poetSpec().name,
-                        enrichedField.getterName())));
+        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(enrichedFields, enrichedField ->
+                CodeBlocks.statement("$1N(other.$2N())", enrichedField.poetSpec().name, enrichedField.getterName())));
 
         return MethodSpec.methodBuilder("from")
                 .addModifiers(Modifier.PUBLIC)
@@ -221,9 +209,7 @@ public final class BeanBuilderGenerator {
 
     private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
         FieldSpec.Builder spec = FieldSpec.builder(
-                typeMapper.getClassName(field.getType()),
-                JavaNameSanitizer.sanitize(fieldName),
-                Modifier.PRIVATE);
+                typeMapper.getClassName(field.getType()), JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
 
         if (field.getType().accept(TypeVisitor.IS_LIST)) {
             spec.initializer("new $T<>()", ArrayList.class);
@@ -251,8 +237,8 @@ public final class BeanBuilderGenerator {
     private MethodSpec createSetter(EnrichedField enriched) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
-        AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
-                .addMember("value", "$S", enriched.fieldName().get());
+        AnnotationSpec.Builder annotationBuilder =
+                AnnotationSpec.builder(JsonSetter.class).addMember("value", "$S", enriched.fieldName().get());
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
         } else if (isCollectionType(type)) {
@@ -333,34 +319,37 @@ public final class BeanBuilderGenerator {
                     ConjureCollections.class,
                     spec.name,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
-            return shouldClearFirst ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
+            return shouldClearFirst
+                    ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
                     : addStatement;
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             CodeBlock addStatement = CodeBlocks.statement(
-                    "this.$1N.putAll($2L)", spec.name,
+                    "this.$1N.putAll($2L)",
+                    spec.name,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
-            return shouldClearFirst ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
+            return shouldClearFirst
+                    ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
                     : addStatement;
         } else if (isByteBuffer(type)) {
             return CodeBlock.builder()
-                    .addStatement("$L", Expressions.requireNonNull(
-                            spec.name, enriched.fieldName().get() + " cannot be null"))
-                    .addStatement("this.$1N = $2T.allocate($1N.remaining()).put($1N.duplicate())",
+                    .addStatement(
+                            "$L", Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"))
+                    .addStatement(
+                            "this.$1N = $2T.allocate($1N.remaining()).put($1N.duplicate())",
                             spec.name,
                             ByteBuffer.class)
                     .addStatement("(($1T)this.$2N).rewind()", Buffer.class, spec.name)
                     .build();
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             OptionalType optionalType = type.accept(TypeVisitor.OPTIONAL);
-            CodeBlock nullCheckedValue = Expressions.requireNonNull(
-                    spec.name, enriched.fieldName().get() + " cannot be null");
+            CodeBlock nullCheckedValue =
+                    Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null");
 
             if (isWidenableContainedType(optionalType.getItemType())) {
                 // we capture covariant type via generic Function#identity mapping before assignment to bind
                 // the resultant optional to the invariant inner variable type
                 return CodeBlock.builder()
-                        .addStatement("this.$1N = $2L.map($3T.identity())",
-                                spec.name, nullCheckedValue, Function.class)
+                        .addStatement("this.$1N = $2L.map($3T.identity())", spec.name, nullCheckedValue, Function.class)
                         .build();
             } else {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
@@ -393,14 +382,11 @@ public final class BeanBuilderGenerator {
         }
 
         if (type.accept(TypeVisitor.IS_MAP)) {
-            return ImmutableList.of(
-                    createCollectionSetter("putAll", enriched),
-                    createMapSetter(enriched));
+            return ImmutableList.of(createCollectionSetter("putAll", enriched), createMapSetter(enriched));
         }
 
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
-            return ImmutableList.of(
-                    createOptionalSetter(enriched));
+            return ImmutableList.of(createOptionalSetter(enriched));
         }
 
         return ImmutableList.of();
@@ -420,21 +406,23 @@ public final class BeanBuilderGenerator {
     private CodeBlock optionalAssignmentStatement(EnrichedField enriched, OptionalType type) {
         FieldSpec spec = enriched.poetSpec();
         if (isPrimitiveOptional(type)) {
-            return CodeBlocks.statement("this.$1N = $2T.of($1N)",
-                    enriched.poetSpec().name, asRawType(typeMapper.getClassName(Type.optional(type))));
+            return CodeBlocks.statement(
+                    "this.$1N = $2T.of($1N)",
+                    enriched.poetSpec().name,
+                    asRawType(typeMapper.getClassName(Type.optional(type))));
         } else {
-            return CodeBlocks.statement("this.$1N = $2T.of($3L)",
-                    spec.name, Optional.class,
+            return CodeBlocks.statement(
+                    "this.$1N = $2T.of($3L)",
+                    spec.name,
+                    Optional.class,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
         }
     }
 
-    private static final EnumSet<PrimitiveType.Value> OPTIONAL_PRIMITIVES = EnumSet.of(
-            PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
+    private static final EnumSet<PrimitiveType.Value> OPTIONAL_PRIMITIVES =
+            EnumSet.of(PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
 
-    /**
-     * Check if the optionalType contains a primitive boolean, double or integer.
-     */
+    /** Check if the optionalType contains a primitive boolean, double or integer. */
     private boolean isPrimitiveOptional(OptionalType optionalType) {
         return optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
                 && OPTIONAL_PRIMITIVES.contains(optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
@@ -494,16 +482,14 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createBuild(Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields) {
-        MethodSpec.Builder method = MethodSpec.methodBuilder("build")
-                .addModifiers(Modifier.PUBLIC)
-                .returns(objectClass);
+        MethodSpec.Builder method =
+                MethodSpec.methodBuilder("build").addModifiers(Modifier.PUBLIC).returns(objectClass);
 
         if (enrichedFields.stream().filter(EnrichedField::isPrimitive).count() != 0) {
             method.addStatement("validatePrimitiveFieldsHaveBeenInitialized()");
         }
 
-        return method
-                .addStatement("return new $L", Expressions.constructorCall(objectClass, fields))
+        return method.addStatement("return new $L", Expressions.constructorCall(objectClass, fields))
                 .build();
     }
 
@@ -515,9 +501,7 @@ public final class BeanBuilderGenerator {
     }
 
     private static boolean isCollectionType(Type type) {
-        return type.accept(TypeVisitor.IS_LIST)
-                || type.accept(TypeVisitor.IS_SET)
-                || type.accept(TypeVisitor.IS_MAP);
+        return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP);
     }
 
     private boolean isOptionalInnerType(Type type) {
@@ -549,11 +533,12 @@ public final class BeanBuilderGenerator {
 
             @Override
             public Boolean visitReference(com.palantir.conjure.spec.TypeName value) {
-                return typeMapper.getType(value)
+                return typeMapper
+                        .getType(value)
                         .map(typeDef -> typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)
                                 && typeDef.accept(TypeDefinitionVisitor.ALIAS)
-                                .getAlias()
-                                .accept(TypeVisitor.IS_OPTIONAL))
+                                        .getAlias()
+                                        .accept(TypeVisitor.IS_OPTIONAL))
                         .orElse(false);
             }
 

@@ -48,19 +48,18 @@ public final class EteTestServer extends Application<Configuration> {
         environment.jersey().register(new EmptyPathResource());
     }
 
-    private static final SslConfiguration TRUST_STORE_CONFIGURATION =
-            new SslConfiguration.Builder().trustStorePath(Paths.get("var/security/truststore.jks")).build();
+    private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
+            .trustStorePath(Paths.get("var/security/truststore.jks"))
+            .build();
     private static final SSLSocketFactory SSL_SOCKET_FACTORY =
             SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION);
     private static final X509TrustManager TRUST_MANAGER =
             SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
 
     public static ClientConfiguration clientConfiguration() {
-        return ClientConfiguration.builder().from(
-                ClientConfigurations.of(
-                        ImmutableList.of("http://localhost:8080/test-example/api"),
-                        SSL_SOCKET_FACTORY,
-                        TRUST_MANAGER))
+        return ClientConfiguration.builder()
+                .from(ClientConfigurations.of(
+                        ImmutableList.of("http://localhost:8080/test-example/api"), SSL_SOCKET_FACTORY, TRUST_MANAGER))
                 // Disable retries to avoid spinning unnecessarily on negative tests
                 .maxNumRetries(0)
                 .build();

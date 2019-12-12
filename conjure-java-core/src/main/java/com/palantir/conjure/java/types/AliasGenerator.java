@@ -45,9 +45,7 @@ public final class AliasGenerator {
 
     private AliasGenerator() {}
 
-    public static JavaFile generateAliasType(
-            TypeMapper typeMapper,
-            AliasDefinition typeDef) {
+    public static JavaFile generateAliasType(TypeMapper typeMapper, AliasDefinition typeDef) {
         TypeName aliasTypeName = typeMapper.getClassName(typeDef.getAlias());
 
         String typePackage = typeDef.getTypeName().getPackage();
@@ -84,20 +82,22 @@ public final class AliasGenerator {
                         .addCode(primitiveSafeHashCode(aliasTypeName))
                         .build());
 
-        Optional<CodeBlock> maybeValueOfFactoryMethod = valueOfFactoryMethod(
-                typeDef.getAlias(), aliasTypeName, typeMapper);
+        Optional<CodeBlock> maybeValueOfFactoryMethod =
+                valueOfFactoryMethod(typeDef.getAlias(), aliasTypeName, typeMapper);
         if (maybeValueOfFactoryMethod.isPresent()) {
             spec.addMethod(MethodSpec.methodBuilder("valueOf")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(String.class, "value")
                     .returns(thisClass)
                     .addCode(maybeValueOfFactoryMethod.get())
-                    .addAnnotations(typeDef.getAlias().accept(MoreVisitors.IS_EXTERNAL)
-                            // JsonCreator behaves in unexpected ways:
-                            // https://github.com/FasterXML/jackson-databind/issues/2318
-                            // allow jackson to try all possible approaches to deserialize external type imports.
-                            ? Collections.singleton(AnnotationSpec.builder(JsonCreator.class).build())
-                            : Collections.emptySet())
+                    .addAnnotations(
+                            typeDef.getAlias().accept(MoreVisitors.IS_EXTERNAL)
+                                    // JsonCreator behaves in unexpected ways:
+                                    // https://github.com/FasterXML/jackson-databind/issues/2318
+                                    // allow jackson to try all possible approaches to deserialize external type
+                                    // imports.
+                                    ? Collections.singleton(AnnotationSpec.builder(JsonCreator.class).build())
+                                    : Collections.emptySet())
                     .build());
         }
 
@@ -114,11 +114,9 @@ public final class AliasGenerator {
             spec.addMethod(createDefaultConstructor(aliasTypeName));
         }
 
-        if (typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE) && typeDef.getAlias().accept(
-                TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE)) {
-            CodeBlock codeBlock = CodeBlock.builder()
-                    .addStatement("return new $T((double) value)", thisClass)
-                    .build();
+        if (typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE)
+                && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE)) {
+            CodeBlock codeBlock = CodeBlock.builder().addStatement("return new $T((double) value)", thisClass).build();
 
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -171,43 +169,46 @@ public final class AliasGenerator {
     private static MethodSpec createDefaultConstructor(TypeName aliasTypeName) {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
-                .addStatement("this($T.empty())", aliasTypeName instanceof ParameterizedTypeName
-                        ? Optional.class
-                        : aliasTypeName)
+                .addStatement(
+                        "this($T.empty())",
+                        aliasTypeName instanceof ParameterizedTypeName ? Optional.class : aliasTypeName)
                 .build();
     }
 
     private static Optional<CodeBlock> valueOfFactoryMethod(
-            Type conjureType,
-            TypeName aliasTypeName,
-            TypeMapper typeMapper) {
+            Type conjureType, TypeName aliasTypeName, TypeMapper typeMapper) {
         // doesn't support valueOf factories for ANY or BINARY types
         if (conjureType.accept(TypeVisitor.IS_PRIMITIVE)
                 && !conjureType.accept(TypeVisitor.IS_ANY)
                 && !conjureType.accept(TypeVisitor.IS_BINARY)) {
-            return Optional.of(valueOfFactoryMethodForPrimitive(
-                    conjureType.accept(TypeVisitor.PRIMITIVE), aliasTypeName));
+            return Optional.of(
+                    valueOfFactoryMethodForPrimitive(conjureType.accept(TypeVisitor.PRIMITIVE), aliasTypeName));
         } else if (conjureType.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
-            return typeMapper.getType(conjureType.accept(TypeVisitor.REFERENCE))
+            return typeMapper
+                    .getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
                     .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
-                    .flatMap(type -> valueOfFactoryMethod(
-                            type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper)
-                            .map(ignored -> {
-                                ClassName className = ClassName.get(
-                                        type.getTypeName().getPackage(), type.getTypeName().getName());
-                                return CodeBlock.builder()
-                                        .addStatement("return of($T.valueOf(value))", className).build();
-                            }));
+                    .flatMap(type ->
+                            valueOfFactoryMethod(type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper)
+                                    .map(ignored -> {
+                                        ClassName className = ClassName.get(
+                                                type.getTypeName().getPackage(), type.getTypeName().getName());
+                                        return CodeBlock.builder()
+                                                .addStatement("return of($T.valueOf(value))", className)
+                                                .build();
+                                    }));
         } else if (conjureType.accept(MoreVisitors.IS_EXTERNAL)) {
             ExternalReference reference = conjureType.accept(MoreVisitors.EXTERNAL);
             // Only generate valueOf methods for external type imports if the fallback type is valid
-            if (valueOfFactoryMethod(reference.getFallback(),
-                    typeMapper.getClassName(reference.getFallback()), typeMapper).isPresent()
-                    && hasValueOfFactory(reference.getExternalReference()) && aliasTypeName.isPrimitive()) {
-                return Optional.of(CodeBlock.builder()
-                        .addStatement("return of($T.valueOf(value))", aliasTypeName.box())
-                        .build());
+            if (valueOfFactoryMethod(
+                                    reference.getFallback(),
+                                    typeMapper.getClassName(reference.getFallback()),
+                                    typeMapper)
+                            .isPresent()
+                    && hasValueOfFactory(reference.getExternalReference())
+                    && aliasTypeName.isPrimitive()) {
+                return Optional.of(
+                        CodeBlock.builder().addStatement("return of($T.valueOf(value))", aliasTypeName.box()).build());
             }
         }
         return Optional.empty();
@@ -220,30 +221,35 @@ public final class AliasGenerator {
                 return CodeBlock.builder().addStatement("return of(value)").build();
             case DOUBLE:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseDouble(value))", aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseDouble(value))", aliasTypeName.box())
+                        .build();
             case INTEGER:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseInt(value))", aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseInt(value))", aliasTypeName.box())
+                        .build();
             case BOOLEAN:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseBoolean(value))", aliasTypeName.box()).build();
+                        .addStatement("return of($T.parseBoolean(value))", aliasTypeName.box())
+                        .build();
             case SAFELONG:
             case RID:
             case BEARERTOKEN:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.valueOf(value))", aliasTypeName).build();
+                        .addStatement("return of($T.valueOf(value))", aliasTypeName)
+                        .build();
             case UUID:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.fromString(value))", aliasTypeName).build();
+                        .addStatement("return of($T.fromString(value))", aliasTypeName)
+                        .build();
             case DATETIME:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parse(value))", aliasTypeName).build();
+                        .addStatement("return of($T.parse(value))", aliasTypeName)
+                        .build();
             case BINARY:
             case ANY:
             case UNKNOWN:
         }
-        throw new IllegalStateException(
-                "Unsupported primitive type: " + primitiveType + "for `valueOf` method.");
+        throw new IllegalStateException("Unsupported primitive type: " + primitiveType + "for `valueOf` method.");
     }
 
     /**
@@ -263,9 +269,8 @@ public final class AliasGenerator {
     }
 
     private static MethodSpec createConstructor(TypeName aliasTypeName) {
-        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PRIVATE)
-                .addParameter(aliasTypeName, "value");
+        MethodSpec.Builder builder =
+                MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).addParameter(aliasTypeName, "value");
         if (!aliasTypeName.isPrimitive()) {
             builder.addStatement("this.value = $T.checkNotNull(value, \"value cannot be null\")", Preconditions.class);
         } else {
@@ -277,12 +282,10 @@ public final class AliasGenerator {
     private static CodeBlock primitiveSafeEquality(ClassName thisClass, TypeName aliasTypeName) {
         if (aliasTypeName.isPrimitive()) {
             return CodeBlocks.statement(
-                    "return this == other || (other instanceof $1T && this.value == (($1T) other).value)",
-                    thisClass);
+                    "return this == other || (other instanceof $1T && this.value == (($1T) other).value)", thisClass);
         }
         return CodeBlocks.statement(
-                "return this == other || (other instanceof $1T && this.value.equals((($1T) other).value))",
-                thisClass);
+                "return this == other || (other instanceof $1T && this.value.equals((($1T) other).value))", thisClass);
     }
 
     private static CodeBlock primitiveSafeToString(TypeName aliasTypeName) {

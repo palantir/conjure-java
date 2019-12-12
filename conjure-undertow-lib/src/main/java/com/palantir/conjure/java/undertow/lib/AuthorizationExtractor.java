@@ -28,5 +28,4 @@ public interface AuthorizationExtractor {
 
     /** Parses a {@link BearerToken} from the provided {@link HttpServerExchange}. */
     BearerToken cookie(HttpServerExchange exchange, String cookieName);
-
 }

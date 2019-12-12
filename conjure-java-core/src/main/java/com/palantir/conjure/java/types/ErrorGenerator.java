@@ -49,20 +49,11 @@ public final class ErrorGenerator {
 
     private ErrorGenerator() {}
 
-    public static Set<JavaFile> generateErrorTypes(
-            TypeMapper typeMapper, List<ErrorDefinition> errorTypeNameToDef) {
-        return splitErrorDefsByNamespace(errorTypeNameToDef)
-                .entrySet()
-                .stream()
-                .flatMap(entry ->
-                        entry.getValue()
-                                .entrySet()
-                                .stream()
-                                .map(innerEntry -> generateErrorTypesForNamespace(
-                                        typeMapper,
-                                        entry.getKey(),
-                                        innerEntry.getKey(),
-                                        innerEntry.getValue()))).collect(Collectors.toSet());
+    public static Set<JavaFile> generateErrorTypes(TypeMapper typeMapper, List<ErrorDefinition> errorTypeNameToDef) {
+        return splitErrorDefsByNamespace(errorTypeNameToDef).entrySet().stream()
+                .flatMap(entry -> entry.getValue().entrySet().stream().map(innerEntry -> generateErrorTypesForNamespace(
+                        typeMapper, entry.getKey(), innerEntry.getKey(), innerEntry.getValue())))
+                .collect(Collectors.toSet());
     }
 
     private static Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> splitErrorDefsByNamespace(
@@ -89,19 +80,25 @@ public final class ErrorGenerator {
         ClassName className = errorTypesClassName(conjurePackage, namespace);
 
         // Generate ErrorType definitions
-        List<FieldSpec> fieldSpecs = errorTypeDefinitions.stream().map(errorDef -> {
-            CodeBlock initializer = CodeBlock.of("ErrorType.create(ErrorType.Code.$L, \"$L:$L\")",
-                    errorDef.getCode().get(),
-                    namespace.get(),
-                    errorDef.getErrorName().getName());
-            FieldSpec.Builder fieldSpecBuilder = FieldSpec.builder(
-                    ClassName.get(ErrorType.class),
-                    CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, errorDef.getErrorName().getName()),
-                    Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                    .initializer(initializer);
-            errorDef.getDocs().ifPresent(docs -> fieldSpecBuilder.addJavadoc(docs.get()));
-            return fieldSpecBuilder.build();
-        }).collect(Collectors.toList());
+        List<FieldSpec> fieldSpecs = errorTypeDefinitions.stream()
+                .map(errorDef -> {
+                    CodeBlock initializer = CodeBlock.of(
+                            "ErrorType.create(ErrorType.Code.$L, \"$L:$L\")",
+                            errorDef.getCode().get(),
+                            namespace.get(),
+                            errorDef.getErrorName().getName());
+                    FieldSpec.Builder fieldSpecBuilder = FieldSpec.builder(
+                                    ClassName.get(ErrorType.class),
+                                    CaseFormat.UPPER_CAMEL.to(
+                                            CaseFormat.UPPER_UNDERSCORE, errorDef.getErrorName().getName()),
+                                    Modifier.PUBLIC,
+                                    Modifier.STATIC,
+                                    Modifier.FINAL)
+                            .initializer(initializer);
+                    errorDef.getDocs().ifPresent(docs -> fieldSpecBuilder.addJavadoc(docs.get()));
+                    return fieldSpecBuilder.build();
+                })
+                .collect(Collectors.toList());
 
         // Generate ServiceException factory methods
         List<MethodSpec> methodSpecs = errorTypeDefinitions.stream()
@@ -114,39 +111,46 @@ public final class ErrorGenerator {
                 .collect(Collectors.toList());
 
         // Generate ServiceException factory check methods
-        List<MethodSpec> checkMethodSpecs = errorTypeDefinitions.stream().map(entry -> {
-            String exceptionMethodName = CaseFormat.UPPER_CAMEL.to(
-                    CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
-            String methodName = "throwIf" + entry.getErrorName().getName();
+        List<MethodSpec> checkMethodSpecs = errorTypeDefinitions.stream()
+                .map(entry -> {
+                    String exceptionMethodName =
+                            CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
+                    String methodName = "throwIf" + entry.getErrorName().getName();
 
-            String shouldThrowVar = "shouldThrow";
+                    String shouldThrowVar = "shouldThrow";
 
-            MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addParameter(TypeName.BOOLEAN, shouldThrowVar);
+                    MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
+                            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                            .addParameter(TypeName.BOOLEAN, shouldThrowVar);
 
-            methodBuilder.addJavadoc("Throws a {@link ServiceException} of type $L when {@code $L} is true.\n",
-                    entry.getErrorName().getName(), shouldThrowVar);
-            methodBuilder.addJavadoc("@param $L $L\n", shouldThrowVar, "Cause the method to throw when true");
-            Streams.concat(
-                    entry.getSafeArgs().stream(),
-                    entry.getUnsafeArgs().stream()).forEach(arg -> {
-                        methodBuilder.addParameter(typeMapper.getClassName(arg.getType()), arg.getFieldName().get());
-                        methodBuilder.addJavadoc("@param $L $L", arg.getFieldName().get(),
+                    methodBuilder.addJavadoc(
+                            "Throws a {@link ServiceException} of type $L when {@code $L} is true.\n",
+                            entry.getErrorName().getName(),
+                            shouldThrowVar);
+                    methodBuilder.addJavadoc("@param $L $L\n", shouldThrowVar, "Cause the method to throw when true");
+                    Streams.concat(entry.getSafeArgs().stream(), entry.getUnsafeArgs().stream())
+                            .forEach(arg -> {
+                                methodBuilder.addParameter(
+                                        typeMapper.getClassName(arg.getType()), arg.getFieldName().get());
+                                methodBuilder.addJavadoc(
+                                        "@param $L $L",
+                                        arg.getFieldName().get(),
                                         StringUtils.appendIfMissing(
                                                 arg.getDocs().map(Javadoc::render).orElse(""), "\n"));
-                    });
+                            });
 
-            methodBuilder.addCode("if ($L) {", shouldThrowVar);
-            methodBuilder.addCode("throw $L;",
-                    Expressions.localMethodCall(exceptionMethodName,
-                            Streams.concat(
-                                    entry.getSafeArgs().stream(),
-                                    entry.getUnsafeArgs().stream()).map(arg -> arg.getFieldName().get())
-                                    .collect(Collectors.toList())));
-            methodBuilder.addCode("}");
-            return methodBuilder.build();
-        }).collect(Collectors.toList());
+                    methodBuilder.addCode("if ($L) {", shouldThrowVar);
+                    methodBuilder.addCode(
+                            "throw $L;",
+                            Expressions.localMethodCall(
+                                    exceptionMethodName,
+                                    Streams.concat(entry.getSafeArgs().stream(), entry.getUnsafeArgs().stream())
+                                            .map(arg -> arg.getFieldName().get())
+                                            .collect(Collectors.toList())));
+                    methodBuilder.addCode("}");
+                    return methodBuilder.build();
+                })
+                .collect(Collectors.toList());
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(className)
                 .addMethod(privateConstructor())
@@ -178,11 +182,9 @@ public final class ErrorGenerator {
             methodBuilder.addCode(", cause");
         }
 
-        entry.getSafeArgs().forEach(arg ->
-                processArg(typeMapper, methodBuilder, arg, true));
+        entry.getSafeArgs().forEach(arg -> processArg(typeMapper, methodBuilder, arg, true));
 
-        entry.getUnsafeArgs().forEach(arg ->
-                processArg(typeMapper, methodBuilder, arg, false));
+        entry.getUnsafeArgs().forEach(arg -> processArg(typeMapper, methodBuilder, arg, false));
         methodBuilder.addCode(");");
 
         return methodBuilder.build();
@@ -206,5 +208,4 @@ public final class ErrorGenerator {
     private static MethodSpec privateConstructor() {
         return MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build();
     }
-
 }

@@ -70,25 +70,31 @@ final class UndertowTypeFunctions {
     // "alias: integer", the returned type will be the type for "integer". The provided type must be an alias
     // (reference) type.
     static Type getAliasedType(Type type, List<TypeDefinition> typeDefinitions) {
-        com.palantir.logsafe.Preconditions.checkArgument(isAliasType(type),
-                "Expected an alias", SafeArg.of("type", type));
-        return getAliasedType(type.accept(
-                new AbstractTypeVisitor<com.palantir.conjure.spec.TypeName>() {
-                    @Override
-                    public com.palantir.conjure.spec.TypeName visitReference(com.palantir.conjure.spec.TypeName value) {
-                        return value;
-                    }
-                }), typeDefinitions).get();
+        com.palantir.logsafe.Preconditions.checkArgument(
+                isAliasType(type), "Expected an alias", SafeArg.of("type", type));
+        return getAliasedType(
+                        type.accept(new AbstractTypeVisitor<com.palantir.conjure.spec.TypeName>() {
+                            @Override
+                            public com.palantir.conjure.spec.TypeName visitReference(
+                                    com.palantir.conjure.spec.TypeName value) {
+                                return value;
+                            }
+                        }),
+                        typeDefinitions)
+                .get();
     }
 
-    static Optional<Type> getAliasedType(com.palantir.conjure.spec.TypeName typeName,
-            List<TypeDefinition> typeDefinitions) {
+    static Optional<Type> getAliasedType(
+            com.palantir.conjure.spec.TypeName typeName, List<TypeDefinition> typeDefinitions) {
         // return type definition for the provided alias type
-        TypeDefinition typeDefinition = typeDefinitions.stream().filter(typeDef -> {
-            com.palantir.conjure.spec.TypeName currName = typeDef.accept(TypeDefinitionVisitor.TYPE_NAME);
-            String currClassName = currName.getPackage() + "." + currName.getName();
-            return currClassName.equals(typeName.getPackage() + "." + typeName.getName());
-        }).findFirst().get();
+        TypeDefinition typeDefinition = typeDefinitions.stream()
+                .filter(typeDef -> {
+                    com.palantir.conjure.spec.TypeName currName = typeDef.accept(TypeDefinitionVisitor.TYPE_NAME);
+                    String currClassName = currName.getPackage() + "." + currName.getName();
+                    return currClassName.equals(typeName.getPackage() + "." + typeName.getName());
+                })
+                .findFirst()
+                .get();
 
         if (typeDefinition.accept(TypeDefinitionVisitor.IS_ALIAS)) {
             AliasDefinition aliasDefinition = typeDefinition.accept(TypeDefinitionVisitor.ALIAS);
@@ -97,18 +103,18 @@ final class UndertowTypeFunctions {
         return Optional.empty();
     }
 
-    private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME =
-            new ImmutableMap.Builder<PrimitiveType.Value, String>()
-                    .put(PrimitiveType.Value.BEARERTOKEN, "BearerToken")
-                    .put(PrimitiveType.Value.BOOLEAN, "Boolean")
-                    .put(PrimitiveType.Value.DATETIME, "DateTime")
-                    .put(PrimitiveType.Value.DOUBLE, "Double")
-                    .put(PrimitiveType.Value.INTEGER, "Integer")
-                    .put(PrimitiveType.Value.RID, "Rid")
-                    .put(PrimitiveType.Value.SAFELONG, "SafeLong")
-                    .put(PrimitiveType.Value.STRING, "String")
-                    .put(PrimitiveType.Value.UUID, "Uuid")
-                    .build();
+    private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME = new ImmutableMap.Builder<
+                    PrimitiveType.Value, String>()
+            .put(PrimitiveType.Value.BEARERTOKEN, "BearerToken")
+            .put(PrimitiveType.Value.BOOLEAN, "Boolean")
+            .put(PrimitiveType.Value.DATETIME, "DateTime")
+            .put(PrimitiveType.Value.DOUBLE, "Double")
+            .put(PrimitiveType.Value.INTEGER, "Integer")
+            .put(PrimitiveType.Value.RID, "Rid")
+            .put(PrimitiveType.Value.SAFELONG, "SafeLong")
+            .put(PrimitiveType.Value.STRING, "String")
+            .put(PrimitiveType.Value.UUID, "Uuid")
+            .build();
 
     static String primitiveTypeName(PrimitiveType in) {
         String typeName = PRIMITIVE_TO_TYPE_NAME.get(in.get());
@@ -143,7 +149,8 @@ final class UndertowTypeFunctions {
 
             @Override
             public Type visitMap(MapType value) {
-                return Type.map(MapType.of(toConjureTypeWithoutAliases(value.getKeyType(), typeDefinitions),
+                return Type.map(MapType.of(
+                        toConjureTypeWithoutAliases(value.getKeyType(), typeDefinitions),
                         toConjureTypeWithoutAliases(value.getValueType(), typeDefinitions)));
             }
 
@@ -165,7 +172,6 @@ final class UndertowTypeFunctions {
             }
         });
     }
-
 
     static final GetTypeVisitor<PrimitiveType> PRIMITIVE_VISITOR = new GetTypeVisitor<PrimitiveType>() {
         @Override
@@ -204,27 +210,32 @@ final class UndertowTypeFunctions {
 
     /**
      * Asynchronous-processing capable endpoints are generated if either of the following are true.
+     *
      * <ul>
-     *     <li>The {@link FeatureFlags#UndertowListenableFutures} is set</li>
-     *     <li>
-     *         Experimental: Both {@link FeatureFlags#ExperimentalUndertowAsyncMarkers} is set and
-     *         {@link EndpointDefinition#getMarkers()} contains an imported annotation with name <pre>Async</pre>.
-     *     </li>
+     *   <li>The {@link FeatureFlags#UndertowListenableFutures} is set
+     *   <li>Experimental: Both {@link FeatureFlags#ExperimentalUndertowAsyncMarkers} is set and {@link
+     *       EndpointDefinition#getMarkers()} contains an imported annotation with name
+     *       <pre>Async</pre>
+     *       .
      * </ul>
      */
     static boolean isAsync(EndpointDefinition endpoint, Set<FeatureFlags> flags) {
         return flags.contains(FeatureFlags.UndertowListenableFutures)
                 || (flags.contains(FeatureFlags.ExperimentalUndertowAsyncMarkers)
-                && endpoint.getMarkers().stream().anyMatch(marker ->
-                marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)));
+                        && endpoint.getMarkers().stream()
+                                .anyMatch(marker -> marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)));
     }
 
     static ParameterizedTypeName getAsyncReturnType(
             EndpointDefinition endpoint, TypeMapper mapper, Set<FeatureFlags> flags) {
-        Preconditions.checkArgument(isAsync(endpoint, flags),
-                "Endpoint must be async", SafeArg.of("endpoint", endpoint));
-        return ParameterizedTypeName.get(ClassName.get(ListenableFuture.class),
-                endpoint.getReturns().map(mapper::getClassName).orElseGet(() -> ClassName.get(Void.class)).box());
+        Preconditions.checkArgument(
+                isAsync(endpoint, flags), "Endpoint must be async", SafeArg.of("endpoint", endpoint));
+        return ParameterizedTypeName.get(
+                ClassName.get(ListenableFuture.class),
+                endpoint.getReturns()
+                        .map(mapper::getClassName)
+                        .orElseGet(() -> ClassName.get(Void.class))
+                        .box());
     }
 
     @Beta
@@ -243,5 +254,4 @@ final class UndertowTypeFunctions {
     }
 
     private UndertowTypeFunctions() {}
-
 }
