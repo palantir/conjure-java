@@ -61,16 +61,14 @@ public final class Retrofit2ServiceEteTest extends TestBase {
 
     @TempDir
     public static File folder;
+
     public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(EteTestServer.class);
 
     private final EteServiceRetrofit client;
 
     public Retrofit2ServiceEteTest() {
         client = Retrofit2Client.create(
-                EteServiceRetrofit.class,
-                clientUserAgent(),
-                new HostMetricsRegistry(),
-                clientConfiguration());
+                EteServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
     }
 
     @Disabled // string returns in Jersey should use a mandated wrapper alias type
@@ -114,7 +112,8 @@ public final class Retrofit2ServiceEteTest extends TestBase {
     @Disabled("https://github.com/palantir/conjure-java-runtime/issues/668")
     @Test
     public void retrofit2_client_can_retrieve_an_optional_empty_from_a_server() {
-        assertThat(Futures.getUnchecked(client.optionalEmpty(AuthHeader.valueOf("authHeader")))).isNotPresent();
+        assertThat(Futures.getUnchecked(client.optionalEmpty(AuthHeader.valueOf("authHeader"))))
+                .isNotPresent();
     }
 
     @Test
@@ -132,8 +131,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
     @BeforeAll
     public static void beforeAll() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/ete-service.yml"),
-                new File("src/test/resources/ete-binary.yml")));
+                new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
