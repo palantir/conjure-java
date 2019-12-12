@@ -38,5 +38,4 @@ public final class CodeBlocks {
         }
         return builder.build();
     }
-
 }

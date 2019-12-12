@@ -53,6 +53,8 @@ public final class Expressions {
     }
 
     private static Iterator<String> indexStringInRange(String format, int lower, int upper) {
-        return IntStream.range(lower, upper).mapToObj(i -> String.format(format, i)).iterator();
+        return IntStream.range(lower, upper)
+                .mapToObj(i -> String.format(format, i))
+                .iterator();
     }
 }

@@ -64,14 +64,14 @@ import org.slf4j.LoggerFactory;
 
 public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
-    private static final ClassName LISTENABLE_FUTURE_TYPE = ClassName.get(
-            "com.google.common.util.concurrent", "ListenableFuture");
+    private static final ClassName LISTENABLE_FUTURE_TYPE =
+            ClassName.get("com.google.common.util.concurrent", "ListenableFuture");
     private static final String AUTH_HEADER_NAME = "Authorization";
 
     private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get("okhttp3", "RequestBody");
     private static final ClassName BINARY_RETURN_TYPE = ClassName.get("okhttp3", "ResponseBody");
-    private static final TypeName OPTIONAL_BINARY_RETURN_TYPE = ParameterizedTypeName.get(
-            ClassName.get(Optional.class), ClassName.get("okhttp3", "ResponseBody"));
+    private static final TypeName OPTIONAL_BINARY_RETURN_TYPE =
+            ParameterizedTypeName.get(ClassName.get(Optional.class), ClassName.get("okhttp3", "ResponseBody"));
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
 
@@ -83,19 +83,12 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        TypeMapper returnTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(),
-                new ReturnTypeClassNameVisitor(
-                        conjureDefinition.getTypes(),
-                        BINARY_RETURN_TYPE,
-                        OPTIONAL_BINARY_RETURN_TYPE,
-                        featureFlags));
+        TypeMapper returnTypeMapper = new TypeMapper(conjureDefinition.getTypes(), new ReturnTypeClassNameVisitor(
+                conjureDefinition.getTypes(), BINARY_RETURN_TYPE, OPTIONAL_BINARY_RETURN_TYPE, featureFlags));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(),
-                new SpecializeBinaryClassNameVisitor(
-                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags),
-                        BINARY_ARGUMENT_TYPE));
+                conjureDefinition.getTypes(), new SpecializeBinaryClassNameVisitor(
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags), BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
@@ -103,9 +96,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     }
 
     private JavaFile generateService(
-            ServiceDefinition serviceDefinition,
-            TypeMapper returnTypeMapper,
-            TypeMapper argumentTypeMapper) {
+            ServiceDefinition serviceDefinition, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(Retrofit2ServiceGenerator.class));
@@ -117,8 +108,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .collect(Collectors.toList()));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateCompatibilityBackfillServiceMethods(
-                        endpoint, returnTypeMapper, argumentTypeMapper))
+                .map(endpoint ->
+                        generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper, argumentTypeMapper))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList()));
 
@@ -133,12 +124,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     }
 
     private MethodSpec generateServiceMethod(
-            EndpointDefinition endpointDef,
-            TypeMapper returnTypeMapper,
-            TypeMapper argumentTypeMapper) {
-        TypeName returnType = endpointDef.getReturns()
-                .map(returnTypeMapper::getClassName)
-                .orElse(ClassName.VOID);
+            EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+        TypeName returnType = endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
 
         Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
         HttpPath endpointPathWithoutRegex = replaceEncodedPathArgs(endpointDef.getHttpPath());
@@ -156,11 +143,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming")).build());
         }
 
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(
-                ClassName.get("java.lang", "Deprecated")));
+        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue ->
+                methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(
-                content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box()));
 
@@ -198,13 +184,9 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         return HttpPath.of("/" + Joiner.on("/").join(newSegments));
     }
 
-    /**
-     * Provides a linear expansion of optional query arguments to improve Java back-compat.
-     */
+    /** Provides a linear expansion of optional query arguments to improve Java back-compat. */
     private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
-            EndpointDefinition endpointDef,
-            TypeMapper returnTypeMapper,
-            TypeMapper argumentTypeMapper) {
+            EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
         List<ArgumentDefinition> queryArgs = new ArrayList<>();
 
@@ -234,16 +216,12 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             TypeMapper argumentTypeMapper,
             Set<ArgumentName> encodedPathArgs,
             List<ArgumentDefinition> extraArgs) {
-        TypeName returnType = endpointDef.getReturns()
-                .map(returnTypeMapper::getClassName)
-                .orElse(ClassName.VOID);
+        TypeName returnType = endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
-        List<ParameterSpec> sortedParams = createServiceMethodParameters(
-                endpointDef, argumentTypeMapper, encodedPathArgs);
-        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream().map(param ->
-                extraArgs.stream()
-                        .filter(arg -> arg.getArgName().get().equals(param.name))
-                        .findFirst())
+        List<ParameterSpec> sortedParams =
+                createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs);
+        List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream()
+                .map(param -> extraArgs.stream().filter(arg -> arg.getArgName().get().equals(param.name)).findFirst())
                 .collect(Collectors.toList());
 
         // omit extraArgs from the back fill method signature
@@ -260,16 +238,18 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
         // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
-        List<Object> values = IntStream.range(0, sortedParams.size()).mapToObj(i -> {
-            Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
-            if (maybeArgDef.isPresent()) {
-                sb.append("$L, ");
-                return maybeArgDef.get().getType().accept(DefaultTypeValueVisitor.INSTANCE);
-            } else {
-                sb.append("$N, ");
-                return sortedParams.get(i);
-            }
-        }).collect(Collectors.toList());
+        List<Object> values = IntStream.range(0, sortedParams.size())
+                .mapToObj(i -> {
+                    Optional<ArgumentDefinition> maybeArgDef = sortedMaybeExtraArgs.get(i);
+                    if (maybeArgDef.isPresent()) {
+                        sb.append("$L, ");
+                        return maybeArgDef.get().getType().accept(DefaultTypeValueVisitor.INSTANCE);
+                    } else {
+                        sb.append("$N, ");
+                        return sortedParams.get(i);
+                    }
+                })
+                .collect(Collectors.toList());
         // trim the end
         sb.setLength(sb.length() - 2);
         sb.append(")");
@@ -285,26 +265,21 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     }
 
     private List<ParameterSpec> createServiceMethodParameters(
-            EndpointDefinition endpointDef,
-            TypeMapper typeMapper,
-            Set<ArgumentName> encodedPathArgs) {
+            EndpointDefinition endpointDef, TypeMapper typeMapper, Set<ArgumentName> encodedPathArgs) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
         Optional<AuthType> auth = endpointDef.getAuth();
         getAuthParameter(auth).ifPresent(parameterSpecs::add);
 
-        ParameterOrder.sorted(endpointDef.getArgs()).forEach(def ->
-                parameterSpecs.add(createEndpointParameter(typeMapper, encodedPathArgs, def)));
+        ParameterOrder.sorted(endpointDef.getArgs())
+                .forEach(def -> parameterSpecs.add(createEndpointParameter(typeMapper, encodedPathArgs, def)));
         return ImmutableList.copyOf(parameterSpecs);
     }
 
     private ParameterSpec createEndpointParameter(
-            TypeMapper argumentTypeMapper,
-            Set<ArgumentName> encodedPathArgs,
-            ArgumentDefinition def) {
-        ParameterSpec.Builder param = ParameterSpec.builder(
-                argumentTypeMapper.getClassName(def.getType()),
-                def.getArgName().get());
+            TypeMapper argumentTypeMapper, Set<ArgumentName> encodedPathArgs, ArgumentDefinition def) {
+        ParameterSpec.Builder param =
+                ParameterSpec.builder(argumentTypeMapper.getClassName(def.getType()), def.getArgName().get());
         ParameterType paramType = def.getParamType();
         if (paramType.accept(ParameterTypeVisitor.IS_PATH)) {
             AnnotationSpec.Builder builder = AnnotationSpec.builder(ClassName.get("retrofit2.http", "Path"))

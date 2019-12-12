@@ -30,25 +30,20 @@ public enum FeatureFlags {
     JerseyBinaryAsResponse,
 
     /**
-     * Instructs the {@link JerseyServiceGenerator} to add {@link NotNull}
-     * annotations to all auth parameters, as well as all non-optional body params on service endpoints.
+     * Instructs the {@link JerseyServiceGenerator} to add {@link NotNull} annotations to all auth parameters, as well
+     * as all non-optional body params on service endpoints.
      */
     RequireNotNullAuthAndBodyParams,
 
-    /**
-     * Undertow generated service interfaces are generated with an "Undertow" prefix.
-     */
+    /** Undertow generated service interfaces are generated with an "Undertow" prefix. */
     UndertowServicePrefix,
 
-    /**
-     * Use the conjure immutable "Bytes" class over ByteBuffer.
-     */
+    /** Use the conjure immutable "Bytes" class over ByteBuffer. */
     UseImmutableBytes,
 
     /**
-     * Instructs the {@link com.palantir.conjure.java.services.UndertowServiceGenerator} to generate service
-     * endpoints returning {@link com.google.common.util.concurrent.ListenableFuture} to allow asynchronous
-     * request processing.
+     * Instructs the {@link com.palantir.conjure.java.services.UndertowServiceGenerator} to generate service endpoints
+     * returning {@link com.google.common.util.concurrent.ListenableFuture} to allow asynchronous request processing.
      */
     UndertowListenableFutures,
 
@@ -61,8 +56,8 @@ public enum FeatureFlags {
     ExperimentalUndertowAsyncMarkers,
 
     /**
-     * Instructs the {@link ObjectGenerator} to not generate objects that fail to deserialize if unknown fields
-     * are encountered.
+     * Instructs the {@link ObjectGenerator} to not generate objects that fail to deserialize if unknown fields are
+     * encountered.
      */
     StrictObjects,
 
