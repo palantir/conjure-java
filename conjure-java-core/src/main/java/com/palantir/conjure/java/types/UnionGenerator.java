@@ -301,8 +301,8 @@ public final class UnionGenerator {
      * Generates the build method for the visitor builder. The result looks as follows:
      *
      * <pre>
-     * Visitor<T> build() {
-     *     return new Visitor<T>() {
+     * Visitor&lt;T&gt; build() {
+     *     return new Visitor&lt;T&gt;() {
      *         [methods delegating to the various visitor function objects]
      *     }
      * }
