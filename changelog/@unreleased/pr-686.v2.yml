@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Undertow endpoints now perform a case-insensitive comparison when checking
+    the request `Content-Type` header.
+  links:
+  - https://github.com/palantir/conjure-java/pull/686
