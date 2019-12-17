@@ -31,7 +31,6 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Locale;
 
 // TODO(rfink): Consider async Jackson, see
 //              https://github.com/spring-projects/spring-framework/commit/31e0e537500c0763a36d3af2570d5c253a374690
@@ -101,9 +100,7 @@ public final class Encodings {
             @Override
             public boolean supportsContentType(String contentType) {
                 // TODO(ckozak): support wildcards? See javax.ws.rs.core.MediaType.isCompatible
-                return contentType != null
-                        // Use startsWith to avoid failures due to charset
-                        && contentType.toLowerCase(Locale.ROOT).startsWith(CONTENT_TYPE);
+                return Encodings.supportsContentType(CONTENT_TYPE, contentType);
             }
         };
     }
@@ -120,8 +117,7 @@ public final class Encodings {
 
             @Override
             public boolean supportsContentType(String contentType) {
-                return contentType != null
-                        && contentType.toLowerCase(Locale.ROOT).startsWith(CONTENT_TYPE);
+                return Encodings.supportsContentType(CONTENT_TYPE, contentType);
             }
 
             @Override
@@ -130,6 +126,24 @@ public final class Encodings {
                 return (value, output) -> delegate.serialize(value, new ShieldingOutputStream(output));
             }
         };
+    }
+
+    private static boolean supportsContentType(String supportedContentType, String requestContentType) {
+        if (requestContentType == null) {
+            return false;
+        }
+
+        if (requestContentType.length() < supportedContentType.length()) {
+            return false;
+        }
+
+        for (int i = 0; i < supportedContentType.length(); i++) {
+            if (Character.toLowerCase(requestContentType.charAt(i)) != supportedContentType.charAt(i)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static ObjectMapper configure(ObjectMapper mapper) {
