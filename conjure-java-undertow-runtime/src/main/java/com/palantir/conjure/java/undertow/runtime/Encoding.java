@@ -48,9 +48,9 @@ public interface Encoding {
 
     /**
      * Checks if a <pre>Content-Type</pre> or <pre>Accept</pre> value is supported by this encoding. This is not an
-     * exact match on {@link #getContentType()} because values may contain additional metadata, for
-     * example <pre>Content-Type: application/json; charset=utf-8</pre> may be supported by an {@link Encoding}
-     * which returns <pre>application/json</pre> from {@link #getContentType()}.
+     * exact match on {@link #getContentType()} because values are case-insensitive and may contain additional
+     * metadata, for example <pre>Content-Type: application/json; charset=utf-8</pre> may be supported by an
+     * {@link Encoding} which returns <pre>application/json</pre> from {@link #getContentType()}.
      */
     boolean supportsContentType(String contentType);
 

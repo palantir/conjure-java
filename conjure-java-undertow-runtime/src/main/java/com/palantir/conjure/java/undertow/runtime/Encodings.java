@@ -31,6 +31,7 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Locale;
 
 // TODO(rfink): Consider async Jackson, see
 //              https://github.com/spring-projects/spring-framework/commit/31e0e537500c0763a36d3af2570d5c253a374690
@@ -102,7 +103,7 @@ public final class Encodings {
                 // TODO(ckozak): support wildcards? See javax.ws.rs.core.MediaType.isCompatible
                 return contentType != null
                         // Use startsWith to avoid failures due to charset
-                        && contentType.startsWith(CONTENT_TYPE);
+                        && contentType.toLowerCase(Locale.ROOT).startsWith(CONTENT_TYPE);
             }
         };
     }
@@ -119,7 +120,8 @@ public final class Encodings {
 
             @Override
             public boolean supportsContentType(String contentType) {
-                return contentType != null && contentType.startsWith(CONTENT_TYPE);
+                return contentType != null
+                        && contentType.toLowerCase(Locale.ROOT).startsWith(CONTENT_TYPE);
             }
 
             @Override
