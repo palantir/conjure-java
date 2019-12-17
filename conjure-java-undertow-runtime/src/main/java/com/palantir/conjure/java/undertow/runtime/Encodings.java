@@ -48,6 +48,27 @@ public final class Encodings {
         }
 
         @Override
+        public final boolean supportsContentType(String contentType) {
+            // TODO(ckozak): support wildcards? See javax.ws.rs.core.MediaType.isCompatible
+            if (contentType == null) {
+                return false;
+            }
+
+            String supportedContentType = getContentType();
+            if (contentType.length() < supportedContentType.length()) {
+                return false;
+            }
+
+            for (int i = 0; i < supportedContentType.length(); i++) {
+                if (Character.toLowerCase(contentType.charAt(i)) != supportedContentType.charAt(i)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        @Override
         public <T> Serializer<T> serializer(TypeMarker<T> type) {
             ObjectWriter writer = mapper.writerFor(mapper.constructType(type.getType()));
             return (value, output) -> {
@@ -96,14 +117,6 @@ public final class Encodings {
             public String getContentType() {
                 return CONTENT_TYPE;
             }
-
-            @Override
-            public boolean supportsContentType(String contentType) {
-                // TODO(ckozak): support wildcards? See javax.ws.rs.core.MediaType.isCompatible
-                return contentType != null
-                        // Use startsWith to avoid failures due to charset
-                        && contentType.startsWith(CONTENT_TYPE);
-            }
         };
     }
 
@@ -115,11 +128,6 @@ public final class Encodings {
             @Override
             public String getContentType() {
                 return CONTENT_TYPE;
-            }
-
-            @Override
-            public boolean supportsContentType(String contentType) {
-                return contentType != null && contentType.startsWith(CONTENT_TYPE);
             }
 
             @Override

@@ -42,8 +42,19 @@ import org.junit.jupiter.api.Test;
 final class EncodingsTest {
 
     private final Encoding json = Encodings.json();
+    private final Encoding cbor = Encodings.cbor();
 
     // TODO(rfink): Wire tests for JSON serializer
+
+    @Test
+    void json_supportsContentType() {
+        assertThat(json.supportsContentType("application/json")).isTrue();
+        assertThat(json.supportsContentType("application/json; charset=utf-8")).isTrue();
+        assertThat(json.supportsContentType("Application/json")).isTrue();
+        assertThat(json.supportsContentType("application/Json")).isTrue();
+
+        assertThat(json.supportsContentType("application/unknown")).isFalse();
+    }
 
     @Test
     void json_deserialize_throwsDeserializationErrorsAsIllegalArgumentException() {
@@ -140,6 +151,16 @@ final class EncodingsTest {
         OutputStream outputStream = mock(OutputStream.class);
         serialize("test", outputStream);
         verify(outputStream, never()).close();
+    }
+
+    @Test
+    void cbor_supportsContentType() {
+        assertThat(cbor.supportsContentType("application/cbor")).isTrue();
+        assertThat(cbor.supportsContentType("application/cbor; charset=utf-8")).isTrue();
+        assertThat(cbor.supportsContentType("Application/cbor")).isTrue();
+        assertThat(cbor.supportsContentType("application/Cbor")).isTrue();
+
+        assertThat(cbor.supportsContentType("application/unknown")).isFalse();
     }
 
     private static InputStream asStream(String data) {
