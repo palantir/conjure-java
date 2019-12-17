@@ -48,6 +48,27 @@ public final class Encodings {
         }
 
         @Override
+        public final boolean supportsContentType(String contentType) {
+            // TODO(ckozak): support wildcards? See javax.ws.rs.core.MediaType.isCompatible
+            if (contentType == null) {
+                return false;
+            }
+
+            String supportedContentType = getContentType();
+            if (contentType.length() < supportedContentType.length()) {
+                return false;
+            }
+
+            for (int i = 0; i < supportedContentType.length(); i++) {
+                if (Character.toLowerCase(contentType.charAt(i)) != supportedContentType.charAt(i)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        @Override
         public <T> Serializer<T> serializer(TypeMarker<T> type) {
             ObjectWriter writer = mapper.writerFor(mapper.constructType(type.getType()));
             return (value, output) -> {
@@ -96,12 +117,6 @@ public final class Encodings {
             public String getContentType() {
                 return CONTENT_TYPE;
             }
-
-            @Override
-            public boolean supportsContentType(String contentType) {
-                // TODO(ckozak): support wildcards? See javax.ws.rs.core.MediaType.isCompatible
-                return Encodings.supportsContentType(CONTENT_TYPE, contentType);
-            }
         };
     }
 
@@ -116,34 +131,11 @@ public final class Encodings {
             }
 
             @Override
-            public boolean supportsContentType(String contentType) {
-                return Encodings.supportsContentType(CONTENT_TYPE, contentType);
-            }
-
-            @Override
             public <T> Serializer<T> serializer(TypeMarker<T> type) {
                 Serializer<T> delegate = super.serializer(type);
                 return (value, output) -> delegate.serialize(value, new ShieldingOutputStream(output));
             }
         };
-    }
-
-    private static boolean supportsContentType(String supportedContentType, String requestContentType) {
-        if (requestContentType == null) {
-            return false;
-        }
-
-        if (requestContentType.length() < supportedContentType.length()) {
-            return false;
-        }
-
-        for (int i = 0; i < supportedContentType.length(); i++) {
-            if (Character.toLowerCase(requestContentType.charAt(i)) != supportedContentType.charAt(i)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private static ObjectMapper configure(ObjectMapper mapper) {
