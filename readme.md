@@ -37,6 +37,8 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Generate Undertow services which return Guava ListenableFuture for asynchronous processing
         --useImmutableBytes
                      Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'
+        --strictObjects
+                     Generate POJOs that by default will fail to deserialize unknown fields
         --nonNullCollections
                      Generate POJOs that by default will fail to deserialize collections with null values
 
