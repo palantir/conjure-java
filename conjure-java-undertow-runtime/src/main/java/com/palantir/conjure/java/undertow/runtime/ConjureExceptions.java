@@ -68,7 +68,7 @@ final class ConjureExceptions {
             error(exchange, serializer, (Error) throwable);
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
-            log(exception);
+            log(exception, throwable);
             writeResponse(
                     exchange,
                     Optional.of(SerializableError.forException(exception)),
@@ -105,7 +105,6 @@ final class ConjureExceptions {
     // propagate through other services.
     private static void remoteException(
             HttpServerExchange exchange, Serializer<SerializableError> serializer, RemoteException exception) {
-
         ErrorType errorType = mapRemoteExceptionErrorType(exception);
         writeResponse(exchange,
                 Optional.of(SerializableError.builder()
@@ -151,7 +150,7 @@ final class ConjureExceptions {
     private static void illegalArgumentException(
             HttpServerExchange exchange, Serializer<SerializableError> serializer, Throwable throwable) {
         ServiceException exception = new ServiceException(ErrorType.INVALID_ARGUMENT, throwable);
-        log(exception);
+        log(exception, throwable);
         writeResponse(
                 exchange,
                 Optional.of(SerializableError.forException(exception)),
@@ -165,7 +164,7 @@ final class ConjureExceptions {
             FrameworkException frameworkException) {
         int statusCode = frameworkException.getStatusCode();
         ServiceException exception = new ServiceException(frameworkException.getErrorType(), frameworkException);
-        log(exception);
+        log(exception, frameworkException);
         writeResponse(exchange, Optional.of(SerializableError.forException(exception)), statusCode, serializer);
     }
 
@@ -216,18 +215,22 @@ final class ConjureExceptions {
         return false;
     }
 
-    private static void log(ServiceException exception) {
-        if (exception.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
+    private static void log(ServiceException serviceException, Throwable exceptionForLogging) {
+        if (serviceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
             log.info("Error handling request",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
-                    SafeArg.of("errorName", exception.getErrorType().name()),
-                    exception);
+                    SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
+                    SafeArg.of("errorName", serviceException.getErrorType().name()),
+                    exceptionForLogging);
         } else {
             log.error("Error handling request",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
-                    SafeArg.of("errorName", exception.getErrorType().name()),
-                    exception);
+                    SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
+                    SafeArg.of("errorName", serviceException.getErrorType().name()),
+                    exceptionForLogging);
         }
+    }
+
+    private static void log(ServiceException exception) {
+        log(exception, exception);
     }
 
     private static final QosException.Visitor<Integer> QOS_EXCEPTION_STATUS_CODE = new QosException.Visitor<Integer>() {
