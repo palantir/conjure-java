@@ -89,7 +89,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
     @Test
     public void retrofit2_client_can_retrieve_a_boolean_from_a_server() {
         assertThat(Futures.getUnchecked(client.boolean_(AuthHeader.valueOf("authHeader"))))
-                .isEqualTo(true);
+                .isTrue();
     }
 
     @Test
