@@ -59,7 +59,7 @@ public final class ErrorGenerator {
     private static Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> splitErrorDefsByNamespace(
             List<ErrorDefinition> errorTypeNameToDef) {
         Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> pkgToNamespacedErrorDefs = new HashMap<>();
-        errorTypeNameToDef.stream().forEach(errorDef -> {
+        errorTypeNameToDef.forEach(errorDef -> {
             String errorPkg = errorDef.getErrorName().getPackage();
             pkgToNamespacedErrorDefs.computeIfAbsent(errorPkg, key -> new HashMap<>());
 
