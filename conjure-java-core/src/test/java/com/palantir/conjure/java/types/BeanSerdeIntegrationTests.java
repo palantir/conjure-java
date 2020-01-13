@@ -75,7 +75,8 @@ public final class BeanSerdeIntegrationTests {
         String json = "{\"aliasOptionalItems\": [null]}";
         ListExample example = mapper.readValue(json, ListExample.class);
         assertThat(example.getAliasOptionalItems()).isNotEmpty();
-        assertThat(Iterables.getOnlyElement(example.getAliasOptionalItems()).get()).isEmpty();
+        assertThat(Iterables.getOnlyElement(example.getAliasOptionalItems()).get())
+                .isEmpty();
         String serialized = mapper.writeValueAsString(example);
         ListExample deserialized = mapper.readValue(serialized, ListExample.class);
         assertThat(deserialized).isEqualTo(example);
@@ -107,12 +108,12 @@ public final class BeanSerdeIntegrationTests {
         String json = "{\"aliasOptionalItems\": { \"one\": null } }";
         MapExample example = mapper.readValue(json, MapExample.class);
         assertThat(example.getAliasOptionalItems()).isNotEmpty();
-        assertThat(Iterables.getOnlyElement(example.getAliasOptionalItems().values()).get()).isEmpty();
+        assertThat(Iterables.getOnlyElement(example.getAliasOptionalItems().values()).get())
+                .isEmpty();
         String serialized = mapper.writeValueAsString(example);
         MapExample deserialized = mapper.readValue(serialized, MapExample.class);
         assertThat(deserialized).isEqualTo(example);
     }
-
 
     @Test
     public void testSafeLongExampleSerde() throws Exception {
@@ -148,9 +149,8 @@ public final class BeanSerdeIntegrationTests {
 
     @Test
     public void testEnumKeyDeserialization() throws IOException {
-        Map<EnumExample, String> value = mapper.readValue(
-                "{\"TWO\": \"foo\"}",
-                new TypeReference<Map<EnumExample, String>>() {});
+        Map<EnumExample, String> value =
+                mapper.readValue("{\"TWO\": \"foo\"}", new TypeReference<Map<EnumExample, String>>() {});
         assertThat(Iterables.getOnlyElement(value.keySet()).get()).isEqualTo(EnumExample.Value.TWO);
     }
 

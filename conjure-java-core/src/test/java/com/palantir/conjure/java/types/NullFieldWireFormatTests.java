@@ -93,14 +93,18 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_optional_field_should_deserialize_as_empty() throws Exception {
-        assertThat(mapper.readValue("{\"item\":null}", OptionalExample.class).getItem()).isNotPresent();
+        assertThat(mapper.readValue("{\"item\":null}", OptionalExample.class).getItem())
+                .isNotPresent();
     }
 
     @Test
     public void null_collection_fields_should_deserialize_as_empty() throws Exception {
-        assertThat(mapper.readValue("{\"items\":null}", SetExample.class).getItems()).isEmpty();
-        assertThat(mapper.readValue("{\"items\":null}", ListExample.class).getItems()).isEmpty();
-        assertThat(mapper.readValue("{\"items\":null}", MapExample.class).getItems()).isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", SetExample.class).getItems())
+                .isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", ListExample.class).getItems())
+                .isEmpty();
+        assertThat(mapper.readValue("{\"items\":null}", MapExample.class).getItems())
+                .isEmpty();
     }
 
     @Test

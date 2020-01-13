@@ -24,5 +24,4 @@ public interface Serializer<T> {
 
     /** Serialize a value to a provided exchange using the Conjure wire format. */
     void serialize(T value, HttpServerExchange exchange) throws IOException;
-
 }
