@@ -82,10 +82,7 @@ public final class OptionsRequestTest {
     }
 
     private static Response execute(String path) {
-        Request request = new Request.Builder()
-                .method("OPTIONS", null)
-                .url("http://localhost:12346" + path)
-                .build();
+        Request request = new Request.Builder().method("OPTIONS", null).url("http://localhost:12346" + path).build();
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {

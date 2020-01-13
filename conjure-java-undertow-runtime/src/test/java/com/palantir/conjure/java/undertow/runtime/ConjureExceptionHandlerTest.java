@@ -79,8 +79,8 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void handlesRemoteException() throws IOException {
-        SerializableError remoteError = SerializableError.forException(
-                new ServiceException(ErrorType.CONFLICT, SafeArg.of("foo", "bar")));
+        SerializableError remoteError =
+                SerializableError.forException(new ServiceException(ErrorType.CONFLICT, SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.CONFLICT.httpErrorCode());
         Response response = execute();
 
@@ -101,8 +101,8 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void handles401RemoteException() throws IOException {
-        SerializableError remoteError = SerializableError.forException(
-                new ServiceException(ErrorType.UNAUTHORIZED, SafeArg.of("foo", "bar")));
+        SerializableError remoteError =
+                SerializableError.forException(new ServiceException(ErrorType.UNAUTHORIZED, SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.UNAUTHORIZED.httpErrorCode());
         Response response = execute();
 
@@ -158,8 +158,7 @@ public final class ConjureExceptionHandlerTest {
         Response response = execute();
 
         assertThat(response.code()).isEqualTo(429);
-        assertThat(response.headers().toMultimap())
-                .containsEntry("Retry-After", ImmutableList.of("120"));
+        assertThat(response.headers().toMultimap()).containsEntry("Retry-After", ImmutableList.of("120"));
         assertThat(response.body().string()).isEmpty();
     }
 
@@ -169,8 +168,7 @@ public final class ConjureExceptionHandlerTest {
         Response response = execute();
 
         assertThat(response.code()).isEqualTo(308);
-        assertThat(response.headers().toMultimap())
-                .containsEntry("Location", ImmutableList.of("http://foo"));
+        assertThat(response.headers().toMultimap()).containsEntry("Location", ImmutableList.of("http://foo"));
         assertThat(response.body().string()).isEmpty();
     }
 
@@ -187,8 +185,7 @@ public final class ConjureExceptionHandlerTest {
     public void handlesIllegalArgumentException() throws IOException {
         exception = new IllegalArgumentException("Foo");
         Response response = execute();
-        assertThat(response.body().string())
-                .contains("{\"errorCode\":\"INVALID_ARGUMENT\"");
+        assertThat(response.body().string()).contains("{\"errorCode\":\"INVALID_ARGUMENT\"");
         assertThat(response.code()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
     }
 
@@ -196,8 +193,7 @@ public final class ConjureExceptionHandlerTest {
     public void handlesRuntimeException() throws IOException {
         exception = new RuntimeException("Foo");
         Response response = execute();
-        assertThat(response.body().string())
-                .contains("{\"errorCode\":\"INTERNAL\"");
+        assertThat(response.body().string()).contains("{\"errorCode\":\"INTERNAL\"");
         assertThat(response.code()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
     }
 
@@ -227,10 +223,7 @@ public final class ConjureExceptionHandlerTest {
     }
 
     private static Response execute() {
-        Request request = new Request.Builder()
-                .get()
-                .url("http://localhost:12345")
-                .build();
+        Request request = new Request.Builder().get().url("http://localhost:12345").build();
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {

@@ -74,8 +74,7 @@ final class EncodingsTest {
 
     @Test
     void json_deserialize_invalidToken() {
-        assertThatThrownBy(() -> deserialize(asStream("{\"invalid\"}"),
-                new TypeMarker<SimpleObject>() {}))
+        assertThatThrownBy(() -> deserialize(asStream("{\"invalid\"}"), new TypeMarker<SimpleObject>() {}))
                 // SafeIllegalArgumentException is mapped to a 400 response status
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Failed to parse request due to malformed content");
@@ -143,7 +142,8 @@ final class EncodingsTest {
         // TODO(rfink): Do we need to test this for all primitive types?
         assertThatThrownBy(() -> deserialize(asStream("null"), new TypeMarker<String>() {}))
                 .isInstanceOf(SafeIllegalArgumentException.class);
-        assertThat(deserialize(asStream("null"), new TypeMarker<Optional<String>>() {})).isEmpty();
+        assertThat(deserialize(asStream("null"), new TypeMarker<Optional<String>>() {}))
+                .isEmpty();
     }
 
     @Test

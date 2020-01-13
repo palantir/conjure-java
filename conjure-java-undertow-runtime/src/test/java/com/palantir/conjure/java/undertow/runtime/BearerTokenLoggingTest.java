@@ -133,8 +133,9 @@ public class BearerTokenLoggingTest {
         runTest(INVALID_PAYLOAD_TOKEN, null, null, null);
     }
 
-    private void runTest(String authHeader,
-            @Nullable String userId, @Nullable String sessionId, @Nullable String tokenId) throws Exception {
+    private void runTest(
+            String authHeader, @Nullable String userId, @Nullable String sessionId, @Nullable String tokenId)
+            throws Exception {
         exchange.getRequestHeaders().put(Headers.AUTHORIZATION, authHeader);
         AtomicBoolean invoked = new AtomicBoolean();
         delegateRunnable.set(() -> {

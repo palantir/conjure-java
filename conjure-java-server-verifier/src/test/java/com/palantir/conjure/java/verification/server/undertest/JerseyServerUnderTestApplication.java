@@ -42,8 +42,9 @@ public final class JerseyServerUnderTestApplication extends Application<JerseySe
 
     @Override
     public void run(JerseyServerUnderTestConfiguration _configuration, Environment environment) {
-        environment.jersey().register(
-                Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
+        environment
+                .jersey()
+                .register(Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
 
         // must register ConjureJerseyFeature to map conjure error types.
         environment.jersey().register(ConjureJerseyFeature.INSTANCE);

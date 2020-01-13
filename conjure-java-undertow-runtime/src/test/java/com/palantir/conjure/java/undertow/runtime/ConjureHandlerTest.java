@@ -53,6 +53,7 @@ public final class ConjureHandlerTest {
 
     @Mock
     private Controller wrapperObserver;
+
     @Mock
     private Controller innerObserver;
 
@@ -90,10 +91,7 @@ public final class ConjureHandlerTest {
                     }
                 }))
                 .build();
-        server = Undertow.builder()
-                .addHttpListener(12345, "localhost")
-                .setHandler(handler)
-                .build();
+        server = Undertow.builder().addHttpListener(12345, "localhost").setHandler(handler).build();
         server.start();
     }
 
@@ -106,7 +104,7 @@ public final class ConjureHandlerTest {
     public void invokesWrapperBeforeBlocking() {
         when(wrapperObserver.control()).thenReturn(1);
         execute();
-        //check that the first wrapper (the one that adds 1) is called before the one that adds 2.
+        // check that the first wrapper (the one that adds 1) is called before the one that adds 2.
         assertThat(wrappersBeforeBlockingCallOrder).isEqualTo(ImmutableList.of(1, 2));
         verify(wrapperObserver).control();
         verify(innerObserver).control();
@@ -122,17 +120,14 @@ public final class ConjureHandlerTest {
 
     @Test
     public void innerWrapperCanShortCircuit() {
-        when(wrapperObserver.control()).thenReturn(-1);  // don't call delegate
+        when(wrapperObserver.control()).thenReturn(-1); // don't call delegate
         execute();
         verify(wrapperObserver).control();
         verify(innerObserver, never()).control();
     }
 
     private static Response execute() {
-        Request request = new Request.Builder()
-                .get()
-                .url("http://localhost:12345/test")
-                .build();
+        Request request = new Request.Builder().get().url("http://localhost:12345/test").build();
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {

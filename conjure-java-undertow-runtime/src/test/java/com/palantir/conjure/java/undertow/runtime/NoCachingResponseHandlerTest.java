@@ -57,8 +57,8 @@ public class NoCachingResponseHandlerTest {
 
     @Test
     public void testCacheControl() throws IOException {
-        try (Response response = client.newCall(new Request.Builder()
-                .get().url("http://localhost:12345").build()).execute()) {
+        try (Response response = client.newCall(new Request.Builder().get().url("http://localhost:12345").build())
+                .execute()) {
             assertThat(response.header(HttpHeaders.CACHE_CONTROL)).isEqualTo("no-cache, no-store, must-revalidate");
         }
     }

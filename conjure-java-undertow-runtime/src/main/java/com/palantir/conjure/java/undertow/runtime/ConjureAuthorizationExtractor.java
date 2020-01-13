@@ -32,11 +32,11 @@ import java.util.function.Consumer;
 import org.slf4j.MDC;
 
 /**
- * Implementation of {@link AuthorizationExtractor} which sets thread state based on a parsed
- * {@link UnverifiedJsonWebToken}. This behavior requires invocations to be wrapped with the
- * {@link LoggingContextHandler} to avoid leaking {@link MDC} state to other operations.
+ * Implementation of {@link AuthorizationExtractor} which sets thread state based on a parsed {@link
+ * UnverifiedJsonWebToken}. This behavior requires invocations to be wrapped with the {@link LoggingContextHandler} to
+ * avoid leaking {@link MDC} state to other operations.
  *
- * Package private internal API.
+ * <p>Package private internal API.
  */
 final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
 
@@ -45,10 +45,10 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
     private static final String TOKEN_ID_KEY = "tokenId";
     private static Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
     private static Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
-    private static final ErrorType MISSING_CREDENTIAL_ERROR_TYPE = ErrorType.create(
-            ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials");
-    private static final ErrorType MALFORMED_CREDENTIAL_ERROR_TYPE = ErrorType.create(
-            ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials");
+    private static final ErrorType MISSING_CREDENTIAL_ERROR_TYPE =
+            ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials");
+    private static final ErrorType MALFORMED_CREDENTIAL_ERROR_TYPE =
+            ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials");
 
     private final PlainSerDe plainSerDe;
 
@@ -57,8 +57,8 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
     }
 
     /**
-     * Parses an {@link AuthHeader} from the provided {@link HttpServerExchange} and applies
-     * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
+     * Parses an {@link AuthHeader} from the provided {@link HttpServerExchange} and applies {@link
+     * UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
      */
     @Override
     public AuthHeader header(HttpServerExchange exchange) {
@@ -67,8 +67,8 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
     }
 
     /**
-     * Parses a {@link BearerToken} from the provided {@link HttpServerExchange} and applies
-     * {@link UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
+     * Parses a {@link BearerToken} from the provided {@link HttpServerExchange} and applies {@link
+     * UnverifiedJsonWebToken} information to the {@link MDC thread state} if present.
      */
     @Override
     public BearerToken cookie(HttpServerExchange exchange, String cookieName) {
@@ -77,18 +77,15 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
             throw new ServiceException(MISSING_CREDENTIAL_ERROR_TYPE);
         }
         try {
-            return setState(
-                    exchange,
-                    plainSerDe.deserializeBearerToken(cookie.getValue()));
+            return setState(exchange, plainSerDe.deserializeBearerToken(cookie.getValue()));
         } catch (RuntimeException e) {
             throw new ServiceException(MALFORMED_CREDENTIAL_ERROR_TYPE, e);
         }
     }
 
     /**
-     * Attempts to extract a {@link UnverifiedJsonWebToken JSON Web Token} from the
-     * {@link BearerToken} value, and populates the SLF4J {@link MDC} with
-     * user id, session id, and token id extracted from the JWT. This is
+     * Attempts to extract a {@link UnverifiedJsonWebToken JSON Web Token} from the {@link BearerToken} value, and
+     * populates the SLF4J {@link MDC} with user id, session id, and token id extracted from the JWT. This is
      * best-effort and does not throw an exception in case any of these steps fail.
      */
     private static BearerToken setState(HttpServerExchange exchange, BearerToken token) {

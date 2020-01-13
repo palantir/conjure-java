@@ -24,19 +24,15 @@ import java.util.Optional;
 
 /**
  * Warning: this should be used with great care as {@link HttpHandler} are powerful and can easily be implemented
- * incorrectly. Make sure to not forget passing the request to the next handlers through
- * calling the endpoint's {@link HttpHandler#handleRequest(HttpServerExchange)}.
- * This function is used to implement filter-like behavior:
- * - Adding logic pre and post handling by the next handlers, by adding the logic before and after
- *  {@link HttpHandler#handleRequest(HttpServerExchange)}
- * - Adding logic post completion of the request by all handlers
- * {@link io.undertow.server.HttpServerExchange#addExchangeCompleteListener(ExchangeCompletionListener)}
- * - Catching and handling exceptions surrounding {@link HttpHandler#handleRequest(HttpServerExchange)} with
- * try ... catch ... finally.
- **/
+ * incorrectly. Make sure to not forget passing the request to the next handlers through calling the endpoint's {@link
+ * HttpHandler#handleRequest(HttpServerExchange)}. This function is used to implement filter-like behavior: - Adding
+ * logic pre and post handling by the next handlers, by adding the logic before and after {@link
+ * HttpHandler#handleRequest(HttpServerExchange)} - Adding logic post completion of the request by all handlers {@link
+ * io.undertow.server.HttpServerExchange#addExchangeCompleteListener(ExchangeCompletionListener)} - Catching and
+ * handling exceptions surrounding {@link HttpHandler#handleRequest(HttpServerExchange)} with try ... catch ... finally.
+ */
 public interface EndpointHandlerWrapper {
 
     /** May wrap {@link Endpoint#handler()} if this wrapper applies, otherwise empty. */
     Optional<HttpHandler> wrap(Endpoint endpoint);
-
 }

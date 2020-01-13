@@ -38,7 +38,7 @@ public class WebSecurityHandlerTest {
     public static void beforeClass() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new WebSecurityHandler(exchange -> { }))
+                .setHandler(new WebSecurityHandler(exchange -> {}))
                 .build();
         server.start();
     }
@@ -52,8 +52,8 @@ public class WebSecurityHandlerTest {
 
     @Test
     public void testWebSecurityHeaders() throws IOException {
-        try (Response response = client.newCall(new Request.Builder()
-                .get().url("http://localhost:12345").build()).execute()) {
+        try (Response response = client.newCall(new Request.Builder().get().url("http://localhost:12345").build())
+                .execute()) {
             validateCommonResponseHeaders(response);
             assertThat(response.header("X-Content-Security-Policy")).isNull();
         }
@@ -70,8 +70,12 @@ public class WebSecurityHandlerTest {
     }
 
     private void testFallbackSecurityPolicyHeader(String userAgent) throws IOException {
-        try (Response response = client.newCall(new Request.Builder().get().url("http://localhost:12345")
-                .header(HttpHeaders.USER_AGENT, userAgent).build()).execute()) {
+        try (Response response = client.newCall(new Request.Builder()
+                        .get()
+                        .url("http://localhost:12345")
+                        .header(HttpHeaders.USER_AGENT, userAgent)
+                        .build())
+                .execute()) {
             validateCommonResponseHeaders(response);
             assertThat(response.header("X-Content-Security-Policy"))
                     .isEqualTo("default-src 'self'; img-src 'self' data:; "
