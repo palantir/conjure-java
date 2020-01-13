@@ -24,5 +24,4 @@ public interface Deserializer<T> {
 
     /** Deserialize the request body. */
     T deserialize(HttpServerExchange exchange) throws IOException;
-
 }
