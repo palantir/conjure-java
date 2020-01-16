@@ -37,9 +37,9 @@ public final class SerializableErrorTest {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(error, stream);
         assertThat(stream.toString())
-                .isEqualTo(
-                        "{\"errorCode\":\"INVALID_ARGUMENT\",\"errorName\":\"Default:InvalidArgument\",\"errorInstanceId\":\""
-                                + error.errorInstanceId()
-                                + "\",\"parameters\":{\"foo\":\"42\",\"bar\":\"boom\"}}");
+                .isEqualTo("{\"errorCode\":\"INVALID_ARGUMENT\",\"errorName\":\"Default:InvalidArgument\","
+                        + "\"errorInstanceId\":\""
+                        + error.errorInstanceId()
+                        + "\",\"parameters\":{\"foo\":\"42\",\"bar\":\"boom\"}}");
     }
 }
