@@ -122,8 +122,8 @@ public final class MethodSpecs {
 
     private static CodeBlock toStringConcatenation(String thisClassName, List<FieldName> fieldNames) {
         checkState(!fieldNames.isEmpty(), "String concatenation is only necessary if there are fields");
-        CodeBlock.Builder builder =
-                CodeBlock.builder().add("$S\n", thisClassName + '{' + fieldNames.get(0).get() + ": ");
+        CodeBlock.Builder builder = CodeBlock.builder()
+                .add("$S\n", thisClassName + '{' + fieldNames.get(0).get() + ": ");
         for (int i = 0; i < fieldNames.size(); i++) {
             FieldName fieldName = fieldNames.get(i);
             // The name of the first field is included with the class name

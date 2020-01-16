@@ -165,8 +165,10 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     @Test
     public void testExceptionThrownInHandlerMethod() throws IOException {
-        try (Response response = client().newCall(
-                        new Request.Builder().get().url("http://localhost:" + PORT + "/async/throws").build())
+        try (Response response = client().newCall(new Request.Builder()
+                        .get()
+                        .url("http://localhost:" + PORT + "/async/throws")
+                        .build())
                 .execute()) {
             assertThat(response).matches(resp -> resp.code() == ErrorType.CONFLICT.httpErrorCode());
             SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
@@ -176,8 +178,10 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     @Test
     public void testFailedFuture() throws IOException {
-        try (Response response = client().newCall(
-                        new Request.Builder().get().url("http://localhost:" + PORT + "/async/failed-future").build())
+        try (Response response = client().newCall(new Request.Builder()
+                        .get()
+                        .url("http://localhost:" + PORT + "/async/failed-future")
+                        .build())
                 .execute()) {
             assertThat(response).matches(resp -> resp.code() == ErrorType.CONFLICT.httpErrorCode());
             SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
@@ -200,8 +204,10 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     @Test
     public void testAsyncOptionalBinaryNotPresent() throws IOException {
-        try (Response response = client().newCall(
-                        new Request.Builder().get().url("http://localhost:" + PORT + "/async/binary").build())
+        try (Response response = client().newCall(new Request.Builder()
+                        .get()
+                        .url("http://localhost:" + PORT + "/async/binary")
+                        .build())
                 .execute()) {
             assertThat(response).matches(resp -> resp.code() == 204);
             assertThat(response.header(HttpHeaders.CONTENT_TYPE)).isNull();

@@ -68,8 +68,8 @@ public final class PlainSerDeTest {
 
     @Test
     public void testDeserializeRid() throws Exception {
-        runDeserializerTest("Rid", "ri.service.instance.folder.foo",
-                ResourceIdentifier.of("ri.service.instance.folder.foo"));
+        runDeserializerTest(
+                "Rid", "ri.service.instance.folder.foo", ResourceIdentifier.of("ri.service.instance.folder.foo"));
     }
 
     @Test
@@ -84,14 +84,15 @@ public final class PlainSerDeTest {
 
     @Test
     public void testDeserializeUuid() throws Exception {
-        runDeserializerTest("Uuid", "90a8481a-2ef5-4c64-83fc-04a9b369e2b8",
+        runDeserializerTest(
+                "Uuid",
+                "90a8481a-2ef5-4c64-83fc-04a9b369e2b8",
                 UUID.fromString("90a8481a-2ef5-4c64-83fc-04a9b369e2b8"));
     }
 
     @Test
     public void testBearerTokensNotIncludedInThrowable() {
-        assertThatLoggableExceptionThrownBy(() ->
-                PLAIN.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
+        assertThatLoggableExceptionThrownBy(() -> PLAIN.deserializeBearerToken(ImmutableList.of("one", "two", "three")))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Expected one element")
                 .hasExactlyArgs(SafeArg.of("size", 3));
@@ -99,50 +100,55 @@ public final class PlainSerDeTest {
 
     @Test
     public void testValuesAreLoggedUnsafe() {
-        assertThatLoggableExceptionThrownBy(() ->
-                PLAIN.deserializeString(ImmutableList.of("one", "two", "three")))
+        assertThatLoggableExceptionThrownBy(() -> PLAIN.deserializeString(ImmutableList.of("one", "two", "three")))
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Expected one element")
-                .hasExactlyArgs(SafeArg.of("size", 3),
-                        UnsafeArg.of("received", ImmutableList.of("one", "two", "three")));
+                .hasExactlyArgs(
+                        SafeArg.of("size", 3), UnsafeArg.of("received", ImmutableList.of("one", "two", "three")));
     }
 
     private static <T> void runDeserializerTest(String typeName, String plainIn, T want) throws Exception {
         runDeserializerTest(typeName, plainIn, want, Optional::of);
     }
 
-    private static <T> void runDeserializerTest(String typeName, String plainIn, T want,
-            Function<T, Object> createOptional) throws Exception {
-        assertThat(PlainSerDe.class.getMethod("deserialize" + typeName, String.class)
-                .invoke(PLAIN, plainIn)).isEqualTo(want);
+    private static <T> void runDeserializerTest(
+            String typeName, String plainIn, T want, Function<T, Object> createOptional) throws Exception {
+        assertThat(PlainSerDe.class
+                        .getMethod("deserialize" + typeName, String.class)
+                        .invoke(PLAIN, plainIn))
+                .isEqualTo(want);
 
         assertThatLoggableExceptionThrownBy(() -> {
-            try {
-                PlainSerDe.class.getMethod("deserialize" + typeName, String.class)
-                        .invoke(PLAIN, new Object[] {null});
-            } catch (InvocationTargetException ite) {
-                throw ite.getCause();
-            }
-        })
+                    try {
+                        PlainSerDe.class
+                                .getMethod("deserialize" + typeName, String.class)
+                                .invoke(PLAIN, new Object[] {null});
+                    } catch (InvocationTargetException ite) {
+                        throw ite.getCause();
+                    }
+                })
                 .describedAs("invoking a string deserializer with null should result in an IAE")
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Value is required");
 
-        assertThat(PlainSerDe.class.getMethod("deserialize" + typeName, Iterable.class)
-                .invoke(PLAIN, ImmutableList.of(plainIn))).isEqualTo(want);
+        assertThat(PlainSerDe.class
+                        .getMethod("deserialize" + typeName, Iterable.class)
+                        .invoke(PLAIN, ImmutableList.of(plainIn)))
+                .isEqualTo(want);
 
         Method optionalStringDeserializer = PlainSerDe.class.getMethod("deserializeOptional" + typeName, String.class);
         assertThat(optionalStringDeserializer.invoke(PLAIN, plainIn)).isEqualTo(createOptional.apply(want));
 
-        assertThat(optionalStringDeserializer.invoke(PLAIN, new Object[] { null }))
+        assertThat(optionalStringDeserializer.invoke(PLAIN, new Object[] {null}))
                 .isEqualTo(createEmptyOptional(optionalStringDeserializer));
 
-        assertThat(PlainSerDe.class.getMethod("deserializeOptional" + typeName, Iterable.class)
-                .invoke(PLAIN, ImmutableList.of(plainIn))).isEqualTo(createOptional.apply(want));
+        assertThat(PlainSerDe.class
+                        .getMethod("deserializeOptional" + typeName, Iterable.class)
+                        .invoke(PLAIN, ImmutableList.of(plainIn)))
+                .isEqualTo(createOptional.apply(want));
     }
 
     private static Object createEmptyOptional(Method deserializerMethod) throws ReflectiveOperationException {
         return deserializerMethod.getReturnType().getDeclaredMethod("empty").invoke(null);
     }
-
 }

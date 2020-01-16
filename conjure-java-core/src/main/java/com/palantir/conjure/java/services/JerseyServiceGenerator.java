@@ -102,7 +102,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     private JavaFile generateService(
             ServiceDefinition serviceDefinition, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
-        TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceDefinition.getServiceName().getName())
+        TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
+                        serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Consumes"))
                         .addMember("value", "$T.APPLICATION_JSON", ClassName.get("javax.ws.rs.core", "MediaType"))
@@ -135,11 +136,16 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     private MethodSpec generateServiceMethod(
             EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
-        TypeName returnType = endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
+        TypeName returnType = endpointDef
+                .getReturns()
+                .map(returnTypeMapper::getClassName)
+                .orElse(ClassName.VOID);
 
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
+                        endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addAnnotation(httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
+                .addAnnotation(
+                        httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
                 .addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, true))
                 .returns(returnType);
 
@@ -208,11 +214,14 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
         List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, argumentTypeMapper, false);
         List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream()
-                .map(param -> extraArgs.stream().filter(arg -> arg.getArgName().get().equals(param.name)).findFirst())
+                .map(param -> extraArgs.stream()
+                        .filter(arg -> arg.getArgName().get().equals(param.name))
+                        .findFirst())
                 .collect(Collectors.toList());
 
         // omit extraArgs from the back fill method signature
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
+                        endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
                 .addParameters(IntStream.range(0, sortedParams.size())
@@ -264,8 +273,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     private ParameterSpec createServiceMethodParameterArg(
             TypeMapper typeMapper, ArgumentDefinition def, boolean withAnnotations) {
-        ParameterSpec.Builder param =
-                ParameterSpec.builder(typeMapper.getClassName(def.getType()), def.getArgName().get());
+        ParameterSpec.Builder param = ParameterSpec.builder(
+                typeMapper.getClassName(def.getType()), def.getArgName().get());
         if (withAnnotations) {
             getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
             param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
@@ -299,8 +308,9 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
         ParameterSpec.Builder paramSpec = ParameterSpec.builder(tokenClassName, paramName);
         if (withAnnotations) {
-            paramSpec.addAnnotation(
-                    AnnotationSpec.builder(annotationClassName).addMember("value", "$S", tokenName).build());
+            paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
+                    .addMember("value", "$S", tokenName)
+                    .build());
             if (featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }

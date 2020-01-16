@@ -124,7 +124,8 @@ public final class Retrofit2ServiceEteTest extends TestBase {
 
     @Test
     public void retrofit2_client_can_retrieve_binary_data_from_a_server() throws IOException {
-        assertThat(Futures.getUnchecked(client.binary(AuthHeader.valueOf("authHeader"))).string())
+        assertThat(Futures.getUnchecked(client.binary(AuthHeader.valueOf("authHeader")))
+                        .string())
                 .isEqualTo("Hello, world!");
     }
 

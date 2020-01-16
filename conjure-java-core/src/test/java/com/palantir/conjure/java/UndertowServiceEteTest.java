@@ -245,7 +245,8 @@ public final class UndertowServiceEteTest extends TestBase {
         HttpURLConnection connection =
                 (HttpURLConnection) new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
         connection.setRequestMethod("POST");
-        connection.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        connection.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/cbor");
         connection.setRequestProperty(HttpHeaders.ACCEPT, "application/cbor");
         connection.setDoOutput(true);
@@ -267,7 +268,8 @@ public final class UndertowServiceEteTest extends TestBase {
         HttpURLConnection connection =
                 (HttpURLConnection) new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
         connection.setRequestMethod("POST");
-        connection.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        connection.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
         connection.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
         connection.setDoOutput(true);
@@ -338,7 +340,8 @@ public final class UndertowServiceEteTest extends TestBase {
         URL url = new URL("http://0.0.0.0:8080/test-example/api/base/external/optional-body");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
-        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        con.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         assertThat(con.getResponseCode()).isEqualTo(204);
     }
 
@@ -352,7 +355,8 @@ public final class UndertowServiceEteTest extends TestBase {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
-        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        con.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         assertThat(con.getResponseCode()).isEqualTo(204);
     }
 
@@ -442,7 +446,8 @@ public final class UndertowServiceEteTest extends TestBase {
         URL url = new URL("http://0.0.0.0:8080/test-example/api/base/no-return");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
-        con.setRequestProperty(HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        con.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         assertThat(con.getResponseCode()).isEqualTo(204);
         assertThat(con.getHeaderField(HttpHeaders.CONTENT_TYPE)).isNull();
     }

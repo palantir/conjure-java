@@ -52,8 +52,8 @@ final class TypeMarkers {
         } else if (OptionalLong.class.equals(type)) {
             return (T) OptionalLong.empty();
         }
-        throw new SafeIllegalArgumentException("Expected a TypeMarker representing an optional type",
-                SafeArg.of("marker", marker));
+        throw new SafeIllegalArgumentException(
+                "Expected a TypeMarker representing an optional type", SafeArg.of("marker", marker));
     }
 
     private TypeMarkers() {}

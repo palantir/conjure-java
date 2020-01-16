@@ -108,7 +108,8 @@ public final class BeanSerdeIntegrationTests {
         String json = "{\"aliasOptionalItems\": { \"one\": null } }";
         MapExample example = mapper.readValue(json, MapExample.class);
         assertThat(example.getAliasOptionalItems()).isNotEmpty();
-        assertThat(Iterables.getOnlyElement(example.getAliasOptionalItems().values()).get())
+        assertThat(Iterables.getOnlyElement(example.getAliasOptionalItems().values())
+                        .get())
                 .isEmpty();
         String serialized = mapper.writeValueAsString(example);
         MapExample deserialized = mapper.readValue(serialized, MapExample.class);

@@ -36,8 +36,10 @@ public final class SerializableErrorTest {
                 new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("foo", 42), UnsafeArg.of("bar", "boom")));
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(error, stream);
-        assertThat(stream.toString()).isEqualTo(
-                "{\"errorCode\":\"INVALID_ARGUMENT\",\"errorName\":\"Default:InvalidArgument\",\"errorInstanceId\":\""
-                        + error.errorInstanceId() + "\",\"parameters\":{\"foo\":\"42\",\"bar\":\"boom\"}}");
+        assertThat(stream.toString())
+                .isEqualTo(
+                        "{\"errorCode\":\"INVALID_ARGUMENT\",\"errorName\":\"Default:InvalidArgument\",\"errorInstanceId\":\""
+                                + error.errorInstanceId()
+                                + "\",\"parameters\":{\"foo\":\"42\",\"bar\":\"boom\"}}");
     }
 }

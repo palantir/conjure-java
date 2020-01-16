@@ -59,7 +59,8 @@ public final class UndertowReturnValueClassNameVisitor implements ClassNameVisit
     @Override
     public TypeName visitOptional(OptionalType optionalType) {
         if (optionalType.getItemType().accept(TypeVisitor.IS_BINARY)) {
-            return ParameterizedTypeName.get(ClassName.get(Optional.class), optionalType.getItemType().accept(this));
+            return ParameterizedTypeName.get(
+                    ClassName.get(Optional.class), optionalType.getItemType().accept(this));
         }
         return delegate.visitOptional(optionalType);
     }

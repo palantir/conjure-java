@@ -22,10 +22,10 @@ import io.undertow.util.Headers;
 
 /**
  * Adds HTTP response headers to GET requests to disable caching.
- * <p>
- * https://tools.ietf.org/html/rfc7234#page-5
- * "Although caching is an entirely OPTIONAL feature of HTTP, it can be assumed that reusing a cached response is
- * desirable and that such reuse is the default behavior when no requirement or local configuration prevents it."
+ *
+ * <p>https://tools.ietf.org/html/rfc7234#page-5 "Although caching is an entirely OPTIONAL feature of HTTP, it can be
+ * assumed that reusing a cached response is desirable and that such reuse is the default behavior when no requirement
+ * or local configuration prevents it."
  */
 final class NoCachingResponseHandler implements HttpHandler {
 

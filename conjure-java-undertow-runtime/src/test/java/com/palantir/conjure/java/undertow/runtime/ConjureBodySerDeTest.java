@@ -76,7 +76,7 @@ public class ConjureBodySerDeTest {
     }
 
     @Test
-    public void testResponseContentType() throws IOException  {
+    public void testResponseContentType() throws IOException {
         Encoding json = new StubEncoding("application/json");
         Encoding plain = new StubEncoding("text/plain");
 
@@ -88,7 +88,7 @@ public class ConjureBodySerDeTest {
     }
 
     @Test
-    public void testResponseNoContentType() throws IOException  {
+    public void testResponseNoContentType() throws IOException {
         Encoding json = new StubEncoding("application/json");
         Encoding plain = new StubEncoding("text/plain");
 
@@ -99,7 +99,7 @@ public class ConjureBodySerDeTest {
     }
 
     @Test
-    public void testResponseUnknownContentType() throws IOException  {
+    public void testResponseUnknownContentType() throws IOException {
         Encoding json = new StubEncoding("application/json");
         Encoding plain = new StubEncoding("text/plain");
 

@@ -32,15 +32,20 @@ public class GoetheTest {
 
     @Test
     public void testFormatAndEmit() {
-        JavaFile javaFile = JavaFile.builder("com.palantir.foo", TypeSpec.classBuilder("Foo")
-                .addStaticBlock(CodeBlock.builder().addStatement("type oops name = bar").build())
-                .build()).build();
+        JavaFile javaFile = JavaFile.builder(
+                        "com.palantir.foo",
+                        TypeSpec.classBuilder("Foo")
+                                .addStaticBlock(CodeBlock.builder()
+                                        .addStatement("type oops name = bar")
+                                        .build())
+                                .build())
+                .build();
         assertThatThrownBy(() -> Goethe.formatAndEmit(javaFile, folder))
                 .hasMessageContaining("Failed to format 'com.palantir.foo.Foo'")
                 .hasMessageContaining("';' expected")
-                .hasMessageContaining("" // newline to align the output
-                        + "    type oops name = bar;\n"
-                        + "            ^");
+                .hasMessageContaining(
+                        "" // newline to align the output
+                                + "    type oops name = bar;\n"
+                                + "            ^");
     }
-
 }

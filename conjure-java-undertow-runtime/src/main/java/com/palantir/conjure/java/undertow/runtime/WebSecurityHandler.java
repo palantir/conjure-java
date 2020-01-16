@@ -24,21 +24,18 @@ import io.undertow.util.HttpString;
 
 /**
  * Applies security headers. These headers include:
+ *
  * <dl>
- *   <dt>Content Security Policy (including support for IE 10 + 11)</dt>
- *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP</dd>
- *
- *   <dt>Referrer Policy</dt>
- *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy</dd>
- *
- *   <dt>Content Type Options</dt>
- *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options</dd>
- *
- *   <dt>Frame Options</dt>
- *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options</dd>
- *
- *   <dt>XSS Protection</dt>
- *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection</dd>
+ *   <dt>Content Security Policy (including support for IE 10 + 11)
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+ *   <dt>Referrer Policy
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+ *   <dt>Content Type Options
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+ *   <dt>Frame Options
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+ *   <dt>XSS Protection
+ *   <dd>https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
  * </dl>
  */
 final class WebSecurityHandler implements HttpHandler {

@@ -27,10 +27,10 @@ import java.util.List;
 /** Internal type to signal a conjure protocol-level failure with a specific response code. */
 final class FrameworkException extends RuntimeException implements SafeLoggable {
 
-    private static final ErrorType UNPROCESSABLE_ENTITY = ErrorType.create(
-            ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnprocessableEntity");
-    private static final ErrorType UNSUPPORTED_MEDIA_TYPE = ErrorType.create(
-            ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnsupportedMediaType");
+    private static final ErrorType UNPROCESSABLE_ENTITY =
+            ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnprocessableEntity");
+    private static final ErrorType UNSUPPORTED_MEDIA_TYPE =
+            ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnsupportedMediaType");
 
     private final String logMessage;
     private final List<Arg<?>> arguments;

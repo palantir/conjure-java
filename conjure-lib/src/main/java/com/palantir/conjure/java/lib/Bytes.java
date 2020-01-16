@@ -75,8 +75,7 @@ public final class Bytes {
 
     @Override
     public boolean equals(Object obj) {
-        return this == obj
-                || (obj instanceof Bytes && Arrays.equals(safe, ((Bytes) obj).safe));
+        return this == obj || (obj instanceof Bytes && Arrays.equals(safe, ((Bytes) obj).safe));
     }
 
     @Override

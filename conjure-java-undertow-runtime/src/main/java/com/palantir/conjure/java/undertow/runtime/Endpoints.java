@@ -24,15 +24,13 @@ final class Endpoints {
     private Endpoints() {}
 
     /**
-     * Build an {@link Endpoint} who is a copy of the {@link Endpoint} but whose handler
-     * has been wrapped by an {@link EndpointHandlerWrapper}.
+     * Build an {@link Endpoint} who is a copy of the {@link Endpoint} but whose handler has been wrapped by an
+     * {@link EndpointHandlerWrapper}.
      */
     static Endpoint map(Endpoint endpoint, EndpointHandlerWrapper wrapper) {
-        return wrapper.wrap(endpoint).map(handler ->
-                Endpoint.builder()
-                        .from(endpoint)
-                        .handler(handler)
-                        .build())
+        return wrapper.wrap(endpoint)
+                .map(handler ->
+                        Endpoint.builder().from(endpoint).handler(handler).build())
                 .orElse(endpoint);
     }
 }

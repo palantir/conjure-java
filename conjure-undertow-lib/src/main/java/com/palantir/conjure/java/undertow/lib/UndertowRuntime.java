@@ -19,7 +19,7 @@ package com.palantir.conjure.java.undertow.lib;
 /**
  * {@link UndertowRuntime} is the anchor for all non-generated logic used by generated handlers.
  *
- * The {@link UndertowRuntime} and provided interfaces {@link BodySerDe}, {@link PlainSerDe}, and
+ * <p>The {@link UndertowRuntime} and provided interfaces {@link BodySerDe}, {@link PlainSerDe}, and
  * {@link AuthorizationExtractor} are internal API, no guarantees are made for custom implementations.
  */
 public interface UndertowRuntime {

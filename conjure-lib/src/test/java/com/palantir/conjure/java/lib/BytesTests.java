@@ -32,7 +32,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 public final class BytesTests {
     @Test
     public void testConstructionCopiesInputArray() {
-        byte[] input = new byte[]{0};
+        byte[] input = new byte[] {0};
         Bytes immutable = Bytes.from(input);
 
         assertThat(immutable.asNewByteArray()[0]).isEqualTo((byte) 0);
@@ -45,35 +45,32 @@ public final class BytesTests {
 
     @Test
     public void testConstructionCopiesArrayWithRange() {
-        byte[] input = new byte[]{0, 1, 2, 3};
+        byte[] input = new byte[] {0, 1, 2, 3};
         Bytes immutable = Bytes.from(input, 1, 2);
-        assertThat(immutable.asNewByteArray()).isEqualTo(new byte[]{1, 2});
+        assertThat(immutable.asNewByteArray()).isEqualTo(new byte[] {1, 2});
     }
 
     @Test
     public void testConstructionCopiesArray_badOffset() {
         byte[] input = new byte[0];
-        assertThatThrownBy(() -> Bytes.from(input, 1, 0))
-                .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+        assertThatThrownBy(() -> Bytes.from(input, 1, 0)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testConstructionCopiesArray_badLength() {
         byte[] input = new byte[0];
-        assertThatThrownBy(() -> Bytes.from(input, 0, 1))
-                .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+        assertThatThrownBy(() -> Bytes.from(input, 0, 1)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testConstructionCopiesArray_badRange() {
         byte[] input = new byte[10];
-        assertThatThrownBy(() -> Bytes.from(input, 5, 10))
-                .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+        assertThatThrownBy(() -> Bytes.from(input, 5, 10)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
     public void testConstructionCopiesByteBuffer() {
-        ByteBuffer buffer = ByteBuffer.wrap(new byte[]{0, 1, 2});
+        ByteBuffer buffer = ByteBuffer.wrap(new byte[] {0, 1, 2});
         Bytes immutable = Bytes.from(buffer);
 
         assertThat(immutable.asReadOnlyByteBuffer()).isEqualTo(buffer.asReadOnlyBuffer());
@@ -122,7 +119,7 @@ public final class BytesTests {
 
     @Test
     public void testCopy() {
-        byte[] input = new byte[]{0, 1, 2};
+        byte[] input = new byte[] {0, 1, 2};
         Bytes immutable = Bytes.from(input);
 
         byte[] test = new byte[input.length];
@@ -147,8 +144,7 @@ public final class BytesTests {
         Bytes immutable = Bytes.from(input);
 
         byte[] test = new byte[0];
-        assertThatThrownBy(() -> immutable.copyTo(test, 0, 1))
-                .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+        assertThatThrownBy(() -> immutable.copyTo(test, 0, 1)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
@@ -157,8 +153,7 @@ public final class BytesTests {
         Bytes immutable = Bytes.from(input);
 
         byte[] test = new byte[5];
-        assertThatThrownBy(() -> immutable.copyTo(test, 0, 10))
-                .isInstanceOf(ArrayIndexOutOfBoundsException.class);
+        assertThatThrownBy(() -> immutable.copyTo(test, 0, 10)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
     }
 
     @Test
@@ -184,7 +179,6 @@ public final class BytesTests {
     @Test
     public void testSerDe_cannotMapEmptyArray() {
         ObjectMapper mapper = new ObjectMapper();
-        assertThatThrownBy(() -> mapper.readValue("[]", Bytes.class))
-                .isInstanceOf(JsonParseException.class);
+        assertThatThrownBy(() -> mapper.readValue("[]", Bytes.class)).isInstanceOf(JsonParseException.class);
     }
 }

@@ -54,7 +54,8 @@ public final class EnumGenerator {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName thisClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName enumClass = ClassName.get(typePackage, typeDef.getTypeName().getName(), "Value");
-        ClassName visitorClass = ClassName.get(typePackage, typeDef.getTypeName().getName(), "Visitor");
+        ClassName visitorClass = ClassName.get(
+                typePackage, typeDef.getTypeName().getName(), "Visitor");
 
         return JavaFile.builder(typePackage, createSafeEnum(typeDef, thisClass, enumClass, visitorClass))
                 .skipJavaLangImports(true)
@@ -186,7 +187,8 @@ public final class EnumGenerator {
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
         return MethodSpec.methodBuilder("accept")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ParameterSpec.builder(parameterizedVisitorClass, "visitor").build())
+                .addParameter(ParameterSpec.builder(parameterizedVisitorClass, "visitor")
+                        .build())
                 .addTypeVariable(TYPE_VARIABLE)
                 .returns(TYPE_VARIABLE)
                 .addCode(switchBlock.build())
@@ -212,7 +214,8 @@ public final class EnumGenerator {
     }
 
     private static MethodSpec createValueOf(ClassName thisClass, Iterable<EnumValueDefinition> values) {
-        ParameterSpec param = ParameterSpec.builder(ClassName.get(String.class), "value").build();
+        ParameterSpec param = ParameterSpec.builder(ClassName.get(String.class), "value")
+                .build();
 
         CodeBlock.Builder parser = CodeBlock.builder().beginControlFlow("switch (upperCasedValue)");
         for (EnumValueDefinition value : values) {

@@ -59,12 +59,10 @@ public abstract class CliConfiguration {
         return ImmutableSet.of();
     }
 
-
     @Value.Check
     final void check() {
         Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
-        Preconditions.checkArgument(outputDirectory().isDirectory(),
-                "Output must exist and be a directory");
+        Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
         Preconditions.checkArgument(
                 generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
                 "Must specify exactly one project to generate");

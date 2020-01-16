@@ -81,9 +81,11 @@ public final class UnionGenerator {
                 .collect(StableCollectors.toLinkedMap(
                         FieldDefinition::getFieldName, entry -> typeMapper.getClassName(entry.getType())));
         List<FieldSpec> fields = ImmutableList.of(
-                FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                        .build());
 
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(typeDef.getTypeName().getName())
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
+                        typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
@@ -160,7 +162,8 @@ public final class UnionGenerator {
 
     private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass, Set<FieldName> memberNames) {
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
-        ParameterSpec visitor = ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
+        ParameterSpec visitor = ParameterSpec.builder(parameterizedVisitorClass, "visitor")
+                .build();
         MethodSpec.Builder visitBuilder = MethodSpec.methodBuilder("accept")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(visitor)
@@ -234,7 +237,11 @@ public final class UnionGenerator {
                         .addStatement("return new $T<$T>()", visitorBuilderClass, TYPE_VARIABLE)
                         .returns(ParameterizedTypeName.get(
                                 visitorStageInterfaceName(
-                                        unionClass, sortedStageNameTypePairs(memberTypes).findFirst().get().memberName),
+                                        unionClass,
+                                        sortedStageNameTypePairs(memberTypes)
+                                                .findFirst()
+                                                .get()
+                                                .memberName),
                                 TYPE_VARIABLE))
                         .build())
                 .build();
@@ -244,7 +251,8 @@ public final class UnionGenerator {
         return memberTypes.entrySet().stream()
                 .map(entry -> {
                     String variableName = variableName();
-                    return MethodSpec.methodBuilder(visitMethodName(entry.getKey().get()))
+                    return MethodSpec.methodBuilder(
+                                    visitMethodName(entry.getKey().get()))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .addParameter(entry.getValue(), variableName)
                             .returns(TYPE_VARIABLE)
@@ -475,7 +483,8 @@ public final class UnionGenerator {
             String memberName, TypeName memberType, TypeName visitResultType, ClassName nextBuilderStage) {
         TypeName visitorObject = visitorObjectTypeName(memberType, visitResultType);
         return MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
-                .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName)).build())
+                .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName))
+                        .build())
                 .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
     }
 
@@ -497,8 +506,9 @@ public final class UnionGenerator {
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
         subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
         baseBuilder.addAnnotation(annotationBuilder.build());
-        baseBuilder.addAnnotation(
-                AnnotationSpec.builder(JsonIgnoreProperties.class).addMember("ignoreUnknown", "$L", true).build());
+        baseBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+                .addMember("ignoreUnknown", "$L", true)
+                .build());
 
         return baseBuilder.build();
     }
@@ -515,7 +525,8 @@ public final class UnionGenerator {
                             .addMember("value", "$S", memberName.get())
                             .build();
                     List<FieldSpec> fields = ImmutableList.of(
-                            FieldSpec.builder(memberType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                            FieldSpec.builder(memberType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                                    .build());
 
                     TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
                             .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
@@ -526,7 +537,8 @@ public final class UnionGenerator {
                             .addFields(fields)
                             .addMethod(MethodSpec.constructorBuilder()
                                     .addModifiers(Modifier.PRIVATE)
-                                    .addAnnotation(AnnotationSpec.builder(JsonCreator.class).build())
+                                    .addAnnotation(AnnotationSpec.builder(JsonCreator.class)
+                                            .build())
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                                             .addAnnotation(jsonPropertyAnnotation)
                                             .build())
@@ -560,9 +572,12 @@ public final class UnionGenerator {
     private static TypeSpec generateUnknownWrapper(ClassName baseClass) {
         ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
-        ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type").build();
+        ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")
+                .build();
         ParameterSpec annotatedTypeParameter = ParameterSpec.builder(UNKNOWN_MEMBER_TYPE, "type")
-                .addAnnotation(AnnotationSpec.builder(JsonProperty.class).addMember("value", "\"type\"").build())
+                .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                        .addMember("value", "\"type\"")
+                        .build())
                 .build();
 
         ClassName wrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
@@ -590,7 +605,8 @@ public final class UnionGenerator {
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)
                         .addParameter(typeParameter)
-                        .addParameter(ParameterSpec.builder(genericMapType, VALUE_FIELD_NAME).build())
+                        .addParameter(ParameterSpec.builder(genericMapType, VALUE_FIELD_NAME)
+                                .build())
                         .addStatement("$L", Expressions.requireNonNull(typeParameter.name, "type cannot be null"))
                         .addStatement(
                                 "$L",
@@ -601,13 +617,15 @@ public final class UnionGenerator {
                         .build())
                 .addMethod(MethodSpec.methodBuilder("getType")
                         .addModifiers(Modifier.PRIVATE)
-                        .addAnnotation(AnnotationSpec.builder(JsonProperty.class).build())
+                        .addAnnotation(
+                                AnnotationSpec.builder(JsonProperty.class).build())
                         .addStatement("return type")
                         .returns(UNKNOWN_MEMBER_TYPE)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("getValue")
                         .addModifiers(Modifier.PRIVATE)
-                        .addAnnotation(AnnotationSpec.builder(JsonAnyGetter.class).build())
+                        .addAnnotation(
+                                AnnotationSpec.builder(JsonAnyGetter.class).build())
                         .addStatement("return $L", VALUE_FIELD_NAME)
                         .returns(genericMapType)
                         .build())
@@ -615,7 +633,8 @@ public final class UnionGenerator {
                         .addModifiers(Modifier.PRIVATE)
                         .addParameter(String.class, "key")
                         .addParameter(Object.class, "val")
-                        .addAnnotation(AnnotationSpec.builder(JsonAnySetter.class).build())
+                        .addAnnotation(
+                                AnnotationSpec.builder(JsonAnySetter.class).build())
                         .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
                         .build())
                 .addMethod(MethodSpecs.createEquals(wrapperClass))

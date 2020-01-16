@@ -73,7 +73,8 @@ final class UndertowServiceInterfaceGenerator {
 
     private MethodSpec generateServiceInterfaceMethod(
             EndpointDefinition endpointDef, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
-        String methodName = JavaNameSanitizer.sanitize(endpointDef.getEndpointName().get());
+        String methodName = JavaNameSanitizer.sanitize(
+                endpointDef.getEndpointName().get());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(createServiceMethodParameters(endpointDef, typeMapper));

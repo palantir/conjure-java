@@ -92,7 +92,8 @@ public class MissingFieldWireFormatTests {
 
     @Test
     public void missing_binary_field_should_throw() throws Exception {
-        assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", BinaryExample.class).getBinary())
+        assertThatLoggableExceptionThrownBy(
+                        () -> mapper.readValue("{}", BinaryExample.class).getBinary())
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("binary")));

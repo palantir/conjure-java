@@ -148,7 +148,8 @@ final class UndertowServiceHandlerGenerator {
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceHandlerGenerator.class))
                 .addSuperinterface(UndertowService.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build())
+                .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                        .build())
                 .addMethod(MethodSpec.methodBuilder("of")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .addParameter(serviceClass, DELEGATE_VAR_NAME)
@@ -204,8 +205,10 @@ final class UndertowServiceHandlerGenerator {
                 .addException(IOException.class)
                 .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
 
-        endpointDefinition.getDeprecated().ifPresent(deprecatedDocsValue -> handleMethodBuilder.addAnnotation(
-                AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "deprecation").build()));
+        endpointDefinition.getDeprecated().ifPresent(deprecatedDocsValue ->
+                handleMethodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                        .addMember("value", "$S", "deprecation")
+                        .build()));
 
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
                 .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
@@ -220,7 +223,8 @@ final class UndertowServiceHandlerGenerator {
                 .addSuperinterface(Endpoint.class)
                 .addField(FieldSpec.builder(UndertowRuntime.class, RUNTIME_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build())
-                .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                        .build());
 
         getBodyParamTypeArgument(endpointDefinition.getArgs())
                 .map(ArgumentDefinition::getType)
@@ -231,7 +235,8 @@ final class UndertowServiceHandlerGenerator {
                 .ifPresent(typeName -> {
                     TypeName type = ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
                     endpointBuilder.addField(
-                            FieldSpec.builder(type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                            FieldSpec.builder(type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                                    .build());
                     ctorBuilder.addStatement(
                             "this.$1N = $2N.bodySerDe().deserializer(new $3T() {})",
                             DESERIALIZER_VAR_NAME,
@@ -243,8 +248,8 @@ final class UndertowServiceHandlerGenerator {
             if (!UndertowTypeFunctions.isOptionalBinary(returnType) && !returnType.accept(TypeVisitor.IS_BINARY)) {
                 TypeName typeName = returnTypeMapper.getClassName(returnType).box();
                 TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
-                endpointBuilder.addField(
-                        FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL).build());
+                endpointBuilder.addField(FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                        .build());
                 ctorBuilder.addStatement(
                         "this.$1N = $2N.bodySerDe().serializer(new $3T() {})",
                         SERIALIZER_VAR_NAME,
@@ -277,7 +282,10 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(HttpString.class)
-                        .addStatement("return $1T.$2N", Methods.class, endpointDefinition.getHttpMethod().toString())
+                        .addStatement(
+                                "return $1T.$2N",
+                                Methods.class,
+                                endpointDefinition.getHttpMethod().toString())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("template")
                         .addModifiers(Modifier.PUBLIC)
@@ -292,13 +300,16 @@ final class UndertowServiceHandlerGenerator {
                         // Note that this is the service name as defined in conjure, not the potentially modified
                         // name of the generated service interface. We may generate "UndertowFooService", but we
                         // should still return "FooService" here.
-                        .addStatement("return $1S", serviceDefinition.getServiceName().getName())
+                        .addStatement(
+                                "return $1S", serviceDefinition.getServiceName().getName())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("name")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(String.class)
-                        .addStatement("return $1S", endpointDefinition.getEndpointName().get())
+                        .addStatement(
+                                "return $1S",
+                                endpointDefinition.getEndpointName().get())
                         .build())
                 .addMethod(MethodSpec.methodBuilder("handler")
                         .addModifiers(Modifier.PUBLIC)
@@ -351,7 +362,8 @@ final class UndertowServiceHandlerGenerator {
                         DESERIALIZER_VAR_NAME,
                         EXCHANGE_VAR_NAME);
             }
-            code.add(generateParamMarkers(bodyParam.getMarkers(), bodyParam.getArgName().get(), paramName, typeMapper));
+            code.add(generateParamMarkers(
+                    bodyParam.getMarkers(), bodyParam.getArgName().get(), paramName, typeMapper));
         });
 
         // path parameters
@@ -377,10 +389,12 @@ final class UndertowServiceHandlerGenerator {
                     async
                             ? UndertowTypeFunctions.getAsyncReturnType(
                                     endpointDefinition, returnTypeMapper, experimentalFeatures)
-                            : returnTypeMapper.getClassName(endpointDefinition.getReturns().get()),
+                            : returnTypeMapper.getClassName(
+                                    endpointDefinition.getReturns().get()),
                     RESULT_VAR_NAME,
                     DELEGATE_VAR_NAME,
-                    JavaNameSanitizer.sanitize(endpointDefinition.getEndpointName().get()),
+                    JavaNameSanitizer.sanitize(
+                            endpointDefinition.getEndpointName().get()),
                     String.join(", ", methodArgs));
         } else {
             code.addStatement(
@@ -586,7 +600,10 @@ final class UndertowServiceHandlerGenerator {
                 endpoint,
                 ParameterTypeVisitor.IS_QUERY,
                 QUERY_PARAMS_VAR_NAME,
-                arg -> arg.getParamType().accept(ParameterTypeVisitor.QUERY).getParamId().get(),
+                arg -> arg.getParamType()
+                        .accept(ParameterTypeVisitor.QUERY)
+                        .getParamId()
+                        .get(),
                 typeDefinitions,
                 typeMapper);
     }
@@ -597,7 +614,10 @@ final class UndertowServiceHandlerGenerator {
                 endpoint,
                 ParameterTypeVisitor.IS_HEADER,
                 HEADER_PARAMS_VAR_NAME,
-                arg -> arg.getParamType().accept(ParameterTypeVisitor.HEADER).getParamId().get(),
+                arg -> arg.getParamType()
+                        .accept(ParameterTypeVisitor.HEADER)
+                        .getParamId()
+                        .get(),
                 typeDefinitions,
                 typeMapper);
     }
@@ -637,7 +657,8 @@ final class UndertowServiceHandlerGenerator {
                     }
                     return CodeBlocks.of(
                             retrieveParam,
-                            generateParamMarkers(arg.getMarkers(), arg.getArgName().get(), paramName, typeMapper));
+                            generateParamMarkers(
+                                    arg.getMarkers(), arg.getArgName().get(), paramName, typeMapper));
                 })
                 .collect(Collectors.toList()));
     }

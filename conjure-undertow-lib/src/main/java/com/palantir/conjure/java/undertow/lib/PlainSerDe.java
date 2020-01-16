@@ -30,10 +30,10 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 /**
- * Provides functionality to parse supported types using the
- * <a href="https://palantir.github.io/conjure/#/docs/spec/wire?id=_6-plain-format">Conjure PLAIN format</a>.
+ * Provides functionality to parse supported types using the <a
+ * href="https://palantir.github.io/conjure/#/docs/spec/wire?id=_6-plain-format">Conjure PLAIN format</a>.
  *
- * These utilities are used to parse HTTP path, query, and header parameter values.
+ * <p>These utilities are used to parse HTTP path, query, and header parameter values.
  */
 public interface PlainSerDe {
 
@@ -156,5 +156,4 @@ public interface PlainSerDe {
     <T> List<T> deserializeComplexList(@Nullable Iterable<String> in, Function<String, T> factory);
 
     <T> Set<T> deserializeComplexSet(@Nullable Iterable<String> in, Function<String, T> factory);
-
 }

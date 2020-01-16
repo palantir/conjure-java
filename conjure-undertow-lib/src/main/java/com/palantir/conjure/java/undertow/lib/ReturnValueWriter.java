@@ -19,11 +19,8 @@ package com.palantir.conjure.java.undertow.lib;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 
-/**
- * Writes a typed return value to the HTTP response.
- */
+/** Writes a typed return value to the HTTP response. */
 public interface ReturnValueWriter<T> {
 
     void write(T returnValue, HttpServerExchange exchange) throws IOException;
-
 }
