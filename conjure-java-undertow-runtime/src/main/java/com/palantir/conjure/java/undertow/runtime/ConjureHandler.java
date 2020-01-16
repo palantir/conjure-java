@@ -26,6 +26,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.undertow.TracedOperationHandler;
+import com.palantir.tracing.undertow.TracedRequestHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -151,10 +152,13 @@ public final class ConjureHandler implements HttpHandler {
             checkOverlappingPaths();
 
             ImmutableList<EndpointHandlerWrapper> wrappers = ImmutableList.<EndpointHandlerWrapper>builder()
-                    // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
-                    // parameters. Servers which do not configure DECODE_URL will still work properly except for
-                    // encoded slash values. When DECODE_URL has not been disabled, the following handler will no-op
                     .add(
+                            // Begin the server span as early as possible to capture the most of the request.
+                            endpoint -> Optional.of(new TracedRequestHandler(endpoint.handler())),
+                            // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
+                            // parameters. Servers which do not configure DECODE_URL will still work properly except
+                            // for encoded slash values. When DECODE_URL has not been disabled, the following handler
+                            // will no-op
                             endpoint -> Optional.of(new URLDecodingHandler(endpoint.handler(), "UTF-8")),
                             // no-cache and web-security handlers add listeners for the response to be committed,
                             // they can be executed on the IO thread.
