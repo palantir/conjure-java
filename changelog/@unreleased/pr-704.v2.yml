@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Upgrade tracing to trace the full request lifecycle
+  links:
+  - https://github.com/palantir/conjure-java/pull/704
