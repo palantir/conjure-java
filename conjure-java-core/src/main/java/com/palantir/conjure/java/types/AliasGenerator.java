@@ -96,7 +96,8 @@ public final class AliasGenerator {
                                     // https://github.com/FasterXML/jackson-databind/issues/2318
                                     // allow jackson to try all possible approaches to deserialize external type
                                     // imports.
-                                    ? Collections.singleton(AnnotationSpec.builder(JsonCreator.class).build())
+                                    ? Collections.singleton(AnnotationSpec.builder(JsonCreator.class)
+                                            .build())
                                     : Collections.emptySet())
                     .build());
         }
@@ -116,7 +117,9 @@ public final class AliasGenerator {
 
         if (typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE)
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE)) {
-            CodeBlock codeBlock = CodeBlock.builder().addStatement("return new $T((double) value)", thisClass).build();
+            CodeBlock codeBlock = CodeBlock.builder()
+                    .addStatement("return new $T((double) value)", thisClass)
+                    .build();
 
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -192,7 +195,8 @@ public final class AliasGenerator {
                             valueOfFactoryMethod(type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper)
                                     .map(ignored -> {
                                         ClassName className = ClassName.get(
-                                                type.getTypeName().getPackage(), type.getTypeName().getName());
+                                                type.getTypeName().getPackage(),
+                                                type.getTypeName().getName());
                                         return CodeBlock.builder()
                                                 .addStatement("return of($T.valueOf(value))", className)
                                                 .build();
@@ -207,8 +211,9 @@ public final class AliasGenerator {
                             .isPresent()
                     && hasValueOfFactory(reference.getExternalReference())
                     && aliasTypeName.isPrimitive()) {
-                return Optional.of(
-                        CodeBlock.builder().addStatement("return of($T.valueOf(value))", aliasTypeName.box()).build());
+                return Optional.of(CodeBlock.builder()
+                        .addStatement("return of($T.valueOf(value))", aliasTypeName.box())
+                        .build());
             }
         }
         return Optional.empty();

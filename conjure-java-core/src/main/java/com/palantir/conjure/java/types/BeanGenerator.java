@@ -80,7 +80,8 @@ public final class BeanGenerator {
         Collection<EnrichedField> nonPrimitiveEnrichedFields =
                 fields.stream().filter(field -> !field.isPrimitive()).collect(Collectors.toList());
 
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(typeDef.getTypeName().getName())
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
+                        typeDef.getTypeName().getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addMethod(createConstructor(fields, poetFields))
@@ -235,7 +236,9 @@ public final class BeanGenerator {
             FieldSpec spec = field.poetSpec();
             builder.addParameter(ParameterSpec.builder(spec.type, spec.name).build());
             builder.addStatement(
-                    "missingFields = addFieldIfMissing(missingFields, $N, $S)", spec, field.fieldName().get());
+                    "missingFields = addFieldIfMissing(missingFields, $N, $S)",
+                    spec,
+                    field.fieldName().get());
         }
 
         builder.beginControlFlow("if (missingFields != null)")
@@ -263,7 +266,8 @@ public final class BeanGenerator {
                 } else {
                     builder.addCode("\n    .$L($L)", spec.name, spec.name);
                 }
-                builder.addParameter(ParameterSpec.builder(getTypeNameWithoutOptional(spec), spec.name).build());
+                builder.addParameter(ParameterSpec.builder(getTypeNameWithoutOptional(spec), spec.name)
+                        .build());
             }
             builder.addCode("\n    .build();\n");
         }
@@ -273,10 +277,12 @@ public final class BeanGenerator {
 
     private static MethodSpec createAddFieldIfMissing(int fieldCount) {
         ParameterizedTypeName listOfStringType = ParameterizedTypeName.get(List.class, String.class);
-        ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev").build();
+        ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev")
+                .build();
         ParameterSpec fieldValueParam = ParameterSpec.builder(com.squareup.javapoet.TypeName.OBJECT, "fieldValue")
                 .build();
-        ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
+        ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName")
+                .build();
 
         return MethodSpec.methodBuilder("addFieldIfMissing")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)

@@ -43,8 +43,8 @@ final class ConjureBodySerDe implements BodySerDe {
 
     /**
      * Selects the first (based on input order) of the provided encodings that
-     * {@link Encoding#supportsContentType supports} the serialization format {@link Headers#ACCEPT accepted}
-     * by a given request, or the first serializer if no such serializer can be found.
+     * {@link Encoding#supportsContentType supports} the serialization format {@link Headers#ACCEPT accepted} by a given
+     * request, or the first serializer if no such serializer can be found.
      */
     ConjureBodySerDe(List<Encoding> encodings) {
         // Defensive copy
@@ -81,8 +81,8 @@ final class ConjureBodySerDe implements BodySerDe {
             throw new SafeIllegalArgumentException("Request is missing Content-Type header");
         }
         if (!contentType.startsWith(BINARY_CONTENT_TYPE)) {
-            throw FrameworkException.unsupportedMediaType("Unsupported Content-Type",
-                    SafeArg.of("Content-Type", contentType));
+            throw FrameworkException.unsupportedMediaType(
+                    "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
         }
         return exchange.getInputStream();
     }
@@ -203,8 +203,8 @@ final class ConjureBodySerDe implements BodySerDe {
                     return container;
                 }
             }
-            throw FrameworkException.unsupportedMediaType("Unsupported Content-Type",
-                    SafeArg.of("Content-Type", contentType));
+            throw FrameworkException.unsupportedMediaType(
+                    "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
         }
     }
 

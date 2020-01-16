@@ -71,8 +71,8 @@ public final class ObjectGeneratorTests {
     @Test
     public void testConjureErrors() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-errors.yml")));
-        List<Path> files = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes))
-                .emit(def, tempDir);
+        List<Path> files =
+                new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes)).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }

@@ -125,13 +125,18 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private MethodSpec generateServiceMethod(
             EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
-        TypeName returnType = endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
+        TypeName returnType = endpointDef
+                .getReturns()
+                .map(returnTypeMapper::getClassName)
+                .orElse(ClassName.VOID);
 
         Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
         HttpPath endpointPathWithoutRegex = replaceEncodedPathArgs(endpointDef.getHttpPath());
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
+                        endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addAnnotation(AnnotationSpec.builder(httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
+                .addAnnotation(AnnotationSpec.builder(httpMethodToClassName(
+                                endpointDef.getHttpMethod().get().name()))
                         .addMember("value", "$S", "." + endpointPathWithoutRegex)
                         .build())
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Headers"))
@@ -140,7 +145,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .build());
 
         if (returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming")).build());
+            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming"))
+                    .build());
         }
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue ->
@@ -216,16 +222,22 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             TypeMapper argumentTypeMapper,
             Set<ArgumentName> encodedPathArgs,
             List<ArgumentDefinition> extraArgs) {
-        TypeName returnType = endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
+        TypeName returnType = endpointDef
+                .getReturns()
+                .map(returnTypeMapper::getClassName)
+                .orElse(ClassName.VOID);
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
         List<ParameterSpec> sortedParams =
                 createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs);
         List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream()
-                .map(param -> extraArgs.stream().filter(arg -> arg.getArgName().get().equals(param.name)).findFirst())
+                .map(param -> extraArgs.stream()
+                        .filter(arg -> arg.getArgName().get().equals(param.name))
+                        .findFirst())
                 .collect(Collectors.toList());
 
         // omit extraArgs from the back fill method signature
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(endpointDef.getEndpointName().get())
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
+                        endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
                 .addParameters(IntStream.range(0, sortedParams.size())
@@ -278,8 +290,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private ParameterSpec createEndpointParameter(
             TypeMapper argumentTypeMapper, Set<ArgumentName> encodedPathArgs, ArgumentDefinition def) {
-        ParameterSpec.Builder param =
-                ParameterSpec.builder(argumentTypeMapper.getClassName(def.getType()), def.getArgName().get());
+        ParameterSpec.Builder param = ParameterSpec.builder(
+                argumentTypeMapper.getClassName(def.getType()), def.getArgName().get());
         ParameterType paramType = def.getParamType();
         if (paramType.accept(ParameterTypeVisitor.IS_PATH)) {
             AnnotationSpec.Builder builder = AnnotationSpec.builder(ClassName.get("retrofit2.http", "Path"))

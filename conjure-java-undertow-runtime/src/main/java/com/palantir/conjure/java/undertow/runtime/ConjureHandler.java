@@ -43,16 +43,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Conjure routing mechanism which can be registered as an Undertow {@link HttpHandler}.
- * This handler takes care of exception handling, tracing, and web-security headers.
+ * Conjure routing mechanism which can be registered as an Undertow {@link HttpHandler}. This handler takes care of
+ * exception handling, tracing, and web-security headers.
  */
 public final class ConjureHandler implements HttpHandler {
 
     private final RoutingHandler routingHandler;
 
-    private ConjureHandler(
-            HttpHandler fallback,
-            List<Endpoint> endpoints) {
+    private ConjureHandler(HttpHandler fallback, List<Endpoint> endpoints) {
         this.routingHandler = Handlers.routing()
                 .setFallbackHandler(fallback)
                 // The method may be valid for another handlers, the
@@ -65,11 +63,11 @@ public final class ConjureHandler implements HttpHandler {
     private static void registerOptionsEndpoints(RoutingHandler routingHandler, List<Endpoint> endpoints) {
         endpoints.stream()
                 .collect(ImmutableSetMultimap.toImmutableSetMultimap(
-                        endpoint -> normalizeTemplate(endpoint.template()),
-                        Endpoint::method))
+                        endpoint -> normalizeTemplate(endpoint.template()), Endpoint::method))
                 .asMap()
-                .forEach((normalizedPath, methods) -> routingHandler.add(Methods.OPTIONS, normalizedPath,
-                        new WebSecurityHandler(new OptionsHandler(ImmutableSet.copyOf(methods)))));
+                .forEach((normalizedPath, methods) ->
+                        routingHandler.add(Methods.OPTIONS, normalizedPath, new WebSecurityHandler(
+                                new OptionsHandler(ImmutableSet.copyOf(methods)))));
     }
 
     @Override
@@ -78,10 +76,7 @@ public final class ConjureHandler implements HttpHandler {
     }
 
     private void register(Endpoint endpoint) {
-        routingHandler.add(
-                endpoint.method(),
-                endpoint.template(),
-                endpoint.handler());
+        routingHandler.add(endpoint.method(), endpoint.template(), endpoint.handler());
     }
 
     public static Builder builder() {
@@ -90,24 +85,22 @@ public final class ConjureHandler implements HttpHandler {
 
     public static final class Builder {
 
-        private static final ImmutableSet<HttpString> ALLOWED_METHODS = ImmutableSet.of(
-                Methods.GET,
-                Methods.PUT,
-                Methods.POST,
-                Methods.DELETE);
+        private static final ImmutableSet<HttpString> ALLOWED_METHODS =
+                ImmutableSet.of(Methods.GET, Methods.PUT, Methods.POST, Methods.DELETE);
 
         private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
         private final List<Endpoint> endpoints = new ArrayList<>();
         private HttpHandler fallback = ResponseCodeHandler.HANDLE_404;
 
-        private Builder() { }
+        private Builder() {}
 
         @CanIgnoreReturnValue
         public Builder endpoints(Endpoint value) {
             Preconditions.checkNotNull(value, "Value is required");
             if (!ALLOWED_METHODS.contains(value.method())) {
-                throw new SafeIllegalStateException("Endpoint method is not recognized",
+                throw new SafeIllegalStateException(
+                        "Endpoint method is not recognized",
                         SafeArg.of("method", value.method()),
                         SafeArg.of("template", value.template()),
                         SafeArg.of("service", value.serviceName()),
@@ -127,8 +120,8 @@ public final class ConjureHandler implements HttpHandler {
         }
 
         /**
-         * The fallback {@link HttpHandler handler} is invoked when no {@link Endpoint} matches a request.
-         * By default a 404 response status will be served.
+         * The fallback {@link HttpHandler handler} is invoked when no {@link Endpoint} matches a request. By default a
+         * 404 response status will be served.
          */
         @CanIgnoreReturnValue
         public Builder fallback(HttpHandler value) {
@@ -137,10 +130,9 @@ public final class ConjureHandler implements HttpHandler {
         }
 
         /**
-         * This MUST only be used for non-blocking operations that are meant to be run on the io-thread.
-         * For blocking operations, please wrap the UndertowService themselves
-         * If you call this multiple time, the last wrapper will be applied last, meaning it will be wrapped by the
-         * previously added {@link EndpointHandlerWrapper}s.
+         * This MUST only be used for non-blocking operations that are meant to be run on the io-thread. For blocking
+         * operations, please wrap the UndertowService themselves If you call this multiple time, the last wrapper will
+         * be applied last, meaning it will be wrapped by the previously added {@link EndpointHandlerWrapper}s.
          */
         @CanIgnoreReturnValue
         public Builder addWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
@@ -162,10 +154,11 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> Optional.of(new URLDecodingHandler(endpoint.handler(), "UTF-8")),
                             // no-cache and web-security handlers add listeners for the response to be committed,
                             // they can be executed on the IO thread.
-                            endpoint -> Methods.GET.equals(endpoint.method())
-                                    // Only applies to GET methods
-                                    ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
-                                    : Optional.empty(),
+                            endpoint ->
+                                    Methods.GET.equals(endpoint.method())
+                                            // Only applies to GET methods
+                                            ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
+                                            : Optional.empty(),
                             endpoint -> Optional.of(new WebSecurityHandler(endpoint.handler())))
                     // Apply custom non-blocking handlers just before the BlockingHandler
                     .addAll(wrappersJustBeforeBlocking)
@@ -202,19 +195,18 @@ public final class ConjureHandler implements HttpHandler {
 
         private void checkOverlappingPaths() {
             Set<String> duplicates = endpoints.stream()
-                    .collect(Collectors.groupingBy(
-                            endpoint -> String.format(
-                                    "%s: %s",
-                                    endpoint.method(),
-                                    normalizeTemplate(endpoint.template()))))
+                    .collect(Collectors.groupingBy(endpoint ->
+                            String.format("%s: %s", endpoint.method(), normalizeTemplate(endpoint.template()))))
                     .entrySet()
-                    .stream().filter(groups -> groups.getValue().size() > 1)
+                    .stream()
+                    .filter(groups -> groups.getValue().size() > 1)
                     .map(entry -> {
                         String services = entry.getValue().stream()
                                 .map(endpoint -> String.format("%s.%s", endpoint.serviceName(), endpoint.name()))
                                 .collect(Collectors.joining(", "));
                         return String.format("%s: %s", entry.getKey(), services);
-                    }).collect(Collectors.toSet());
+                    })
+                    .collect(Collectors.toSet());
             if (!duplicates.isEmpty()) {
                 throw new SafeIllegalArgumentException(
                         "The same route is declared by multiple UndertowServices",

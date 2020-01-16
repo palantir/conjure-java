@@ -39,7 +39,7 @@ import picocli.CommandLine;
         name = "conjure-java",
         description = "CLI to generate Java POJOs and interfaces from Conjure API definitions.",
         mixinStandardHelpOptions = true,
-        subcommands = { ConjureJavaCli.GenerateCommand.class})
+        subcommands = {ConjureJavaCli.GenerateCommand.class})
 public final class ConjureJavaCli implements Runnable {
     public static void main(String[] args) {
         CommandLine.run(new ConjureJavaCli(), args);
@@ -50,7 +50,8 @@ public final class ConjureJavaCli implements Runnable {
         CommandLine.usage(this, System.out);
     }
 
-    @CommandLine.Command(name = "generate",
+    @CommandLine.Command(
+            name = "generate",
             description = "Generate Java bindings for a Conjure API",
             mixinStandardHelpOptions = true,
             usageHelpWidth = 120)
@@ -59,65 +60,73 @@ public final class ConjureJavaCli implements Runnable {
                 .registerModule(new Jdk8Module())
                 .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
 
-        @CommandLine.Parameters(paramLabel = "<input>",
-                description = "Path to the input IR file",
-                index = "0")
+        @CommandLine.Parameters(paramLabel = "<input>", description = "Path to the input IR file", index = "0")
         private String input;
 
-        @CommandLine.Parameters(paramLabel = "<output>",
+        @CommandLine.Parameters(
+                paramLabel = "<output>",
                 description = "Output directory for generated source",
                 index = "1")
         private String output;
 
-        @CommandLine.Option(names = "--objects",
+        @CommandLine.Option(
+                names = "--objects",
                 defaultValue = "false",
                 description = "Generate POJOs for Conjure type definitions")
         private boolean generateObjects;
 
-        @CommandLine.Option(names = "--jersey",
+        @CommandLine.Option(
+                names = "--jersey",
                 defaultValue = "false",
                 description = "Generate jax-rs annotated interfaces for client or server-usage")
         private boolean generateJersey;
 
-        @CommandLine.Option(names = "--undertow",
+        @CommandLine.Option(
+                names = "--undertow",
                 defaultValue = "false",
-                description =
-                        "Generate undertow service interfaces and endpoint wrappers for server usage")
+                description = "Generate undertow service interfaces and endpoint wrappers for server usage")
         private boolean generateUndertow;
 
-        @CommandLine.Option(names = "--retrofit",
+        @CommandLine.Option(
+                names = "--retrofit",
                 defaultValue = "false",
                 description = "Generate retrofit interfaces for streaming/async clients")
         private boolean generateRetrofit;
 
-        @CommandLine.Option(names = "--jerseyBinaryAsResponse",
+        @CommandLine.Option(
+                names = "--jerseyBinaryAsResponse",
                 defaultValue = "false",
                 description = "Generate jersey interfaces which return Response instead of StreamingOutput")
         private boolean jerseyBinaryAsReponse;
 
-        @CommandLine.Option(names = "--requireNotNullAuthAndBodyParams",
+        @CommandLine.Option(
+                names = "--requireNotNullAuthAndBodyParams",
                 defaultValue = "false",
                 description = "Generate @NotNull annotations for AuthHeaders and request body params")
         private boolean notNullAuthAndBody;
 
-        @CommandLine.Option(names = "--undertowServicePrefixes",
+        @CommandLine.Option(
+                names = "--undertowServicePrefixes",
                 defaultValue = "false",
-                description =
-                        "Generate service interfaces for Undertow with class names prefixed 'Undertow'")
+                description = "Generate service interfaces for Undertow with class names prefixed 'Undertow'")
         private boolean undertowServicePrefix;
 
-        @CommandLine.Option(names = "--undertowListenableFutures",
+        @CommandLine.Option(
+                names = "--undertowListenableFutures",
                 defaultValue = "false",
-                description = "Generate Undertow services which return Guava ListenableFuture for asynchronous "
-                        + "processing")
+                description =
+                        "Generate Undertow services which return Guava ListenableFuture for asynchronous "
+                                + "processing")
         private boolean undertowListenableFutures;
 
-        @CommandLine.Option(names = "--strictObjects",
+        @CommandLine.Option(
+                names = "--strictObjects",
                 defaultValue = "false",
                 description = "Generate POJOs that by default will fail to deserialize unknown fields")
         private boolean strictObjects;
 
-        @CommandLine.Option(names = "--nonNullCollections",
+        @CommandLine.Option(
+                names = "--nonNullCollections",
                 defaultValue = "false",
                 description = "Generate POJOs that by default will fail to deserialize collections with null values")
         private boolean nonNullCollections;
@@ -126,11 +135,13 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(
                 names = "--experimentalUndertowAsyncMarkers",
                 defaultValue = "false",
-                description = "Experimental: Allows Undertow asynchronous processing to be enabled on individual "
-                        + "endpoints")
+                description =
+                        "Experimental: Allows Undertow asynchronous processing to be enabled on individual "
+                                + "endpoints")
         private boolean experimentalUndertowAsyncMarkers;
 
-        @CommandLine.Option(names = "--useImmutableBytes",
+        @CommandLine.Option(
+                names = "--useImmutableBytes",
                 defaultValue = "false",
                 description = "Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'")
         private boolean useImmutableBytes;
@@ -190,6 +201,5 @@ public final class ConjureJavaCli implements Runnable {
                     .nonNullCollections(nonNullCollections)
                     .build();
         }
-
     }
 }

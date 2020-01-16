@@ -48,7 +48,8 @@ public final class AutoDeserializeTest {
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
 
     public static final DropwizardAppExtension<?> jerseyServerUnderTestExtension = new DropwizardAppExtension<>(
-            JerseyServerUnderTestApplication.class, Resources.getResource("config.yml").getPath());
+            JerseyServerUnderTestApplication.class,
+            Resources.getResource("config.yml").getPath());
 
     @RegisterExtension
     public static final UndertowServerUnderTestExtension undertowServerUnderTest =
@@ -57,13 +58,13 @@ public final class AutoDeserializeTest {
     @RegisterExtension
     public static final VerificationClientExtension VERIFICATION_CLIENT_EXTENSION = new VerificationClientExtension();
 
-    private static final VerificationClientService verificationService = VerificationClients.verificationClientService(
-            VERIFICATION_CLIENT_EXTENSION);
+    private static final VerificationClientService verificationService =
+            VerificationClients.verificationClientService(VERIFICATION_CLIENT_EXTENSION);
 
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
     @MethodSource("getTestCases")
-    public @interface AutoDeserializeTestCases { }
+    public @interface AutoDeserializeTestCases {}
 
     public static Stream<Arguments> getTestCases() {
         return Cases.TEST_CASES.getAutoDeserialize().entrySet().stream().flatMap(testCase -> {
@@ -73,28 +74,30 @@ public final class AutoDeserializeTest {
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
             return Stream.concat(
-                    IntStream.range(0, positiveSize).mapToObj(i1 ->
-                            Arguments.of(endpointName, i1, true, positiveAndNegativeTestCases.getPositive().get(i1))),
+                    IntStream.range(0, positiveSize).mapToObj(i1 -> Arguments.of(
+                            endpointName,
+                            i1,
+                            true,
+                            positiveAndNegativeTestCases.getPositive().get(i1))),
                     IntStream.range(0, negativeSize).mapToObj(i -> Arguments.of(
-                            endpointName, positiveSize + i, false, positiveAndNegativeTestCases.getNegative().get(i))));
+                            endpointName,
+                            positiveSize + i,
+                            false,
+                            positiveAndNegativeTestCases.getNegative().get(i))));
         });
     }
 
     @AutoDeserializeTestCases
-    public void runJerseyTestCase(
-            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
+    public void runJerseyTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
         runTestCase(endpointName, index, shouldSucceed, jsonString, jerseyServerUnderTestExtension.getLocalPort());
     }
 
     @AutoDeserializeTestCases
-    public void runUndertowTestCase(
-            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
-        runTestCase(
-                endpointName, index, shouldSucceed, jsonString, undertowServerUnderTest.getLocalPort());
+    public void runUndertowTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
+        runTestCase(endpointName, index, shouldSucceed, jsonString, undertowServerUnderTest.getLocalPort());
     }
 
-    public void runTestCase(
-            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString, int port) {
+    public void runTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString, int port) {
         Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         if (shouldSucceed) {

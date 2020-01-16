@@ -49,8 +49,8 @@ final class TracedEncoding implements Encoding {
     }
 
     /**
-     * Builds a human readable type string. Class types use the classes simple name, however complex types
-     * do not have this optimization because it is more complex than it's worth for now.
+     * Builds a human readable type string. Class types use the classes simple name, however complex types do not have
+     * this optimization because it is more complex than it's worth for now.
      */
     static String toString(TypeMarker<?> typeMarker) {
         Type type = typeMarker.getType();

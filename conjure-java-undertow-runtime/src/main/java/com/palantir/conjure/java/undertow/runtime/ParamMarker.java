@@ -18,9 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import io.undertow.server.HttpServerExchange;
 
-/**
- * execute arbitrary actions given a marker on a param.
- */
+/** execute arbitrary actions given a marker on a param. */
 public interface ParamMarker {
 
     void mark(String markerClass, String parameterName, Object parameterValue, HttpServerExchange exchange);

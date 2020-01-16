@@ -45,25 +45,24 @@ public class ConjureHandlerBuilderTest {
         assertThatThrownBy(builder::build)
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("The same route is declared by multiple UndertowServices")
-                .matches(e -> ((SafeLoggable) e).getArgs().equals(ImmutableList.of(
-                        SafeArg.of(
-                                "duplicates",
-                                ImmutableSet.of(
-                                        "GET: /foo/{param}/foo/{param}: "
-                                                + "serviceName1.bar, serviceName1.bar2, serviceName2.bar",
-                                        "POST: /foo: serviceName1.bar, serviceName2.bar")))));
+                .matches(e -> ((SafeLoggable) e).getArgs().equals(ImmutableList.of(SafeArg.of(
+                        "duplicates",
+                        ImmutableSet.of(
+                                "GET: /foo/{param}/foo/{param}: "
+                                        + "serviceName1.bar, serviceName1.bar2, serviceName2.bar",
+                                "POST: /foo: serviceName1.bar, serviceName2.bar")))));
     }
 
     @Test
     public void testAddEndpoint_options() {
         assertThatLoggableExceptionThrownBy(() -> ConjureHandler.builder()
-                .endpoints(Endpoint.builder()
-                        .name("name")
-                        .serviceName("service")
-                        .handler(ResponseCodeHandler.HANDLE_200)
-                        .method(Methods.OPTIONS)
-                        .template("/template")
-                        .build()))
+                        .endpoints(Endpoint.builder()
+                                .name("name")
+                                .serviceName("service")
+                                .handler(ResponseCodeHandler.HANDLE_200)
+                                .method(Methods.OPTIONS)
+                                .template("/template")
+                                .build()))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasLogMessage("Endpoint method is not recognized")
                 .containsArgs(SafeArg.of("method", Methods.OPTIONS));
@@ -72,13 +71,13 @@ public class ConjureHandlerBuilderTest {
     @Test
     public void testAddEndpoint_trace() {
         assertThatLoggableExceptionThrownBy(() -> ConjureHandler.builder()
-                .endpoints(Endpoint.builder()
-                        .name("name")
-                        .serviceName("service")
-                        .handler(ResponseCodeHandler.HANDLE_200)
-                        .method(Methods.TRACE)
-                        .template("/template")
-                        .build()))
+                        .endpoints(Endpoint.builder()
+                                .name("name")
+                                .serviceName("service")
+                                .handler(ResponseCodeHandler.HANDLE_200)
+                                .method(Methods.TRACE)
+                                .template("/template")
+                                .build()))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasLogMessage("Endpoint method is not recognized")
                 .containsArgs(SafeArg.of("method", Methods.TRACE));
@@ -89,7 +88,7 @@ public class ConjureHandlerBuilderTest {
                 .method(method)
                 .template(template)
                 .serviceName(serviceName)
-                .handler(exchange -> { })
+                .handler(exchange -> {})
                 .name(name)
                 .build();
     }

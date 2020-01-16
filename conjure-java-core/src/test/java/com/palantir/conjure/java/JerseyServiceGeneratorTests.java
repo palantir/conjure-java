@@ -60,8 +60,8 @@ public final class JerseyServiceGeneratorTests extends TestBase {
     @Test
     public void testServiceGeneration_exampleService_requireNotNullAuthHeadersAndRequestBodies() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
-        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(RequireNotNullAuthAndBodyParams))
-                .emit(def, folder);
+        List<Path> files =
+                new JerseyServiceGenerator(ImmutableSet.of(RequireNotNullAuthAndBodyParams)).emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey_require_not_null");
     }
 
@@ -90,15 +90,15 @@ public final class JerseyServiceGeneratorTests extends TestBase {
     @Test
     public void testBinaryReturnResponse() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary.yml")));
-        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.JerseyBinaryAsResponse))
-                .emit(def, folder);
+        List<Path> files =
+                new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.JerseyBinaryAsResponse)).emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.binary_as_response");
     }
 
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(RequireNotNullAuthAndBodyParams))
-                .emit(def, folder);
+        List<Path> files =
+                new JerseyServiceGenerator(ImmutableSet.of(RequireNotNullAuthAndBodyParams)).emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey");
     }
 }

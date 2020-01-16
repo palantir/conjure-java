@@ -86,7 +86,8 @@ public class NullFieldWireFormatTests {
 
     @Test
     public void null_binary_field_should_throw() {
-        assertThatThrownBy(() -> mapper.readValue("{\"binary\":null}", BinaryExample.class).getBinary())
+        assertThatThrownBy(() -> mapper.readValue("{\"binary\":null}", BinaryExample.class)
+                        .getBinary())
                 .isInstanceOf(JsonMappingException.class)
                 .hasMessageContaining("binary cannot be null");
     }

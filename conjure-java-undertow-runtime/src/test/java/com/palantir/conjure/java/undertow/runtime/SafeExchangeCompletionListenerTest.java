@@ -59,7 +59,9 @@ public class SafeExchangeCompletionListenerTest {
 
     @Test
     public void test_throwsError() {
-        Mockito.doThrow(new NoClassDefFoundError("com.palantir.Example")).when(action).accept(exchange);
+        Mockito.doThrow(new NoClassDefFoundError("com.palantir.Example"))
+                .when(action)
+                .accept(exchange);
         ExchangeCompletionListener listener = SafeExchangeCompletionListener.of(action);
         listener.exchangeEvent(exchange, nextListener);
         Mockito.verify(action).accept(exchange);

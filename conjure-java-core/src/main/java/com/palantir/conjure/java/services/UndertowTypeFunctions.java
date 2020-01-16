@@ -213,8 +213,8 @@ final class UndertowTypeFunctions {
      *
      * <ul>
      *   <li>The {@link FeatureFlags#UndertowListenableFutures} is set
-     *   <li>Experimental: Both {@link FeatureFlags#ExperimentalUndertowAsyncMarkers} is set and {@link
-     *       EndpointDefinition#getMarkers()} contains an imported annotation with name
+     *   <li>Experimental: Both {@link FeatureFlags#ExperimentalUndertowAsyncMarkers} is set and
+     *       {@link EndpointDefinition#getMarkers()} contains an imported annotation with name
      *       <pre>Async</pre>
      *       .
      * </ul>

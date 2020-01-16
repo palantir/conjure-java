@@ -32,7 +32,8 @@ public class TypeMarkersTest {
 
     @Test
     public void testIsOptional_optional() {
-        assertThat(TypeMarkers.isOptional(new TypeMarker<Optional<String>>() {})).isTrue();
+        assertThat(TypeMarkers.isOptional(new TypeMarker<Optional<String>>() {}))
+                .isTrue();
     }
 
     @Test
@@ -57,27 +58,32 @@ public class TypeMarkersTest {
 
     @Test
     public void testIsOptional_listOptional() {
-        assertThat(TypeMarkers.isOptional(new TypeMarker<List<Optional<String>>>() {})).isFalse();
+        assertThat(TypeMarkers.isOptional(new TypeMarker<List<Optional<String>>>() {}))
+                .isFalse();
     }
 
     @Test
     public void testGetEmptyOptional_optional() {
-        assertThat(TypeMarkers.getEmptyOptional(new TypeMarker<Optional<String>>() {})).isEmpty();
+        assertThat(TypeMarkers.getEmptyOptional(new TypeMarker<Optional<String>>() {}))
+                .isEmpty();
     }
 
     @Test
     public void testGetEmptyOptional_optionalDouble() {
-        assertThat(TypeMarkers.getEmptyOptional(new TypeMarker<OptionalDouble>() {})).isEmpty();
+        assertThat(TypeMarkers.getEmptyOptional(new TypeMarker<OptionalDouble>() {}))
+                .isEmpty();
     }
 
     @Test
     public void testGetEmptyOptional_optionalLong() {
-        assertThat(TypeMarkers.getEmptyOptional(new TypeMarker<OptionalLong>() {})).isEmpty();
+        assertThat(TypeMarkers.getEmptyOptional(new TypeMarker<OptionalLong>() {}))
+                .isEmpty();
     }
 
     @Test
     public void testGetEmptyOptional_optionalInt() {
-        assertThat(TypeMarkers.getEmptyOptional(new TypeMarker<OptionalInt>() {})).isEmpty();
+        assertThat(TypeMarkers.getEmptyOptional(new TypeMarker<OptionalInt>() {}))
+                .isEmpty();
     }
 
     @Test

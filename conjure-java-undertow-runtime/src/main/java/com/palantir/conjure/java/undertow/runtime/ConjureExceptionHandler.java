@@ -22,9 +22,9 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 
 /**
- * Delegates to the given {@link HttpHandler}, and catches&forwards all {@link Throwable}s. Any exception thrown in
- * the delegate handler is caught and serialized using the Conjure JSON format into a {@link SerializableError}. The
- * result is written it into the exchange's output stream, and an appropriate HTTP status code is set.
+ * Delegates to the given {@link HttpHandler}, and catches&forwards all {@link Throwable}s. Any exception thrown in the
+ * delegate handler is caught and serialized using the Conjure JSON format into a {@link SerializableError}. The result
+ * is written it into the exchange's output stream, and an appropriate HTTP status code is set.
  */
 final class ConjureExceptionHandler implements HttpHandler {
 

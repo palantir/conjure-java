@@ -37,8 +37,9 @@ import java.util.List;
 /** Tools for a better JavaPoet. */
 public final class Goethe {
 
-    private static final Formatter JAVA_FORMATTER =
-            new Formatter(JavaFormatterOptions.builder().style(JavaFormatterOptions.Style.AOSP).build());
+    private static final Formatter JAVA_FORMATTER = new Formatter(JavaFormatterOptions.builder()
+            .style(JavaFormatterOptions.Style.AOSP)
+            .build());
 
     private Goethe() {}
 

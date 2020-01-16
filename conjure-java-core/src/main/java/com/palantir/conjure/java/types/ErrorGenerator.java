@@ -90,7 +90,8 @@ public final class ErrorGenerator {
                     FieldSpec.Builder fieldSpecBuilder = FieldSpec.builder(
                                     ClassName.get(ErrorType.class),
                                     CaseFormat.UPPER_CAMEL.to(
-                                            CaseFormat.UPPER_UNDERSCORE, errorDef.getErrorName().getName()),
+                                            CaseFormat.UPPER_UNDERSCORE,
+                                            errorDef.getErrorName().getName()),
                                     Modifier.PUBLIC,
                                     Modifier.STATIC,
                                     Modifier.FINAL)
@@ -113,8 +114,8 @@ public final class ErrorGenerator {
         // Generate ServiceException factory check methods
         List<MethodSpec> checkMethodSpecs = errorTypeDefinitions.stream()
                 .map(entry -> {
-                    String exceptionMethodName =
-                            CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
+                    String exceptionMethodName = CaseFormat.UPPER_CAMEL.to(
+                            CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
                     String methodName = "throwIf" + entry.getErrorName().getName();
 
                     String shouldThrowVar = "shouldThrow";
@@ -131,12 +132,16 @@ public final class ErrorGenerator {
                     Streams.concat(entry.getSafeArgs().stream(), entry.getUnsafeArgs().stream())
                             .forEach(arg -> {
                                 methodBuilder.addParameter(
-                                        typeMapper.getClassName(arg.getType()), arg.getFieldName().get());
+                                        typeMapper.getClassName(arg.getType()),
+                                        arg.getFieldName().get());
                                 methodBuilder.addJavadoc(
                                         "@param $L $L",
                                         arg.getFieldName().get(),
                                         StringUtils.appendIfMissing(
-                                                arg.getDocs().map(Javadoc::render).orElse(""), "\n"));
+                                                arg.getDocs()
+                                                        .map(Javadoc::render)
+                                                        .orElse(""),
+                                                "\n"));
                             });
 
                     methodBuilder.addCode("if ($L) {", shouldThrowVar);
@@ -168,8 +173,10 @@ public final class ErrorGenerator {
 
     private static MethodSpec generateExceptionFactory(
             TypeMapper typeMapper, ErrorDefinition entry, boolean withCause) {
-        String methodName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
-        String typeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, entry.getErrorName().getName());
+        String methodName = CaseFormat.UPPER_CAMEL.to(
+                CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
+        String typeName = CaseFormat.UPPER_CAMEL.to(
+                CaseFormat.UPPER_UNDERSCORE, entry.getErrorName().getName());
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)

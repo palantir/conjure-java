@@ -90,8 +90,7 @@ public final class BeanBuilderGenerator {
             ClassName builderClass,
             ObjectDefinition typeDef,
             Set<FeatureFlags> featureFlags) {
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, featureFlags)
-                .generate(typeDef);
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, featureFlags).generate(typeDef);
     }
 
     private TypeSpec generate(ObjectDefinition typeDef) {
@@ -110,8 +109,9 @@ public final class BeanBuilderGenerator {
                 .addMethod(createBuild(enrichedFields, poetFields));
 
         if (!featureFlags.contains(FeatureFlags.StrictObjects)) {
-            builder.addAnnotation(
-                    AnnotationSpec.builder(JsonIgnoreProperties.class).addMember("ignoreUnknown", "$L", true).build());
+            builder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+                    .addMember("ignoreUnknown", "$L", true)
+                    .build());
         }
 
         return builder.build();
@@ -136,7 +136,9 @@ public final class BeanBuilderGenerator {
         for (EnrichedField field : primitives) {
             String name = deriveFieldInitializedName(field);
             builder.addStatement(
-                    "missingFields = addFieldIfMissing(missingFields, $N, $S)", name, field.fieldName().get());
+                    "missingFields = addFieldIfMissing(missingFields, $N, $S)",
+                    name,
+                    field.fieldName().get());
         }
 
         builder.beginControlFlow("if (missingFields != null)")
@@ -152,9 +154,12 @@ public final class BeanBuilderGenerator {
 
     private static MethodSpec createAddFieldIfMissing(int fieldCount) {
         ParameterizedTypeName listOfStringType = ParameterizedTypeName.get(List.class, String.class);
-        ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev").build();
-        ParameterSpec fieldValueParam = ParameterSpec.builder(TypeName.BOOLEAN, "initialized").build();
-        ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
+        ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev")
+                .build();
+        ParameterSpec fieldValueParam = ParameterSpec.builder(TypeName.BOOLEAN, "initialized")
+                .build();
+        ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName")
+                .build();
 
         return MethodSpec.methodBuilder("addFieldIfMissing")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
@@ -237,8 +242,8 @@ public final class BeanBuilderGenerator {
     private MethodSpec createSetter(EnrichedField enriched) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
-        AnnotationSpec.Builder annotationBuilder =
-                AnnotationSpec.builder(JsonSetter.class).addMember("value", "$S", enriched.fieldName().get());
+        AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
+                .addMember("value", "$S", enriched.fieldName().get());
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
         } else if (isCollectionType(type)) {
@@ -333,7 +338,9 @@ public final class BeanBuilderGenerator {
         } else if (isByteBuffer(type)) {
             return CodeBlock.builder()
                     .addStatement(
-                            "$L", Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"))
+                            "$L",
+                            Expressions.requireNonNull(
+                                    spec.name, enriched.fieldName().get() + " cannot be null"))
                     .addStatement(
                             "this.$1N = $2T.allocate($1N.remaining()).put($1N.duplicate())",
                             spec.name,
@@ -425,7 +432,8 @@ public final class BeanBuilderGenerator {
     /** Check if the optionalType contains a primitive boolean, double or integer. */
     private boolean isPrimitiveOptional(OptionalType optionalType) {
         return optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
-                && OPTIONAL_PRIMITIVES.contains(optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
+                && OPTIONAL_PRIMITIVES.contains(
+                        optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
     }
 
     // we want to widen containers of anything that's not a primitive, a conjure reference or an optional

@@ -91,9 +91,13 @@ public final class SafeLongTests {
 
     @Test
     public void testComparable() {
-        assertThat(Stream.of(SafeLong.of(1), SafeLong.of(3), SafeLong.of(2)).max(Comparator.naturalOrder()).get())
+        assertThat(Stream.of(SafeLong.of(1), SafeLong.of(3), SafeLong.of(2))
+                        .max(Comparator.naturalOrder())
+                        .get())
                 .isEqualTo(SafeLong.of(3));
-        assertThat(Stream.of(SafeLong.of(1), SafeLong.of(3), SafeLong.of(2)).min(Comparator.naturalOrder()).get())
+        assertThat(Stream.of(SafeLong.of(1), SafeLong.of(3), SafeLong.of(2))
+                        .min(Comparator.naturalOrder())
+                        .get())
                 .isEqualTo(SafeLong.of(1));
     }
 }

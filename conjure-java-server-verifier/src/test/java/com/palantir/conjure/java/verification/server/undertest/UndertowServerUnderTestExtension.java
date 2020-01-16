@@ -37,12 +37,13 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
 
     @Override
     public void beforeAll(ExtensionContext _context) {
-        UndertowAutoDeserializeService autoDeserialize = Reflection.newProxy(
-                UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
+        UndertowAutoDeserializeService autoDeserialize =
+                Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
         UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
         HttpHandler handler = ConjureHandler.builder()
-                .addAllEndpoints(service.endpoints(ConjureUndertowRuntime.builder().build()))
+                .addAllEndpoints(
+                        service.endpoints(ConjureUndertowRuntime.builder().build()))
                 .build();
 
         server = Undertow.builder()
@@ -60,6 +61,8 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
     }
 
     public int getLocalPort() {
-        return ((InetSocketAddress) Iterables.getOnlyElement(server.getListenerInfo()).getAddress()).getPort();
+        return ((InetSocketAddress)
+                        Iterables.getOnlyElement(server.getListenerInfo()).getAddress())
+                .getPort();
     }
 }

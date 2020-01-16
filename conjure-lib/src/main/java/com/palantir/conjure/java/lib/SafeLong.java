@@ -21,10 +21,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import org.immutables.value.Value;
 
-/**
- * A wrapper around a long which is safe for json-serialization as a number
- * without loss of precision.
- */
+/** A wrapper around a long which is safe for json-serialization as a number without loss of precision. */
 @Value.Immutable
 public abstract class SafeLong implements Comparable<SafeLong> {
 
@@ -37,7 +34,8 @@ public abstract class SafeLong implements Comparable<SafeLong> {
 
     @Value.Check
     protected final void check() {
-        Preconditions.checkArgument(MIN_SAFE_VALUE <= longValue() && longValue() <= MAX_SAFE_VALUE,
+        Preconditions.checkArgument(
+                MIN_SAFE_VALUE <= longValue() && longValue() <= MAX_SAFE_VALUE,
                 "number must be safely representable in javascript i.e. "
                         + "lie between -9007199254740991 and 9007199254740991");
     }
