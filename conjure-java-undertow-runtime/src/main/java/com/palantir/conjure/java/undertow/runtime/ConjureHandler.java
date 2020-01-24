@@ -159,7 +159,9 @@ public final class ConjureHandler implements HttpHandler {
                                             // Only applies to GET methods
                                             ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
                                             : Optional.empty(),
-                            endpoint -> Optional.of(new WebSecurityHandler(endpoint.handler())))
+                            endpoint -> Optional.of(new WebSecurityHandler(endpoint.handler())),
+                            endpoint -> endpoint.deprecated()
+                                    .map(reason -> new DeprecationReportingResponseHandler(endpoint.handler())))
                     // Apply custom non-blocking handlers just before the BlockingHandler
                     .addAll(wrappersJustBeforeBlocking)
                     // It is vitally important to never run blocking operations on the initial IO thread otherwise
