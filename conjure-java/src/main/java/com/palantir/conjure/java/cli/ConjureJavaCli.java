@@ -90,6 +90,12 @@ public final class ConjureJavaCli implements Runnable {
         private boolean generateUndertow;
 
         @CommandLine.Option(
+                names = "--dialogue",
+                defaultValue = "false",
+                description = "Generate interfaces for dialogue clients")
+        private boolean generateDialogue;
+
+        @CommandLine.Option(
                 names = "--retrofit",
                 defaultValue = "false",
                 description = "Generate retrofit interfaces for streaming/async clients")
@@ -183,6 +189,7 @@ public final class ConjureJavaCli implements Runnable {
                 if (config.generateUndertow()) {
                     undertowGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
+                // TODO(forozco): wire up dialogue generator
             } catch (IOException e) {
                 throw new SafeRuntimeException("Error parsing definition", e);
             }
@@ -197,6 +204,7 @@ public final class ConjureJavaCli implements Runnable {
                     .generateObjects(generateObjects)
                     .generateRetrofit(generateRetrofit)
                     .generateUndertow(generateUndertow)
+                    .generateDialogue(generateDialogue)
                     .options(Options.builder()
                             .jerseyBinaryAsResponse(jerseyBinaryAsReponse)
                             .requireNotNullAuthAndBodyParams(notNullAuthAndBody)
