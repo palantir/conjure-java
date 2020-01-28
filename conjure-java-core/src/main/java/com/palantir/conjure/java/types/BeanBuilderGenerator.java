@@ -154,12 +154,12 @@ public final class BeanBuilderGenerator {
 
     private static MethodSpec createAddFieldIfMissing(int fieldCount) {
         ParameterizedTypeName listOfStringType = ParameterizedTypeName.get(List.class, String.class);
-        ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev")
-                .build();
-        ParameterSpec fieldValueParam = ParameterSpec.builder(TypeName.BOOLEAN, "initialized")
-                .build();
-        ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName")
-                .build();
+        ParameterSpec listParam =
+                ParameterSpec.builder(listOfStringType, "prev").build();
+        ParameterSpec fieldValueParam =
+                ParameterSpec.builder(TypeName.BOOLEAN, "initialized").build();
+        ParameterSpec fieldNameParam =
+                ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
 
         return MethodSpec.methodBuilder("addFieldIfMissing")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)

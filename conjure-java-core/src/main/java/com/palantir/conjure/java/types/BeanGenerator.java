@@ -277,12 +277,12 @@ public final class BeanGenerator {
 
     private static MethodSpec createAddFieldIfMissing(int fieldCount) {
         ParameterizedTypeName listOfStringType = ParameterizedTypeName.get(List.class, String.class);
-        ParameterSpec listParam = ParameterSpec.builder(listOfStringType, "prev")
-                .build();
+        ParameterSpec listParam =
+                ParameterSpec.builder(listOfStringType, "prev").build();
         ParameterSpec fieldValueParam = ParameterSpec.builder(com.squareup.javapoet.TypeName.OBJECT, "fieldValue")
                 .build();
-        ParameterSpec fieldNameParam = ParameterSpec.builder(ClassName.get(String.class), "fieldName")
-                .build();
+        ParameterSpec fieldNameParam =
+                ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
 
         return MethodSpec.methodBuilder("addFieldIfMissing")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)

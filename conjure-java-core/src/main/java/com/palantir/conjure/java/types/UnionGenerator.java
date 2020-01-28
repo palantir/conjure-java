@@ -162,8 +162,8 @@ public final class UnionGenerator {
 
     private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass, Set<FieldName> memberNames) {
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
-        ParameterSpec visitor = ParameterSpec.builder(parameterizedVisitorClass, "visitor")
-                .build();
+        ParameterSpec visitor =
+                ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
         MethodSpec.Builder visitBuilder = MethodSpec.methodBuilder("accept")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(visitor)
@@ -572,8 +572,8 @@ public final class UnionGenerator {
     private static TypeSpec generateUnknownWrapper(ClassName baseClass) {
         ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
-        ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")
-                .build();
+        ParameterSpec typeParameter =
+                ParameterSpec.builder(String.class, "type").build();
         ParameterSpec annotatedTypeParameter = ParameterSpec.builder(UNKNOWN_MEMBER_TYPE, "type")
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "\"type\"")

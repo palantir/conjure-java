@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Test;
 
 public final class AuthTest {
 
-    private static final UndertowRuntime CONTEXT = ConjureUndertowRuntime.builder()
-            .build();
+    private static final UndertowRuntime CONTEXT =
+            ConjureUndertowRuntime.builder().build();
 
     @Test
     public void testParseAuthHeader() {

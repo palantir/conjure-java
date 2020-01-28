@@ -136,10 +136,8 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     private MethodSpec generateServiceMethod(
             EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
-        TypeName returnType = endpointDef
-                .getReturns()
-                .map(returnTypeMapper::getClassName)
-                .orElse(ClassName.VOID);
+        TypeName returnType =
+                endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         endpointDef.getEndpointName().get())
