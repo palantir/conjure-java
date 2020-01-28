@@ -223,10 +223,8 @@ public final class ConjureExceptionHandlerTest {
     }
 
     private static Response execute() {
-        Request request = new Request.Builder()
-                .get()
-                .url("http://localhost:12345")
-                .build();
+        Request request =
+                new Request.Builder().get().url("http://localhost:12345").build();
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {

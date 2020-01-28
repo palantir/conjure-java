@@ -130,10 +130,8 @@ public final class ConjureHandlerTest {
     }
 
     private static Response execute() {
-        Request request = new Request.Builder()
-                .get()
-                .url("http://localhost:12345/test")
-                .build();
+        Request request =
+                new Request.Builder().get().url("http://localhost:12345/test").build();
         try {
             return client.newCall(request).execute();
         } catch (IOException e) {

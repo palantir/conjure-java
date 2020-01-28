@@ -125,10 +125,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private MethodSpec generateServiceMethod(
             EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
-        TypeName returnType = endpointDef
-                .getReturns()
-                .map(returnTypeMapper::getClassName)
-                .orElse(ClassName.VOID);
+        TypeName returnType =
+                endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
 
         Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
         HttpPath endpointPathWithoutRegex = replaceEncodedPathArgs(endpointDef.getHttpPath());
@@ -222,10 +220,8 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             TypeMapper argumentTypeMapper,
             Set<ArgumentName> encodedPathArgs,
             List<ArgumentDefinition> extraArgs) {
-        TypeName returnType = endpointDef
-                .getReturns()
-                .map(returnTypeMapper::getClassName)
-                .orElse(ClassName.VOID);
+        TypeName returnType =
+                endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
         List<ParameterSpec> sortedParams =
                 createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs);

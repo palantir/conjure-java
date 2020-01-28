@@ -52,10 +52,8 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .build();
-        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
-                .parse(args)
-                .get(1)
-                .getCommand();
+        ConjureJavaCli.GenerateCommand cmd =
+                new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
@@ -80,10 +78,8 @@ public final class ConjureJavaCliTest {
                         FeatureFlags.RequireNotNullAuthAndBodyParams,
                         FeatureFlags.UseImmutableBytes))
                 .build();
-        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
-                .parse(args)
-                .get(1)
-                .getCommand();
+        ConjureJavaCli.GenerateCommand cmd =
+                new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
@@ -95,10 +91,8 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .build();
-        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
-                .parse(args)
-                .get(1)
-                .getCommand();
+        ConjureJavaCli.GenerateCommand cmd =
+                new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
