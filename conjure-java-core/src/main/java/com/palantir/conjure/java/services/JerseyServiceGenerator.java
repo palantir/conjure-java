@@ -88,11 +88,14 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 ? BINARY_RETURN_TYPE_RESPONSE
                 : OPTIONAL_BINARY_RETURN_TYPE;
 
-        TypeMapper returnTypeMapper = new TypeMapper(conjureDefinition.getTypes(), new ReturnTypeClassNameVisitor(
-                conjureDefinition.getTypes(), binaryReturnType, optionalBinaryReturnType, featureFlags));
+        TypeMapper returnTypeMapper = new TypeMapper(
+                conjureDefinition.getTypes(),
+                new ReturnTypeClassNameVisitor(
+                        conjureDefinition.getTypes(), binaryReturnType, optionalBinaryReturnType, featureFlags));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(), new SpecializeBinaryClassNameVisitor(
+                conjureDefinition.getTypes(),
+                new SpecializeBinaryClassNameVisitor(
                         new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags), BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()

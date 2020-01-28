@@ -65,9 +65,10 @@ public final class ConjureHandler implements HttpHandler {
                 .collect(ImmutableSetMultimap.toImmutableSetMultimap(
                         endpoint -> normalizeTemplate(endpoint.template()), Endpoint::method))
                 .asMap()
-                .forEach((normalizedPath, methods) ->
-                        routingHandler.add(Methods.OPTIONS, normalizedPath, new WebSecurityHandler(
-                                new OptionsHandler(ImmutableSet.copyOf(methods)))));
+                .forEach((normalizedPath, methods) -> routingHandler.add(
+                        Methods.OPTIONS,
+                        normalizedPath,
+                        new WebSecurityHandler(new OptionsHandler(ImmutableSet.copyOf(methods)))));
     }
 
     @Override
@@ -174,8 +175,9 @@ public final class ConjureHandler implements HttpHandler {
                             // Logging context and trace handler must execute prior to the exception
                             // to provide user and trace information on exceptions.
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
-                            endpoint -> Optional.of(new TracedOperationHandler(
-                                    endpoint.handler(), endpoint.method() + " " + endpoint.template())),
+                            endpoint -> Optional.of(
+                                    new TracedOperationHandler(
+                                            endpoint.handler(), endpoint.method() + " " + endpoint.template())),
                             endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())))
                     .build()
                     .reverse();

@@ -83,11 +83,14 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        TypeMapper returnTypeMapper = new TypeMapper(conjureDefinition.getTypes(), new ReturnTypeClassNameVisitor(
-                conjureDefinition.getTypes(), BINARY_RETURN_TYPE, OPTIONAL_BINARY_RETURN_TYPE, featureFlags));
+        TypeMapper returnTypeMapper = new TypeMapper(
+                conjureDefinition.getTypes(),
+                new ReturnTypeClassNameVisitor(
+                        conjureDefinition.getTypes(), BINARY_RETURN_TYPE, OPTIONAL_BINARY_RETURN_TYPE, featureFlags));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(), new SpecializeBinaryClassNameVisitor(
+                conjureDefinition.getTypes(),
+                new SpecializeBinaryClassNameVisitor(
                         new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags), BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
