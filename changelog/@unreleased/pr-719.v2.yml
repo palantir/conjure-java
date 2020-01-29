@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: conjure-java now supports a `--packagePrefix=<value>` flag, which can
+    ensure that locally generated code doesn't conflict with any published types.
+  links:
+  - https://github.com/palantir/conjure-java/pull/719
