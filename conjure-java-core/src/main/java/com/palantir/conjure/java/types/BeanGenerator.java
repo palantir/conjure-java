@@ -24,7 +24,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -69,8 +68,7 @@ public final class BeanGenerator {
     /** The name of the singleton instance field generated for empty types. */
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
-    public static JavaFile generateBeanType(
-            TypeMapper typeMapper, ObjectDefinition typeDef, Set<FeatureFlags> featureFlags) {
+    public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef, Options featureFlags) {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName objectClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
@@ -200,14 +198,13 @@ public final class BeanGenerator {
         return builder.build();
     }
 
-    private static Collection<MethodSpec> createGetters(
-            Collection<EnrichedField> fields, Set<FeatureFlags> featureFlags) {
+    private static Collection<MethodSpec> createGetters(Collection<EnrichedField> fields, Options featureFlags) {
         return fields.stream()
                 .map(field -> BeanGenerator.createGetter(field, featureFlags))
                 .collect(Collectors.toList());
     }
 
-    private static MethodSpec createGetter(EnrichedField field, Set<FeatureFlags> featureFlags) {
+    private static MethodSpec createGetter(EnrichedField field, Options featureFlags) {
         MethodSpec.Builder getterBuilder = MethodSpec.methodBuilder(field.getterName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
@@ -215,8 +212,7 @@ public final class BeanGenerator {
                         .build())
                 .returns(field.poetSpec().type);
 
-        if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY)
-                && !featureFlags.contains(FeatureFlags.UseImmutableBytes)) {
+        if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
             getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
         } else {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);

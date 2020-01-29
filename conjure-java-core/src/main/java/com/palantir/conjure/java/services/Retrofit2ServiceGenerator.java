@@ -20,7 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
@@ -75,10 +75,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
 
-    private final Set<FeatureFlags> featureFlags;
+    private final Options options;
 
-    public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
-        this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
+    public Retrofit2ServiceGenerator(Options options) {
+        this.options = options;
     }
 
     @Override
@@ -86,12 +86,12 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new ReturnTypeClassNameVisitor(
-                        conjureDefinition.getTypes(), BINARY_RETURN_TYPE, OPTIONAL_BINARY_RETURN_TYPE, featureFlags));
+                        conjureDefinition.getTypes(), BINARY_RETURN_TYPE, OPTIONAL_BINARY_RETURN_TYPE, options));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new SpecializeBinaryClassNameVisitor(
-                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags), BINARY_ARGUMENT_TYPE));
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), options), BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))

@@ -21,7 +21,6 @@ import static com.palantir.conjure.java.EteTestServer.clientUserAgent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
@@ -133,7 +132,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
     public static void beforeAll() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new Retrofit2ServiceGenerator(ImmutableSet.of()).emit(def, folder);
+        List<Path> files = new Retrofit2ServiceGenerator(Options.empty()).emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 }

@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
@@ -28,9 +28,9 @@ import java.util.stream.Collectors;
 
 public final class ObjectGenerator implements TypeGenerator {
 
-    private final Set<FeatureFlags> featureFlags;
+    private final Options featureFlags;
 
-    public ObjectGenerator(Set<FeatureFlags> featureFlags) {
+    public ObjectGenerator(Options featureFlags) {
         this.featureFlags = featureFlags;
     }
 

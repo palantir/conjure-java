@@ -7,9 +7,8 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.defs.Conjure;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -32,8 +30,11 @@ public final class ObjectGeneratorTests {
     @Test
     public void testObjectGenerator_allExamples() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
-        List<Path> files = new ObjectGenerator(ImmutableSet.of(
-                        FeatureFlags.UseImmutableBytes, FeatureFlags.StrictObjects, FeatureFlags.NonNullCollections))
+        List<Path> files = new ObjectGenerator(Options.builder()
+                        .useImmutableBytes(true)
+                        .strictObjects(true)
+                        .nonNullCollections(true)
+                        .build())
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -43,7 +44,7 @@ public final class ObjectGeneratorTests {
     public void testObjectGenerator_byteBufferCompatibility() throws IOException {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
-        List<Path> files = new ObjectGenerator(Collections.emptySet()).emit(def, tempDir);
+        List<Path> files = new ObjectGenerator(Options.empty()).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
@@ -55,7 +56,8 @@ public final class ObjectGeneratorTests {
                 new File("src/test/resources/example-types.yml"),
                 new File("src/test/resources/example-service.yml")));
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
-        ObjectGenerator generator = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes));
+        ObjectGenerator generator =
+                new ObjectGenerator(Options.builder().useImmutableBytes(true).build());
         generator.emit(conjure, src);
 
         // Generated files contain imports
@@ -72,7 +74,7 @@ public final class ObjectGeneratorTests {
     public void testConjureErrors() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-errors.yml")));
         List<Path> files =
-                new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes)).emit(def, tempDir);
+                new ObjectGenerator(Options.builder().useImmutableBytes(true).build()).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
