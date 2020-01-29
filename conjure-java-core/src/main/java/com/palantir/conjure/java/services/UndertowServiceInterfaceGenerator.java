@@ -18,7 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
@@ -44,16 +44,16 @@ import javax.lang.model.element.Modifier;
 
 final class UndertowServiceInterfaceGenerator {
 
-    private final Set<FeatureFlag> experimentalFeatures;
+    private final Set<Option> options;
 
-    UndertowServiceInterfaceGenerator(Set<FeatureFlag> experimentalFeatures) {
-        this.experimentalFeatures = experimentalFeatures;
+    UndertowServiceInterfaceGenerator(Set<Option> options) {
+        this.options = options;
     }
 
     public JavaFile generateServiceInterface(
             ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
-                        (experimentalFeatures.stream().anyMatch(FeatureFlag.IsUndertowServicePrefix) ? "Undertow" : "")
+                        (options.stream().anyMatch(Option.IsUndertowServicePrefix) ? "Undertow" : "")
                                 + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(
@@ -83,9 +83,8 @@ final class UndertowServiceInterfaceGenerator {
 
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
-        if (UndertowTypeFunctions.isAsync(endpointDef, experimentalFeatures)) {
-            methodBuilder.returns(
-                    UndertowTypeFunctions.getAsyncReturnType(endpointDef, returnTypeMapper, experimentalFeatures));
+        if (UndertowTypeFunctions.isAsync(endpointDef, options)) {
+            methodBuilder.returns(UndertowTypeFunctions.getAsyncReturnType(endpointDef, returnTypeMapper, options));
         } else {
             endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
         }

@@ -23,23 +23,23 @@ import javax.ws.rs.core.Response;
 import org.derive4j.Data;
 
 @Data
-public interface FeatureFlag {
-    Predicate<FeatureFlag> IsJerseyBinaryAsResponse =
-            FeatureFlags.cases().jerseyBinaryAsResponse(() -> true).otherwise(() -> false)::apply;
-    Predicate<FeatureFlag> IsRequireNotNullAuthAndBodyParams =
-            FeatureFlags.cases().requireNotNullAuthAndBodyParams(() -> true).otherwise(() -> false)::apply;
-    Predicate<FeatureFlag> IsUndertowServicePrefix =
-            FeatureFlags.cases().undertowServicePrefix(() -> true).otherwise(() -> false)::apply;
-    Predicate<FeatureFlag> IsUseImmutableBytes =
-            FeatureFlags.cases().useImmutableBytes(() -> true).otherwise(() -> false)::apply;
-    Predicate<FeatureFlag> IsUndertowListenableFutures =
-            FeatureFlags.cases().undertowListenableFutures(() -> true).otherwise(() -> false)::apply;
-    Predicate<FeatureFlag> IsExperimentalUndertowAsyncMarkers =
-            FeatureFlags.cases().experimentalUndertowAsyncMarkers(() -> true).otherwise(() -> false)::apply;
-    Predicate<FeatureFlag> IsStrictObjects =
-            FeatureFlags.cases().strictObjects(() -> true).otherwise(() -> false)::apply;
-    Predicate<FeatureFlag> IsNonNullCollections =
-            FeatureFlags.cases().nonNullCollections(() -> true).otherwise(() -> false)::apply;
+public interface Option {
+    Predicate<Option> IsJerseyBinaryAsResponse =
+            Options.cases().jerseyBinaryAsResponse(() -> true).otherwise(() -> false)::apply;
+    Predicate<Option> IsRequireNotNullAuthAndBodyParams =
+            Options.cases().requireNotNullAuthAndBodyParams(() -> true).otherwise(() -> false)::apply;
+    Predicate<Option> IsUndertowServicePrefix =
+            Options.cases().undertowServicePrefix(() -> true).otherwise(() -> false)::apply;
+    Predicate<Option> IsUseImmutableBytes =
+            Options.cases().useImmutableBytes(() -> true).otherwise(() -> false)::apply;
+    Predicate<Option> IsUndertowListenableFutures =
+            Options.cases().undertowListenableFutures(() -> true).otherwise(() -> false)::apply;
+    Predicate<Option> IsExperimentalUndertowAsyncMarkers =
+            Options.cases().experimentalUndertowAsyncMarkers(() -> true).otherwise(() -> false)::apply;
+    Predicate<Option> IsStrictObjects =
+            Options.cases().strictObjects(() -> true).otherwise(() -> false)::apply;
+    Predicate<Option> IsNonNullCollections =
+            Options.cases().nonNullCollections(() -> true).otherwise(() -> false)::apply;
 
     interface Cases<T> {
         /**

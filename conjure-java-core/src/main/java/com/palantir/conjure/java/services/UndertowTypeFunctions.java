@@ -20,7 +20,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
@@ -212,24 +212,24 @@ final class UndertowTypeFunctions {
      * Asynchronous-processing capable endpoints are generated if either of the following are true.
      *
      * <ul>
-     *   <li>The {@link FeatureFlag#UndertowListenableFutures} is set
-     *   <li>Experimental: Both {@link FeatureFlag#ExperimentalUndertowAsyncMarkers} is set and
+     *   <li>The {@link Option.Cases#undertowListenableFutures} is set
+     *   <li>Experimental: Both {@link Option.Cases#experimentalUndertowAsyncMarkers} is set and
      *       {@link EndpointDefinition#getMarkers()} contains an imported annotation with name
      *       <pre>Async</pre>
      *       .
      * </ul>
      */
-    static boolean isAsync(EndpointDefinition endpoint, Set<FeatureFlag> flags) {
-        return flags.stream().anyMatch(FeatureFlag.IsUndertowListenableFutures)
-                || (flags.stream().anyMatch(FeatureFlag.IsExperimentalUndertowAsyncMarkers)
+    static boolean isAsync(EndpointDefinition endpoint, Set<Option> options) {
+        return options.stream().anyMatch(Option.IsUndertowListenableFutures)
+                || (options.stream().anyMatch(Option.IsExperimentalUndertowAsyncMarkers)
                         && endpoint.getMarkers().stream()
                                 .anyMatch(marker -> marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)));
     }
 
     static ParameterizedTypeName getAsyncReturnType(
-            EndpointDefinition endpoint, TypeMapper mapper, Set<FeatureFlag> flags) {
+            EndpointDefinition endpoint, TypeMapper mapper, Set<Option> options) {
         Preconditions.checkArgument(
-                isAsync(endpoint, flags), "Endpoint must be async", SafeArg.of("endpoint", endpoint));
+                isAsync(endpoint, options), "Endpoint must be async", SafeArg.of("endpoint", endpoint));
         return ParameterizedTypeName.get(
                 ClassName.get(ListenableFuture.class),
                 endpoint.getReturns()

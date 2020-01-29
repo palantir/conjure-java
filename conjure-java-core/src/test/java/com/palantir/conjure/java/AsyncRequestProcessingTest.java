@@ -85,8 +85,8 @@ public final class AsyncRequestProcessingTest extends TestBase {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/async-request-processing-test.yml")));
         List<Path> files = ImmutableList.<Path>builder()
-                .addAll(new UndertowServiceGenerator(ImmutableSet.of(
-                                FeatureFlags.undertowListenableFutures(), FeatureFlags.undertowServicePrefix()))
+                .addAll(new UndertowServiceGenerator(
+                                ImmutableSet.of(Options.undertowListenableFutures(), Options.undertowServicePrefix()))
                         .emit(def, folder))
                 .addAll(new JerseyServiceGenerator(ImmutableSet.of()).emit(def, folder))
                 .build();

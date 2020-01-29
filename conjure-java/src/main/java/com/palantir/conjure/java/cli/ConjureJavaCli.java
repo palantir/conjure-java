@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.ServiceGenerator;
@@ -154,16 +154,16 @@ public final class ConjureJavaCli implements Runnable {
         @SuppressWarnings("BanSystemErr")
         public void run() {
             CliConfiguration config = getConfiguration();
-            if (config.generateObjects() && !config.featureFlags().stream().anyMatch(FeatureFlag.IsUseImmutableBytes)) {
+            if (config.generateObjects() && !config.options().stream().anyMatch(Option.IsUseImmutableBytes)) {
                 System.err.println("[WARNING] Using deprecated ByteBuffer codegen, please enable the "
                         + "--useImmutableBytes feature flag to opt into the preferred implementation");
             }
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
-                TypeGenerator typeGenerator = new ObjectGenerator(config.featureFlags());
-                ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.featureFlags());
-                ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.featureFlags());
-                ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.featureFlags());
+                TypeGenerator typeGenerator = new ObjectGenerator(config.options());
+                ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.options());
+                ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.options());
+                ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.options());
 
                 if (config.generateObjects()) {
                     typeGenerator.emit(conjureDefinition, config.outputDirectory());

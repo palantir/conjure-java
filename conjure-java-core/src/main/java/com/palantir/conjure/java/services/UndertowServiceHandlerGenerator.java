@@ -21,7 +21,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MoreCollectors;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -98,10 +98,10 @@ final class UndertowServiceHandlerGenerator {
     private static final ImmutableSet<String> RESERVED_PARAM_NAMES = ImmutableSet.of(
             EXCHANGE_VAR_NAME, DELEGATE_VAR_NAME, RUNTIME_VAR_NAME, DESERIALIZER_VAR_NAME, SERIALIZER_VAR_NAME);
 
-    private final Set<FeatureFlag> experimentalFeatures;
+    private final Set<Option> options;
 
-    UndertowServiceHandlerGenerator(Set<FeatureFlag> experimentalFeatures) {
-        this.experimentalFeatures = experimentalFeatures;
+    UndertowServiceHandlerGenerator(Set<Option> options) {
+        this.options = options;
     }
 
     public JavaFile generateServiceHandler(
@@ -113,7 +113,7 @@ final class UndertowServiceHandlerGenerator {
         // class name
         ClassName serviceClass = ClassName.get(
                 serviceDefinition.getServiceName().getPackage(),
-                (experimentalFeatures.stream().anyMatch(FeatureFlag.IsUndertowServicePrefix) ? "Undertow" : "")
+                (options.stream().anyMatch(Option.IsUndertowServicePrefix) ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
         TypeSpec.Builder factory = TypeSpec.classBuilder(serviceName + "Factory")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
@@ -260,9 +260,9 @@ final class UndertowServiceHandlerGenerator {
 
         endpointBuilder.addMethod(ctorBuilder.build()).addMethod(handleMethodBuilder.build());
 
-        if (UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures)) {
-            ParameterizedTypeName type = UndertowTypeFunctions.getAsyncReturnType(
-                    endpointDefinition, returnTypeMapper, experimentalFeatures);
+        if (UndertowTypeFunctions.isAsync(endpointDefinition, options)) {
+            ParameterizedTypeName type =
+                    UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper, options);
             TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
             endpointBuilder.addSuperinterface(
                     ParameterizedTypeName.get(ClassName.get(ReturnValueWriter.class), resultType));
@@ -382,13 +382,12 @@ final class UndertowServiceHandlerGenerator {
                 .map(arg -> sanitizeVarName(arg, endpointDefinition))
                 .collect(Collectors.toList()));
 
-        boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures);
+        boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, options);
         if (async || endpointDefinition.getReturns().isPresent()) {
             code.addStatement(
                     "$1T $2N = $3N.$4L($5L)",
                     async
-                            ? UndertowTypeFunctions.getAsyncReturnType(
-                                    endpointDefinition, returnTypeMapper, experimentalFeatures)
+                            ? UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper, options)
                             : returnTypeMapper.getClassName(
                                     endpointDefinition.getReturns().get()),
                     RESULT_VAR_NAME,
@@ -403,7 +402,7 @@ final class UndertowServiceHandlerGenerator {
                     endpointDefinition.getEndpointName(),
                     String.join(", ", methodArgs));
         }
-        if (UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures)) {
+        if (UndertowTypeFunctions.isAsync(endpointDefinition, options)) {
             code.add(CodeBlocks.statement(
                     "$1N.async().register($2N, this, $3N)", RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME));
         } else {

@@ -46,7 +46,7 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
 Conjure-java supports feature flags to enable additional opt-in features. To enable features provided by a feature
 flag, simply supply the feature flag as an additional parameter when executing conjure-java. Available feature flags
-can be found in the [FeatureFlags](./conjure-java-core/src/main/java/com/palantir/conjure/java/FeatureFlags.java) class.
+can be found in the [Options](./conjure-java-core/src/main/java/com/palantir/conjure/java/Option.java) class.
 
 ## Example generated objects
 

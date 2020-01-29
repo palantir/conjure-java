@@ -23,7 +23,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -74,14 +74,14 @@ public final class BeanBuilderGenerator {
     private final TypeMapper typeMapper;
     private final ClassName builderClass;
     private final ClassName objectClass;
-    private final Set<FeatureFlag> featureFlags;
+    private final Set<Option> options;
 
     private BeanBuilderGenerator(
-            TypeMapper typeMapper, ClassName builderClass, ClassName objectClass, Set<FeatureFlag> featureFlags) {
+            TypeMapper typeMapper, ClassName builderClass, ClassName objectClass, Set<Option> options) {
         this.typeMapper = typeMapper;
         this.builderClass = builderClass;
         this.objectClass = objectClass;
-        this.featureFlags = featureFlags;
+        this.options = options;
     }
 
     public static TypeSpec generate(
@@ -89,8 +89,8 @@ public final class BeanBuilderGenerator {
             ClassName objectClass,
             ClassName builderClass,
             ObjectDefinition typeDef,
-            Set<FeatureFlag> featureFlags) {
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, featureFlags).generate(typeDef);
+            Set<Option> options) {
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, options).generate(typeDef);
     }
 
     private TypeSpec generate(ObjectDefinition typeDef) {
@@ -108,7 +108,7 @@ public final class BeanBuilderGenerator {
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
                 .addMethod(createBuild(enrichedFields, poetFields));
 
-        if (featureFlags.stream().noneMatch(FeatureFlag.IsStrictObjects)) {
+        if (options.stream().noneMatch(Option.IsStrictObjects)) {
             builder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
                     .addMember("ignoreUnknown", "$L", true)
                     .build());
@@ -250,7 +250,7 @@ public final class BeanBuilderGenerator {
             annotationBuilder.addMember("nulls", "$T.SKIP", Nulls.class);
             if (isOptionalInnerType(type)) {
                 annotationBuilder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
-            } else if (featureFlags.stream().anyMatch(FeatureFlag.IsNonNullCollections)) {
+            } else if (options.stream().anyMatch(Option.IsNonNullCollections)) {
                 annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
             }
         }
@@ -370,7 +370,7 @@ public final class BeanBuilderGenerator {
     }
 
     private boolean isByteBuffer(Type type) {
-        return type.accept(TypeVisitor.IS_BINARY) && featureFlags.stream().noneMatch(FeatureFlag.IsUseImmutableBytes);
+        return type.accept(TypeVisitor.IS_BINARY) && options.stream().noneMatch(Option.IsUseImmutableBytes);
     }
 
     private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched) {

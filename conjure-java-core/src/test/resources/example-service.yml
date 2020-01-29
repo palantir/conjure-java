@@ -54,7 +54,7 @@ services:
     endpoints:
       getFileSystems:
         markers:
-          - Nonnull # requires FeatureFlags.DangerousGothamMethodMarkers
+          - Nonnull # requires Options.DangerousGothamMethodMarkers
         http: GET /fileSystems
         returns: map<string, BackingFileSystem>
         docs: |

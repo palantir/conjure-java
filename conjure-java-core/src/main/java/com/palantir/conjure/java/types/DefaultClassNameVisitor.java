@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.spec.ExternalReference;
@@ -50,13 +50,13 @@ import java.util.stream.Collectors;
 public final class DefaultClassNameVisitor implements ClassNameVisitor {
 
     private final Set<com.palantir.conjure.spec.TypeName> typesByName;
-    private final Set<FeatureFlag> featureFlags;
+    private final Set<Option> options;
 
-    public DefaultClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlag> featureFlags) {
+    public DefaultClassNameVisitor(List<TypeDefinition> types, Set<Option> options) {
         this.typesByName = types.stream()
                 .map(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME))
                 .collect(Collectors.toSet());
-        this.featureFlags = featureFlags;
+        this.options = options;
     }
 
     @Override
@@ -123,7 +123,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
             case SAFELONG:
                 return ClassName.get(SafeLong.class);
             case BINARY:
-                return featureFlags.stream().anyMatch(FeatureFlag.IsUseImmutableBytes)
+                return options.stream().anyMatch(Option.IsUseImmutableBytes)
                         ? ClassName.get(Bytes.class)
                         : ClassName.get(ByteBuffer.class);
             case ANY:

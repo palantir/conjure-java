@@ -24,8 +24,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlag;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -70,8 +69,7 @@ public final class BeanGenerator {
     /** The name of the singleton instance field generated for empty types. */
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
-    public static JavaFile generateBeanType(
-            TypeMapper typeMapper, ObjectDefinition typeDef, Set<FeatureFlag> featureFlags) {
+    public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef, Set<Option> options) {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName objectClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
@@ -86,7 +84,7 @@ public final class BeanGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addMethod(createConstructor(fields, poetFields))
-                .addMethods(createGetters(fields, featureFlags));
+                .addMethods(createGetters(fields, options));
 
         if (!poetFields.isEmpty()) {
             typeBuilder
@@ -124,8 +122,7 @@ public final class BeanGenerator {
                             .addMember("builder", "$T.class", builderClass)
                             .build())
                     .addMethod(createBuilder(builderClass))
-                    .addType(BeanBuilderGenerator.generate(
-                            typeMapper, objectClass, builderClass, typeDef, featureFlags));
+                    .addType(BeanBuilderGenerator.generate(typeMapper, objectClass, builderClass, typeDef, options));
         }
 
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
@@ -201,14 +198,13 @@ public final class BeanGenerator {
         return builder.build();
     }
 
-    private static Collection<MethodSpec> createGetters(
-            Collection<EnrichedField> fields, Set<FeatureFlag> featureFlags) {
+    private static Collection<MethodSpec> createGetters(Collection<EnrichedField> fields, Set<Option> options) {
         return fields.stream()
-                .map(field -> BeanGenerator.createGetter(field, featureFlags))
+                .map(field -> BeanGenerator.createGetter(field, options))
                 .collect(Collectors.toList());
     }
 
-    private static MethodSpec createGetter(EnrichedField field, Set<FeatureFlag> featureFlags) {
+    private static MethodSpec createGetter(EnrichedField field, Set<Option> options) {
         MethodSpec.Builder getterBuilder = MethodSpec.methodBuilder(field.getterName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
@@ -217,10 +213,7 @@ public final class BeanGenerator {
                 .returns(field.poetSpec().type);
 
         if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY)
-                && !featureFlags.stream().anyMatch(flag -> FeatureFlags.cases()
-                        .useImmutableBytes(() -> true)
-                        .otherwise(() -> false)
-                        .apply(flag))) {
+                && !options.stream().anyMatch(Option.IsUseImmutableBytes)) {
             getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
         } else {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);

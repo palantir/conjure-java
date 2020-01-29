@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
@@ -33,8 +33,8 @@ public final class TypeMapper {
     private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
     private final ClassNameVisitor classNameVisitor;
 
-    public TypeMapper(List<TypeDefinition> types, Set<FeatureFlag> featureFlags) {
-        this(types, new DefaultClassNameVisitor(types, featureFlags));
+    public TypeMapper(List<TypeDefinition> types, Set<Option> options) {
+        this(types, new DefaultClassNameVisitor(types, options));
     }
 
     public TypeMapper(List<TypeDefinition> types, ClassNameVisitor classNameVisitor) {

@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
@@ -28,20 +28,20 @@ import java.util.stream.Collectors;
 
 public final class ObjectGenerator implements TypeGenerator {
 
-    private final Set<FeatureFlag> featureFlags;
+    private final Set<Option> options;
 
-    public ObjectGenerator(Set<FeatureFlag> featureFlags) {
-        this.featureFlags = featureFlags;
+    public ObjectGenerator(Set<Option> options) {
+        this.options = options;
     }
 
     @Override
     public Set<JavaFile> generateTypes(List<TypeDefinition> types) {
-        TypeMapper typeMapper = new TypeMapper(types, featureFlags);
+        TypeMapper typeMapper = new TypeMapper(types, options);
         return types.stream()
                 .map(typeDef -> {
                     if (typeDef.accept(TypeDefinitionVisitor.IS_OBJECT)) {
                         return BeanGenerator.generateBeanType(
-                                typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), featureFlags);
+                                typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), options);
                     } else if (typeDef.accept(TypeDefinitionVisitor.IS_UNION)) {
                         return UnionGenerator.generateUnionType(
                                 typeMapper, typeDef.accept(TypeDefinitionVisitor.UNION));
@@ -63,7 +63,7 @@ public final class ObjectGenerator implements TypeGenerator {
             return ImmutableSet.of();
         }
 
-        TypeMapper typeMapper = new TypeMapper(types, featureFlags);
+        TypeMapper typeMapper = new TypeMapper(types, options);
         return ErrorGenerator.generateErrorTypes(typeMapper, errors);
     }
 }

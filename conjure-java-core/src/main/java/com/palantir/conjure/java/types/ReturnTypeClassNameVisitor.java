@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.java.FeatureFlag;
+import com.palantir.conjure.java.Option;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -46,8 +46,8 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
             List<TypeDefinition> types,
             ClassName binaryClassName,
             TypeName optionalBinaryTypeName,
-            Set<FeatureFlag> featureFlags) {
-        this.delegate = new DefaultClassNameVisitor(types, featureFlags);
+            Set<Option> options) {
+        this.delegate = new DefaultClassNameVisitor(types, options);
         this.types = types.stream()
                 .collect(Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
         this.binaryClassName = binaryClassName;

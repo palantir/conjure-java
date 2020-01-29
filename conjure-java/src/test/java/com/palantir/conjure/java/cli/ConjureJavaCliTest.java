@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public final class ConjureJavaCliTest {
     }
 
     @Test
-    public void parseFeatureFlags() {
+    public void parseOptions() {
         String[] args = {
             "generate",
             targetFile.getAbsolutePath(),
@@ -73,10 +73,10 @@ public final class ConjureJavaCliTest {
                 .input(targetFile)
                 .outputDirectory(tempDir)
                 .generateObjects(true)
-                .featureFlags(ImmutableSet.of(
-                        FeatureFlags.jerseyBinaryAsResponse(),
-                        FeatureFlags.requireNotNullAuthAndBodyParams(),
-                        FeatureFlags.useImmutableBytes()))
+                .options(ImmutableSet.of(
+                        Options.jerseyBinaryAsResponse(),
+                        Options.requireNotNullAuthAndBodyParams(),
+                        Options.useImmutableBytes()))
                 .build();
         ConjureJavaCli.GenerateCommand cmd =
                 new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();

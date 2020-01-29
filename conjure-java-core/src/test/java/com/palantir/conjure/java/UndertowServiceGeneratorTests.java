@@ -84,7 +84,7 @@ public final class UndertowServiceGeneratorTests extends TestBase {
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/dangerous-name-service.yml")));
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
         ServiceGenerator generator =
-                new UndertowServiceGenerator(Collections.singleton(FeatureFlags.undertowServicePrefix()));
+                new UndertowServiceGenerator(Collections.singleton(Options.undertowServicePrefix()));
         List<Path> files = generator.emit(conjure, src);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
@@ -93,8 +93,7 @@ public final class UndertowServiceGeneratorTests extends TestBase {
     public void testIndividualMethodAsync() throws IOException {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
-        List<Path> files = new UndertowServiceGenerator(
-                        ImmutableSet.of(FeatureFlags.experimentalUndertowAsyncMarkers()))
+        List<Path> files = new UndertowServiceGenerator(ImmutableSet.of(Options.experimentalUndertowAsyncMarkers()))
                 .emit(def, tempDir);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.async");
     }
@@ -103,7 +102,7 @@ public final class UndertowServiceGeneratorTests extends TestBase {
     public void testIndividualMethodAsyncWithoutFlag() throws IOException {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));
-        // Without FeatureFlags.ExperimentalUndertowAsyncMarkers this should generate blocking methods
+        // Without Options.ExperimentalUndertowAsyncMarkers this should generate blocking methods
         List<Path> files = new UndertowServiceGenerator(ImmutableSet.of()).emit(def, tempDir);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow");
     }
