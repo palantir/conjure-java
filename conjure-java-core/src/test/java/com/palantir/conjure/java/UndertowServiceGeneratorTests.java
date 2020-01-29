@@ -88,6 +88,15 @@ public final class UndertowServiceGeneratorTests extends TestBase {
     }
 
     @Test
+    void testPrefixedServices() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
+        List<Path> files = new UndertowServiceGenerator(
+                        Options.builder().packagePrefix("test.prefix").build())
+                .emit(def, tempDir);
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".undertow.prefix");
+    }
+
+    @Test
     public void testIndividualMethodAsync() throws IOException {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/undertow-async-endpoint.yml")));

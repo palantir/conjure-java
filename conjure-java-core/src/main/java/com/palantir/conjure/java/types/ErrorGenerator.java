@@ -19,9 +19,11 @@ package com.palantir.conjure.java.types;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.FieldDefinition;
@@ -49,10 +51,14 @@ public final class ErrorGenerator {
 
     private ErrorGenerator() {}
 
-    public static Set<JavaFile> generateErrorTypes(TypeMapper typeMapper, List<ErrorDefinition> errorTypeNameToDef) {
+    public static Set<JavaFile> generateErrorTypes(
+            TypeMapper typeMapper, List<ErrorDefinition> errorTypeNameToDef, Options options) {
         return splitErrorDefsByNamespace(errorTypeNameToDef).entrySet().stream()
                 .flatMap(entry -> entry.getValue().entrySet().stream().map(innerEntry -> generateErrorTypesForNamespace(
-                        typeMapper, entry.getKey(), innerEntry.getKey(), innerEntry.getValue())))
+                        typeMapper,
+                        Packages.getPrefixedPackage(entry.getKey(), options.packagePrefix()),
+                        innerEntry.getKey(),
+                        innerEntry.getValue())))
                 .collect(Collectors.toSet());
     }
 

@@ -22,6 +22,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -43,17 +44,16 @@ import javax.lang.model.element.Modifier;
 
 final class UndertowServiceInterfaceGenerator {
 
-    private final Options experimentalFeatures;
+    private final Options options;
 
-    UndertowServiceInterfaceGenerator(Options experimentalFeatures) {
-        this.experimentalFeatures = experimentalFeatures;
+    UndertowServiceInterfaceGenerator(Options options) {
+        this.options = options;
     }
 
     public JavaFile generateServiceInterface(
             ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
-        TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
-                        (experimentalFeatures.undertowServicePrefix() ? "Undertow" : "")
-                                + serviceDefinition.getServiceName().getName())
+        TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder((options.undertowServicePrefix() ? "Undertow" : "")
+                        + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(
                         ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceInterfaceGenerator.class));
@@ -64,7 +64,10 @@ final class UndertowServiceInterfaceGenerator {
                 .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper))
                 .collect(Collectors.toList()));
 
-        return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
+        return JavaFile.builder(
+                        Packages.getPrefixedPackage(
+                                serviceDefinition.getServiceName().getPackage(), options.packagePrefix()),
+                        serviceBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
@@ -82,9 +85,8 @@ final class UndertowServiceInterfaceGenerator {
 
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
-        if (UndertowTypeFunctions.isAsync(endpointDef, experimentalFeatures)) {
-            methodBuilder.returns(
-                    UndertowTypeFunctions.getAsyncReturnType(endpointDef, returnTypeMapper, experimentalFeatures));
+        if (UndertowTypeFunctions.isAsync(endpointDef, options)) {
+            methodBuilder.returns(UndertowTypeFunctions.getAsyncReturnType(endpointDef, returnTypeMapper, options));
         } else {
             endpointDef.getReturns().ifPresent(type -> methodBuilder.returns(returnTypeMapper.getClassName(type)));
         }

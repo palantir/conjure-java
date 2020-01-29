@@ -53,7 +53,7 @@ public abstract class TestBase {
         for (Path file : files) {
             Path output = outputDir.resolve(file.getFileName() + suffix);
             if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
-                Files.delete(output);
+                Files.deleteIfExists(output);
                 Files.copy(file, output);
             }
             assertThat(readFromFile(file)).isEqualTo(readFromFile(output));

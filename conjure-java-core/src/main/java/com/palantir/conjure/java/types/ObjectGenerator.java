@@ -28,29 +28,29 @@ import java.util.stream.Collectors;
 
 public final class ObjectGenerator implements TypeGenerator {
 
-    private final Options featureFlags;
+    private final Options options;
 
-    public ObjectGenerator(Options featureFlags) {
-        this.featureFlags = featureFlags;
+    public ObjectGenerator(Options options) {
+        this.options = options;
     }
 
     @Override
     public Set<JavaFile> generateTypes(List<TypeDefinition> types) {
-        TypeMapper typeMapper = new TypeMapper(types, featureFlags);
+        TypeMapper typeMapper = new TypeMapper(types, options);
 
         return types.stream()
                 .map(typeDef -> {
                     if (typeDef.accept(TypeDefinitionVisitor.IS_OBJECT)) {
                         return BeanGenerator.generateBeanType(
-                                typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), featureFlags);
+                                typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), options);
                     } else if (typeDef.accept(TypeDefinitionVisitor.IS_UNION)) {
                         return UnionGenerator.generateUnionType(
-                                typeMapper, typeDef.accept(TypeDefinitionVisitor.UNION));
+                                typeMapper, typeDef.accept(TypeDefinitionVisitor.UNION), options);
                     } else if (typeDef.accept(TypeDefinitionVisitor.IS_ENUM)) {
-                        return EnumGenerator.generateEnumType(typeDef.accept(TypeDefinitionVisitor.ENUM));
+                        return EnumGenerator.generateEnumType(typeDef.accept(TypeDefinitionVisitor.ENUM), options);
                     } else if (typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)) {
                         return AliasGenerator.generateAliasType(
-                                typeMapper, typeDef.accept(TypeDefinitionVisitor.ALIAS));
+                                typeMapper, typeDef.accept(TypeDefinitionVisitor.ALIAS), options);
                     } else {
                         throw new IllegalArgumentException("Unknown object definition type " + typeDef.getClass());
                     }
@@ -64,7 +64,7 @@ public final class ObjectGenerator implements TypeGenerator {
             return ImmutableSet.of();
         }
 
-        TypeMapper typeMapper = new TypeMapper(types, featureFlags);
-        return ErrorGenerator.generateErrorTypes(typeMapper, errors);
+        TypeMapper typeMapper = new TypeMapper(types, options);
+        return ErrorGenerator.generateErrorTypes(typeMapper, errors, options);
     }
 }

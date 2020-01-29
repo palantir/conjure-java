@@ -88,8 +88,8 @@ public final class BeanBuilderGenerator {
             ClassName objectClass,
             ClassName builderClass,
             ObjectDefinition typeDef,
-            Options featureFlags) {
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, featureFlags).generate(typeDef);
+            Options options) {
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, options).generate(typeDef);
     }
 
     private TypeSpec generate(ObjectDefinition typeDef) {

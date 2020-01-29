@@ -26,6 +26,7 @@ import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
@@ -116,7 +117,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList()));
 
-        return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
+        return JavaFile.builder(
+                        Packages.getPrefixedPackage(
+                                serviceDefinition.getServiceName().getPackage(), options.packagePrefix()),
+                        serviceBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();

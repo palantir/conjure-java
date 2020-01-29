@@ -24,6 +24,7 @@ import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -98,8 +99,9 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
 
     private JavaFile generateService(
             ServiceDefinition serviceDefinition, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
-        TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
-                        serviceDefinition.getServiceName().getName())
+        com.palantir.conjure.spec.TypeName prefixedName =
+                Packages.getPrefixedName(serviceDefinition.getServiceName(), options.packagePrefix());
+        TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Consumes"))
                         .addMember("value", "$T.APPLICATION_JSON", ClassName.get("javax.ws.rs.core", "MediaType"))
@@ -124,7 +126,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList()));
 
-        return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), serviceBuilder.build())
+        return JavaFile.builder(prefixedName.getPackage(), serviceBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();

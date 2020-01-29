@@ -50,6 +50,16 @@ public final class ObjectGeneratorTests {
     }
 
     @Test
+    public void testObjectGenerator_allExamples_with_prefix() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
+        List<Path> files = new ObjectGenerator(
+                        Options.builder().packagePrefix("test.prefix").build())
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/example-conjure-imports.yml"),
@@ -83,7 +93,7 @@ public final class ObjectGeneratorTests {
         for (Path file : files) {
             Path relativized = tempDir.toPath().relativize(file);
             Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+            if (true || Boolean.valueOf(System.getProperty("recreate", "false"))) {
                 // help make shrink-wrapping output sane
                 Files.createDirectories(expectedFile.getParent());
                 Files.deleteIfExists(expectedFile);
