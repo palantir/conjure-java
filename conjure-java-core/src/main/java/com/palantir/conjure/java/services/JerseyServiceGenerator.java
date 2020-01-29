@@ -17,9 +17,8 @@
 package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
@@ -68,35 +67,29 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     private static final TypeName OPTIONAL_BINARY_RETURN_TYPE =
             ParameterizedTypeName.get(ClassName.get(Optional.class), BINARY_RETURN_TYPE_OUTPUT);
 
-    private final Set<FeatureFlags> featureFlags;
+    private final Options options;
 
-    public JerseyServiceGenerator() {
-        this(ImmutableSet.of());
-    }
-
-    public JerseyServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
-        this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
+    public JerseyServiceGenerator(Options options) {
+        this.options = options;
     }
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        ClassName binaryReturnType = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse)
-                ? BINARY_RETURN_TYPE_RESPONSE
-                : BINARY_RETURN_TYPE_OUTPUT;
+        ClassName binaryReturnType =
+                options.jerseyBinaryAsResponse() ? BINARY_RETURN_TYPE_RESPONSE : BINARY_RETURN_TYPE_OUTPUT;
 
-        TypeName optionalBinaryReturnType = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse)
-                ? BINARY_RETURN_TYPE_RESPONSE
-                : OPTIONAL_BINARY_RETURN_TYPE;
+        TypeName optionalBinaryReturnType =
+                options.jerseyBinaryAsResponse() ? BINARY_RETURN_TYPE_RESPONSE : OPTIONAL_BINARY_RETURN_TYPE;
 
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new ReturnTypeClassNameVisitor(
-                        conjureDefinition.getTypes(), binaryReturnType, optionalBinaryReturnType, featureFlags));
+                        conjureDefinition.getTypes(), binaryReturnType, optionalBinaryReturnType, options));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new SpecializeBinaryClassNameVisitor(
-                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), featureFlags), BINARY_ARGUMENT_TYPE));
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), options), BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
@@ -312,7 +305,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
                     .addMember("value", "$S", tokenName)
                     .build());
-            if (featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+            if (options.requireNotNullAuthAndBodyParams()) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }
         }
@@ -334,8 +327,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "HeaderParam"))
                     .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
-            if (def.getType().accept(TypeVisitor.IS_OPTIONAL)
-                    || !featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+            if (def.getType().accept(TypeVisitor.IS_OPTIONAL) || !options.requireNotNullAuthAndBodyParams()) {
                 return Optional.empty();
             }
             annotationSpecBuilder = AnnotationSpec.builder(NOT_NULL);

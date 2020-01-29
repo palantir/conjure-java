@@ -19,8 +19,7 @@ package com.palantir.conjure.java.cli;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -73,10 +72,11 @@ public final class ConjureJavaCliTest {
                 .input(targetFile)
                 .outputDirectory(tempDir)
                 .generateObjects(true)
-                .featureFlags(ImmutableSet.of(
-                        FeatureFlags.JerseyBinaryAsResponse,
-                        FeatureFlags.RequireNotNullAuthAndBodyParams,
-                        FeatureFlags.UseImmutableBytes))
+                .options(Options.builder()
+                        .jerseyBinaryAsResponse(true)
+                        .requireNotNullAuthAndBodyParams(true)
+                        .useImmutableBytes(true)
+                        .build())
                 .build();
         ConjureJavaCli.GenerateCommand cmd =
                 new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();

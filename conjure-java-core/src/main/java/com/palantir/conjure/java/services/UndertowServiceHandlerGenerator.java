@@ -21,7 +21,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MoreCollectors;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -78,7 +78,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
@@ -98,9 +97,9 @@ final class UndertowServiceHandlerGenerator {
     private static final ImmutableSet<String> RESERVED_PARAM_NAMES = ImmutableSet.of(
             EXCHANGE_VAR_NAME, DELEGATE_VAR_NAME, RUNTIME_VAR_NAME, DESERIALIZER_VAR_NAME, SERIALIZER_VAR_NAME);
 
-    private final Set<FeatureFlags> experimentalFeatures;
+    private final Options experimentalFeatures;
 
-    UndertowServiceHandlerGenerator(Set<FeatureFlags> experimentalFeatures) {
+    UndertowServiceHandlerGenerator(Options experimentalFeatures) {
         this.experimentalFeatures = experimentalFeatures;
     }
 
@@ -113,7 +112,7 @@ final class UndertowServiceHandlerGenerator {
         // class name
         ClassName serviceClass = ClassName.get(
                 serviceDefinition.getServiceName().getPackage(),
-                (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
+                (experimentalFeatures.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
         TypeSpec.Builder factory = TypeSpec.classBuilder(serviceName + "Factory")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);

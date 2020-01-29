@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -85,10 +84,12 @@ public final class AsyncRequestProcessingTest extends TestBase {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/async-request-processing-test.yml")));
         List<Path> files = ImmutableList.<Path>builder()
-                .addAll(new UndertowServiceGenerator(ImmutableSet.of(
-                                FeatureFlags.UndertowListenableFutures, FeatureFlags.UndertowServicePrefix))
+                .addAll(new UndertowServiceGenerator(Options.builder()
+                                .undertowServicePrefix(true)
+                                .undertowListenableFutures(true)
+                                .build())
                         .emit(def, folder))
-                .addAll(new JerseyServiceGenerator(ImmutableSet.of()).emit(def, folder))
+                .addAll(new JerseyServiceGenerator(Options.empty()).emit(def, folder))
                 .build();
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }

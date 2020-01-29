@@ -20,7 +20,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
@@ -40,7 +40,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 final class UndertowTypeFunctions {
 
@@ -212,22 +211,21 @@ final class UndertowTypeFunctions {
      * Asynchronous-processing capable endpoints are generated if either of the following are true.
      *
      * <ul>
-     *   <li>The {@link FeatureFlags#UndertowListenableFutures} is set
-     *   <li>Experimental: Both {@link FeatureFlags#ExperimentalUndertowAsyncMarkers} is set and
+     *   <li>The {@link Options#undertowListenableFutures()} is set
+     *   <li>Experimental: Both {@link Options#experimentalUndertowAsyncMarkers()} is set and
      *       {@link EndpointDefinition#getMarkers()} contains an imported annotation with name
      *       <pre>Async</pre>
      *       .
      * </ul>
      */
-    static boolean isAsync(EndpointDefinition endpoint, Set<FeatureFlags> flags) {
-        return flags.contains(FeatureFlags.UndertowListenableFutures)
-                || (flags.contains(FeatureFlags.ExperimentalUndertowAsyncMarkers)
+    static boolean isAsync(EndpointDefinition endpoint, Options options) {
+        return options.undertowListenableFutures()
+                || (options.experimentalUndertowAsyncMarkers()
                         && endpoint.getMarkers().stream()
                                 .anyMatch(marker -> marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)));
     }
 
-    static ParameterizedTypeName getAsyncReturnType(
-            EndpointDefinition endpoint, TypeMapper mapper, Set<FeatureFlags> flags) {
+    static ParameterizedTypeName getAsyncReturnType(EndpointDefinition endpoint, TypeMapper mapper, Options flags) {
         Preconditions.checkArgument(
                 isAsync(endpoint, flags), "Endpoint must be async", SafeArg.of("endpoint", endpoint));
         return ParameterizedTypeName.get(

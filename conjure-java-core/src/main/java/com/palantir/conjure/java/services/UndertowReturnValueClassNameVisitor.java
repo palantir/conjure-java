@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.services;
 
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
@@ -33,13 +33,12 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public final class UndertowReturnValueClassNameVisitor implements ClassNameVisitor {
 
     private final ClassNameVisitor delegate;
 
-    public UndertowReturnValueClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlags> featureFlags) {
+    public UndertowReturnValueClassNameVisitor(List<TypeDefinition> types, Options featureFlags) {
         delegate = new DefaultClassNameVisitor(types, featureFlags);
     }
 

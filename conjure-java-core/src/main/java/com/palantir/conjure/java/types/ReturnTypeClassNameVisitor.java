@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -31,7 +31,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,7 +45,7 @@ public final class ReturnTypeClassNameVisitor implements ClassNameVisitor {
             List<TypeDefinition> types,
             ClassName binaryClassName,
             TypeName optionalBinaryTypeName,
-            Set<FeatureFlags> featureFlags) {
+            Options featureFlags) {
         this.delegate = new DefaultClassNameVisitor(types, featureFlags);
         this.types = types.stream()
                 .collect(Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));

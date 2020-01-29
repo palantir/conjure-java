@@ -16,51 +16,44 @@
 
 package com.palantir.conjure.java.cli;
 
-import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.Options;
 import com.palantir.logsafe.Preconditions;
 import java.io.File;
-import java.util.Set;
 import org.immutables.value.Value;
 
 @Value.Immutable
-public abstract class CliConfiguration {
-    abstract File input();
+public interface CliConfiguration {
+    File input();
 
-    abstract File outputDirectory();
+    File outputDirectory();
 
     @Value.Default
-    @SuppressWarnings("checkstyle:designforextension")
-    boolean generateObjects() {
+    default boolean generateObjects() {
         return false;
     }
 
     @Value.Default
-    @SuppressWarnings("checkstyle:designforextension")
-    boolean generateJersey() {
+    default boolean generateJersey() {
         return false;
     }
 
     @Value.Default
-    @SuppressWarnings("checkstyle:designforextension")
-    boolean generateRetrofit() {
+    default boolean generateRetrofit() {
         return false;
     }
 
     @Value.Default
-    @SuppressWarnings("checkstyle:designforextension")
-    boolean generateUndertow() {
+    default boolean generateUndertow() {
         return false;
     }
 
     @Value.Default
-    @SuppressWarnings("checkstyle:designforextension")
-    Set<FeatureFlags> featureFlags() {
-        return ImmutableSet.of();
+    default Options options() {
+        return Options.empty();
     }
 
     @Value.Check
-    final void check() {
+    default void check() {
         Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
         Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
         Preconditions.checkArgument(
@@ -68,41 +61,9 @@ public abstract class CliConfiguration {
                 "Must specify exactly one project to generate");
     }
 
+    class Builder extends ImmutableCliConfiguration.Builder {}
+
     static Builder builder() {
         return new Builder();
-    }
-
-    public static final class Builder extends ImmutableCliConfiguration.Builder {
-        Builder jerseyBinaryAsResponse(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.JerseyBinaryAsResponse) : this;
-        }
-
-        Builder notNullAuthAndBody(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.RequireNotNullAuthAndBodyParams) : this;
-        }
-
-        Builder undertowServicePrefix(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.UndertowServicePrefix) : this;
-        }
-
-        Builder useImmutableBytes(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.UseImmutableBytes) : this;
-        }
-
-        Builder undertowListenableFutures(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.UndertowListenableFutures) : this;
-        }
-
-        Builder experimentalUndertowAsyncMarkers(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.ExperimentalUndertowAsyncMarkers) : this;
-        }
-
-        Builder strictObjects(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.StrictObjects) : this;
-        }
-
-        Builder nonNullCollections(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.NonNullCollections) : this;
-        }
     }
 }

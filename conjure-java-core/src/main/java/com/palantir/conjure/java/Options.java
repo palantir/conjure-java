@@ -21,31 +21,49 @@ import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
+import org.immutables.value.Value;
 
-public enum FeatureFlags {
+@Value.Immutable
+public interface Options {
+
     /**
      * Instructs the {@link JerseyServiceGenerator} to generate binary response endpoints with the {@link Response}
      * type.
      */
-    JerseyBinaryAsResponse,
+    @Value.Default
+    default boolean jerseyBinaryAsResponse() {
+        return false;
+    }
 
     /**
      * Instructs the {@link JerseyServiceGenerator} to add {@link NotNull} annotations to all auth parameters, as well
      * as all non-optional body params on service endpoints.
      */
-    RequireNotNullAuthAndBodyParams,
+    @Value.Default
+    default boolean requireNotNullAuthAndBodyParams() {
+        return false;
+    }
 
     /** Undertow generated service interfaces are generated with an "Undertow" prefix. */
-    UndertowServicePrefix,
+    @Value.Default
+    default boolean undertowServicePrefix() {
+        return false;
+    }
 
     /** Use the conjure immutable "Bytes" class over ByteBuffer. */
-    UseImmutableBytes,
+    @Value.Default
+    default boolean useImmutableBytes() {
+        return false;
+    }
 
     /**
      * Instructs the {@link com.palantir.conjure.java.services.UndertowServiceGenerator} to generate service endpoints
      * returning {@link com.google.common.util.concurrent.ListenableFuture} to allow asynchronous request processing.
      */
-    UndertowListenableFutures,
+    @Value.Default
+    default boolean undertowListenableFutures() {
+        return false;
+    }
 
     /**
      * Allows synchronous and {@link com.google.common.util.concurrent.ListenableFuture} based asynchronous request
@@ -53,16 +71,35 @@ public enum FeatureFlags {
      * This feature is experimental and subject to change.
      */
     @Beta
-    ExperimentalUndertowAsyncMarkers,
+    @Value.Default
+    default boolean experimentalUndertowAsyncMarkers() {
+        return false;
+    }
 
     /**
      * Instructs the {@link ObjectGenerator} to not generate objects that fail to deserialize if unknown fields are
      * encountered.
      */
-    StrictObjects,
+    @Value.Default
+    default boolean strictObjects() {
+        return false;
+    }
 
     /**
      * Instructs the {@link ObjectGenerator} to generate objects that fail to deserialize collections with null values.
      */
-    NonNullCollections,
+    @Value.Default
+    default boolean nonNullCollections() {
+        return false;
+    }
+
+    class Builder extends ImmutableOptions.Builder {}
+
+    static Builder builder() {
+        return new Builder();
+    }
+
+    static Options empty() {
+        return builder().build();
+    }
 }
