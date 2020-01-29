@@ -193,7 +193,7 @@ public final class ConjureJavaCli implements Runnable {
                     .generateUndertow(generateUndertow)
                     .options(Options.builder()
                             .jerseyBinaryAsResponse(jerseyBinaryAsReponse)
-                            .nonNullCollections(notNullAuthAndBody)
+                            .requireNotNullAuthAndBodyParams(notNullAuthAndBody)
                             .undertowServicePrefix(undertowServicePrefix)
                             .useImmutableBytes(useImmutableBytes)
                             .undertowListenableFutures(undertowListenableFutures)
