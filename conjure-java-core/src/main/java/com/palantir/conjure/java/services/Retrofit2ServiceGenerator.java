@@ -20,7 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.FeatureFlag;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
@@ -75,9 +75,9 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
 
-    private final Set<FeatureFlags> featureFlags;
+    private final Set<FeatureFlag> featureFlags;
 
-    public Retrofit2ServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
+    public Retrofit2ServiceGenerator(Set<FeatureFlag> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
     }
 

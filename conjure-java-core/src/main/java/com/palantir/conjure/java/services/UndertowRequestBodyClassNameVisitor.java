@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.services;
 
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.FeatureFlag;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.spec.ExternalReference;
@@ -36,7 +36,7 @@ public final class UndertowRequestBodyClassNameVisitor implements ClassNameVisit
 
     private final ClassNameVisitor delegate;
 
-    public UndertowRequestBodyClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlags> featureFlags) {
+    public UndertowRequestBodyClassNameVisitor(List<TypeDefinition> types, Set<FeatureFlag> featureFlags) {
         delegate = new DefaultClassNameVisitor(types, featureFlags);
     }
 

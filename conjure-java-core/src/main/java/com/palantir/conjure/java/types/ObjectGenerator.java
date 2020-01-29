@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.google.common.collect.ImmutableSet;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.FeatureFlag;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
@@ -28,16 +28,15 @@ import java.util.stream.Collectors;
 
 public final class ObjectGenerator implements TypeGenerator {
 
-    private final Set<FeatureFlags> featureFlags;
+    private final Set<FeatureFlag> featureFlags;
 
-    public ObjectGenerator(Set<FeatureFlags> featureFlags) {
+    public ObjectGenerator(Set<FeatureFlag> featureFlags) {
         this.featureFlags = featureFlags;
     }
 
     @Override
     public Set<JavaFile> generateTypes(List<TypeDefinition> types) {
         TypeMapper typeMapper = new TypeMapper(types, featureFlags);
-
         return types.stream()
                 .map(typeDef -> {
                     if (typeDef.accept(TypeDefinitionVisitor.IS_OBJECT)) {

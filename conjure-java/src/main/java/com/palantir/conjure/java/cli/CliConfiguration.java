@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.cli;
 
 import com.google.common.collect.ImmutableSet;
+import com.palantir.conjure.java.FeatureFlag;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.logsafe.Preconditions;
 import java.io.File;
@@ -55,7 +56,7 @@ public abstract class CliConfiguration {
 
     @Value.Default
     @SuppressWarnings("checkstyle:designforextension")
-    Set<FeatureFlags> featureFlags() {
+    Set<FeatureFlag> featureFlags() {
         return ImmutableSet.of();
     }
 
@@ -74,35 +75,35 @@ public abstract class CliConfiguration {
 
     public static final class Builder extends ImmutableCliConfiguration.Builder {
         Builder jerseyBinaryAsResponse(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.JerseyBinaryAsResponse) : this;
+            return flag ? addFeatureFlags(FeatureFlags.jerseyBinaryAsResponse()) : this;
         }
 
         Builder notNullAuthAndBody(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.RequireNotNullAuthAndBodyParams) : this;
+            return flag ? addFeatureFlags(FeatureFlags.requireNotNullAuthAndBodyParams()) : this;
         }
 
         Builder undertowServicePrefix(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.UndertowServicePrefix) : this;
+            return flag ? addFeatureFlags(FeatureFlags.undertowServicePrefix()) : this;
         }
 
         Builder useImmutableBytes(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.UseImmutableBytes) : this;
+            return flag ? addFeatureFlags(FeatureFlags.useImmutableBytes()) : this;
         }
 
         Builder undertowListenableFutures(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.UndertowListenableFutures) : this;
+            return flag ? addFeatureFlags(FeatureFlags.undertowListenableFutures()) : this;
         }
 
         Builder experimentalUndertowAsyncMarkers(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.ExperimentalUndertowAsyncMarkers) : this;
+            return flag ? addFeatureFlags(FeatureFlags.experimentalUndertowAsyncMarkers()) : this;
         }
 
         Builder strictObjects(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.StrictObjects) : this;
+            return flag ? addFeatureFlags(FeatureFlags.strictObjects()) : this;
         }
 
         Builder nonNullCollections(boolean flag) {
-            return flag ? addFeatureFlags(FeatureFlags.NonNullCollections) : this;
+            return flag ? addFeatureFlags(FeatureFlags.nonNullCollections()) : this;
         }
     }
 }

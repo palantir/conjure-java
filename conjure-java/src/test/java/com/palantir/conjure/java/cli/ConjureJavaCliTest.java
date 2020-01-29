@@ -74,9 +74,9 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .featureFlags(ImmutableSet.of(
-                        FeatureFlags.JerseyBinaryAsResponse,
-                        FeatureFlags.RequireNotNullAuthAndBodyParams,
-                        FeatureFlags.UseImmutableBytes))
+                        FeatureFlags.jerseyBinaryAsResponse(),
+                        FeatureFlags.requireNotNullAuthAndBodyParams(),
+                        FeatureFlags.useImmutableBytes()))
                 .build();
         ConjureJavaCli.GenerateCommand cmd =
                 new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();

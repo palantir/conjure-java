@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.FeatureFlag;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -29,9 +29,9 @@ import java.util.stream.Collectors;
 
 public final class UndertowServiceGenerator implements ServiceGenerator {
 
-    private final Set<FeatureFlags> experimentalFeatures;
+    private final Set<FeatureFlag> experimentalFeatures;
 
-    public UndertowServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
+    public UndertowServiceGenerator(Set<FeatureFlag> experimentalFeatures) {
         this.experimentalFeatures = experimentalFeatures;
     }
 

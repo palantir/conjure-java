@@ -84,7 +84,11 @@ dependencies {
     integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
 
     annotationProcessor 'org.immutables:value'
+    annotationProcessor 'org.derive4j:derive4j'
+
     compileOnly 'org.immutables:value::annotations'
+    compileOnly 'org.derive4j:derive4j-annotation'
+
     testCompileOnly 'org.immutables:value::annotations'
 }
 

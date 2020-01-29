@@ -19,7 +19,7 @@ package com.palantir.conjure.java.services;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.FeatureFlag;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
@@ -68,23 +68,23 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
     private static final TypeName OPTIONAL_BINARY_RETURN_TYPE =
             ParameterizedTypeName.get(ClassName.get(Optional.class), BINARY_RETURN_TYPE_OUTPUT);
 
-    private final Set<FeatureFlags> featureFlags;
+    private final Set<FeatureFlag> featureFlags;
 
     public JerseyServiceGenerator() {
         this(ImmutableSet.of());
     }
 
-    public JerseyServiceGenerator(Set<FeatureFlags> experimentalFeatures) {
+    public JerseyServiceGenerator(Set<FeatureFlag> experimentalFeatures) {
         this.featureFlags = ImmutableSet.copyOf(experimentalFeatures);
     }
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        ClassName binaryReturnType = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse)
+        ClassName binaryReturnType = featureFlags.stream().anyMatch(FeatureFlag.IsJerseyBinaryAsResponse)
                 ? BINARY_RETURN_TYPE_RESPONSE
                 : BINARY_RETURN_TYPE_OUTPUT;
 
-        TypeName optionalBinaryReturnType = featureFlags.contains(FeatureFlags.JerseyBinaryAsResponse)
+        TypeName optionalBinaryReturnType = featureFlags.stream().anyMatch(FeatureFlag.IsJerseyBinaryAsResponse)
                 ? BINARY_RETURN_TYPE_RESPONSE
                 : OPTIONAL_BINARY_RETURN_TYPE;
 
@@ -312,7 +312,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
                     .addMember("value", "$S", tokenName)
                     .build());
-            if (featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+            if (featureFlags.stream().anyMatch(FeatureFlag.IsRequireNotNullAuthAndBodyParams)) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
             }
         }
@@ -335,7 +335,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                     .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
             if (def.getType().accept(TypeVisitor.IS_OPTIONAL)
-                    || !featureFlags.contains(FeatureFlags.RequireNotNullAuthAndBodyParams)) {
+                    || !featureFlags.stream().anyMatch(FeatureFlag.IsRequireNotNullAuthAndBodyParams)) {
                 return Optional.empty();
             }
             annotationSpecBuilder = AnnotationSpec.builder(NOT_NULL);

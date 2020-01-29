@@ -33,7 +33,9 @@ public final class ObjectGeneratorTests {
     public void testObjectGenerator_allExamples() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
         List<Path> files = new ObjectGenerator(ImmutableSet.of(
-                        FeatureFlags.UseImmutableBytes, FeatureFlags.StrictObjects, FeatureFlags.NonNullCollections))
+                        FeatureFlags.useImmutableBytes(),
+                        FeatureFlags.strictObjects(),
+                        FeatureFlags.nonNullCollections()))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -55,7 +57,7 @@ public final class ObjectGeneratorTests {
                 new File("src/test/resources/example-types.yml"),
                 new File("src/test/resources/example-service.yml")));
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
-        ObjectGenerator generator = new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes));
+        ObjectGenerator generator = new ObjectGenerator(Collections.singleton(FeatureFlags.useImmutableBytes()));
         generator.emit(conjure, src);
 
         // Generated files contain imports
@@ -72,7 +74,7 @@ public final class ObjectGeneratorTests {
     public void testConjureErrors() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-errors.yml")));
         List<Path> files =
-                new ObjectGenerator(Collections.singleton(FeatureFlags.UseImmutableBytes)).emit(def, tempDir);
+                new ObjectGenerator(Collections.singleton(FeatureFlags.useImmutableBytes())).emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }

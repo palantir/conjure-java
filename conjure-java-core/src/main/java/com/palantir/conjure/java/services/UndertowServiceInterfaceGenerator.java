@@ -18,7 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.java.FeatureFlags;
+import com.palantir.conjure.java.FeatureFlag;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
@@ -44,16 +44,16 @@ import javax.lang.model.element.Modifier;
 
 final class UndertowServiceInterfaceGenerator {
 
-    private final Set<FeatureFlags> experimentalFeatures;
+    private final Set<FeatureFlag> experimentalFeatures;
 
-    UndertowServiceInterfaceGenerator(Set<FeatureFlags> experimentalFeatures) {
+    UndertowServiceInterfaceGenerator(Set<FeatureFlag> experimentalFeatures) {
         this.experimentalFeatures = experimentalFeatures;
     }
 
     public JavaFile generateServiceInterface(
             ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(
-                        (experimentalFeatures.contains(FeatureFlags.UndertowServicePrefix) ? "Undertow" : "")
+                        (experimentalFeatures.stream().anyMatch(FeatureFlag.IsUndertowServicePrefix) ? "Undertow" : "")
                                 + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(

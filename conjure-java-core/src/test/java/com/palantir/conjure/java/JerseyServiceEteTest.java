@@ -180,7 +180,7 @@ public final class JerseyServiceEteTest extends TestBase {
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.RequireNotNullAuthAndBodyParams))
+        List<Path> files = new JerseyServiceGenerator(ImmutableSet.of(FeatureFlags.requireNotNullAuthAndBodyParams()))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }

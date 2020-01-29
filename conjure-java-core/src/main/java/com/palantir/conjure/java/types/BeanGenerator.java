@@ -24,6 +24,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.FeatureFlag;
 import com.palantir.conjure.java.FeatureFlags;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
@@ -70,7 +71,7 @@ public final class BeanGenerator {
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
     public static JavaFile generateBeanType(
-            TypeMapper typeMapper, ObjectDefinition typeDef, Set<FeatureFlags> featureFlags) {
+            TypeMapper typeMapper, ObjectDefinition typeDef, Set<FeatureFlag> featureFlags) {
         String typePackage = typeDef.getTypeName().getPackage();
         ClassName objectClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
         ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
@@ -201,13 +202,13 @@ public final class BeanGenerator {
     }
 
     private static Collection<MethodSpec> createGetters(
-            Collection<EnrichedField> fields, Set<FeatureFlags> featureFlags) {
+            Collection<EnrichedField> fields, Set<FeatureFlag> featureFlags) {
         return fields.stream()
                 .map(field -> BeanGenerator.createGetter(field, featureFlags))
                 .collect(Collectors.toList());
     }
 
-    private static MethodSpec createGetter(EnrichedField field, Set<FeatureFlags> featureFlags) {
+    private static MethodSpec createGetter(EnrichedField field, Set<FeatureFlag> featureFlags) {
         MethodSpec.Builder getterBuilder = MethodSpec.methodBuilder(field.getterName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
@@ -216,7 +217,10 @@ public final class BeanGenerator {
                 .returns(field.poetSpec().type);
 
         if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY)
-                && !featureFlags.contains(FeatureFlags.UseImmutableBytes)) {
+                && !featureFlags.stream().anyMatch(flag -> FeatureFlags.cases()
+                        .useImmutableBytes(() -> true)
+                        .otherwise(() -> false)
+                        .apply(flag))) {
             getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
         } else {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);

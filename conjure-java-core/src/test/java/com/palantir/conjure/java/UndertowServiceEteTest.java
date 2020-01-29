@@ -487,9 +487,9 @@ public final class UndertowServiceEteTest extends TestBase {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
         List<Path> files = ImmutableList.<Path>builder()
-                .addAll(new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix))
+                .addAll(new UndertowServiceGenerator(ImmutableSet.of(FeatureFlags.undertowServicePrefix()))
                         .emit(def, folder))
-                .addAll(new ObjectGenerator(ImmutableSet.of(FeatureFlags.UndertowServicePrefix)).emit(def, folder))
+                .addAll(new ObjectGenerator(ImmutableSet.of(FeatureFlags.undertowServicePrefix())).emit(def, folder))
                 .build();
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
