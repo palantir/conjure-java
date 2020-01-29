@@ -19,6 +19,7 @@ package com.palantir.conjure.java;
 import com.google.common.annotations.Beta;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import org.immutables.value.Value;
@@ -92,6 +93,8 @@ public interface Options {
     default boolean nonNullCollections() {
         return false;
     }
+
+    Optional<String> packagePrefix();
 
     class Builder extends ImmutableOptions.Builder {}
 

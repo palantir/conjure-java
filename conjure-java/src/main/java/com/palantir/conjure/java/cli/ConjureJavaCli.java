@@ -33,6 +33,8 @@ import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -146,6 +148,10 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate binary fields using the immutable 'Bytes' type instead of 'ByteBuffer'")
         private boolean useImmutableBytes;
 
+        @CommandLine.Option(names = "--packagePrefix", description = "Prefix to the package of all generated classes")
+        @Nullable
+        private String packagePrefix;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -200,6 +206,7 @@ public final class ConjureJavaCli implements Runnable {
                             .experimentalUndertowAsyncMarkers(experimentalUndertowAsyncMarkers)
                             .strictObjects(strictObjects)
                             .nonNullCollections(nonNullCollections)
+                            .packagePrefix(Optional.ofNullable(packagePrefix))
                             .build())
                     .build();
         }
