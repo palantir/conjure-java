@@ -155,11 +155,10 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> Optional.of(new URLDecodingHandler(endpoint.handler(), "UTF-8")),
                             // no-cache and web-security handlers add listeners for the response to be committed,
                             // they can be executed on the IO thread.
-                            endpoint ->
-                                    Methods.GET.equals(endpoint.method())
-                                            // Only applies to GET methods
-                                            ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
-                                            : Optional.empty(),
+                            endpoint -> Methods.GET.equals(endpoint.method())
+                                    // Only applies to GET methods
+                                    ? Optional.of(new NoCachingResponseHandler(endpoint.handler()))
+                                    : Optional.empty(),
                             endpoint -> Optional.of(new WebSecurityHandler(endpoint.handler())),
                             endpoint -> endpoint.deprecated()
                                     .map(reason -> new DeprecationReportingResponseHandler(endpoint.handler())))
