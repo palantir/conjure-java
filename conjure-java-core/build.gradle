@@ -56,6 +56,9 @@ dependencies {
     compile 'org.apache.commons:commons-lang3'
     compile 'org.slf4j:slf4j-api'
     compile 'com.atlassian.commonmark:commonmark'
+    implementation 'org.glassfish.jersey.core:jersey-common'
+    implementation 'com.palantir.dialogue:dialogue-target'
+    implementation 'com.palantir.dialogue:dialogue-serde'
 
     testCompile('com.palantir.conjure:conjure-core') {
         exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'

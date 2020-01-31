@@ -26,6 +26,7 @@ import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.types.TypeGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -176,6 +177,7 @@ public final class ConjureJavaCli implements Runnable {
                 ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.options());
                 ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.options());
                 ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.options());
+                ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options(), "unknown");
 
                 if (config.generateObjects()) {
                     typeGenerator.emit(conjureDefinition, config.outputDirectory());
@@ -189,7 +191,9 @@ public final class ConjureJavaCli implements Runnable {
                 if (config.generateUndertow()) {
                     undertowGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
-                // TODO(forozco): wire up dialogue generator
+                if (config.generateDialogue()) {
+                    dialogueServiceGenerator.emit(conjureDefinition, config.outputDirectory());
+                }
             } catch (IOException e) {
                 throw new SafeRuntimeException("Error parsing definition", e);
             }
