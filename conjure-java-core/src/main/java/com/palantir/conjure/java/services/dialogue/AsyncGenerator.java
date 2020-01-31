@@ -156,10 +156,8 @@ public final class AsyncGenerator {
                         MoreExecutors.class)
                 .build();
 
-        MethodSpec asyncClient = methodBuilder
-                .addCode(request)
-                .addCode(transformed)
-                .build();
+        MethodSpec asyncClient =
+                methodBuilder.addCode(request).addCode(transformed).build();
         return asyncClient;
     }
 
@@ -308,7 +306,7 @@ public final class AsyncGenerator {
         });
     }
 
-    private static class PlainSerializer extends DefaultTypeVisitor<String> {
+    private static final class PlainSerializer extends DefaultTypeVisitor<String> {
         private static final PlainSerializer INSTANCE = new PlainSerializer();
 
         @Override

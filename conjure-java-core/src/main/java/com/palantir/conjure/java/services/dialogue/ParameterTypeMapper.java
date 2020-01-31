@@ -6,7 +6,6 @@ package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -23,7 +22,6 @@ import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ParameterSpec;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -41,20 +39,19 @@ public final class ParameterTypeMapper {
     }
 
     public List<ParameterSpec> methodParams(EndpointDefinition endpointDef) {
-        List<ParameterSpec> parameterSpecs = new ArrayList<>();
-        endpointDef.getAuth().ifPresent(auth -> parameterSpecs.add(Auth.authParam(auth)));
+        ImmutableList.Builder<ParameterSpec> paramSpecBuilder = ImmutableList.builder();
+        endpointDef.getAuth().ifPresent(auth -> paramSpecBuilder.add(Auth.authParam(auth)));
+        endpointDef.getArgs().stream()
+                .sorted(Comparator.comparing(o -> o.getParamType().accept(PARAM_SORT_VISITOR)
+                        + o.getType().accept(TYPE_SORT_VISITOR)))
+                .forEach(def -> paramSpecBuilder.add(param(def)));
 
-        List<ArgumentDefinition> sortedArgList = Lists.newArrayList(endpointDef.getArgs());
-        sortedArgList.sort(Comparator.comparing(o ->
-                o.getParamType().accept(PARAM_SORT_VISITOR) + o.getType().accept(TYPE_SORT_VISITOR)));
-        sortedArgList.forEach(def -> parameterSpecs.add(param(def)));
-
-        return ImmutableList.copyOf(parameterSpecs);
+        return paramSpecBuilder.build();
     }
 
     private ParameterSpec param(ArgumentDefinition def) {
-        ParameterSpec.Builder param =
-                ParameterSpec.builder(parameterTypes.getClassName(def.getType()), def.getArgName().get());
+        ParameterSpec.Builder param = ParameterSpec.builder(
+                parameterTypes.getClassName(def.getType()), def.getArgName().get());
 
         param.addAnnotations(markers(def.getMarkers()));
         return param.build();
