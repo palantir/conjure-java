@@ -28,13 +28,12 @@ final class MarkerCallbacks {
      */
     static MarkerCallback fold(List<ParamMarker> paramMarkers) {
         return paramMarkers.stream()
-                        .reduce(
-                                (markerClass, parameterName, parameterValue, exchange) -> {},
-                                (paramMarker1, paramMarker2) ->
-                                        (markerClass, parameterName, parameterValue, exchange) -> {
-                                            paramMarker1.mark(markerClass, parameterName, parameterValue, exchange);
-                                            paramMarker2.mark(markerClass, parameterName, parameterValue, exchange);
-                                        })::mark;
+                .reduce(
+                        (markerClass, parameterName, parameterValue, exchange) -> {},
+                        (paramMarker1, paramMarker2) -> (markerClass, parameterName, parameterValue, exchange) -> {
+                            paramMarker1.mark(markerClass, parameterName, parameterValue, exchange);
+                            paramMarker2.mark(markerClass, parameterName, parameterValue, exchange);
+                        })::mark;
     }
 
     private MarkerCallbacks() {}
