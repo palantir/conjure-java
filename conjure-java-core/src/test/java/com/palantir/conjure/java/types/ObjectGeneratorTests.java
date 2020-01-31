@@ -50,6 +50,16 @@ public final class ObjectGeneratorTests {
     }
 
     @Test
+    public void testObjectGenerator_allExamples_with_prefix() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
+        List<Path> files = new ObjectGenerator(
+                        Options.builder().packagePrefix("test.prefix").build())
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/example-conjure-imports.yml"),

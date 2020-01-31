@@ -22,7 +22,9 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
 import com.squareup.javapoet.ClassName;
@@ -50,14 +52,16 @@ public final class EnumGenerator {
 
     private EnumGenerator() {}
 
-    public static JavaFile generateEnumType(EnumDefinition typeDef) {
-        String typePackage = typeDef.getTypeName().getPackage();
-        ClassName thisClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
-        ClassName enumClass = ClassName.get(typePackage, typeDef.getTypeName().getName(), "Value");
-        ClassName visitorClass =
-                ClassName.get(typePackage, typeDef.getTypeName().getName(), "Visitor");
+    public static JavaFile generateEnumType(EnumDefinition typeDef, Options options) {
+        com.palantir.conjure.spec.TypeName prefixedTypeName =
+                Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
+        ClassName thisClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
+        ClassName enumClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName(), "Value");
+        ClassName visitorClass = ClassName.get(
+                prefixedTypeName.getPackage(), typeDef.getTypeName().getName(), "Visitor");
 
-        return JavaFile.builder(typePackage, createSafeEnum(typeDef, thisClass, enumClass, visitorClass))
+        return JavaFile.builder(
+                        prefixedTypeName.getPackage(), createSafeEnum(typeDef, thisClass, enumClass, visitorClass))
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();

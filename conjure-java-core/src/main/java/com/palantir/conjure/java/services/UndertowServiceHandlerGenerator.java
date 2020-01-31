@@ -32,6 +32,7 @@ import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
@@ -97,10 +98,10 @@ final class UndertowServiceHandlerGenerator {
     private static final ImmutableSet<String> RESERVED_PARAM_NAMES = ImmutableSet.of(
             EXCHANGE_VAR_NAME, DELEGATE_VAR_NAME, RUNTIME_VAR_NAME, DESERIALIZER_VAR_NAME, SERIALIZER_VAR_NAME);
 
-    private final Options experimentalFeatures;
+    private final Options options;
 
-    UndertowServiceHandlerGenerator(Options experimentalFeatures) {
-        this.experimentalFeatures = experimentalFeatures;
+    UndertowServiceHandlerGenerator(Options options) {
+        this.options = options;
     }
 
     public JavaFile generateServiceHandler(
@@ -112,7 +113,7 @@ final class UndertowServiceHandlerGenerator {
         // class name
         ClassName serviceClass = ClassName.get(
                 serviceDefinition.getServiceName().getPackage(),
-                (experimentalFeatures.undertowServicePrefix() ? "Undertow" : "")
+                (options.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
         TypeSpec.Builder factory = TypeSpec.classBuilder(serviceName + "Factory")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
@@ -175,7 +176,10 @@ final class UndertowServiceHandlerGenerator {
                         e, serviceDefinition, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
                 .build();
 
-        return JavaFile.builder(serviceDefinition.getServiceName().getPackage(), endpoints)
+        return JavaFile.builder(
+                        Packages.getPrefixedPackage(
+                                serviceDefinition.getServiceName().getPackage(), options.packagePrefix()),
+                        endpoints)
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
@@ -259,9 +263,9 @@ final class UndertowServiceHandlerGenerator {
 
         endpointBuilder.addMethod(ctorBuilder.build()).addMethod(handleMethodBuilder.build());
 
-        if (UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures)) {
-            ParameterizedTypeName type = UndertowTypeFunctions.getAsyncReturnType(
-                    endpointDefinition, returnTypeMapper, experimentalFeatures);
+        if (UndertowTypeFunctions.isAsync(endpointDefinition, options)) {
+            ParameterizedTypeName type =
+                    UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper, options);
             TypeName resultType = Iterables.getOnlyElement(type.typeArguments);
             endpointBuilder.addSuperinterface(
                     ParameterizedTypeName.get(ClassName.get(ReturnValueWriter.class), resultType));
@@ -381,13 +385,12 @@ final class UndertowServiceHandlerGenerator {
                 .map(arg -> sanitizeVarName(arg, endpointDefinition))
                 .collect(Collectors.toList()));
 
-        boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures);
+        boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, options);
         if (async || endpointDefinition.getReturns().isPresent()) {
             code.addStatement(
                     "$1T $2N = $3N.$4L($5L)",
                     async
-                            ? UndertowTypeFunctions.getAsyncReturnType(
-                                    endpointDefinition, returnTypeMapper, experimentalFeatures)
+                            ? UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper, options)
                             : returnTypeMapper.getClassName(
                                     endpointDefinition.getReturns().get()),
                     RESULT_VAR_NAME,
@@ -402,7 +405,7 @@ final class UndertowServiceHandlerGenerator {
                     endpointDefinition.getEndpointName(),
                     String.join(", ", methodArgs));
         }
-        if (UndertowTypeFunctions.isAsync(endpointDefinition, experimentalFeatures)) {
+        if (UndertowTypeFunctions.isAsync(endpointDefinition, options)) {
             code.add(CodeBlocks.statement(
                     "$1N.async().register($2N, this, $3N)", RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME));
         } else {

@@ -94,6 +94,15 @@ public final class JerseyServiceGeneratorTests extends TestBase {
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.binary_as_response");
     }
 
+    @Test
+    void testPrefixedServices() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
+        List<Path> files = new JerseyServiceGenerator(
+                        Options.builder().packagePrefix("test.prefix").build())
+                .emit(def, folder);
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.prefix");
+    }
+
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
         List<Path> files = new JerseyServiceGenerator(

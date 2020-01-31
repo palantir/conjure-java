@@ -29,8 +29,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -71,9 +73,10 @@ public final class UnionGenerator {
     // If the member type is not known, a String containing the name of the unknown type is used.
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
 
-    public static JavaFile generateUnionType(TypeMapper typeMapper, UnionDefinition typeDef) {
-        String typePackage = typeDef.getTypeName().getPackage();
-        ClassName unionClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
+    public static JavaFile generateUnionType(TypeMapper typeMapper, UnionDefinition typeDef, Options options) {
+        com.palantir.conjure.spec.TypeName prefixedTypeName =
+                Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
+        ClassName unionClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
         ClassName baseClass = unionClass.nestedClass("Base");
         ClassName visitorClass = unionClass.nestedClass("Visitor");
         ClassName visitorBuilderClass = unionClass.nestedClass("VisitorBuilder");
@@ -110,7 +113,7 @@ public final class UnionGenerator {
 
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
-        return JavaFile.builder(typePackage, typeBuilder.build())
+        return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();

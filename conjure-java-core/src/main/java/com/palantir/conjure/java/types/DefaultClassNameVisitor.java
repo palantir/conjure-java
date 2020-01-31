@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -144,7 +145,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
         // Types without namespace are either defined locally in this conjure definition, or raw imports.
         if (typesByName.contains(type)) {
-            return ClassName.get(type.getPackage(), type.getName());
+            return ClassName.get(
+                    Packages.getPrefixedPackage(type.getPackage(), options.packagePrefix()), type.getName());
         } else {
             throw new IllegalStateException("Unknown LocalReferenceType type: " + type);
         }

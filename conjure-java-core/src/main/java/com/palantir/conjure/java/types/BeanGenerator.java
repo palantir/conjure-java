@@ -27,6 +27,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -68,9 +69,10 @@ public final class BeanGenerator {
     /** The name of the singleton instance field generated for empty types. */
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
-    public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef, Options featureFlags) {
-        String typePackage = typeDef.getTypeName().getPackage();
-        ClassName objectClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
+    public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef, Options options) {
+        com.palantir.conjure.spec.TypeName prefixedName =
+                Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
+        ClassName objectClass = ClassName.get(prefixedName.getPackage(), prefixedName.getName());
         ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
 
         Collection<EnrichedField> fields = createFields(typeMapper, typeDef.getFields());
@@ -78,12 +80,11 @@ public final class BeanGenerator {
         Collection<EnrichedField> nonPrimitiveEnrichedFields =
                 fields.stream().filter(field -> !field.isPrimitive()).collect(Collectors.toList());
 
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
-                        typeDef.getTypeName().getName())
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addMethod(createConstructor(fields, poetFields))
-                .addMethods(createGetters(fields, featureFlags));
+                .addMethods(createGetters(fields, options));
 
         if (!poetFields.isEmpty()) {
             typeBuilder
@@ -97,7 +98,7 @@ public final class BeanGenerator {
         }
 
         typeBuilder.addMethod(MethodSpecs.createToString(
-                typeDef.getTypeName().getName(),
+                prefixedName.getName(),
                 fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList())));
 
         if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
@@ -121,15 +122,14 @@ public final class BeanGenerator {
                             .addMember("builder", "$T.class", builderClass)
                             .build())
                     .addMethod(createBuilder(builderClass))
-                    .addType(BeanBuilderGenerator.generate(
-                            typeMapper, objectClass, builderClass, typeDef, featureFlags));
+                    .addType(BeanBuilderGenerator.generate(typeMapper, objectClass, builderClass, typeDef, options));
         }
 
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
 
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
-        return JavaFile.builder(typePackage, typeBuilder.build())
+        return JavaFile.builder(prefixedName.getPackage(), typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();

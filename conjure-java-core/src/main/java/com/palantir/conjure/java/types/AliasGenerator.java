@@ -19,7 +19,9 @@ package com.palantir.conjure.java.types;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
@@ -45,13 +47,14 @@ public final class AliasGenerator {
 
     private AliasGenerator() {}
 
-    public static JavaFile generateAliasType(TypeMapper typeMapper, AliasDefinition typeDef) {
+    public static JavaFile generateAliasType(TypeMapper typeMapper, AliasDefinition typeDef, Options options) {
+        com.palantir.conjure.spec.TypeName prefixedTypeName =
+                Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
         TypeName aliasTypeName = typeMapper.getClassName(typeDef.getAlias());
 
-        String typePackage = typeDef.getTypeName().getPackage();
-        ClassName thisClass = ClassName.get(typePackage, typeDef.getTypeName().getName());
+        ClassName thisClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
 
-        TypeSpec.Builder spec = TypeSpec.classBuilder(typeDef.getTypeName().getName())
+        TypeSpec.Builder spec = TypeSpec.classBuilder(prefixedTypeName.getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(aliasTypeName, "value", Modifier.PRIVATE, Modifier.FINAL)
@@ -83,7 +86,7 @@ public final class AliasGenerator {
                         .build());
 
         Optional<CodeBlock> maybeValueOfFactoryMethod =
-                valueOfFactoryMethod(typeDef.getAlias(), aliasTypeName, typeMapper);
+                valueOfFactoryMethod(typeDef.getAlias(), aliasTypeName, typeMapper, options);
         if (maybeValueOfFactoryMethod.isPresent()) {
             spec.addMethod(MethodSpec.methodBuilder("valueOf")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -163,7 +166,7 @@ public final class AliasGenerator {
 
         typeDef.getDocs().ifPresent(docs -> spec.addJavadoc("$L", Javadoc.render(docs)));
 
-        return JavaFile.builder(typePackage, spec.build())
+        return JavaFile.builder(prefixedTypeName.getPackage(), spec.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
@@ -179,7 +182,7 @@ public final class AliasGenerator {
     }
 
     private static Optional<CodeBlock> valueOfFactoryMethod(
-            Type conjureType, TypeName aliasTypeName, TypeMapper typeMapper) {
+            Type conjureType, TypeName aliasTypeName, TypeMapper typeMapper, Options options) {
         // doesn't support valueOf factories for ANY or BINARY types
         if (conjureType.accept(TypeVisitor.IS_PRIMITIVE)
                 && !conjureType.accept(TypeVisitor.IS_ANY)
@@ -191,23 +194,25 @@ public final class AliasGenerator {
                     .getType(conjureType.accept(TypeVisitor.REFERENCE))
                     .filter(type -> type.accept(TypeDefinitionVisitor.IS_ALIAS))
                     .map(type -> type.accept(TypeDefinitionVisitor.ALIAS))
-                    .flatMap(type ->
-                            valueOfFactoryMethod(type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper)
-                                    .map(ignored -> {
-                                        ClassName className = ClassName.get(
-                                                type.getTypeName().getPackage(),
-                                                type.getTypeName().getName());
-                                        return CodeBlock.builder()
-                                                .addStatement("return of($T.valueOf(value))", className)
-                                                .build();
-                                    }));
+                    .flatMap(type -> valueOfFactoryMethod(
+                                    type.getAlias(), typeMapper.getClassName(type.getAlias()), typeMapper, options)
+                            .map(ignored -> {
+                                ClassName className = ClassName.get(
+                                        Packages.getPrefixedPackage(
+                                                type.getTypeName().getPackage(), options.packagePrefix()),
+                                        type.getTypeName().getName());
+                                return CodeBlock.builder()
+                                        .addStatement("return of($T.valueOf(value))", className)
+                                        .build();
+                            }));
         } else if (conjureType.accept(MoreVisitors.IS_EXTERNAL)) {
             ExternalReference reference = conjureType.accept(MoreVisitors.EXTERNAL);
             // Only generate valueOf methods for external type imports if the fallback type is valid
             if (valueOfFactoryMethod(
                                     reference.getFallback(),
                                     typeMapper.getClassName(reference.getFallback()),
-                                    typeMapper)
+                                    typeMapper,
+                                    options)
                             .isPresent()
                     && hasValueOfFactory(reference.getExternalReference())
                     && aliasTypeName.isPrimitive()) {

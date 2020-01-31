@@ -64,6 +64,15 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
                 .contains("import com.palantir.product.StringExample;");
     }
 
+    @Test
+    void testPrefixedServices() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
+        List<Path> files = new Retrofit2ServiceGenerator(
+                        Options.builder().packagePrefix("test.prefix").build())
+                .emit(def, folder);
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit.prefix");
+    }
+
     private static String compiledFileContent(File srcDir, String clazz) throws IOException {
         return new String(Files.readAllBytes(Paths.get(srcDir.getPath(), clazz)), StandardCharsets.UTF_8);
     }

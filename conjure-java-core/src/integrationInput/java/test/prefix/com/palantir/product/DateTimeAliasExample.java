@@ -1,0 +1,47 @@
+package test.prefix.com.palantir.product;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.logsafe.Preconditions;
+import java.time.OffsetDateTime;
+import javax.annotation.Generated;
+
+@Generated("com.palantir.conjure.java.types.AliasGenerator")
+public final class DateTimeAliasExample {
+    private final OffsetDateTime value;
+
+    private DateTimeAliasExample(OffsetDateTime value) {
+        this.value = Preconditions.checkNotNull(value, "value cannot be null");
+    }
+
+    @JsonValue
+    public OffsetDateTime get() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other
+                || (other instanceof DateTimeAliasExample
+                        && this.value.equals(((DateTimeAliasExample) other).value));
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
+    public static DateTimeAliasExample valueOf(String value) {
+        return of(OffsetDateTime.parse(value));
+    }
+
+    @JsonCreator
+    public static DateTimeAliasExample of(OffsetDateTime value) {
+        return new DateTimeAliasExample(value);
+    }
+}
