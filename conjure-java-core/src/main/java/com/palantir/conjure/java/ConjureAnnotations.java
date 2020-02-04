@@ -16,8 +16,11 @@
 
 package com.palantir.conjure.java;
 
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.spec.Documentation;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import java.util.Optional;
 
 public final class ConjureAnnotations {
 
@@ -25,6 +28,12 @@ public final class ConjureAnnotations {
         return AnnotationSpec.builder(ClassName.get("javax.annotation", "Generated"))
                 .addMember("value", "$S", clazz.getCanonicalName())
                 .build();
+    }
+
+    public static ImmutableList<AnnotationSpec> deprecation(Optional<Documentation> deprecation) {
+        return deprecation.isPresent()
+                ? ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build())
+                : ImmutableList.of();
     }
 
     private ConjureAnnotations() {}

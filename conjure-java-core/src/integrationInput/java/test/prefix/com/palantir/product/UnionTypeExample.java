@@ -105,6 +105,7 @@ public final class UnionTypeExample {
     }
 
     public interface Visitor<T> {
+        /** Docs for when UnionTypeExample is of type StringExample. */
         T visitStringExample(StringExample value);
 
         T visitSet(Set<String> value);
