@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Support enum value, union type, and bean field deprecation
+  links:
+  - https://github.com/palantir/conjure-java/pull/728
+  - https://github.com/palantir/conjure/pull/494
