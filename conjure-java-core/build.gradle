@@ -45,9 +45,7 @@ dependencies {
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
     compile 'com.google.googlejavaformat:google-java-format'
     compile 'com.google.guava:guava'
-    compile 'com.palantir.conjure:conjure-generator-common', {
-        exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'
-    }
+    compile 'com.palantir.conjure:conjure-generator-common'
     compile 'com.palantir.conjure.java.api:errors'
     compile 'com.palantir.ri:resource-identifier'
     compile 'com.palantir.syntactic-paths:syntactic-paths'
@@ -59,9 +57,7 @@ dependencies {
     compile 'org.slf4j:slf4j-api'
     compile 'com.atlassian.commonmark:commonmark'
 
-    testCompile('com.palantir.conjure:conjure-core') {
-        exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'
-    }
+    testCompile 'com.palantir.conjure:conjure-core'
     testCompile project(':conjure-java-undertow-runtime')
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
