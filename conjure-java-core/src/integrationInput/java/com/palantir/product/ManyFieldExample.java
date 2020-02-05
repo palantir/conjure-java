@@ -96,14 +96,20 @@ public final class ManyFieldExample {
         return this.set;
     }
 
-    /** docs for map field */
+    /** @deprecated deprecation documentation. */
     @JsonProperty("map")
+    @Deprecated
     public Map<String, String> getMap() {
         return this.map;
     }
 
-    /** docs for alias field */
+    /**
+     * docs for alias field
+     *
+     * @deprecated This field is deprecated.
+     */
     @JsonProperty("alias")
+    @Deprecated
     public StringAliasExample getAlias() {
         return this.alias;
     }
@@ -322,7 +328,8 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for map field */
+        /** @deprecated deprecation documentation. */
+        @Deprecated
         @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(Map<String, String> map) {
             this.map.clear();
@@ -330,19 +337,26 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for map field */
+        /** @deprecated deprecation documentation. */
+        @Deprecated
         public Builder putAllMap(Map<String, String> map) {
             this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
         }
 
-        /** docs for map field */
+        /** @deprecated deprecation documentation. */
+        @Deprecated
         public Builder map(String key, String value) {
             this.map.put(key, value);
             return this;
         }
 
-        /** docs for alias field */
+        /**
+         * docs for alias field
+         *
+         * @deprecated This field is deprecated.
+         */
+        @Deprecated
         @JsonSetter("alias")
         public Builder alias(StringAliasExample alias) {
             this.alias = Preconditions.checkNotNull(alias, "alias cannot be null");

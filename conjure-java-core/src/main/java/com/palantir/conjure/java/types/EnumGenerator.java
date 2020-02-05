@@ -27,6 +27,7 @@ import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -40,7 +41,6 @@ import com.squareup.javapoet.TypeVariableName;
 import java.util.List;
 import java.util.Locale;
 import javax.lang.model.element.Modifier;
-import org.apache.commons.lang3.StringUtils;
 
 public final class EnumGenerator {
 
@@ -120,7 +120,8 @@ public final class EnumGenerator {
                             thisClass, v.getValue(), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                     .initializer(
                             CodeBlock.of("new $1T($2T.$3N, $4S)", thisClass, enumClass, v.getValue(), v.getValue()));
-            v.getDocs().ifPresent(docs -> fieldSpec.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+            Javadoc.render(v.getDocs(), v.getDeprecated()).ifPresent(docs -> fieldSpec.addJavadoc("$L", docs));
+            v.getDeprecated().ifPresent(_deprecated -> fieldSpec.addAnnotation(Deprecated.class));
             return fieldSpec.build();
         });
     }
@@ -131,7 +132,9 @@ public final class EnumGenerator {
                 .addModifiers(Modifier.PUBLIC);
         for (EnumValueDefinition value : values) {
             TypeSpec.Builder anonymousClassBuilder = TypeSpec.anonymousClassBuilder("");
-            value.getDocs().ifPresent(docs -> anonymousClassBuilder.addJavadoc("$L", Javadoc.render(docs)));
+            Javadoc.render(value.getDocs(), value.getDeprecated())
+                    .ifPresent(docs -> anonymousClassBuilder.addJavadoc("$L", docs));
+            value.getDeprecated().ifPresent(_deprecation -> anonymousClassBuilder.addAnnotation(Deprecated.class));
             enumBuilder.addEnumConstant(value.getValue(), anonymousClassBuilder.build());
         }
         if (withUnknown) {
@@ -169,14 +172,15 @@ public final class EnumGenerator {
             MethodSpec.Builder methodSpecBuilder = MethodSpec.methodBuilder(getVisitorMethodName(value))
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .returns(TYPE_VARIABLE);
-            value.getDocs().ifPresent(docs ->
-                    methodSpecBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+            Javadoc.render(value.getDocs(), value.getDeprecated())
+                    .ifPresent(docs -> methodSpecBuilder.addJavadoc("$L", docs));
+            value.getDeprecated().ifPresent(_deprecated -> methodSpecBuilder.addAnnotation(Deprecated.class));
             methods.add(methodSpecBuilder.build());
         }
         return methods.build();
     }
 
-    private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass, Iterable<EnumValueDefinition> values) {
+    private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass, List<EnumValueDefinition> values) {
         CodeBlock.Builder switchBlock = CodeBlock.builder();
         switchBlock.beginControlFlow("switch (value)");
         for (EnumValueDefinition value : values) {
@@ -189,6 +193,8 @@ public final class EnumGenerator {
                 .addStatement("return visitor.$1L(string)", VISIT_UNKNOWN_METHOD_NAME)
                 .endControlFlow();
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
+        boolean anyDeprecatedValues = values.stream()
+                .anyMatch(definition -> definition.getDeprecated().isPresent());
         return MethodSpec.methodBuilder("accept")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(parameterizedVisitorClass, "visitor")
@@ -196,6 +202,12 @@ public final class EnumGenerator {
                 .addTypeVariable(TYPE_VARIABLE)
                 .returns(TYPE_VARIABLE)
                 .addCode(switchBlock.build())
+                .addAnnotations(
+                        anyDeprecatedValues
+                                ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)
+                                        .addMember("value", "$S", "deprecation")
+                                        .build())
+                                : ImmutableList.of())
                 .build();
     }
 
@@ -205,8 +217,8 @@ public final class EnumGenerator {
 
     private static MethodSpec createConstructor(ClassName enumClass) {
         // Note: We generate a two arg constructor that handles both known
-        // and unknown variants instead of using separate contructors to avoid
-        // jackson's behavior of preferring single string contructors for key
+        // and unknown variants instead of using separate constructors to avoid
+        // jackson's behavior of preferring single string constructors for key
         // deserializers over static factories.
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
@@ -217,7 +229,7 @@ public final class EnumGenerator {
                 .build();
     }
 
-    private static MethodSpec createValueOf(ClassName thisClass, Iterable<EnumValueDefinition> values) {
+    private static MethodSpec createValueOf(ClassName thisClass, List<EnumValueDefinition> values) {
         ParameterSpec param =
                 ParameterSpec.builder(ClassName.get(String.class), "value").build();
 
@@ -233,11 +245,18 @@ public final class EnumGenerator {
                 .addStatement("return new $T(Value.UNKNOWN, upperCasedValue)", thisClass)
                 .unindent()
                 .endControlFlow();
-
+        boolean anyDeprecatedValues = values.stream()
+                .anyMatch(definition -> definition.getDeprecated().isPresent());
         return MethodSpec.methodBuilder("valueOf")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(thisClass)
                 .addAnnotation(JsonCreator.class)
+                .addAnnotations(
+                        anyDeprecatedValues
+                                ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)
+                                        .addMember("value", "$S", "deprecation")
+                                        .build())
+                                : ImmutableList.of())
                 .addParameter(param)
                 .addStatement("$L", Expressions.requireNonNull(param.name, param.name + " cannot be null"))
                 // uppercase param for backwards compatibility

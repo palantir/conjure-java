@@ -8,31 +8,15 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
-    /** Invalid Conjure type definition. */
-    public static final ErrorType INVALID_TYPE_DEFINITION =
-            ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidTypeDefinition");
-
     /** Invalid Conjure service definition. */
     public static final ErrorType INVALID_SERVICE_DEFINITION =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidServiceDefinition");
 
+    /** Invalid Conjure type definition. */
+    public static final ErrorType INVALID_TYPE_DEFINITION =
+            ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidTypeDefinition");
+
     private ConjureErrors() {}
-
-    public static ServiceException invalidTypeDefinition(String typeName, Object typeDef) {
-        return new ServiceException(
-                INVALID_TYPE_DEFINITION,
-                SafeArg.of("typeName", typeName),
-                UnsafeArg.of("typeDef", typeDef));
-    }
-
-    public static ServiceException invalidTypeDefinition(
-            Throwable cause, String typeName, Object typeDef) {
-        return new ServiceException(
-                INVALID_TYPE_DEFINITION,
-                cause,
-                SafeArg.of("typeName", typeName),
-                UnsafeArg.of("typeDef", typeDef));
-    }
 
     /**
      * @param serviceName Name of the invalid service definition.
@@ -58,19 +42,20 @@ public final class ConjureErrors {
                 UnsafeArg.of("serviceDef", serviceDef));
     }
 
-    /**
-     * Throws a {@link ServiceException} of type InvalidTypeDefinition when {@code shouldThrow} is
-     * true.
-     *
-     * @param shouldThrow Cause the method to throw when true
-     * @param typeName
-     * @param typeDef
-     */
-    public static void throwIfInvalidTypeDefinition(
-            boolean shouldThrow, String typeName, Object typeDef) {
-        if (shouldThrow) {
-            throw invalidTypeDefinition(typeName, typeDef);
-        }
+    public static ServiceException invalidTypeDefinition(String typeName, Object typeDef) {
+        return new ServiceException(
+                INVALID_TYPE_DEFINITION,
+                SafeArg.of("typeName", typeName),
+                UnsafeArg.of("typeDef", typeDef));
+    }
+
+    public static ServiceException invalidTypeDefinition(
+            Throwable cause, String typeName, Object typeDef) {
+        return new ServiceException(
+                INVALID_TYPE_DEFINITION,
+                cause,
+                SafeArg.of("typeName", typeName),
+                UnsafeArg.of("typeDef", typeDef));
     }
 
     /**
@@ -85,6 +70,21 @@ public final class ConjureErrors {
             boolean shouldThrow, String serviceName, Object serviceDef) {
         if (shouldThrow) {
             throw invalidServiceDefinition(serviceName, serviceDef);
+        }
+    }
+
+    /**
+     * Throws a {@link ServiceException} of type InvalidTypeDefinition when {@code shouldThrow} is
+     * true.
+     *
+     * @param shouldThrow Cause the method to throw when true
+     * @param typeName
+     * @param typeDef
+     */
+    public static void throwIfInvalidTypeDefinition(
+            boolean shouldThrow, String typeName, Object typeDef) {
+        if (shouldThrow) {
+            throw invalidTypeDefinition(typeName, typeDef);
         }
     }
 }

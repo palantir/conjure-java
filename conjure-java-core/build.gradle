@@ -57,9 +57,7 @@ dependencies {
     compile 'org.slf4j:slf4j-api'
     compile 'com.atlassian.commonmark:commonmark'
 
-    testCompile('com.palantir.conjure:conjure-core') {
-        exclude group: 'com.palantir.conjure.java', module: 'conjure-lib'
-    }
+    testCompile 'com.palantir.conjure:conjure-core'
     testCompile project(':conjure-java-undertow-runtime')
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
