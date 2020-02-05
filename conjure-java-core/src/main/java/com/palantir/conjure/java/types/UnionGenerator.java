@@ -83,8 +83,8 @@ public final class UnionGenerator {
         Map<FieldName, TypeName> memberTypes = typeDef.getUnion().stream()
                 .collect(StableCollectors.toLinkedMap(
                         FieldDefinition::getFieldName, entry -> typeMapper.getClassName(entry.getType())));
-        List<FieldSpec> fields = ImmutableList.of(
-                FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+        List<FieldSpec> fields =
+                ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(

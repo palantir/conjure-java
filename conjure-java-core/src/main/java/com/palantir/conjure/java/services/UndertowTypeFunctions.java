@@ -102,18 +102,18 @@ final class UndertowTypeFunctions {
         return Optional.empty();
     }
 
-    private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME = new ImmutableMap.Builder<
-                    PrimitiveType.Value, String>()
-            .put(PrimitiveType.Value.BEARERTOKEN, "BearerToken")
-            .put(PrimitiveType.Value.BOOLEAN, "Boolean")
-            .put(PrimitiveType.Value.DATETIME, "DateTime")
-            .put(PrimitiveType.Value.DOUBLE, "Double")
-            .put(PrimitiveType.Value.INTEGER, "Integer")
-            .put(PrimitiveType.Value.RID, "Rid")
-            .put(PrimitiveType.Value.SAFELONG, "SafeLong")
-            .put(PrimitiveType.Value.STRING, "String")
-            .put(PrimitiveType.Value.UUID, "Uuid")
-            .build();
+    private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME =
+            new ImmutableMap.Builder<PrimitiveType.Value, String>()
+                    .put(PrimitiveType.Value.BEARERTOKEN, "BearerToken")
+                    .put(PrimitiveType.Value.BOOLEAN, "Boolean")
+                    .put(PrimitiveType.Value.DATETIME, "DateTime")
+                    .put(PrimitiveType.Value.DOUBLE, "Double")
+                    .put(PrimitiveType.Value.INTEGER, "Integer")
+                    .put(PrimitiveType.Value.RID, "Rid")
+                    .put(PrimitiveType.Value.SAFELONG, "SafeLong")
+                    .put(PrimitiveType.Value.STRING, "String")
+                    .put(PrimitiveType.Value.UUID, "Uuid")
+                    .build();
 
     static String primitiveTypeName(PrimitiveType in) {
         String typeName = PRIMITIVE_TO_TYPE_NAME.get(in.get());
