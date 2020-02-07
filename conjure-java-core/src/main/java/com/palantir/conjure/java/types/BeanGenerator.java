@@ -218,8 +218,9 @@ public final class BeanGenerator {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);
         }
 
-        field.conjureDef().getDocs().ifPresent(docs ->
-                getterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+        field.conjureDef()
+                .getDocs()
+                .ifPresent(docs -> getterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
         return getterBuilder.build();
     }
 

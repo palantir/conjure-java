@@ -169,8 +169,9 @@ public final class EnumGenerator {
             MethodSpec.Builder methodSpecBuilder = MethodSpec.methodBuilder(getVisitorMethodName(value))
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .returns(TYPE_VARIABLE);
-            value.getDocs().ifPresent(docs ->
-                    methodSpecBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+            value.getDocs()
+                    .ifPresent(
+                            docs -> methodSpecBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
             methods.add(methodSpecBuilder.build());
         }
         return methods.build();

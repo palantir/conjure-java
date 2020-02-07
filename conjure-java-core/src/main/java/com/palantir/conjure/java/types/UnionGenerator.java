@@ -156,8 +156,9 @@ public final class UnionGenerator {
                                     wrapperClass(unionClass, memberName),
                                     variableName)
                             .returns(unionClass);
-                    memberTypeDef.getDocs().ifPresent(docs ->
-                            builder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+                    memberTypeDef
+                            .getDocs()
+                            .ifPresent(docs -> builder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
                     return builder.build();
                 })
                 .collect(Collectors.toList());
@@ -338,10 +339,11 @@ public final class UnionGenerator {
                 .addAnnotation(Override.class);
 
         // Add statements to copy over visitor handlers to local immutable variables.
-        sortedStageNameTypePairs(memberTypeMap).forEach(nameType -> builder.addStatement(
-                "final $1T $2L = this.$2L",
-                visitorObjectTypeName(nameType.type, visitResultType),
-                visitorFieldName(nameType.memberName)));
+        sortedStageNameTypePairs(memberTypeMap)
+                .forEach(nameType -> builder.addStatement(
+                        "final $1T $2L = this.$2L",
+                        visitorObjectTypeName(nameType.type, visitResultType),
+                        visitorFieldName(nameType.memberName)));
 
         return builder.addStatement(
                         "return $L",

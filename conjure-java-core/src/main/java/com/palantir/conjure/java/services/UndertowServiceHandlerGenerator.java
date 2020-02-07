@@ -172,8 +172,10 @@ final class UndertowServiceHandlerGenerator {
                                 Arrays.class,
                                 endpointBlock)
                         .build())
-                .addTypes(Lists.transform(serviceDefinition.getEndpoints(), e -> generateEndpointHandler(
-                        e, serviceDefinition, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
+                .addTypes(Lists.transform(
+                        serviceDefinition.getEndpoints(),
+                        e -> generateEndpointHandler(
+                                e, serviceDefinition, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
                 .build();
 
         return JavaFile.builder(
