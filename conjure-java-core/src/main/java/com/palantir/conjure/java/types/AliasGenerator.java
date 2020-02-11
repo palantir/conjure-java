@@ -268,8 +268,8 @@ public final class AliasGenerator {
      */
     private static boolean hasValueOfFactory(com.palantir.conjure.spec.TypeName className) {
         try {
-            Class clazz = Class.forName(className.getPackage() + '.' + className.getName());
-            Method valueOf = clazz.getDeclaredMethod("valueOf", (Class<?>) String.class);
+            Class<?> clazz = Class.forName(className.getPackage() + '.' + className.getName());
+            Method valueOf = clazz.getDeclaredMethod("valueOf", String.class);
             return java.lang.reflect.Modifier.isPublic(valueOf.getModifiers())
                     && java.lang.reflect.Modifier.isStatic(valueOf.getModifiers());
         } catch (ReflectiveOperationException e) {
