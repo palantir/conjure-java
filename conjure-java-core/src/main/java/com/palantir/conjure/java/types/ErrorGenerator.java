@@ -54,11 +54,12 @@ public final class ErrorGenerator {
     public static Set<JavaFile> generateErrorTypes(
             TypeMapper typeMapper, List<ErrorDefinition> errorTypeNameToDef, Options options) {
         return splitErrorDefsByNamespace(errorTypeNameToDef).entrySet().stream()
-                .flatMap(entry -> entry.getValue().entrySet().stream().map(innerEntry -> generateErrorTypesForNamespace(
-                        typeMapper,
-                        Packages.getPrefixedPackage(entry.getKey(), options.packagePrefix()),
-                        innerEntry.getKey(),
-                        innerEntry.getValue())))
+                .flatMap(entry -> entry.getValue().entrySet().stream()
+                        .map(innerEntry -> generateErrorTypesForNamespace(
+                                typeMapper,
+                                Packages.getPrefixedPackage(entry.getKey(), options.packagePrefix()),
+                                innerEntry.getKey(),
+                                innerEntry.getValue())))
                 .collect(Collectors.toSet());
     }
 
@@ -210,8 +211,9 @@ public final class ErrorGenerator {
         methodBuilder.addParameter(argType, argName);
         Class<?> clazz = isSafe ? SafeArg.class : UnsafeArg.class;
         methodBuilder.addCode(",\n    $T.of($S, $L)", clazz, argName, argName);
-        argDefinition.getDocs().ifPresent(docs ->
-                methodBuilder.addJavadoc("@param $L $L", argName, Javadoc.render(docs)));
+        argDefinition
+                .getDocs()
+                .ifPresent(docs -> methodBuilder.addJavadoc("@param $L $L", argName, Javadoc.render(docs)));
     }
 
     private static ClassName errorTypesClassName(String conjurePackage, ErrorNamespace namespace) {

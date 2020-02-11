@@ -83,8 +83,8 @@ public final class UnionGenerator {
         Map<FieldDefinition, TypeName> memberTypes = typeDef.getUnion().stream()
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(), entry -> typeMapper.getClassName(entry.getType())));
-        List<FieldSpec> fields = ImmutableList.of(
-                FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+        List<FieldSpec> fields =
+                ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
 
         boolean containsDeprecated = typeDef.getUnion().stream()
@@ -356,10 +356,11 @@ public final class UnionGenerator {
                 .addAnnotation(Override.class);
 
         // Add statements to copy over visitor handlers to local immutable variables.
-        sortedStageNameTypePairs(memberTypeMap).forEach(nameType -> builder.addStatement(
-                "final $1T $2L = this.$2L",
-                visitorObjectTypeName(nameType.type, visitResultType),
-                visitorFieldName(nameType.memberName)));
+        sortedStageNameTypePairs(memberTypeMap)
+                .forEach(nameType -> builder.addStatement(
+                        "final $1T $2L = this.$2L",
+                        visitorObjectTypeName(nameType.type, visitResultType),
+                        visitorFieldName(nameType.memberName)));
 
         return builder.addStatement(
                         "return $L",

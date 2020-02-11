@@ -199,8 +199,10 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields) {
-        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(enrichedFields, enrichedField ->
-                CodeBlocks.statement("$1N(other.$2N())", enrichedField.poetSpec().name, enrichedField.getterName())));
+        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(
+                enrichedFields,
+                enrichedField -> CodeBlocks.statement(
+                        "$1N(other.$2N())", enrichedField.poetSpec().name, enrichedField.getterName())));
 
         return MethodSpec.methodBuilder("from")
                 .addModifiers(Modifier.PUBLIC)
