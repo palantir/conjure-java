@@ -174,9 +174,8 @@ public final class ConjureHandler implements HttpHandler {
                             // Logging context and trace handler must execute prior to the exception
                             // to provide user and trace information on exceptions.
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
-                            endpoint -> Optional.of(
-                                    new TracedOperationHandler(
-                                            endpoint.handler(), endpoint.method() + " " + endpoint.template())),
+                            endpoint -> Optional.of(new TracedOperationHandler(
+                                    endpoint.handler(), endpoint.method() + " " + endpoint.template())),
                             endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())))
                     .build()
                     .reverse();

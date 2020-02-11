@@ -74,16 +74,18 @@ public final class AutoDeserializeTest {
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
             return Stream.concat(
-                    IntStream.range(0, positiveSize).mapToObj(i1 -> Arguments.of(
-                            endpointName,
-                            i1,
-                            true,
-                            positiveAndNegativeTestCases.getPositive().get(i1))),
-                    IntStream.range(0, negativeSize).mapToObj(i -> Arguments.of(
-                            endpointName,
-                            positiveSize + i,
-                            false,
-                            positiveAndNegativeTestCases.getNegative().get(i))));
+                    IntStream.range(0, positiveSize)
+                            .mapToObj(i1 -> Arguments.of(
+                                    endpointName,
+                                    i1,
+                                    true,
+                                    positiveAndNegativeTestCases.getPositive().get(i1))),
+                    IntStream.range(0, negativeSize)
+                            .mapToObj(i -> Arguments.of(
+                                    endpointName,
+                                    positiveSize + i,
+                                    false,
+                                    positiveAndNegativeTestCases.getNegative().get(i))));
         });
     }
 

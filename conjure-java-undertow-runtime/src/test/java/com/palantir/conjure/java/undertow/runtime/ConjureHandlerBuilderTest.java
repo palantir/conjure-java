@@ -45,12 +45,14 @@ public class ConjureHandlerBuilderTest {
         assertThatThrownBy(builder::build)
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("The same route is declared by multiple UndertowServices")
-                .matches(e -> ((SafeLoggable) e).getArgs().equals(ImmutableList.of(SafeArg.of(
-                        "duplicates",
-                        ImmutableSet.of(
-                                "GET: /foo/{param}/foo/{param}: "
-                                        + "serviceName1.bar, serviceName1.bar2, serviceName2.bar",
-                                "POST: /foo: serviceName1.bar, serviceName2.bar")))));
+                .matches(e -> ((SafeLoggable) e)
+                        .getArgs()
+                        .equals(ImmutableList.of(SafeArg.of(
+                                "duplicates",
+                                ImmutableSet.of(
+                                        "GET: /foo/{param}/foo/{param}: "
+                                                + "serviceName1.bar, serviceName1.bar2, serviceName2.bar",
+                                        "POST: /foo: serviceName1.bar, serviceName2.bar")))));
     }
 
     @Test

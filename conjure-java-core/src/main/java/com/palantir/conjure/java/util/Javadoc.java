@@ -72,10 +72,12 @@ public final class Javadoc {
     }
 
     public static Optional<String> getParameterJavadoc(ArgumentDefinition argument, EndpointDefinition endpoint) {
-        return argument.getDocs().map(docs -> "@param "
-                + JavaNameSanitizer.sanitizeParameterName(argument.getArgName().get(), endpoint)
-                + " "
-                + Javadoc.render(argument.getDocs().get()));
+        return argument.getDocs()
+                .map(docs -> "@param "
+                        + JavaNameSanitizer.sanitizeParameterName(
+                                argument.getArgName().get(), endpoint)
+                        + " "
+                        + Javadoc.render(argument.getDocs().get()));
     }
 
     public static String getDeprecatedJavadoc(Documentation deprecationDocs) {
