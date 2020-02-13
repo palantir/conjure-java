@@ -14,6 +14,7 @@ import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.HeaderParameterType;
@@ -28,6 +29,7 @@ import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -73,9 +75,10 @@ public final class AsyncGenerator {
             endpoint.getArgs().stream()
                     .filter(arg -> arg.getParamType().accept(ParameterTypeVisitor.IS_BODY))
                     .findAny()
-                    .ifPresent(body ->
-                            impl.addField(serializer(endpoint.getEndpointName().get(), body.getType())));
-            impl.addField(deserializer(endpoint.getEndpointName().get(), endpoint.getReturns()));
+                    .flatMap(body -> serializer(endpoint.getEndpointName(), body.getType()))
+                    .ifPresent(impl::addField);
+
+            deserializer(endpoint.getEndpointName(), endpoint.getReturns()).ifPresent(impl::addField);
             impl.addMethod(asyncClientImpl(serviceClassName, endpoint));
         });
 
@@ -92,16 +95,24 @@ public final class AsyncGenerator {
         return asyncImpl;
     }
 
-    private FieldSpec serializer(String endpointName, Type type) {
+    private Optional<FieldSpec> serializer(EndpointName endpointName, Type type) {
+        if (type.accept(TypeVisitor.IS_BINARY)) {
+            return Optional.empty();
+        }
         TypeName className = returnTypes.baseType(type).box();
         ParameterizedTypeName deserializerType = ParameterizedTypeName.get(ClassName.get(Serializer.class), className);
-        return FieldSpec.builder(deserializerType, endpointName + "Serializer")
+        return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Serializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer("runtime.bodySerDe().serializer(new $T<$T>() {})", TypeMarker.class, className)
-                .build();
+                .build());
     }
 
-    private FieldSpec deserializer(String endpointName, Optional<Type> type) {
+    private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
+        // TODO(forozco): handle optional binary ??
+        if (type.map(t -> t.accept(TypeVisitor.IS_BINARY)).orElse(false)) {
+            return Optional.empty();
+        }
+
         TypeName className = returnTypes.baseType(type).box();
         ParameterizedTypeName deserializerType =
                 ParameterizedTypeName.get(ClassName.get(Deserializer.class), className);
@@ -113,10 +124,10 @@ public final class AsyncGenerator {
                 .add(type.isPresent() ? realDeserializer : voidDeserializer)
                 .build();
 
-        return FieldSpec.builder(deserializerType, endpointName + "Deserializer")
+        return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(initializer)
-                .build();
+                .build());
     }
 
     private MethodSpec asyncClientImpl(ClassName serviceClassName, EndpointDefinition def) {
@@ -132,8 +143,9 @@ public final class AsyncGenerator {
         CodeBlock.Builder requestParams = CodeBlock.builder();
         def.getAuth().map(AsyncGenerator::generateAuthHeader).ifPresent(requestParams::add);
 
-        def.getArgs().forEach(param ->
-                addParameter(requestParams, def.getEndpointName().get(), param));
+        def.getArgs().stream()
+                .map(param -> generateParam(def.getEndpointName().get(), param))
+                .forEach(requestParams::add);
 
         CodeBlock request = CodeBlock.builder()
                 .add("$T $L = $T.builder();", Request.Builder.class, "_request", Request.class)
@@ -148,10 +160,13 @@ public final class AsyncGenerator {
                 .build();
         CodeBlock transformed = CodeBlock.builder()
                 .add(
-                        "return $T.transform($L, $L::deserialize, $T.directExecutor());",
+                        "return $T.transform($L, $L, $T.directExecutor());",
                         Futures.class,
                         execute,
-                        def.getEndpointName().get() + "Deserializer",
+                        def.getReturns()
+                                .filter(type -> type.accept(TypeVisitor.IS_BINARY))
+                                .map(type -> "runtime" + ".bodySerDe()::deserializeInputStream")
+                                .orElseGet(() -> def.getEndpointName().get() + "Deserializer::deserialize"),
                         MoreExecutors.class)
                 .build();
 
@@ -160,73 +175,28 @@ public final class AsyncGenerator {
         return asyncClient;
     }
 
-    private void addParameter(CodeBlock.Builder request, String endpointName, ArgumentDefinition param) {
-        param.getParamType().accept(new ParameterType.Visitor<CodeBlock.Builder>() {
+    private CodeBlock generateParam(String endpointName, ArgumentDefinition param) {
+        return param.getParamType().accept(new ParameterType.Visitor<CodeBlock>() {
             @Override
-            public CodeBlock.Builder visitBody(BodyParameterType value) {
-                return request.add(
+            public CodeBlock visitBody(BodyParameterType value) {
+                if (param.getType().accept(TypeVisitor.IS_BINARY)) {
+                    return CodeBlock.of("$L.body(runtime.bodySerDe().serialize($L));", "_request", param.getArgName());
+                }
+                return CodeBlock.of(
                         "$L.body($LSerializer.serialize($L));", "_request", endpointName, param.getArgName());
             }
 
             @Override
-            public CodeBlock.Builder visitHeader(HeaderParameterType value) {
-                return param.getType().accept(new DefaultTypeVisitor<CodeBlock.Builder>() {
-                    @Override
-                    public CodeBlock.Builder visitOptional(OptionalType optionalType) {
-                        return request.add(
-                                "$L.ifPresent(v -> $L.putHeaderParams($S, $T.toString(v)));",
-                                param.getArgName(),
-                                "_request",
-                                value.getParamId(),
-                                Objects.class);
-                    }
-
-                    @Override
-                    public CodeBlock.Builder visitReference(com.palantir.conjure.spec.TypeName unused) {
-                        return request.add(
-                                "$L.putHeaderParams($S, $L.toString());",
-                                "_request",
-                                value.getParamId(),
-                                param.getArgName());
-                    }
-
-                    @Override
-                    public CodeBlock.Builder visitList(ListType unused) {
-                        return visitCollection();
-                    }
-
-                    @Override
-                    public CodeBlock.Builder visitSet(SetType unused) {
-                        return visitCollection();
-                    }
-
-                    private CodeBlock.Builder visitCollection() {
-                        return request.add(
-                                "$L.putAllHeaderParams($S, plainSerDe.serialize$L($L));",
-                                "_request",
-                                value.getParamId(),
-                                param.getType().accept(PlainSerializer.INSTANCE),
-                                param.getArgName());
-                    }
-
-                    @Override
-                    public CodeBlock.Builder visitDefault() {
-                        return request.add(
-                                "$L.putHeaderParams($S, plainSerDe.serialize$L($L));",
-                                "_request",
-                                value.getParamId(),
-                                param.getType().accept(PlainSerializer.INSTANCE),
-                                param.getArgName());
-                    }
-                });
+            public CodeBlock visitHeader(HeaderParameterType value) {
+                return generateHeaderParam(param, value);
             }
 
             @Override
-            public CodeBlock.Builder visitPath(PathParameterType value) {
-                return param.getType().accept(new DefaultTypeVisitor<CodeBlock.Builder>() {
+            public CodeBlock visitPath(PathParameterType value) {
+                return param.getType().accept(new DefaultTypeVisitor<CodeBlock>() {
                     @Override
-                    public CodeBlock.Builder visitReference(com.palantir.conjure.spec.TypeName unused) {
-                        return request.add(
+                    public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
+                        return CodeBlock.of(
                                 "$L.putPathParams($S, $L.toString());",
                                 "_request",
                                 param.getArgName(),
@@ -234,8 +204,8 @@ public final class AsyncGenerator {
                     }
 
                     @Override
-                    public CodeBlock.Builder visitDefault() {
-                        return request.add(
+                    public CodeBlock visitDefault() {
+                        return CodeBlock.of(
                                 "$L.putPathParams($S, plainSerDe.serialize$L($L));",
                                 "_request",
                                 param.getArgName(),
@@ -246,11 +216,11 @@ public final class AsyncGenerator {
             }
 
             @Override
-            public CodeBlock.Builder visitQuery(QueryParameterType value) {
-                return param.getType().accept(new DefaultTypeVisitor<CodeBlock.Builder>() {
+            public CodeBlock visitQuery(QueryParameterType value) {
+                return param.getType().accept(new DefaultTypeVisitor<CodeBlock>() {
                     @Override
-                    public CodeBlock.Builder visitOptional(OptionalType optionalType) {
-                        return request.add(
+                    public CodeBlock visitOptional(OptionalType optionalType) {
+                        return CodeBlock.of(
                                 "$L.ifPresent(v -> $L.putQueryParams($S, $T.toString(v)));",
                                 param.getArgName(),
                                 "_request",
@@ -259,8 +229,8 @@ public final class AsyncGenerator {
                     }
 
                     @Override
-                    public CodeBlock.Builder visitReference(com.palantir.conjure.spec.TypeName unused) {
-                        return request.add(
+                    public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
+                        return CodeBlock.of(
                                 "$L.putQueryParams($S, $L.toString());",
                                 "_request",
                                 value.getParamId(),
@@ -268,17 +238,17 @@ public final class AsyncGenerator {
                     }
 
                     @Override
-                    public CodeBlock.Builder visitList(ListType value) {
+                    public CodeBlock visitList(ListType value) {
                         return visitCollection();
                     }
 
                     @Override
-                    public CodeBlock.Builder visitSet(SetType value) {
+                    public CodeBlock visitSet(SetType value) {
                         return visitCollection();
                     }
 
-                    private CodeBlock.Builder visitCollection() {
-                        return request.add(
+                    private CodeBlock visitCollection() {
+                        return CodeBlock.of(
                                 "$L.putAllQueryParams($S, plainSerDe.serialize$L($L));",
                                 "_request",
                                 value.getParamId(),
@@ -287,8 +257,8 @@ public final class AsyncGenerator {
                     }
 
                     @Override
-                    public CodeBlock.Builder visitDefault() {
-                        return request.add(
+                    public CodeBlock visitDefault() {
+                        return CodeBlock.of(
                                 "$L.putQueryParams($S, plainSerDe.serialize$L($L));",
                                 "_request",
                                 value.getParamId(),
@@ -299,8 +269,58 @@ public final class AsyncGenerator {
             }
 
             @Override
-            public CodeBlock.Builder visitUnknown(String unknownType) {
+            public CodeBlock visitUnknown(String unknownType) {
                 throw new UnsupportedOperationException("Unknown parameter type: " + unknownType);
+            }
+        });
+    }
+
+    private CodeBlock generateHeaderParam(ArgumentDefinition param, HeaderParameterType value) {
+        return param.getType().accept(new DefaultTypeVisitor<CodeBlock>() {
+            @Override
+            public CodeBlock visitOptional(OptionalType optionalType) {
+                return CodeBlock.of(
+                        "$L.ifPresent(v -> $L.putHeaderParams($S, $T.toString(v)));",
+                        param.getArgName(),
+                        "_request",
+                        value.getParamId(),
+                        Objects.class);
+            }
+
+            @Override
+            public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
+                // TODO(forozco): handle references correctly
+                return CodeBlock.of(
+                        "$L.putHeaderParams($S, $L.toString());", "_request", value.getParamId(), param.getArgName());
+            }
+
+            @Override
+            public CodeBlock visitList(ListType unused) {
+                return visitCollection();
+            }
+
+            @Override
+            public CodeBlock visitSet(SetType unused) {
+                return visitCollection();
+            }
+
+            private CodeBlock visitCollection() {
+                return CodeBlock.of(
+                        "$L.putAllHeaderParams($S, plainSerDe.serialize$L($L));",
+                        "_request",
+                        value.getParamId(),
+                        param.getType().accept(PlainSerializer.INSTANCE),
+                        param.getArgName());
+            }
+
+            @Override
+            public CodeBlock visitDefault() {
+                return CodeBlock.of(
+                        "$L.putHeaderParams($S, plainSerDe.serialize$L($L));",
+                        "_request",
+                        value.getParamId(),
+                        param.getType().accept(PlainSerializer.INSTANCE),
+                        param.getArgName());
             }
         });
     }

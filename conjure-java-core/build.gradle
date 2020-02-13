@@ -75,6 +75,9 @@ dependencies {
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
     testCompile 'javax.xml.bind:jaxb-api'
+    testCompile 'com.palantir.dialogue:dialogue-java-client'
+    testCompile 'com.palantir.dialogue:dialogue-serde'
+
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     integrationInputCompile project(':conjure-lib')
@@ -85,6 +88,7 @@ dependencies {
     integrationInputCompile 'javax.annotation:javax.annotation-api'
     integrationInputCompile 'javax.validation:validation-api'
     integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
+    integrationInputCompile 'com.palantir.dialogue:dialogue-target'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'
