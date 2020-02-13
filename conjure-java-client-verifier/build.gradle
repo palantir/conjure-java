@@ -23,6 +23,7 @@ dependencies {
 
     generatedDialogueCompile 'com.palantir.dialogue:dialogue-java-client'
     generatedDialogueCompile 'com.palantir.dialogue:dialogue-serde'
+    generatedDialogueCompile sourceSets.generatedObjects.output
 
     generatedObjectsCompile project(':conjure-java-core')
     generatedObjectsCompile project(':conjure-lib')
@@ -42,6 +43,8 @@ dependencies {
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
     testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'io.dropwizard:dropwizard-testing'
+    testCompile 'com.palantir.dialogue:dialogue-java-client'
+    testCompile 'com.palantir.dialogue:dialogue-serde'
     testCompile sourceSets.generatedDialogue.output
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
