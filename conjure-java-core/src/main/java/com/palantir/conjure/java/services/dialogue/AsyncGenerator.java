@@ -214,6 +214,11 @@ public final class AsyncGenerator {
         });
     }
 
+    private CodeBlock generateHeaderParam(ArgumentDefinition param, HeaderParameterType value) {
+        return generatePlainSerializer(
+                "putHeaderParams", value.getParamId().get(), param.getArgName().get(), param.getType());
+    }
+
     private CodeBlock generatePathParam(ArgumentDefinition param) {
         return generatePlainSerializer(
                 "putPathParams", param.getArgName().get(), param.getArgName().get(), param.getType());
@@ -295,11 +300,6 @@ public final class AsyncGenerator {
                         .build();
             }
         });
-    }
-
-    private CodeBlock generateHeaderParam(ArgumentDefinition param, HeaderParameterType value) {
-        return generatePlainSerializer(
-                "putHeaderParams", value.getParamId().get(), param.getArgName().get(), param.getType());
     }
 
     private static CodeBlock generateAuthHeader(AuthType auth) {
