@@ -204,7 +204,12 @@ public final class UnionGenerator {
                     VALUE_FIELD_NAME);
         }
         ClassName unknownWrapperClass = visitorClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
-        codeBuilder.nextControlFlow("else if ($L instanceof $T)", VALUE_FIELD_NAME, unknownWrapperClass);
+        CodeBlock ifStatement = CodeBlock.of("if ($L instanceof $T)", VALUE_FIELD_NAME, unknownWrapperClass);
+        if (beginControlFlow) {
+            codeBuilder.beginControlFlow("$L", ifStatement);
+        } else {
+            codeBuilder.nextControlFlow("else $L", ifStatement);
+        }
         codeBuilder.addStatement(
                 "return $N.$L((($T) $L).getType())",
                 visitor,
@@ -521,17 +526,19 @@ public final class UnionGenerator {
                         .addMember("visible", "$L", true)
                         .addMember("defaultImpl", "$T.class", unknownWrapperClass)
                         .build());
-        List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
-                .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
-                        .addMember(
-                                "value",
-                                "$T.class",
-                                peerWrapperClass(baseClass, entry.getKey().getFieldName()))
-                        .build())
-                .collect(Collectors.toList());
-        AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
-        subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
-        baseBuilder.addAnnotation(annotationBuilder.build());
+        if (!memberTypes.isEmpty()) {
+            List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
+                    .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
+                            .addMember(
+                                    "value",
+                                    "$T.class",
+                                    peerWrapperClass(baseClass, entry.getKey().getFieldName()))
+                            .build())
+                    .collect(Collectors.toList());
+            AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
+            subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
+            baseBuilder.addAnnotation(annotationBuilder.build());
+        }
         baseBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
                 .addMember("ignoreUnknown", "$L", true)
                 .build());
