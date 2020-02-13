@@ -1,0 +1,11 @@
+package test.api;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.tokens.auth.BearerToken;
+import java.lang.Void;
+import javax.annotation.Generated;
+
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+public interface AsyncCookieService {
+    ListenableFuture<Void> eatCookies(BearerToken token);
+}

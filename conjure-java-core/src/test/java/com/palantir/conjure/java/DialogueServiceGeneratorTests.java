@@ -52,7 +52,6 @@ public final class DialogueServiceGeneratorTests extends TestBase {
     }
 
     @Test
-    @Disabled("Pending support for all valid conjure definitions")
     public void testServiceGeneration_cookieService() throws IOException {
         testServiceGeneration("cookie-service");
     }
