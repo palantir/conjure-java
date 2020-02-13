@@ -1,0 +1,105 @@
+package com.palantir.another;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.dialogue.BinaryRequestBody;
+import com.palantir.ri.ResourceIdentifier;
+import com.palantir.tokens.auth.AuthHeader;
+import java.io.InputStream;
+import java.lang.Boolean;
+import java.lang.Deprecated;
+import java.lang.Double;
+import java.lang.Integer;
+import java.lang.String;
+import java.lang.Void;
+import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.Set;
+import javax.annotation.Generated;
+import test.prefix.com.palantir.product.AliasedString;
+import test.prefix.com.palantir.product.CreateDatasetRequest;
+import test.prefix.com.palantir.product.NestedAliasedBinary;
+import test.prefix.com.palantir.product.datasets.BackingFileSystem;
+import test.prefix.com.palantir.product.datasets.Dataset;
+
+/** A Markdown description of the service. */
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+public interface AsyncTestService {
+    /** Returns a mapping from file system id to backing file system configuration. */
+    ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
+
+    ListenableFuture<Dataset> createDataset(
+            AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
+
+    ListenableFuture<Optional<Dataset>> getDataset(
+            AuthHeader authHeader, ResourceIdentifier datasetRid);
+
+    ListenableFuture<InputStream> getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+
+    ListenableFuture<NestedAliasedBinary> getAliasedRawData(
+            AuthHeader authHeader, ResourceIdentifier datasetRid);
+
+    ListenableFuture<Optional<ByteBuffer>> maybeGetRawData(
+            AuthHeader authHeader, ResourceIdentifier datasetRid);
+
+    ListenableFuture<AliasedString> getAliasedString(
+            AuthHeader authHeader, ResourceIdentifier datasetRid);
+
+    ListenableFuture<Void> uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
+
+    ListenableFuture<Void> uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input);
+
+    /** @param datasetRid A valid dataset resource identifier. */
+    ListenableFuture<Set<String>> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
+
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @Deprecated
+    ListenableFuture<Set<String>> getBranchesDeprecated(
+            AuthHeader authHeader, ResourceIdentifier datasetRid);
+
+    ListenableFuture<Optional<String>> resolveBranch(
+            AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
+
+    ListenableFuture<Optional<String>> testParam(
+            AuthHeader authHeader, ResourceIdentifier datasetRid);
+
+    ListenableFuture<Integer> testQueryParams(
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query);
+
+    ListenableFuture<Void> testNoResponseQueryParams(
+            AuthHeader authHeader,
+            ResourceIdentifier something,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> optionalMiddle,
+            Set<String> setEnd,
+            Optional<ResourceIdentifier> optionalEnd,
+            String query);
+
+    ListenableFuture<Boolean> testBoolean(AuthHeader authHeader);
+
+    ListenableFuture<Double> testDouble(AuthHeader authHeader);
+
+    ListenableFuture<Integer> testInteger(AuthHeader authHeader);
+
+    ListenableFuture<Optional<String>> testPostOptional(
+            AuthHeader authHeader, Optional<String> maybeString);
+
+    ListenableFuture<Void> testOptionalIntegerAndDouble(
+            AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
+
+    ListenableFuture<Void> getForStrings(
+            AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
+}
