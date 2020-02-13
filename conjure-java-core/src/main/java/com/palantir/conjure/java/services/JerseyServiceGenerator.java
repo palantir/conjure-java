@@ -291,12 +291,12 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         if (auth.get().accept(AuthTypeVisitor.IS_HEADER)) {
             annotationClassName = ClassName.get("javax.ws.rs", "HeaderParam");
             tokenClassName = ClassName.get("com.palantir.tokens.auth", "AuthHeader");
-            paramName = "authHeader";
+            paramName = Auth.AUTH_HEADER_PARAM_NAME;
             tokenName = "Authorization";
         } else if (auth.get().accept(AuthTypeVisitor.IS_COOKIE)) {
             annotationClassName = ClassName.get("javax.ws.rs", "CookieParam");
             tokenClassName = ClassName.get("com.palantir.tokens.auth", "BearerToken");
-            paramName = "token";
+            paramName = Auth.COOKIE_AUTH_PARAM_NAME;
             tokenName = auth.get().accept(AuthTypeVisitor.COOKIE).getCookieName();
         } else {
             throw new IllegalStateException("Unrecognized auth type: " + auth.get());

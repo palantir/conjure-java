@@ -7,11 +7,15 @@ package com.palantir.conjure.java.services.dialogue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.palantir.conjure.java.services.Auth;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
+import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.BodyParameterType;
+import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ExternalReference;
+import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.HeaderParameterType;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -31,7 +35,9 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -124,14 +130,7 @@ public final class AsyncGenerator {
         methodBuilder.returns(returnTypes.async(def.getReturns()));
 
         CodeBlock.Builder requestParams = CodeBlock.builder();
-        def.getAuth().ifPresent(auth -> {
-            Auth.verifyAuthTypeIsHeader(auth);
-            requestParams.add(
-                    "$L.putHeaderParams($S, plainSerDe.serializeBearerToken($L.getBearerToken()));",
-                    "_request",
-                    Auth.AUTH_HEADER_NAME,
-                    Auth.AUTH_HEADER_PARAM_NAME);
-        });
+        def.getAuth().map(AsyncGenerator::generateAuthHeader).ifPresent(requestParams::add);
 
         def.getArgs().forEach(param ->
                 addParameter(requestParams, def.getEndpointName().get(), param));
@@ -302,6 +301,34 @@ public final class AsyncGenerator {
             @Override
             public CodeBlock.Builder visitUnknown(String unknownType) {
                 throw new UnsupportedOperationException("Unknown parameter type: " + unknownType);
+            }
+        });
+    }
+
+    private static CodeBlock generateAuthHeader(AuthType auth) {
+        return auth.accept(new AuthType.Visitor<CodeBlock>() {
+            @Override
+            public CodeBlock visitHeader(HeaderAuthType value) {
+                return CodeBlock.of(
+                        "$L.putHeaderParams($S, plainSerDe.serializeBearerToken($L.getBearerToken()));",
+                        "_request",
+                        Auth.AUTH_HEADER_NAME,
+                        Auth.AUTH_HEADER_PARAM_NAME);
+            }
+
+            @Override
+            public CodeBlock visitCookie(CookieAuthType value) {
+                return CodeBlock.of(
+                        "$L.putHeaderParam($S, \"$L=\" + planSerDe.serializeBearerToken($L));",
+                        "_request",
+                        "Cookie",
+                        value.getCookieName(),
+                        Auth.COOKIE_AUTH_PARAM_NAME);
+            }
+
+            @Override
+            public CodeBlock visitUnknown(String unknownType) {
+                throw new SafeIllegalStateException("unknown auth type", SafeArg.of("type", unknownType));
             }
         });
     }
