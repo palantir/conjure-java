@@ -116,9 +116,8 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(
                 names = "--undertowListenableFutures",
                 defaultValue = "false",
-                description =
-                        "Generate Undertow services which return Guava ListenableFuture for asynchronous "
-                                + "processing")
+                description = "Generate Undertow services which return Guava ListenableFuture for asynchronous "
+                        + "processing")
         private boolean undertowListenableFutures;
 
         @CommandLine.Option(
@@ -137,9 +136,8 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(
                 names = "--experimentalUndertowAsyncMarkers",
                 defaultValue = "false",
-                description =
-                        "Experimental: Allows Undertow asynchronous processing to be enabled on individual "
-                                + "endpoints")
+                description = "Experimental: Allows Undertow asynchronous processing to be enabled on individual "
+                        + "endpoints")
         private boolean experimentalUndertowAsyncMarkers;
 
         @CommandLine.Option(
