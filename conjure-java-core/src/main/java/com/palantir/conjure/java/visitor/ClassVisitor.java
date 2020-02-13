@@ -26,6 +26,7 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.dialogue.BinaryRequestBody;
 import com.squareup.javapoet.TypeName;
 import java.io.InputStream;
 import java.util.List;
@@ -51,10 +52,11 @@ public final class ClassVisitor implements ClassNameVisitor {
             return delegate.visitPrimitive(value);
         }
 
+        // TODO(forozco): handle optional binary response
         if (mode == Mode.RETURN_VALUE) {
             return TypeName.get(InputStream.class);
         } else {
-            throw new UnsupportedOperationException("BinaryType is not supported in conjure-dialogue mode: " + mode);
+            return TypeName.get(BinaryRequestBody.class);
         }
     }
 
