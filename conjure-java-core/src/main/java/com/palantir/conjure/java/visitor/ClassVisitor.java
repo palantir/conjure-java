@@ -75,6 +75,6 @@ public final class ClassVisitor implements ClassNameVisitor {
 
     @Override
     public TypeName visitExternal(ExternalReference value) {
-        throw new UnsupportedOperationException("Type is not supported by conjure-dialogue: " + value);
+        return delegate.visitExternal(value);
     }
 }

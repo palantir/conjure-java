@@ -29,10 +29,14 @@ import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HttpPath;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.UrlBuilder;
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -43,6 +47,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.glassfish.jersey.uri.internal.UriTemplateParser;
@@ -66,7 +71,18 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
         TypeMapper returnTypes = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new ClassVisitor(conjureDefinition.getTypes(), options, ClassVisitor.Mode.RETURN_VALUE));
-        TypeAwareGenerator generator = new TypeAwareGenerator(parameterTypes, returnTypes, apiVersion);
+        Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitionsByName =
+                conjureDefinition.getTypes().stream()
+                        .collect(Collectors.toMap(
+                                type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
+        TypeAwareGenerator generator = new TypeAwareGenerator(
+                typeName -> Preconditions.checkNotNull(
+                        typeDefinitionsByName.get(typeName),
+                        "Referenced unknown TypeName",
+                        SafeArg.of("typeName", typeName)),
+                parameterTypes,
+                returnTypes,
+                apiVersion);
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generator.service(serviceDef).stream())
                 .collect(Collectors.toSet());
@@ -74,11 +90,17 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
 
     // TODO(rfink): Split into separate classes: endpoint, interface, impl.
     private static final class TypeAwareGenerator {
+        private final Function<com.palantir.conjure.spec.TypeName, TypeDefinition> typeNameResolver;
         private final ParameterTypeMapper parameterTypes;
         private final ReturnTypeMapper returnTypes;
         private final String apiVersion;
 
-        private TypeAwareGenerator(TypeMapper parameterTypes, TypeMapper returnTypes, String apiVersion) {
+        private TypeAwareGenerator(
+                Function<com.palantir.conjure.spec.TypeName, TypeDefinition> typeNameResolver,
+                TypeMapper parameterTypes,
+                TypeMapper returnTypes,
+                String apiVersion) {
+            this.typeNameResolver = typeNameResolver;
             this.parameterTypes = new ParameterTypeMapper(parameterTypes);
             this.returnTypes = new ReturnTypeMapper(returnTypes);
             this.apiVersion = apiVersion;
@@ -103,7 +125,8 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
                     .addModifiers(Modifier.PRIVATE)
                     .build());
             serviceBuilder.addMethod(new BlockingGenerator(parameterTypes, returnTypes).generate(def));
-            serviceBuilder.addMethod(new AsyncGenerator(parameterTypes, returnTypes).generate(serviceClassName, def));
+            serviceBuilder.addMethod(
+                    new AsyncGenerator(typeNameResolver, parameterTypes, returnTypes).generate(serviceClassName, def));
             serviceBuilder.addFields(def.getEndpoints().stream()
                     .map(e -> endpoint(e, def.getServiceName().getName()))
                     .collect(toList()));

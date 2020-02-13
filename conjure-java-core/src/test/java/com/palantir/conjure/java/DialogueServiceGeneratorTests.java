@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
@@ -46,7 +45,6 @@ public final class DialogueServiceGeneratorTests extends TestBase {
     }
 
     @Test
-    @Disabled("Pending support for all valid conjure definitions")
     public void testServiceGeneration_exampleService() throws IOException {
         testServiceGeneration("example-service");
     }
@@ -57,7 +55,15 @@ public final class DialogueServiceGeneratorTests extends TestBase {
     }
 
     @Test
-    @Disabled("Pending support for all valid conjure definitions")
+    void testPrefixedServices() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
+        List<Path> files = new DialogueServiceGenerator(
+                        Options.builder().packagePrefix("test.prefix").build(), "")
+                .emit(def, folder);
+        validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".dialogue.prefix");
+    }
+
+    @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/example-conjure-imports.yml"),
@@ -68,16 +74,14 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         generator.emit(conjure, src);
 
         // Generated files contain imports
-        assertThat(compiledFileContent(src, "test/api/with/imports/ImportService.java"))
+        assertThat(compiledFileContent(src, "test/api/with/imports/DialogueImportService.java"))
                 .contains("import com.palantir.product.StringExample;");
     }
 
     @Test
     public void generateEteServices() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                // TODO(forozco): uncomment once we support everything
-                // new File("src/test/resources/ete-service.yml"),
-                new File("src/test/resources/ete-binary.yml")));
+                new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new DialogueServiceGenerator(Options.empty(), "").emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
