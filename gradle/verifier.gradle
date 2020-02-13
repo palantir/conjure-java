@@ -25,17 +25,21 @@ sourceSets {
     generatedObjects
     generatedJersey
     generatedUndertow
+    generatedDialogue
 }
 
 idea {
     module {
+        sourceDirs += sourceSets.generatedDialogue.java.srcDirs
         sourceDirs += sourceSets.generatedObjects.java.srcDirs
         sourceDirs += sourceSets.generatedJersey.java.srcDirs
         sourceDirs += sourceSets.generatedUndertow.java.srcDirs
+        generatedSourceDirs += sourceSets.generatedDialogue.java.srcDirs
         generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
         generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
         generatedSourceDirs += sourceSets.generatedUndertow.java.srcDirs
         scopes.COMPILE.plus += [
+                configurations.generatedDialogueCompile,
                 configurations.generatedObjectsCompile,
                 configurations.generatedJerseyCompile,
                 configurations.generatedUndertowCompile]
@@ -85,6 +89,16 @@ task conjureJavaJersey(type: JavaExec) {
     doFirst { delete "src/generatedJersey/java/*" }
 }
 
+task conjureJavaDialogue(type: JavaExec) {
+    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedDialogue/java', '--dialogue'
+
+    inputs.file "${-> configurations.verificationApi.singleFile}"
+    outputs.dir "src/generatedDialogue/java"
+    doFirst { delete "src/generatedDialogue/java/*" }
+}
+
 task conjureJavaUndertow(type: JavaExec) {
     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
@@ -99,10 +113,12 @@ task conjureJavaUndertow(type: JavaExec) {
 compileGeneratedObjectsJava.dependsOn conjureJavaObjects
 compileGeneratedObjectsJava.dependsOn conjureJavaJersey
 compileGeneratedObjectsJava.dependsOn conjureJavaUndertow
+compileGeneratedObjectsJava.dependsOn conjureJavaDialogue
 
-tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, conjureJavaUndertow, unpackVerifier, copyTestCases
+tasks.idea.dependsOn conjureJavaDialogue, conjureJavaObjects, conjureJavaJersey, conjureJavaUndertow, unpackVerifier, copyTestCases
 test.dependsOn unpackVerifier, copyTestCases
 
-checkstyleGeneratedObjects.enabled = false
+checkstyleGeneratedDialogue.enabled = false
 checkstyleGeneratedJersey.enabled = false
+checkstyleGeneratedObjects.enabled = false
 checkstyleGeneratedUndertow.enabled = false

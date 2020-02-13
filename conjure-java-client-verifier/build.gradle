@@ -21,6 +21,9 @@ dependencies {
     verificationApi 'com.palantir.conjure.verification:verification-server-api'
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
+    generatedDialogueCompile 'com.palantir.dialogue:dialogue-java-client'
+    generatedDialogueCompile 'com.palantir.dialogue:dialogue-serde'
+
     generatedObjectsCompile project(':conjure-java-core')
     generatedObjectsCompile project(':conjure-lib')
 
@@ -39,6 +42,7 @@ dependencies {
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
     testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'io.dropwizard:dropwizard-testing'
+    testCompile sourceSets.generatedDialogue.output
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
     testCompile sourceSets.generatedUndertow.output

@@ -18,15 +18,23 @@ package com.palantir.conjure.java.compliance;
 
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
+import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.server.AutoDeserializeService;
+import com.palantir.conjure.verification.server.BlockingAutoDeserializeService;
+import com.palantir.conjure.verification.server.DialogueAutoDeserializeService;
 import com.palantir.conjure.verification.server.SingleHeaderService;
 import com.palantir.conjure.verification.server.SinglePathParamService;
 import com.palantir.conjure.verification.server.SingleQueryParamService;
+import com.palantir.dialogue.JavaChannels;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 
 public final class VerificationClients {
     private VerificationClients() {}
+
+    private static final DefaultConjureRuntime DEFAULT_CONJURE_RUNTIME =
+            DefaultConjureRuntime.builder().build();
 
     public static AutoDeserializeService autoDeserializeService(VerificationServerRule server) {
         return JaxRsClient.create(
@@ -34,6 +42,12 @@ public final class VerificationClients {
                 getUserAgent(),
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
+    }
+
+    public static BlockingAutoDeserializeService dialogueAutoDeserializeService(VerificationServerRule server) {
+        return DialogueAutoDeserializeService.blocking(
+                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
+                DEFAULT_CONJURE_RUNTIME);
     }
 
     public static AutoDeserializeConfirmService confirmService(VerificationServerRule server) {
