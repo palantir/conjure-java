@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 public interface ServiceGenerator {
 
@@ -51,8 +50,7 @@ public interface ServiceGenerator {
     }
 
     static Optional<String> getJavaDoc(EndpointDefinition endpointDef) {
-        Optional<String> depr =
-                endpointDef.getDeprecated().map(v -> StringUtils.appendIfMissing("@deprecated " + v, "\n"));
+        Optional<String> depr = endpointDef.getDeprecated().map(Javadoc::getDeprecatedJavadoc);
 
         Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
 

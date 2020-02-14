@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Defining an empty union no longer causes conjure-java to crash.
+  links:
+  - https://github.com/palantir/conjure-java/pull/733

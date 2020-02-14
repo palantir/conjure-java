@@ -199,8 +199,10 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields) {
-        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(enrichedFields, enrichedField ->
-                CodeBlocks.statement("$1N(other.$2N())", enrichedField.poetSpec().name, enrichedField.getterName())));
+        CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(
+                enrichedFields,
+                enrichedField -> CodeBlocks.statement(
+                        "$1N(other.$2N())", enrichedField.poetSpec().name, enrichedField.getterName())));
 
         return MethodSpec.methodBuilder("from")
                 .addModifiers(Modifier.PUBLIC)
@@ -271,10 +273,13 @@ public final class BeanBuilderGenerator {
 
     private MethodSpec createCollectionSetter(String prefix, EnrichedField enriched) {
         FieldSpec field = enriched.poetSpec();
-        Type type = enriched.conjureDef().getType();
+        FieldDefinition definition = enriched.conjureDef();
+        Type type = definition.getType();
         boolean shouldClearFirst = false;
         return MethodSpec.methodBuilder(prefix + StringUtils.capitalize(field.name))
-                .addJavadoc(enriched.conjureDef().getDocs().map(Javadoc::render).orElse(""))
+                .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
+                        .orElse(""))
+                .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
                 .addParameter(widenParameterIfPossible(field.type, type), field.name)
@@ -482,8 +487,11 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec.Builder publicSetter(EnrichedField enriched) {
+        FieldDefinition definition = enriched.conjureDef();
         return MethodSpec.methodBuilder(enriched.poetSpec().name)
-                .addJavadoc(enriched.conjureDef().getDocs().map(Javadoc::render).orElse(""))
+                .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
+                        .orElse(""))
+                .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass);
     }

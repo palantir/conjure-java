@@ -23,9 +23,15 @@ import javax.annotation.Generated;
 public final class EnumExample {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
-    public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
+    /** @deprecated Prefer <code>ONE</code> where possible. */
+    @Deprecated public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
 
-    /** Value of 100. */
+    /**
+     * Value of 100.
+     *
+     * @deprecated One is easier to manage.
+     */
+    @Deprecated
     public static final EnumExample ONE_HUNDRED = new EnumExample(Value.ONE_HUNDRED, "ONE_HUNDRED");
 
     private final Value value;
@@ -60,6 +66,7 @@ public final class EnumExample {
     }
 
     @JsonCreator
+    @SuppressWarnings("deprecation")
     public static EnumExample valueOf(String value) {
         Preconditions.checkNotNull(value, "value cannot be null");
         String upperCasedValue = value.toUpperCase(Locale.ROOT);
@@ -75,6 +82,7 @@ public final class EnumExample {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public <T> T accept(Visitor<T> visitor) {
         switch (value) {
             case ONE:
@@ -92,9 +100,16 @@ public final class EnumExample {
     public enum Value {
         ONE,
 
+        /** @deprecated Prefer <code>ONE</code> where possible. */
+        @Deprecated
         TWO,
 
-        /** Value of 100. */
+        /**
+         * Value of 100.
+         *
+         * @deprecated One is easier to manage.
+         */
+        @Deprecated
         ONE_HUNDRED,
 
         UNKNOWN
@@ -104,9 +119,16 @@ public final class EnumExample {
     public interface Visitor<T> {
         T visitOne();
 
+        /** @deprecated Prefer <code>ONE</code> where possible. */
+        @Deprecated
         T visitTwo();
 
-        /** Value of 100. */
+        /**
+         * Value of 100.
+         *
+         * @deprecated One is easier to manage.
+         */
+        @Deprecated
         T visitOneHundred();
 
         T visitUnknown(String unknownValue);
