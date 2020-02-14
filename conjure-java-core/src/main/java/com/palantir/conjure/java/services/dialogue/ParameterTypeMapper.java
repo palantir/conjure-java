@@ -35,6 +35,7 @@ import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +50,10 @@ public final class ParameterTypeMapper {
 
     public ParameterTypeMapper(TypeMapper parameterTypes) {
         this.parameterTypes = parameterTypes;
+    }
+
+    public TypeName baseType(Type type) {
+        return parameterTypes.getClassName(type);
     }
 
     public List<ParameterSpec> methodParams(EndpointDefinition endpointDef) {

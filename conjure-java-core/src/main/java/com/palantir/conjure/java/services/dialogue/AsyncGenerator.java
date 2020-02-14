@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.java.services.Auth;
-import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.BodyParameterType;
@@ -40,7 +39,9 @@ import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
+import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -50,7 +51,6 @@ import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -66,12 +66,14 @@ import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
 public final class AsyncGenerator {
-
-    public static final String REQUEST = "_request";
+    private static final String REQUEST = "_request";
+    private final TypeNameResolver typeNameResolver;
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
 
-    public AsyncGenerator(ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+    public AsyncGenerator(
+            TypeNameResolver typeNameResolver, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+        this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
     }
@@ -205,79 +207,12 @@ public final class AsyncGenerator {
 
             @Override
             public CodeBlock visitPath(PathParameterType value) {
-                return param.getType().accept(new DefaultTypeVisitor<CodeBlock>() {
-                    @Override
-                    public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
-                        return CodeBlock.of(
-                                "$L.putPathParams($S, $L.toString());",
-                                REQUEST,
-                                param.getArgName(),
-                                param.getArgName());
-                    }
-
-                    @Override
-                    public CodeBlock visitDefault() {
-                        return CodeBlock.of(
-                                "$L.putPathParams($S, plainSerDe.serialize$L($L));",
-                                REQUEST,
-                                param.getArgName(),
-                                param.getType().accept(PlainSerializer.INSTANCE),
-                                param.getArgName());
-                    }
-                });
+                return generatePathParam(param);
             }
 
             @Override
             public CodeBlock visitQuery(QueryParameterType value) {
-                return param.getType().accept(new DefaultTypeVisitor<CodeBlock>() {
-                    @Override
-                    public CodeBlock visitOptional(OptionalType optionalType) {
-                        return CodeBlock.of(
-                                "$L.ifPresent(v -> $L.putQueryParams($S, $T.toString(v)));",
-                                param.getArgName(),
-                                REQUEST,
-                                value.getParamId(),
-                                Objects.class);
-                    }
-
-                    @Override
-                    public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
-                        return CodeBlock.of(
-                                "$L.putQueryParams($S, $L.toString());",
-                                REQUEST,
-                                value.getParamId(),
-                                param.getArgName());
-                    }
-
-                    @Override
-                    public CodeBlock visitList(ListType value) {
-                        return visitCollection();
-                    }
-
-                    @Override
-                    public CodeBlock visitSet(SetType value) {
-                        return visitCollection();
-                    }
-
-                    private CodeBlock visitCollection() {
-                        return CodeBlock.of(
-                                "$L.putAllQueryParams($S, plainSerDe.serialize$L($L));",
-                                REQUEST,
-                                value.getParamId(),
-                                param.getType().accept(PlainSerializer.INSTANCE),
-                                param.getArgName());
-                    }
-
-                    @Override
-                    public CodeBlock visitDefault() {
-                        return CodeBlock.of(
-                                "$L.putQueryParams($S, plainSerDe.serialize$L($L));",
-                                REQUEST,
-                                value.getParamId(),
-                                param.getType().accept(PlainSerializer.INSTANCE),
-                                param.getArgName());
-                    }
-                });
+                return generateQueryParam(param, value);
             }
 
             @Override
@@ -288,51 +223,101 @@ public final class AsyncGenerator {
     }
 
     private CodeBlock generateHeaderParam(ArgumentDefinition param, HeaderParameterType value) {
-        return param.getType().accept(new DefaultTypeVisitor<CodeBlock>() {
+        return generatePlainSerializer(
+                "putHeaderParams",
+                value.getParamId().get(),
+                CodeBlock.of(param.getArgName().get()),
+                param.getType());
+    }
+
+    private CodeBlock generatePathParam(ArgumentDefinition param) {
+        return generatePlainSerializer(
+                "putPathParams",
+                param.getArgName().get(),
+                CodeBlock.of("$L", param.getArgName().get()),
+                param.getType());
+    }
+
+    private CodeBlock generateQueryParam(ArgumentDefinition param, QueryParameterType value) {
+        return generatePlainSerializer(
+                "putQueryParams",
+                value.getParamId().get(),
+                CodeBlock.of(param.getArgName().get()),
+                param.getType());
+    }
+
+    private CodeBlock generatePlainSerializer(String method, String key, CodeBlock argName, Type type) {
+        return type.accept(new Type.Visitor<CodeBlock>() {
+            @Override
+            public CodeBlock visitPrimitive(PrimitiveType primitiveType) {
+                return CodeBlock.of(
+                        "$L.$L($S, plainSerDe.serialize$L($L));",
+                        "_request",
+                        method,
+                        key,
+                        primitiveTypeName(primitiveType),
+                        argName);
+            }
+
             @Override
             public CodeBlock visitOptional(OptionalType optionalType) {
-                return CodeBlock.of(
-                        "$L.ifPresent(v -> $L.putHeaderParams($S, $T.toString(v)));",
-                        param.getArgName(),
-                        REQUEST,
-                        value.getParamId(),
-                        Objects.class);
+                return CodeBlock.builder()
+                        .beginControlFlow("if ($L.isPresent())", argName)
+                        .add(generatePlainSerializer(
+                                method, key, CodeBlock.of("$L.get()", argName), optionalType.getItemType()))
+                        .endControlFlow()
+                        .build();
             }
 
             @Override
-            public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
-                // TODO(forozco): handle references correctly
-                return CodeBlock.of(
-                        "$L.putHeaderParams($S, $L.toString());", REQUEST, value.getParamId(), param.getArgName());
+            public CodeBlock visitList(ListType value) {
+                return visitCollection(value.getItemType());
             }
 
             @Override
-            public CodeBlock visitList(ListType unused) {
-                return visitCollection();
+            public CodeBlock visitSet(SetType value) {
+                return visitCollection(value.getItemType());
             }
 
             @Override
-            public CodeBlock visitSet(SetType unused) {
-                return visitCollection();
-            }
-
-            private CodeBlock visitCollection() {
-                return CodeBlock.of(
-                        "$L.putAllHeaderParams($S, plainSerDe.serialize$L($L));",
-                        REQUEST,
-                        value.getParamId(),
-                        param.getType().accept(PlainSerializer.INSTANCE),
-                        param.getArgName());
+            public CodeBlock visitMap(MapType value) {
+                throw new SafeIllegalStateException("Maps can not be query parameters");
             }
 
             @Override
-            public CodeBlock visitDefault() {
-                return CodeBlock.of(
-                        "$L.putHeaderParams($S, plainSerDe.serialize$L($L));",
-                        REQUEST,
-                        value.getParamId(),
-                        param.getType().accept(PlainSerializer.INSTANCE),
-                        param.getArgName());
+            public CodeBlock visitReference(com.palantir.conjure.spec.TypeName typeName) {
+                TypeDefinition typeDef = typeNameResolver.resolve(typeName);
+                if (typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)) {
+                    return generatePlainSerializer(
+                            method,
+                            key,
+                            CodeBlock.of("$L.get()", argName),
+                            typeDef.accept(TypeDefinitionVisitor.ALIAS).getAlias());
+                } else if (typeDef.accept(TypeDefinitionVisitor.IS_ENUM)) {
+                    return CodeBlock.of("$L.$L($S, $T.toString($L));", "_request", method, key, Objects.class, argName);
+                }
+                throw new IllegalStateException("Plain serialization can only be aliases and enums");
+            }
+
+            @Override
+            public CodeBlock visitExternal(ExternalReference value) {
+                // TODO(forozco): we could probably do something smarter than just calling toString
+                return CodeBlock.of("$L.$L($S, $T.toString($L));", "_request", method, key, Objects.class, argName);
+            }
+
+            @Override
+            public CodeBlock visitUnknown(String unknownType) {
+                throw new SafeIllegalStateException("Unknown param type", SafeArg.of("type", unknownType));
+            }
+
+            private CodeBlock visitCollection(Type itemType) {
+                CodeBlock elementVariable = CodeBlock.of("$LElement", argName);
+                return CodeBlock.builder()
+                        .beginControlFlow(
+                                "for ($T $L : $L)", parameterTypes.baseType(itemType), elementVariable, argName)
+                        .add(generatePlainSerializer(method, key, elementVariable, itemType))
+                        .endControlFlow()
+                        .build();
             }
         });
     }
@@ -363,50 +348,6 @@ public final class AsyncGenerator {
                 throw new SafeIllegalStateException("unknown auth type", SafeArg.of("type", unknownType));
             }
         });
-    }
-
-    private static final class PlainSerializer extends DefaultTypeVisitor<String> {
-        private static final PlainSerializer INSTANCE = new PlainSerializer();
-
-        @Override
-        public String visitPrimitive(PrimitiveType primitiveType) {
-            return primitiveTypeName(primitiveType);
-        }
-
-        @Override
-        public String visitOptional(OptionalType value) {
-            throw new SafeIllegalArgumentException("Cannot serialize optional");
-        }
-
-        @Override
-        public String visitList(ListType value) {
-            return value.getItemType().accept(PlainSerializer.INSTANCE) + "List";
-        }
-
-        @Override
-        public String visitSet(SetType value) {
-            return value.getItemType().accept(PlainSerializer.INSTANCE) + "Set";
-        }
-
-        @Override
-        public String visitMap(MapType value) {
-            throw new SafeIllegalArgumentException("Cannot serialize map");
-        }
-
-        @Override
-        public String visitReference(com.palantir.conjure.spec.TypeName value) {
-            throw new SafeIllegalArgumentException("Cannot serialize reference");
-        }
-
-        @Override
-        public String visitExternal(ExternalReference value) {
-            throw new SafeIllegalArgumentException("Cannot serialize external");
-        }
-
-        @Override
-        public String visitDefault() {
-            throw new SafeIllegalArgumentException("Only primitive types and collections can be serialized");
-        }
     }
 
     private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME = new ImmutableMap.Builder<
