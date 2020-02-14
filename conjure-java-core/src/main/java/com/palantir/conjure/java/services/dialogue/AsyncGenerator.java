@@ -67,6 +67,7 @@ import javax.lang.model.element.Modifier;
 
 public final class AsyncGenerator {
 
+    public static final String REQUEST = "_request";
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
 
@@ -160,7 +161,7 @@ public final class AsyncGenerator {
                 .forEach(requestParams::add);
 
         CodeBlock request = CodeBlock.builder()
-                .add("$T $L = $T.builder();", Request.Builder.class, "_request", Request.class)
+                .add("$T $L = $T.builder();", Request.Builder.class, REQUEST, Request.class)
                 .add(requestParams.build())
                 .build();
         CodeBlock execute = CodeBlock.builder()
@@ -168,7 +169,7 @@ public final class AsyncGenerator {
                         "channel.execute($T.$L, $L.build())",
                         serviceClassName,
                         def.getEndpointName().get(),
-                        "_request")
+                        REQUEST)
                 .build();
         CodeBlock transformed = CodeBlock.builder()
                 .add(
@@ -192,10 +193,10 @@ public final class AsyncGenerator {
             @Override
             public CodeBlock visitBody(BodyParameterType value) {
                 if (param.getType().accept(TypeVisitor.IS_BINARY)) {
-                    return CodeBlock.of("$L.body(runtime.bodySerDe().serialize($L));", "_request", param.getArgName());
+                    return CodeBlock.of("$L.body(runtime.bodySerDe().serialize($L));", REQUEST, param.getArgName());
                 }
                 return CodeBlock.of(
-                        "$L.body($LSerializer.serialize($L));", "_request", endpointName, param.getArgName());
+                        "$L.body($LSerializer.serialize($L));", REQUEST, endpointName, param.getArgName());
             }
 
             @Override
@@ -210,7 +211,7 @@ public final class AsyncGenerator {
                     public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
                         return CodeBlock.of(
                                 "$L.putPathParams($S, $L.toString());",
-                                "_request",
+                                REQUEST,
                                 param.getArgName(),
                                 param.getArgName());
                     }
@@ -219,7 +220,7 @@ public final class AsyncGenerator {
                     public CodeBlock visitDefault() {
                         return CodeBlock.of(
                                 "$L.putPathParams($S, plainSerDe.serialize$L($L));",
-                                "_request",
+                                REQUEST,
                                 param.getArgName(),
                                 param.getType().accept(PlainSerializer.INSTANCE),
                                 param.getArgName());
@@ -235,7 +236,7 @@ public final class AsyncGenerator {
                         return CodeBlock.of(
                                 "$L.ifPresent(v -> $L.putQueryParams($S, $T.toString(v)));",
                                 param.getArgName(),
-                                "_request",
+                                REQUEST,
                                 value.getParamId(),
                                 Objects.class);
                     }
@@ -244,7 +245,7 @@ public final class AsyncGenerator {
                     public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
                         return CodeBlock.of(
                                 "$L.putQueryParams($S, $L.toString());",
-                                "_request",
+                                REQUEST,
                                 value.getParamId(),
                                 param.getArgName());
                     }
@@ -262,7 +263,7 @@ public final class AsyncGenerator {
                     private CodeBlock visitCollection() {
                         return CodeBlock.of(
                                 "$L.putAllQueryParams($S, plainSerDe.serialize$L($L));",
-                                "_request",
+                                REQUEST,
                                 value.getParamId(),
                                 param.getType().accept(PlainSerializer.INSTANCE),
                                 param.getArgName());
@@ -272,7 +273,7 @@ public final class AsyncGenerator {
                     public CodeBlock visitDefault() {
                         return CodeBlock.of(
                                 "$L.putQueryParams($S, plainSerDe.serialize$L($L));",
-                                "_request",
+                                REQUEST,
                                 value.getParamId(),
                                 param.getType().accept(PlainSerializer.INSTANCE),
                                 param.getArgName());
@@ -294,7 +295,7 @@ public final class AsyncGenerator {
                 return CodeBlock.of(
                         "$L.ifPresent(v -> $L.putHeaderParams($S, $T.toString(v)));",
                         param.getArgName(),
-                        "_request",
+                        REQUEST,
                         value.getParamId(),
                         Objects.class);
             }
@@ -303,7 +304,7 @@ public final class AsyncGenerator {
             public CodeBlock visitReference(com.palantir.conjure.spec.TypeName unused) {
                 // TODO(forozco): handle references correctly
                 return CodeBlock.of(
-                        "$L.putHeaderParams($S, $L.toString());", "_request", value.getParamId(), param.getArgName());
+                        "$L.putHeaderParams($S, $L.toString());", REQUEST, value.getParamId(), param.getArgName());
             }
 
             @Override
@@ -319,7 +320,7 @@ public final class AsyncGenerator {
             private CodeBlock visitCollection() {
                 return CodeBlock.of(
                         "$L.putAllHeaderParams($S, plainSerDe.serialize$L($L));",
-                        "_request",
+                        REQUEST,
                         value.getParamId(),
                         param.getType().accept(PlainSerializer.INSTANCE),
                         param.getArgName());
@@ -329,7 +330,7 @@ public final class AsyncGenerator {
             public CodeBlock visitDefault() {
                 return CodeBlock.of(
                         "$L.putHeaderParams($S, plainSerDe.serialize$L($L));",
-                        "_request",
+                        REQUEST,
                         value.getParamId(),
                         param.getType().accept(PlainSerializer.INSTANCE),
                         param.getArgName());
@@ -343,7 +344,7 @@ public final class AsyncGenerator {
             public CodeBlock visitHeader(HeaderAuthType value) {
                 return CodeBlock.of(
                         "$L.putHeaderParams($S, plainSerDe.serializeBearerToken($L.getBearerToken()));",
-                        "_request",
+                        REQUEST,
                         Auth.AUTH_HEADER_NAME,
                         Auth.AUTH_HEADER_PARAM_NAME);
             }
@@ -352,7 +353,7 @@ public final class AsyncGenerator {
             public CodeBlock visitCookie(CookieAuthType value) {
                 return CodeBlock.of(
                         "$L.putHeaderParam($S, \"$L=\" + planSerDe.serializeBearerToken($L));",
-                        "_request",
+                        REQUEST,
                         "Cookie",
                         value.getCookieName(),
                         Auth.COOKIE_AUTH_PARAM_NAME);
