@@ -63,19 +63,16 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import javax.lang.model.element.Modifier;
 
 public final class AsyncGenerator {
     private static final String REQUEST = "_request";
-    private final Function<com.palantir.conjure.spec.TypeName, TypeDefinition> typeNameResolver;
+    private final TypeNameResolver typeNameResolver;
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
 
     public AsyncGenerator(
-            Function<com.palantir.conjure.spec.TypeName, TypeDefinition> typeNameResolver,
-            ParameterTypeMapper parameterTypes,
-            ReturnTypeMapper returnTypes) {
+            TypeNameResolver typeNameResolver, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
         this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
@@ -265,7 +262,7 @@ public final class AsyncGenerator {
             @Override
             public CodeBlock visitOptional(OptionalType optionalType) {
                 return CodeBlock.builder()
-                        .beginControlFlow("if (!$L.isEmpty())", argName)
+                        .beginControlFlow("if ($L.isPresent())", argName)
                         .add(generatePlainSerializer(
                                 method, key, CodeBlock.of("$L.get()", argName), optionalType.getItemType()))
                         .endControlFlow()
@@ -289,7 +286,7 @@ public final class AsyncGenerator {
 
             @Override
             public CodeBlock visitReference(com.palantir.conjure.spec.TypeName typeName) {
-                TypeDefinition typeDef = typeNameResolver.apply(typeName);
+                TypeDefinition typeDef = typeNameResolver.resolve(typeName);
                 if (typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)) {
                     return generatePlainSerializer(
                             method,

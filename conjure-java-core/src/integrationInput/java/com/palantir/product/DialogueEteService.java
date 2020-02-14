@@ -1383,7 +1383,7 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                if (!param.isEmpty()) {
+                if (param.isPresent()) {
                     _request.putQueryParams("param", Objects.toString(param.get()));
                 }
                 return Futures.transform(
@@ -1429,7 +1429,7 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                if (!queryParamName.isEmpty()) {
+                if (queryParamName.isPresent()) {
                     _request.putQueryParams(
                             "queryParamName",
                             plainSerDe.serializeString(queryParamName.get().get()));
@@ -1492,7 +1492,7 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                if (!query.isEmpty()) {
+                if (query.isPresent()) {
                     _request.putQueryParams("query", Objects.toString(query.get()));
                 }
                 return Futures.transform(
@@ -1552,7 +1552,7 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                if (!queryParamName.isEmpty()) {
+                if (queryParamName.isPresent()) {
                     _request.putQueryParams(
                             "queryParamName", Objects.toString(queryParamName.get()));
                 }
@@ -1583,7 +1583,7 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                if (!input.isEmpty()) {
+                if (input.isPresent()) {
                     _request.putQueryParams("input", Objects.toString(input.get().get()));
                 }
                 return Futures.transform(
