@@ -112,7 +112,7 @@ final class UndertowServiceHandlerGenerator {
         String serviceName = serviceDefinition.getServiceName().getName();
         // class name
         ClassName serviceClass = ClassName.get(
-                serviceDefinition.getServiceName().getPackage(),
+                Packages.getPrefixedPackage(serviceDefinition.getServiceName().getPackage(), options.packagePrefix()),
                 (options.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName());
         TypeSpec.Builder factory = TypeSpec.classBuilder(serviceName + "Factory")
@@ -131,7 +131,7 @@ final class UndertowServiceHandlerGenerator {
                 .build());
 
         ClassName serviceType = ClassName.get(
-                serviceDefinition.getServiceName().getPackage(),
+                Packages.getPrefixedPackage(serviceDefinition.getServiceName().getPackage(), options.packagePrefix()),
                 serviceDefinition.getServiceName().getName() + "Endpoints");
 
         CodeBlock endpointBlock = CodeBlock.builder().build();
@@ -189,7 +189,9 @@ final class UndertowServiceHandlerGenerator {
 
     private TypeName endpointToHandlerType(com.palantir.conjure.spec.TypeName serviceName, EndpointName name) {
         return ClassName.get(
-                serviceName.getPackage(), serviceName.getName() + "Endpoints", endpointToHandlerClassName(name));
+                Packages.getPrefixedPackage(serviceName.getPackage(), options.packagePrefix()),
+                serviceName.getName() + "Endpoints",
+                endpointToHandlerClassName(name));
     }
 
     private String endpointToHandlerClassName(EndpointName name) {

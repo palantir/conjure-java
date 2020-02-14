@@ -18,8 +18,8 @@ package com.palantir.conjure.java.verification.server;
 
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
+import com.palantir.conjure.java.com.palantir.conjure.verification.client.VerificationClientService;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import com.palantir.conjure.verification.client.VerificationClientService;
 
 public final class VerificationClients {
     private VerificationClients() {}

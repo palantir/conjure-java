@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services.dialogue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.Auth;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
@@ -67,19 +68,25 @@ import javax.lang.model.element.Modifier;
 
 public final class AsyncGenerator {
     private static final String REQUEST = "_request";
+    private final Options options;
     private final TypeNameResolver typeNameResolver;
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
 
     public AsyncGenerator(
-            TypeNameResolver typeNameResolver, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+            Options options,
+            TypeNameResolver typeNameResolver,
+            ParameterTypeMapper parameterTypes,
+            ReturnTypeMapper returnTypes) {
+        this.options = options;
         this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
     }
 
     public MethodSpec generate(ClassName serviceClassName, ServiceDefinition def) {
-        TypeSpec.Builder impl = TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.asyncClassName(def));
+        TypeSpec.Builder impl =
+                TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.asyncClassName(def, options));
 
         impl.addField(FieldSpec.builder(PlainSerDe.class, "plainSerDe")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -102,7 +109,7 @@ public final class AsyncGenerator {
                 .addJavadoc(
                         "Creates an asynchronous/non-blocking client for a $L service.",
                         def.getServiceName().getName())
-                .returns(Names.asyncClassName(def))
+                .returns(Names.asyncClassName(def, options))
                 .addParameter(Channel.class, "channel")
                 .addParameter(ConjureRuntime.class, "runtime")
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())

@@ -19,7 +19,9 @@ package com.palantir.conjure.java.services.dialogue;
 import static java.util.stream.Collectors.toList;
 
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerator;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.Type;
@@ -35,22 +37,25 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class InterfaceGenerator {
 
+    private final Options options;
     private final ServiceDefinition def;
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
 
-    public InterfaceGenerator(ServiceDefinition def, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+    public InterfaceGenerator(
+            Options options, ServiceDefinition def, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+        this.options = options;
         this.def = def;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
     }
 
     public JavaFile generateBlocking() {
-        return generate(Names.blockingClassName(def), returnTypes::baseType);
+        return generate(Names.blockingClassName(def, options), returnTypes::baseType);
     }
 
     public JavaFile generateAsync() {
-        return generate(Names.asyncClassName(def), returnTypes::async);
+        return generate(Names.asyncClassName(def, options), returnTypes::async);
     }
 
     private JavaFile generate(ClassName className, Function<Optional<Type>, TypeName> returnTypeMapper) {
@@ -64,7 +69,9 @@ public final class InterfaceGenerator {
                 .map(endpoint -> apiMethod(endpoint, returnTypeMapper))
                 .collect(toList()));
 
-        return JavaFile.builder(def.getServiceName().getPackage(), serviceBuilder.build())
+        return JavaFile.builder(
+                        Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
+                        serviceBuilder.build())
                 .build();
     }
 

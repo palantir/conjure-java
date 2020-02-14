@@ -26,9 +26,7 @@ conjure {
 
 dependencies {
     conjure 'com.palantir.conjure.verification:verification-server-api'
-
     testCases 'com.palantir.conjure.verification:verification-server-test-cases'
-    verificationApi 'com.palantir.conjure.verification:verification-server-api'
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
     testCompile project(':conjure-java-core')

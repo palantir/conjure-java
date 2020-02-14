@@ -17,10 +17,10 @@
 package com.palantir.conjure.java.compliance;
 
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
-import com.palantir.conjure.verification.server.AutoDeserializeService;
-import com.palantir.conjure.verification.server.BlockingAutoDeserializeService;
-import com.palantir.conjure.verification.server.EndpointName;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingAutoDeserializeService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.EndpointName;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
