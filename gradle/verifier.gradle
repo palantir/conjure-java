@@ -20,38 +20,27 @@ ext {
     osClassifier = isFamily(FAMILY_MAC) ? "osx" : "linux"
 }
 
-// We locally-codegen verification-api.conjure.json into these source-sets
-sourceSets {
-    generatedObjects
-    generatedJersey
-    generatedUndertow
-    generatedDialogue
+apply plugin: 'com.palantir.conjure-java-local'
+
+conjure {
+    java {
+        addFlag 'useImmutableBytes'
+        addFlag 'jersey'
+        addFlag 'objects'
+    }
 }
 
-idea {
-    module {
-        sourceDirs += sourceSets.generatedDialogue.java.srcDirs
-        sourceDirs += sourceSets.generatedObjects.java.srcDirs
-        sourceDirs += sourceSets.generatedJersey.java.srcDirs
-        sourceDirs += sourceSets.generatedUndertow.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedDialogue.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedUndertow.java.srcDirs
-        scopes.COMPILE.plus += [
-                configurations.generatedDialogueCompile,
-                configurations.generatedObjectsCompile,
-                configurations.generatedJerseyCompile,
-                configurations.generatedUndertowCompile]
+configurations.conjureJava.exclude group: 'com.palantir.conjure.java'
+dependencies {
+    conjureJava files(project(':conjure-java').tasks.distTar.archiveFile) {
+        builtBy project(':conjure-java').tasks.distTar
     }
 }
 
 configurations {
     testCases
-    verificationApi
     verifier
 }
-
 
 task unpackVerifier(type: Sync) {
     from { tarTree(configurations.verifier.singleFile) }
@@ -63,62 +52,11 @@ task copyTestCases(type: Sync) {
     from configurations.testCases, {
         rename { "test-cases.json" }
     }
-    from configurations.verificationApi, {
+    from configurations.conjure, {
         rename { "verification-api.json" }
     }
     into "$buildDir/test-cases"
 }
 
-task conjureJavaObjects(type: JavaExec) {
-    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
-    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects', '--useImmutableBytes'
-
-    inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.dir "src/generatedObjects/java"
-    doFirst { delete "src/generatedObjects/java/*" }
-}
-
-task conjureJavaJersey(type: JavaExec) {
-    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
-    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jersey'
-
-    inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.dir "src/generatedJersey/java"
-    doFirst { delete "src/generatedJersey/java/*" }
-}
-
-task conjureJavaDialogue(type: JavaExec) {
-    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
-    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedDialogue/java', '--dialogue'
-
-    inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.dir "src/generatedDialogue/java"
-    doFirst { delete "src/generatedDialogue/java/*" }
-}
-
-task conjureJavaUndertow(type: JavaExec) {
-    main = "com.palantir.conjure.java.cli.ConjureJavaCli"
-    classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedUndertow/java', '--undertow',
-            '--undertowServicePrefixes'
-
-    inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.dir "src/generatedUndertow/java"
-    doFirst { delete "src/generatedUndertow/java/*" }
-}
-
-compileGeneratedObjectsJava.dependsOn conjureJavaObjects
-compileGeneratedObjectsJava.dependsOn conjureJavaJersey
-compileGeneratedObjectsJava.dependsOn conjureJavaUndertow
-compileGeneratedObjectsJava.dependsOn conjureJavaDialogue
-
-tasks.idea.dependsOn conjureJavaDialogue, conjureJavaObjects, conjureJavaJersey, conjureJavaUndertow, unpackVerifier, copyTestCases
+tasks.idea.dependsOn  unpackVerifier, copyTestCases
 test.dependsOn unpackVerifier, copyTestCases
-
-checkstyleGeneratedDialogue.enabled = false
-checkstyleGeneratedJersey.enabled = false
-checkstyleGeneratedObjects.enabled = false
-checkstyleGeneratedUndertow.enabled = false

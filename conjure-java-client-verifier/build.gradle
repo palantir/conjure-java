@@ -18,27 +18,21 @@ apply from: "${rootDir}/gradle/verifier.gradle"
 
 sourceCompatibility = 11
 
+conjure {
+    java {
+        addFlag 'dialogue'
+    }
+}
+
 dependencies {
+    conjure 'com.palantir.conjure.verification:verification-server-api'
+
     testCases 'com.palantir.conjure.verification:verification-server-test-cases'
     verificationApi 'com.palantir.conjure.verification:verification-server-api'
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
-    generatedDialogueCompile 'com.palantir.dialogue:dialogue-java-client'
-    generatedDialogueCompile 'com.palantir.dialogue:dialogue-serde'
-    generatedDialogueCompile sourceSets.generatedObjects.output
-
-    generatedObjectsCompile project(':conjure-java-core')
-    generatedObjectsCompile project(':conjure-lib')
-
-    generatedJerseyCompile project(':conjure-java-core')
-    generatedJerseyCompile project(':conjure-lib')
-    generatedJerseyCompile sourceSets.generatedObjects.output
-
-    generatedUndertowCompile project(':conjure-java-core')
-    generatedUndertowCompile project(':conjure-undertow-lib')
-    generatedUndertowCompile sourceSets.generatedObjects.output
-
     testCompile project(':conjure-java-core')
+    testCompile project('verification-server-api')
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
@@ -47,15 +41,20 @@ dependencies {
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile 'com.palantir.dialogue:dialogue-java-client'
     testCompile 'com.palantir.dialogue:dialogue-serde'
-    testCompile sourceSets.generatedDialogue.output
-    testCompile sourceSets.generatedObjects.output
-    testCompile sourceSets.generatedJersey.output
-    testCompile sourceSets.generatedUndertow.output
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
+}
+
+project('verification-server-api') {
+    dependencies {
+        compile project(':conjure-java-core')
+        compile project(':conjure-lib')
+        compile 'com.palantir.dialogue:dialogue-java-client'
+        compile 'com.palantir.dialogue:dialogue-serde'
+    }
 }
 
 tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureEach {

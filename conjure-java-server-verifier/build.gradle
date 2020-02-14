@@ -16,22 +16,18 @@
 
 apply from: "${rootDir}/gradle/verifier.gradle"
 
+conjure {
+    java {
+        addFlag 'undertow'
+    }
+}
+
 dependencies {
     testCases 'com.palantir.conjure.verification:verification-client-test-cases'
-    verificationApi 'com.palantir.conjure.verification:verification-client-api'
+    conjure 'com.palantir.conjure.verification:verification-client-api'
     verifier "com.palantir.conjure.verification:verification-client::${osClassifier}@tgz"
 
-    generatedObjectsCompile project(':conjure-java-core')
-    generatedObjectsCompile project(':conjure-lib')
-
-    generatedJerseyCompile project(':conjure-java-core')
-    generatedJerseyCompile project(':conjure-lib')
-    generatedJerseyCompile sourceSets.generatedObjects.output
-
-    generatedUndertowCompile project(':conjure-java-core')
-    generatedUndertowCompile project(':conjure-undertow-lib')
-    generatedUndertowCompile sourceSets.generatedObjects.output
-
+    testCompile project('verification-client-api')
     testCompile project(':conjure-java-core')
     testCompile project(':conjure-java-undertow-runtime')
     testCompile 'org.assertj:assertj-core'
@@ -42,13 +38,18 @@ dependencies {
     testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'com.palantir.websecurity:dropwizard-web-security'
     testCompile 'io.dropwizard:dropwizard-testing'
-    testCompile sourceSets.generatedObjects.output
-    testCompile sourceSets.generatedJersey.output
-    testCompile sourceSets.generatedUndertow.output
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
+}
+
+project('verification-client-api') {
+    dependencies {
+        compile project(':conjure-java-core')
+        compile project(':conjure-lib')
+        compile project(':conjure-undertow-lib')
+    }
 }
 
 tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureEach {
