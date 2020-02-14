@@ -195,8 +195,7 @@ public final class AsyncGenerator {
                 if (param.getType().accept(TypeVisitor.IS_BINARY)) {
                     return CodeBlock.of("$L.body(runtime.bodySerDe().serialize($L));", REQUEST, param.getArgName());
                 }
-                return CodeBlock.of(
-                        "$L.body($LSerializer.serialize($L));", REQUEST, endpointName, param.getArgName());
+                return CodeBlock.of("$L.body($LSerializer.serialize($L));", REQUEST, endpointName, param.getArgName());
             }
 
             @Override
