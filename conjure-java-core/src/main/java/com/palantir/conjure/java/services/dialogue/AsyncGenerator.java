@@ -227,20 +227,29 @@ public final class AsyncGenerator {
 
     private CodeBlock generateHeaderParam(ArgumentDefinition param, HeaderParameterType value) {
         return generatePlainSerializer(
-                "putHeaderParams", value.getParamId().get(), param.getArgName().get(), param.getType());
+                "putHeaderParams",
+                value.getParamId().get(),
+                CodeBlock.of(param.getArgName().get()),
+                param.getType());
     }
 
     private CodeBlock generatePathParam(ArgumentDefinition param) {
         return generatePlainSerializer(
-                "putPathParams", param.getArgName().get(), param.getArgName().get(), param.getType());
+                "putPathParams",
+                param.getArgName().get(),
+                CodeBlock.of("$L", param.getArgName().get()),
+                param.getType());
     }
 
     private CodeBlock generateQueryParam(ArgumentDefinition param, QueryParameterType value) {
         return generatePlainSerializer(
-                "putQueryParams", value.getParamId().get(), param.getArgName().get(), param.getType());
+                "putQueryParams",
+                value.getParamId().get(),
+                CodeBlock.of(param.getArgName().get()),
+                param.getType());
     }
 
-    private CodeBlock generatePlainSerializer(String method, String key, String argName, Type type) {
+    private CodeBlock generatePlainSerializer(String method, String key, CodeBlock argName, Type type) {
         return type.accept(new Type.Visitor<CodeBlock>() {
             @Override
             public CodeBlock visitPrimitive(PrimitiveType primitiveType) {
@@ -256,9 +265,10 @@ public final class AsyncGenerator {
             @Override
             public CodeBlock visitOptional(OptionalType optionalType) {
                 return CodeBlock.builder()
-                        .add("$L.ifPresent(v -> {\n", argName)
-                        .add(generatePlainSerializer(method, key, "v", optionalType.getItemType()))
-                        .add("\n});")
+                        .beginControlFlow("if (!$L.isEmpty())", argName)
+                        .add(generatePlainSerializer(
+                                method, key, CodeBlock.of("$L.get()", argName), optionalType.getItemType()))
+                        .endControlFlow()
                         .build();
             }
 
@@ -284,7 +294,7 @@ public final class AsyncGenerator {
                     return generatePlainSerializer(
                             method,
                             key,
-                            argName + ".get()",
+                            CodeBlock.of("$L.get()", argName),
                             typeDef.accept(TypeDefinitionVisitor.ALIAS).getAlias());
                 } else if (typeDef.accept(TypeDefinitionVisitor.IS_ENUM)) {
                     return CodeBlock.of("$L.$L($S, $T.toString($L));", "_request", method, key, Objects.class, argName);
@@ -304,9 +314,11 @@ public final class AsyncGenerator {
             }
 
             private CodeBlock visitCollection(Type itemType) {
+                CodeBlock elementVariable = CodeBlock.of("$LElement", argName);
                 return CodeBlock.builder()
-                        .beginControlFlow("for ($T v : $L)", parameterTypes.baseType(itemType), argName)
-                        .add(generatePlainSerializer(method, key, "v", itemType))
+                        .beginControlFlow(
+                                "for ($T $L : $L)", parameterTypes.baseType(itemType), elementVariable, argName)
+                        .add(generatePlainSerializer(method, key, elementVariable, itemType))
                         .endControlFlow()
                         .build();
             }

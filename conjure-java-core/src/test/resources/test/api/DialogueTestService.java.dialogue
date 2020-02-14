@@ -1202,18 +1202,18 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(testQueryParamsSerializer.serialize(query));
                 _request.putQueryParams("different", plainSerDe.serializeRid(something));
-                optionalMiddle.ifPresent(
-                        v -> {
-                            _request.putQueryParams("optionalMiddle", plainSerDe.serializeRid(v));
-                        });
-                _request.putQueryParams("implicit", plainSerDe.serializeRid(implicit));
-                for (String v : setEnd) {
-                    _request.putQueryParams("setEnd", plainSerDe.serializeString(v));
+                if (!optionalMiddle.isEmpty()) {
+                    _request.putQueryParams(
+                            "optionalMiddle", plainSerDe.serializeRid(optionalMiddle.get()));
                 }
-                optionalEnd.ifPresent(
-                        v -> {
-                            _request.putQueryParams("optionalEnd", plainSerDe.serializeRid(v));
-                        });
+                _request.putQueryParams("implicit", plainSerDe.serializeRid(implicit));
+                for (String setEndElement : setEnd) {
+                    _request.putQueryParams("setEnd", plainSerDe.serializeString(setEndElement));
+                }
+                if (!optionalEnd.isEmpty()) {
+                    _request.putQueryParams(
+                            "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
+                }
                 return Futures.transform(
                         channel.execute(DialogueTestService.testQueryParams, _request.build()),
                         testQueryParamsDeserializer::deserialize,
@@ -1235,18 +1235,18 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(testNoResponseQueryParamsSerializer.serialize(query));
                 _request.putQueryParams("different", plainSerDe.serializeRid(something));
-                optionalMiddle.ifPresent(
-                        v -> {
-                            _request.putQueryParams("optionalMiddle", plainSerDe.serializeRid(v));
-                        });
-                _request.putQueryParams("implicit", plainSerDe.serializeRid(implicit));
-                for (String v : setEnd) {
-                    _request.putQueryParams("setEnd", plainSerDe.serializeString(v));
+                if (!optionalMiddle.isEmpty()) {
+                    _request.putQueryParams(
+                            "optionalMiddle", plainSerDe.serializeRid(optionalMiddle.get()));
                 }
-                optionalEnd.ifPresent(
-                        v -> {
-                            _request.putQueryParams("optionalEnd", plainSerDe.serializeRid(v));
-                        });
+                _request.putQueryParams("implicit", plainSerDe.serializeRid(implicit));
+                for (String setEndElement : setEnd) {
+                    _request.putQueryParams("setEnd", plainSerDe.serializeString(setEndElement));
+                }
+                if (!optionalEnd.isEmpty()) {
+                    _request.putQueryParams(
+                            "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
+                }
                 return Futures.transform(
                         channel.execute(
                                 DialogueTestService.testNoResponseQueryParams, _request.build()),
@@ -1311,14 +1311,14 @@ public final class DialogueTestService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                maybeInteger.ifPresent(
-                        v -> {
-                            _request.putQueryParams("maybeInteger", plainSerDe.serializeInteger(v));
-                        });
-                maybeDouble.ifPresent(
-                        v -> {
-                            _request.putQueryParams("maybeDouble", plainSerDe.serializeDouble(v));
-                        });
+                if (!maybeInteger.isEmpty()) {
+                    _request.putQueryParams(
+                            "maybeInteger", plainSerDe.serializeInteger(maybeInteger.get()));
+                }
+                if (!maybeDouble.isEmpty()) {
+                    _request.putQueryParams(
+                            "maybeDouble", plainSerDe.serializeDouble(maybeDouble.get()));
+                }
                 return Futures.transform(
                         channel.execute(
                                 DialogueTestService.testOptionalIntegerAndDouble, _request.build()),
@@ -1336,8 +1336,9 @@ public final class DialogueTestService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                for (AliasedString v : strings) {
-                    _request.putQueryParams("strings", plainSerDe.serializeString(v.get()));
+                for (AliasedString stringsElement : strings) {
+                    _request.putQueryParams(
+                            "strings", plainSerDe.serializeString(stringsElement.get()));
                 }
                 return Futures.transform(
                         channel.execute(DialogueTestService.getForStrings, _request.build()),
