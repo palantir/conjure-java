@@ -90,13 +90,13 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
 
     // TODO(rfink): Split into separate classes: endpoint, interface, impl.
     private static final class TypeAwareGenerator {
-        private final Function<com.palantir.conjure.spec.TypeName, TypeDefinition> typeNameResolver;
+        private final TypeNameResolver typeNameResolver;
         private final ParameterTypeMapper parameterTypes;
         private final ReturnTypeMapper returnTypes;
         private final String apiVersion;
 
         private TypeAwareGenerator(
-                Function<com.palantir.conjure.spec.TypeName, TypeDefinition> typeNameResolver,
+                TypeNameResolver typeNameResolver,
                 TypeMapper parameterTypes,
                 TypeMapper returnTypes,
                 String apiVersion) {

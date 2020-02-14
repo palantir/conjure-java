@@ -80,13 +80,15 @@ public final class UnionGenerator {
         ClassName baseClass = unionClass.nestedClass("Base");
         ClassName visitorClass = unionClass.nestedClass("Visitor");
         ClassName visitorBuilderClass = unionClass.nestedClass("VisitorBuilder");
-        Map<FieldName, TypeName> memberTypes = typeDef.getUnion().stream()
+        Map<FieldDefinition, TypeName> memberTypes = typeDef.getUnion().stream()
                 .collect(StableCollectors.toLinkedMap(
-                        FieldDefinition::getFieldName, entry -> typeMapper.getClassName(entry.getType())));
-        List<FieldSpec> fields = ImmutableList.of(
-                FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                        Function.identity(), entry -> typeMapper.getClassName(entry.getType())));
+        List<FieldSpec> fields =
+                ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
 
+        boolean containsDeprecated = typeDef.getUnion().stream()
+                .anyMatch(fieldDefinition -> fieldDefinition.getDeprecated().isPresent());
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
                         typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
@@ -95,7 +97,7 @@ public final class UnionGenerator {
                 .addMethod(generateConstructor(baseClass))
                 .addMethod(generateGetValue(baseClass))
                 .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
-                .addMethod(generateAcceptVisitMethod(visitorClass, memberTypes.keySet()))
+                .addMethod(generateAcceptVisitMethod(visitorClass, memberTypes.keySet(), containsDeprecated))
                 .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass))
                 .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes))
                 .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes))
@@ -156,14 +158,16 @@ public final class UnionGenerator {
                                     wrapperClass(unionClass, memberName),
                                     variableName)
                             .returns(unionClass);
-                    memberTypeDef.getDocs().ifPresent(docs ->
-                            builder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
+                    Javadoc.render(memberTypeDef.getDocs(), memberTypeDef.getDeprecated())
+                            .ifPresent(javadoc -> builder.addJavadoc("$L", javadoc));
+                    memberTypeDef.getDeprecated().ifPresent(_deprecated -> builder.addAnnotation(Deprecated.class));
                     return builder.build();
                 })
                 .collect(Collectors.toList());
     }
 
-    private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass, Set<FieldName> memberNames) {
+    private static MethodSpec generateAcceptVisitMethod(
+            ClassName visitorClass, Set<FieldDefinition> members, boolean containsDeprecated) {
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
         ParameterSpec visitor =
                 ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
@@ -173,9 +177,17 @@ public final class UnionGenerator {
                 .addTypeVariable(TYPE_VARIABLE)
                 .returns(TYPE_VARIABLE);
 
+        if (containsDeprecated) {
+            // Don't cause deprecation linting to fail on generated code.
+            visitBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                    .addMember("value", "$S", "deprecation")
+                    .build());
+        }
+
         CodeBlock.Builder codeBuilder = CodeBlock.builder();
         boolean beginControlFlow = true;
-        for (FieldName memberName : memberNames) {
+        for (FieldDefinition member : members) {
+            FieldName memberName = member.getFieldName();
             ClassName wrapperClass = peerWrapperClass(visitorClass, memberName);
             CodeBlock ifStatement = CodeBlock.of("if ($L instanceof $T)", VALUE_FIELD_NAME, wrapperClass);
             if (beginControlFlow) {
@@ -192,7 +204,12 @@ public final class UnionGenerator {
                     VALUE_FIELD_NAME);
         }
         ClassName unknownWrapperClass = visitorClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
-        codeBuilder.nextControlFlow("else if ($L instanceof $T)", VALUE_FIELD_NAME, unknownWrapperClass);
+        CodeBlock ifStatement = CodeBlock.of("if ($L instanceof $T)", VALUE_FIELD_NAME, unknownWrapperClass);
+        if (beginControlFlow) {
+            codeBuilder.beginControlFlow("$L", ifStatement);
+        } else {
+            codeBuilder.nextControlFlow("else $L", ifStatement);
+        }
         codeBuilder.addStatement(
                 "return $N.$L((($T) $L).getType())",
                 visitor,
@@ -223,7 +240,7 @@ public final class UnionGenerator {
     private static TypeSpec generateVisitor(
             ClassName unionClass,
             ClassName visitorClass,
-            Map<FieldName, TypeName> memberTypes,
+            Map<FieldDefinition, TypeName> memberTypes,
             ClassName visitorBuilderClass) {
         return TypeSpec.interfaceBuilder(visitorClass)
                 .addModifiers(Modifier.PUBLIC)
@@ -250,12 +267,18 @@ public final class UnionGenerator {
                 .build();
     }
 
-    private static List<MethodSpec> generateMemberVisitMethods(Map<FieldName, TypeName> memberTypes) {
+    private static List<MethodSpec> generateMemberVisitMethods(Map<FieldDefinition, TypeName> memberTypes) {
         return memberTypes.entrySet().stream()
                 .map(entry -> {
                     String variableName = variableName();
-                    return MethodSpec.methodBuilder(
-                                    visitMethodName(entry.getKey().get()))
+                    return MethodSpec.methodBuilder(visitMethodName(
+                                    entry.getKey().getFieldName().get()))
+                            .addJavadoc(Javadoc.render(
+                                            entry.getKey().getDocs(),
+                                            entry.getKey().getDeprecated())
+                                    .orElse(""))
+                            .addAnnotations(ConjureAnnotations.deprecation(
+                                    entry.getKey().getDeprecated()))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .addParameter(entry.getValue(), variableName)
                             .returns(TYPE_VARIABLE)
@@ -269,7 +292,7 @@ public final class UnionGenerator {
             ClassName enclosingClass,
             ClassName visitor,
             ClassName visitorBuilder,
-            Map<FieldName, TypeName> memberTypeMap) {
+            Map<FieldDefinition, TypeName> memberTypeMap) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         return TypeSpec.classBuilder(visitorBuilder)
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
@@ -292,7 +315,7 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<MethodSpec> allVisitorBuilderSetters(
-            ClassName enclosingClass, TypeName visitResultType, Map<FieldName, TypeName> memberTypeMap) {
+            ClassName enclosingClass, TypeName visitResultType, Map<FieldDefinition, TypeName> memberTypeMap) {
         ImmutableList.Builder<MethodSpec> setterMethods = ImmutableList.builder();
         Stream<NameTypePair> memberTypes = sortedStageNameTypePairs(memberTypeMap);
         PeekingIterator<NameTypePair> memberIter = Iterators.peekingIterator(memberTypes.iterator());
@@ -331,17 +354,18 @@ public final class UnionGenerator {
      * </pre>
      */
     private static MethodSpec builderBuildMethod(
-            ClassName visitorClass, TypeName visitResultType, Map<FieldName, TypeName> memberTypeMap) {
+            ClassName visitorClass, TypeName visitResultType, Map<FieldDefinition, TypeName> memberTypeMap) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("build")
                 .returns(ParameterizedTypeName.get(visitorClass, visitResultType))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class);
 
         // Add statements to copy over visitor handlers to local immutable variables.
-        sortedStageNameTypePairs(memberTypeMap).forEach(nameType -> builder.addStatement(
-                "final $1T $2L = this.$2L",
-                visitorObjectTypeName(nameType.type, visitResultType),
-                visitorFieldName(nameType.memberName)));
+        sortedStageNameTypePairs(memberTypeMap)
+                .forEach(nameType -> builder.addStatement(
+                        "final $1T $2L = this.$2L",
+                        visitorObjectTypeName(nameType.type, visitResultType),
+                        visitorFieldName(nameType.memberName)));
 
         return builder.addStatement(
                         "return $L",
@@ -362,7 +386,7 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<MethodSpec> allDelegatingVisitorMethods(
-            Map<FieldName, TypeName> memberTypeMap, TypeName visitorResultType) {
+            Map<FieldDefinition, TypeName> memberTypeMap, TypeName visitorResultType) {
         return sortedStageNameTypePairs(memberTypeMap)
                 .map(pair -> MethodSpec.methodBuilder(visitMethodName(pair.memberName))
                         .addModifiers(Modifier.PUBLIC)
@@ -376,7 +400,7 @@ public final class UnionGenerator {
 
     /** Generates all the interface type names for the different visitor builder stages. */
     private static List<TypeName> allVisitorBuilderStages(
-            ClassName enclosingClass, Map<FieldName, TypeName> memberTypeMap, TypeVariableName visitResultType) {
+            ClassName enclosingClass, Map<FieldDefinition, TypeName> memberTypeMap, TypeVariableName visitResultType) {
         return Stream.concat(sortedStageNameTypePairs(memberTypeMap).map(p -> p.memberName), Stream.of(COMPLETED))
                 .map(stageName -> visitorStageInterfaceName(enclosingClass, stageName))
                 .map(stageType -> ParameterizedTypeName.get(stageType, visitResultType))
@@ -394,7 +418,7 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<FieldSpec> allVisitorBuilderFields(
-            Map<FieldName, TypeName> memberTypeMap, TypeVariableName visitResultType) {
+            Map<FieldDefinition, TypeName> memberTypeMap, TypeVariableName visitResultType) {
         return sortedStageNameTypePairs(memberTypeMap)
                 .map(field -> FieldSpec.builder(
                                 visitorObjectTypeName(field.type, visitResultType),
@@ -435,7 +459,7 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<TypeSpec> generateVisitorBuilderStageInterfaces(
-            ClassName enclosingClass, ClassName visitorClass, Map<FieldName, TypeName> memberTypes) {
+            ClassName enclosingClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         List<TypeSpec> interfaces = new ArrayList<>();
         PeekingIterator<NameTypePair> memberIter =
@@ -466,10 +490,11 @@ public final class UnionGenerator {
         return interfaces;
     }
 
-    private static Stream<NameTypePair> sortedStageNameTypePairs(Map<FieldName, TypeName> memberTypes) {
+    private static Stream<NameTypePair> sortedStageNameTypePairs(Map<FieldDefinition, TypeName> memberTypes) {
         return Stream.concat(
                 memberTypes.entrySet().stream()
-                        .map(entry -> new NameTypePair(entry.getKey().get(), entry.getValue()))
+                        .map(entry ->
+                                new NameTypePair(entry.getKey().getFieldName().get(), entry.getValue()))
                         .sorted(Comparator.comparing(p -> p.memberName)),
                 Stream.of(NameTypePair.UNKNOWN));
     }
@@ -491,7 +516,7 @@ public final class UnionGenerator {
                 .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
     }
 
-    private static TypeSpec generateBase(ClassName baseClass, Map<FieldName, TypeName> memberTypes) {
+    private static TypeSpec generateBase(ClassName baseClass, Map<FieldDefinition, TypeName> memberTypes) {
         ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
         TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass)
                 .addModifiers(Modifier.PRIVATE)
@@ -501,14 +526,19 @@ public final class UnionGenerator {
                         .addMember("visible", "$L", true)
                         .addMember("defaultImpl", "$T.class", unknownWrapperClass)
                         .build());
-        List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
-                .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
-                        .addMember("value", "$T.class", peerWrapperClass(baseClass, entry.getKey()))
-                        .build())
-                .collect(Collectors.toList());
-        AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
-        subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
-        baseBuilder.addAnnotation(annotationBuilder.build());
+        if (!memberTypes.isEmpty()) {
+            List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
+                    .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
+                            .addMember(
+                                    "value",
+                                    "$T.class",
+                                    peerWrapperClass(baseClass, entry.getKey().getFieldName()))
+                            .build())
+                    .collect(Collectors.toList());
+            AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
+            subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
+            baseBuilder.addAnnotation(annotationBuilder.build());
+        }
         baseBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
                 .addMember("ignoreUnknown", "$L", true)
                 .build());

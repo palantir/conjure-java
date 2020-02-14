@@ -79,24 +79,24 @@ public class SingleParamServicesTest {
         List<Object[]> objects = new ArrayList<>();
         Cases.TEST_CASES.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
-            IntStream.range(0, 2)
-                    .forEach(serviceIndex -> IntStream.range(0, size).forEach(i -> objects.add(new Object[] {
+            IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
+                    .forEach(i -> objects.add(new Object[] {
                         "singleHeaderService", serviceIndex, endpointName, i, singleHeaderTestCases.get(i)
                     })));
         });
 
         Cases.TEST_CASES.getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
-            IntStream.range(0, 2)
-                    .forEach(serviceIndex -> IntStream.range(0, size).forEach(i -> objects.add(new Object[] {
+            IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
+                    .forEach(i -> objects.add(new Object[] {
                         "singlePathParamService", serviceIndex, endpointName, i, singleHeaderTestCases.get(i)
                     })));
         });
 
         Cases.TEST_CASES.getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
             int size = singleQueryTestCases.size();
-            IntStream.range(0, 2)
-                    .forEach(serviceIndex -> IntStream.range(0, size).forEach(i -> objects.add(new Object[] {
+            IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
+                    .forEach(i -> objects.add(new Object[] {
                         "singleQueryParamService", serviceIndex, endpointName, i, singleQueryTestCases.get(i)
                     })));
         });

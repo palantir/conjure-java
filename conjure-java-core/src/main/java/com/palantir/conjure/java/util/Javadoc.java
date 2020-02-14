@@ -61,11 +61,27 @@ public final class Javadoc {
         return StringUtils.appendIfMissing(renderedHtml, "\n");
     }
 
+    public static Optional<String> render(Optional<Documentation> documentation, Optional<Documentation> deprecation) {
+        if (!documentation.isPresent() && !deprecation.isPresent()) {
+            return Optional.empty();
+        }
+        StringBuilder sb = new StringBuilder();
+        documentation.map(Javadoc::render).ifPresent(sb::append);
+        deprecation.map(Javadoc::getDeprecatedJavadoc).ifPresent(sb::append);
+        return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();
+    }
+
     public static Optional<String> getParameterJavadoc(ArgumentDefinition argument, EndpointDefinition endpoint) {
-        return argument.getDocs().map(docs -> "@param "
-                + JavaNameSanitizer.sanitizeParameterName(argument.getArgName().get(), endpoint)
-                + " "
-                + Javadoc.render(argument.getDocs().get()));
+        return argument.getDocs()
+                .map(docs -> "@param "
+                        + JavaNameSanitizer.sanitizeParameterName(
+                                argument.getArgName().get(), endpoint)
+                        + " "
+                        + Javadoc.render(argument.getDocs().get()));
+    }
+
+    public static String getDeprecatedJavadoc(Documentation deprecationDocs) {
+        return "@deprecated " + render(deprecationDocs);
     }
 
     private Javadoc() {}

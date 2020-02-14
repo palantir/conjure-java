@@ -73,9 +73,11 @@ types:
           This enumerates the numbers 1:2 also 100.
         values:
           - ONE
-          - TWO
+          - value: TWO
+            deprecated: Prefer `ONE` where possible.
           - value: ONE_HUNDRED
             docs: Value of 100.
+            deprecated: One is easier to manage.
       EnumFieldExample:
         fields:
           enum: EnumExample
@@ -157,10 +159,11 @@ types:
             docs: docs for set field
           map:
             type: map<string, string>
-            docs: docs for map field
+            deprecated: deprecation documentation.
           alias:
             type: StringAliasExample
             docs: docs for alias field
+            deprecated: This field is deprecated.
       UnionTypeExample:
         docs: A type which can either be a StringExample, a set of strings, or an integer.
         union:
@@ -173,6 +176,8 @@ types:
           if: integer # some 'bad' member names!
           new: integer
           interface: integer
+      EmptyUnionTypeExample:
+        union: {}
       EmptyObjectExample:
         fields: {}
       AliasAsMapKeyExample:
@@ -202,8 +207,13 @@ types:
       Union:
         union:
           foo: string
-          bar: integer
-          baz: ExternalLong
+          bar:
+            type: integer
+            deprecated: Int is deprecated.
+          baz:
+            type: ExternalLong
+            docs: 64-bit integer.
+            deprecated: Prefer `foo`.
       SingleUnion:
         union:
           foo: string

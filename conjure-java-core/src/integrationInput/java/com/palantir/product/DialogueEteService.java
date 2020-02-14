@@ -1383,10 +1383,9 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                param.ifPresent(
-                        v -> {
-                            _request.putQueryParams("param", Objects.toString(v));
-                        });
+                if (param.isPresent()) {
+                    _request.putQueryParams("param", Objects.toString(param.get()));
+                }
                 return Futures.transform(
                         channel.execute(
                                 DialogueEteService.optionalExternalLongQuery, _request.build()),
@@ -1430,11 +1429,11 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                queryParamName.ifPresent(
-                        v -> {
-                            _request.putQueryParams(
-                                    "queryParamName", plainSerDe.serializeString(v.get()));
-                        });
+                if (queryParamName.isPresent()) {
+                    _request.putQueryParams(
+                            "queryParamName",
+                            plainSerDe.serializeString(queryParamName.get().get()));
+                }
                 return Futures.transform(
                         channel.execute(DialogueEteService.optionalAliasOne, _request.build()),
                         optionalAliasOneDeserializer::deserialize,
@@ -1493,10 +1492,9 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                query.ifPresent(
-                        v -> {
-                            _request.putQueryParams("query", Objects.toString(v));
-                        });
+                if (query.isPresent()) {
+                    _request.putQueryParams("query", Objects.toString(query.get()));
+                }
                 return Futures.transform(
                         channel.execute(
                                 DialogueEteService.optionalQueryExternalImport, _request.build()),
@@ -1537,8 +1535,9 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                for (SimpleEnum v : queryParamName) {
-                    _request.putQueryParams("queryParamName", Objects.toString(v));
+                for (SimpleEnum queryParamNameElement : queryParamName) {
+                    _request.putQueryParams(
+                            "queryParamName", Objects.toString(queryParamNameElement));
                 }
                 return Futures.transform(
                         channel.execute(DialogueEteService.enumListQuery, _request.build()),
@@ -1553,10 +1552,10 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                queryParamName.ifPresent(
-                        v -> {
-                            _request.putQueryParams("queryParamName", Objects.toString(v));
-                        });
+                if (queryParamName.isPresent()) {
+                    _request.putQueryParams(
+                            "queryParamName", Objects.toString(queryParamName.get()));
+                }
                 return Futures.transform(
                         channel.execute(DialogueEteService.optionalEnumQuery, _request.build()),
                         optionalEnumQueryDeserializer::deserialize,
@@ -1584,10 +1583,9 @@ public final class DialogueEteService {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                input.ifPresent(
-                        v -> {
-                            _request.putQueryParams("input", Objects.toString(v.get()));
-                        });
+                if (input.isPresent()) {
+                    _request.putQueryParams("input", Objects.toString(input.get().get()));
+                }
                 return Futures.transform(
                         channel.execute(DialogueEteService.aliasLongEndpoint, _request.build()),
                         aliasLongEndpointDeserializer::deserialize,
@@ -1606,14 +1604,15 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                for (StringAliasExample v : strings) {
-                    _request.putQueryParams("strings", plainSerDe.serializeString(v.get()));
+                for (StringAliasExample stringsElement : strings) {
+                    _request.putQueryParams(
+                            "strings", plainSerDe.serializeString(stringsElement.get()));
                 }
-                for (long v : longs) {
-                    _request.putQueryParams("longs", Objects.toString(v));
+                for (long longsElement : longs) {
+                    _request.putQueryParams("longs", Objects.toString(longsElement));
                 }
-                for (int v : ints) {
-                    _request.putQueryParams("ints", plainSerDe.serializeInteger(v));
+                for (int intsElement : ints) {
+                    _request.putQueryParams("ints", plainSerDe.serializeInteger(intsElement));
                 }
                 return Futures.transform(
                         channel.execute(

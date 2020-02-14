@@ -35,14 +35,23 @@ public final class Union {
         return new Union(new FooWrapper(value));
     }
 
+    /** @deprecated Int is deprecated. */
+    @Deprecated
     public static Union bar(int value) {
         return new Union(new BarWrapper(value));
     }
 
+    /**
+     * 64-bit integer.
+     *
+     * @deprecated Prefer <code>foo</code>.
+     */
+    @Deprecated
     public static Union baz(long value) {
         return new Union(new BazWrapper(value));
     }
 
+    @SuppressWarnings("deprecation")
     public <T> T accept(Visitor<T> visitor) {
         if (value instanceof FooWrapper) {
             return visitor.visitFoo(((FooWrapper) value).value);
@@ -79,8 +88,16 @@ public final class Union {
     public interface Visitor<T> {
         T visitFoo(String value);
 
+        /** @deprecated Int is deprecated. */
+        @Deprecated
         T visitBar(int value);
 
+        /**
+         * 64-bit integer.
+         *
+         * @deprecated Prefer <code>foo</code>.
+         */
+        @Deprecated
         T visitBaz(long value);
 
         T visitUnknown(String unknownType);

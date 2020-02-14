@@ -97,8 +97,9 @@ final class UndertowServiceInterfaceGenerator {
     private List<ParameterSpec> createServiceMethodParameters(EndpointDefinition endpointDef, TypeMapper typeMapper) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
-        endpointDef.getAuth().ifPresent(authType ->
-                parameterSpecs.add(authType.accept(new AuthType.Visitor<ParameterSpec>() {
+        endpointDef
+                .getAuth()
+                .ifPresent(authType -> parameterSpecs.add(authType.accept(new AuthType.Visitor<ParameterSpec>() {
                     @Override
                     public ParameterSpec visitHeader(HeaderAuthType _value) {
                         return ParameterSpec.builder(ClassName.get(AuthHeader.class), "authHeader")

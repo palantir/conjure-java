@@ -154,8 +154,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                     .build());
         }
 
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue ->
-                methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
+        endpointDef
+                .getDeprecated()
+                .ifPresent(
+                        deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
@@ -248,8 +250,10 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                         .mapToObj(sortedParams::get)
                         .collect(Collectors.toList()));
 
-        endpointDef.getReturns().ifPresent(type ->
-                methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box())));
+        endpointDef
+                .getReturns()
+                .ifPresent(type ->
+                        methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box())));
 
         // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
