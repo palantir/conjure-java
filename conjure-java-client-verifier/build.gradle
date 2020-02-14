@@ -16,6 +16,8 @@
 
 apply from: "${rootDir}/gradle/verifier.gradle"
 
+sourceCompatibility = 11
+
 dependencies {
     testCases 'com.palantir.conjure.verification:verification-server-test-cases'
     verificationApi 'com.palantir.conjure.verification:verification-server-api'
