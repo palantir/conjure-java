@@ -44,7 +44,7 @@ apply plugin: 'com.palantir.consistent-versions'
 
 allprojects {
     apply plugin: 'com.palantir.java-format'
-    version gitVersion()
+    version System.env.CIRCLE_TAG ?: gitVersion()
     group 'com.palantir.conjure.java'
 
     repositories {

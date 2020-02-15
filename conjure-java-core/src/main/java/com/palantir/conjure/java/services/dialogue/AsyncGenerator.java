@@ -268,10 +268,14 @@ public final class AsyncGenerator {
 
             @Override
             public CodeBlock visitOptional(OptionalType optionalType) {
+
                 return CodeBlock.builder()
                         .beginControlFlow("if ($L.isPresent())", argName)
                         .add(generatePlainSerializer(
-                                method, key, CodeBlock.of("$L.get()", argName), optionalType.getItemType()))
+                                method,
+                                key,
+                                CodeBlock.of("$L.$L()", argName, getOptionalAccessor(optionalType.getItemType())),
+                                optionalType.getItemType()))
                         .endControlFlow()
                         .build();
             }
@@ -355,6 +359,18 @@ public final class AsyncGenerator {
                 throw new SafeIllegalStateException("unknown auth type", SafeArg.of("type", unknownType));
             }
         });
+    }
+
+    private static String getOptionalAccessor(Type type) {
+        if (type.accept(TypeVisitor.IS_PRIMITIVE)) {
+            PrimitiveType primitive = type.accept(TypeVisitor.PRIMITIVE);
+            if (primitive.equals(PrimitiveType.DOUBLE)) {
+                return "getAsDouble";
+            } else if (primitive.equals(PrimitiveType.INTEGER)) {
+                return "getAsInt";
+            }
+        }
+        return "get";
     }
 
     private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME = new ImmutableMap.Builder<

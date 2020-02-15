@@ -1313,11 +1313,11 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 if (maybeInteger.isPresent()) {
                     _request.putQueryParams(
-                            "maybeInteger", plainSerDe.serializeInteger(maybeInteger.get()));
+                            "maybeInteger", plainSerDe.serializeInteger(maybeInteger.getAsInt()));
                 }
                 if (maybeDouble.isPresent()) {
                     _request.putQueryParams(
-                            "maybeDouble", plainSerDe.serializeDouble(maybeDouble.get()));
+                            "maybeDouble", plainSerDe.serializeDouble(maybeDouble.getAsDouble()));
                 }
                 return Futures.transform(
                         channel.execute(
