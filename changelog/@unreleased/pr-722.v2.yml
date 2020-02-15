@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Add dialogue client generation using `--dialogue` flag
+  links:
+  - https://github.com/palantir/conjure-java/pull/722
