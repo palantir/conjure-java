@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Dialogue properly supports `optional<integer>` and `optional<double>`
+    parameters
+  links:
+  - https://github.com/palantir/conjure-java/pull/763
