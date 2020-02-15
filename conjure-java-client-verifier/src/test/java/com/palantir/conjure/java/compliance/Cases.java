@@ -19,10 +19,11 @@ package com.palantir.conjure.java.compliance;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.palantir.conjure.verification.server.ClientTestCases;
-import com.palantir.conjure.verification.server.EndpointName;
-import com.palantir.conjure.verification.server.IgnoredClientTestCases;
-import com.palantir.conjure.verification.server.IgnoredTestCases;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.ClientTestCases;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.EndpointName;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.IgnoredClientTestCases;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.IgnoredTestCases;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.TestCases;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -40,7 +41,7 @@ public final class Cases {
         try {
             return new ObjectMapper()
                     .registerModule(new Jdk8Module())
-                    .readValue(file, com.palantir.conjure.verification.server.TestCases.class)
+                    .readValue(file, TestCases.class)
                     .getClient();
         } catch (IOException e) {
             throw new RuntimeException(

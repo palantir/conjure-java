@@ -48,6 +48,11 @@ public interface CliConfiguration {
     }
 
     @Value.Default
+    default boolean generateDialogue() {
+        return false;
+    }
+
+    @Value.Default
     default Options options() {
         return Options.empty();
     }
@@ -57,7 +62,7 @@ public interface CliConfiguration {
         Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
         Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
         Preconditions.checkArgument(
-                generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow(),
+                generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow() ^ generateDialogue(),
                 "Must specify exactly one project to generate");
     }
 

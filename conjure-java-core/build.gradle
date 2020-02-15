@@ -56,6 +56,9 @@ dependencies {
     compile 'org.apache.commons:commons-lang3'
     compile 'org.slf4j:slf4j-api'
     compile 'com.atlassian.commonmark:commonmark'
+    implementation 'org.glassfish.jersey.core:jersey-common'
+    implementation 'com.palantir.dialogue:dialogue-target'
+    implementation 'com.palantir.dialogue:dialogue-serde'
 
     testCompile 'com.palantir.conjure:conjure-core'
     testCompile project(':conjure-java-undertow-runtime')
@@ -80,6 +83,7 @@ dependencies {
     integrationInputCompile 'javax.annotation:javax.annotation-api'
     integrationInputCompile 'javax.validation:validation-api'
     integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
+    integrationInputCompile 'com.palantir.dialogue:dialogue-target'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'

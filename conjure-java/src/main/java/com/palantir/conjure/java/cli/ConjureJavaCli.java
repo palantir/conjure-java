@@ -26,6 +26,7 @@ import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.types.TypeGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -88,6 +89,12 @@ public final class ConjureJavaCli implements Runnable {
                 defaultValue = "false",
                 description = "Generate undertow service interfaces and endpoint wrappers for server usage")
         private boolean generateUndertow;
+
+        @CommandLine.Option(
+                names = "--dialogue",
+                defaultValue = "false",
+                description = "Generate interfaces for dialogue clients")
+        private boolean generateDialogue;
 
         @CommandLine.Option(
                 names = "--retrofit",
@@ -168,6 +175,7 @@ public final class ConjureJavaCli implements Runnable {
                 ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.options());
                 ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.options());
                 ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.options());
+                ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options(), "unknown");
 
                 if (config.generateObjects()) {
                     typeGenerator.emit(conjureDefinition, config.outputDirectory());
@@ -180,6 +188,9 @@ public final class ConjureJavaCli implements Runnable {
                 }
                 if (config.generateUndertow()) {
                     undertowGenerator.emit(conjureDefinition, config.outputDirectory());
+                }
+                if (config.generateDialogue()) {
+                    dialogueServiceGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
             } catch (IOException e) {
                 throw new SafeRuntimeException("Error parsing definition", e);
@@ -195,6 +206,7 @@ public final class ConjureJavaCli implements Runnable {
                     .generateObjects(generateObjects)
                     .generateRetrofit(generateRetrofit)
                     .generateUndertow(generateUndertow)
+                    .generateDialogue(generateDialogue)
                     .options(Options.builder()
                             .jerseyBinaryAsResponse(jerseyBinaryAsReponse)
                             .requireNotNullAuthAndBodyParams(notNullAuthAndBody)

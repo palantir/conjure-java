@@ -18,12 +18,12 @@ package com.palantir.conjure.java.verification.server;
 
 import com.google.common.io.Resources;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.com.palantir.conjure.verification.client.EndpointName;
+import com.palantir.conjure.java.com.palantir.conjure.verification.client.PositiveAndNegativeTestCases;
+import com.palantir.conjure.java.com.palantir.conjure.verification.client.VerificationClientRequest;
+import com.palantir.conjure.java.com.palantir.conjure.verification.client.VerificationClientService;
 import com.palantir.conjure.java.verification.server.undertest.JerseyServerUnderTestApplication;
 import com.palantir.conjure.java.verification.server.undertest.UndertowServerUnderTestExtension;
-import com.palantir.conjure.verification.client.EndpointName;
-import com.palantir.conjure.verification.client.PositiveAndNegativeTestCases;
-import com.palantir.conjure.verification.client.VerificationClientRequest;
-import com.palantir.conjure.verification.client.VerificationClientService;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.lang.annotation.Retention;
