@@ -18,9 +18,9 @@ package com.palantir.conjure.java.verification.server.undertest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.Reflection;
+import com.palantir.conjure.java.com.palantir.conjure.verification.client.AutoDeserializeService;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
-import com.palantir.conjure.verification.client.AutoDeserializeService;
 import com.palantir.websecurity.WebSecurityBundle;
 import io.dropwizard.Application;
 import io.dropwizard.jackson.DiscoverableSubtypeResolver;

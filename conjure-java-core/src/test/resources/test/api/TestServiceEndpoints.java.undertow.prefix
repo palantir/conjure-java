@@ -1,6 +1,5 @@
 package test.prefix.com.palantir.another;
 
-import com.palantir.another.TestService;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -44,55 +43,34 @@ public final class TestServiceEndpoints implements UndertowService {
     }
 
     public static UndertowService of(TestService delegate) {
-        return new com.palantir.another.TestServiceEndpoints(delegate);
+        return new TestServiceEndpoints(delegate);
     }
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return Collections.unmodifiableList(
                 Arrays.asList(
-                        new com.palantir.another.TestServiceEndpoints.GetFileSystemsEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.CreateDatasetEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.GetDatasetEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.GetRawDataEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.GetAliasedRawDataEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.MaybeGetRawDataEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.GetAliasedStringEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.UploadRawDataEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.UploadAliasedRawDataEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.GetBranchesEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.GetBranchesDeprecatedEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.ResolveBranchEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.TestParamEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.TestQueryParamsEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints
-                                .TestNoResponseQueryParamsEndpoint(runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.TestBooleanEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.TestDoubleEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.TestIntegerEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.TestPostOptionalEndpoint(
-                                runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints
-                                .TestOptionalIntegerAndDoubleEndpoint(runtime, delegate),
-                        new com.palantir.another.TestServiceEndpoints.GetForStringsEndpoint(
-                                runtime, delegate)));
+                        new GetFileSystemsEndpoint(runtime, delegate),
+                        new CreateDatasetEndpoint(runtime, delegate),
+                        new GetDatasetEndpoint(runtime, delegate),
+                        new GetRawDataEndpoint(runtime, delegate),
+                        new GetAliasedRawDataEndpoint(runtime, delegate),
+                        new MaybeGetRawDataEndpoint(runtime, delegate),
+                        new GetAliasedStringEndpoint(runtime, delegate),
+                        new UploadRawDataEndpoint(runtime, delegate),
+                        new UploadAliasedRawDataEndpoint(runtime, delegate),
+                        new GetBranchesEndpoint(runtime, delegate),
+                        new GetBranchesDeprecatedEndpoint(runtime, delegate),
+                        new ResolveBranchEndpoint(runtime, delegate),
+                        new TestParamEndpoint(runtime, delegate),
+                        new TestQueryParamsEndpoint(runtime, delegate),
+                        new TestNoResponseQueryParamsEndpoint(runtime, delegate),
+                        new TestBooleanEndpoint(runtime, delegate),
+                        new TestDoubleEndpoint(runtime, delegate),
+                        new TestIntegerEndpoint(runtime, delegate),
+                        new TestPostOptionalEndpoint(runtime, delegate),
+                        new TestOptionalIntegerAndDoubleEndpoint(runtime, delegate),
+                        new GetForStringsEndpoint(runtime, delegate)));
     }
 
     private static final class GetFileSystemsEndpoint implements HttpHandler, Endpoint {

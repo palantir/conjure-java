@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.dialogue.Channel;
@@ -30,16 +31,19 @@ import javax.lang.model.element.Modifier;
 
 public final class BlockingGenerator {
 
+    private final Options options;
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
 
-    public BlockingGenerator(ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+    public BlockingGenerator(Options options, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+        this.options = options;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
     }
 
     public MethodSpec generate(ServiceDefinition def) {
-        TypeSpec.Builder impl = TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.blockingClassName(def));
+        TypeSpec.Builder impl =
+                TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.blockingClassName(def, options));
         def.getEndpoints().forEach(endpoint -> impl.addMethod(blockingClientImpl(endpoint)));
 
         MethodSpec blockingImpl = MethodSpec.methodBuilder("blocking")
@@ -47,10 +51,10 @@ public final class BlockingGenerator {
                 .addJavadoc(
                         "Creates a synchronous/blocking client for a $L service.",
                         def.getServiceName().getName())
-                .returns(Names.blockingClassName(def))
+                .returns(Names.blockingClassName(def, options))
                 .addParameter(Channel.class, "channel")
                 .addParameter(ConjureRuntime.class, "runtime")
-                .addCode("$T delegate = async(channel, runtime);", Names.asyncClassName(def))
+                .addCode("$T delegate = async(channel, runtime);", Names.asyncClassName(def, options))
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return blockingImpl;

@@ -16,26 +16,29 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
+import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.squareup.javapoet.ClassName;
 
 public final class Names {
     private Names() {}
 
-    public static ClassName publicClassName(ServiceDefinition def) {
-        return serviceClassName("Dialogue", def);
+    public static ClassName publicClassName(ServiceDefinition def, Options options) {
+        return serviceClassName("Dialogue", def, options);
     }
 
-    public static ClassName blockingClassName(ServiceDefinition def) {
-        return serviceClassName("Blocking", def);
+    public static ClassName blockingClassName(ServiceDefinition def, Options options) {
+        return serviceClassName("Blocking", def, options);
     }
 
-    public static ClassName asyncClassName(ServiceDefinition def) {
-        return serviceClassName("Async", def);
+    public static ClassName asyncClassName(ServiceDefinition def, Options options) {
+        return serviceClassName("Async", def, options);
     }
 
-    private static ClassName serviceClassName(String prefix, ServiceDefinition def) {
+    private static ClassName serviceClassName(String prefix, ServiceDefinition def, Options options) {
         String simpleName = prefix + def.getServiceName().getName();
-        return ClassName.get(def.getServiceName().getPackage(), simpleName);
+        return ClassName.get(
+                Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()), simpleName);
     }
 }

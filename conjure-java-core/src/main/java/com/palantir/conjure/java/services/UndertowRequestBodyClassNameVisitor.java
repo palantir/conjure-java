@@ -35,8 +35,8 @@ public final class UndertowRequestBodyClassNameVisitor implements ClassNameVisit
 
     private final ClassNameVisitor delegate;
 
-    public UndertowRequestBodyClassNameVisitor(List<TypeDefinition> types, Options featureFlags) {
-        delegate = new DefaultClassNameVisitor(types, featureFlags);
+    public UndertowRequestBodyClassNameVisitor(List<TypeDefinition> types, Options options) {
+        delegate = new DefaultClassNameVisitor(types, options);
     }
 
     @Override

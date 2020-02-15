@@ -24,6 +24,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.visitor.ClassVisitor;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
@@ -76,6 +77,7 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
                         .collect(Collectors.toMap(
                                 type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
         TypeAwareGenerator generator = new TypeAwareGenerator(
+                options,
                 typeName -> Preconditions.checkNotNull(
                         typeDefinitionsByName.get(typeName),
                         "Referenced unknown TypeName",
@@ -90,16 +92,19 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
 
     // TODO(rfink): Split into separate classes: endpoint, interface, impl.
     private static final class TypeAwareGenerator {
+        private final Options options;
         private final TypeNameResolver typeNameResolver;
         private final ParameterTypeMapper parameterTypes;
         private final ReturnTypeMapper returnTypes;
         private final String apiVersion;
 
         private TypeAwareGenerator(
+                Options options,
                 TypeNameResolver typeNameResolver,
                 TypeMapper parameterTypes,
                 TypeMapper returnTypes,
                 String apiVersion) {
+            this.options = options;
             this.typeNameResolver = typeNameResolver;
             this.parameterTypes = new ParameterTypeMapper(parameterTypes);
             this.returnTypes = new ReturnTypeMapper(returnTypes);
@@ -108,7 +113,7 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
 
         private Set<JavaFile> service(ServiceDefinition def) {
             JavaFile client = client(def);
-            InterfaceGenerator ifaceGenerator = new InterfaceGenerator(def, parameterTypes, returnTypes);
+            InterfaceGenerator ifaceGenerator = new InterfaceGenerator(options, def, parameterTypes, returnTypes);
 
             ImmutableSet<JavaFile> of =
                     ImmutableSet.of(ifaceGenerator.generateBlocking(), ifaceGenerator.generateAsync(), client);
@@ -116,7 +121,7 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
         }
 
         private JavaFile client(ServiceDefinition def) {
-            ClassName serviceClassName = Names.publicClassName(def);
+            ClassName serviceClassName = Names.publicClassName(def, options);
             TypeSpec.Builder serviceBuilder = TypeSpec.classBuilder(serviceClassName)
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                     .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueServiceGenerator.class));
@@ -124,14 +129,16 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
             serviceBuilder.addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PRIVATE)
                     .build());
-            serviceBuilder.addMethod(new BlockingGenerator(parameterTypes, returnTypes).generate(def));
-            serviceBuilder.addMethod(
-                    new AsyncGenerator(typeNameResolver, parameterTypes, returnTypes).generate(serviceClassName, def));
+            serviceBuilder.addMethod(new BlockingGenerator(options, parameterTypes, returnTypes).generate(def));
+            serviceBuilder.addMethod(new AsyncGenerator(options, typeNameResolver, parameterTypes, returnTypes)
+                    .generate(serviceClassName, def));
             serviceBuilder.addFields(def.getEndpoints().stream()
                     .map(e -> endpoint(e, def.getServiceName().getName()))
                     .collect(toList()));
 
-            return JavaFile.builder(def.getServiceName().getPackage(), serviceBuilder.build())
+            return JavaFile.builder(
+                            Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
+                            serviceBuilder.build())
                     .build();
         }
 

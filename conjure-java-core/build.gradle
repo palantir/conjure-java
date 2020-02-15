@@ -73,9 +73,6 @@ dependencies {
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
     testCompile 'javax.xml.bind:jaxb-api'
-    testCompile 'com.palantir.dialogue:dialogue-java-client'
-    testCompile 'com.palantir.dialogue:dialogue-serde'
-
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     integrationInputCompile project(':conjure-lib')

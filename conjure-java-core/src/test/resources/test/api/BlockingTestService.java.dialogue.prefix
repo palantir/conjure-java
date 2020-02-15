@@ -1,4 +1,4 @@
-package com.palantir.another;
+package test.prefix.com.palantir.another;
 
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.ri.ResourceIdentifier;

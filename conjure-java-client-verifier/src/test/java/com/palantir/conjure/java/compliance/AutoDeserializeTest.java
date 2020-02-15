@@ -17,9 +17,10 @@
 package com.palantir.conjure.java.compliance;
 
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
-import com.palantir.conjure.verification.server.AutoDeserializeService;
-import com.palantir.conjure.verification.server.EndpointName;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingAutoDeserializeService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.EndpointName;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +42,9 @@ public class AutoDeserializeTest {
     public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
-    private static final AutoDeserializeService testService = VerificationClients.autoDeserializeService(server);
+    private static final AutoDeserializeService jerseyTestService = VerificationClients.autoDeserializeService(server);
+    private static final BlockingAutoDeserializeService dialogueTestService =
+            VerificationClients.dialogueAutoDeserializeService(server);
     private static final AutoDeserializeConfirmService confirmService = VerificationClients.confirmService(server);
 
     @Parameterized.Parameter(0)
@@ -83,24 +86,35 @@ public class AutoDeserializeTest {
     }
 
     @Test
-    public void runTestCase() throws Exception {
+    public void runConjureJavaRuntimeTestCase() throws Exception {
+        runTestCase(jerseyTestService);
+    }
+
+    @Test
+    public void runConjureDialogueTestCase() throws Exception {
+        runTestCase(dialogueTestService);
+    }
+
+    private void runTestCase(Object service) throws Exception {
         Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
-        Method method = testService.getClass().getMethod(endpointName.get(), int.class);
+        Method method = service.getClass().getMethod(endpointName.get(), int.class);
+        // Need to set accessible true work around dialogues anonymous class impl
+        method.setAccessible(true);
         System.out.println(String.format(
                 "Test case %s: Invoking %s(%s), expected %s",
                 index, endpointName, jsonString, shouldSucceed ? "success" : "failure"));
 
         if (shouldSucceed) {
-            expectSuccess(method);
+            expectSuccess(service, method);
         } else {
-            expectFailure(method);
+            expectFailure(service, method);
         }
     }
 
-    private void expectSuccess(Method method) throws Exception {
+    private void expectSuccess(Object service, Method method) throws Exception {
         try {
-            Object resultFromServer = method.invoke(testService, index);
+            Object resultFromServer = method.invoke(service, index);
             log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
             confirmService.confirm(endpointName, index, resultFromServer);
         } catch (RemoteException e) {
@@ -109,9 +123,9 @@ public class AutoDeserializeTest {
         }
     }
 
-    private void expectFailure(Method method) {
+    private void expectFailure(Object service, Method method) {
         Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
-            Object result = method.invoke(testService, index);
+            Object result = method.invoke(service, index);
             log.error("Result should have caused an exception but deserialized to: {}", result);
         });
     }

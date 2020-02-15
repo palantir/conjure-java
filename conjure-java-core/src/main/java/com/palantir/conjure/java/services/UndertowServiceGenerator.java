@@ -29,10 +29,10 @@ import java.util.stream.Collectors;
 
 public final class UndertowServiceGenerator implements ServiceGenerator {
 
-    private final Options experimentalFeatures;
+    private final Options options;
 
-    public UndertowServiceGenerator(Options experimentalFeatures) {
-        this.experimentalFeatures = experimentalFeatures;
+    public UndertowServiceGenerator(Options options) {
+        this.options = options;
     }
 
     @Override
@@ -43,12 +43,10 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
                         conjureDefinition.getTypes(),
                         new TypeMapper(
                                 conjureDefinition.getTypes(),
-                                new UndertowRequestBodyClassNameVisitor(
-                                        conjureDefinition.getTypes(), experimentalFeatures)),
+                                new UndertowRequestBodyClassNameVisitor(conjureDefinition.getTypes(), options)),
                         new TypeMapper(
                                 conjureDefinition.getTypes(),
-                                new UndertowReturnValueClassNameVisitor(
-                                        conjureDefinition.getTypes(), experimentalFeatures)))
+                                new UndertowReturnValueClassNameVisitor(conjureDefinition.getTypes(), options)))
                         .stream())
                 .collect(Collectors.toSet());
     }
@@ -59,9 +57,9 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
         return ImmutableList.of(
-                new UndertowServiceInterfaceGenerator(experimentalFeatures)
+                new UndertowServiceInterfaceGenerator(options)
                         .generateServiceInterface(serviceDefinition, typeMapper, returnTypeMapper),
-                new UndertowServiceHandlerGenerator(experimentalFeatures)
+                new UndertowServiceHandlerGenerator(options)
                         .generateServiceHandler(serviceDefinition, typeDefinitions, typeMapper, returnTypeMapper));
     }
 }

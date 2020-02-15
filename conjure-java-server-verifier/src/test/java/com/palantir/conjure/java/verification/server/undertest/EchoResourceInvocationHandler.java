@@ -18,7 +18,7 @@ package com.palantir.conjure.java.verification.server.undertest;
 
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.AbstractInvocationHandler;
-import com.palantir.conjure.verification.client.AutoDeserializeService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.client.AutoDeserializeService;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
