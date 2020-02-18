@@ -3,6 +3,9 @@ package test.prefix.com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -21,6 +24,9 @@ import javax.annotation.Nonnull;
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 public final class SimpleEnum {
     public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
+
+    private static final List<SimpleEnum> values =
+            Collections.unmodifiableList(Arrays.asList(VALUE));
 
     private final Value value;
 
@@ -71,6 +77,10 @@ public final class SimpleEnum {
             default:
                 return visitor.visitUnknown(string);
         }
+    }
+
+    public static List<SimpleEnum> values() {
+        return values;
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")

@@ -3,6 +3,9 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -34,6 +37,9 @@ public final class EnumExample {
      */
     @Deprecated
     public static final EnumExample ONE_HUNDRED = new EnumExample(Value.ONE_HUNDRED, "ONE_HUNDRED");
+
+    private static final List<EnumExample> values =
+            Collections.unmodifiableList(Arrays.asList(ONE, TWO, ONE_HUNDRED));
 
     private final Value value;
 
@@ -95,6 +101,10 @@ public final class EnumExample {
             default:
                 return visitor.visitUnknown(string);
         }
+    }
+
+    public static List<EnumExample> values() {
+        return values;
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")

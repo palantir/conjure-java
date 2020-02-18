@@ -20,6 +20,9 @@ import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptio
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.product.EnumExample;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 public class EnumTests {
@@ -51,6 +54,16 @@ public class EnumTests {
     @Test
     public void testNullValidationUsesSafeLoggable() {
         assertThatLoggableExceptionThrownBy(() -> EnumExample.valueOf(null)).hasLogMessage("value cannot be null");
+    }
+
+    @Test
+    public void testValues() {
+        Set<EnumExample.Value> valuesFromClass =
+                EnumExample.values().stream().map(v -> v.get()).collect(Collectors.toSet());
+        Set<EnumExample.Value> valuesFromEnum = Arrays.stream(EnumExample.Value.values())
+                .filter(v -> !v.equals(EnumExample.Value.UNKNOWN))
+                .collect(Collectors.toSet());
+        assertThat(valuesFromClass).isEqualTo(valuesFromEnum);
     }
 
     private enum Visitor implements EnumExample.Visitor<String> {
