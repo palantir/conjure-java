@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = CovariantOptionalExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -116,27 +117,27 @@ public final class CovariantOptionalExample {
         }
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
-        public Builder item(Optional<?> item) {
+        public Builder item(@Nonnull Optional<?> item) {
             this.item =
                     Preconditions.checkNotNull(item, "item cannot be null")
                             .map(Function.identity());
             return this;
         }
 
-        public Builder item(Object item) {
+        public Builder item(@Nonnull Object item) {
             this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "setItem", nulls = Nulls.SKIP)
-        public Builder setItem(Optional<? extends Set<StringAliasExample>> setItem) {
+        public Builder setItem(@Nonnull Optional<? extends Set<StringAliasExample>> setItem) {
             this.setItem =
                     Preconditions.checkNotNull(setItem, "setItem cannot be null")
                             .map(Function.identity());
             return this;
         }
 
-        public Builder setItem(Set<StringAliasExample> setItem) {
+        public Builder setItem(@Nonnull Set<StringAliasExample> setItem) {
             this.setItem =
                     Optional.of(Preconditions.checkNotNull(setItem, "setItem cannot be null"));
             return this;

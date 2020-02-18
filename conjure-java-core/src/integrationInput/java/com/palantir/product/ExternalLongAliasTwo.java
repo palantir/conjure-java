@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class ExternalLongAliasTwo {
     private final ExternalLongAliasOne value;
 
-    private ExternalLongAliasTwo(ExternalLongAliasOne value) {
+    private ExternalLongAliasTwo(@Nonnull ExternalLongAliasOne value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -40,7 +41,7 @@ public final class ExternalLongAliasTwo {
     }
 
     @JsonCreator
-    public static ExternalLongAliasTwo of(ExternalLongAliasOne value) {
+    public static ExternalLongAliasTwo of(@Nonnull ExternalLongAliasOne value) {
         return new ExternalLongAliasTwo(value);
     }
 }

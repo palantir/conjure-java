@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = DateTimeExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -96,7 +97,7 @@ public final class DateTimeExample {
         }
 
         @JsonSetter("datetime")
-        public Builder datetime(OffsetDateTime datetime) {
+        public Builder datetime(@Nonnull OffsetDateTime datetime) {
             this.datetime = Preconditions.checkNotNull(datetime, "datetime cannot be null");
             return this;
         }

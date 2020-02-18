@@ -5,12 +5,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.ri.ResourceIdentifier;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class RidAliasExample {
     private final ResourceIdentifier value;
 
-    private RidAliasExample(ResourceIdentifier value) {
+    private RidAliasExample(@Nonnull ResourceIdentifier value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -41,7 +42,7 @@ public final class RidAliasExample {
     }
 
     @JsonCreator
-    public static RidAliasExample of(ResourceIdentifier value) {
+    public static RidAliasExample of(@Nonnull ResourceIdentifier value) {
         return new RidAliasExample(value);
     }
 }
