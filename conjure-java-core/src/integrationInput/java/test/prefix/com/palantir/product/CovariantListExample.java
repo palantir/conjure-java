@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 import test.api.ExampleExternalReference;
 
 @JsonDeserialize(builder = CovariantListExample.Builder.class)
@@ -115,14 +116,14 @@ public final class CovariantListExample {
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
-        public Builder items(Iterable<?> items) {
+        public Builder items(@Nonnull Iterable<?> items) {
             this.items.clear();
             ConjureCollections.addAll(
                     this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        public Builder addAllItems(Iterable<?> items) {
+        public Builder addAllItems(@Nonnull Iterable<?> items) {
             ConjureCollections.addAll(
                     this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
@@ -134,7 +135,8 @@ public final class CovariantListExample {
         }
 
         @JsonSetter(value = "externalItems", nulls = Nulls.SKIP)
-        public Builder externalItems(Iterable<? extends ExampleExternalReference> externalItems) {
+        public Builder externalItems(
+                @Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             this.externalItems.clear();
             ConjureCollections.addAll(
                     this.externalItems,
@@ -143,7 +145,7 @@ public final class CovariantListExample {
         }
 
         public Builder addAllExternalItems(
-                Iterable<? extends ExampleExternalReference> externalItems) {
+                @Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             ConjureCollections.addAll(
                     this.externalItems,
                     Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));

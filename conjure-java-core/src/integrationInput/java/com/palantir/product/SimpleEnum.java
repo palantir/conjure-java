@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Locale;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 /**
  * This class is used instead of a native enum to support unknown values. Rather than throw an
@@ -52,7 +53,7 @@ public final class SimpleEnum {
     }
 
     @JsonCreator
-    public static SimpleEnum valueOf(String value) {
+    public static SimpleEnum valueOf(@Nonnull String value) {
         Preconditions.checkNotNull(value, "value cannot be null");
         String upperCasedValue = value.toUpperCase(Locale.ROOT);
         switch (upperCasedValue) {

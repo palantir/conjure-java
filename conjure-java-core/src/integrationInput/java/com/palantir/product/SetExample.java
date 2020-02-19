@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = SetExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -111,14 +112,14 @@ public final class SetExample {
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder items(Iterable<String> items) {
+        public Builder items(@Nonnull Iterable<String> items) {
             this.items.clear();
             ConjureCollections.addAll(
                     this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        public Builder addAllItems(Iterable<String> items) {
+        public Builder addAllItems(@Nonnull Iterable<String> items) {
             ConjureCollections.addAll(
                     this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
@@ -130,7 +131,7 @@ public final class SetExample {
         }
 
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder doubleItems(Iterable<Double> doubleItems) {
+        public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             this.doubleItems.clear();
             ConjureCollections.addAll(
                     this.doubleItems,
@@ -138,7 +139,7 @@ public final class SetExample {
             return this;
         }
 
-        public Builder addAllDoubleItems(Iterable<Double> doubleItems) {
+        public Builder addAllDoubleItems(@Nonnull Iterable<Double> doubleItems) {
             ConjureCollections.addAll(
                     this.doubleItems,
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));

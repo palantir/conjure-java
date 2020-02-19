@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add non-null annotation to all parameters that cannot be null.
+  links:
+  - https://github.com/palantir/conjure-java/pull/769
