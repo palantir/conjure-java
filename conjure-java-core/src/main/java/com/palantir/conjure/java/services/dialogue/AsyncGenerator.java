@@ -66,7 +66,7 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
-public final class AsyncGenerator {
+public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     private static final String REQUEST = "_request";
     private final Options options;
     private final TypeNameResolver typeNameResolver;
@@ -84,7 +84,8 @@ public final class AsyncGenerator {
         this.returnTypes = returnTypes;
     }
 
-    public MethodSpec generate(ClassName serviceClassName, ServiceDefinition def) {
+    @Override
+    public MethodSpec generate(ServiceDefinition def) {
         TypeSpec.Builder impl =
                 TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.asyncClassName(def, options));
 
@@ -101,10 +102,10 @@ public final class AsyncGenerator {
                     .ifPresent(impl::addField);
 
             deserializer(endpoint.getEndpointName(), endpoint.getReturns()).ifPresent(impl::addField);
-            impl.addMethod(asyncClientImpl(serviceClassName, endpoint));
+            impl.addMethod(asyncClientImpl(def, endpoint));
         });
 
-        MethodSpec asyncImpl = MethodSpec.methodBuilder("async")
+        MethodSpec asyncImpl = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(
                         "Creates an asynchronous/non-blocking client for a $L service.",
@@ -152,7 +153,7 @@ public final class AsyncGenerator {
                 .build());
     }
 
-    private MethodSpec asyncClientImpl(ClassName serviceClassName, EndpointDefinition def) {
+    private MethodSpec asyncClientImpl(ServiceDefinition serviceDefinition, EndpointDefinition def) {
         List<ParameterSpec> params = parameterTypes.methodParams(def);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         def.getEndpointName().get())
@@ -176,7 +177,7 @@ public final class AsyncGenerator {
         CodeBlock execute = CodeBlock.builder()
                 .add(
                         "channel.execute($T.$L, $L.build())",
-                        serviceClassName,
+                        Names.endpointsClassName(serviceDefinition, options),
                         def.getEndpointName().get(),
                         REQUEST)
                 .build();

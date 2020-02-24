@@ -6,53 +6,16 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
-import com.palantir.dialogue.Endpoint;
-import com.palantir.dialogue.HttpMethod;
-import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.RemoteExceptions;
 import com.palantir.dialogue.Request;
-import com.palantir.dialogue.UrlBuilder;
 import com.palantir.tokens.auth.BearerToken;
 import java.lang.Override;
-import java.lang.String;
 import java.lang.Void;
-import java.util.Map;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
 public final class DialogueCookieService {
-    private static final Endpoint eatCookies =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("cookies").build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "CookieService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "eatCookies";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
     private DialogueCookieService() {}
 
     /** Creates a synchronous/blocking client for a CookieService service. */
@@ -80,7 +43,7 @@ public final class DialogueCookieService {
                 _request.putHeaderParam(
                         "Cookie", "PALANTIR_TOKEN=" + planSerDe.serializeBearerToken(token));
                 return Futures.transform(
-                        channel.execute(DialogueCookieService.eatCookies, _request.build()),
+                        channel.execute(DialogueCookieEndpoints.eatCookies, _request.build()),
                         eatCookiesDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }

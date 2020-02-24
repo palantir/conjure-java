@@ -24,10 +24,6 @@ import com.palantir.conjure.java.com.palantir.conjure.verification.server.Blocki
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingSingleHeaderService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingSinglePathParamService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingSingleQueryParamService;
-import com.palantir.conjure.java.com.palantir.conjure.verification.server.DialogueAutoDeserializeService;
-import com.palantir.conjure.java.com.palantir.conjure.verification.server.DialogueSingleHeaderService;
-import com.palantir.conjure.java.com.palantir.conjure.verification.server.DialogueSinglePathParamService;
-import com.palantir.conjure.java.com.palantir.conjure.verification.server.DialogueSingleQueryParamService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.SingleHeaderService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.SinglePathParamService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.SingleQueryParamService;
@@ -51,7 +47,7 @@ public final class VerificationClients {
     }
 
     public static BlockingAutoDeserializeService dialogueAutoDeserializeService(VerificationServerRule server) {
-        return DialogueAutoDeserializeService.blocking(
+        return BlockingAutoDeserializeService.of(
                 JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
                 DEFAULT_CONJURE_RUNTIME);
     }
@@ -73,7 +69,7 @@ public final class VerificationClients {
     }
 
     public static BlockingSinglePathParamService dialogueSinglePathParamService(VerificationServerRule server) {
-        return DialogueSinglePathParamService.blocking(
+        return BlockingSinglePathParamService.of(
                 JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
                 DEFAULT_CONJURE_RUNTIME);
     }
@@ -84,7 +80,7 @@ public final class VerificationClients {
     }
 
     public static BlockingSingleHeaderService dialogueSingleHeaderService(VerificationServerRule server) {
-        return DialogueSingleHeaderService.blocking(
+        return BlockingSingleHeaderService.of(
                 JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
                 DEFAULT_CONJURE_RUNTIME);
     }
@@ -102,7 +98,7 @@ public final class VerificationClients {
     }
 
     public static BlockingSingleQueryParamService dialogueSingleQueryParamService(VerificationServerRule server) {
-        return DialogueSingleQueryParamService.blocking(
+        return BlockingSingleQueryParamService.of(
                 JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
                 DEFAULT_CONJURE_RUNTIME);
     }

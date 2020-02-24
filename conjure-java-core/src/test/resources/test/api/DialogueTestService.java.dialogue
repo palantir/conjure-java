@@ -7,15 +7,11 @@ import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
-import com.palantir.dialogue.Endpoint;
-import com.palantir.dialogue.HttpMethod;
-import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.RemoteExceptions;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
-import com.palantir.dialogue.UrlBuilder;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.NestedAliasedBinary;
@@ -40,722 +36,6 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
 public final class DialogueTestService {
-    private static final Endpoint getFileSystems =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("catalog").fixed("fileSystems").build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "getFileSystems";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint createDataset =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("catalog").fixed("datasets").build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.POST;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "createDataset";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint getDataset =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "getDataset";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint getRawData =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("raw")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "getRawData";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint getAliasedRawData =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("raw-aliased")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "getAliasedRawData";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint maybeGetRawData =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("raw-maybe")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "maybeGetRawData";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint getAliasedString =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("string-aliased")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "getAliasedString";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint uploadRawData =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .fixed("upload-raw")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.POST;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "uploadRawData";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint uploadAliasedRawData =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .fixed("upload-raw-aliased")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.POST;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "uploadAliasedRawData";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint getBranches =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("branches")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "getBranches";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint getBranchesDeprecated =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("branchesDeprecated")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "getBranchesDeprecated";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint resolveBranch =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("branches")
-                                .variable("branch")
-                                .fixed("resolve")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "resolveBranch";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint testParam =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("testParam")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "testParam";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint testQueryParams =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("catalog").fixed("test-query-params").build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.POST;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "testQueryParams";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint testNoResponseQueryParams =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("test-no-response-query-params")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.POST;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "testNoResponseQueryParams";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint testBoolean =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("catalog").fixed("boolean").build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "testBoolean";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint testDouble =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("catalog").fixed("double").build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "testDouble";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint testInteger =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("catalog").fixed("integer").build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "testInteger";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint testPostOptional =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("catalog").fixed("optional").build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.POST;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "testPostOptional";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint testOptionalIntegerAndDouble =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("optional-integer-double")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "testOptionalIntegerAndDouble";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private static final Endpoint getForStrings =
-            new Endpoint() {
-                private final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("catalog")
-                                .fixed("datasets")
-                                .variable("datasetRid")
-                                .fixed("strings")
-                                .build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "TestService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "getForStrings";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
     private DialogueTestService() {}
 
     /** Creates a synchronous/blocking client for a TestService service. */
@@ -1011,7 +291,7 @@ public final class DialogueTestService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.getFileSystems, _request.build()),
+                        channel.execute(DialogueTestEndpoints.getFileSystems, _request.build()),
                         getFileSystemsDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1026,7 +306,7 @@ public final class DialogueTestService {
                 _request.body(createDatasetSerializer.serialize(request));
                 _request.putHeaderParams("Test-Header", plainSerDe.serializeString(testHeaderArg));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.createDataset, _request.build()),
+                        channel.execute(DialogueTestEndpoints.createDataset, _request.build()),
                         createDatasetDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1040,7 +320,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.getDataset, _request.build()),
+                        channel.execute(DialogueTestEndpoints.getDataset, _request.build()),
                         getDatasetDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1054,7 +334,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.getRawData, _request.build()),
+                        channel.execute(DialogueTestEndpoints.getRawData, _request.build()),
                         runtime.bodySerDe()::deserializeInputStream,
                         MoreExecutors.directExecutor());
             }
@@ -1068,7 +348,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.getAliasedRawData, _request.build()),
+                        channel.execute(DialogueTestEndpoints.getAliasedRawData, _request.build()),
                         getAliasedRawDataDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1082,7 +362,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.maybeGetRawData, _request.build()),
+                        channel.execute(DialogueTestEndpoints.maybeGetRawData, _request.build()),
                         maybeGetRawDataDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1096,7 +376,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.getAliasedString, _request.build()),
+                        channel.execute(DialogueTestEndpoints.getAliasedString, _request.build()),
                         getAliasedStringDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1110,7 +390,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(runtime.bodySerDe().serialize(input));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.uploadRawData, _request.build()),
+                        channel.execute(DialogueTestEndpoints.uploadRawData, _request.build()),
                         uploadRawDataDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1124,7 +404,8 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(uploadAliasedRawDataSerializer.serialize(input));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.uploadAliasedRawData, _request.build()),
+                        channel.execute(
+                                DialogueTestEndpoints.uploadAliasedRawData, _request.build()),
                         uploadAliasedRawDataDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1138,7 +419,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.getBranches, _request.build()),
+                        channel.execute(DialogueTestEndpoints.getBranches, _request.build()),
                         getBranchesDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1153,7 +434,7 @@ public final class DialogueTestService {
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return Futures.transform(
                         channel.execute(
-                                DialogueTestService.getBranchesDeprecated, _request.build()),
+                                DialogueTestEndpoints.getBranchesDeprecated, _request.build()),
                         getBranchesDeprecatedDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1168,7 +449,7 @@ public final class DialogueTestService {
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 _request.putPathParams("branch", plainSerDe.serializeString(branch));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.resolveBranch, _request.build()),
+                        channel.execute(DialogueTestEndpoints.resolveBranch, _request.build()),
                         resolveBranchDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1182,7 +463,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.testParam, _request.build()),
+                        channel.execute(DialogueTestEndpoints.testParam, _request.build()),
                         testParamDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1215,7 +496,7 @@ public final class DialogueTestService {
                             "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
                 }
                 return Futures.transform(
-                        channel.execute(DialogueTestService.testQueryParams, _request.build()),
+                        channel.execute(DialogueTestEndpoints.testQueryParams, _request.build()),
                         testQueryParamsDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1249,7 +530,7 @@ public final class DialogueTestService {
                 }
                 return Futures.transform(
                         channel.execute(
-                                DialogueTestService.testNoResponseQueryParams, _request.build()),
+                                DialogueTestEndpoints.testNoResponseQueryParams, _request.build()),
                         testNoResponseQueryParamsDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1261,7 +542,7 @@ public final class DialogueTestService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.testBoolean, _request.build()),
+                        channel.execute(DialogueTestEndpoints.testBoolean, _request.build()),
                         testBooleanDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1273,7 +554,7 @@ public final class DialogueTestService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.testDouble, _request.build()),
+                        channel.execute(DialogueTestEndpoints.testDouble, _request.build()),
                         testDoubleDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1285,7 +566,7 @@ public final class DialogueTestService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.testInteger, _request.build()),
+                        channel.execute(DialogueTestEndpoints.testInteger, _request.build()),
                         testIntegerDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1299,7 +580,7 @@ public final class DialogueTestService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(testPostOptionalSerializer.serialize(maybeString));
                 return Futures.transform(
-                        channel.execute(DialogueTestService.testPostOptional, _request.build()),
+                        channel.execute(DialogueTestEndpoints.testPostOptional, _request.build()),
                         testPostOptionalDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1321,7 +602,8 @@ public final class DialogueTestService {
                 }
                 return Futures.transform(
                         channel.execute(
-                                DialogueTestService.testOptionalIntegerAndDouble, _request.build()),
+                                DialogueTestEndpoints.testOptionalIntegerAndDouble,
+                                _request.build()),
                         testOptionalIntegerAndDoubleDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1341,7 +623,7 @@ public final class DialogueTestService {
                             "strings", plainSerDe.serializeString(stringsElement.get()));
                 }
                 return Futures.transform(
-                        channel.execute(DialogueTestService.getForStrings, _request.build()),
+                        channel.execute(DialogueTestEndpoints.getForStrings, _request.build()),
                         getForStringsDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
