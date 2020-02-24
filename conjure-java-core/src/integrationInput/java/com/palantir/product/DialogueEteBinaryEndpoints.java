@@ -10,137 +10,124 @@ import java.util.Map;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
-final class DialogueEteBinaryEndpoints {
-    static final Endpoint postBinary =
-            new Endpoint() {
-                final PathTemplate pathTemplate = PathTemplate.builder().fixed("binary").build();
+enum DialogueEteBinaryEndpoints implements Endpoint {
+    postBinary {
+        private final PathTemplate pathTemplate = PathTemplate.builder().fixed("binary").build();
 
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
 
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.POST;
-                }
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
 
-                @Override
-                public String serviceName() {
-                    return "EteBinaryService";
-                }
+        @Override
+        public String serviceName() {
+            return "EteBinaryService";
+        }
 
-                @Override
-                public String endpointName() {
-                    return "postBinary";
-                }
+        @Override
+        public String endpointName() {
+            return "postBinary";
+        }
 
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
+        @Override
+        public String version() {
+            return "";
+        }
+    },
 
-    static final Endpoint getOptionalBinaryPresent =
-            new Endpoint() {
-                final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("binary")
-                                .fixed("optional")
-                                .fixed("present")
-                                .build();
+    getOptionalBinaryPresent {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("binary").fixed("optional").fixed("present").build();
 
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
 
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
 
-                @Override
-                public String serviceName() {
-                    return "EteBinaryService";
-                }
+        @Override
+        public String serviceName() {
+            return "EteBinaryService";
+        }
 
-                @Override
-                public String endpointName() {
-                    return "getOptionalBinaryPresent";
-                }
+        @Override
+        public String endpointName() {
+            return "getOptionalBinaryPresent";
+        }
 
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
+        @Override
+        public String version() {
+            return "";
+        }
+    },
 
-    static final Endpoint getOptionalBinaryEmpty =
-            new Endpoint() {
-                final PathTemplate pathTemplate =
-                        PathTemplate.builder()
-                                .fixed("binary")
-                                .fixed("optional")
-                                .fixed("empty")
-                                .build();
+    getOptionalBinaryEmpty {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("binary").fixed("optional").fixed("empty").build();
 
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
 
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
 
-                @Override
-                public String serviceName() {
-                    return "EteBinaryService";
-                }
+        @Override
+        public String serviceName() {
+            return "EteBinaryService";
+        }
 
-                @Override
-                public String endpointName() {
-                    return "getOptionalBinaryEmpty";
-                }
+        @Override
+        public String endpointName() {
+            return "getOptionalBinaryEmpty";
+        }
 
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
+        @Override
+        public String version() {
+            return "";
+        }
+    },
 
-    static final Endpoint getBinaryFailure =
-            new Endpoint() {
-                final PathTemplate pathTemplate =
-                        PathTemplate.builder().fixed("binary").fixed("failure").build();
+    /** Throws an exception after partially writing a binary response. */
+    getBinaryFailure {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("binary").fixed("failure").build();
 
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
 
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
 
-                @Override
-                public String serviceName() {
-                    return "EteBinaryService";
-                }
+        @Override
+        public String serviceName() {
+            return "EteBinaryService";
+        }
 
-                @Override
-                public String endpointName() {
-                    return "getBinaryFailure";
-                }
+        @Override
+        public String endpointName() {
+            return "getBinaryFailure";
+        }
 
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
-    private DialogueEteBinaryEndpoints() {}
+        @Override
+        public String version() {
+            return "";
+        }
+    }
 }

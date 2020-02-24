@@ -72,7 +72,8 @@ final class DialogueEndpointsGenerator {
         TypeSpec.Builder builder = TypeSpec.anonymousClassBuilder("");
         def.getDocs().map(Javadoc::render).ifPresent(builder::addJavadoc);
 
-        return builder.addField(FieldSpec.builder(TypeName.get(PathTemplate.class), "pathTemplate", Modifier.FINAL)
+        return builder.addField(FieldSpec.builder(
+                                TypeName.get(PathTemplate.class), "pathTemplate", Modifier.PRIVATE, Modifier.FINAL)
                         .initializer(pathTemplateInitializer(def.getHttpPath()))
                         .build())
                 .addMethod(MethodSpec.methodBuilder("renderPath")
