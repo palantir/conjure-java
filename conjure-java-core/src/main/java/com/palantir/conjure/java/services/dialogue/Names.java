@@ -26,24 +26,20 @@ public final class Names {
 
     public static ClassName endpointsClassName(ServiceDefinition def, Options options) {
         String simpleName = "Dialogue" + def.getServiceName().getName().replaceAll("Service$", "") + "Endpoints";
-        return ClassName.get(
-                Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()), simpleName);
-    }
-
-    public static ClassName publicClassName(ServiceDefinition def, Options options) {
-        return serviceClassName("Dialogue", def, options);
+        return maybeRelocate(def, options, simpleName);
     }
 
     public static ClassName blockingClassName(ServiceDefinition def, Options options) {
-        return serviceClassName("Blocking", def, options);
+        String simpleName = def.getServiceName().getName() + "Blocking";
+        return maybeRelocate(def, options, simpleName);
     }
 
     public static ClassName asyncClassName(ServiceDefinition def, Options options) {
-        return serviceClassName("Async", def, options);
+        String simpleName = def.getServiceName().getName() + "Async";
+        return maybeRelocate(def, options, simpleName);
     }
 
-    private static ClassName serviceClassName(String prefix, ServiceDefinition def, Options options) {
-        String simpleName = prefix + def.getServiceName().getName();
+    private static ClassName maybeRelocate(ServiceDefinition def, Options options, String simpleName) {
         return ClassName.get(
                 Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()), simpleName);
     }
