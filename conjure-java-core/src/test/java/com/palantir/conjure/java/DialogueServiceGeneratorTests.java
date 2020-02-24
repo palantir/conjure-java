@@ -74,7 +74,7 @@ public final class DialogueServiceGeneratorTests extends TestBase {
         generator.emit(conjure, src);
 
         // Generated files contain imports
-        assertThat(compiledFileContent(src, "test/api/with/imports/DialogueImportService.java"))
+        assertThat(compiledFileContent(src, "test/api/with/imports/BlockingImportService.java"))
                 .contains("import com.palantir.product.StringExample;");
     }
 

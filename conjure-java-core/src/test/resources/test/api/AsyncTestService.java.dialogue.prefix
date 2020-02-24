@@ -1,7 +1,16 @@
 package test.prefix.com.palantir.another;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.dialogue.BinaryRequestBody;
+import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.PlainSerDe;
+import com.palantir.dialogue.Request;
+import com.palantir.dialogue.Serializer;
+import com.palantir.dialogue.TypeMarker;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
@@ -9,6 +18,7 @@ import java.lang.Boolean;
 import java.lang.Deprecated;
 import java.lang.Double;
 import java.lang.Integer;
+import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
 import java.nio.ByteBuffer;
@@ -102,4 +112,432 @@ public interface AsyncTestService {
 
     ListenableFuture<Void> getForStrings(
             AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
+
+    /** Creates an asynchronous/non-blocking client for a TestService service. */
+    static AsyncTestService of(Channel channel, ConjureRuntime runtime) {
+        return new AsyncTestService() {
+            private final PlainSerDe plainSerDe = runtime.plainSerDe();
+
+            private final Deserializer<Map<String, BackingFileSystem>> getFileSystemsDeserializer =
+                    runtime.bodySerDe()
+                            .deserializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
+
+            private final Serializer<CreateDatasetRequest> createDatasetSerializer =
+                    runtime.bodySerDe().serializer(new TypeMarker<CreateDatasetRequest>() {});
+
+            private final Deserializer<Dataset> createDatasetDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Dataset>() {});
+
+            private final Deserializer<Optional<Dataset>> getDatasetDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<Dataset>>() {});
+
+            private final Deserializer<NestedAliasedBinary> getAliasedRawDataDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<NestedAliasedBinary>() {});
+
+            private final Deserializer<Optional<ByteBuffer>> maybeGetRawDataDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<ByteBuffer>>() {});
+
+            private final Deserializer<AliasedString> getAliasedStringDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<AliasedString>() {});
+
+            private final Deserializer<Void> uploadRawDataDeserializer =
+                    runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Serializer<NestedAliasedBinary> uploadAliasedRawDataSerializer =
+                    runtime.bodySerDe().serializer(new TypeMarker<NestedAliasedBinary>() {});
+
+            private final Deserializer<Void> uploadAliasedRawDataDeserializer =
+                    runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Deserializer<Set<String>> getBranchesDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
+
+            private final Deserializer<Set<String>> getBranchesDeprecatedDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
+
+            private final Deserializer<Optional<String>> resolveBranchDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+
+            private final Deserializer<Optional<String>> testParamDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+
+            private final Serializer<String> testQueryParamsSerializer =
+                    runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+
+            private final Deserializer<Integer> testQueryParamsDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
+
+            private final Serializer<String> testNoResponseQueryParamsSerializer =
+                    runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+
+            private final Deserializer<Void> testNoResponseQueryParamsDeserializer =
+                    runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Deserializer<Boolean> testBooleanDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
+
+            private final Deserializer<Double> testDoubleDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
+
+            private final Deserializer<Integer> testIntegerDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
+
+            private final Serializer<Optional<String>> testPostOptionalSerializer =
+                    runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
+
+            private final Deserializer<Optional<String>> testPostOptionalDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+
+            private final Deserializer<Void> testOptionalIntegerAndDoubleDeserializer =
+                    runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Deserializer<Void> getForStringsDeserializer =
+                    runtime.bodySerDe().emptyBodyDeserializer();
+
+            @Override
+            public ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(
+                    AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.getFileSystems, _request.build()),
+                        getFileSystemsDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Dataset> createDataset(
+                    AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.body(createDatasetSerializer.serialize(request));
+                _request.putHeaderParams("Test-Header", plainSerDe.serializeString(testHeaderArg));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.createDataset, _request.build()),
+                        createDatasetDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Optional<Dataset>> getDataset(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.getDataset, _request.build()),
+                        getDatasetDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<InputStream> getRawData(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.getRawData, _request.build()),
+                        runtime.bodySerDe()::deserializeInputStream,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<NestedAliasedBinary> getAliasedRawData(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.getAliasedRawData, _request.build()),
+                        getAliasedRawDataDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Optional<ByteBuffer>> maybeGetRawData(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.maybeGetRawData, _request.build()),
+                        maybeGetRawDataDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<AliasedString> getAliasedString(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.getAliasedString, _request.build()),
+                        getAliasedStringDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Void> uploadRawData(
+                    AuthHeader authHeader, BinaryRequestBody input) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.body(runtime.bodySerDe().serialize(input));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.uploadRawData, _request.build()),
+                        uploadRawDataDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Void> uploadAliasedRawData(
+                    AuthHeader authHeader, NestedAliasedBinary input) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.body(uploadAliasedRawDataSerializer.serialize(input));
+                return Futures.transform(
+                        channel.execute(
+                                DialogueTestEndpoints.uploadAliasedRawData, _request.build()),
+                        uploadAliasedRawDataDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Set<String>> getBranches(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.getBranches, _request.build()),
+                        getBranchesDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Set<String>> getBranchesDeprecated(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                return Futures.transform(
+                        channel.execute(
+                                DialogueTestEndpoints.getBranchesDeprecated, _request.build()),
+                        getBranchesDeprecatedDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Optional<String>> resolveBranch(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid, String branch) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                _request.putPathParams("branch", plainSerDe.serializeString(branch));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.resolveBranch, _request.build()),
+                        resolveBranchDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Optional<String>> testParam(
+                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.testParam, _request.build()),
+                        testParamDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Integer> testQueryParams(
+                    AuthHeader authHeader,
+                    ResourceIdentifier something,
+                    ResourceIdentifier implicit,
+                    Optional<ResourceIdentifier> optionalMiddle,
+                    Set<String> setEnd,
+                    Optional<ResourceIdentifier> optionalEnd,
+                    String query) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.body(testQueryParamsSerializer.serialize(query));
+                _request.putQueryParams("different", plainSerDe.serializeRid(something));
+                if (optionalMiddle.isPresent()) {
+                    _request.putQueryParams(
+                            "optionalMiddle", plainSerDe.serializeRid(optionalMiddle.get()));
+                }
+                _request.putQueryParams("implicit", plainSerDe.serializeRid(implicit));
+                for (String setEndElement : setEnd) {
+                    _request.putQueryParams("setEnd", plainSerDe.serializeString(setEndElement));
+                }
+                if (optionalEnd.isPresent()) {
+                    _request.putQueryParams(
+                            "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
+                }
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.testQueryParams, _request.build()),
+                        testQueryParamsDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Void> testNoResponseQueryParams(
+                    AuthHeader authHeader,
+                    ResourceIdentifier something,
+                    ResourceIdentifier implicit,
+                    Optional<ResourceIdentifier> optionalMiddle,
+                    Set<String> setEnd,
+                    Optional<ResourceIdentifier> optionalEnd,
+                    String query) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.body(testNoResponseQueryParamsSerializer.serialize(query));
+                _request.putQueryParams("different", plainSerDe.serializeRid(something));
+                if (optionalMiddle.isPresent()) {
+                    _request.putQueryParams(
+                            "optionalMiddle", plainSerDe.serializeRid(optionalMiddle.get()));
+                }
+                _request.putQueryParams("implicit", plainSerDe.serializeRid(implicit));
+                for (String setEndElement : setEnd) {
+                    _request.putQueryParams("setEnd", plainSerDe.serializeString(setEndElement));
+                }
+                if (optionalEnd.isPresent()) {
+                    _request.putQueryParams(
+                            "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
+                }
+                return Futures.transform(
+                        channel.execute(
+                                DialogueTestEndpoints.testNoResponseQueryParams, _request.build()),
+                        testNoResponseQueryParamsDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Boolean> testBoolean(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.testBoolean, _request.build()),
+                        testBooleanDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Double> testDouble(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.testDouble, _request.build()),
+                        testDoubleDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Integer> testInteger(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.testInteger, _request.build()),
+                        testIntegerDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Optional<String>> testPostOptional(
+                    AuthHeader authHeader, Optional<String> maybeString) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.body(testPostOptionalSerializer.serialize(maybeString));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.testPostOptional, _request.build()),
+                        testPostOptionalDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Void> testOptionalIntegerAndDouble(
+                    AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                if (maybeInteger.isPresent()) {
+                    _request.putQueryParams(
+                            "maybeInteger", plainSerDe.serializeInteger(maybeInteger.getAsInt()));
+                }
+                if (maybeDouble.isPresent()) {
+                    _request.putQueryParams(
+                            "maybeDouble", plainSerDe.serializeDouble(maybeDouble.getAsDouble()));
+                }
+                return Futures.transform(
+                        channel.execute(
+                                DialogueTestEndpoints.testOptionalIntegerAndDouble,
+                                _request.build()),
+                        testOptionalIntegerAndDoubleDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Void> getForStrings(
+                    AuthHeader authHeader,
+                    ResourceIdentifier datasetRid,
+                    Set<AliasedString> strings) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
+                for (AliasedString stringsElement : strings) {
+                    _request.putQueryParams(
+                            "strings", plainSerDe.serializeString(stringsElement.get()));
+                }
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.getForStrings, _request.build()),
+                        getForStringsDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+        };
+    }
 }

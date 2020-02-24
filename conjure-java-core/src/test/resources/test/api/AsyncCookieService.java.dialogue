@@ -1,11 +1,40 @@
 package test.api;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.PlainSerDe;
+import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.BearerToken;
+import java.lang.Override;
 import java.lang.Void;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
 public interface AsyncCookieService {
     ListenableFuture<Void> eatCookies(BearerToken token);
+
+    /** Creates an asynchronous/non-blocking client for a CookieService service. */
+    static AsyncCookieService of(Channel channel, ConjureRuntime runtime) {
+        return new AsyncCookieService() {
+            private final PlainSerDe plainSerDe = runtime.plainSerDe();
+
+            private final Deserializer<Void> eatCookiesDeserializer =
+                    runtime.bodySerDe().emptyBodyDeserializer();
+
+            @Override
+            public ListenableFuture<Void> eatCookies(BearerToken token) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParam(
+                        "Cookie", "PALANTIR_TOKEN=" + planSerDe.serializeBearerToken(token));
+                return Futures.transform(
+                        channel.execute(DialogueCookieEndpoints.eatCookies, _request.build()),
+                        eatCookiesDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+        };
+    }
 }
