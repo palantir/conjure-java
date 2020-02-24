@@ -16,11 +16,10 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
-import static java.util.stream.Collectors.toList;
-
 import com.google.common.base.Splitter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HttpPath;
@@ -53,29 +52,27 @@ final class DialogueEndpointsGenerator {
     public JavaFile endpointsClass(ServiceDefinition def) {
         ClassName serviceClassName = Names.endpointsClassName(def, options);
 
-        TypeSpec endpointsClass = TypeSpec.classBuilder(serviceClassName)
-                .addModifiers(Modifier.FINAL)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueEndpointsGenerator.class))
-                .addFields(def.getEndpoints().stream()
-                        .map(e -> endpointField(e, def.getServiceName().getName(), apiVersion))
-                        .collect(toList()))
-                .addMethod(MethodSpec.constructorBuilder()
-                        .addModifiers(Modifier.PRIVATE)
-                        .build())
-                .build();
+        TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(serviceClassName)
+                .addSuperinterface(ClassName.get(Endpoint.class))
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueEndpointsGenerator.class));
+
+        def.getEndpoints().forEach(endpoint -> {
+            enumBuilder.addEnumConstant(
+                    endpoint.getEndpointName().get(),
+                    endpointField(endpoint, def.getServiceName().getName(), apiVersion));
+        });
 
         return JavaFile.builder(
                         Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
-                        endpointsClass)
+                        enumBuilder.build())
                 .build();
     }
 
-    private static FieldSpec endpointField(EndpointDefinition def, String serviceName, String apiVersion) {
-        ClassName endpointType = ClassName.get(Endpoint.class);
+    private static TypeSpec endpointField(EndpointDefinition def, String serviceName, String apiVersion) {
+        TypeSpec.Builder builder = TypeSpec.anonymousClassBuilder("");
+        def.getDocs().map(Javadoc::render).ifPresent(builder::addJavadoc);
 
-        TypeSpec endpointClass = TypeSpec.anonymousClassBuilder("")
-                .addSuperinterface(endpointType)
-                .addField(FieldSpec.builder(TypeName.get(PathTemplate.class), "pathTemplate", Modifier.FINAL)
+        return builder.addField(FieldSpec.builder(TypeName.get(PathTemplate.class), "pathTemplate", Modifier.FINAL)
                         .initializer(pathTemplateInitializer(def.getHttpPath()))
                         .build())
                 .addMethod(MethodSpec.methodBuilder("renderPath")
@@ -120,10 +117,6 @@ final class DialogueEndpointsGenerator {
                                 .add("return $S;", apiVersion)
                                 .build())
                         .build())
-                .build();
-
-        return FieldSpec.builder(endpointType, def.getEndpointName().get(), Modifier.STATIC, Modifier.FINAL)
-                .initializer(CodeBlock.of("$L", endpointClass))
                 .build();
     }
 
