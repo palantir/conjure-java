@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: The generated dialogue interfaces for a conjure FooService are now
+    `FooServiceBlocking` and `FooServiceAsync` instead of `BlockingFooService` and
+    `AsyncFooService`.
+  links:
+  - https://github.com/palantir/conjure-java/pull/790
