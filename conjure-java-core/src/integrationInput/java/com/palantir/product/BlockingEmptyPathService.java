@@ -6,7 +6,7 @@ import com.palantir.dialogue.RemoteExceptions;
 import java.lang.Override;
 import javax.annotation.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface BlockingEmptyPathService {
     boolean emptyPath();
 

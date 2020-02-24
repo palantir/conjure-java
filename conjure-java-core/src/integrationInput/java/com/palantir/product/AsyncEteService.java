@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface AsyncEteService {
     /**
      * foo bar baz.

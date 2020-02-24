@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 import javax.annotation.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface AsyncEteBinaryService {
     ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body);
 

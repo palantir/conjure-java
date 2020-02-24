@@ -29,7 +29,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.List;
 import javax.lang.model.element.Modifier;
 
-public final class BlockingGenerator implements MethodGenerator {
+public final class BlockingGenerator implements StaticFactoryMethodGenerator {
 
     private final Options options;
     private final ParameterTypeMapper parameterTypes;

@@ -66,7 +66,7 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
-public final class AsyncGenerator implements MethodGenerator {
+public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     private static final String REQUEST = "_request";
     private final Options options;
     private final TypeNameResolver typeNameResolver;

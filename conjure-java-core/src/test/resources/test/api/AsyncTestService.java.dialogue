@@ -35,7 +35,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 /** A Markdown description of the service. */
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface AsyncTestService {
     /** Returns a mapping from file system id to backing file system configuration. */
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);

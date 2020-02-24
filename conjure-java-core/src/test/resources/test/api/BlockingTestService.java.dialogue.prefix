@@ -24,7 +24,7 @@ import test.prefix.com.palantir.product.datasets.BackingFileSystem;
 import test.prefix.com.palantir.product.datasets.Dataset;
 
 /** A Markdown description of the service. */
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface BlockingTestService {
     /** Returns a mapping from file system id to backing file system configuration. */
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);

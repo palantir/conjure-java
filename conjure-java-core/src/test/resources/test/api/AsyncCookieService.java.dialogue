@@ -13,7 +13,7 @@ import java.lang.Override;
 import java.lang.Void;
 import javax.annotation.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface AsyncCookieService {
     ListenableFuture<Void> eatCookies(BearerToken token);
 

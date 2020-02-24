@@ -35,23 +35,24 @@ import java.util.function.Function;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
-public final class InterfaceGenerator {
+public final class DialogueInterfaceGenerator {
 
     private final Options options;
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
 
-    public InterfaceGenerator(Options options, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
+    public DialogueInterfaceGenerator(
+            Options options, ParameterTypeMapper parameterTypes, ReturnTypeMapper returnTypes) {
         this.options = options;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
     }
 
-    public JavaFile generateBlocking(ServiceDefinition def, MethodGenerator methodGenerator) {
+    public JavaFile generateBlocking(ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator) {
         return generate(def, Names.blockingClassName(def, options), returnTypes::baseType, methodGenerator);
     }
 
-    public JavaFile generateAsync(ServiceDefinition def, MethodGenerator methodGenerator) {
+    public JavaFile generateAsync(ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator) {
         return generate(def, Names.asyncClassName(def, options), returnTypes::async, methodGenerator);
     }
 
@@ -59,10 +60,10 @@ public final class InterfaceGenerator {
             ServiceDefinition def,
             ClassName className,
             Function<Optional<Type>, TypeName> returnTypeMapper,
-            MethodGenerator methodGenerator) {
+            StaticFactoryMethodGenerator methodGenerator) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueServiceGenerator.class));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class));
 
         def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 

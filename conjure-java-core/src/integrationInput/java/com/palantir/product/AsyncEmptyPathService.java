@@ -13,7 +13,7 @@ import java.lang.Boolean;
 import java.lang.Override;
 import javax.annotation.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface AsyncEmptyPathService {
     ListenableFuture<Boolean> emptyPath();
 

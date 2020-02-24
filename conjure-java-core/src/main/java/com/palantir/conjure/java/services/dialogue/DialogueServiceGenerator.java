@@ -58,7 +58,7 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
                         .collect(Collectors.toMap(
                                 type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
 
-        InterfaceGenerator interfaceGenerator = new InterfaceGenerator(
+        DialogueInterfaceGenerator interfaceGenerator = new DialogueInterfaceGenerator(
                 options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
 
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
