@@ -24,6 +24,12 @@ import com.squareup.javapoet.ClassName;
 public final class Names {
     private Names() {}
 
+    public static ClassName endpointsClassName(ServiceDefinition def, Options options) {
+        String simpleName = "Dialogue" + def.getServiceName().getName().replaceAll("Service$", "") + "Endpoints";
+        return ClassName.get(
+                Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()), simpleName);
+    }
+
     public static ClassName publicClassName(ServiceDefinition def, Options options) {
         return serviceClassName("Dialogue", def, options);
     }

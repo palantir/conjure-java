@@ -51,10 +51,10 @@ final class DialogueEndpointsGenerator {
     }
 
     public JavaFile endpointsClass(ServiceDefinition def) {
-        ClassName serviceClassName = Names.publicClassName(def, options);
+        ClassName serviceClassName = Names.endpointsClassName(def, options);
 
         TypeSpec endpointsClass = TypeSpec.classBuilder(serviceClassName)
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addModifiers(Modifier.FINAL)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueEndpointsGenerator.class))
                 .addFields(def.getEndpoints().stream()
                         .map(e -> endpointField(e, def.getServiceName().getName(), apiVersion))
@@ -122,8 +122,7 @@ final class DialogueEndpointsGenerator {
                         .build())
                 .build();
 
-        return FieldSpec.builder(
-                        endpointType, def.getEndpointName().get(), Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+        return FieldSpec.builder(endpointType, def.getEndpointName().get(), Modifier.STATIC, Modifier.FINAL)
                 .initializer(CodeBlock.of("$L", endpointClass))
                 .build();
     }
