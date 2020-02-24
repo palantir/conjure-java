@@ -207,7 +207,7 @@ public final class DialogueEteBinaryService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(runtime.bodySerDe().serialize(body));
                 return Futures.transform(
-                        channel.execute(DialogueEteBinaryService.postBinary, _request.build()),
+                        channel.execute(DialogueEteBinaryEndpoints.postBinary, _request.build()),
                         runtime.bodySerDe()::deserializeInputStream,
                         MoreExecutors.directExecutor());
             }
@@ -221,7 +221,7 @@ public final class DialogueEteBinaryService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
                         channel.execute(
-                                DialogueEteBinaryService.getOptionalBinaryPresent,
+                                DialogueEteBinaryEndpoints.getOptionalBinaryPresent,
                                 _request.build()),
                         getOptionalBinaryPresentDeserializer::deserialize,
                         MoreExecutors.directExecutor());
@@ -236,7 +236,8 @@ public final class DialogueEteBinaryService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
                         channel.execute(
-                                DialogueEteBinaryService.getOptionalBinaryEmpty, _request.build()),
+                                DialogueEteBinaryEndpoints.getOptionalBinaryEmpty,
+                                _request.build()),
                         getOptionalBinaryEmptyDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -251,7 +252,7 @@ public final class DialogueEteBinaryService {
                 _request.putQueryParams("numBytes", plainSerDe.serializeInteger(numBytes));
                 return Futures.transform(
                         channel.execute(
-                                DialogueEteBinaryService.getBinaryFailure, _request.build()),
+                                DialogueEteBinaryEndpoints.getBinaryFailure, _request.build()),
                         runtime.bodySerDe()::deserializeInputStream,
                         MoreExecutors.directExecutor());
             }

@@ -77,7 +77,7 @@ public final class DialogueEmptyPathService {
             public ListenableFuture<Boolean> emptyPath() {
                 Request.Builder _request = Request.builder();
                 return Futures.transform(
-                        channel.execute(DialogueEmptyPathService.emptyPath, _request.build()),
+                        channel.execute(DialogueEmptyPathEndpoints.emptyPath, _request.build()),
                         emptyPathDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }

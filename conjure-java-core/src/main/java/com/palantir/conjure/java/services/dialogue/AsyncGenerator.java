@@ -101,7 +101,7 @@ public final class AsyncGenerator {
                     .ifPresent(impl::addField);
 
             deserializer(endpoint.getEndpointName(), endpoint.getReturns()).ifPresent(impl::addField);
-            impl.addMethod(asyncClientImpl(serviceClassName, endpoint));
+            impl.addMethod(asyncClientImpl(def, endpoint));
         });
 
         MethodSpec asyncImpl = MethodSpec.methodBuilder("async")
@@ -152,7 +152,7 @@ public final class AsyncGenerator {
                 .build());
     }
 
-    private MethodSpec asyncClientImpl(ClassName serviceClassName, EndpointDefinition def) {
+    private MethodSpec asyncClientImpl(ServiceDefinition serviceDefinition, EndpointDefinition def) {
         List<ParameterSpec> params = parameterTypes.methodParams(def);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         def.getEndpointName().get())
@@ -176,7 +176,7 @@ public final class AsyncGenerator {
         CodeBlock execute = CodeBlock.builder()
                 .add(
                         "channel.execute($T.$L, $L.build())",
-                        serviceClassName,
+                        Names.endpointsClassName(serviceDefinition, options),
                         def.getEndpointName().get(),
                         REQUEST)
                 .build();

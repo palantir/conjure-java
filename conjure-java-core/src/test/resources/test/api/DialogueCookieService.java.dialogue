@@ -80,7 +80,7 @@ public final class DialogueCookieService {
                 _request.putHeaderParam(
                         "Cookie", "PALANTIR_TOKEN=" + planSerDe.serializeBearerToken(token));
                 return Futures.transform(
-                        channel.execute(DialogueCookieService.eatCookies, _request.build()),
+                        channel.execute(DialogueCookieEndpoints.eatCookies, _request.build()),
                         eatCookiesDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }

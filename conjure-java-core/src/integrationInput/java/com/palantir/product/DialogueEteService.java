@@ -1225,7 +1225,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.string, _request.build()),
+                        channel.execute(DialogueEteEndpoints.string, _request.build()),
                         stringDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1237,7 +1237,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.integer, _request.build()),
+                        channel.execute(DialogueEteEndpoints.integer, _request.build()),
                         integerDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1249,7 +1249,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.double_, _request.build()),
+                        channel.execute(DialogueEteEndpoints.double_, _request.build()),
                         double_Deserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1261,7 +1261,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.boolean_, _request.build()),
+                        channel.execute(DialogueEteEndpoints.boolean_, _request.build()),
                         boolean_Deserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1273,7 +1273,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.safelong, _request.build()),
+                        channel.execute(DialogueEteEndpoints.safelong, _request.build()),
                         safelongDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1285,7 +1285,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.rid, _request.build()),
+                        channel.execute(DialogueEteEndpoints.rid, _request.build()),
                         ridDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1297,7 +1297,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.bearertoken, _request.build()),
+                        channel.execute(DialogueEteEndpoints.bearertoken, _request.build()),
                         bearertokenDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1309,7 +1309,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.optionalString, _request.build()),
+                        channel.execute(DialogueEteEndpoints.optionalString, _request.build()),
                         optionalStringDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1321,7 +1321,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.optionalEmpty, _request.build()),
+                        channel.execute(DialogueEteEndpoints.optionalEmpty, _request.build()),
                         optionalEmptyDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1333,7 +1333,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.datetime, _request.build()),
+                        channel.execute(DialogueEteEndpoints.datetime, _request.build()),
                         datetimeDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1345,7 +1345,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.binary, _request.build()),
+                        channel.execute(DialogueEteEndpoints.binary, _request.build()),
                         runtime.bodySerDe()::deserializeInputStream,
                         MoreExecutors.directExecutor());
             }
@@ -1358,7 +1358,7 @@ public final class DialogueEteService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("param", plainSerDe.serializeString(param));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.path, _request.build()),
+                        channel.execute(DialogueEteEndpoints.path, _request.build()),
                         pathDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1371,7 +1371,7 @@ public final class DialogueEteService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("param", Objects.toString(param));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.externalLongPath, _request.build()),
+                        channel.execute(DialogueEteEndpoints.externalLongPath, _request.build()),
                         externalLongPathDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1388,7 +1388,7 @@ public final class DialogueEteService {
                 }
                 return Futures.transform(
                         channel.execute(
-                                DialogueEteService.optionalExternalLongQuery, _request.build()),
+                                DialogueEteEndpoints.optionalExternalLongQuery, _request.build()),
                         optionalExternalLongQueryDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1402,7 +1402,7 @@ public final class DialogueEteService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(notNullBodySerializer.serialize(notNullBody));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.notNullBody, _request.build()),
+                        channel.execute(DialogueEteEndpoints.notNullBody, _request.build()),
                         notNullBodyDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1417,7 +1417,7 @@ public final class DialogueEteService {
                 _request.putQueryParams(
                         "queryParamName", plainSerDe.serializeString(queryParamName.get()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.aliasOne, _request.build()),
+                        channel.execute(DialogueEteEndpoints.aliasOne, _request.build()),
                         aliasOneDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1435,7 +1435,7 @@ public final class DialogueEteService {
                             plainSerDe.serializeString(queryParamName.get().get()));
                 }
                 return Futures.transform(
-                        channel.execute(DialogueEteService.optionalAliasOne, _request.build()),
+                        channel.execute(DialogueEteEndpoints.optionalAliasOne, _request.build()),
                         optionalAliasOneDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1450,7 +1450,7 @@ public final class DialogueEteService {
                 _request.putQueryParams(
                         "queryParamName", plainSerDe.serializeString(queryParamName.get().get()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.aliasTwo, _request.build()),
+                        channel.execute(DialogueEteEndpoints.aliasTwo, _request.build()),
                         aliasTwoDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1465,7 +1465,7 @@ public final class DialogueEteService {
                 _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
                 return Futures.transform(
                         channel.execute(
-                                DialogueEteService.notNullBodyExternalImport, _request.build()),
+                                DialogueEteEndpoints.notNullBodyExternalImport, _request.build()),
                         notNullBodyExternalImportDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1480,7 +1480,7 @@ public final class DialogueEteService {
                 _request.body(optionalBodyExternalImportSerializer.serialize(body));
                 return Futures.transform(
                         channel.execute(
-                                DialogueEteService.optionalBodyExternalImport, _request.build()),
+                                DialogueEteEndpoints.optionalBodyExternalImport, _request.build()),
                         optionalBodyExternalImportDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1497,7 +1497,7 @@ public final class DialogueEteService {
                 }
                 return Futures.transform(
                         channel.execute(
-                                DialogueEteService.optionalQueryExternalImport, _request.build()),
+                                DialogueEteEndpoints.optionalQueryExternalImport, _request.build()),
                         optionalQueryExternalImportDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1509,7 +1509,7 @@ public final class DialogueEteService {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.noReturn, _request.build()),
+                        channel.execute(DialogueEteEndpoints.noReturn, _request.build()),
                         noReturnDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1523,7 +1523,7 @@ public final class DialogueEteService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putQueryParams("queryParamName", Objects.toString(queryParamName));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.enumQuery, _request.build()),
+                        channel.execute(DialogueEteEndpoints.enumQuery, _request.build()),
                         enumQueryDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1540,7 +1540,7 @@ public final class DialogueEteService {
                             "queryParamName", Objects.toString(queryParamNameElement));
                 }
                 return Futures.transform(
-                        channel.execute(DialogueEteService.enumListQuery, _request.build()),
+                        channel.execute(DialogueEteEndpoints.enumListQuery, _request.build()),
                         enumListQueryDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1557,7 +1557,7 @@ public final class DialogueEteService {
                             "queryParamName", Objects.toString(queryParamName.get()));
                 }
                 return Futures.transform(
-                        channel.execute(DialogueEteService.optionalEnumQuery, _request.build()),
+                        channel.execute(DialogueEteEndpoints.optionalEnumQuery, _request.build()),
                         optionalEnumQueryDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1571,7 +1571,7 @@ public final class DialogueEteService {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putHeaderParams("Custom-Header", Objects.toString(headerParameter));
                 return Futures.transform(
-                        channel.execute(DialogueEteService.enumHeader, _request.build()),
+                        channel.execute(DialogueEteEndpoints.enumHeader, _request.build()),
                         enumHeaderDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1587,7 +1587,7 @@ public final class DialogueEteService {
                     _request.putQueryParams("input", Objects.toString(input.get().get()));
                 }
                 return Futures.transform(
-                        channel.execute(DialogueEteService.aliasLongEndpoint, _request.build()),
+                        channel.execute(DialogueEteEndpoints.aliasLongEndpoint, _request.build()),
                         aliasLongEndpointDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
@@ -1616,7 +1616,7 @@ public final class DialogueEteService {
                 }
                 return Futures.transform(
                         channel.execute(
-                                DialogueEteService.complexQueryParameters, _request.build()),
+                                DialogueEteEndpoints.complexQueryParameters, _request.build()),
                         complexQueryParametersDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
