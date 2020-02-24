@@ -6,52 +6,16 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
-import com.palantir.dialogue.Endpoint;
-import com.palantir.dialogue.HttpMethod;
-import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.RemoteExceptions;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
-import com.palantir.dialogue.UrlBuilder;
 import java.lang.Boolean;
 import java.lang.Override;
-import java.lang.String;
-import java.util.Map;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator")
 public final class DialogueEmptyPathService {
-    private static final Endpoint emptyPath =
-            new Endpoint() {
-                private final PathTemplate pathTemplate = PathTemplate.builder().build();
-
-                @Override
-                public void renderPath(Map<String, String> params, UrlBuilder url) {
-                    pathTemplate.fill(params, url);
-                }
-
-                @Override
-                public HttpMethod httpMethod() {
-                    return HttpMethod.GET;
-                }
-
-                @Override
-                public String serviceName() {
-                    return "EmptyPathService";
-                }
-
-                @Override
-                public String endpointName() {
-                    return "emptyPath";
-                }
-
-                @Override
-                public String version() {
-                    return "";
-                }
-            };
-
     private DialogueEmptyPathService() {}
 
     /** Creates a synchronous/blocking client for a EmptyPathService service. */
