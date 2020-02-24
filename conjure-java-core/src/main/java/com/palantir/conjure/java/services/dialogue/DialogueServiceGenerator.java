@@ -19,7 +19,6 @@ package com.palantir.conjure.java.services.dialogue;
 import static java.util.stream.Collectors.toList;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerator;
@@ -50,6 +49,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 import org.glassfish.jersey.uri.internal.UriTemplateParser;
 
@@ -66,6 +66,8 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
+        DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options, apiVersion);
+
         TypeMapper parameterTypes = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new ClassVisitor(conjureDefinition.getTypes(), options, ClassVisitor.Mode.PARAMETER));
@@ -76,17 +78,23 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
                 conjureDefinition.getTypes().stream()
                         .collect(Collectors.toMap(
                                 type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
-        TypeAwareGenerator generator = new TypeAwareGenerator(
-                options,
-                typeName -> Preconditions.checkNotNull(
-                        typeDefinitionsByName.get(typeName),
-                        "Referenced unknown TypeName",
-                        SafeArg.of("typeName", typeName)),
-                parameterTypes,
-                returnTypes,
-                apiVersion);
+
+        InterfaceGenerator interfaceGenerator = new InterfaceGenerator(
+                options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
+
+        TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
+                typeDefinitionsByName.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
+        TypeAwareGenerator generator =
+                new TypeAwareGenerator(options, typeNameResolver, parameterTypes, returnTypes, apiVersion);
+
         return conjureDefinition.getServices().stream()
-                .flatMap(serviceDef -> generator.service(serviceDef).stream())
+                .flatMap(serviceDef -> {
+                    return Stream.of(
+                            endpoints.endpointsClass(serviceDef),
+                            interfaceGenerator.generateBlocking(serviceDef),
+                            interfaceGenerator.generateAsync(serviceDef),
+                            generator.client(serviceDef));
+                })
                 .collect(Collectors.toSet());
     }
 
@@ -109,15 +117,6 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
             this.parameterTypes = new ParameterTypeMapper(parameterTypes);
             this.returnTypes = new ReturnTypeMapper(returnTypes);
             this.apiVersion = apiVersion;
-        }
-
-        private Set<JavaFile> service(ServiceDefinition def) {
-            JavaFile client = client(def);
-            InterfaceGenerator ifaceGenerator = new InterfaceGenerator(options, def, parameterTypes, returnTypes);
-
-            ImmutableSet<JavaFile> of =
-                    ImmutableSet.of(ifaceGenerator.generateBlocking(), ifaceGenerator.generateAsync(), client);
-            return of;
         }
 
         private JavaFile client(ServiceDefinition def) {

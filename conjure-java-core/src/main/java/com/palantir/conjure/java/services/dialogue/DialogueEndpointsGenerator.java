@@ -21,9 +21,7 @@ import static java.util.stream.Collectors.toList;
 import com.google.common.base.Splitter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.util.Packages;
-import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HttpPath;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -40,28 +38,19 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.glassfish.jersey.uri.internal.UriTemplateParser;
 
-public final class DialogueEndpointsGenerator implements ServiceGenerator {
+final class DialogueEndpointsGenerator {
     private final Options options;
     private final String apiVersion;
 
-    public DialogueEndpointsGenerator(Options options, String apiVersion) {
+    DialogueEndpointsGenerator(Options options, String apiVersion) {
         this.options = options;
         this.apiVersion = apiVersion;
     }
 
-    @Override
-    public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        return conjureDefinition.getServices().stream()
-                .map(this::endpointsClass)
-                .collect(Collectors.toSet());
-    }
-
-    private JavaFile endpointsClass(ServiceDefinition def) {
+    public JavaFile endpointsClass(ServiceDefinition def) {
         ClassName serviceClassName = Names.publicClassName(def, options);
 
         TypeSpec endpointsClass = TypeSpec.classBuilder(serviceClassName)
