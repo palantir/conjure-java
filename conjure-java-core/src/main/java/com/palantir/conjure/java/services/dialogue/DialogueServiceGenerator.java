@@ -16,28 +16,21 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
-import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.types.TypeMapper;
-import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.visitor.ClassVisitor;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeSpec;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.lang.model.element.Modifier;
 
 // TODO(rfink): Add unit tests for misc edge cases, e.g.: docs/no-docs, auth/no-auth, binary return type.
 public final class DialogueServiceGenerator implements ServiceGenerator {
@@ -70,7 +63,6 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
 
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
                 typeDefinitionsByName.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
-        TypeAwareGenerator generator = new TypeAwareGenerator(options, typeNameResolver, parameterTypes, returnTypes);
 
         AsyncGenerator asyncGenerator = new AsyncGenerator(
                 options, typeNameResolver, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
@@ -83,44 +75,8 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
                     return Stream.of(
                             endpoints.endpointsClass(serviceDef),
                             interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
-                            interfaceGenerator.generateAsync(serviceDef, asyncGenerator),
-                            generator.client(serviceDef));
+                            interfaceGenerator.generateAsync(serviceDef, asyncGenerator));
                 })
                 .collect(Collectors.toSet());
-    }
-
-    // TODO(rfink): Split into separate classes: endpoint, interface, impl.
-    private static final class TypeAwareGenerator {
-        private final Options options;
-        private final TypeNameResolver typeNameResolver;
-        private final ParameterTypeMapper parameterTypes;
-        private final ReturnTypeMapper returnTypes;
-
-        private TypeAwareGenerator(
-                Options options, TypeNameResolver typeNameResolver, TypeMapper parameterTypes, TypeMapper returnTypes) {
-            this.options = options;
-            this.typeNameResolver = typeNameResolver;
-            this.parameterTypes = new ParameterTypeMapper(parameterTypes);
-            this.returnTypes = new ReturnTypeMapper(returnTypes);
-        }
-
-        private JavaFile client(ServiceDefinition def) {
-            ClassName serviceClassName = Names.publicClassName(def, options);
-            TypeSpec.Builder serviceBuilder = TypeSpec.classBuilder(serviceClassName)
-                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                    .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueServiceGenerator.class));
-
-            serviceBuilder.addMethod(new BlockingGenerator(options, parameterTypes, returnTypes).generate(def));
-            serviceBuilder.addMethod(
-                    new AsyncGenerator(options, typeNameResolver, parameterTypes, returnTypes).generate(def));
-            serviceBuilder.addMethod(MethodSpec.constructorBuilder()
-                    .addModifiers(Modifier.PRIVATE)
-                    .build());
-
-            return JavaFile.builder(
-                            Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
-                            serviceBuilder.build())
-                    .build();
-        }
     }
 }
