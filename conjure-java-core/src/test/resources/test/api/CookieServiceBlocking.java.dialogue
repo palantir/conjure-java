@@ -8,13 +8,13 @@ import java.lang.Override;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface BlockingCookieService {
+public interface CookieServiceBlocking {
     void eatCookies(BearerToken token);
 
     /** Creates a synchronous/blocking client for a CookieService service. */
-    static BlockingCookieService of(Channel channel, ConjureRuntime runtime) {
-        AsyncCookieService delegate = AsyncCookieService.of(channel, runtime);
-        return new BlockingCookieService() {
+    static CookieServiceBlocking of(Channel channel, ConjureRuntime runtime) {
+        CookieServiceAsync delegate = CookieServiceAsync.of(channel, runtime);
+        return new CookieServiceBlocking() {
             @Override
             public void eatCookies(BearerToken token) {
                 RemoteExceptions.getUnchecked(delegate.eatCookies(token));

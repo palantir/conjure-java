@@ -18,7 +18,7 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface AsyncEteBinaryService {
+public interface EteBinaryServiceAsync {
     ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     ListenableFuture<Optional<ByteBuffer>> getOptionalBinaryPresent(AuthHeader authHeader);
@@ -29,8 +29,8 @@ public interface AsyncEteBinaryService {
     ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes);
 
     /** Creates an asynchronous/non-blocking client for a EteBinaryService service. */
-    static AsyncEteBinaryService of(Channel channel, ConjureRuntime runtime) {
-        return new AsyncEteBinaryService() {
+    static EteBinaryServiceAsync of(Channel channel, ConjureRuntime runtime) {
+        return new EteBinaryServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
 
             private final Deserializer<Optional<ByteBuffer>> getOptionalBinaryPresentDeserializer =

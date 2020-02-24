@@ -30,7 +30,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface AsyncEteService {
+public interface EteServiceAsync {
     /**
      * foo bar baz.
      *
@@ -122,8 +122,8 @@ public interface AsyncEteService {
             Set<Integer> ints);
 
     /** Creates an asynchronous/non-blocking client for a EteService service. */
-    static AsyncEteService of(Channel channel, ConjureRuntime runtime) {
-        return new AsyncEteService() {
+    static EteServiceAsync of(Channel channel, ConjureRuntime runtime) {
+        return new EteServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
 
             private final Deserializer<String> stringDeserializer =

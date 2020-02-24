@@ -7,13 +7,13 @@ import java.lang.Override;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface BlockingEmptyPathService {
+public interface EmptyPathServiceBlocking {
     boolean emptyPath();
 
     /** Creates a synchronous/blocking client for a EmptyPathService service. */
-    static BlockingEmptyPathService of(Channel channel, ConjureRuntime runtime) {
-        AsyncEmptyPathService delegate = AsyncEmptyPathService.of(channel, runtime);
-        return new BlockingEmptyPathService() {
+    static EmptyPathServiceBlocking of(Channel channel, ConjureRuntime runtime) {
+        EmptyPathServiceAsync delegate = EmptyPathServiceAsync.of(channel, runtime);
+        return new EmptyPathServiceBlocking() {
             @Override
             public boolean emptyPath() {
                 return RemoteExceptions.getUnchecked(delegate.emptyPath());

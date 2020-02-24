@@ -19,7 +19,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface BlockingEteService {
+public interface EteServiceBlocking {
     /**
      * foo bar baz.
      *
@@ -106,9 +106,9 @@ public interface BlockingEteService {
             Set<Integer> ints);
 
     /** Creates a synchronous/blocking client for a EteService service. */
-    static BlockingEteService of(Channel channel, ConjureRuntime runtime) {
-        AsyncEteService delegate = AsyncEteService.of(channel, runtime);
-        return new BlockingEteService() {
+    static EteServiceBlocking of(Channel channel, ConjureRuntime runtime) {
+        EteServiceAsync delegate = EteServiceAsync.of(channel, runtime);
+        return new EteServiceBlocking() {
             @Override
             public String string(AuthHeader authHeader) {
                 return RemoteExceptions.getUnchecked(delegate.string(authHeader));

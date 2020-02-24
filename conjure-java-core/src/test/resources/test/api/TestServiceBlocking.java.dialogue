@@ -25,7 +25,7 @@ import javax.annotation.Generated;
 
 /** A Markdown description of the service. */
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface BlockingTestService {
+public interface TestServiceBlocking {
     /** Returns a mapping from file system id to backing file system configuration. */
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
 
@@ -96,9 +96,9 @@ public interface BlockingTestService {
             AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 
     /** Creates a synchronous/blocking client for a TestService service. */
-    static BlockingTestService of(Channel channel, ConjureRuntime runtime) {
-        AsyncTestService delegate = AsyncTestService.of(channel, runtime);
-        return new BlockingTestService() {
+    static TestServiceBlocking of(Channel channel, ConjureRuntime runtime) {
+        TestServiceAsync delegate = TestServiceAsync.of(channel, runtime);
+        return new TestServiceBlocking() {
             @Override
             public Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader) {
                 return RemoteExceptions.getUnchecked(delegate.getFileSystems(authHeader));

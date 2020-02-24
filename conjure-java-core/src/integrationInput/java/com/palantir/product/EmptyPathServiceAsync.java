@@ -14,12 +14,12 @@ import java.lang.Override;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface AsyncEmptyPathService {
+public interface EmptyPathServiceAsync {
     ListenableFuture<Boolean> emptyPath();
 
     /** Creates an asynchronous/non-blocking client for a EmptyPathService service. */
-    static AsyncEmptyPathService of(Channel channel, ConjureRuntime runtime) {
-        return new AsyncEmptyPathService() {
+    static EmptyPathServiceAsync of(Channel channel, ConjureRuntime runtime) {
+        return new EmptyPathServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
 
             private final Deserializer<Boolean> emptyPathDeserializer =

@@ -12,7 +12,7 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface BlockingEteBinaryService {
+public interface EteBinaryServiceBlocking {
     InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     Optional<ByteBuffer> getOptionalBinaryPresent(AuthHeader authHeader);
@@ -23,9 +23,9 @@ public interface BlockingEteBinaryService {
     InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
 
     /** Creates a synchronous/blocking client for a EteBinaryService service. */
-    static BlockingEteBinaryService of(Channel channel, ConjureRuntime runtime) {
-        AsyncEteBinaryService delegate = AsyncEteBinaryService.of(channel, runtime);
-        return new BlockingEteBinaryService() {
+    static EteBinaryServiceBlocking of(Channel channel, ConjureRuntime runtime) {
+        EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(channel, runtime);
+        return new EteBinaryServiceBlocking() {
             @Override
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 return RemoteExceptions.getUnchecked(delegate.postBinary(authHeader, body));

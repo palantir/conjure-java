@@ -14,12 +14,12 @@ import java.lang.Void;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface AsyncCookieService {
+public interface CookieServiceAsync {
     ListenableFuture<Void> eatCookies(BearerToken token);
 
     /** Creates an asynchronous/non-blocking client for a CookieService service. */
-    static AsyncCookieService of(Channel channel, ConjureRuntime runtime) {
-        return new AsyncCookieService() {
+    static CookieServiceAsync of(Channel channel, ConjureRuntime runtime) {
+        return new CookieServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
 
             private final Deserializer<Void> eatCookiesDeserializer =

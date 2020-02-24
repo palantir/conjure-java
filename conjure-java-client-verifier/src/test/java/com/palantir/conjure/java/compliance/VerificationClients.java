@@ -20,13 +20,13 @@ import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeService;
-import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingAutoDeserializeService;
-import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingSingleHeaderService;
-import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingSinglePathParamService;
-import com.palantir.conjure.java.com.palantir.conjure.verification.server.BlockingSingleQueryParamService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeServiceBlocking;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.SingleHeaderService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.SingleHeaderServiceBlocking;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.SinglePathParamService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.SinglePathParamServiceBlocking;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.SingleQueryParamService;
+import com.palantir.conjure.java.com.palantir.conjure.verification.server.SingleQueryParamServiceBlocking;
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.dialogue.JavaChannels;
@@ -46,8 +46,8 @@ public final class VerificationClients {
                 server.getClientConfiguration());
     }
 
-    public static BlockingAutoDeserializeService dialogueAutoDeserializeService(VerificationServerRule server) {
-        return BlockingAutoDeserializeService.of(
+    public static AutoDeserializeServiceBlocking dialogueAutoDeserializeService(VerificationServerRule server) {
+        return AutoDeserializeServiceBlocking.of(
                 JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
                 DEFAULT_CONJURE_RUNTIME);
     }
@@ -68,8 +68,8 @@ public final class VerificationClients {
                 server.getClientConfiguration());
     }
 
-    public static BlockingSinglePathParamService dialogueSinglePathParamService(VerificationServerRule server) {
-        return BlockingSinglePathParamService.of(
+    public static SinglePathParamServiceBlocking dialogueSinglePathParamService(VerificationServerRule server) {
+        return SinglePathParamServiceBlocking.of(
                 JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
                 DEFAULT_CONJURE_RUNTIME);
     }
@@ -79,8 +79,8 @@ public final class VerificationClients {
                 SingleHeaderService.class, getUserAgent(), new HostMetricsRegistry(), server.getClientConfiguration());
     }
 
-    public static BlockingSingleHeaderService dialogueSingleHeaderService(VerificationServerRule server) {
-        return BlockingSingleHeaderService.of(
+    public static SingleHeaderServiceBlocking dialogueSingleHeaderService(VerificationServerRule server) {
+        return SingleHeaderServiceBlocking.of(
                 JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
                 DEFAULT_CONJURE_RUNTIME);
     }
@@ -97,8 +97,8 @@ public final class VerificationClients {
         return UserAgent.of(UserAgent.Agent.of("test", "develop"));
     }
 
-    public static BlockingSingleQueryParamService dialogueSingleQueryParamService(VerificationServerRule server) {
-        return BlockingSingleQueryParamService.of(
+    public static SingleQueryParamServiceBlocking dialogueSingleQueryParamService(VerificationServerRule server) {
+        return SingleQueryParamServiceBlocking.of(
                 JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
                 DEFAULT_CONJURE_RUNTIME);
     }

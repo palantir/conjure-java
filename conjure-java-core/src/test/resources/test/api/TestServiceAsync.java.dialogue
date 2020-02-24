@@ -1,4 +1,4 @@
-package test.prefix.com.palantir.another;
+package com.palantir.another;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -11,6 +11,11 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
+import com.palantir.product.AliasedString;
+import com.palantir.product.CreateDatasetRequest;
+import com.palantir.product.NestedAliasedBinary;
+import com.palantir.product.datasets.BackingFileSystem;
+import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
@@ -28,15 +33,10 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
-import test.prefix.com.palantir.product.AliasedString;
-import test.prefix.com.palantir.product.CreateDatasetRequest;
-import test.prefix.com.palantir.product.NestedAliasedBinary;
-import test.prefix.com.palantir.product.datasets.BackingFileSystem;
-import test.prefix.com.palantir.product.datasets.Dataset;
 
 /** A Markdown description of the service. */
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-public interface AsyncTestService {
+public interface TestServiceAsync {
     /** Returns a mapping from file system id to backing file system configuration. */
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 
@@ -114,8 +114,8 @@ public interface AsyncTestService {
             AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 
     /** Creates an asynchronous/non-blocking client for a TestService service. */
-    static AsyncTestService of(Channel channel, ConjureRuntime runtime) {
-        return new AsyncTestService() {
+    static TestServiceAsync of(Channel channel, ConjureRuntime runtime) {
+        return new TestServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
 
             private final Deserializer<Map<String, BackingFileSystem>> getFileSystemsDeserializer =
