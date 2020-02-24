@@ -72,12 +72,18 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
                 typeDefinitionsByName.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
         TypeAwareGenerator generator = new TypeAwareGenerator(options, typeNameResolver, parameterTypes, returnTypes);
 
+        AsyncGenerator asyncGenerator = new AsyncGenerator(
+                options, typeNameResolver, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
+
+        BlockingGenerator blockingGenerator = new BlockingGenerator(
+                options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
+
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> {
                     return Stream.of(
                             endpoints.endpointsClass(serviceDef),
-                            interfaceGenerator.generateBlocking(serviceDef),
-                            interfaceGenerator.generateAsync(serviceDef),
+                            interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
+                            interfaceGenerator.generateAsync(serviceDef, asyncGenerator),
                             generator.client(serviceDef));
                 })
                 .collect(Collectors.toSet());
@@ -105,8 +111,8 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
                     .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueServiceGenerator.class));
 
             serviceBuilder.addMethod(new BlockingGenerator(options, parameterTypes, returnTypes).generate(def));
-            serviceBuilder.addMethod(new AsyncGenerator(options, typeNameResolver, parameterTypes, returnTypes)
-                    .generate(serviceClassName, def));
+            serviceBuilder.addMethod(
+                    new AsyncGenerator(options, typeNameResolver, parameterTypes, returnTypes).generate(def));
             serviceBuilder.addMethod(MethodSpec.constructorBuilder()
                     .addModifiers(Modifier.PRIVATE)
                     .build());

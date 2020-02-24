@@ -47,16 +47,19 @@ public final class InterfaceGenerator {
         this.returnTypes = returnTypes;
     }
 
-    public JavaFile generateBlocking(ServiceDefinition def) {
-        return generate(def, Names.blockingClassName(def, options), returnTypes::baseType);
+    public JavaFile generateBlocking(ServiceDefinition def, MethodGenerator methodGenerator) {
+        return generate(def, Names.blockingClassName(def, options), returnTypes::baseType, methodGenerator);
     }
 
-    public JavaFile generateAsync(ServiceDefinition def) {
-        return generate(def, Names.asyncClassName(def, options), returnTypes::async);
+    public JavaFile generateAsync(ServiceDefinition def, MethodGenerator methodGenerator) {
+        return generate(def, Names.asyncClassName(def, options), returnTypes::async, methodGenerator);
     }
 
     private JavaFile generate(
-            ServiceDefinition def, ClassName className, Function<Optional<Type>, TypeName> returnTypeMapper) {
+            ServiceDefinition def,
+            ClassName className,
+            Function<Optional<Type>, TypeName> returnTypeMapper,
+            MethodGenerator methodGenerator) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueServiceGenerator.class));
@@ -66,6 +69,8 @@ public final class InterfaceGenerator {
         serviceBuilder.addMethods(def.getEndpoints().stream()
                 .map(endpoint -> apiMethod(endpoint, returnTypeMapper))
                 .collect(toList()));
+
+        serviceBuilder.addMethod(methodGenerator.generate(def));
 
         return JavaFile.builder(
                         Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),

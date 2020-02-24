@@ -29,7 +29,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.List;
 import javax.lang.model.element.Modifier;
 
-public final class BlockingGenerator {
+public final class BlockingGenerator implements MethodGenerator {
 
     private final Options options;
     private final ParameterTypeMapper parameterTypes;
@@ -41,12 +41,13 @@ public final class BlockingGenerator {
         this.returnTypes = returnTypes;
     }
 
+    @Override
     public MethodSpec generate(ServiceDefinition def) {
         TypeSpec.Builder impl =
                 TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.blockingClassName(def, options));
         def.getEndpoints().forEach(endpoint -> impl.addMethod(blockingClientImpl(endpoint)));
 
-        MethodSpec blockingImpl = MethodSpec.methodBuilder("blocking")
+        MethodSpec blockingImpl = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(
                         "Creates a synchronous/blocking client for a $L service.",
@@ -54,7 +55,10 @@ public final class BlockingGenerator {
                 .returns(Names.blockingClassName(def, options))
                 .addParameter(Channel.class, "channel")
                 .addParameter(ConjureRuntime.class, "runtime")
-                .addCode("$T delegate = async(channel, runtime);", Names.asyncClassName(def, options))
+                .addCode(
+                        "$T delegate = $T.of(channel, runtime);",
+                        Names.asyncClassName(def, options),
+                        Names.asyncClassName(def, options))
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return blockingImpl;

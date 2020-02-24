@@ -66,7 +66,7 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
-public final class AsyncGenerator {
+public final class AsyncGenerator implements MethodGenerator {
     private static final String REQUEST = "_request";
     private final Options options;
     private final TypeNameResolver typeNameResolver;
@@ -84,7 +84,8 @@ public final class AsyncGenerator {
         this.returnTypes = returnTypes;
     }
 
-    public MethodSpec generate(ClassName serviceClassName, ServiceDefinition def) {
+    @Override
+    public MethodSpec generate(ServiceDefinition def) {
         TypeSpec.Builder impl =
                 TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.asyncClassName(def, options));
 
@@ -104,7 +105,7 @@ public final class AsyncGenerator {
             impl.addMethod(asyncClientImpl(def, endpoint));
         });
 
-        MethodSpec asyncImpl = MethodSpec.methodBuilder("async")
+        MethodSpec asyncImpl = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(
                         "Creates an asynchronous/non-blocking client for a $L service.",
