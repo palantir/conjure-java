@@ -88,6 +88,18 @@ public class ConjureBodySerDeTest {
     }
 
     @Test
+    public void testResponseContentType_singleHeader() throws IOException {
+        Encoding json = new StubEncoding("application/json");
+        Encoding plain = new StubEncoding("text/plain");
+
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().put(Headers.ACCEPT, "application/unknown, text/plain, application/json");
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(json, plain));
+        serializers.serializer(TYPE).serialize("test", exchange);
+        assertThat(exchange.getResponseHeaders().getFirst(Headers.CONTENT_TYPE)).isSameAs(plain.getContentType());
+    }
+
+    @Test
     public void testResponseNoContentType() throws IOException {
         Encoding json = new StubEncoding("application/json");
         Encoding plain = new StubEncoding("text/plain");
