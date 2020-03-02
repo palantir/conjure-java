@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
@@ -38,6 +39,8 @@ import java.util.List;
 final class ConjureBodySerDe implements BodySerDe {
 
     private static final String BINARY_CONTENT_TYPE = "application/octet-stream";
+    private static final Splitter ACCEPT_VALUE_SPLITTER =
+            Splitter.on(',').trimResults().omitEmptyStrings();
 
     private final List<Encoding> encodings;
 
@@ -114,11 +117,12 @@ final class ConjureBodySerDe implements BodySerDe {
             if (acceptValues != null) {
                 // This implementation prefers the client "Accept" order
                 for (int i = 0; i < acceptValues.size(); i++) {
-                    String acceptValue = acceptValues.get(i);
-                    for (int j = 0; j < encodings.size(); j++) {
-                        EncodingSerializerContainer<T> container = encodings.get(j);
-                        if (container.encoding.supportsContentType(acceptValue)) {
-                            return container;
+                    for (String acceptValue : ACCEPT_VALUE_SPLITTER.split(acceptValues.get(i))) {
+                        for (int j = 0; j < encodings.size(); j++) {
+                            EncodingSerializerContainer<T> container = encodings.get(j);
+                            if (container.encoding.supportsContentType(acceptValue)) {
+                                return container;
+                            }
                         }
                     }
                 }
