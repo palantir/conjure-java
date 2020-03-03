@@ -33,7 +33,7 @@ final class ConjureExceptionHandler implements HttpHandler {
     private final HttpHandler delegate;
     private final ConjureUndertowMetrics metrics;
 
-    private final ConjureExceptionHandler(HttpHandler delegate, TaggedMetricRegistry taggedMetricRegistry) {
+    ConjureExceptionHandler(HttpHandler delegate, TaggedMetricRegistry taggedMetricRegistry) {
         this(delegate, ConjureExceptions.serializer(), taggedMetricRegistry);
     }
 
