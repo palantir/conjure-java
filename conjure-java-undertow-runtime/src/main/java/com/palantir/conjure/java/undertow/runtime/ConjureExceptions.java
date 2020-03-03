@@ -44,20 +44,6 @@ import org.xnio.IoUtils;
  */
 final class ConjureExceptions {
 
-    private enum ErrorCause {
-        RPC("rpc"),
-        QOS("qos"),
-        SERVICE_INTERNAL("serviceInternal"),
-        INTERNAL("internal"),
-        OTHER("other");
-
-        private final String cause;
-
-        ErrorCause(String cause) {
-            this.cause = cause;
-        }
-    }
-
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
     private final ConjureUndertowMetrics metrics;
 

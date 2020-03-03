@@ -29,6 +29,7 @@ import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.BlockingHandler;
@@ -56,9 +57,11 @@ public final class ConjureExceptionHandlerTest {
     public void before() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
-                    throw exception;
-                }, new DefaultTaggedMetricRegistry())))
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
+                        exchange -> {
+                            throw exception;
+                        },
+                        new DefaultTaggedMetricRegistry())))
                 .build();
         server.start();
     }
@@ -201,24 +204,31 @@ public final class ConjureExceptionHandlerTest {
     @Test
     public void handlesErrorWithoutSendingResponseBody() throws IOException {
         server.stop();
+        TaggedMetricRegistry metrics = new DefaultTaggedMetricRegistry();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
-                    throw new Error();
-                }, new DefaultTaggedMetricRegistry())))
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
+                        exchange -> {
+                            throw new Error();
+                        },
+                        metrics)))
                 .build();
         server.start();
 
         Response response = execute();
         assertThat(response.body().string()).isEmpty();
         assertThat(response.code()).isEqualTo(500);
+        assertThat(ConjureUndertowMetrics.of(metrics).internalerrorAll(ErrorCause.INTERNAL.toString()).getCount())
+                .isEqualTo(1);
     }
 
     @Test
     public void handlesErrorWithoutRethrowing() {
-        HttpHandler handler = new ConjureExceptionHandler(exchange -> {
-            throw new Error();
-        }, new DefaultTaggedMetricRegistry());
+        HttpHandler handler = new ConjureExceptionHandler(
+                exchange -> {
+                    throw new Error();
+                },
+                new DefaultTaggedMetricRegistry());
         assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))
                 .doesNotThrowAnyException();
     }
