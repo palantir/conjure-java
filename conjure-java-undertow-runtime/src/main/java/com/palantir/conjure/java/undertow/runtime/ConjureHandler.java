@@ -27,6 +27,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import com.palantir.tracing.undertow.TracedRequestHandler;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -93,6 +94,7 @@ public final class ConjureHandler implements HttpHandler {
 
         private final List<Endpoint> endpoints = new ArrayList<>();
         private HttpHandler fallback = ResponseCodeHandler.HANDLE_404;
+        private Optional<TaggedMetricRegistry> maybeTaggedMetricRegistry = Optional.empty();
 
         private Builder() {}
 
@@ -138,6 +140,17 @@ public final class ConjureHandler implements HttpHandler {
         @CanIgnoreReturnValue
         public Builder addWrapperBeforeBlocking(EndpointHandlerWrapper wrapper) {
             wrappersJustBeforeBlocking.add(wrapper);
+            return this;
+        }
+
+        /**
+         * This MUST only be used for non-blocking operations that are meant to be run on the io-thread. For blocking
+         * operations, please wrap the UndertowService themselves If you call this multiple time, the last wrapper will
+         * be applied last, meaning it will be wrapped by the previously added {@link EndpointHandlerWrapper}s.
+         */
+        @CanIgnoreReturnValue
+        public Builder addTaggedMetricRegistry(TaggedMetricRegistry taggedMetricRegistry) {
+            maybeTaggedMetricRegistry = Optional.of(taggedMetricRegistry);
             return this;
         }
 

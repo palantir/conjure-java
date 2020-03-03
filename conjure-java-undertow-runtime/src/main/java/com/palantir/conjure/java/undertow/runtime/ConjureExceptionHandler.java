@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 
@@ -31,14 +32,16 @@ final class ConjureExceptionHandler implements HttpHandler {
     private final Serializer<SerializableError> serializer;
     private final HttpHandler delegate;
 
-    ConjureExceptionHandler(HttpHandler delegate) {
+    private final ConjureExceptionHandler(HttpHandler delegate, TaggedMetricRegistry taggedMetricRegistry) {
         this(delegate, ConjureExceptions.serializer());
     }
 
     // Constructor allows new exception handlers to be created without creating new serializer instances.
-    ConjureExceptionHandler(HttpHandler delegate, Serializer<SerializableError> serializer) {
+    ConjureExceptionHandler(
+            HttpHandler delegate, Serializer<SerializableError> serializer, TaggedMetricRegistry taggedMetricRegistry) {
         this.delegate = delegate;
         this.serializer = serializer;
+        ConjureUndertow
     }
 
     @Override
