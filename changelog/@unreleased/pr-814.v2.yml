@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: "Internal error metric\n\nAdds the `server.response.internalerror.all`
+    metric, tagged with `cause` for internal errors. Internal errors are 500's minus
+    rethrown 500s and unhandled 400's which are rethrown as 500s. "
+  links:
+  - https://github.com/palantir/conjure-java/pull/814
