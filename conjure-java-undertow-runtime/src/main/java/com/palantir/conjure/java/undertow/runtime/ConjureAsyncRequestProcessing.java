@@ -26,6 +26,7 @@ import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tracing.DeferredTracer;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import io.undertow.server.ExchangeCompletionListener;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -78,9 +79,13 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
     private final Serializer<SerializableError> exceptionSerializer = ConjureExceptions.serializer();
 
     private final Duration timeout;
+    private final TaggedMetricRegistry taggedMetricRegistry;
+    private final ConjureExceptions conjureExceptions;
 
-    ConjureAsyncRequestProcessing(Duration timeout) {
+    ConjureAsyncRequestProcessing(Duration timeout, TaggedMetricRegistry taggedMetricRegistry) {
         this.timeout = timeout;
+        this.taggedMetricRegistry = taggedMetricRegistry;
+        this.conjureExceptions = new ConjureExceptions(taggedMetricRegistry);
     }
 
     @Override
@@ -106,9 +111,9 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
             T result = Futures.getDone(future);
             returnValueWriter.write(result, exchange);
         } catch (ExecutionException e) {
-            ConjureExceptions.handle(exchange, exceptionSerializer, e.getCause());
+            conjureExceptions.handle(exchange, exceptionSerializer, e.getCause());
         } catch (RuntimeException e) {
-            ConjureExceptions.handle(exchange, exceptionSerializer, e);
+            conjureExceptions.handle(exchange, exceptionSerializer, e);
         }
     }
 
@@ -143,7 +148,7 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
                     public void onFailure(Throwable throwable) {
                         exchange.dispatch(wrapCallback(
                                 serverExchange ->
-                                        ConjureExceptions.handle(serverExchange, exceptionSerializer, throwable),
+                                        conjureExceptions.handle(serverExchange, exceptionSerializer, throwable),
                                 tracer));
                     }
                 },
@@ -151,7 +156,7 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
     }
 
     private HttpHandler wrapCallback(HttpHandler action, DeferredTracer tracer) {
-        HttpHandler next = new ConjureExceptionHandler(action, exceptionSerializer);
+        HttpHandler next = new ConjureExceptionHandler(action, exceptionSerializer, taggedMetricRegistry);
         return exchange -> tracer.withTrace(() -> {
             next.handleRequest(exchange);
             return null;

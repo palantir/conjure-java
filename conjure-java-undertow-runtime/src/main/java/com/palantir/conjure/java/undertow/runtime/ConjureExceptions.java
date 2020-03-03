@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
@@ -43,9 +44,26 @@ import org.xnio.IoUtils;
  */
 final class ConjureExceptions {
 
-    private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
+    private enum ErrorCause {
+        RPC("rpc"),
+        QOS("qos"),
+        SERVICE_INTERNAL("serviceInternal"),
+        INTERNAL("internal"),
+        OTHER("other");
 
-    private ConjureExceptions() {}
+        private final String cause;
+
+        ErrorCause(String cause) {
+            this.cause = cause;
+        }
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
+    private final ConjureUndertowMetrics metrics;
+
+    ConjureExceptions(TaggedMetricRegistry taggedMetricRegistry) {
+        this.metrics = ConjureUndertowMetrics.of(taggedMetricRegistry);
+    }
 
     static Serializer<SerializableError> serializer() {
         // Exceptions should always be serialized using JSON
@@ -53,7 +71,7 @@ final class ConjureExceptions {
                 .serializer(new TypeMarker<SerializableError>() {});
     }
 
-    static void handle(HttpServerExchange exchange, Serializer<SerializableError> serializer, Throwable throwable) {
+    void handle(HttpServerExchange exchange, Serializer<SerializableError> serializer, Throwable throwable) {
         if (throwable instanceof ServiceException) {
             serviceException(exchange, serializer, (ServiceException) throwable);
         } else if (throwable instanceof QosException) {
@@ -69,6 +87,7 @@ final class ConjureExceptions {
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
             log(exception, throwable);
+            metrics.internalerrorAll(ErrorCause.OTHER.toString()).mark();
             writeResponse(
                     exchange,
                     Optional.of(SerializableError.forException(exception)),
@@ -77,9 +96,10 @@ final class ConjureExceptions {
         }
     }
 
-    private static void serviceException(
+    private void serviceException(
             HttpServerExchange exchange, Serializer<SerializableError> serializer, ServiceException exception) {
         log(exception);
+        metrics.internalerrorAll(ErrorCause.SERVICE_INTERNAL.toString()).mark();
         writeResponse(
                 exchange,
                 Optional.of(SerializableError.forException(exception)),
@@ -87,10 +107,11 @@ final class ConjureExceptions {
                 serializer);
     }
 
-    private static void qosException(
+    private void qosException(
             HttpServerExchange exchange, Serializer<SerializableError> serializer, QosException exception) {
         exception.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
         log.debug("Possible quality-of-service intervention", exception);
+        metrics.internalerrorAll(ErrorCause.QOS.toString()).mark();
         writeResponse(exchange, Optional.empty(), exception.accept(QOS_EXCEPTION_STATUS_CODE), serializer);
     }
 
@@ -99,7 +120,7 @@ final class ConjureExceptions {
     // considered internal to *this* service rather than the originating service. This means in particular
     // that Conjure errors are defined only local to a given service and these error types don't
     // propagate through other services.
-    private static void remoteException(
+    private void remoteException(
             HttpServerExchange exchange, Serializer<SerializableError> serializer, RemoteException exception) {
         ErrorType errorType = mapRemoteExceptionErrorType(exception);
         writeResponse(
@@ -147,7 +168,7 @@ final class ConjureExceptions {
         }
     }
 
-    private static void illegalArgumentException(
+    private void illegalArgumentException(
             HttpServerExchange exchange, Serializer<SerializableError> serializer, Throwable throwable) {
         ServiceException exception = new ServiceException(ErrorType.INVALID_ARGUMENT, throwable);
         log(exception, throwable);
@@ -158,7 +179,7 @@ final class ConjureExceptions {
                 serializer);
     }
 
-    private static void frameworkException(
+    private void frameworkException(
             HttpServerExchange exchange,
             Serializer<SerializableError> serializer,
             FrameworkException frameworkException) {
@@ -168,10 +189,11 @@ final class ConjureExceptions {
         writeResponse(exchange, Optional.of(SerializableError.forException(exception)), statusCode, serializer);
     }
 
-    private static void error(HttpServerExchange exchange, Serializer<SerializableError> serializer, Error error) {
+    private void error(HttpServerExchange exchange, Serializer<SerializableError> serializer, Error error) {
         // log errors in order to associate the log line with the correct traceId but
         // avoid doing work beyond setting a 500 response code, no response body is sent.
         log.error("Error handling request", error);
+        metrics.internalerrorAll(ErrorCause.INTERNAL.toString()).mark();
         // The writeResponse method terminates responses if data has already been sent to clients
         // do not interpret partial data as a full response.
         writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode(), serializer);

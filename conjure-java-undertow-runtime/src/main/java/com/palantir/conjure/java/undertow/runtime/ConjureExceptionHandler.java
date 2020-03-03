@@ -31,7 +31,7 @@ final class ConjureExceptionHandler implements HttpHandler {
 
     private final Serializer<SerializableError> serializer;
     private final HttpHandler delegate;
-    private final ConjureUndertowMetrics metrics;
+    private final ConjureExceptions conjureExceptions;
 
     ConjureExceptionHandler(HttpHandler delegate, TaggedMetricRegistry taggedMetricRegistry) {
         this(delegate, ConjureExceptions.serializer(), taggedMetricRegistry);
@@ -42,7 +42,7 @@ final class ConjureExceptionHandler implements HttpHandler {
             HttpHandler delegate, Serializer<SerializableError> serializer, TaggedMetricRegistry taggedMetricRegistry) {
         this.delegate = delegate;
         this.serializer = serializer;
-        this.metrics  = ConjureUndertowMetrics.of(taggedMetricRegistry);
+        this.conjureExceptions = new ConjureExceptions(taggedMetricRegistry);
     }
 
     @Override
@@ -50,7 +50,7 @@ final class ConjureExceptionHandler implements HttpHandler {
         try {
             delegate.handleRequest(exchange);
         } catch (Throwable throwable) {
-            ConjureExceptions.handle(exchange, serializer, throwable);
+            conjureExceptions.handle(exchange, serializer, throwable);
         }
     }
 }

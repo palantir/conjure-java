@@ -28,6 +28,7 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.BlockingHandler;
@@ -57,7 +58,7 @@ public final class ConjureExceptionHandlerTest {
                 .addHttpListener(12345, "localhost")
                 .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
                     throw exception;
-                })))
+                }, new DefaultTaggedMetricRegistry())))
                 .build();
         server.start();
     }
@@ -204,7 +205,7 @@ public final class ConjureExceptionHandlerTest {
                 .addHttpListener(12345, "localhost")
                 .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
                     throw new Error();
-                })))
+                }, new DefaultTaggedMetricRegistry())))
                 .build();
         server.start();
 
@@ -217,7 +218,7 @@ public final class ConjureExceptionHandlerTest {
     public void handlesErrorWithoutRethrowing() {
         HttpHandler handler = new ConjureExceptionHandler(exchange -> {
             throw new Error();
-        });
+        }, new DefaultTaggedMetricRegistry());
         assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))
                 .doesNotThrowAnyException();
     }

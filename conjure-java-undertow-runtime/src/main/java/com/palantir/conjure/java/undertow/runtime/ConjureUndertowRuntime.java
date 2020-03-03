@@ -25,9 +25,12 @@ import com.palantir.conjure.java.undertow.lib.MarkerCallback;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /** {@link ConjureUndertowRuntime} provides functionality required by generated handlers. */
 public final class ConjureUndertowRuntime implements UndertowRuntime {
@@ -42,7 +45,8 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
                 builder.encodings.isEmpty() ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
-        this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout);
+        this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout,
+                builder.maybeTaggedMetricRegistry.orElse(SharedTaggedMetricRegistries.getSingleton()));
     }
 
     public static Builder builder() {
@@ -79,6 +83,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private final List<Encoding> encodings = new ArrayList<>();
         private final List<ParamMarker> paramMarkers = new ArrayList<>();
+        private Optional<TaggedMetricRegistry> maybeTaggedMetricRegistry = Optional.empty();
 
         private Builder() {}
 
@@ -100,6 +105,12 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
             return this;
         }
 
+        @CanIgnoreReturnValue
+        public Builder taggedMetricRegistry(TaggedMetricRegistry taggedMetricRegistry) {
+            maybeTaggedMetricRegistry = Optional.of(Preconditions.checkNotNull(taggedMetricRegistry,
+                    "taggedMetricRegistry cannot be null"));
+            return this;
+        }
         public ConjureUndertowRuntime build() {
             return new ConjureUndertowRuntime(this);
         }
