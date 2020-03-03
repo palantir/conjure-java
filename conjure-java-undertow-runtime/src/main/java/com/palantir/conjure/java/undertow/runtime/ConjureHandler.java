@@ -193,7 +193,7 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> Optional.of(new ConjureExceptionHandler(
                                     endpoint.handler(),
                                     maybeTaggedMetricRegistry.orElseGet(
-                                            () -> SharedTaggedMetricRegistries.getSingleton()))))
+                                            SharedTaggedMetricRegistries::getSingleton))))
                     .build()
                     .reverse();
 

@@ -45,8 +45,9 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
                 builder.encodings.isEmpty() ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
-        this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout,
-                builder.maybeTaggedMetricRegistry.orElseGet(() -> SharedTaggedMetricRegistries.getSingleton()));
+        this.async = new ConjureAsyncRequestProcessing(
+                builder.asyncTimeout,
+                builder.maybeTaggedMetricRegistry.orElseGet(SharedTaggedMetricRegistries::getSingleton));
     }
 
     public static Builder builder() {
@@ -107,10 +108,11 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
         @CanIgnoreReturnValue
         public Builder taggedMetricRegistry(TaggedMetricRegistry taggedMetricRegistry) {
-            maybeTaggedMetricRegistry = Optional.of(Preconditions.checkNotNull(taggedMetricRegistry,
-                    "taggedMetricRegistry cannot be null"));
+            maybeTaggedMetricRegistry = Optional.of(
+                    Preconditions.checkNotNull(taggedMetricRegistry, "taggedMetricRegistry cannot be null"));
             return this;
         }
+
         public ConjureUndertowRuntime build() {
             return new ConjureUndertowRuntime(this);
         }
