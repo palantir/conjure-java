@@ -202,8 +202,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.getFileSystems,
+                                _request.build(),
                                 getFileSystemsDeserializer::deserialize);
             }
 
@@ -219,8 +219,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.createDataset,
+                                _request.build(),
                                 createDatasetDeserializer::deserialize);
             }
 
@@ -235,8 +235,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.getDataset,
+                                _request.build(),
                                 getDatasetDeserializer::deserialize);
             }
 
@@ -251,8 +251,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.getRawData,
+                                _request.build(),
                                 runtime.bodySerDe()::deserializeInputStream);
             }
 
@@ -267,8 +267,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.getAliasedRawData,
+                                _request.build(),
                                 getAliasedRawDataDeserializer::deserialize);
             }
 
@@ -283,8 +283,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.maybeGetRawData,
+                                _request.build(),
                                 maybeGetRawDataDeserializer::deserialize);
             }
 
@@ -299,8 +299,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.getAliasedString,
+                                _request.build(),
                                 getAliasedStringDeserializer::deserialize);
             }
 
@@ -315,8 +315,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.uploadRawData,
+                                _request.build(),
                                 uploadRawDataDeserializer::deserialize);
             }
 
@@ -331,8 +331,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.uploadAliasedRawData,
+                                _request.build(),
                                 uploadAliasedRawDataDeserializer::deserialize);
             }
 
@@ -347,8 +347,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.getBranches,
+                                _request.build(),
                                 getBranchesDeserializer::deserialize);
             }
 
@@ -363,8 +363,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.getBranchesDeprecated,
+                                _request.build(),
                                 getBranchesDeprecatedDeserializer::deserialize);
             }
 
@@ -380,8 +380,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.resolveBranch,
+                                _request.build(),
                                 resolveBranchDeserializer::deserialize);
             }
 
@@ -396,8 +396,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.testParam,
+                                _request.build(),
                                 testParamDeserializer::deserialize);
             }
 
@@ -431,8 +431,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.testQueryParams,
+                                _request.build(),
                                 testQueryParamsDeserializer::deserialize);
             }
 
@@ -466,8 +466,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.testNoResponseQueryParams,
+                                _request.build(),
                                 testNoResponseQueryParamsDeserializer::deserialize);
             }
 
@@ -480,8 +480,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.testBoolean,
+                                _request.build(),
                                 testBooleanDeserializer::deserialize);
             }
 
@@ -494,8 +494,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.testDouble,
+                                _request.build(),
                                 testDoubleDeserializer::deserialize);
             }
 
@@ -508,8 +508,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.testInteger,
+                                _request.build(),
                                 testIntegerDeserializer::deserialize);
             }
 
@@ -524,8 +524,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.testPostOptional,
+                                _request.build(),
                                 testPostOptionalDeserializer::deserialize);
             }
 
@@ -547,8 +547,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.testOptionalIntegerAndDouble,
+                                _request.build(),
                                 testOptionalIntegerAndDoubleDeserializer::deserialize);
             }
 
@@ -569,8 +569,8 @@ public interface TestServiceAsync {
                 return runtime.clients()
                         .call(
                                 channel,
-                                _request.build(),
                                 DialogueTestEndpoints.getForStrings,
+                                _request.build(),
                                 getForStringsDeserializer::deserialize);
             }
         };

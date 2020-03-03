@@ -2,7 +2,6 @@ package test.api;
 
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
-import com.palantir.dialogue.RemoteExceptions;
 import com.palantir.tokens.auth.BearerToken;
 import java.lang.Override;
 import javax.annotation.Generated;
@@ -17,7 +16,7 @@ public interface CookieServiceBlocking {
         return new CookieServiceBlocking() {
             @Override
             public void eatCookies(BearerToken token) {
-                RemoteExceptions.getUnchecked(delegate.eatCookies(token));
+                runtime.clients().block(delegate.eatCookies(token));
             }
         };
     }

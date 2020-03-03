@@ -1,8 +1,6 @@
 package com.palantir.product;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -230,10 +228,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.string, _request.build()),
-                        stringDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.string,
+                                _request.build(),
+                                stringDeserializer::deserialize);
             }
 
             @Override
@@ -242,10 +242,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.integer, _request.build()),
-                        integerDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.integer,
+                                _request.build(),
+                                integerDeserializer::deserialize);
             }
 
             @Override
@@ -254,10 +256,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.double_, _request.build()),
-                        double_Deserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.double_,
+                                _request.build(),
+                                double_Deserializer::deserialize);
             }
 
             @Override
@@ -266,10 +270,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.boolean_, _request.build()),
-                        boolean_Deserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.boolean_,
+                                _request.build(),
+                                boolean_Deserializer::deserialize);
             }
 
             @Override
@@ -278,10 +284,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.safelong, _request.build()),
-                        safelongDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.safelong,
+                                _request.build(),
+                                safelongDeserializer::deserialize);
             }
 
             @Override
@@ -290,10 +298,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.rid, _request.build()),
-                        ridDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.rid,
+                                _request.build(),
+                                ridDeserializer::deserialize);
             }
 
             @Override
@@ -302,10 +312,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.bearertoken, _request.build()),
-                        bearertokenDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.bearertoken,
+                                _request.build(),
+                                bearertokenDeserializer::deserialize);
             }
 
             @Override
@@ -314,10 +326,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.optionalString, _request.build()),
-                        optionalStringDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.optionalString,
+                                _request.build(),
+                                optionalStringDeserializer::deserialize);
             }
 
             @Override
@@ -326,10 +340,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.optionalEmpty, _request.build()),
-                        optionalEmptyDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.optionalEmpty,
+                                _request.build(),
+                                optionalEmptyDeserializer::deserialize);
             }
 
             @Override
@@ -338,10 +354,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.datetime, _request.build()),
-                        datetimeDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.datetime,
+                                _request.build(),
+                                datetimeDeserializer::deserialize);
             }
 
             @Override
@@ -350,10 +368,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.binary, _request.build()),
-                        runtime.bodySerDe()::deserializeInputStream,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.binary,
+                                _request.build(),
+                                runtime.bodySerDe()::deserializeInputStream);
             }
 
             @Override
@@ -363,10 +383,12 @@ public interface EteServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("param", plainSerDe.serializeString(param));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.path, _request.build()),
-                        pathDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.path,
+                                _request.build(),
+                                pathDeserializer::deserialize);
             }
 
             @Override
@@ -376,10 +398,12 @@ public interface EteServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("param", Objects.toString(param));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.externalLongPath, _request.build()),
-                        externalLongPathDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.externalLongPath,
+                                _request.build(),
+                                externalLongPathDeserializer::deserialize);
             }
 
             @Override
@@ -392,11 +416,12 @@ public interface EteServiceAsync {
                 if (param.isPresent()) {
                     _request.putQueryParams("param", Objects.toString(param.get()));
                 }
-                return Futures.transform(
-                        channel.execute(
-                                DialogueEteEndpoints.optionalExternalLongQuery, _request.build()),
-                        optionalExternalLongQueryDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.optionalExternalLongQuery,
+                                _request.build(),
+                                optionalExternalLongQueryDeserializer::deserialize);
             }
 
             @Override
@@ -407,10 +432,12 @@ public interface EteServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(notNullBodySerializer.serialize(notNullBody));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.notNullBody, _request.build()),
-                        notNullBodyDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.notNullBody,
+                                _request.build(),
+                                notNullBodyDeserializer::deserialize);
             }
 
             @Override
@@ -422,10 +449,12 @@ public interface EteServiceAsync {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putQueryParams(
                         "queryParamName", plainSerDe.serializeString(queryParamName.get()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.aliasOne, _request.build()),
-                        aliasOneDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.aliasOne,
+                                _request.build(),
+                                aliasOneDeserializer::deserialize);
             }
 
             @Override
@@ -440,10 +469,12 @@ public interface EteServiceAsync {
                             "queryParamName",
                             plainSerDe.serializeString(queryParamName.get().get()));
                 }
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.optionalAliasOne, _request.build()),
-                        optionalAliasOneDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.optionalAliasOne,
+                                _request.build(),
+                                optionalAliasOneDeserializer::deserialize);
             }
 
             @Override
@@ -455,10 +486,12 @@ public interface EteServiceAsync {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putQueryParams(
                         "queryParamName", plainSerDe.serializeString(queryParamName.get().get()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.aliasTwo, _request.build()),
-                        aliasTwoDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.aliasTwo,
+                                _request.build(),
+                                aliasTwoDeserializer::deserialize);
             }
 
             @Override
@@ -469,11 +502,12 @@ public interface EteServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
-                return Futures.transform(
-                        channel.execute(
-                                DialogueEteEndpoints.notNullBodyExternalImport, _request.build()),
-                        notNullBodyExternalImportDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.notNullBodyExternalImport,
+                                _request.build(),
+                                notNullBodyExternalImportDeserializer::deserialize);
             }
 
             @Override
@@ -484,11 +518,12 @@ public interface EteServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(optionalBodyExternalImportSerializer.serialize(body));
-                return Futures.transform(
-                        channel.execute(
-                                DialogueEteEndpoints.optionalBodyExternalImport, _request.build()),
-                        optionalBodyExternalImportDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.optionalBodyExternalImport,
+                                _request.build(),
+                                optionalBodyExternalImportDeserializer::deserialize);
             }
 
             @Override
@@ -501,11 +536,12 @@ public interface EteServiceAsync {
                 if (query.isPresent()) {
                     _request.putQueryParams("query", Objects.toString(query.get()));
                 }
-                return Futures.transform(
-                        channel.execute(
-                                DialogueEteEndpoints.optionalQueryExternalImport, _request.build()),
-                        optionalQueryExternalImportDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.optionalQueryExternalImport,
+                                _request.build(),
+                                optionalQueryExternalImportDeserializer::deserialize);
             }
 
             @Override
@@ -514,10 +550,12 @@ public interface EteServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.noReturn, _request.build()),
-                        noReturnDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.noReturn,
+                                _request.build(),
+                                noReturnDeserializer::deserialize);
             }
 
             @Override
@@ -528,10 +566,12 @@ public interface EteServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putQueryParams("queryParamName", Objects.toString(queryParamName));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.enumQuery, _request.build()),
-                        enumQueryDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.enumQuery,
+                                _request.build(),
+                                enumQueryDeserializer::deserialize);
             }
 
             @Override
@@ -545,10 +585,12 @@ public interface EteServiceAsync {
                     _request.putQueryParams(
                             "queryParamName", Objects.toString(queryParamNameElement));
                 }
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.enumListQuery, _request.build()),
-                        enumListQueryDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.enumListQuery,
+                                _request.build(),
+                                enumListQueryDeserializer::deserialize);
             }
 
             @Override
@@ -562,10 +604,12 @@ public interface EteServiceAsync {
                     _request.putQueryParams(
                             "queryParamName", Objects.toString(queryParamName.get()));
                 }
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.optionalEnumQuery, _request.build()),
-                        optionalEnumQueryDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.optionalEnumQuery,
+                                _request.build(),
+                                optionalEnumQueryDeserializer::deserialize);
             }
 
             @Override
@@ -576,10 +620,12 @@ public interface EteServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putHeaderParams("Custom-Header", Objects.toString(headerParameter));
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.enumHeader, _request.build()),
-                        enumHeaderDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.enumHeader,
+                                _request.build(),
+                                enumHeaderDeserializer::deserialize);
             }
 
             @Override
@@ -592,10 +638,12 @@ public interface EteServiceAsync {
                 if (input.isPresent()) {
                     _request.putQueryParams("input", Objects.toString(input.get().get()));
                 }
-                return Futures.transform(
-                        channel.execute(DialogueEteEndpoints.aliasLongEndpoint, _request.build()),
-                        aliasLongEndpointDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.aliasLongEndpoint,
+                                _request.build(),
+                                aliasLongEndpointDeserializer::deserialize);
             }
 
             @Override
@@ -620,11 +668,12 @@ public interface EteServiceAsync {
                 for (int intsElement : ints) {
                     _request.putQueryParams("ints", plainSerDe.serializeInteger(intsElement));
                 }
-                return Futures.transform(
-                        channel.execute(
-                                DialogueEteEndpoints.complexQueryParameters, _request.build()),
-                        complexQueryParametersDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteEndpoints.complexQueryParameters,
+                                _request.build(),
+                                complexQueryParametersDeserializer::deserialize);
             }
         };
     }

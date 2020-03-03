@@ -1,8 +1,6 @@
 package com.palantir.product;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -47,10 +45,12 @@ public interface EteBinaryServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(runtime.bodySerDe().serialize(body));
-                return Futures.transform(
-                        channel.execute(DialogueEteBinaryEndpoints.postBinary, _request.build()),
-                        runtime.bodySerDe()::deserializeInputStream,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteBinaryEndpoints.postBinary,
+                                _request.build(),
+                                runtime.bodySerDe()::deserializeInputStream);
             }
 
             @Override
@@ -60,12 +60,12 @@ public interface EteBinaryServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(
+                return runtime.clients()
+                        .call(
+                                channel,
                                 DialogueEteBinaryEndpoints.getOptionalBinaryPresent,
-                                _request.build()),
-                        getOptionalBinaryPresentDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                                _request.build(),
+                                getOptionalBinaryPresentDeserializer::deserialize);
             }
 
             @Override
@@ -75,12 +75,12 @@ public interface EteBinaryServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(
+                return runtime.clients()
+                        .call(
+                                channel,
                                 DialogueEteBinaryEndpoints.getOptionalBinaryEmpty,
-                                _request.build()),
-                        getOptionalBinaryEmptyDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                                _request.build(),
+                                getOptionalBinaryEmptyDeserializer::deserialize);
             }
 
             @Override
@@ -91,11 +91,12 @@ public interface EteBinaryServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putQueryParams("numBytes", plainSerDe.serializeInteger(numBytes));
-                return Futures.transform(
-                        channel.execute(
-                                DialogueEteBinaryEndpoints.getBinaryFailure, _request.build()),
-                        runtime.bodySerDe()::deserializeInputStream,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEteBinaryEndpoints.getBinaryFailure,
+                                _request.build(),
+                                runtime.bodySerDe()::deserializeInputStream);
             }
         };
     }

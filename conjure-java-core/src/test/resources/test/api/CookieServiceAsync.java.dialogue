@@ -1,8 +1,6 @@
 package test.api;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -30,10 +28,12 @@ public interface CookieServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParam(
                         "Cookie", "PALANTIR_TOKEN=" + planSerDe.serializeBearerToken(token));
-                return Futures.transform(
-                        channel.execute(DialogueCookieEndpoints.eatCookies, _request.build()),
-                        eatCookiesDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueCookieEndpoints.eatCookies,
+                                _request.build(),
+                                eatCookiesDeserializer::deserialize);
             }
         };
     }
