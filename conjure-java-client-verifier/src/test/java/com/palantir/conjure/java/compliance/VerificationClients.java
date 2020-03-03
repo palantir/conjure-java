@@ -30,7 +30,6 @@ import com.palantir.conjure.java.com.palantir.conjure.verification.server.Single
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.dialogue.JavaChannels;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 
 public final class VerificationClients {
     private VerificationClients() {}
@@ -48,8 +47,7 @@ public final class VerificationClients {
 
     public static AutoDeserializeServiceBlocking dialogueAutoDeserializeService(VerificationServerRule server) {
         return AutoDeserializeServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
-                DEFAULT_CONJURE_RUNTIME);
+                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
     }
 
     public static AutoDeserializeConfirmService confirmService(VerificationServerRule server) {
@@ -70,8 +68,7 @@ public final class VerificationClients {
 
     public static SinglePathParamServiceBlocking dialogueSinglePathParamService(VerificationServerRule server) {
         return SinglePathParamServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
-                DEFAULT_CONJURE_RUNTIME);
+                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
     }
 
     public static SingleHeaderService singleHeaderService(VerificationServerRule server) {
@@ -81,8 +78,7 @@ public final class VerificationClients {
 
     public static SingleHeaderServiceBlocking dialogueSingleHeaderService(VerificationServerRule server) {
         return SingleHeaderServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
-                DEFAULT_CONJURE_RUNTIME);
+                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
     }
 
     public static SingleQueryParamService singleQueryParamService(VerificationServerRule server) {
@@ -99,7 +95,6 @@ public final class VerificationClients {
 
     public static SingleQueryParamServiceBlocking dialogueSingleQueryParamService(VerificationServerRule server) {
         return SingleQueryParamServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
-                DEFAULT_CONJURE_RUNTIME);
+                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
     }
 }
