@@ -218,7 +218,9 @@ public final class ConjureExceptionHandlerTest {
         Response response = execute();
         assertThat(response.body().string()).isEmpty();
         assertThat(response.code()).isEqualTo(500);
-        assertThat(ConjureUndertowMetrics.of(metrics).internalerrorAll(ErrorCause.INTERNAL.toString()).getCount())
+        assertThat(ConjureUndertowMetrics.of(metrics)
+                        .internalerrorAll(ErrorCause.INTERNAL.toString())
+                        .getCount())
                 .isEqualTo(1);
     }
 
