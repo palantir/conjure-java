@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.compliance;
 
-import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeService;
@@ -40,7 +39,7 @@ public final class VerificationClients {
     public static AutoDeserializeService autoDeserializeService(VerificationServerRule server) {
         return JaxRsClient.create(
                 AutoDeserializeService.class,
-                getUserAgent(),
+                VerificationServerRule.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
@@ -53,7 +52,7 @@ public final class VerificationClients {
     public static AutoDeserializeConfirmService confirmService(VerificationServerRule server) {
         return JaxRsClient.create(
                 AutoDeserializeConfirmService.class,
-                getUserAgent(),
+                VerificationServerRule.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
@@ -61,7 +60,7 @@ public final class VerificationClients {
     public static SinglePathParamService singlePathParamService(VerificationServerRule server) {
         return JaxRsClient.create(
                 SinglePathParamService.class,
-                getUserAgent(),
+                VerificationServerRule.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
@@ -73,7 +72,10 @@ public final class VerificationClients {
 
     public static SingleHeaderService singleHeaderService(VerificationServerRule server) {
         return JaxRsClient.create(
-                SingleHeaderService.class, getUserAgent(), new HostMetricsRegistry(), server.getClientConfiguration());
+                SingleHeaderService.class,
+                VerificationServerRule.userAgent,
+                new HostMetricsRegistry(),
+                server.getClientConfiguration());
     }
 
     public static SingleHeaderServiceBlocking dialogueSingleHeaderService(VerificationServerRule server) {
@@ -84,13 +86,9 @@ public final class VerificationClients {
     public static SingleQueryParamService singleQueryParamService(VerificationServerRule server) {
         return JaxRsClient.create(
                 SingleQueryParamService.class,
-                getUserAgent(),
+                VerificationServerRule.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
-    }
-
-    private static UserAgent getUserAgent() {
-        return UserAgent.of(UserAgent.Agent.of("test", "develop"));
     }
 
     public static SingleQueryParamServiceBlocking dialogueSingleQueryParamService(VerificationServerRule server) {
