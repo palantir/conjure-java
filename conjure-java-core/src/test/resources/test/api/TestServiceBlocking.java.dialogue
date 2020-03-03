@@ -3,7 +3,6 @@ package com.palantir.another;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
-import com.palantir.dialogue.RemoteExceptions;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.NestedAliasedBinary;
@@ -101,81 +100,78 @@ public interface TestServiceBlocking {
         return new TestServiceBlocking() {
             @Override
             public Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.getFileSystems(authHeader));
+                return runtime.clients().block(delegate.getFileSystems(authHeader));
             }
 
             @Override
             public Dataset createDataset(
                     AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.createDataset(authHeader, testHeaderArg, request));
+                return runtime.clients()
+                        .block(delegate.createDataset(authHeader, testHeaderArg, request));
             }
 
             @Override
             public Optional<Dataset> getDataset(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return RemoteExceptions.getUnchecked(delegate.getDataset(authHeader, datasetRid));
+                return runtime.clients().block(delegate.getDataset(authHeader, datasetRid));
             }
 
             @Override
             public InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return RemoteExceptions.getUnchecked(delegate.getRawData(authHeader, datasetRid));
+                return runtime.clients().block(delegate.getRawData(authHeader, datasetRid));
             }
 
             @Override
             public NestedAliasedBinary getAliasedRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.getAliasedRawData(authHeader, datasetRid));
+                return runtime.clients().block(delegate.getAliasedRawData(authHeader, datasetRid));
             }
 
             @Override
             public Optional<ByteBuffer> maybeGetRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.maybeGetRawData(authHeader, datasetRid));
+                return runtime.clients().block(delegate.maybeGetRawData(authHeader, datasetRid));
             }
 
             @Override
             public AliasedString getAliasedString(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.getAliasedString(authHeader, datasetRid));
+                return runtime.clients().block(delegate.getAliasedString(authHeader, datasetRid));
             }
 
             @Override
             public void uploadRawData(AuthHeader authHeader, BinaryRequestBody input) {
-                RemoteExceptions.getUnchecked(delegate.uploadRawData(authHeader, input));
+                runtime.clients().block(delegate.uploadRawData(authHeader, input));
             }
 
             @Override
             public void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input) {
-                RemoteExceptions.getUnchecked(delegate.uploadAliasedRawData(authHeader, input));
+                runtime.clients().block(delegate.uploadAliasedRawData(authHeader, input));
             }
 
             @Override
             public Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return RemoteExceptions.getUnchecked(delegate.getBranches(authHeader, datasetRid));
+                return runtime.clients().block(delegate.getBranches(authHeader, datasetRid));
             }
 
             @Override
             public Set<String> getBranchesDeprecated(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.getBranchesDeprecated(authHeader, datasetRid));
+                return runtime.clients()
+                        .block(delegate.getBranchesDeprecated(authHeader, datasetRid));
             }
 
             @Override
             public Optional<String> resolveBranch(
                     AuthHeader authHeader, ResourceIdentifier datasetRid, String branch) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.resolveBranch(authHeader, datasetRid, branch));
+                return runtime.clients()
+                        .block(delegate.resolveBranch(authHeader, datasetRid, branch));
             }
 
             @Override
             public Optional<String> testParam(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return RemoteExceptions.getUnchecked(delegate.testParam(authHeader, datasetRid));
+                return runtime.clients().block(delegate.testParam(authHeader, datasetRid));
             }
 
             @Override
@@ -187,15 +183,16 @@ public interface TestServiceBlocking {
                     Set<String> setEnd,
                     Optional<ResourceIdentifier> optionalEnd,
                     String query) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.testQueryParams(
-                                authHeader,
-                                something,
-                                implicit,
-                                optionalMiddle,
-                                setEnd,
-                                optionalEnd,
-                                query));
+                return runtime.clients()
+                        .block(
+                                delegate.testQueryParams(
+                                        authHeader,
+                                        something,
+                                        implicit,
+                                        optionalMiddle,
+                                        setEnd,
+                                        optionalEnd,
+                                        query));
             }
 
             @Override
@@ -207,45 +204,46 @@ public interface TestServiceBlocking {
                     Set<String> setEnd,
                     Optional<ResourceIdentifier> optionalEnd,
                     String query) {
-                RemoteExceptions.getUnchecked(
-                        delegate.testNoResponseQueryParams(
-                                authHeader,
-                                something,
-                                implicit,
-                                optionalMiddle,
-                                setEnd,
-                                optionalEnd,
-                                query));
+                runtime.clients()
+                        .block(
+                                delegate.testNoResponseQueryParams(
+                                        authHeader,
+                                        something,
+                                        implicit,
+                                        optionalMiddle,
+                                        setEnd,
+                                        optionalEnd,
+                                        query));
             }
 
             @Override
             public boolean testBoolean(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.testBoolean(authHeader));
+                return runtime.clients().block(delegate.testBoolean(authHeader));
             }
 
             @Override
             public double testDouble(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.testDouble(authHeader));
+                return runtime.clients().block(delegate.testDouble(authHeader));
             }
 
             @Override
             public int testInteger(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.testInteger(authHeader));
+                return runtime.clients().block(delegate.testInteger(authHeader));
             }
 
             @Override
             public Optional<String> testPostOptional(
                     AuthHeader authHeader, Optional<String> maybeString) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.testPostOptional(authHeader, maybeString));
+                return runtime.clients().block(delegate.testPostOptional(authHeader, maybeString));
             }
 
             @Override
             public void testOptionalIntegerAndDouble(
                     AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble) {
-                RemoteExceptions.getUnchecked(
-                        delegate.testOptionalIntegerAndDouble(
-                                authHeader, maybeInteger, maybeDouble));
+                runtime.clients()
+                        .block(
+                                delegate.testOptionalIntegerAndDouble(
+                                        authHeader, maybeInteger, maybeDouble));
             }
 
             @Override
@@ -253,8 +251,7 @@ public interface TestServiceBlocking {
                     AuthHeader authHeader,
                     ResourceIdentifier datasetRid,
                     Set<AliasedString> strings) {
-                RemoteExceptions.getUnchecked(
-                        delegate.getForStrings(authHeader, datasetRid, strings));
+                runtime.clients().block(delegate.getForStrings(authHeader, datasetRid, strings));
             }
         };
     }

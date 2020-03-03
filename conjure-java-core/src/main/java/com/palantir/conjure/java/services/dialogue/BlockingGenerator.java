@@ -21,7 +21,6 @@ import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
-import com.palantir.dialogue.RemoteExceptions;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -30,6 +29,8 @@ import java.util.List;
 import javax.lang.model.element.Modifier;
 
 public final class BlockingGenerator implements StaticFactoryMethodGenerator {
+    private static final String RUNTIME = "runtime";
+    private static final String CHANNEL = "channel";
 
     private final Options options;
     private final ParameterTypeMapper parameterTypes;
@@ -53,12 +54,14 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                         "Creates a synchronous/blocking client for a $L service.",
                         def.getServiceName().getName())
                 .returns(Names.blockingClassName(def, options))
-                .addParameter(Channel.class, "channel")
-                .addParameter(ConjureRuntime.class, "runtime")
+                .addParameter(Channel.class, CHANNEL)
+                .addParameter(ConjureRuntime.class, RUNTIME)
                 .addCode(
-                        "$T delegate = $T.of(channel, runtime);",
+                        "$T delegate = $T.of($L, $L);",
                         Names.asyncClassName(def, options),
-                        Names.asyncClassName(def, options))
+                        Names.asyncClassName(def, options),
+                        CHANNEL,
+                        RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return blockingImpl;
@@ -79,8 +82,8 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
         methodBuilder
                 .addCode(def.getReturns().isPresent() ? "return " : "")
                 .addCode(
-                        "$T.getUnchecked(delegate.$L($L));",
-                        RemoteExceptions.class,
+                        "$L.clients().block(delegate.$L($L));",
+                        RUNTIME,
                         def.getEndpointName().get(),
                         argList);
 
