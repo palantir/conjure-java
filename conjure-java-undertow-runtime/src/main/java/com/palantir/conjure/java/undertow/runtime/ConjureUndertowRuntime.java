@@ -46,7 +46,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout,
-                builder.maybeTaggedMetricRegistry.orElse(SharedTaggedMetricRegistries.getSingleton()));
+                builder.maybeTaggedMetricRegistry.orElseGet(() -> SharedTaggedMetricRegistries.getSingleton()));
     }
 
     public static Builder builder() {

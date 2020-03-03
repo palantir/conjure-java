@@ -190,8 +190,10 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
                             endpoint -> Optional.of(new TracedOperationHandler(
                                     endpoint.handler(), endpoint.method() + " " + endpoint.template())),
-                            endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler(),
-                                    maybeTaggedMetricRegistry.orElse(SharedTaggedMetricRegistries.getSingleton()))))
+                            endpoint -> Optional.of(new ConjureExceptionHandler(
+                                    endpoint.handler(),
+                                    maybeTaggedMetricRegistry.orElseGet(
+                                            () -> SharedTaggedMetricRegistries.getSingleton()))))
                     .build()
                     .reverse();
 

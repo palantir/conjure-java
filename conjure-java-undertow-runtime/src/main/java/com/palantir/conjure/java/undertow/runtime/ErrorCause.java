@@ -23,6 +23,7 @@ public enum ErrorCause {
     INTERNAL("internal"),
     OTHER("other");
 
+    @SuppressWarnings("unused")
     private final String cause;
 
     ErrorCause(String cause) {
