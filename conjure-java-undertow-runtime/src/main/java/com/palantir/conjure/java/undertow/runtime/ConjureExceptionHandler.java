@@ -31,9 +31,10 @@ final class ConjureExceptionHandler implements HttpHandler {
 
     private final Serializer<SerializableError> serializer;
     private final HttpHandler delegate;
+    private final ConjureUndertowMetrics metrics;
 
     private final ConjureExceptionHandler(HttpHandler delegate, TaggedMetricRegistry taggedMetricRegistry) {
-        this(delegate, ConjureExceptions.serializer());
+        this(delegate, ConjureExceptions.serializer(), taggedMetricRegistry);
     }
 
     // Constructor allows new exception handlers to be created without creating new serializer instances.
@@ -41,7 +42,7 @@ final class ConjureExceptionHandler implements HttpHandler {
             HttpHandler delegate, Serializer<SerializableError> serializer, TaggedMetricRegistry taggedMetricRegistry) {
         this.delegate = delegate;
         this.serializer = serializer;
-        ConjureUndertow
+        this.metrics  = ConjureUndertowMetrics.of(taggedMetricRegistry);
     }
 
     @Override

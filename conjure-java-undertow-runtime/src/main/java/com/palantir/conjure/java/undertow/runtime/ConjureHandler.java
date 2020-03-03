@@ -27,6 +27,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.undertow.TracedOperationHandler;
 import com.palantir.tracing.undertow.TracedRequestHandler;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
@@ -189,7 +190,8 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
                             endpoint -> Optional.of(new TracedOperationHandler(
                                     endpoint.handler(), endpoint.method() + " " + endpoint.template())),
-                            endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())))
+                            endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler(),
+                                    maybeTaggedMetricRegistry.orElse(SharedTaggedMetricRegistries.getSingleton()))))
                     .build()
                     .reverse();
 
