@@ -369,7 +369,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.binary,
                                 _request.build(),
-                                runtime.bodySerDe()::deserializeInputStream);
+                                runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override

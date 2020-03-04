@@ -50,7 +50,7 @@ public interface EteBinaryServiceAsync {
                                 channel,
                                 DialogueEteBinaryEndpoints.postBinary,
                                 _request.build(),
-                                runtime.bodySerDe()::deserializeInputStream);
+                                runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
@@ -96,7 +96,7 @@ public interface EteBinaryServiceAsync {
                                 channel,
                                 DialogueEteBinaryEndpoints.getBinaryFailure,
                                 _request.build(),
-                                runtime.bodySerDe()::deserializeInputStream);
+                                runtime.bodySerDe().inputStreamDeserializer());
             }
         };
     }

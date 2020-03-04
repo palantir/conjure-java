@@ -253,7 +253,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getRawData,
                                 _request.build(),
-                                runtime.bodySerDe()::deserializeInputStream);
+                                runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
