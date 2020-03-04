@@ -81,7 +81,6 @@ subprojects {
             options.compilerArgs += ['--release', '8']
         }
     }
-    tasks.checkClassUniqueness.enabled = false
 
     // Run `./gradlew test -Drecreate=true` to recreate all the expected
     // generated code that we have checked into the repo.

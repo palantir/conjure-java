@@ -51,8 +51,8 @@ dependencies {
     compile 'com.palantir.syntactic-paths:syntactic-paths'
     compile 'com.palantir.tokens:auth-tokens'
     compile 'com.squareup:javapoet'
-    compile 'javax.annotation:javax.annotation-api'
-    compile 'javax.validation:validation-api'
+    compile 'jakarta.annotation:jakarta.annotation-api'
+    compile 'jakarta.validation:jakarta.validation-api'
     compile 'org.apache.commons:commons-lang3'
     compile 'org.slf4j:slf4j-api'
     compile 'com.atlassian.commonmark:commonmark'
@@ -72,7 +72,7 @@ dependencies {
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
-    testCompile 'javax.xml.bind:jaxb-api'
+    testCompile 'jakarta.xml.bind:jakarta.xml.bind-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     integrationInputCompile project(':conjure-lib')
@@ -80,9 +80,9 @@ dependencies {
     integrationInputCompile 'com.google.guava:guava'
     integrationInputCompile 'com.palantir.conjure.java.api:errors'
     integrationInputCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
-    integrationInputCompile 'javax.annotation:javax.annotation-api'
-    integrationInputCompile 'javax.validation:validation-api'
-    integrationInputCompile 'javax.ws.rs:javax.ws.rs-api'
+    integrationInputCompile 'jakarta.annotation:jakarta.annotation-api'
+    integrationInputCompile 'jakarta.validation:jakarta.validation-api'
+    integrationInputCompile 'jakarta.ws.rs:jakarta.ws.rs-api'
     integrationInputCompile 'com.palantir.dialogue:dialogue-target'
 
     annotationProcessor 'org.immutables:value'
