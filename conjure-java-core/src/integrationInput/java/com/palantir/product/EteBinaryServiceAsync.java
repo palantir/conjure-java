@@ -65,7 +65,7 @@ public interface EteBinaryServiceAsync {
                                 channel,
                                 DialogueEteBinaryEndpoints.getOptionalBinaryPresent,
                                 _request.build(),
-                                getOptionalBinaryPresentDeserializer::deserialize);
+                                getOptionalBinaryPresentDeserializer);
             }
 
             @Override
@@ -80,7 +80,7 @@ public interface EteBinaryServiceAsync {
                                 channel,
                                 DialogueEteBinaryEndpoints.getOptionalBinaryEmpty,
                                 _request.build(),
-                                getOptionalBinaryEmptyDeserializer::deserialize);
+                                getOptionalBinaryEmptyDeserializer);
             }
 
             @Override

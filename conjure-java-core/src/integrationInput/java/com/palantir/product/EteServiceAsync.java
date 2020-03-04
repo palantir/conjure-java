@@ -233,7 +233,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.string,
                                 _request.build(),
-                                stringDeserializer::deserialize);
+                                stringDeserializer);
             }
 
             @Override
@@ -247,7 +247,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.integer,
                                 _request.build(),
-                                integerDeserializer::deserialize);
+                                integerDeserializer);
             }
 
             @Override
@@ -261,7 +261,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.double_,
                                 _request.build(),
-                                double_Deserializer::deserialize);
+                                double_Deserializer);
             }
 
             @Override
@@ -275,7 +275,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.boolean_,
                                 _request.build(),
-                                boolean_Deserializer::deserialize);
+                                boolean_Deserializer);
             }
 
             @Override
@@ -289,7 +289,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.safelong,
                                 _request.build(),
-                                safelongDeserializer::deserialize);
+                                safelongDeserializer);
             }
 
             @Override
@@ -299,11 +299,7 @@ public interface EteServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.rid,
-                                _request.build(),
-                                ridDeserializer::deserialize);
+                        .call(channel, DialogueEteEndpoints.rid, _request.build(), ridDeserializer);
             }
 
             @Override
@@ -317,7 +313,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.bearertoken,
                                 _request.build(),
-                                bearertokenDeserializer::deserialize);
+                                bearertokenDeserializer);
             }
 
             @Override
@@ -331,7 +327,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.optionalString,
                                 _request.build(),
-                                optionalStringDeserializer::deserialize);
+                                optionalStringDeserializer);
             }
 
             @Override
@@ -345,7 +341,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.optionalEmpty,
                                 _request.build(),
-                                optionalEmptyDeserializer::deserialize);
+                                optionalEmptyDeserializer);
             }
 
             @Override
@@ -359,7 +355,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.datetime,
                                 _request.build(),
-                                datetimeDeserializer::deserialize);
+                                datetimeDeserializer);
             }
 
             @Override
@@ -388,7 +384,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.path,
                                 _request.build(),
-                                pathDeserializer::deserialize);
+                                pathDeserializer);
             }
 
             @Override
@@ -403,7 +399,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.externalLongPath,
                                 _request.build(),
-                                externalLongPathDeserializer::deserialize);
+                                externalLongPathDeserializer);
             }
 
             @Override
@@ -421,7 +417,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.optionalExternalLongQuery,
                                 _request.build(),
-                                optionalExternalLongQueryDeserializer::deserialize);
+                                optionalExternalLongQueryDeserializer);
             }
 
             @Override
@@ -437,7 +433,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.notNullBody,
                                 _request.build(),
-                                notNullBodyDeserializer::deserialize);
+                                notNullBodyDeserializer);
             }
 
             @Override
@@ -454,7 +450,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.aliasOne,
                                 _request.build(),
-                                aliasOneDeserializer::deserialize);
+                                aliasOneDeserializer);
             }
 
             @Override
@@ -474,7 +470,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.optionalAliasOne,
                                 _request.build(),
-                                optionalAliasOneDeserializer::deserialize);
+                                optionalAliasOneDeserializer);
             }
 
             @Override
@@ -491,7 +487,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.aliasTwo,
                                 _request.build(),
-                                aliasTwoDeserializer::deserialize);
+                                aliasTwoDeserializer);
             }
 
             @Override
@@ -507,7 +503,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.notNullBodyExternalImport,
                                 _request.build(),
-                                notNullBodyExternalImportDeserializer::deserialize);
+                                notNullBodyExternalImportDeserializer);
             }
 
             @Override
@@ -523,7 +519,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.optionalBodyExternalImport,
                                 _request.build(),
-                                optionalBodyExternalImportDeserializer::deserialize);
+                                optionalBodyExternalImportDeserializer);
             }
 
             @Override
@@ -541,7 +537,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.optionalQueryExternalImport,
                                 _request.build(),
-                                optionalQueryExternalImportDeserializer::deserialize);
+                                optionalQueryExternalImportDeserializer);
             }
 
             @Override
@@ -555,7 +551,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.noReturn,
                                 _request.build(),
-                                noReturnDeserializer::deserialize);
+                                noReturnDeserializer);
             }
 
             @Override
@@ -571,7 +567,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.enumQuery,
                                 _request.build(),
-                                enumQueryDeserializer::deserialize);
+                                enumQueryDeserializer);
             }
 
             @Override
@@ -590,7 +586,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.enumListQuery,
                                 _request.build(),
-                                enumListQueryDeserializer::deserialize);
+                                enumListQueryDeserializer);
             }
 
             @Override
@@ -609,7 +605,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.optionalEnumQuery,
                                 _request.build(),
-                                optionalEnumQueryDeserializer::deserialize);
+                                optionalEnumQueryDeserializer);
             }
 
             @Override
@@ -625,7 +621,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.enumHeader,
                                 _request.build(),
-                                enumHeaderDeserializer::deserialize);
+                                enumHeaderDeserializer);
             }
 
             @Override
@@ -643,7 +639,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.aliasLongEndpoint,
                                 _request.build(),
-                                aliasLongEndpointDeserializer::deserialize);
+                                aliasLongEndpointDeserializer);
             }
 
             @Override
@@ -673,7 +669,7 @@ public interface EteServiceAsync {
                                 channel,
                                 DialogueEteEndpoints.complexQueryParameters,
                                 _request.build(),
-                                complexQueryParametersDeserializer::deserialize);
+                                complexQueryParametersDeserializer);
             }
         };
     }

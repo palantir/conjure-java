@@ -204,7 +204,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getFileSystems,
                                 _request.build(),
-                                getFileSystemsDeserializer::deserialize);
+                                getFileSystemsDeserializer);
             }
 
             @Override
@@ -221,7 +221,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.createDataset,
                                 _request.build(),
-                                createDatasetDeserializer::deserialize);
+                                createDatasetDeserializer);
             }
 
             @Override
@@ -237,7 +237,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getDataset,
                                 _request.build(),
-                                getDatasetDeserializer::deserialize);
+                                getDatasetDeserializer);
             }
 
             @Override
@@ -269,7 +269,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getAliasedRawData,
                                 _request.build(),
-                                getAliasedRawDataDeserializer::deserialize);
+                                getAliasedRawDataDeserializer);
             }
 
             @Override
@@ -285,7 +285,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.maybeGetRawData,
                                 _request.build(),
-                                maybeGetRawDataDeserializer::deserialize);
+                                maybeGetRawDataDeserializer);
             }
 
             @Override
@@ -301,7 +301,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getAliasedString,
                                 _request.build(),
-                                getAliasedStringDeserializer::deserialize);
+                                getAliasedStringDeserializer);
             }
 
             @Override
@@ -317,7 +317,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.uploadRawData,
                                 _request.build(),
-                                uploadRawDataDeserializer::deserialize);
+                                uploadRawDataDeserializer);
             }
 
             @Override
@@ -333,7 +333,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.uploadAliasedRawData,
                                 _request.build(),
-                                uploadAliasedRawDataDeserializer::deserialize);
+                                uploadAliasedRawDataDeserializer);
             }
 
             @Override
@@ -349,7 +349,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getBranches,
                                 _request.build(),
-                                getBranchesDeserializer::deserialize);
+                                getBranchesDeserializer);
             }
 
             @Override
@@ -365,7 +365,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getBranchesDeprecated,
                                 _request.build(),
-                                getBranchesDeprecatedDeserializer::deserialize);
+                                getBranchesDeprecatedDeserializer);
             }
 
             @Override
@@ -382,7 +382,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.resolveBranch,
                                 _request.build(),
-                                resolveBranchDeserializer::deserialize);
+                                resolveBranchDeserializer);
             }
 
             @Override
@@ -398,7 +398,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.testParam,
                                 _request.build(),
-                                testParamDeserializer::deserialize);
+                                testParamDeserializer);
             }
 
             @Override
@@ -433,7 +433,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.testQueryParams,
                                 _request.build(),
-                                testQueryParamsDeserializer::deserialize);
+                                testQueryParamsDeserializer);
             }
 
             @Override
@@ -468,7 +468,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.testNoResponseQueryParams,
                                 _request.build(),
-                                testNoResponseQueryParamsDeserializer::deserialize);
+                                testNoResponseQueryParamsDeserializer);
             }
 
             @Override
@@ -482,7 +482,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.testBoolean,
                                 _request.build(),
-                                testBooleanDeserializer::deserialize);
+                                testBooleanDeserializer);
             }
 
             @Override
@@ -496,7 +496,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.testDouble,
                                 _request.build(),
-                                testDoubleDeserializer::deserialize);
+                                testDoubleDeserializer);
             }
 
             @Override
@@ -510,7 +510,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.testInteger,
                                 _request.build(),
-                                testIntegerDeserializer::deserialize);
+                                testIntegerDeserializer);
             }
 
             @Override
@@ -526,7 +526,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.testPostOptional,
                                 _request.build(),
-                                testPostOptionalDeserializer::deserialize);
+                                testPostOptionalDeserializer);
             }
 
             @Override
@@ -549,7 +549,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.testOptionalIntegerAndDouble,
                                 _request.build(),
-                                testOptionalIntegerAndDoubleDeserializer::deserialize);
+                                testOptionalIntegerAndDoubleDeserializer);
             }
 
             @Override
@@ -571,7 +571,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getForStrings,
                                 _request.build(),
-                                getForStringsDeserializer::deserialize);
+                                getForStringsDeserializer);
             }
         };
     }
