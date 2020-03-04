@@ -135,6 +135,18 @@ public final class Encodings {
         };
     }
 
+    /** Returns a serializer for the Conjure Smile wire format. */
+    public static Encoding smile() {
+        return new AbstractJacksonEncoding(configure(ObjectMappers.newSmileServerObjectMapper())) {
+            private static final String CONTENT_TYPE = "application/x-jackson-smile";
+
+            @Override
+            public String getContentType() {
+                return CONTENT_TYPE;
+            }
+        };
+    }
+
     private static ObjectMapper configure(ObjectMapper mapper) {
         // See documentation on Encoding.Serializer#serialize: Implementations must not close the stream.
         return mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)

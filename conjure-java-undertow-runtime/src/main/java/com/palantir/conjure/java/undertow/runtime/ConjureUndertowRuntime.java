@@ -39,7 +39,9 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(
-                builder.encodings.isEmpty() ? ImmutableList.of(Encodings.json(), Encodings.cbor()) : builder.encodings);
+                builder.encodings.isEmpty()
+                        ? ImmutableList.of(Encodings.json(), Encodings.smile(), Encodings.cbor())
+                        : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout);
