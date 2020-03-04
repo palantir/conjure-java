@@ -3,7 +3,6 @@ package com.palantir.product;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
-import com.palantir.dialogue.RemoteExceptions;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -111,157 +110,154 @@ public interface EteServiceBlocking {
         return new EteServiceBlocking() {
             @Override
             public String string(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.string(authHeader));
+                return runtime.clients().block(delegate.string(authHeader));
             }
 
             @Override
             public int integer(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.integer(authHeader));
+                return runtime.clients().block(delegate.integer(authHeader));
             }
 
             @Override
             public double double_(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.double_(authHeader));
+                return runtime.clients().block(delegate.double_(authHeader));
             }
 
             @Override
             public boolean boolean_(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.boolean_(authHeader));
+                return runtime.clients().block(delegate.boolean_(authHeader));
             }
 
             @Override
             public SafeLong safelong(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.safelong(authHeader));
+                return runtime.clients().block(delegate.safelong(authHeader));
             }
 
             @Override
             public ResourceIdentifier rid(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.rid(authHeader));
+                return runtime.clients().block(delegate.rid(authHeader));
             }
 
             @Override
             public BearerToken bearertoken(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.bearertoken(authHeader));
+                return runtime.clients().block(delegate.bearertoken(authHeader));
             }
 
             @Override
             public Optional<String> optionalString(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.optionalString(authHeader));
+                return runtime.clients().block(delegate.optionalString(authHeader));
             }
 
             @Override
             public Optional<String> optionalEmpty(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.optionalEmpty(authHeader));
+                return runtime.clients().block(delegate.optionalEmpty(authHeader));
             }
 
             @Override
             public OffsetDateTime datetime(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.datetime(authHeader));
+                return runtime.clients().block(delegate.datetime(authHeader));
             }
 
             @Override
             public InputStream binary(AuthHeader authHeader) {
-                return RemoteExceptions.getUnchecked(delegate.binary(authHeader));
+                return runtime.clients().block(delegate.binary(authHeader));
             }
 
             @Override
             public String path(AuthHeader authHeader, String param) {
-                return RemoteExceptions.getUnchecked(delegate.path(authHeader, param));
+                return runtime.clients().block(delegate.path(authHeader, param));
             }
 
             @Override
             public long externalLongPath(AuthHeader authHeader, long param) {
-                return RemoteExceptions.getUnchecked(delegate.externalLongPath(authHeader, param));
+                return runtime.clients().block(delegate.externalLongPath(authHeader, param));
             }
 
             @Override
             public Optional<Long> optionalExternalLongQuery(
                     AuthHeader authHeader, Optional<Long> param) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.optionalExternalLongQuery(authHeader, param));
+                return runtime.clients()
+                        .block(delegate.optionalExternalLongQuery(authHeader, param));
             }
 
             @Override
             public StringAliasExample notNullBody(
                     AuthHeader authHeader, StringAliasExample notNullBody) {
-                return RemoteExceptions.getUnchecked(delegate.notNullBody(authHeader, notNullBody));
+                return runtime.clients().block(delegate.notNullBody(authHeader, notNullBody));
             }
 
             @Override
             public StringAliasExample aliasOne(
                     AuthHeader authHeader, StringAliasExample queryParamName) {
-                return RemoteExceptions.getUnchecked(delegate.aliasOne(authHeader, queryParamName));
+                return runtime.clients().block(delegate.aliasOne(authHeader, queryParamName));
             }
 
             @Override
             public StringAliasExample optionalAliasOne(
                     AuthHeader authHeader, Optional<StringAliasExample> queryParamName) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.optionalAliasOne(authHeader, queryParamName));
+                return runtime.clients()
+                        .block(delegate.optionalAliasOne(authHeader, queryParamName));
             }
 
             @Override
             public NestedStringAliasExample aliasTwo(
                     AuthHeader authHeader, NestedStringAliasExample queryParamName) {
-                return RemoteExceptions.getUnchecked(delegate.aliasTwo(authHeader, queryParamName));
+                return runtime.clients().block(delegate.aliasTwo(authHeader, queryParamName));
             }
 
             @Override
             public StringAliasExample notNullBodyExternalImport(
                     AuthHeader authHeader, StringAliasExample notNullBody) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.notNullBodyExternalImport(authHeader, notNullBody));
+                return runtime.clients()
+                        .block(delegate.notNullBodyExternalImport(authHeader, notNullBody));
             }
 
             @Override
             public Optional<StringAliasExample> optionalBodyExternalImport(
                     AuthHeader authHeader, Optional<StringAliasExample> body) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.optionalBodyExternalImport(authHeader, body));
+                return runtime.clients()
+                        .block(delegate.optionalBodyExternalImport(authHeader, body));
             }
 
             @Override
             public Optional<StringAliasExample> optionalQueryExternalImport(
                     AuthHeader authHeader, Optional<StringAliasExample> query) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.optionalQueryExternalImport(authHeader, query));
+                return runtime.clients()
+                        .block(delegate.optionalQueryExternalImport(authHeader, query));
             }
 
             @Override
             public void noReturn(AuthHeader authHeader) {
-                RemoteExceptions.getUnchecked(delegate.noReturn(authHeader));
+                runtime.clients().block(delegate.noReturn(authHeader));
             }
 
             @Override
             public SimpleEnum enumQuery(AuthHeader authHeader, SimpleEnum queryParamName) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.enumQuery(authHeader, queryParamName));
+                return runtime.clients().block(delegate.enumQuery(authHeader, queryParamName));
             }
 
             @Override
             public List<SimpleEnum> enumListQuery(
                     AuthHeader authHeader, List<SimpleEnum> queryParamName) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.enumListQuery(authHeader, queryParamName));
+                return runtime.clients().block(delegate.enumListQuery(authHeader, queryParamName));
             }
 
             @Override
             public Optional<SimpleEnum> optionalEnumQuery(
                     AuthHeader authHeader, Optional<SimpleEnum> queryParamName) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.optionalEnumQuery(authHeader, queryParamName));
+                return runtime.clients()
+                        .block(delegate.optionalEnumQuery(authHeader, queryParamName));
             }
 
             @Override
             public SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter) {
-                return RemoteExceptions.getUnchecked(
-                        delegate.enumHeader(authHeader, headerParameter));
+                return runtime.clients().block(delegate.enumHeader(authHeader, headerParameter));
             }
 
             @Override
             public Optional<LongAlias> aliasLongEndpoint(
                     AuthHeader authHeader, Optional<LongAlias> input) {
-                return RemoteExceptions.getUnchecked(delegate.aliasLongEndpoint(authHeader, input));
+                return runtime.clients().block(delegate.aliasLongEndpoint(authHeader, input));
             }
 
             @Override
@@ -271,9 +267,10 @@ public interface EteServiceBlocking {
                     Set<StringAliasExample> strings,
                     Set<Long> longs,
                     Set<Integer> ints) {
-                RemoteExceptions.getUnchecked(
-                        delegate.complexQueryParameters(
-                                authHeader, datasetRid, strings, longs, ints));
+                runtime.clients()
+                        .block(
+                                delegate.complexQueryParameters(
+                                        authHeader, datasetRid, strings, longs, ints));
             }
         };
     }

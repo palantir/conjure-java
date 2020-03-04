@@ -1,8 +1,6 @@
 package com.palantir.another;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -201,10 +199,12 @@ public interface TestServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.getFileSystems, _request.build()),
-                        getFileSystemsDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.getFileSystems,
+                                _request.build(),
+                                getFileSystemsDeserializer::deserialize);
             }
 
             @Override
@@ -216,10 +216,12 @@ public interface TestServiceAsync {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(createDatasetSerializer.serialize(request));
                 _request.putHeaderParams("Test-Header", plainSerDe.serializeString(testHeaderArg));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.createDataset, _request.build()),
-                        createDatasetDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.createDataset,
+                                _request.build(),
+                                createDatasetDeserializer::deserialize);
             }
 
             @Override
@@ -230,10 +232,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.getDataset, _request.build()),
-                        getDatasetDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.getDataset,
+                                _request.build(),
+                                getDatasetDeserializer::deserialize);
             }
 
             @Override
@@ -244,10 +248,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.getRawData, _request.build()),
-                        runtime.bodySerDe()::deserializeInputStream,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.getRawData,
+                                _request.build(),
+                                runtime.bodySerDe()::deserializeInputStream);
             }
 
             @Override
@@ -258,10 +264,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.getAliasedRawData, _request.build()),
-                        getAliasedRawDataDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.getAliasedRawData,
+                                _request.build(),
+                                getAliasedRawDataDeserializer::deserialize);
             }
 
             @Override
@@ -272,10 +280,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.maybeGetRawData, _request.build()),
-                        maybeGetRawDataDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.maybeGetRawData,
+                                _request.build(),
+                                maybeGetRawDataDeserializer::deserialize);
             }
 
             @Override
@@ -286,10 +296,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.getAliasedString, _request.build()),
-                        getAliasedStringDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.getAliasedString,
+                                _request.build(),
+                                getAliasedStringDeserializer::deserialize);
             }
 
             @Override
@@ -300,10 +312,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(runtime.bodySerDe().serialize(input));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.uploadRawData, _request.build()),
-                        uploadRawDataDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.uploadRawData,
+                                _request.build(),
+                                uploadRawDataDeserializer::deserialize);
             }
 
             @Override
@@ -314,11 +328,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(uploadAliasedRawDataSerializer.serialize(input));
-                return Futures.transform(
-                        channel.execute(
-                                DialogueTestEndpoints.uploadAliasedRawData, _request.build()),
-                        uploadAliasedRawDataDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.uploadAliasedRawData,
+                                _request.build(),
+                                uploadAliasedRawDataDeserializer::deserialize);
             }
 
             @Override
@@ -329,10 +344,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.getBranches, _request.build()),
-                        getBranchesDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.getBranches,
+                                _request.build(),
+                                getBranchesDeserializer::deserialize);
             }
 
             @Override
@@ -343,11 +360,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                return Futures.transform(
-                        channel.execute(
-                                DialogueTestEndpoints.getBranchesDeprecated, _request.build()),
-                        getBranchesDeprecatedDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.getBranchesDeprecated,
+                                _request.build(),
+                                getBranchesDeprecatedDeserializer::deserialize);
             }
 
             @Override
@@ -359,10 +377,12 @@ public interface TestServiceAsync {
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 _request.putPathParams("branch", plainSerDe.serializeString(branch));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.resolveBranch, _request.build()),
-                        resolveBranchDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.resolveBranch,
+                                _request.build(),
+                                resolveBranchDeserializer::deserialize);
             }
 
             @Override
@@ -373,10 +393,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.testParam, _request.build()),
-                        testParamDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.testParam,
+                                _request.build(),
+                                testParamDeserializer::deserialize);
             }
 
             @Override
@@ -406,10 +428,12 @@ public interface TestServiceAsync {
                     _request.putQueryParams(
                             "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
                 }
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.testQueryParams, _request.build()),
-                        testQueryParamsDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.testQueryParams,
+                                _request.build(),
+                                testQueryParamsDeserializer::deserialize);
             }
 
             @Override
@@ -439,11 +463,12 @@ public interface TestServiceAsync {
                     _request.putQueryParams(
                             "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
                 }
-                return Futures.transform(
-                        channel.execute(
-                                DialogueTestEndpoints.testNoResponseQueryParams, _request.build()),
-                        testNoResponseQueryParamsDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.testNoResponseQueryParams,
+                                _request.build(),
+                                testNoResponseQueryParamsDeserializer::deserialize);
             }
 
             @Override
@@ -452,10 +477,12 @@ public interface TestServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.testBoolean, _request.build()),
-                        testBooleanDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.testBoolean,
+                                _request.build(),
+                                testBooleanDeserializer::deserialize);
             }
 
             @Override
@@ -464,10 +491,12 @@ public interface TestServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.testDouble, _request.build()),
-                        testDoubleDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.testDouble,
+                                _request.build(),
+                                testDoubleDeserializer::deserialize);
             }
 
             @Override
@@ -476,10 +505,12 @@ public interface TestServiceAsync {
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.testInteger, _request.build()),
-                        testIntegerDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.testInteger,
+                                _request.build(),
+                                testIntegerDeserializer::deserialize);
             }
 
             @Override
@@ -490,10 +521,12 @@ public interface TestServiceAsync {
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(testPostOptionalSerializer.serialize(maybeString));
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.testPostOptional, _request.build()),
-                        testPostOptionalDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.testPostOptional,
+                                _request.build(),
+                                testPostOptionalDeserializer::deserialize);
             }
 
             @Override
@@ -511,12 +544,12 @@ public interface TestServiceAsync {
                     _request.putQueryParams(
                             "maybeDouble", plainSerDe.serializeDouble(maybeDouble.getAsDouble()));
                 }
-                return Futures.transform(
-                        channel.execute(
+                return runtime.clients()
+                        .call(
+                                channel,
                                 DialogueTestEndpoints.testOptionalIntegerAndDouble,
-                                _request.build()),
-                        testOptionalIntegerAndDoubleDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                                _request.build(),
+                                testOptionalIntegerAndDoubleDeserializer::deserialize);
             }
 
             @Override
@@ -533,10 +566,12 @@ public interface TestServiceAsync {
                     _request.putQueryParams(
                             "strings", plainSerDe.serializeString(stringsElement.get()));
                 }
-                return Futures.transform(
-                        channel.execute(DialogueTestEndpoints.getForStrings, _request.build()),
-                        getForStringsDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueTestEndpoints.getForStrings,
+                                _request.build(),
+                                getForStringsDeserializer::deserialize);
             }
         };
     }

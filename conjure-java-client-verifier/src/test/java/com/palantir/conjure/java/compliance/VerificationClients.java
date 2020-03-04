@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.compliance;
 
-import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeService;
@@ -30,7 +29,6 @@ import com.palantir.conjure.java.com.palantir.conjure.verification.server.Single
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.dialogue.JavaChannels;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 
 public final class VerificationClients {
     private VerificationClients() {}
@@ -41,21 +39,20 @@ public final class VerificationClients {
     public static AutoDeserializeService autoDeserializeService(VerificationServerRule server) {
         return JaxRsClient.create(
                 AutoDeserializeService.class,
-                getUserAgent(),
+                VerificationServerRule.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
 
     public static AutoDeserializeServiceBlocking dialogueAutoDeserializeService(VerificationServerRule server) {
         return AutoDeserializeServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
-                DEFAULT_CONJURE_RUNTIME);
+                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
     }
 
     public static AutoDeserializeConfirmService confirmService(VerificationServerRule server) {
         return JaxRsClient.create(
                 AutoDeserializeConfirmService.class,
-                getUserAgent(),
+                VerificationServerRule.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
@@ -63,43 +60,39 @@ public final class VerificationClients {
     public static SinglePathParamService singlePathParamService(VerificationServerRule server) {
         return JaxRsClient.create(
                 SinglePathParamService.class,
-                getUserAgent(),
+                VerificationServerRule.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
 
     public static SinglePathParamServiceBlocking dialogueSinglePathParamService(VerificationServerRule server) {
         return SinglePathParamServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
-                DEFAULT_CONJURE_RUNTIME);
+                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
     }
 
     public static SingleHeaderService singleHeaderService(VerificationServerRule server) {
         return JaxRsClient.create(
-                SingleHeaderService.class, getUserAgent(), new HostMetricsRegistry(), server.getClientConfiguration());
+                SingleHeaderService.class,
+                VerificationServerRule.userAgent,
+                new HostMetricsRegistry(),
+                server.getClientConfiguration());
     }
 
     public static SingleHeaderServiceBlocking dialogueSingleHeaderService(VerificationServerRule server) {
         return SingleHeaderServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
-                DEFAULT_CONJURE_RUNTIME);
+                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
     }
 
     public static SingleQueryParamService singleQueryParamService(VerificationServerRule server) {
         return JaxRsClient.create(
                 SingleQueryParamService.class,
-                getUserAgent(),
+                VerificationServerRule.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
 
-    private static UserAgent getUserAgent() {
-        return UserAgent.of(UserAgent.Agent.of("test", "develop"));
-    }
-
     public static SingleQueryParamServiceBlocking dialogueSingleQueryParamService(VerificationServerRule server) {
         return SingleQueryParamServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration(), getUserAgent(), new DefaultTaggedMetricRegistry()),
-                DEFAULT_CONJURE_RUNTIME);
+                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
     }
 }

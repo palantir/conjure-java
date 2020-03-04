@@ -17,8 +17,6 @@
 package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.Auth;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -68,6 +66,9 @@ import javax.lang.model.element.Modifier;
 
 public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     private static final String REQUEST = "_request";
+    private static final String CHANNEL = "channel";
+    private static final String RUNTIME = "runtime";
+
     private final Options options;
     private final TypeNameResolver typeNameResolver;
     private final ParameterTypeMapper parameterTypes;
@@ -111,8 +112,8 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                         "Creates an asynchronous/non-blocking client for a $L service.",
                         def.getServiceName().getName())
                 .returns(Names.asyncClassName(def, options))
-                .addParameter(Channel.class, "channel")
-                .addParameter(ConjureRuntime.class, "runtime")
+                .addParameter(Channel.class, CHANNEL)
+                .addParameter(ConjureRuntime.class, RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return asyncImpl;
@@ -126,7 +127,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
         ParameterizedTypeName deserializerType = ParameterizedTypeName.get(ClassName.get(Serializer.class), className);
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Serializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .initializer("runtime.bodySerDe().serializer(new $T<$T>() {})", TypeMarker.class, className)
+                .initializer("$L.bodySerDe().serializer(new $T<$T>() {})", RUNTIME, TypeMarker.class, className)
                 .build());
     }
 
@@ -140,12 +141,10 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
         ParameterizedTypeName deserializerType =
                 ParameterizedTypeName.get(ClassName.get(Deserializer.class), className);
 
-        CodeBlock realDeserializer = CodeBlock.of(".deserializer(new $T<$T>() {})", TypeMarker.class, className);
-        CodeBlock voidDeserializer = CodeBlock.of(".emptyBodyDeserializer()");
-        CodeBlock initializer = CodeBlock.builder()
-                .add("runtime.bodySerDe()")
-                .add(type.isPresent() ? realDeserializer : voidDeserializer)
-                .build();
+        CodeBlock realDeserializer = CodeBlock.of("deserializer(new $T<$T>() {})", TypeMarker.class, className);
+        CodeBlock voidDeserializer = CodeBlock.of("emptyBodyDeserializer()");
+        CodeBlock initializer =
+                CodeBlock.of("$L.bodySerDe().$L", RUNTIME, type.isPresent() ? realDeserializer : voidDeserializer);
 
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -174,27 +173,19 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .add("$T $L = $T.builder();", Request.Builder.class, REQUEST, Request.class)
                 .add(requestParams.build())
                 .build();
-        CodeBlock execute = CodeBlock.builder()
-                .add(
-                        "channel.execute($T.$L, $L.build())",
-                        Names.endpointsClassName(serviceDefinition, options),
-                        def.getEndpointName().get(),
-                        REQUEST)
-                .build();
-        CodeBlock transformed = CodeBlock.builder()
-                .add(
-                        "return $T.transform($L, $L, $T.directExecutor());",
-                        Futures.class,
-                        execute,
-                        def.getReturns()
-                                .filter(type -> type.accept(TypeVisitor.IS_BINARY))
-                                .map(type -> "runtime" + ".bodySerDe()::deserializeInputStream")
-                                .orElseGet(() -> def.getEndpointName().get() + "Deserializer::deserialize"),
-                        MoreExecutors.class)
-                .build();
+        CodeBlock execute = CodeBlock.of(
+                "return $L.clients().call($L, $T.$L, $L.build(), $L);",
+                RUNTIME,
+                CHANNEL,
+                Names.endpointsClassName(serviceDefinition, options),
+                def.getEndpointName().get(),
+                REQUEST,
+                def.getReturns()
+                        .filter(type -> type.accept(TypeVisitor.IS_BINARY))
+                        .map(type -> RUNTIME + ".bodySerDe()::deserializeInputStream")
+                        .orElseGet(() -> def.getEndpointName().get() + "Deserializer::deserialize"));
 
-        MethodSpec asyncClient =
-                methodBuilder.addCode(request).addCode(transformed).build();
+        MethodSpec asyncClient = methodBuilder.addCode(request).addCode(execute).build();
         return asyncClient;
     }
 

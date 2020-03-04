@@ -22,8 +22,8 @@ dependencies {
     compile 'com.palantir.safe-logging:preconditions'
     compile 'com.palantir.tokens:auth-tokens'
     compile 'com.palantir.conjure.java.api:errors'
-    compile 'javax.annotation:javax.annotation-api'
-    compile 'javax.ws.rs:javax.ws.rs-api'
+    compile 'jakarta.annotation:jakarta.annotation-api'
+    compile 'jakarta.ws.rs:jakarta.ws.rs-api'
 
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'

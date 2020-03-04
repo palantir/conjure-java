@@ -2,7 +2,6 @@ package com.palantir.product;
 
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
-import com.palantir.dialogue.RemoteExceptions;
 import java.lang.Override;
 import javax.annotation.Generated;
 
@@ -16,7 +15,7 @@ public interface EmptyPathServiceBlocking {
         return new EmptyPathServiceBlocking() {
             @Override
             public boolean emptyPath() {
-                return RemoteExceptions.getUnchecked(delegate.emptyPath());
+                return runtime.clients().block(delegate.emptyPath());
             }
         };
     }

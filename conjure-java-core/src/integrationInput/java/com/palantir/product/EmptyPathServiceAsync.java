@@ -1,8 +1,6 @@
 package com.palantir.product;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -28,10 +26,12 @@ public interface EmptyPathServiceAsync {
             @Override
             public ListenableFuture<Boolean> emptyPath() {
                 Request.Builder _request = Request.builder();
-                return Futures.transform(
-                        channel.execute(DialogueEmptyPathEndpoints.emptyPath, _request.build()),
-                        emptyPathDeserializer::deserialize,
-                        MoreExecutors.directExecutor());
+                return runtime.clients()
+                        .call(
+                                channel,
+                                DialogueEmptyPathEndpoints.emptyPath,
+                                _request.build(),
+                                emptyPathDeserializer::deserialize);
             }
         };
     }
