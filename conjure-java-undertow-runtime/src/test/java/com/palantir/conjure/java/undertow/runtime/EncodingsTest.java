@@ -43,6 +43,7 @@ final class EncodingsTest {
 
     private final Encoding json = Encodings.json();
     private final Encoding cbor = Encodings.cbor();
+    private final Encoding smile = Encodings.smile();
 
     // TODO(rfink): Wire tests for JSON serializer
 
@@ -161,6 +162,15 @@ final class EncodingsTest {
         assertThat(cbor.supportsContentType("application/Cbor")).isTrue();
 
         assertThat(cbor.supportsContentType("application/unknown")).isFalse();
+    }
+
+    @Test
+    void smile_supportsContentType() {
+        assertThat(smile.supportsContentType("application/x-jackson-smile")).isTrue();
+        assertThat(smile.supportsContentType("application/x-jackson-smile; charset=utf-8"))
+                .isTrue();
+        assertThat(smile.supportsContentType("Application/x-jackson-smile")).isTrue();
+        assertThat(smile.supportsContentType("application/unknown")).isFalse();
     }
 
     private static InputStream asStream(String data) {
