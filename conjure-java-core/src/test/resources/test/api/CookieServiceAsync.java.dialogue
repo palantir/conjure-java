@@ -33,7 +33,7 @@ public interface CookieServiceAsync {
                                 channel,
                                 DialogueCookieEndpoints.eatCookies,
                                 _request.build(),
-                                eatCookiesDeserializer::deserialize);
+                                eatCookiesDeserializer);
             }
         };
     }
