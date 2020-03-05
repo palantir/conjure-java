@@ -182,8 +182,8 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 REQUEST,
                 def.getReturns()
                         .filter(type -> type.accept(TypeVisitor.IS_BINARY))
-                        .map(type -> RUNTIME + ".bodySerDe()::deserializeInputStream")
-                        .orElseGet(() -> def.getEndpointName().get() + "Deserializer::deserialize"));
+                        .map(type -> RUNTIME + ".bodySerDe().inputStreamDeserializer()")
+                        .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
         MethodSpec asyncClient = methodBuilder.addCode(request).addCode(execute).build();
         return asyncClient;

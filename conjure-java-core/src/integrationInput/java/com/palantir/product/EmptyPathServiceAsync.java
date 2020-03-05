@@ -31,7 +31,7 @@ public interface EmptyPathServiceAsync {
                                 channel,
                                 DialogueEmptyPathEndpoints.emptyPath,
                                 _request.build(),
-                                emptyPathDeserializer::deserialize);
+                                emptyPathDeserializer);
             }
         };
     }
