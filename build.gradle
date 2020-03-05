@@ -82,6 +82,10 @@ subprojects {
         }
     }
 
+    sourceSets.configureEach {
+        configurations[compileClasspathConfigurationName].exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    }
+
     // Run `./gradlew test -Drecreate=true` to recreate all the expected
     // generated code that we have checked into the repo.
     tasks.withType(Test) {
