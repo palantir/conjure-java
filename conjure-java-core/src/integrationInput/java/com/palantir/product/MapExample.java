@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = MapExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -145,13 +145,13 @@ public final class MapExample {
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder items(@NotNull Map<String, String> items) {
+        public Builder items(@Nonnull Map<String, String> items) {
             this.items.clear();
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        public Builder putAllItems(@NotNull Map<String, String> items) {
+        public Builder putAllItems(@Nonnull Map<String, String> items) {
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
@@ -162,14 +162,14 @@ public final class MapExample {
         }
 
         @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
-        public Builder optionalItems(@NotNull Map<String, Optional<String>> optionalItems) {
+        public Builder optionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
             this.optionalItems.clear();
             this.optionalItems.putAll(
                     Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
-        public Builder putAllOptionalItems(@NotNull Map<String, Optional<String>> optionalItems) {
+        public Builder putAllOptionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
             this.optionalItems.putAll(
                     Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
@@ -181,7 +181,7 @@ public final class MapExample {
         }
 
         @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
-        public Builder aliasOptionalItems(@NotNull Map<String, OptionalAlias> aliasOptionalItems) {
+        public Builder aliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
             this.aliasOptionalItems.clear();
             this.aliasOptionalItems.putAll(
                     Preconditions.checkNotNull(
@@ -190,7 +190,7 @@ public final class MapExample {
         }
 
         public Builder putAllAliasOptionalItems(
-                @NotNull Map<String, OptionalAlias> aliasOptionalItems) {
+                @Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
             this.aliasOptionalItems.putAll(
                     Preconditions.checkNotNull(
                             aliasOptionalItems, "aliasOptionalItems cannot be null"));

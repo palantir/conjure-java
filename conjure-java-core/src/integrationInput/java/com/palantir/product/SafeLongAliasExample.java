@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class SafeLongAliasExample {
     private final SafeLong value;
 
-    private SafeLongAliasExample(@NotNull SafeLong value) {
+    private SafeLongAliasExample(@Nonnull SafeLong value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -42,7 +42,7 @@ public final class SafeLongAliasExample {
     }
 
     @JsonCreator
-    public static SafeLongAliasExample of(@NotNull SafeLong value) {
+    public static SafeLongAliasExample of(@Nonnull SafeLong value) {
         return new SafeLongAliasExample(value);
     }
 }

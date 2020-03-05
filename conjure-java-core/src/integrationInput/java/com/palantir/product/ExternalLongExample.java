@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = ExternalLongExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -152,7 +152,7 @@ public final class ExternalLongExample {
 
         @JsonSetter(value = "optionalExternalLong", nulls = Nulls.SKIP)
         public Builder optionalExternalLong(
-                @NotNull Optional<? extends Long> optionalExternalLong) {
+                @Nonnull Optional<? extends Long> optionalExternalLong) {
             this.optionalExternalLong =
                     Preconditions.checkNotNull(
                                     optionalExternalLong, "optionalExternalLong cannot be null")
@@ -169,7 +169,7 @@ public final class ExternalLongExample {
         }
 
         @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder listExternalLong(@NotNull Iterable<? extends Long> listExternalLong) {
+        public Builder listExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
             this.listExternalLong.clear();
             ConjureCollections.addAll(
                     this.listExternalLong,
@@ -178,7 +178,7 @@ public final class ExternalLongExample {
             return this;
         }
 
-        public Builder addAllListExternalLong(@NotNull Iterable<? extends Long> listExternalLong) {
+        public Builder addAllListExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
             ConjureCollections.addAll(
                     this.listExternalLong,
                     Preconditions.checkNotNull(

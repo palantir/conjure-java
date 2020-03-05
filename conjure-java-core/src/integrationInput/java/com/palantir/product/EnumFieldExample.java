@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = EnumFieldExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -89,7 +89,7 @@ public final class EnumFieldExample {
         }
 
         @JsonSetter("enum")
-        public Builder enum_(@NotNull EnumExample enum_) {
+        public Builder enum_(@Nonnull EnumExample enum_) {
             this.enum_ = Preconditions.checkNotNull(enum_, "enum cannot be null");
             return this;
         }

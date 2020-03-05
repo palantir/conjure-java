@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = BinaryExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -92,7 +92,7 @@ public final class BinaryExample {
         }
 
         @JsonSetter("binary")
-        public Builder binary(@NotNull ByteBuffer binary) {
+        public Builder binary(@Nonnull ByteBuffer binary) {
             Preconditions.checkNotNull(binary, "binary cannot be null");
             this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
             ((Buffer) this.binary).rewind();

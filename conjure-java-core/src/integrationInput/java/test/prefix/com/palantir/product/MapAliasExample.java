@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Map;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class MapAliasExample {
     private final Map<String, Object> value;
 
-    private MapAliasExample(@NotNull Map<String, Object> value) {
+    private MapAliasExample(@Nonnull Map<String, Object> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -38,7 +38,7 @@ public final class MapAliasExample {
     }
 
     @JsonCreator
-    public static MapAliasExample of(@NotNull Map<String, Object> value) {
+    public static MapAliasExample of(@Nonnull Map<String, Object> value) {
         return new MapAliasExample(value);
     }
 }

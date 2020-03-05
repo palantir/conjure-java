@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class BinaryAliasTwo {
     private final BinaryAliasOne value;
 
-    private BinaryAliasTwo(@NotNull BinaryAliasOne value) {
+    private BinaryAliasTwo(@Nonnull BinaryAliasOne value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -37,7 +37,7 @@ public final class BinaryAliasTwo {
     }
 
     @JsonCreator
-    public static BinaryAliasTwo of(@NotNull BinaryAliasOne value) {
+    public static BinaryAliasTwo of(@Nonnull BinaryAliasOne value) {
         return new BinaryAliasTwo(value);
     }
 }

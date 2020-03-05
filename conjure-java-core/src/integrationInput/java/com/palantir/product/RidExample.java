@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = RidExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -89,7 +89,7 @@ public final class RidExample {
         }
 
         @JsonSetter("ridValue")
-        public Builder ridValue(@NotNull ResourceIdentifier ridValue) {
+        public Builder ridValue(@Nonnull ResourceIdentifier ridValue) {
             this.ridValue = Preconditions.checkNotNull(ridValue, "ridValue cannot be null");
             return this;
         }

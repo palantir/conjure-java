@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 /** A type which can either be a StringExample, a set of strings, or an integer. */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
@@ -156,28 +156,28 @@ public final class UnionTypeExample {
 
         @Override
         public IfStageVisitorBuilder<T> alsoAnInteger(
-                @NotNull IntFunction<T> alsoAnIntegerVisitor) {
+                @Nonnull IntFunction<T> alsoAnIntegerVisitor) {
             Preconditions.checkNotNull(alsoAnIntegerVisitor, "alsoAnIntegerVisitor cannot be null");
             this.alsoAnIntegerVisitor = alsoAnIntegerVisitor;
             return this;
         }
 
         @Override
-        public InterfaceStageVisitorBuilder<T> if_(@NotNull IntFunction<T> ifVisitor) {
+        public InterfaceStageVisitorBuilder<T> if_(@Nonnull IntFunction<T> ifVisitor) {
             Preconditions.checkNotNull(ifVisitor, "ifVisitor cannot be null");
             this.ifVisitor = ifVisitor;
             return this;
         }
 
         @Override
-        public NewStageVisitorBuilder<T> interface_(@NotNull IntFunction<T> interfaceVisitor) {
+        public NewStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor) {
             Preconditions.checkNotNull(interfaceVisitor, "interfaceVisitor cannot be null");
             this.interfaceVisitor = interfaceVisitor;
             return this;
         }
 
         @Override
-        public SetStageVisitorBuilder<T> new_(@NotNull IntFunction<T> newVisitor) {
+        public SetStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor) {
             Preconditions.checkNotNull(newVisitor, "newVisitor cannot be null");
             this.newVisitor = newVisitor;
             return this;
@@ -185,7 +185,7 @@ public final class UnionTypeExample {
 
         @Override
         public StringExampleStageVisitorBuilder<T> set(
-                @NotNull Function<Set<String>, T> setVisitor) {
+                @Nonnull Function<Set<String>, T> setVisitor) {
             Preconditions.checkNotNull(setVisitor, "setVisitor cannot be null");
             this.setVisitor = setVisitor;
             return this;
@@ -193,7 +193,7 @@ public final class UnionTypeExample {
 
         @Override
         public ThisFieldIsAnIntegerStageVisitorBuilder<T> stringExample(
-                @NotNull Function<StringExample, T> stringExampleVisitor) {
+                @Nonnull Function<StringExample, T> stringExampleVisitor) {
             Preconditions.checkNotNull(stringExampleVisitor, "stringExampleVisitor cannot be null");
             this.stringExampleVisitor = stringExampleVisitor;
             return this;
@@ -201,7 +201,7 @@ public final class UnionTypeExample {
 
         @Override
         public UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(
-                @NotNull IntFunction<T> thisFieldIsAnIntegerVisitor) {
+                @Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor) {
             Preconditions.checkNotNull(
                     thisFieldIsAnIntegerVisitor, "thisFieldIsAnIntegerVisitor cannot be null");
             this.thisFieldIsAnIntegerVisitor = thisFieldIsAnIntegerVisitor;
@@ -210,7 +210,7 @@ public final class UnionTypeExample {
 
         @Override
         public CompletedStageVisitorBuilder<T> unknown(
-                @NotNull Function<String, T> unknownVisitor) {
+                @Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -271,37 +271,37 @@ public final class UnionTypeExample {
     }
 
     public interface AlsoAnIntegerStageVisitorBuilder<T> {
-        IfStageVisitorBuilder<T> alsoAnInteger(@NotNull IntFunction<T> alsoAnIntegerVisitor);
+        IfStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor);
     }
 
     public interface IfStageVisitorBuilder<T> {
-        InterfaceStageVisitorBuilder<T> if_(@NotNull IntFunction<T> ifVisitor);
+        InterfaceStageVisitorBuilder<T> if_(@Nonnull IntFunction<T> ifVisitor);
     }
 
     public interface InterfaceStageVisitorBuilder<T> {
-        NewStageVisitorBuilder<T> interface_(@NotNull IntFunction<T> interfaceVisitor);
+        NewStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor);
     }
 
     public interface NewStageVisitorBuilder<T> {
-        SetStageVisitorBuilder<T> new_(@NotNull IntFunction<T> newVisitor);
+        SetStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor);
     }
 
     public interface SetStageVisitorBuilder<T> {
-        StringExampleStageVisitorBuilder<T> set(@NotNull Function<Set<String>, T> setVisitor);
+        StringExampleStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor);
     }
 
     public interface StringExampleStageVisitorBuilder<T> {
         ThisFieldIsAnIntegerStageVisitorBuilder<T> stringExample(
-                @NotNull Function<StringExample, T> stringExampleVisitor);
+                @Nonnull Function<StringExample, T> stringExampleVisitor);
     }
 
     public interface ThisFieldIsAnIntegerStageVisitorBuilder<T> {
         UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(
-                @NotNull IntFunction<T> thisFieldIsAnIntegerVisitor);
+                @Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(@NotNull Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
     }
 
     public interface CompletedStageVisitorBuilder<T> {
@@ -330,7 +330,7 @@ public final class UnionTypeExample {
         private final StringExample value;
 
         @JsonCreator
-        private StringExampleWrapper(@JsonProperty("stringExample") @NotNull StringExample value) {
+        private StringExampleWrapper(@JsonProperty("stringExample") @Nonnull StringExample value) {
             Preconditions.checkNotNull(value, "stringExample cannot be null");
             this.value = value;
         }
@@ -367,7 +367,7 @@ public final class UnionTypeExample {
         private final Set<String> value;
 
         @JsonCreator
-        private SetWrapper(@JsonProperty("set") @NotNull Set<String> value) {
+        private SetWrapper(@JsonProperty("set") @Nonnull Set<String> value) {
             Preconditions.checkNotNull(value, "set cannot be null");
             this.value = value;
         }
@@ -403,7 +403,7 @@ public final class UnionTypeExample {
 
         @JsonCreator
         private ThisFieldIsAnIntegerWrapper(
-                @JsonProperty("thisFieldIsAnInteger") @NotNull int value) {
+                @JsonProperty("thisFieldIsAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "thisFieldIsAnInteger cannot be null");
             this.value = value;
         }
@@ -440,7 +440,7 @@ public final class UnionTypeExample {
         private final int value;
 
         @JsonCreator
-        private AlsoAnIntegerWrapper(@JsonProperty("alsoAnInteger") @NotNull int value) {
+        private AlsoAnIntegerWrapper(@JsonProperty("alsoAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "alsoAnInteger cannot be null");
             this.value = value;
         }
@@ -477,7 +477,7 @@ public final class UnionTypeExample {
         private final int value;
 
         @JsonCreator
-        private IfWrapper(@JsonProperty("if") @NotNull int value) {
+        private IfWrapper(@JsonProperty("if") @Nonnull int value) {
             Preconditions.checkNotNull(value, "if cannot be null");
             this.value = value;
         }
@@ -512,7 +512,7 @@ public final class UnionTypeExample {
         private final int value;
 
         @JsonCreator
-        private NewWrapper(@JsonProperty("new") @NotNull int value) {
+        private NewWrapper(@JsonProperty("new") @Nonnull int value) {
             Preconditions.checkNotNull(value, "new cannot be null");
             this.value = value;
         }
@@ -547,7 +547,7 @@ public final class UnionTypeExample {
         private final int value;
 
         @JsonCreator
-        private InterfaceWrapper(@JsonProperty("interface") @NotNull int value) {
+        private InterfaceWrapper(@JsonProperty("interface") @Nonnull int value) {
             Preconditions.checkNotNull(value, "interface cannot be null");
             this.value = value;
         }
@@ -593,7 +593,7 @@ public final class UnionTypeExample {
             this(type, new HashMap<String, Object>());
         }
 
-        private UnknownWrapper(@NotNull String type, @NotNull Map<String, Object> value) {
+        private UnknownWrapper(@Nonnull String type, @Nonnull Map<String, Object> value) {
             Preconditions.checkNotNull(type, "type cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
             this.type = type;

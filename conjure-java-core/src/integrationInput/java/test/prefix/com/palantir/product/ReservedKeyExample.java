@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = ReservedKeyExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -189,19 +189,19 @@ public final class ReservedKeyExample {
         }
 
         @JsonSetter("package")
-        public Builder package_(@NotNull String package_) {
+        public Builder package_(@Nonnull String package_) {
             this.package_ = Preconditions.checkNotNull(package_, "package cannot be null");
             return this;
         }
 
         @JsonSetter("interface")
-        public Builder interface_(@NotNull String interface_) {
+        public Builder interface_(@Nonnull String interface_) {
             this.interface_ = Preconditions.checkNotNull(interface_, "interface cannot be null");
             return this;
         }
 
         @JsonSetter("field-name-with-dashes")
-        public Builder fieldNameWithDashes(@NotNull String fieldNameWithDashes) {
+        public Builder fieldNameWithDashes(@Nonnull String fieldNameWithDashes) {
             this.fieldNameWithDashes =
                     Preconditions.checkNotNull(
                             fieldNameWithDashes, "field-name-with-dashes cannot be null");

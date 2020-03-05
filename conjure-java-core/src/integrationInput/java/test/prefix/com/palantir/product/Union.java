@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class Union {
@@ -123,21 +123,21 @@ public final class Union {
         private Function<String, T> unknownVisitor;
 
         @Override
-        public BazStageVisitorBuilder<T> bar(@NotNull IntFunction<T> barVisitor) {
+        public BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor) {
             Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
             this.barVisitor = barVisitor;
             return this;
         }
 
         @Override
-        public FooStageVisitorBuilder<T> baz(@NotNull Function<Long, T> bazVisitor) {
+        public FooStageVisitorBuilder<T> baz(@Nonnull Function<Long, T> bazVisitor) {
             Preconditions.checkNotNull(bazVisitor, "bazVisitor cannot be null");
             this.bazVisitor = bazVisitor;
             return this;
         }
 
         @Override
-        public UnknownStageVisitorBuilder<T> foo(@NotNull Function<String, T> fooVisitor) {
+        public UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor) {
             Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
             this.fooVisitor = fooVisitor;
             return this;
@@ -145,7 +145,7 @@ public final class Union {
 
         @Override
         public CompletedStageVisitorBuilder<T> unknown(
-                @NotNull Function<String, T> unknownVisitor) {
+                @Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -182,19 +182,19 @@ public final class Union {
     }
 
     public interface BarStageVisitorBuilder<T> {
-        BazStageVisitorBuilder<T> bar(@NotNull IntFunction<T> barVisitor);
+        BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor);
     }
 
     public interface BazStageVisitorBuilder<T> {
-        FooStageVisitorBuilder<T> baz(@NotNull Function<Long, T> bazVisitor);
+        FooStageVisitorBuilder<T> baz(@Nonnull Function<Long, T> bazVisitor);
     }
 
     public interface FooStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> foo(@NotNull Function<String, T> fooVisitor);
+        UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(@NotNull Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
     }
 
     public interface CompletedStageVisitorBuilder<T> {
@@ -219,7 +219,7 @@ public final class Union {
         private final String value;
 
         @JsonCreator
-        private FooWrapper(@JsonProperty("foo") @NotNull String value) {
+        private FooWrapper(@JsonProperty("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
@@ -254,7 +254,7 @@ public final class Union {
         private final int value;
 
         @JsonCreator
-        private BarWrapper(@JsonProperty("bar") @NotNull int value) {
+        private BarWrapper(@JsonProperty("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
@@ -289,7 +289,7 @@ public final class Union {
         private final long value;
 
         @JsonCreator
-        private BazWrapper(@JsonProperty("baz") @NotNull long value) {
+        private BazWrapper(@JsonProperty("baz") @Nonnull long value) {
             Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
         }
@@ -334,7 +334,7 @@ public final class Union {
             this(type, new HashMap<String, Object>());
         }
 
-        private UnknownWrapper(@NotNull String type, @NotNull Map<String, Object> value) {
+        private UnknownWrapper(@Nonnull String type, @Nonnull Map<String, Object> value) {
             Preconditions.checkNotNull(type, "type cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
             this.type = type;

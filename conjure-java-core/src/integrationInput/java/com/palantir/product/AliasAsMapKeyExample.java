@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = AliasAsMapKeyExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -210,13 +210,13 @@ public final class AliasAsMapKeyExample {
         }
 
         @JsonSetter(value = "strings", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder strings(@NotNull Map<StringAliasExample, ManyFieldExample> strings) {
+        public Builder strings(@Nonnull Map<StringAliasExample, ManyFieldExample> strings) {
             this.strings.clear();
             this.strings.putAll(Preconditions.checkNotNull(strings, "strings cannot be null"));
             return this;
         }
 
-        public Builder putAllStrings(@NotNull Map<StringAliasExample, ManyFieldExample> strings) {
+        public Builder putAllStrings(@Nonnull Map<StringAliasExample, ManyFieldExample> strings) {
             this.strings.putAll(Preconditions.checkNotNull(strings, "strings cannot be null"));
             return this;
         }
@@ -227,13 +227,13 @@ public final class AliasAsMapKeyExample {
         }
 
         @JsonSetter(value = "rids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder rids(@NotNull Map<RidAliasExample, ManyFieldExample> rids) {
+        public Builder rids(@Nonnull Map<RidAliasExample, ManyFieldExample> rids) {
             this.rids.clear();
             this.rids.putAll(Preconditions.checkNotNull(rids, "rids cannot be null"));
             return this;
         }
 
-        public Builder putAllRids(@NotNull Map<RidAliasExample, ManyFieldExample> rids) {
+        public Builder putAllRids(@Nonnull Map<RidAliasExample, ManyFieldExample> rids) {
             this.rids.putAll(Preconditions.checkNotNull(rids, "rids cannot be null"));
             return this;
         }
@@ -245,7 +245,7 @@ public final class AliasAsMapKeyExample {
 
         @JsonSetter(value = "bearertokens", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder bearertokens(
-                @NotNull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
+                @Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
             this.bearertokens.clear();
             this.bearertokens.putAll(
                     Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
@@ -253,7 +253,7 @@ public final class AliasAsMapKeyExample {
         }
 
         public Builder putAllBearertokens(
-                @NotNull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
+                @Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
             this.bearertokens.putAll(
                     Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
             return this;
@@ -265,14 +265,14 @@ public final class AliasAsMapKeyExample {
         }
 
         @JsonSetter(value = "integers", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder integers(@NotNull Map<IntegerAliasExample, ManyFieldExample> integers) {
+        public Builder integers(@Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
             this.integers.clear();
             this.integers.putAll(Preconditions.checkNotNull(integers, "integers cannot be null"));
             return this;
         }
 
         public Builder putAllIntegers(
-                @NotNull Map<IntegerAliasExample, ManyFieldExample> integers) {
+                @Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
             this.integers.putAll(Preconditions.checkNotNull(integers, "integers cannot be null"));
             return this;
         }
@@ -283,7 +283,7 @@ public final class AliasAsMapKeyExample {
         }
 
         @JsonSetter(value = "safelongs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder safelongs(@NotNull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
+        public Builder safelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
             this.safelongs.clear();
             this.safelongs.putAll(
                     Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
@@ -291,7 +291,7 @@ public final class AliasAsMapKeyExample {
         }
 
         public Builder putAllSafelongs(
-                @NotNull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
+                @Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
             this.safelongs.putAll(
                     Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
             return this;
@@ -303,7 +303,7 @@ public final class AliasAsMapKeyExample {
         }
 
         @JsonSetter(value = "datetimes", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder datetimes(@NotNull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
+        public Builder datetimes(@Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
             this.datetimes.clear();
             this.datetimes.putAll(
                     Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
@@ -311,7 +311,7 @@ public final class AliasAsMapKeyExample {
         }
 
         public Builder putAllDatetimes(
-                @NotNull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
+                @Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
             this.datetimes.putAll(
                     Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
             return this;
@@ -323,13 +323,13 @@ public final class AliasAsMapKeyExample {
         }
 
         @JsonSetter(value = "uuids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder uuids(@NotNull Map<UuidAliasExample, ManyFieldExample> uuids) {
+        public Builder uuids(@Nonnull Map<UuidAliasExample, ManyFieldExample> uuids) {
             this.uuids.clear();
             this.uuids.putAll(Preconditions.checkNotNull(uuids, "uuids cannot be null"));
             return this;
         }
 
-        public Builder putAllUuids(@NotNull Map<UuidAliasExample, ManyFieldExample> uuids) {
+        public Builder putAllUuids(@Nonnull Map<UuidAliasExample, ManyFieldExample> uuids) {
             this.uuids.putAll(Preconditions.checkNotNull(uuids, "uuids cannot be null"));
             return this;
         }

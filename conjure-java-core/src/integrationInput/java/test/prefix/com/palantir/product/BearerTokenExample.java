@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.validation.constraints.NotNull;
+import javax.annotation.Nonnull;
 
 @JsonDeserialize(builder = BearerTokenExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -92,7 +92,7 @@ public final class BearerTokenExample {
         }
 
         @JsonSetter("bearerTokenValue")
-        public Builder bearerTokenValue(@NotNull BearerToken bearerTokenValue) {
+        public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
             this.bearerTokenValue =
                     Preconditions.checkNotNull(bearerTokenValue, "bearerTokenValue cannot be null");
             return this;
