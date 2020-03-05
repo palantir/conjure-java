@@ -19,7 +19,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.UUID;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @JsonDeserialize(builder = PrimitiveOptionalsExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -217,7 +217,7 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter(value = "num", nulls = Nulls.SKIP)
-        public Builder num(@Nonnull OptionalDouble num) {
+        public Builder num(@NotNull OptionalDouble num) {
             this.num = Preconditions.checkNotNull(num, "num cannot be null");
             return this;
         }
@@ -228,7 +228,7 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter(value = "bool", nulls = Nulls.SKIP)
-        public Builder bool(@Nonnull Optional<Boolean> bool) {
+        public Builder bool(@NotNull Optional<Boolean> bool) {
             this.bool = Preconditions.checkNotNull(bool, "bool cannot be null");
             return this;
         }
@@ -239,7 +239,7 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter(value = "integer", nulls = Nulls.SKIP)
-        public Builder integer(@Nonnull OptionalInt integer) {
+        public Builder integer(@NotNull OptionalInt integer) {
             this.integer = Preconditions.checkNotNull(integer, "integer cannot be null");
             return this;
         }
@@ -250,36 +250,36 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter(value = "safelong", nulls = Nulls.SKIP)
-        public Builder safelong(@Nonnull Optional<SafeLong> safelong) {
+        public Builder safelong(@NotNull Optional<SafeLong> safelong) {
             this.safelong = Preconditions.checkNotNull(safelong, "safelong cannot be null");
             return this;
         }
 
-        public Builder safelong(@Nonnull SafeLong safelong) {
+        public Builder safelong(@NotNull SafeLong safelong) {
             this.safelong =
                     Optional.of(Preconditions.checkNotNull(safelong, "safelong cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "rid", nulls = Nulls.SKIP)
-        public Builder rid(@Nonnull Optional<ResourceIdentifier> rid) {
+        public Builder rid(@NotNull Optional<ResourceIdentifier> rid) {
             this.rid = Preconditions.checkNotNull(rid, "rid cannot be null");
             return this;
         }
 
-        public Builder rid(@Nonnull ResourceIdentifier rid) {
+        public Builder rid(@NotNull ResourceIdentifier rid) {
             this.rid = Optional.of(Preconditions.checkNotNull(rid, "rid cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "bearertoken", nulls = Nulls.SKIP)
-        public Builder bearertoken(@Nonnull Optional<BearerToken> bearertoken) {
+        public Builder bearertoken(@NotNull Optional<BearerToken> bearertoken) {
             this.bearertoken =
                     Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null");
             return this;
         }
 
-        public Builder bearertoken(@Nonnull BearerToken bearertoken) {
+        public Builder bearertoken(@NotNull BearerToken bearertoken) {
             this.bearertoken =
                     Optional.of(
                             Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null"));
@@ -287,12 +287,12 @@ public final class PrimitiveOptionalsExample {
         }
 
         @JsonSetter(value = "uuid", nulls = Nulls.SKIP)
-        public Builder uuid(@Nonnull Optional<UUID> uuid) {
+        public Builder uuid(@NotNull Optional<UUID> uuid) {
             this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;
         }
 
-        public Builder uuid(@Nonnull UUID uuid) {
+        public Builder uuid(@NotNull UUID uuid) {
             this.uuid = Optional.of(Preconditions.checkNotNull(uuid, "uuid cannot be null"));
             return this;
         }

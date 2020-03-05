@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.time.OffsetDateTime;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class DateTimeAliasExample {
     private final OffsetDateTime value;
 
-    private DateTimeAliasExample(@Nonnull OffsetDateTime value) {
+    private DateTimeAliasExample(@NotNull OffsetDateTime value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -42,7 +42,7 @@ public final class DateTimeAliasExample {
     }
 
     @JsonCreator
-    public static DateTimeAliasExample of(@Nonnull OffsetDateTime value) {
+    public static DateTimeAliasExample of(@NotNull OffsetDateTime value) {
         return new DateTimeAliasExample(value);
     }
 }

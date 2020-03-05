@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @JsonDeserialize(builder = StringExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -88,7 +88,7 @@ public final class StringExample {
         }
 
         @JsonSetter("string")
-        public Builder string(@Nonnull String string) {
+        public Builder string(@NotNull String string) {
             this.string = Preconditions.checkNotNull(string, "string cannot be null");
             return this;
         }

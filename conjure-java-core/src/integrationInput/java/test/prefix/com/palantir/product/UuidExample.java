@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @JsonDeserialize(builder = UuidExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -91,7 +91,7 @@ public final class UuidExample {
         }
 
         @JsonSetter("uuid")
-        public Builder uuid(@Nonnull UUID uuid) {
+        public Builder uuid(@NotNull UUID uuid) {
             this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;
         }

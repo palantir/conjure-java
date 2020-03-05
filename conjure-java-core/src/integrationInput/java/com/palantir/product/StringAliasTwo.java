@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Optional;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class StringAliasTwo {
     private final Optional<StringAliasOne> value;
 
-    private StringAliasTwo(@Nonnull Optional<StringAliasOne> value) {
+    private StringAliasTwo(@NotNull Optional<StringAliasOne> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -42,7 +42,7 @@ public final class StringAliasTwo {
     }
 
     @JsonCreator
-    public static StringAliasTwo of(@Nonnull Optional<StringAliasOne> value) {
+    public static StringAliasTwo of(@NotNull Optional<StringAliasOne> value) {
         return new StringAliasTwo(value);
     }
 }

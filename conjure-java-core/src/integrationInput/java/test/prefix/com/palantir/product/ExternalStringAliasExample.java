@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class ExternalStringAliasExample {
     private final String value;
 
-    private ExternalStringAliasExample(@Nonnull String value) {
+    private ExternalStringAliasExample(@NotNull String value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -37,7 +37,7 @@ public final class ExternalStringAliasExample {
     }
 
     @JsonCreator
-    public static ExternalStringAliasExample of(@Nonnull String value) {
+    public static ExternalStringAliasExample of(@NotNull String value) {
         return new ExternalStringAliasExample(value);
     }
 }

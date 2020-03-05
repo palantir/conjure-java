@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @JsonDeserialize(builder = OptionalExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -93,12 +93,12 @@ public final class OptionalExample {
         }
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
-        public Builder item(@Nonnull Optional<String> item) {
+        public Builder item(@NotNull Optional<String> item) {
             this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
-        public Builder item(@Nonnull String item) {
+        public Builder item(@NotNull String item) {
             this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;
         }

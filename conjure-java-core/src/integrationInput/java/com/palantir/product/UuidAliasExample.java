@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.UUID;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class UuidAliasExample {
     private final UUID value;
 
-    private UuidAliasExample(@Nonnull UUID value) {
+    private UuidAliasExample(@NotNull UUID value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -42,7 +42,7 @@ public final class UuidAliasExample {
     }
 
     @JsonCreator
-    public static UuidAliasExample of(@Nonnull UUID value) {
+    public static UuidAliasExample of(@NotNull UUID value) {
         return new UuidAliasExample(value);
     }
 }

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class EmptyUnionTypeExample {
@@ -72,7 +72,7 @@ public final class EmptyUnionTypeExample {
 
         @Override
         public CompletedStageVisitorBuilder<T> unknown(
-                @Nonnull Function<String, T> unknownVisitor) {
+                @NotNull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -91,7 +91,7 @@ public final class EmptyUnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        CompletedStageVisitorBuilder<T> unknown(@NotNull Function<String, T> unknownVisitor);
     }
 
     public interface CompletedStageVisitorBuilder<T> {
@@ -121,7 +121,7 @@ public final class EmptyUnionTypeExample {
             this(type, new HashMap<String, Object>());
         }
 
-        private UnknownWrapper(@Nonnull String type, @Nonnull Map<String, Object> value) {
+        private UnknownWrapper(@NotNull String type, @NotNull Map<String, Object> value) {
             Preconditions.checkNotNull(type, "type cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
             this.type = type;

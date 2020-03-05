@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @JsonDeserialize(builder = SafeLongExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -90,7 +90,7 @@ public final class SafeLongExample {
         }
 
         @JsonSetter("safeLongValue")
-        public Builder safeLongValue(@Nonnull SafeLong safeLongValue) {
+        public Builder safeLongValue(@NotNull SafeLong safeLongValue) {
             this.safeLongValue =
                     Preconditions.checkNotNull(safeLongValue, "safeLongValue cannot be null");
             return this;

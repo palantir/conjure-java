@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.BearerToken;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class BearerTokenAliasExample {
     private final BearerToken value;
 
-    private BearerTokenAliasExample(@Nonnull BearerToken value) {
+    private BearerTokenAliasExample(@NotNull BearerToken value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
@@ -42,7 +42,7 @@ public final class BearerTokenAliasExample {
     }
 
     @JsonCreator
-    public static BearerTokenAliasExample of(@Nonnull BearerToken value) {
+    public static BearerTokenAliasExample of(@NotNull BearerToken value) {
         return new BearerTokenAliasExample(value);
     }
 }

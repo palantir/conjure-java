@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Generated;
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 @JsonDeserialize(builder = AnyMapExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
@@ -99,13 +99,13 @@ public final class AnyMapExample {
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder items(@Nonnull Map<String, Object> items) {
+        public Builder items(@NotNull Map<String, Object> items) {
             this.items.clear();
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        public Builder putAllItems(@Nonnull Map<String, Object> items) {
+        public Builder putAllItems(@NotNull Map<String, Object> items) {
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
