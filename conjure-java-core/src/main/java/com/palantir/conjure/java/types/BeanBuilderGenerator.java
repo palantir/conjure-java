@@ -66,8 +66,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 
 public final class BeanBuilderGenerator {
@@ -293,7 +293,7 @@ public final class BeanBuilderGenerator {
         if (typeName.isPrimitive()) {
             return typeName;
         }
-        return typeName.annotated(AnnotationSpec.builder(NotNull.class).build());
+        return typeName.annotated(AnnotationSpec.builder(Nonnull.class).build());
     }
 
     private TypeName widenParameterIfPossible(TypeName current, Type type) {
