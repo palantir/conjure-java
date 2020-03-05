@@ -59,8 +59,8 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
+import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 
 public final class UnionGenerator {
@@ -513,7 +513,7 @@ public final class UnionGenerator {
         TypeName visitorObject = visitorObjectTypeName(memberType, visitResultType);
         return MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
                 .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName))
-                        .addAnnotation(Nonnull.class)
+                        .addAnnotation(NotNull.class)
                         .build())
                 .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
     }
@@ -576,7 +576,7 @@ public final class UnionGenerator {
                                             .build())
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                                             .addAnnotation(jsonPropertyAnnotation)
-                                            .addAnnotation(Nonnull.class)
+                                            .addAnnotation(NotNull.class)
                                             .build())
                                     .addStatement(
                                             "$L",
@@ -609,7 +609,7 @@ public final class UnionGenerator {
         ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
         ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")
-                .addAnnotation(Nonnull.class)
+                .addAnnotation(NotNull.class)
                 .build();
         ParameterSpec annotatedTypeParameter = ParameterSpec.builder(UNKNOWN_MEMBER_TYPE, "type")
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
@@ -643,7 +643,7 @@ public final class UnionGenerator {
                         .addModifiers(Modifier.PRIVATE)
                         .addParameter(typeParameter)
                         .addParameter(ParameterSpec.builder(genericMapType, VALUE_FIELD_NAME)
-                                .addAnnotation(Nonnull.class)
+                                .addAnnotation(NotNull.class)
                                 .build())
                         .addStatement("$L", Expressions.requireNonNull(typeParameter.name, "type cannot be null"))
                         .addStatement(

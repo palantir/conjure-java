@@ -40,8 +40,8 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import java.util.List;
 import java.util.Locale;
-import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
+import javax.validation.constraints.NotNull;
 
 public final class EnumGenerator {
 
@@ -232,7 +232,7 @@ public final class EnumGenerator {
 
     private static MethodSpec createValueOf(ClassName thisClass, List<EnumValueDefinition> values) {
         ParameterSpec param = ParameterSpec.builder(ClassName.get(String.class), "value")
-                .addAnnotation(Nonnull.class)
+                .addAnnotation(NotNull.class)
                 .build();
 
         CodeBlock.Builder parser = CodeBlock.builder().beginControlFlow("switch (upperCasedValue)");
