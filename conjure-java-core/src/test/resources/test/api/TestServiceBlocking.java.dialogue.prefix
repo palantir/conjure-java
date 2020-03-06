@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.lang.Deprecated;
 import java.lang.Override;
 import java.lang.String;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -18,7 +17,6 @@ import java.util.Set;
 import javax.annotation.Generated;
 import test.prefix.com.palantir.product.AliasedString;
 import test.prefix.com.palantir.product.CreateDatasetRequest;
-import test.prefix.com.palantir.product.NestedAliasedBinary;
 import test.prefix.com.palantir.product.datasets.BackingFileSystem;
 import test.prefix.com.palantir.product.datasets.Dataset;
 
@@ -35,15 +33,15 @@ public interface TestServiceBlocking {
 
     InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    NestedAliasedBinary getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    Optional<ByteBuffer> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    Optional<InputStream> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     AliasedString getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     void uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
 
-    void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input);
+    void uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
     /** @param datasetRid A valid dataset resource identifier. */
     Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
@@ -122,13 +120,13 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            public NestedAliasedBinary getAliasedRawData(
+            public InputStream getAliasedRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.getAliasedRawData(authHeader, datasetRid));
             }
 
             @Override
-            public Optional<ByteBuffer> maybeGetRawData(
+            public Optional<InputStream> maybeGetRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.maybeGetRawData(authHeader, datasetRid));
             }
@@ -145,7 +143,7 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            public void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input) {
+            public void uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input) {
                 runtime.clients().block(delegate.uploadAliasedRawData(authHeader, input));
             }
 

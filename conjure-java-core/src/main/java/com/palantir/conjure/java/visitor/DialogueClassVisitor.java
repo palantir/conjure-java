@@ -25,13 +25,22 @@ import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
+import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.visitor.TypeDefinitionVisitor;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.BinaryRequestBody;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public final class ClassVisitor implements ClassNameVisitor {
+public final class DialogueClassVisitor implements ClassNameVisitor {
 
     public enum Mode {
         RETURN_VALUE,
@@ -40,10 +49,13 @@ public final class ClassVisitor implements ClassNameVisitor {
 
     private final DefaultClassNameVisitor delegate;
     private final Mode mode;
+    private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
 
-    public ClassVisitor(List<TypeDefinition> types, Options options, Mode mode) {
+    public DialogueClassVisitor(List<TypeDefinition> types, Options options, Mode mode) {
         this.delegate = new DefaultClassNameVisitor(types, options);
         this.mode = mode;
+        this.types = types.stream()
+                .collect(Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
     }
 
     @Override
@@ -52,7 +64,6 @@ public final class ClassVisitor implements ClassNameVisitor {
             return delegate.visitPrimitive(value);
         }
 
-        // TODO(forozco): handle optional binary response
         if (mode == Mode.RETURN_VALUE) {
             return TypeName.get(InputStream.class);
         } else {
@@ -62,7 +73,15 @@ public final class ClassVisitor implements ClassNameVisitor {
 
     @Override
     public TypeName visitOptional(OptionalType value) {
+        Type itemType = value.getItemType();
+        if (itemType.accept(TypeVisitor.IS_BINARY) || itemType.accept(TypeVisitor.IS_REFERENCE)) {
+            return ParameterizedTypeName.get(ClassName.get(Optional.class), box(itemType.accept(this)));
+        }
         return delegate.visitOptional(value);
+    }
+
+    private static TypeName box(TypeName input) {
+        return input.isPrimitive() ? input.box() : input;
     }
 
     @Override
@@ -81,8 +100,21 @@ public final class ClassVisitor implements ClassNameVisitor {
     }
 
     @Override
-    public TypeName visitReference(com.palantir.conjure.spec.TypeName value) {
-        return delegate.visitReference(value);
+    public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
+        if (!types.containsKey(type)) {
+            throw new IllegalStateException("Unknown LocalReferenceType type: " + type);
+        }
+
+        TypeDefinition def = types.get(type);
+        if (def.accept(TypeDefinitionVisitor.IS_ALIAS)) {
+            Type aliasType = def.accept(TypeDefinitionVisitor.ALIAS).getAlias();
+            TypeName aliasTypeName = aliasType.accept(this);
+            if (aliasTypeName.equals(visitPrimitive(PrimitiveType.BINARY))) {
+                return aliasTypeName;
+            }
+        }
+
+        return delegate.visitReference(type);
     }
 
     @Override

@@ -11,7 +11,6 @@ import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
-import com.palantir.product.NestedAliasedBinary;
 import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
@@ -24,7 +23,6 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -46,10 +44,10 @@ public interface TestServiceAsync {
 
     ListenableFuture<InputStream> getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    ListenableFuture<NestedAliasedBinary> getAliasedRawData(
+    ListenableFuture<InputStream> getAliasedRawData(
             AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    ListenableFuture<Optional<ByteBuffer>> maybeGetRawData(
+    ListenableFuture<Optional<InputStream>> maybeGetRawData(
             AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     ListenableFuture<AliasedString> getAliasedString(
@@ -57,7 +55,7 @@ public interface TestServiceAsync {
 
     ListenableFuture<Void> uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
 
-    ListenableFuture<Void> uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input);
+    ListenableFuture<Void> uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
     /** @param datasetRid A valid dataset resource identifier. */
     ListenableFuture<Set<String>> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
@@ -129,20 +127,14 @@ public interface TestServiceAsync {
             private final Deserializer<Optional<Dataset>> getDatasetDeserializer =
                     runtime.bodySerDe().deserializer(new TypeMarker<Optional<Dataset>>() {});
 
-            private final Deserializer<NestedAliasedBinary> getAliasedRawDataDeserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<NestedAliasedBinary>() {});
-
-            private final Deserializer<Optional<ByteBuffer>> maybeGetRawDataDeserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<ByteBuffer>>() {});
-
             private final Deserializer<AliasedString> getAliasedStringDeserializer =
                     runtime.bodySerDe().deserializer(new TypeMarker<AliasedString>() {});
 
             private final Deserializer<Void> uploadRawDataDeserializer =
                     runtime.bodySerDe().emptyBodyDeserializer();
 
-            private final Serializer<NestedAliasedBinary> uploadAliasedRawDataSerializer =
-                    runtime.bodySerDe().serializer(new TypeMarker<NestedAliasedBinary>() {});
+            private final Serializer<InputStream> uploadAliasedRawDataSerializer =
+                    runtime.bodySerDe().serializer(new TypeMarker<InputStream>() {});
 
             private final Deserializer<Void> uploadAliasedRawDataDeserializer =
                     runtime.bodySerDe().emptyBodyDeserializer();
@@ -257,7 +249,7 @@ public interface TestServiceAsync {
             }
 
             @Override
-            public ListenableFuture<NestedAliasedBinary> getAliasedRawData(
+            public ListenableFuture<InputStream> getAliasedRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams(
@@ -269,11 +261,11 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.getAliasedRawData,
                                 _request.build(),
-                                getAliasedRawDataDeserializer);
+                                runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
-            public ListenableFuture<Optional<ByteBuffer>> maybeGetRawData(
+            public ListenableFuture<Optional<InputStream>> maybeGetRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams(
@@ -285,7 +277,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.maybeGetRawData,
                                 _request.build(),
-                                maybeGetRawDataDeserializer);
+                                runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
@@ -322,12 +314,12 @@ public interface TestServiceAsync {
 
             @Override
             public ListenableFuture<Void> uploadAliasedRawData(
-                    AuthHeader authHeader, NestedAliasedBinary input) {
+                    AuthHeader authHeader, BinaryRequestBody input) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams(
                         "Authorization",
                         plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                _request.body(uploadAliasedRawDataSerializer.serialize(input));
+                _request.body(runtime.bodySerDe().serialize(input));
                 return runtime.clients()
                         .call(
                                 channel,

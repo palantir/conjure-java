@@ -19,7 +19,7 @@ package com.palantir.conjure.java.services.dialogue;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.types.TypeMapper;
-import com.palantir.conjure.java.visitor.ClassVisitor;
+import com.palantir.conjure.java.visitor.DialogueClassVisitor;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
@@ -49,10 +49,11 @@ public final class DialogueServiceGenerator implements ServiceGenerator {
 
         TypeMapper parameterTypes = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new ClassVisitor(conjureDefinition.getTypes(), options, ClassVisitor.Mode.PARAMETER));
+                new DialogueClassVisitor(conjureDefinition.getTypes(), options, DialogueClassVisitor.Mode.PARAMETER));
         TypeMapper returnTypes = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new ClassVisitor(conjureDefinition.getTypes(), options, ClassVisitor.Mode.RETURN_VALUE));
+                new DialogueClassVisitor(
+                        conjureDefinition.getTypes(), options, DialogueClassVisitor.Mode.RETURN_VALUE));
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitionsByName =
                 conjureDefinition.getTypes().stream()
                         .collect(Collectors.toMap(
