@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.services.dialogue;
+package com.palantir.conjure.java.visitor;
 
+import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
+import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -27,34 +29,46 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.dialogue.BinaryRequestBody;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-final class DialogueClassNameVisitor implements ClassNameVisitor {
+public final class DialogueClassVisitor implements ClassNameVisitor {
 
-    private final ClassNameVisitor delegate;
+    public enum Mode {
+        RETURN_VALUE,
+        PARAMETER
+    }
+
+    private final DefaultClassNameVisitor delegate;
+    private final Mode mode;
     private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
 
-    DialogueClassNameVisitor(ClassNameVisitor delegate, List<TypeDefinition> types) {
-        this.delegate = delegate;
+    public DialogueClassVisitor(List<TypeDefinition> types, Options options, Mode mode) {
+        this.delegate = new DefaultClassNameVisitor(types, options);
+        this.mode = mode;
         this.types = types.stream()
                 .collect(Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
     }
 
     @Override
-    public TypeName visitUnknown(String unknownType) {
-        return delegate.visitUnknown(unknownType);
-    }
-
-    @Override
     public TypeName visitPrimitive(PrimitiveType value) {
-        return delegate.visitPrimitive(value);
+        if (!value.equals(PrimitiveType.BINARY)) {
+            return delegate.visitPrimitive(value);
+        }
+
+        if (mode == Mode.RETURN_VALUE) {
+            return TypeName.get(InputStream.class);
+        } else {
+            return TypeName.get(BinaryRequestBody.class);
+        }
     }
 
     @Override
