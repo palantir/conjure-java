@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.lang.Deprecated;
 import java.lang.Override;
 import java.lang.String;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -37,7 +36,7 @@ public interface TestServiceBlocking {
 
     NestedAliasedBinary getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    Optional<ByteBuffer> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    Optional<InputStream> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     AliasedString getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
@@ -128,7 +127,7 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            public Optional<ByteBuffer> maybeGetRawData(
+            public Optional<InputStream> maybeGetRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.maybeGetRawData(authHeader, datasetRid));
             }

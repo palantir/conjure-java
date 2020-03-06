@@ -19,7 +19,6 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -49,7 +48,7 @@ public interface TestServiceAsync {
     ListenableFuture<NestedAliasedBinary> getAliasedRawData(
             AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    ListenableFuture<Optional<ByteBuffer>> maybeGetRawData(
+    ListenableFuture<Optional<InputStream>> maybeGetRawData(
             AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     ListenableFuture<AliasedString> getAliasedString(
@@ -131,9 +130,6 @@ public interface TestServiceAsync {
 
             private final Deserializer<NestedAliasedBinary> getAliasedRawDataDeserializer =
                     runtime.bodySerDe().deserializer(new TypeMarker<NestedAliasedBinary>() {});
-
-            private final Deserializer<Optional<ByteBuffer>> maybeGetRawDataDeserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<ByteBuffer>>() {});
 
             private final Deserializer<AliasedString> getAliasedStringDeserializer =
                     runtime.bodySerDe().deserializer(new TypeMarker<AliasedString>() {});
@@ -273,7 +269,7 @@ public interface TestServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Optional<ByteBuffer>> maybeGetRawData(
+            public ListenableFuture<Optional<InputStream>> maybeGetRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams(
@@ -285,7 +281,7 @@ public interface TestServiceAsync {
                                 channel,
                                 DialogueTestEndpoints.maybeGetRawData,
                                 _request.build(),
-                                maybeGetRawDataDeserializer);
+                                runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override

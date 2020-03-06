@@ -4,14 +4,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
-import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
-import com.palantir.dialogue.TypeMarker;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import javax.annotation.Generated;
 
@@ -19,9 +16,9 @@ import javax.annotation.Generated;
 public interface EteBinaryServiceAsync {
     ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
-    ListenableFuture<Optional<ByteBuffer>> getOptionalBinaryPresent(AuthHeader authHeader);
+    ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(AuthHeader authHeader);
 
-    ListenableFuture<Optional<ByteBuffer>> getOptionalBinaryEmpty(AuthHeader authHeader);
+    ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /** Throws an exception after partially writing a binary response. */
     ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes);
@@ -30,12 +27,6 @@ public interface EteBinaryServiceAsync {
     static EteBinaryServiceAsync of(Channel channel, ConjureRuntime runtime) {
         return new EteBinaryServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
-
-            private final Deserializer<Optional<ByteBuffer>> getOptionalBinaryPresentDeserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<ByteBuffer>>() {});
-
-            private final Deserializer<Optional<ByteBuffer>> getOptionalBinaryEmptyDeserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<ByteBuffer>>() {});
 
             @Override
             public ListenableFuture<InputStream> postBinary(
@@ -54,7 +45,7 @@ public interface EteBinaryServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Optional<ByteBuffer>> getOptionalBinaryPresent(
+            public ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(
                     AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams(
@@ -65,11 +56,11 @@ public interface EteBinaryServiceAsync {
                                 channel,
                                 DialogueEteBinaryEndpoints.getOptionalBinaryPresent,
                                 _request.build(),
-                                getOptionalBinaryPresentDeserializer);
+                                runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
-            public ListenableFuture<Optional<ByteBuffer>> getOptionalBinaryEmpty(
+            public ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(
                     AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams(
@@ -80,7 +71,7 @@ public interface EteBinaryServiceAsync {
                                 channel,
                                 DialogueEteBinaryEndpoints.getOptionalBinaryEmpty,
                                 _request.build(),
-                                getOptionalBinaryEmptyDeserializer);
+                                runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override

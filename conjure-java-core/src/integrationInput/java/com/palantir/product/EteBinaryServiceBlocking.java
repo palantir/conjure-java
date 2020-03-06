@@ -6,7 +6,6 @@ import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import javax.annotation.Generated;
 
@@ -14,9 +13,9 @@ import javax.annotation.Generated;
 public interface EteBinaryServiceBlocking {
     InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
-    Optional<ByteBuffer> getOptionalBinaryPresent(AuthHeader authHeader);
+    Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader);
 
-    Optional<ByteBuffer> getOptionalBinaryEmpty(AuthHeader authHeader);
+    Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /** Throws an exception after partially writing a binary response. */
     InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
@@ -31,12 +30,12 @@ public interface EteBinaryServiceBlocking {
             }
 
             @Override
-            public Optional<ByteBuffer> getOptionalBinaryPresent(AuthHeader authHeader) {
+            public Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader) {
                 return runtime.clients().block(delegate.getOptionalBinaryPresent(authHeader));
             }
 
             @Override
-            public Optional<ByteBuffer> getOptionalBinaryEmpty(AuthHeader authHeader) {
+            public Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader) {
                 return runtime.clients().block(delegate.getOptionalBinaryEmpty(authHeader));
             }
 

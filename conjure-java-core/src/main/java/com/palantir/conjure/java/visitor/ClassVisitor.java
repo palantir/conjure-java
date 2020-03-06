@@ -26,10 +26,14 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.BinaryRequestBody;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 public final class ClassVisitor implements ClassNameVisitor {
 
@@ -52,7 +56,6 @@ public final class ClassVisitor implements ClassNameVisitor {
             return delegate.visitPrimitive(value);
         }
 
-        // TODO(forozco): handle optional binary response
         if (mode == Mode.RETURN_VALUE) {
             return TypeName.get(InputStream.class);
         } else {
@@ -62,6 +65,11 @@ public final class ClassVisitor implements ClassNameVisitor {
 
     @Override
     public TypeName visitOptional(OptionalType value) {
+        if (value.getItemType().accept(TypeVisitor.IS_BINARY)) {
+            return ParameterizedTypeName.get(
+                    ClassName.get(Optional.class),
+                    value.getItemType().accept(this));
+        }
         return delegate.visitOptional(value);
     }
 
