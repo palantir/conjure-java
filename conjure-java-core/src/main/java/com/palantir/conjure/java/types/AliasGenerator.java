@@ -41,7 +41,6 @@ import com.squareup.javapoet.TypeSpec;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Optional;
-import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 
 public final class AliasGenerator {
@@ -106,13 +105,10 @@ public final class AliasGenerator {
                     .build());
         }
 
-        TypeName paramTypeName = aliasTypeName.isPrimitive()
-                ? aliasTypeName
-                : aliasTypeName.annotated(AnnotationSpec.builder(Nonnull.class).build());
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addAnnotation(JsonCreator.class)
-                .addParameter(paramTypeName, "value")
+                .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"))
                 .returns(thisClass)
                 .addStatement("return new $T(value)", thisClass)
                 .build());
@@ -283,11 +279,9 @@ public final class AliasGenerator {
     }
 
     private static MethodSpec createConstructor(TypeName aliasTypeName) {
-        TypeName paramTypeName = aliasTypeName.isPrimitive()
-                ? aliasTypeName
-                : aliasTypeName.annotated(AnnotationSpec.builder(Nonnull.class).build());
-        MethodSpec.Builder builder =
-                MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).addParameter(paramTypeName, "value");
+        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PRIVATE)
+                .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"));
         if (!aliasTypeName.isPrimitive()) {
             builder.addStatement("this.value = $T.checkNotNull(value, \"value cannot be null\")", Preconditions.class);
         } else {
