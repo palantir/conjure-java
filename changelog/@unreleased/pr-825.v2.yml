@@ -1,6 +1,6 @@
 type: fix
 fix:
-  description: Fix regression in 5.6.0 where conjure-java could generate some Nonnull
-    annotations relying on `com.google.code.findbugs:jsr305`.
+  description: Fix regression in 5.6.0 where conjure-java could generate bad @Nonnull
+    annotations when placed on a fully qualified parameter type.
   links:
   - https://github.com/palantir/conjure-java/pull/825
