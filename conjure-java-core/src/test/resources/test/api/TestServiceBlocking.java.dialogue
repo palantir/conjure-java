@@ -5,7 +5,6 @@ import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
-import com.palantir.product.NestedAliasedBinary;
 import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
@@ -34,7 +33,7 @@ public interface TestServiceBlocking {
 
     InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    NestedAliasedBinary getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     Optional<InputStream> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
@@ -42,7 +41,7 @@ public interface TestServiceBlocking {
 
     void uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
 
-    void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input);
+    void uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
     /** @param datasetRid A valid dataset resource identifier. */
     Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
@@ -121,7 +120,7 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            public NestedAliasedBinary getAliasedRawData(
+            public InputStream getAliasedRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.getAliasedRawData(authHeader, datasetRid));
             }
@@ -144,7 +143,7 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            public void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input) {
+            public void uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input) {
                 runtime.clients().block(delegate.uploadAliasedRawData(authHeader, input));
             }
 

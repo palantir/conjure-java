@@ -132,12 +132,12 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     }
 
     private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
-        if (type.map(t -> t.accept(TypeVisitor.IS_BINARY) || isOptionalBinary(t))
-                .orElse(false)) {
+        TypeName className = returnTypes.baseType(type).box();
+        if (className.equals(returnTypes.baseType(Type.primitive(PrimitiveType.BINARY)))
+                || className.equals(
+                        returnTypes.baseType(Type.optional(OptionalType.of(Type.primitive(PrimitiveType.BINARY)))))) {
             return Optional.empty();
         }
-
-        TypeName className = returnTypes.baseType(type).box();
         ParameterizedTypeName deserializerType =
                 ParameterizedTypeName.get(ClassName.get(Deserializer.class), className);
 
@@ -152,10 +152,17 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .build());
     }
 
-    // TODO(ckozak): Type should be dealiased
-    private static boolean isOptionalBinary(Type type) {
-        return type.accept(TypeVisitor.IS_OPTIONAL)
-                && type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_BINARY);
+    private static boolean isBinaryOrOptionalBinary(TypeName className, ReturnTypeMapper returnTypes) {
+        return isBinary(className, returnTypes) || isOptionalBinary(className, returnTypes);
+    }
+
+    private static boolean isBinary(TypeName className, ReturnTypeMapper returnTypes) {
+        return className.equals(returnTypes.baseType(Type.primitive(PrimitiveType.BINARY)));
+    }
+
+    private static boolean isOptionalBinary(TypeName className, ReturnTypeMapper returnTypes) {
+        return className.equals(
+                returnTypes.baseType(Type.optional(OptionalType.of(Type.primitive(PrimitiveType.BINARY)))));
     }
 
     private MethodSpec asyncClientImpl(ServiceDefinition serviceDefinition, EndpointDefinition def) {
@@ -187,9 +194,9 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 def.getEndpointName().get(),
                 REQUEST,
                 def.getReturns()
-                        .filter(type -> type.accept(TypeVisitor.IS_BINARY) || isOptionalBinary(type))
+                        .filter(type -> isBinaryOrOptionalBinary(returnTypes.baseType(type), returnTypes))
                         .map(type -> RUNTIME
-                                + (isOptionalBinary(type)
+                                + (isOptionalBinary(returnTypes.baseType(type), returnTypes)
                                         ? ".bodySerDe().optionalInputStreamDeserializer()"
                                         : ".bodySerDe().inputStreamDeserializer()"))
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
@@ -202,7 +209,9 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
         return param.getParamType().accept(new ParameterType.Visitor<CodeBlock>() {
             @Override
             public CodeBlock visitBody(BodyParameterType value) {
-                if (param.getType().accept(TypeVisitor.IS_BINARY)) {
+                if (parameterTypes
+                        .baseType(param.getType())
+                        .equals(parameterTypes.baseType(Type.primitive(PrimitiveType.BINARY)))) {
                     return CodeBlock.of("$L.body(runtime.bodySerDe().serialize($L));", REQUEST, param.getArgName());
                 }
                 return CodeBlock.of("$L.body($LSerializer.serialize($L));", REQUEST, endpointName, param.getArgName());
