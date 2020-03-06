@@ -66,7 +66,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -259,7 +258,7 @@ public final class BeanBuilderGenerator {
 
         boolean shouldClearFirst = true;
         MethodSpec.Builder setterBuilder = publicSetter(enriched)
-                .addParameter(nonnullParameter(widenParameterIfPossible(field.type, type), field.name))
+                .addParameter(Parameters.nonnullParameter(widenParameterIfPossible(field.type, type), field.name))
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
         if (enriched.isPrimitive()) {
@@ -283,18 +282,9 @@ public final class BeanBuilderGenerator {
                 .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
-                .addParameter(nonnullParameter(widenParameterIfPossible(field.type, type), field.name))
+                .addParameter(Parameters.nonnullParameter(widenParameterIfPossible(field.type, type), field.name))
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
                 .addStatement("return this")
-                .build();
-    }
-
-    private ParameterSpec nonnullParameter(TypeName typeName, String paramName) {
-        ParameterSpec.Builder builder = ParameterSpec.builder(typeName, paramName);
-        if (typeName.isPrimitive()) {
-            return builder.build();
-        }
-        return builder.addAnnotation(AnnotationSpec.builder(Nonnull.class).build())
                 .build();
     }
 
@@ -417,7 +407,7 @@ public final class BeanBuilderGenerator {
         FieldSpec field = enriched.poetSpec();
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
         return publicSetter(enriched)
-                .addParameter(nonnullParameter(typeMapper.getClassName(type.getItemType()), field.name))
+                .addParameter(Parameters.nonnullParameter(typeMapper.getClassName(type.getItemType()), field.name))
                 .addCode(optionalAssignmentStatement(enriched, type))
                 .addStatement("return this")
                 .build();
