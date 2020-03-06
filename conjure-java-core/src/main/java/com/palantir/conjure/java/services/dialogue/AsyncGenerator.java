@@ -133,9 +133,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
 
     private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
         TypeName className = returnTypes.baseType(type).box();
-        if (className.equals(returnTypes.baseType(Type.primitive(PrimitiveType.BINARY)))
-                || className.equals(
-                        returnTypes.baseType(Type.optional(OptionalType.of(Type.primitive(PrimitiveType.BINARY)))))) {
+        if (isBinaryOrOptionalBinary(className, returnTypes)) {
             return Optional.empty();
         }
         ParameterizedTypeName deserializerType =
