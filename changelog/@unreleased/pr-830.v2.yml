@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Dialogue endpoints use version '0.0.0' over 'unknown' by default
+  links:
+  - https://github.com/palantir/conjure-java/pull/830

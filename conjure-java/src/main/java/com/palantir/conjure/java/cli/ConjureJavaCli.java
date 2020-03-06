@@ -175,7 +175,7 @@ public final class ConjureJavaCli implements Runnable {
                 ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.options());
                 ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.options());
                 ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.options());
-                ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options(), "unknown");
+                ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options(), "0.0.0");
 
                 if (config.generateObjects()) {
                     typeGenerator.emit(conjureDefinition, config.outputDirectory());
