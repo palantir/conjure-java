@@ -67,8 +67,7 @@ public final class ClassVisitor implements ClassNameVisitor {
     public TypeName visitOptional(OptionalType value) {
         if (value.getItemType().accept(TypeVisitor.IS_BINARY)) {
             return ParameterizedTypeName.get(
-                    ClassName.get(Optional.class),
-                    value.getItemType().accept(this));
+                    ClassName.get(Optional.class), value.getItemType().accept(this));
         }
         return delegate.visitOptional(value);
     }

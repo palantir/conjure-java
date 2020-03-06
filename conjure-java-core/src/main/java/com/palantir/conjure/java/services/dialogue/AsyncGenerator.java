@@ -132,7 +132,8 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     }
 
     private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
-        if (type.map(t -> t.accept(TypeVisitor.IS_BINARY) || isOptionalBinary(t)).orElse(false)) {
+        if (type.map(t -> t.accept(TypeVisitor.IS_BINARY) || isOptionalBinary(t))
+                .orElse(false)) {
             return Optional.empty();
         }
 
@@ -187,9 +188,10 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 REQUEST,
                 def.getReturns()
                         .filter(type -> type.accept(TypeVisitor.IS_BINARY) || isOptionalBinary(type))
-                        .map(type -> RUNTIME + (isOptionalBinary(type)
-                                ? ".bodySerDe().optionalInputStreamDeserializer()"
-                                : ".bodySerDe().inputStreamDeserializer()"))
+                        .map(type -> RUNTIME
+                                + (isOptionalBinary(type)
+                                        ? ".bodySerDe().optionalInputStreamDeserializer()"
+                                        : ".bodySerDe().inputStreamDeserializer()"))
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
         MethodSpec asyncClient = methodBuilder.addCode(request).addCode(execute).build();
