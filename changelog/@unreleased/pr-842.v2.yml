@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: dialogue now adds a `@SuppressWarnings("deprecated")` to its own code
+    when it needs to call out to a known deprecated method.
+  links:
+  - https://github.com/palantir/conjure-java/pull/842

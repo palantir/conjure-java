@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.lang.Deprecated;
 import java.lang.Override;
 import java.lang.String;
+import java.lang.SuppressWarnings;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -153,6 +154,7 @@ public interface TestServiceBlocking {
             }
 
             @Override
+            @SuppressWarnings("deprecated")
             public Set<String> getBranchesDeprecated(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients()
