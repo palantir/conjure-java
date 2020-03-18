@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: '`@SuppressWarnings("deprecation")` not `"deprecated"`'
+  links:
+  - https://github.com/palantir/conjure-java/pull/843

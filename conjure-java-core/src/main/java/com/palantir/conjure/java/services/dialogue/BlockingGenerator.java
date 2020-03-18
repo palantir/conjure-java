@@ -78,7 +78,7 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
 
         if (def.getDeprecated().isPresent()) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
-                    .addMember("value", "$S", "deprecated")
+                    .addMember("value", "$S", "deprecation")
                     .build());
         }
 
