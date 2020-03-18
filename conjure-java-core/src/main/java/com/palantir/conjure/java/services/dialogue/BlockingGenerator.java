@@ -21,6 +21,7 @@ import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -74,6 +75,13 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameters(params)
                 .addAnnotation(Override.class);
+
+        if (def.getDeprecated().isPresent()) {
+            methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                    .addMember("value", "$S", "deprecated")
+                    .build());
+        }
+
         methodBuilder.returns(returnTypes.baseType(def.getReturns()));
 
         CodeBlock argList =
