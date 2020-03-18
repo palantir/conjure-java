@@ -154,7 +154,7 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            @SuppressWarnings("deprecated")
+            @SuppressWarnings("deprecation")
             public Set<String> getBranchesDeprecated(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients()
