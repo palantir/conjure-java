@@ -116,8 +116,15 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
             ListenableFuture<T> future, ReturnValueWriter<T> returnValueWriter, HttpServerExchange exchange) {
         // Attach data to the exchange in order to reuse a stateless listener
         exchange.putAttachment(FUTURE, future);
-        // Cancel the future if the exchange is completed before the future is done
-        exchange.addExchangeCompleteListener(COMPLETION_LISTENER);
+        // If the exchange is complete we still follow this path to provide standard logging.
+        if (exchange.isComplete()) {
+            // If the exchange has already completed (http/2 rst_stream while processing).
+            // Calling addExchangeCompleteListener will result in an IllegalStateException in this case.
+            future.cancel(INTERRUPT_ON_CANCEL);
+        } else {
+            // Cancel the future if the exchange is completed before the future is done
+            exchange.addExchangeCompleteListener(COMPLETION_LISTENER);
+        }
 
         XnioExecutor.Key timeoutKey = exchange.getIoThread()
                 .executeAfter(() -> future.cancel(INTERRUPT_ON_CANCEL), timeout.toMillis(), TimeUnit.MILLISECONDS);
