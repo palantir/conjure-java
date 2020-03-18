@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Prevent ISE when the exchange is completed prior to async register-callback
+  links:
+  - https://github.com/palantir/conjure-java/pull/840
