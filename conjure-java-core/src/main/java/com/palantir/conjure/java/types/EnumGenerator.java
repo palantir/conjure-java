@@ -274,6 +274,8 @@ public final class EnumGenerator {
     private static FieldSpec createValuesList(ClassName thisClass, List<EnumValueDefinition> values) {
         CodeBlock arrayValues =
                 CodeBlock.join(values.stream().map(value -> CodeBlock.of("$L", value.getValue()))::iterator, "," + " ");
+        boolean anyDeprecatedValues = values.stream()
+                .anyMatch(definition -> definition.getDeprecated().isPresent());
         return FieldSpec.builder(
                         ParameterizedTypeName.get(ClassName.get(List.class), thisClass),
                         "values",
@@ -282,6 +284,12 @@ public final class EnumGenerator {
                         Modifier.FINAL)
                 .initializer(CodeBlock.of(
                         "$T.unmodifiableList($T.asList(" + arrayValues + "))", Collections.class, Arrays.class))
+                .addAnnotations(
+                        anyDeprecatedValues
+                                ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)
+                                .addMember("value", "$S", "deprecation")
+                                .build())
+                                : ImmutableList.of())
                 .build();
     }
 
