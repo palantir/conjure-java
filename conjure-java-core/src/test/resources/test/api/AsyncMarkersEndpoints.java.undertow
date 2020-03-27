@@ -30,8 +30,7 @@ public final class AsyncMarkersEndpoints implements UndertowService {
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return Collections.unmodifiableList(
-                Arrays.asList(
-                        new AsyncEndpoint(runtime, delegate), new SyncEndpoint(runtime, delegate)));
+                Arrays.asList(new AsyncEndpoint(runtime, delegate), new SyncEndpoint(runtime, delegate)));
     }
 
     private static final class AsyncEndpoint implements HttpHandler, Endpoint {

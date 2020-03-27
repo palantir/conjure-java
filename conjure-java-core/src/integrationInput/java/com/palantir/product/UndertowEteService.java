@@ -15,19 +15,18 @@ import javax.annotation.Generated;
 public interface UndertowEteService {
     /**
      * foo bar baz.
-     *
      * <h2>Very Important Documentation</h2>
-     *
-     * <p>This documentation provides a <em>list</em>:
-     *
+     * <p>This documentation provides a <em>list</em>:</p>
      * <ul>
-     *   <li>Docs rule
-     *   <li>Lists are wonderful
+     * <li>Docs rule</li>
+     * <li>Lists are wonderful</li>
      * </ul>
      */
     String string(AuthHeader authHeader);
 
-    /** one <em>two</em> three. */
+    /**
+     * one <em>two</em> three.
+     */
     int integer(AuthHeader authHeader);
 
     double double_(AuthHeader authHeader);
@@ -50,7 +49,6 @@ public interface UndertowEteService {
 
     /**
      * Path endpoint.
-     *
      * @param param Documentation for <code>param</code>
      */
     String path(AuthHeader authHeader, String param);
@@ -63,20 +61,15 @@ public interface UndertowEteService {
 
     StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);
 
-    StringAliasExample optionalAliasOne(
-            AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
+    StringAliasExample optionalAliasOne(AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
 
-    NestedStringAliasExample aliasTwo(
-            AuthHeader authHeader, NestedStringAliasExample queryParamName);
+    NestedStringAliasExample aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName);
 
-    StringAliasExample notNullBodyExternalImport(
-            AuthHeader authHeader, StringAliasExample notNullBody);
+    StringAliasExample notNullBodyExternalImport(AuthHeader authHeader, StringAliasExample notNullBody);
 
-    Optional<StringAliasExample> optionalBodyExternalImport(
-            AuthHeader authHeader, Optional<StringAliasExample> body);
+    Optional<StringAliasExample> optionalBodyExternalImport(AuthHeader authHeader, Optional<StringAliasExample> body);
 
-    Optional<StringAliasExample> optionalQueryExternalImport(
-            AuthHeader authHeader, Optional<StringAliasExample> query);
+    Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader, Optional<StringAliasExample> query);
 
     void noReturn(AuthHeader authHeader);
 
@@ -84,8 +77,7 @@ public interface UndertowEteService {
 
     List<SimpleEnum> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
 
-    Optional<SimpleEnum> optionalEnumQuery(
-            AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
+    Optional<SimpleEnum> optionalEnumQuery(AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
     SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 

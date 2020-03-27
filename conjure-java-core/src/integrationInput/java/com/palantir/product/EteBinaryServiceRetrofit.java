@@ -19,22 +19,21 @@ public interface EteBinaryServiceRetrofit {
     @POST("./binary")
     @Headers({"hr-path-template: /binary", "Accept: application/octet-stream"})
     @Streaming
-    ListenableFuture<ResponseBody> postBinary(
-            @Header("Authorization") AuthHeader authHeader, @Body RequestBody body);
+    ListenableFuture<ResponseBody> postBinary(@Header("Authorization") AuthHeader authHeader, @Body RequestBody body);
 
     @GET("./binary/optional/present")
     @Headers({"hr-path-template: /binary/optional/present", "Accept: application/octet-stream"})
     @Streaming
-    ListenableFuture<Optional<ResponseBody>> getOptionalBinaryPresent(
-            @Header("Authorization") AuthHeader authHeader);
+    ListenableFuture<Optional<ResponseBody>> getOptionalBinaryPresent(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./binary/optional/empty")
     @Headers({"hr-path-template: /binary/optional/empty", "Accept: application/octet-stream"})
     @Streaming
-    ListenableFuture<Optional<ResponseBody>> getOptionalBinaryEmpty(
-            @Header("Authorization") AuthHeader authHeader);
+    ListenableFuture<Optional<ResponseBody>> getOptionalBinaryEmpty(@Header("Authorization") AuthHeader authHeader);
 
-    /** Throws an exception after partially writing a binary response. */
+    /**
+     * Throws an exception after partially writing a binary response.
+     */
     @GET("./binary/failure")
     @Headers({"hr-path-template: /binary/failure", "Accept: application/octet-stream"})
     @Streaming

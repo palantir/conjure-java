@@ -28,8 +28,7 @@ public final class SafeLongAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof SafeLongAliasExample
-                        && this.value.equals(((SafeLongAliasExample) other).value));
+                || (other instanceof SafeLongAliasExample && this.value.equals(((SafeLongAliasExample) other).value));
     }
 
     @Override

@@ -28,8 +28,7 @@ public final class MapAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof MapAliasExample
-                        && this.value.equals(((MapAliasExample) other).value));
+                || (other instanceof MapAliasExample && this.value.equals(((MapAliasExample) other).value));
     }
 
     @Override

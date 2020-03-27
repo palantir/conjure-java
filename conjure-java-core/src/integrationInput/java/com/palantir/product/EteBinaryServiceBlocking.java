@@ -17,10 +17,14 @@ public interface EteBinaryServiceBlocking {
 
     Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader);
 
-    /** Throws an exception after partially writing a binary response. */
+    /**
+     * Throws an exception after partially writing a binary response.
+     */
     InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
 
-    /** Creates a synchronous/blocking client for a EteBinaryService service. */
+    /**
+     * Creates a synchronous/blocking client for a EteBinaryService service.
+     */
     static EteBinaryServiceBlocking of(Channel channel, ConjureRuntime runtime) {
         EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(channel, runtime);
         return new EteBinaryServiceBlocking() {

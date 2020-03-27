@@ -76,13 +76,11 @@ public final class SetExample {
         missingFields = addFieldIfMissing(missingFields, doubleItems, "doubleItems");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -114,14 +112,12 @@ public final class SetExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
             this.items.clear();
-            ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<String> items) {
-            ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -134,15 +130,13 @@ public final class SetExample {
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             this.doubleItems.clear();
             ConjureCollections.addAll(
-                    this.doubleItems,
-                    Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
+                    this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 
         public Builder addAllDoubleItems(@Nonnull Iterable<Double> doubleItems) {
             ConjureCollections.addAll(
-                    this.doubleItems,
-                    Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
+                    this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 

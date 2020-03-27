@@ -12,35 +12,35 @@ import javax.annotation.Nonnull;
 
 /**
  * This enumerates the numbers 1:2 also 100.
- *
- * <p>This class is used instead of a native enum to support unknown values. Rather than throw an
- * exception, the {@link EnumExample#valueOf} method defaults to a new instantiation of {@link
- * EnumExample} where {@link EnumExample#get} will return {@link EnumExample.Value#UNKNOWN}.
- *
- * <p>For example, {@code EnumExample.valueOf("corrupted value").get()} will return {@link
- * EnumExample.Value#UNKNOWN}, but {@link EnumExample#toString} will return "corrupted value".
- *
- * <p>There is no method to access all instantiations of this class, since they cannot be known at
- * compile time.
+ * <p>
+ * This class is used instead of a native enum to support unknown values.
+ * Rather than throw an exception, the {@link EnumExample#valueOf} method defaults to a new instantiation of
+ * {@link EnumExample} where {@link EnumExample#get} will return {@link EnumExample.Value#UNKNOWN}.
+ * <p>
+ * For example, {@code EnumExample.valueOf("corrupted value").get()} will return {@link EnumExample.Value#UNKNOWN},
+ * but {@link EnumExample#toString} will return "corrupted value".
+ * <p>
+ * There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 public final class EnumExample {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
-    /** @deprecated Prefer <code>ONE</code> where possible. */
-    @Deprecated public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
+    /**
+     * @deprecated Prefer <code>ONE</code> where possible.
+     */
+    @Deprecated
+    public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
 
     /**
      * Value of 100.
-     *
      * @deprecated One is easier to manage.
      */
     @Deprecated
     public static final EnumExample ONE_HUNDRED = new EnumExample(Value.ONE_HUNDRED, "ONE_HUNDRED");
 
     @SuppressWarnings("deprecation")
-    private static final List<EnumExample> values =
-            Collections.unmodifiableList(Arrays.asList(ONE, TWO, ONE_HUNDRED));
+    private static final List<EnumExample> values = Collections.unmodifiableList(Arrays.asList(ONE, TWO, ONE_HUNDRED));
 
     private final Value value;
 
@@ -63,9 +63,7 @@ public final class EnumExample {
 
     @Override
     public boolean equals(Object other) {
-        return (this == other)
-                || (other instanceof EnumExample
-                        && this.string.equals(((EnumExample) other).string));
+        return (this == other) || (other instanceof EnumExample && this.string.equals(((EnumExample) other).string));
     }
 
     @Override
@@ -112,13 +110,14 @@ public final class EnumExample {
     public enum Value {
         ONE,
 
-        /** @deprecated Prefer <code>ONE</code> where possible. */
+        /**
+         * @deprecated Prefer <code>ONE</code> where possible.
+         */
         @Deprecated
         TWO,
 
         /**
          * Value of 100.
-         *
          * @deprecated One is easier to manage.
          */
         @Deprecated
@@ -131,13 +130,14 @@ public final class EnumExample {
     public interface Visitor<T> {
         T visitOne();
 
-        /** @deprecated Prefer <code>ONE</code> where possible. */
+        /**
+         * @deprecated Prefer <code>ONE</code> where possible.
+         */
         @Deprecated
         T visitTwo();
 
         /**
          * Value of 100.
-         *
          * @deprecated One is easier to manage.
          */
         @Deprecated

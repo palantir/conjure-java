@@ -33,15 +33,12 @@ public final class EmptyUnionTypeExample {
         if (value instanceof UnknownWrapper) {
             return visitor.visitUnknown(((UnknownWrapper) value).getType());
         }
-        throw new IllegalStateException(
-                String.format("Could not identify type %s", value.getClass()));
+        throw new IllegalStateException(String.format("Could not identify type %s", value.getClass()));
     }
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof EmptyUnionTypeExample
-                        && equalTo((EmptyUnionTypeExample) other));
+        return this == other || (other instanceof EmptyUnionTypeExample && equalTo((EmptyUnionTypeExample) other));
     }
 
     private boolean equalTo(EmptyUnionTypeExample other) {
@@ -71,8 +68,7 @@ public final class EmptyUnionTypeExample {
         private Function<String, T> unknownVisitor;
 
         @Override
-        public CompletedStageVisitorBuilder<T> unknown(
-                @Nonnull Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -98,11 +94,7 @@ public final class EmptyUnionTypeExample {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {}
 
@@ -145,8 +137,7 @@ public final class EmptyUnionTypeExample {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
+            return this == other || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
         }
 
         private boolean equalTo(UnknownWrapper other) {

@@ -27,8 +27,7 @@ public final class ReferenceAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof ReferenceAliasExample
-                        && this.value.equals(((ReferenceAliasExample) other).value));
+                || (other instanceof ReferenceAliasExample && this.value.equals(((ReferenceAliasExample) other).value));
     }
 
     @Override

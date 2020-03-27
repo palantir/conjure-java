@@ -24,8 +24,7 @@ public final class LongAlias {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof LongAlias && this.value == ((LongAlias) other).value);
+        return this == other || (other instanceof LongAlias && this.value == ((LongAlias) other).value);
     }
 
     @Override

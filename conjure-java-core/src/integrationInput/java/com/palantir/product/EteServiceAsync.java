@@ -31,19 +31,18 @@ import javax.annotation.Generated;
 public interface EteServiceAsync {
     /**
      * foo bar baz.
-     *
      * <h2>Very Important Documentation</h2>
-     *
-     * <p>This documentation provides a <em>list</em>:
-     *
+     * <p>This documentation provides a <em>list</em>:</p>
      * <ul>
-     *   <li>Docs rule
-     *   <li>Lists are wonderful
+     * <li>Docs rule</li>
+     * <li>Lists are wonderful</li>
      * </ul>
      */
     ListenableFuture<String> string(AuthHeader authHeader);
 
-    /** one <em>two</em> three. */
+    /**
+     * one <em>two</em> three.
+     */
     ListenableFuture<Integer> integer(AuthHeader authHeader);
 
     ListenableFuture<Double> double_(AuthHeader authHeader);
@@ -66,27 +65,22 @@ public interface EteServiceAsync {
 
     /**
      * Path endpoint.
-     *
      * @param param Documentation for <code>param</code>
      */
     ListenableFuture<String> path(AuthHeader authHeader, String param);
 
     ListenableFuture<Long> externalLongPath(AuthHeader authHeader, long param);
 
-    ListenableFuture<Optional<Long>> optionalExternalLongQuery(
-            AuthHeader authHeader, Optional<Long> param);
+    ListenableFuture<Optional<Long>> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param);
 
-    ListenableFuture<StringAliasExample> notNullBody(
-            AuthHeader authHeader, StringAliasExample notNullBody);
+    ListenableFuture<StringAliasExample> notNullBody(AuthHeader authHeader, StringAliasExample notNullBody);
 
-    ListenableFuture<StringAliasExample> aliasOne(
-            AuthHeader authHeader, StringAliasExample queryParamName);
+    ListenableFuture<StringAliasExample> aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);
 
     ListenableFuture<StringAliasExample> optionalAliasOne(
             AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
 
-    ListenableFuture<NestedStringAliasExample> aliasTwo(
-            AuthHeader authHeader, NestedStringAliasExample queryParamName);
+    ListenableFuture<NestedStringAliasExample> aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName);
 
     ListenableFuture<StringAliasExample> notNullBodyExternalImport(
             AuthHeader authHeader, StringAliasExample notNullBody);
@@ -101,16 +95,14 @@ public interface EteServiceAsync {
 
     ListenableFuture<SimpleEnum> enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
 
-    ListenableFuture<List<SimpleEnum>> enumListQuery(
-            AuthHeader authHeader, List<SimpleEnum> queryParamName);
+    ListenableFuture<List<SimpleEnum>> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
 
     ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(
             AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
     ListenableFuture<SimpleEnum> enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
-    ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(
-            AuthHeader authHeader, Optional<LongAlias> input);
+    ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 
     ListenableFuture<Void> complexQueryParameters(
             AuthHeader authHeader,
@@ -119,7 +111,9 @@ public interface EteServiceAsync {
             Set<Long> longs,
             Set<Integer> ints);
 
-    /** Creates an asynchronous/non-blocking client for a EteService service. */
+    /**
+     * Creates an asynchronous/non-blocking client for a EteService service.
+     */
     static EteServiceAsync of(Channel channel, ConjureRuntime runtime) {
         return new EteServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
@@ -184,22 +178,14 @@ public interface EteServiceAsync {
             private final Deserializer<StringAliasExample> notNullBodyExternalImportDeserializer =
                     runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
-            private final Serializer<Optional<StringAliasExample>>
-                    optionalBodyExternalImportSerializer =
-                            runtime.bodySerDe()
-                                    .serializer(new TypeMarker<Optional<StringAliasExample>>() {});
+            private final Serializer<Optional<StringAliasExample>> optionalBodyExternalImportSerializer =
+                    runtime.bodySerDe().serializer(new TypeMarker<Optional<StringAliasExample>>() {});
 
-            private final Deserializer<Optional<StringAliasExample>>
-                    optionalBodyExternalImportDeserializer =
-                            runtime.bodySerDe()
-                                    .deserializer(
-                                            new TypeMarker<Optional<StringAliasExample>>() {});
+            private final Deserializer<Optional<StringAliasExample>> optionalBodyExternalImportDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<StringAliasExample>>() {});
 
-            private final Deserializer<Optional<StringAliasExample>>
-                    optionalQueryExternalImportDeserializer =
-                            runtime.bodySerDe()
-                                    .deserializer(
-                                            new TypeMarker<Optional<StringAliasExample>>() {});
+            private final Deserializer<Optional<StringAliasExample>> optionalQueryExternalImportDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<StringAliasExample>>() {});
 
             private final Deserializer<Void> noReturnDeserializer =
                     runtime.bodySerDe().emptyBodyDeserializer();
@@ -225,103 +211,62 @@ public interface EteServiceAsync {
             @Override
             public ListenableFuture<String> string(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.string,
-                                _request.build(),
-                                stringDeserializer);
+                        .call(channel, DialogueEteEndpoints.string, _request.build(), stringDeserializer);
             }
 
             @Override
             public ListenableFuture<Integer> integer(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.integer,
-                                _request.build(),
-                                integerDeserializer);
+                        .call(channel, DialogueEteEndpoints.integer, _request.build(), integerDeserializer);
             }
 
             @Override
             public ListenableFuture<Double> double_(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.double_,
-                                _request.build(),
-                                double_Deserializer);
+                        .call(channel, DialogueEteEndpoints.double_, _request.build(), double_Deserializer);
             }
 
             @Override
             public ListenableFuture<Boolean> boolean_(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.boolean_,
-                                _request.build(),
-                                boolean_Deserializer);
+                        .call(channel, DialogueEteEndpoints.boolean_, _request.build(), boolean_Deserializer);
             }
 
             @Override
             public ListenableFuture<SafeLong> safelong(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.safelong,
-                                _request.build(),
-                                safelongDeserializer);
+                        .call(channel, DialogueEteEndpoints.safelong, _request.build(), safelongDeserializer);
             }
 
             @Override
             public ListenableFuture<ResourceIdentifier> rid(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return runtime.clients()
-                        .call(channel, DialogueEteEndpoints.rid, _request.build(), ridDeserializer);
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                return runtime.clients().call(channel, DialogueEteEndpoints.rid, _request.build(), ridDeserializer);
             }
 
             @Override
             public ListenableFuture<BearerToken> bearertoken(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.bearertoken,
-                                _request.build(),
-                                bearertokenDeserializer);
+                        .call(channel, DialogueEteEndpoints.bearertoken, _request.build(), bearertokenDeserializer);
             }
 
             @Override
             public ListenableFuture<Optional<String>> optionalString(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
                         .call(
                                 channel,
@@ -333,37 +278,23 @@ public interface EteServiceAsync {
             @Override
             public ListenableFuture<Optional<String>> optionalEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.optionalEmpty,
-                                _request.build(),
-                                optionalEmptyDeserializer);
+                        .call(channel, DialogueEteEndpoints.optionalEmpty, _request.build(), optionalEmptyDeserializer);
             }
 
             @Override
             public ListenableFuture<OffsetDateTime> datetime(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.datetime,
-                                _request.build(),
-                                datetimeDeserializer);
+                        .call(channel, DialogueEteEndpoints.datetime, _request.build(), datetimeDeserializer);
             }
 
             @Override
             public ListenableFuture<InputStream> binary(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
                         .call(
                                 channel,
@@ -375,24 +306,15 @@ public interface EteServiceAsync {
             @Override
             public ListenableFuture<String> path(AuthHeader authHeader, String param) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("param", plainSerDe.serializeString(param));
-                return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.path,
-                                _request.build(),
-                                pathDeserializer);
+                return runtime.clients().call(channel, DialogueEteEndpoints.path, _request.build(), pathDeserializer);
             }
 
             @Override
             public ListenableFuture<Long> externalLongPath(AuthHeader authHeader, long param) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("param", Objects.toString(param));
                 return runtime.clients()
                         .call(
@@ -406,9 +328,7 @@ public interface EteServiceAsync {
             public ListenableFuture<Optional<Long>> optionalExternalLongQuery(
                     AuthHeader authHeader, Optional<Long> param) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 if (param.isPresent()) {
                     _request.putQueryParams("param", Objects.toString(param.get()));
                 }
@@ -424,42 +344,27 @@ public interface EteServiceAsync {
             public ListenableFuture<StringAliasExample> notNullBody(
                     AuthHeader authHeader, StringAliasExample notNullBody) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(notNullBodySerializer.serialize(notNullBody));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.notNullBody,
-                                _request.build(),
-                                notNullBodyDeserializer);
+                        .call(channel, DialogueEteEndpoints.notNullBody, _request.build(), notNullBodyDeserializer);
             }
 
             @Override
             public ListenableFuture<StringAliasExample> aliasOne(
                     AuthHeader authHeader, StringAliasExample queryParamName) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                _request.putQueryParams(
-                        "queryParamName", plainSerDe.serializeString(queryParamName.get()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putQueryParams("queryParamName", plainSerDe.serializeString(queryParamName.get()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.aliasOne,
-                                _request.build(),
-                                aliasOneDeserializer);
+                        .call(channel, DialogueEteEndpoints.aliasOne, _request.build(), aliasOneDeserializer);
             }
 
             @Override
             public ListenableFuture<StringAliasExample> optionalAliasOne(
                     AuthHeader authHeader, Optional<StringAliasExample> queryParamName) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 if (queryParamName.isPresent()) {
                     _request.putQueryParams(
                             "queryParamName",
@@ -477,26 +382,19 @@ public interface EteServiceAsync {
             public ListenableFuture<NestedStringAliasExample> aliasTwo(
                     AuthHeader authHeader, NestedStringAliasExample queryParamName) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putQueryParams(
-                        "queryParamName", plainSerDe.serializeString(queryParamName.get().get()));
+                        "queryParamName",
+                        plainSerDe.serializeString(queryParamName.get().get()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.aliasTwo,
-                                _request.build(),
-                                aliasTwoDeserializer);
+                        .call(channel, DialogueEteEndpoints.aliasTwo, _request.build(), aliasTwoDeserializer);
             }
 
             @Override
             public ListenableFuture<StringAliasExample> notNullBodyExternalImport(
                     AuthHeader authHeader, StringAliasExample notNullBody) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(notNullBodyExternalImportSerializer.serialize(notNullBody));
                 return runtime.clients()
                         .call(
@@ -510,9 +408,7 @@ public interface EteServiceAsync {
             public ListenableFuture<Optional<StringAliasExample>> optionalBodyExternalImport(
                     AuthHeader authHeader, Optional<StringAliasExample> body) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(optionalBodyExternalImportSerializer.serialize(body));
                 return runtime.clients()
                         .call(
@@ -526,9 +422,7 @@ public interface EteServiceAsync {
             public ListenableFuture<Optional<StringAliasExample>> optionalQueryExternalImport(
                     AuthHeader authHeader, Optional<StringAliasExample> query) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 if (query.isPresent()) {
                     _request.putQueryParams("query", Objects.toString(query.get()));
                 }
@@ -543,62 +437,39 @@ public interface EteServiceAsync {
             @Override
             public ListenableFuture<Void> noReturn(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.noReturn,
-                                _request.build(),
-                                noReturnDeserializer);
+                        .call(channel, DialogueEteEndpoints.noReturn, _request.build(), noReturnDeserializer);
             }
 
             @Override
-            public ListenableFuture<SimpleEnum> enumQuery(
-                    AuthHeader authHeader, SimpleEnum queryParamName) {
+            public ListenableFuture<SimpleEnum> enumQuery(AuthHeader authHeader, SimpleEnum queryParamName) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putQueryParams("queryParamName", Objects.toString(queryParamName));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.enumQuery,
-                                _request.build(),
-                                enumQueryDeserializer);
+                        .call(channel, DialogueEteEndpoints.enumQuery, _request.build(), enumQueryDeserializer);
             }
 
             @Override
             public ListenableFuture<List<SimpleEnum>> enumListQuery(
                     AuthHeader authHeader, List<SimpleEnum> queryParamName) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 for (SimpleEnum queryParamNameElement : queryParamName) {
-                    _request.putQueryParams(
-                            "queryParamName", Objects.toString(queryParamNameElement));
+                    _request.putQueryParams("queryParamName", Objects.toString(queryParamNameElement));
                 }
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.enumListQuery,
-                                _request.build(),
-                                enumListQueryDeserializer);
+                        .call(channel, DialogueEteEndpoints.enumListQuery, _request.build(), enumListQueryDeserializer);
             }
 
             @Override
             public ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(
                     AuthHeader authHeader, Optional<SimpleEnum> queryParamName) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 if (queryParamName.isPresent()) {
-                    _request.putQueryParams(
-                            "queryParamName", Objects.toString(queryParamName.get()));
+                    _request.putQueryParams("queryParamName", Objects.toString(queryParamName.get()));
                 }
                 return runtime.clients()
                         .call(
@@ -609,30 +480,22 @@ public interface EteServiceAsync {
             }
 
             @Override
-            public ListenableFuture<SimpleEnum> enumHeader(
-                    AuthHeader authHeader, SimpleEnum headerParameter) {
+            public ListenableFuture<SimpleEnum> enumHeader(AuthHeader authHeader, SimpleEnum headerParameter) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putHeaderParams("Custom-Header", Objects.toString(headerParameter));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEteEndpoints.enumHeader,
-                                _request.build(),
-                                enumHeaderDeserializer);
+                        .call(channel, DialogueEteEndpoints.enumHeader, _request.build(), enumHeaderDeserializer);
             }
 
             @Override
             public ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(
                     AuthHeader authHeader, Optional<LongAlias> input) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 if (input.isPresent()) {
-                    _request.putQueryParams("input", Objects.toString(input.get().get()));
+                    _request.putQueryParams(
+                            "input", Objects.toString(input.get().get()));
                 }
                 return runtime.clients()
                         .call(
@@ -650,13 +513,10 @@ public interface EteServiceAsync {
                     Set<Long> longs,
                     Set<Integer> ints) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 for (StringAliasExample stringsElement : strings) {
-                    _request.putQueryParams(
-                            "strings", plainSerDe.serializeString(stringsElement.get()));
+                    _request.putQueryParams("strings", plainSerDe.serializeString(stringsElement.get()));
                 }
                 for (long longsElement : longs) {
                     _request.putQueryParams("longs", Objects.toString(longsElement));

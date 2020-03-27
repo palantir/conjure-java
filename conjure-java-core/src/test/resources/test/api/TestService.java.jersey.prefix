@@ -28,17 +28,20 @@ import test.prefix.com.palantir.product.NestedAliasedBinary;
 import test.prefix.com.palantir.product.datasets.BackingFileSystem;
 import test.prefix.com.palantir.product.datasets.Dataset;
 
-/** A Markdown description of the service. */
+/**
+ * A Markdown description of the service.
+ */
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface TestService {
-    /** Returns a mapping from file system id to backing file system configuration. */
+    /**
+     * Returns a mapping from file system id to backing file system configuration.
+     */
     @GET
     @Path("catalog/fileSystems")
-    Map<String, BackingFileSystem> getFileSystems(
-            @HeaderParam("Authorization") AuthHeader authHeader);
+    Map<String, BackingFileSystem> getFileSystems(@HeaderParam("Authorization") AuthHeader authHeader);
 
     @POST
     @Path("catalog/datasets")
@@ -83,15 +86,15 @@ public interface TestService {
     @POST
     @Path("catalog/datasets/upload-raw")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    void uploadRawData(
-            @HeaderParam("Authorization") AuthHeader authHeader, @Safe InputStream input);
+    void uploadRawData(@HeaderParam("Authorization") AuthHeader authHeader, @Safe InputStream input);
 
     @POST
     @Path("catalog/datasets/upload-raw-aliased")
-    void uploadAliasedRawData(
-            @HeaderParam("Authorization") AuthHeader authHeader, NestedAliasedBinary input);
+    void uploadAliasedRawData(@HeaderParam("Authorization") AuthHeader authHeader, NestedAliasedBinary input);
 
-    /** @param datasetRid A valid dataset resource identifier. */
+    /**
+     * @param datasetRid A valid dataset resource identifier.
+     */
     @GET
     @Path("catalog/datasets/{datasetRid}/branches")
     Set<String> getBranches(
@@ -100,7 +103,6 @@ public interface TestService {
 
     /**
      * Gets all branches of this dataset.
-     *
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
@@ -179,18 +181,9 @@ public interface TestService {
 
     @Deprecated
     default int testQueryParams(
-            AuthHeader authHeader,
-            ResourceIdentifier something,
-            ResourceIdentifier implicit,
-            String query) {
+            AuthHeader authHeader, ResourceIdentifier something, ResourceIdentifier implicit, String query) {
         return testQueryParams(
-                authHeader,
-                something,
-                implicit,
-                Optional.empty(),
-                Collections.emptySet(),
-                Optional.empty(),
-                query);
+                authHeader, something, implicit, Optional.empty(), Collections.emptySet(), Optional.empty(), query);
     }
 
     @Deprecated
@@ -201,13 +194,7 @@ public interface TestService {
             Optional<ResourceIdentifier> optionalMiddle,
             String query) {
         return testQueryParams(
-                authHeader,
-                something,
-                implicit,
-                optionalMiddle,
-                Collections.emptySet(),
-                Optional.empty(),
-                query);
+                authHeader, something, implicit, optionalMiddle, Collections.emptySet(), Optional.empty(), query);
     }
 
     @Deprecated
@@ -218,24 +205,14 @@ public interface TestService {
             Optional<ResourceIdentifier> optionalMiddle,
             Set<String> setEnd,
             String query) {
-        return testQueryParams(
-                authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
+        return testQueryParams(authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
     }
 
     @Deprecated
     default void testNoResponseQueryParams(
-            AuthHeader authHeader,
-            ResourceIdentifier something,
-            ResourceIdentifier implicit,
-            String query) {
+            AuthHeader authHeader, ResourceIdentifier something, ResourceIdentifier implicit, String query) {
         testNoResponseQueryParams(
-                authHeader,
-                something,
-                implicit,
-                Optional.empty(),
-                Collections.emptySet(),
-                Optional.empty(),
-                query);
+                authHeader, something, implicit, Optional.empty(), Collections.emptySet(), Optional.empty(), query);
     }
 
     @Deprecated
@@ -246,13 +223,7 @@ public interface TestService {
             Optional<ResourceIdentifier> optionalMiddle,
             String query) {
         testNoResponseQueryParams(
-                authHeader,
-                something,
-                implicit,
-                optionalMiddle,
-                Collections.emptySet(),
-                Optional.empty(),
-                query);
+                authHeader, something, implicit, optionalMiddle, Collections.emptySet(), Optional.empty(), query);
     }
 
     @Deprecated
@@ -263,8 +234,7 @@ public interface TestService {
             Optional<ResourceIdentifier> optionalMiddle,
             Set<String> setEnd,
             String query) {
-        testNoResponseQueryParams(
-                authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
+        testNoResponseQueryParams(authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
     }
 
     @Deprecated

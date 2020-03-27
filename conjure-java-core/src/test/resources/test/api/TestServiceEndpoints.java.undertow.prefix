@@ -48,29 +48,28 @@ public final class TestServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(
-                Arrays.asList(
-                        new GetFileSystemsEndpoint(runtime, delegate),
-                        new CreateDatasetEndpoint(runtime, delegate),
-                        new GetDatasetEndpoint(runtime, delegate),
-                        new GetRawDataEndpoint(runtime, delegate),
-                        new GetAliasedRawDataEndpoint(runtime, delegate),
-                        new MaybeGetRawDataEndpoint(runtime, delegate),
-                        new GetAliasedStringEndpoint(runtime, delegate),
-                        new UploadRawDataEndpoint(runtime, delegate),
-                        new UploadAliasedRawDataEndpoint(runtime, delegate),
-                        new GetBranchesEndpoint(runtime, delegate),
-                        new GetBranchesDeprecatedEndpoint(runtime, delegate),
-                        new ResolveBranchEndpoint(runtime, delegate),
-                        new TestParamEndpoint(runtime, delegate),
-                        new TestQueryParamsEndpoint(runtime, delegate),
-                        new TestNoResponseQueryParamsEndpoint(runtime, delegate),
-                        new TestBooleanEndpoint(runtime, delegate),
-                        new TestDoubleEndpoint(runtime, delegate),
-                        new TestIntegerEndpoint(runtime, delegate),
-                        new TestPostOptionalEndpoint(runtime, delegate),
-                        new TestOptionalIntegerAndDoubleEndpoint(runtime, delegate),
-                        new GetForStringsEndpoint(runtime, delegate)));
+        return Collections.unmodifiableList(Arrays.asList(
+                new GetFileSystemsEndpoint(runtime, delegate),
+                new CreateDatasetEndpoint(runtime, delegate),
+                new GetDatasetEndpoint(runtime, delegate),
+                new GetRawDataEndpoint(runtime, delegate),
+                new GetAliasedRawDataEndpoint(runtime, delegate),
+                new MaybeGetRawDataEndpoint(runtime, delegate),
+                new GetAliasedStringEndpoint(runtime, delegate),
+                new UploadRawDataEndpoint(runtime, delegate),
+                new UploadAliasedRawDataEndpoint(runtime, delegate),
+                new GetBranchesEndpoint(runtime, delegate),
+                new GetBranchesDeprecatedEndpoint(runtime, delegate),
+                new ResolveBranchEndpoint(runtime, delegate),
+                new TestParamEndpoint(runtime, delegate),
+                new TestQueryParamsEndpoint(runtime, delegate),
+                new TestNoResponseQueryParamsEndpoint(runtime, delegate),
+                new TestBooleanEndpoint(runtime, delegate),
+                new TestDoubleEndpoint(runtime, delegate),
+                new TestIntegerEndpoint(runtime, delegate),
+                new TestPostOptionalEndpoint(runtime, delegate),
+                new TestOptionalIntegerAndDoubleEndpoint(runtime, delegate),
+                new GetForStringsEndpoint(runtime, delegate)));
     }
 
     private static final class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
@@ -83,9 +82,7 @@ public final class TestServiceEndpoints implements UndertowService {
         GetFileSystemsEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer =
-                    runtime.bodySerDe()
-                            .serializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
         }
 
         @Override
@@ -133,8 +130,7 @@ public final class TestServiceEndpoints implements UndertowService {
         CreateDatasetEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<CreateDatasetRequest>() {});
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<CreateDatasetRequest>() {});
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Dataset>() {});
         }
 
@@ -143,10 +139,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             CreateDatasetRequest request = deserializer.deserialize(exchange);
             HeaderMap headerParams = exchange.getRequestHeaders();
-            String testHeaderArg =
-                    runtime.plainSerDe().deserializeString(headerParams.get("Test-Header"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "testHeaderArg", testHeaderArg, exchange);
+            String testHeaderArg = runtime.plainSerDe().deserializeString(headerParams.get("Test-Header"));
+            runtime.markers().param("com.palantir.redaction.Safe", "testHeaderArg", testHeaderArg, exchange);
             Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
             serializer.serialize(result, exchange);
         }
@@ -187,8 +181,7 @@ public final class TestServiceEndpoints implements UndertowService {
         GetDatasetEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer =
-                    runtime.bodySerDe().serializer(new TypeMarker<Optional<Dataset>>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<Dataset>>() {});
         }
 
         @Override
@@ -196,10 +189,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             Optional<Dataset> result = delegate.getDataset(authHeader, datasetRid);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
@@ -249,10 +240,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
             runtime.bodySerDe().serialize(result, exchange);
         }
@@ -293,8 +282,7 @@ public final class TestServiceEndpoints implements UndertowService {
         GetAliasedRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer =
-                    runtime.bodySerDe().serializer(new TypeMarker<NestedAliasedBinary>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<NestedAliasedBinary>() {});
         }
 
         @Override
@@ -302,10 +290,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
             serializer.serialize(result, exchange);
         }
@@ -351,10 +337,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             runtime.markers().param("javax.annotation.Nonnull", "datasetRid", datasetRid, exchange);
             Optional<BinaryResponseBody> result = delegate.maybeGetRawData(authHeader, datasetRid);
             if (result.isPresent()) {
@@ -408,10 +392,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
             serializer.serialize(result, exchange);
         }
@@ -497,8 +479,7 @@ public final class TestServiceEndpoints implements UndertowService {
         UploadAliasedRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<NestedAliasedBinary>() {});
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<NestedAliasedBinary>() {});
         }
 
         @Override
@@ -553,10 +534,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             Set<String> result = delegate.getBranches(authHeader, datasetRid);
             serializer.serialize(result, exchange);
         }
@@ -606,10 +585,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
             serializer.serialize(result, exchange);
         }
@@ -663,10 +640,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             String branch = runtime.plainSerDe().deserializeString(pathParams.get("branch"));
             Optional<String> result = delegate.resolveBranch(authHeader, datasetRid, branch);
             if (result.isPresent()) {
@@ -720,10 +695,8 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             Optional<String> result = delegate.testParam(authHeader, datasetRid);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
@@ -779,27 +752,16 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             String query = deserializer.deserialize(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            ResourceIdentifier something =
-                    runtime.plainSerDe().deserializeRid(queryParams.get("different"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "something", something, exchange);
+            ResourceIdentifier something = runtime.plainSerDe().deserializeRid(queryParams.get("different"));
+            runtime.markers().param("com.palantir.redaction.Safe", "something", something, exchange);
             Optional<ResourceIdentifier> optionalMiddle =
                     runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalMiddle"));
-            ResourceIdentifier implicit =
-                    runtime.plainSerDe().deserializeRid(queryParams.get("implicit"));
-            Set<String> setEnd =
-                    runtime.plainSerDe().deserializeStringSet(queryParams.get("setEnd"));
+            ResourceIdentifier implicit = runtime.plainSerDe().deserializeRid(queryParams.get("implicit"));
+            Set<String> setEnd = runtime.plainSerDe().deserializeStringSet(queryParams.get("setEnd"));
             Optional<ResourceIdentifier> optionalEnd =
                     runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalEnd"));
-            int result =
-                    delegate.testQueryParams(
-                            authHeader,
-                            something,
-                            implicit,
-                            optionalMiddle,
-                            setEnd,
-                            optionalEnd,
-                            query);
+            int result = delegate.testQueryParams(
+                    authHeader, something, implicit, optionalMiddle, setEnd, optionalEnd, query);
             serializer.serialize(result, exchange);
         }
 
@@ -847,14 +809,11 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             String query = deserializer.deserialize(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            ResourceIdentifier something =
-                    runtime.plainSerDe().deserializeRid(queryParams.get("different"));
+            ResourceIdentifier something = runtime.plainSerDe().deserializeRid(queryParams.get("different"));
             Optional<ResourceIdentifier> optionalMiddle =
                     runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalMiddle"));
-            ResourceIdentifier implicit =
-                    runtime.plainSerDe().deserializeRid(queryParams.get("implicit"));
-            Set<String> setEnd =
-                    runtime.plainSerDe().deserializeStringSet(queryParams.get("setEnd"));
+            ResourceIdentifier implicit = runtime.plainSerDe().deserializeRid(queryParams.get("implicit"));
+            Set<String> setEnd = runtime.plainSerDe().deserializeStringSet(queryParams.get("setEnd"));
             Optional<ResourceIdentifier> optionalEnd =
                     runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalEnd"));
             delegate.testNoResponseQueryParams(
@@ -1038,8 +997,7 @@ public final class TestServiceEndpoints implements UndertowService {
         TestPostOptionalEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
         }
 
@@ -1081,8 +1039,7 @@ public final class TestServiceEndpoints implements UndertowService {
         }
     }
 
-    private static final class TestOptionalIntegerAndDoubleEndpoint
-            implements HttpHandler, Endpoint {
+    private static final class TestOptionalIntegerAndDoubleEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
         private final TestService delegate;
@@ -1096,11 +1053,8 @@ public final class TestServiceEndpoints implements UndertowService {
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            OptionalInt maybeInteger =
-                    runtime.plainSerDe()
-                            .deserializeOptionalInteger(queryParams.get("maybeInteger"));
-            OptionalDouble maybeDouble =
-                    runtime.plainSerDe().deserializeOptionalDouble(queryParams.get("maybeDouble"));
+            OptionalInt maybeInteger = runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("maybeInteger"));
+            OptionalDouble maybeDouble = runtime.plainSerDe().deserializeOptionalDouble(queryParams.get("maybeDouble"));
             delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -1146,15 +1100,11 @@ public final class TestServiceEndpoints implements UndertowService {
             AuthHeader authHeader = runtime.auth().header(exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
-            ResourceIdentifier datasetRid =
-                    runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             Set<AliasedString> strings =
-                    runtime.plainSerDe()
-                            .deserializeComplexSet(
-                                    queryParams.get("strings"), AliasedString::valueOf);
+                    runtime.plainSerDe().deserializeComplexSet(queryParams.get("strings"), AliasedString::valueOf);
             delegate.getForStrings(authHeader, datasetRid, strings);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }

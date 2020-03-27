@@ -29,8 +29,7 @@ public final class CookieServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(
-                Arrays.asList(new EatCookiesEndpoint(runtime, delegate)));
+        return Collections.unmodifiableList(Arrays.asList(new EatCookiesEndpoint(runtime, delegate)));
     }
 
     private static final class EatCookiesEndpoint implements HttpHandler, Endpoint {

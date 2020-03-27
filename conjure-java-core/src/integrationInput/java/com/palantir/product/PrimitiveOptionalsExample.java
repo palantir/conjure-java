@@ -95,8 +95,7 @@ public final class PrimitiveOptionalsExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof PrimitiveOptionalsExample
-                        && equalTo((PrimitiveOptionalsExample) other));
+                || (other instanceof PrimitiveOptionalsExample && equalTo((PrimitiveOptionalsExample) other));
     }
 
     private boolean equalTo(PrimitiveOptionalsExample other) {
@@ -113,15 +112,8 @@ public final class PrimitiveOptionalsExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result =
-                    Objects.hash(
-                            this.num,
-                            this.bool,
-                            this.integer,
-                            this.safelong,
-                            this.rid,
-                            this.bearertoken,
-                            this.uuid);
+            result = Objects.hash(
+                    this.num, this.bool, this.integer, this.safelong, this.rid, this.bearertoken, this.uuid);
             memoizedHashCode = result;
         }
         return result;
@@ -129,21 +121,8 @@ public final class PrimitiveOptionalsExample {
 
     @Override
     public String toString() {
-        return "PrimitiveOptionalsExample{num: "
-                + num
-                + ", bool: "
-                + bool
-                + ", integer: "
-                + integer
-                + ", safelong: "
-                + safelong
-                + ", rid: "
-                + rid
-                + ", bearertoken: "
-                + bearertoken
-                + ", uuid: "
-                + uuid
-                + '}';
+        return "PrimitiveOptionalsExample{num: " + num + ", bool: " + bool + ", integer: " + integer + ", safelong: "
+                + safelong + ", rid: " + rid + ", bearertoken: " + bearertoken + ", uuid: " + uuid + '}';
     }
 
     private static void validateFields(
@@ -164,13 +143,11 @@ public final class PrimitiveOptionalsExample {
         missingFields = addFieldIfMissing(missingFields, uuid, "uuid");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -254,8 +231,7 @@ public final class PrimitiveOptionalsExample {
         }
 
         public Builder safelong(@Nonnull SafeLong safelong) {
-            this.safelong =
-                    Optional.of(Preconditions.checkNotNull(safelong, "safelong cannot be null"));
+            this.safelong = Optional.of(Preconditions.checkNotNull(safelong, "safelong cannot be null"));
             return this;
         }
 
@@ -272,15 +248,12 @@ public final class PrimitiveOptionalsExample {
 
         @JsonSetter(value = "bearertoken", nulls = Nulls.SKIP)
         public Builder bearertoken(@Nonnull Optional<BearerToken> bearertoken) {
-            this.bearertoken =
-                    Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null");
+            this.bearertoken = Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null");
             return this;
         }
 
         public Builder bearertoken(@Nonnull BearerToken bearertoken) {
-            this.bearertoken =
-                    Optional.of(
-                            Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null"));
+            this.bearertoken = Optional.of(Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null"));
             return this;
         }
 
@@ -296,8 +269,7 @@ public final class PrimitiveOptionalsExample {
         }
 
         public PrimitiveOptionalsExample build() {
-            return new PrimitiveOptionalsExample(
-                    num, bool, integer, safelong, rid, bearertoken, uuid);
+            return new PrimitiveOptionalsExample(num, bool, integer, safelong, rid, bearertoken, uuid);
         }
     }
 }

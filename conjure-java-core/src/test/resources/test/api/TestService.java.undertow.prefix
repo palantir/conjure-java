@@ -16,14 +16,17 @@ import test.prefix.com.palantir.product.NestedAliasedBinary;
 import test.prefix.com.palantir.product.datasets.BackingFileSystem;
 import test.prefix.com.palantir.product.datasets.Dataset;
 
-/** A Markdown description of the service. */
+/**
+ * A Markdown description of the service.
+ */
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface TestService {
-    /** Returns a mapping from file system id to backing file system configuration. */
+    /**
+     * Returns a mapping from file system id to backing file system configuration.
+     */
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
 
-    Dataset createDataset(
-            AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
+    Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
     Optional<Dataset> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
@@ -31,8 +34,7 @@ public interface TestService {
 
     NestedAliasedBinary getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    Optional<BinaryResponseBody> maybeGetRawData(
-            AuthHeader authHeader, ResourceIdentifier datasetRid);
+    Optional<BinaryResponseBody> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     AliasedString getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
@@ -40,20 +42,20 @@ public interface TestService {
 
     void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input);
 
-    /** @param datasetRid A valid dataset resource identifier. */
+    /**
+     * @param datasetRid A valid dataset resource identifier.
+     */
     Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
-     *
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
     @Deprecated
     Set<String> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    Optional<String> resolveBranch(
-            AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
+    Optional<String> resolveBranch(AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
 
     Optional<String> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
@@ -83,9 +85,7 @@ public interface TestService {
 
     Optional<String> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
 
-    void testOptionalIntegerAndDouble(
-            AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
+    void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
 
-    void getForStrings(
-            AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
+    void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 }

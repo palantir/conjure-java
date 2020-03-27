@@ -25,21 +25,20 @@ import retrofit2.http.Streaming;
 public interface EteServiceRetrofit {
     /**
      * foo bar baz.
-     *
      * <h2>Very Important Documentation</h2>
-     *
-     * <p>This documentation provides a <em>list</em>:
-     *
+     * <p>This documentation provides a <em>list</em>:</p>
      * <ul>
-     *   <li>Docs rule
-     *   <li>Lists are wonderful
+     * <li>Docs rule</li>
+     * <li>Lists are wonderful</li>
      * </ul>
      */
     @GET("./base/string")
     @Headers({"hr-path-template: /base/string", "Accept: application/json"})
     ListenableFuture<String> string(@Header("Authorization") AuthHeader authHeader);
 
-    /** one <em>two</em> three. */
+    /**
+     * one <em>two</em> three.
+     */
     @GET("./base/integer")
     @Headers({"hr-path-template: /base/integer", "Accept: application/json"})
     ListenableFuture<Integer> integer(@Header("Authorization") AuthHeader authHeader);
@@ -66,13 +65,11 @@ public interface EteServiceRetrofit {
 
     @GET("./base/optionalString")
     @Headers({"hr-path-template: /base/optionalString", "Accept: application/json"})
-    ListenableFuture<Optional<String>> optionalString(
-            @Header("Authorization") AuthHeader authHeader);
+    ListenableFuture<Optional<String>> optionalString(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/optionalEmpty")
     @Headers({"hr-path-template: /base/optionalEmpty", "Accept: application/json"})
-    ListenableFuture<Optional<String>> optionalEmpty(
-            @Header("Authorization") AuthHeader authHeader);
+    ListenableFuture<Optional<String>> optionalEmpty(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/datetime")
     @Headers({"hr-path-template: /base/datetime", "Accept: application/json"})
@@ -85,18 +82,15 @@ public interface EteServiceRetrofit {
 
     /**
      * Path endpoint.
-     *
      * @param param Documentation for <code>param</code>
      */
     @GET("./base/path/{param}")
     @Headers({"hr-path-template: /base/path/{param}", "Accept: application/json"})
-    ListenableFuture<String> path(
-            @Header("Authorization") AuthHeader authHeader, @Path("param") String param);
+    ListenableFuture<String> path(@Header("Authorization") AuthHeader authHeader, @Path("param") String param);
 
     @GET("./base/externalLong/{param}")
     @Headers({"hr-path-template: /base/externalLong/{param}", "Accept: application/json"})
-    ListenableFuture<Long> externalLongPath(
-            @Header("Authorization") AuthHeader authHeader, @Path("param") long param);
+    ListenableFuture<Long> externalLongPath(@Header("Authorization") AuthHeader authHeader, @Path("param") long param);
 
     @GET("./base/optionalExternalLong")
     @Headers({"hr-path-template: /base/optionalExternalLong", "Accept: application/json"})
@@ -111,8 +105,7 @@ public interface EteServiceRetrofit {
     @GET("./base/aliasOne")
     @Headers({"hr-path-template: /base/aliasOne", "Accept: application/json"})
     ListenableFuture<StringAliasExample> aliasOne(
-            @Header("Authorization") AuthHeader authHeader,
-            @Query("queryParamName") StringAliasExample queryParamName);
+            @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") StringAliasExample queryParamName);
 
     @GET("./base/optionalAliasOne")
     @Headers({"hr-path-template: /base/optionalAliasOne", "Accept: application/json"})
@@ -134,14 +127,12 @@ public interface EteServiceRetrofit {
     @POST("./base/external/optional-body")
     @Headers({"hr-path-template: /base/external/optional-body", "Accept: application/json"})
     ListenableFuture<Optional<StringAliasExample>> optionalBodyExternalImport(
-            @Header("Authorization") AuthHeader authHeader,
-            @Body Optional<StringAliasExample> body);
+            @Header("Authorization") AuthHeader authHeader, @Body Optional<StringAliasExample> body);
 
     @POST("./base/external/optional-query")
     @Headers({"hr-path-template: /base/external/optional-query", "Accept: application/json"})
     ListenableFuture<Optional<StringAliasExample>> optionalQueryExternalImport(
-            @Header("Authorization") AuthHeader authHeader,
-            @Query("query") Optional<StringAliasExample> query);
+            @Header("Authorization") AuthHeader authHeader, @Query("query") Optional<StringAliasExample> query);
 
     @POST("./base/no-return")
     @Headers({"hr-path-template: /base/no-return", "Accept: application/json"})
@@ -150,14 +141,12 @@ public interface EteServiceRetrofit {
     @GET("./base/enum/query")
     @Headers({"hr-path-template: /base/enum/query", "Accept: application/json"})
     ListenableFuture<SimpleEnum> enumQuery(
-            @Header("Authorization") AuthHeader authHeader,
-            @Query("queryParamName") SimpleEnum queryParamName);
+            @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") SimpleEnum queryParamName);
 
     @GET("./base/enum/list/query")
     @Headers({"hr-path-template: /base/enum/list/query", "Accept: application/json"})
     ListenableFuture<List<SimpleEnum>> enumListQuery(
-            @Header("Authorization") AuthHeader authHeader,
-            @Query("queryParamName") List<SimpleEnum> queryParamName);
+            @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") List<SimpleEnum> queryParamName);
 
     @GET("./base/enum/optional/query")
     @Headers({"hr-path-template: /base/enum/optional/query", "Accept: application/json"})
@@ -168,14 +157,12 @@ public interface EteServiceRetrofit {
     @GET("./base/enum/header")
     @Headers({"hr-path-template: /base/enum/header", "Accept: application/json"})
     ListenableFuture<SimpleEnum> enumHeader(
-            @Header("Authorization") AuthHeader authHeader,
-            @Header("Custom-Header") SimpleEnum headerParameter);
+            @Header("Authorization") AuthHeader authHeader, @Header("Custom-Header") SimpleEnum headerParameter);
 
     @GET("./base/alias-long")
     @Headers({"hr-path-template: /base/alias-long", "Accept: application/json"})
     ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(
-            @Header("Authorization") AuthHeader authHeader,
-            @Query("input") Optional<LongAlias> input);
+            @Header("Authorization") AuthHeader authHeader, @Query("input") Optional<LongAlias> input);
 
     @GET("./base/datasets/{datasetRid}/strings")
     @Headers({"hr-path-template: /base/datasets/{datasetRid}/strings", "Accept: application/json"})
@@ -187,14 +174,12 @@ public interface EteServiceRetrofit {
             @Query("ints") Set<Integer> ints);
 
     @Deprecated
-    default ListenableFuture<Optional<Long>> optionalExternalLongQuery(
-            @Header("Authorization") AuthHeader authHeader) {
+    default ListenableFuture<Optional<Long>> optionalExternalLongQuery(@Header("Authorization") AuthHeader authHeader) {
         return optionalExternalLongQuery(authHeader, Optional.empty());
     }
 
     @Deprecated
-    default ListenableFuture<StringAliasExample> optionalAliasOne(
-            @Header("Authorization") AuthHeader authHeader) {
+    default ListenableFuture<StringAliasExample> optionalAliasOne(@Header("Authorization") AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());
     }
 
@@ -205,33 +190,25 @@ public interface EteServiceRetrofit {
     }
 
     @Deprecated
-    default ListenableFuture<List<SimpleEnum>> enumListQuery(
-            @Header("Authorization") AuthHeader authHeader) {
+    default ListenableFuture<List<SimpleEnum>> enumListQuery(@Header("Authorization") AuthHeader authHeader) {
         return enumListQuery(authHeader, Collections.emptyList());
     }
 
     @Deprecated
-    default ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(
-            @Header("Authorization") AuthHeader authHeader) {
+    default ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(@Header("Authorization") AuthHeader authHeader) {
         return optionalEnumQuery(authHeader, Optional.empty());
     }
 
     @Deprecated
-    default ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(
-            @Header("Authorization") AuthHeader authHeader) {
+    default ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(@Header("Authorization") AuthHeader authHeader) {
         return aliasLongEndpoint(authHeader, Optional.empty());
     }
 
     @Deprecated
     default void complexQueryParameters(
-            @Header("Authorization") AuthHeader authHeader,
-            @Path("datasetRid") ResourceIdentifier datasetRid) {
+            @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid) {
         complexQueryParameters(
-                authHeader,
-                datasetRid,
-                Collections.emptySet(),
-                Collections.emptySet(),
-                Collections.emptySet());
+                authHeader, datasetRid, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
     }
 
     @Deprecated
@@ -239,8 +216,7 @@ public interface EteServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
             @Query("strings") Set<StringAliasExample> strings) {
-        complexQueryParameters(
-                authHeader, datasetRid, strings, Collections.emptySet(), Collections.emptySet());
+        complexQueryParameters(authHeader, datasetRid, strings, Collections.emptySet(), Collections.emptySet());
     }
 
     @Deprecated

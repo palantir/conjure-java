@@ -28,8 +28,7 @@ public final class UuidAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof UuidAliasExample
-                        && this.value.equals(((UuidAliasExample) other).value));
+                || (other instanceof UuidAliasExample && this.value.equals(((UuidAliasExample) other).value));
     }
 
     @Override

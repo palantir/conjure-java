@@ -78,8 +78,7 @@ public final class ReservedKeyExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof ReservedKeyExample && equalTo((ReservedKeyExample) other));
+        return this == other || (other instanceof ReservedKeyExample && equalTo((ReservedKeyExample) other));
     }
 
     private boolean equalTo(ReservedKeyExample other) {
@@ -95,14 +94,13 @@ public final class ReservedKeyExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result =
-                    Objects.hash(
-                            this.package_,
-                            this.interface_,
-                            this.fieldNameWithDashes,
-                            this.primitveFieldNameWithDashes,
-                            this.memoizedHashCode_,
-                            this.result);
+            result = Objects.hash(
+                    this.package_,
+                    this.interface_,
+                    this.fieldNameWithDashes,
+                    this.primitveFieldNameWithDashes,
+                    this.memoizedHashCode_,
+                    this.result);
             memoizedHashCode = result;
         }
         return result;
@@ -110,37 +108,23 @@ public final class ReservedKeyExample {
 
     @Override
     public String toString() {
-        return "ReservedKeyExample{package: "
-                + package_
-                + ", interface: "
-                + interface_
-                + ", field-name-with-dashes: "
-                + fieldNameWithDashes
-                + ", primitve-field-name-with-dashes: "
-                + primitveFieldNameWithDashes
-                + ", memoizedHashCode: "
-                + memoizedHashCode_
-                + ", result: "
-                + result
-                + '}';
+        return "ReservedKeyExample{package: " + package_ + ", interface: " + interface_ + ", field-name-with-dashes: "
+                + fieldNameWithDashes + ", primitve-field-name-with-dashes: " + primitveFieldNameWithDashes
+                + ", memoizedHashCode: " + memoizedHashCode_ + ", result: " + result + '}';
     }
 
-    private static void validateFields(
-            String package_, String interface_, String fieldNameWithDashes) {
+    private static void validateFields(String package_, String interface_, String fieldNameWithDashes) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, package_, "package");
         missingFields = addFieldIfMissing(missingFields, interface_, "interface");
-        missingFields =
-                addFieldIfMissing(missingFields, fieldNameWithDashes, "field-name-with-dashes");
+        missingFields = addFieldIfMissing(missingFields, fieldNameWithDashes, "field-name-with-dashes");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -203,8 +187,7 @@ public final class ReservedKeyExample {
         @JsonSetter("field-name-with-dashes")
         public Builder fieldNameWithDashes(@Nonnull String fieldNameWithDashes) {
             this.fieldNameWithDashes =
-                    Preconditions.checkNotNull(
-                            fieldNameWithDashes, "field-name-with-dashes cannot be null");
+                    Preconditions.checkNotNull(fieldNameWithDashes, "field-name-with-dashes cannot be null");
             return this;
         }
 
@@ -231,24 +214,17 @@ public final class ReservedKeyExample {
 
         private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
-            missingFields =
-                    addFieldIfMissing(
-                            missingFields,
-                            _primitveFieldNameWithDashesInitialized,
-                            "primitve-field-name-with-dashes");
-            missingFields =
-                    addFieldIfMissing(
-                            missingFields, _memoizedHashCode_Initialized, "memoizedHashCode");
+            missingFields = addFieldIfMissing(
+                    missingFields, _primitveFieldNameWithDashesInitialized, "primitve-field-name-with-dashes");
+            missingFields = addFieldIfMissing(missingFields, _memoizedHashCode_Initialized, "memoizedHashCode");
             missingFields = addFieldIfMissing(missingFields, _resultInitialized, "result");
             if (missingFields != null) {
                 throw new SafeIllegalArgumentException(
-                        "Some required fields have not been set",
-                        SafeArg.of("missingFields", missingFields));
+                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
             }
         }
 
-        private static List<String> addFieldIfMissing(
-                List<String> prev, boolean initialized, String fieldName) {
+        private static List<String> addFieldIfMissing(List<String> prev, boolean initialized, String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {
@@ -262,12 +238,7 @@ public final class ReservedKeyExample {
         public ReservedKeyExample build() {
             validatePrimitiveFieldsHaveBeenInitialized();
             return new ReservedKeyExample(
-                    package_,
-                    interface_,
-                    fieldNameWithDashes,
-                    primitveFieldNameWithDashes,
-                    memoizedHashCode_,
-                    result);
+                    package_, interface_, fieldNameWithDashes, primitveFieldNameWithDashes, memoizedHashCode_, result);
         }
     }
 }

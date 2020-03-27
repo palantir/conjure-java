@@ -9,7 +9,9 @@ import javax.annotation.Generated;
 public interface EmptyPathServiceBlocking {
     boolean emptyPath();
 
-    /** Creates a synchronous/blocking client for a EmptyPathService service. */
+    /**
+     * Creates a synchronous/blocking client for a EmptyPathService service.
+     */
     static EmptyPathServiceBlocking of(Channel channel, ConjureRuntime runtime) {
         EmptyPathServiceAsync delegate = EmptyPathServiceAsync.of(channel, runtime);
         return new EmptyPathServiceBlocking() {

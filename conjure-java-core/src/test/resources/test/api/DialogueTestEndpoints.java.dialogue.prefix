@@ -11,7 +11,9 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueTestEndpoints implements Endpoint {
-    /** Returns a mapping from file system id to backing file system configuration. */
+    /**
+     * Returns a mapping from file system id to backing file system configuration.
+     */
     getFileSystems {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("catalog").fixed("fileSystems").build();
@@ -73,12 +75,11 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     getDataset {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -107,13 +108,12 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     getRawData {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("raw")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("raw")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -142,13 +142,12 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     getAliasedRawData {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("raw-aliased")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("raw-aliased")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -177,13 +176,12 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     maybeGetRawData {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("raw-maybe")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("raw-maybe")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -212,13 +210,12 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     getAliasedString {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("string-aliased")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("string-aliased")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -247,12 +244,11 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     uploadRawData {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .fixed("upload-raw")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .fixed("upload-raw")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -281,12 +277,11 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     uploadAliasedRawData {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .fixed("upload-raw-aliased")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .fixed("upload-raw-aliased")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -315,13 +310,12 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     getBranches {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("branches")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("branches")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -349,15 +343,16 @@ enum DialogueTestEndpoints implements Endpoint {
         }
     },
 
-    /** Gets all branches of this dataset. */
+    /**
+     * Gets all branches of this dataset.
+     */
     getBranchesDeprecated {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("branchesDeprecated")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("branchesDeprecated")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -386,15 +381,14 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     resolveBranch {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("branches")
-                        .variable("branch")
-                        .fixed("resolve")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("branches")
+                .variable("branch")
+                .fixed("resolve")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -423,13 +417,12 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     testParam {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("testParam")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("testParam")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -458,8 +451,10 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     testQueryParams {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("catalog").fixed("test-query-params").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("test-query-params")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -488,11 +483,10 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     testNoResponseQueryParams {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("test-no-response-query-params")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("test-no-response-query-params")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -641,8 +635,10 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     testOptionalIntegerAndDouble {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("catalog").fixed("optional-integer-double").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("optional-integer-double")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -671,13 +667,12 @@ enum DialogueTestEndpoints implements Endpoint {
     },
 
     getForStrings {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("catalog")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("strings")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("strings")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {

@@ -91,8 +91,7 @@ public final class AliasAsMapKeyExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof AliasAsMapKeyExample && equalTo((AliasAsMapKeyExample) other));
+        return this == other || (other instanceof AliasAsMapKeyExample && equalTo((AliasAsMapKeyExample) other));
     }
 
     private boolean equalTo(AliasAsMapKeyExample other) {
@@ -109,15 +108,14 @@ public final class AliasAsMapKeyExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result =
-                    Objects.hash(
-                            this.strings,
-                            this.rids,
-                            this.bearertokens,
-                            this.integers,
-                            this.safelongs,
-                            this.datetimes,
-                            this.uuids);
+            result = Objects.hash(
+                    this.strings,
+                    this.rids,
+                    this.bearertokens,
+                    this.integers,
+                    this.safelongs,
+                    this.datetimes,
+                    this.uuids);
             memoizedHashCode = result;
         }
         return result;
@@ -125,21 +123,9 @@ public final class AliasAsMapKeyExample {
 
     @Override
     public String toString() {
-        return "AliasAsMapKeyExample{strings: "
-                + strings
-                + ", rids: "
-                + rids
-                + ", bearertokens: "
-                + bearertokens
-                + ", integers: "
-                + integers
-                + ", safelongs: "
-                + safelongs
-                + ", datetimes: "
-                + datetimes
-                + ", uuids: "
-                + uuids
-                + '}';
+        return "AliasAsMapKeyExample{strings: " + strings + ", rids: " + rids + ", bearertokens: " + bearertokens
+                + ", integers: " + integers + ", safelongs: " + safelongs + ", datetimes: " + datetimes + ", uuids: "
+                + uuids + '}';
     }
 
     private static void validateFields(
@@ -160,13 +146,11 @@ public final class AliasAsMapKeyExample {
         missingFields = addFieldIfMissing(missingFields, uuids, "uuids");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -246,18 +230,14 @@ public final class AliasAsMapKeyExample {
         }
 
         @JsonSetter(value = "bearertokens", nulls = Nulls.SKIP)
-        public Builder bearertokens(
-                @Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
+        public Builder bearertokens(@Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
             this.bearertokens.clear();
-            this.bearertokens.putAll(
-                    Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
+            this.bearertokens.putAll(Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
             return this;
         }
 
-        public Builder putAllBearertokens(
-                @Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
-            this.bearertokens.putAll(
-                    Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
+        public Builder putAllBearertokens(@Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
+            this.bearertokens.putAll(Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
             return this;
         }
 
@@ -273,8 +253,7 @@ public final class AliasAsMapKeyExample {
             return this;
         }
 
-        public Builder putAllIntegers(
-                @Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
+        public Builder putAllIntegers(@Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
             this.integers.putAll(Preconditions.checkNotNull(integers, "integers cannot be null"));
             return this;
         }
@@ -287,15 +266,12 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "safelongs", nulls = Nulls.SKIP)
         public Builder safelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
             this.safelongs.clear();
-            this.safelongs.putAll(
-                    Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
+            this.safelongs.putAll(Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
             return this;
         }
 
-        public Builder putAllSafelongs(
-                @Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
-            this.safelongs.putAll(
-                    Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
+        public Builder putAllSafelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
+            this.safelongs.putAll(Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
             return this;
         }
 
@@ -307,15 +283,12 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "datetimes", nulls = Nulls.SKIP)
         public Builder datetimes(@Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
             this.datetimes.clear();
-            this.datetimes.putAll(
-                    Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
+            this.datetimes.putAll(Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
             return this;
         }
 
-        public Builder putAllDatetimes(
-                @Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
-            this.datetimes.putAll(
-                    Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
+        public Builder putAllDatetimes(@Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
+            this.datetimes.putAll(Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
             return this;
         }
 
@@ -342,8 +315,7 @@ public final class AliasAsMapKeyExample {
         }
 
         public AliasAsMapKeyExample build() {
-            return new AliasAsMapKeyExample(
-                    strings, rids, bearertokens, integers, safelongs, datetimes, uuids);
+            return new AliasAsMapKeyExample(strings, rids, bearertokens, integers, safelongs, datetimes, uuids);
         }
     }
 }

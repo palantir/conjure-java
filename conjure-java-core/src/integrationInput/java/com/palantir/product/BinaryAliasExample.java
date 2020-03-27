@@ -28,8 +28,7 @@ public final class BinaryAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof BinaryAliasExample
-                        && this.value.equals(((BinaryAliasExample) other).value));
+                || (other instanceof BinaryAliasExample && this.value.equals(((BinaryAliasExample) other).value));
     }
 
     @Override

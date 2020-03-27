@@ -28,8 +28,7 @@ public final class TestServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(
-                Arrays.asList(new GetBinaryEndpoint(runtime, delegate)));
+        return Collections.unmodifiableList(Arrays.asList(new GetBinaryEndpoint(runtime, delegate)));
     }
 
     private static final class GetBinaryEndpoint implements HttpHandler, Endpoint {

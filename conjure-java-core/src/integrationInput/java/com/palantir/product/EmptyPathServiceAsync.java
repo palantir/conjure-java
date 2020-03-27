@@ -15,7 +15,9 @@ import javax.annotation.Generated;
 public interface EmptyPathServiceAsync {
     ListenableFuture<Boolean> emptyPath();
 
-    /** Creates an asynchronous/non-blocking client for a EmptyPathService service. */
+    /**
+     * Creates an asynchronous/non-blocking client for a EmptyPathService service.
+     */
     static EmptyPathServiceAsync of(Channel channel, ConjureRuntime runtime) {
         return new EmptyPathServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
@@ -27,11 +29,7 @@ public interface EmptyPathServiceAsync {
             public ListenableFuture<Boolean> emptyPath() {
                 Request.Builder _request = Request.builder();
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueEmptyPathEndpoints.emptyPath,
-                                _request.build(),
-                                emptyPathDeserializer);
+                        .call(channel, DialogueEmptyPathEndpoints.emptyPath, _request.build(), emptyPathDeserializer);
             }
         };
     }
