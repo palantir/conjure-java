@@ -17,3 +17,4 @@ We recommend using [Intellij IDEA Community Edition](https://www.jetbrains.com/i
 Tips:
 
 - run `./gradlew checkstyleMain checkstyleTest` locally to make sure your code conforms to the code-style.
+- run `./gradlew test -Drecreate=true` to recreate all the test files if you've made a change to code generation.
