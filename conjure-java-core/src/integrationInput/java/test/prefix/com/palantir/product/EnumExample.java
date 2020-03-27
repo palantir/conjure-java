@@ -38,6 +38,7 @@ public final class EnumExample {
     @Deprecated
     public static final EnumExample ONE_HUNDRED = new EnumExample(Value.ONE_HUNDRED, "ONE_HUNDRED");
 
+    @SuppressWarnings("deprecation")
     private static final List<EnumExample> values =
             Collections.unmodifiableList(Arrays.asList(ONE, TWO, ONE_HUNDRED));
 
