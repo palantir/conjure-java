@@ -22,10 +22,10 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.io.CharSink;
 import com.google.common.io.CharSource;
-import com.google.googlejavaformat.FormatterDiagnostic;
-import com.google.googlejavaformat.java.Formatter;
-import com.google.googlejavaformat.java.FormatterException;
-import com.google.googlejavaformat.java.JavaFormatterOptions;
+import com.palantir.javaformat.java.Formatter;
+import com.palantir.javaformat.java.FormatterDiagnostic;
+import com.palantir.javaformat.java.FormatterException;
+import com.palantir.javaformat.java.JavaFormatterOptions;
 import com.squareup.javapoet.JavaFile;
 import java.io.File;
 import java.io.IOException;
@@ -37,8 +37,8 @@ import java.util.List;
 /** Tools for a better JavaPoet. */
 public final class Goethe {
 
-    private static final Formatter JAVA_FORMATTER = new Formatter(JavaFormatterOptions.builder()
-            .style(JavaFormatterOptions.Style.AOSP)
+    private static final Formatter JAVA_FORMATTER = Formatter.createFormatter(JavaFormatterOptions.builder()
+            .style(JavaFormatterOptions.Style.PALANTIR)
             .build());
 
     private Goethe() {}
