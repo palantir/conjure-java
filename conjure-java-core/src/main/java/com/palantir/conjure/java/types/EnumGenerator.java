@@ -287,8 +287,8 @@ public final class EnumGenerator {
                 .addAnnotations(
                         anyDeprecatedValues
                                 ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)
-                                .addMember("value", "$S", "deprecation")
-                                .build())
+                                        .addMember("value", "$S", "deprecation")
+                                        .build())
                                 : ImmutableList.of())
                 .build();
     }
