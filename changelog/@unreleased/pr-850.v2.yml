@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Suppress deprecation building enum values list when necessary
+  links:
+  - https://github.com/palantir/conjure-java/pull/850
