@@ -19,7 +19,9 @@ import java.util.function.IntFunction;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
-/** A type which can either be a StringExample, a set of strings, or an integer. */
+/**
+ * A type which can either be a StringExample, a set of strings, or an integer.
+ */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionTypeExample {
     private final Base value;
@@ -34,7 +36,9 @@ public final class UnionTypeExample {
         return value;
     }
 
-    /** Docs for when UnionTypeExample is of type StringExample. */
+    /**
+     * Docs for when UnionTypeExample is of type StringExample.
+     */
     public static UnionTypeExample stringExample(StringExample value) {
         return new UnionTypeExample(new StringExampleWrapper(value));
     }
@@ -81,14 +85,12 @@ public final class UnionTypeExample {
         } else if (value instanceof UnknownWrapper) {
             return visitor.visitUnknown(((UnknownWrapper) value).getType());
         }
-        throw new IllegalStateException(
-                String.format("Could not identify type %s", value.getClass()));
+        throw new IllegalStateException(String.format("Could not identify type %s", value.getClass()));
     }
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof UnionTypeExample && equalTo((UnionTypeExample) other));
+        return this == other || (other instanceof UnionTypeExample && equalTo((UnionTypeExample) other));
     }
 
     private boolean equalTo(UnionTypeExample other) {
@@ -106,7 +108,9 @@ public final class UnionTypeExample {
     }
 
     public interface Visitor<T> {
-        /** Docs for when UnionTypeExample is of type StringExample. */
+        /**
+         * Docs for when UnionTypeExample is of type StringExample.
+         */
         T visitStringExample(StringExample value);
 
         T visitSet(Set<String> value);
@@ -155,8 +159,7 @@ public final class UnionTypeExample {
         private Function<String, T> unknownVisitor;
 
         @Override
-        public IfStageVisitorBuilder<T> alsoAnInteger(
-                @Nonnull IntFunction<T> alsoAnIntegerVisitor) {
+        public IfStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
             Preconditions.checkNotNull(alsoAnIntegerVisitor, "alsoAnIntegerVisitor cannot be null");
             this.alsoAnIntegerVisitor = alsoAnIntegerVisitor;
             return this;
@@ -184,8 +187,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public StringExampleStageVisitorBuilder<T> set(
-                @Nonnull Function<Set<String>, T> setVisitor) {
+        public StringExampleStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor) {
             Preconditions.checkNotNull(setVisitor, "setVisitor cannot be null");
             this.setVisitor = setVisitor;
             return this;
@@ -200,17 +202,14 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(
-                @Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor) {
-            Preconditions.checkNotNull(
-                    thisFieldIsAnIntegerVisitor, "thisFieldIsAnIntegerVisitor cannot be null");
+        public UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(@Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor) {
+            Preconditions.checkNotNull(thisFieldIsAnIntegerVisitor, "thisFieldIsAnIntegerVisitor cannot be null");
             this.thisFieldIsAnIntegerVisitor = thisFieldIsAnIntegerVisitor;
             return this;
         }
 
         @Override
-        public CompletedStageVisitorBuilder<T> unknown(
-                @Nonnull Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -296,8 +295,7 @@ public final class UnionTypeExample {
     }
 
     public interface ThisFieldIsAnIntegerStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(
-                @Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor);
+        UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(@Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
@@ -308,11 +306,7 @@ public final class UnionTypeExample {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
         @JsonSubTypes.Type(StringExampleWrapper.class),
         @JsonSubTypes.Type(SetWrapper.class),
@@ -342,9 +336,7 @@ public final class UnionTypeExample {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof StringExampleWrapper
-                            && equalTo((StringExampleWrapper) other));
+            return this == other || (other instanceof StringExampleWrapper && equalTo((StringExampleWrapper) other));
         }
 
         private boolean equalTo(StringExampleWrapper other) {
@@ -402,8 +394,7 @@ public final class UnionTypeExample {
         private final int value;
 
         @JsonCreator
-        private ThisFieldIsAnIntegerWrapper(
-                @JsonProperty("thisFieldIsAnInteger") @Nonnull int value) {
+        private ThisFieldIsAnIntegerWrapper(@JsonProperty("thisFieldIsAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "thisFieldIsAnInteger cannot be null");
             this.value = value;
         }
@@ -416,8 +407,7 @@ public final class UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof ThisFieldIsAnIntegerWrapper
-                            && equalTo((ThisFieldIsAnIntegerWrapper) other));
+                    || (other instanceof ThisFieldIsAnIntegerWrapper && equalTo((ThisFieldIsAnIntegerWrapper) other));
         }
 
         private boolean equalTo(ThisFieldIsAnIntegerWrapper other) {
@@ -452,9 +442,7 @@ public final class UnionTypeExample {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof AlsoAnIntegerWrapper
-                            && equalTo((AlsoAnIntegerWrapper) other));
+            return this == other || (other instanceof AlsoAnIntegerWrapper && equalTo((AlsoAnIntegerWrapper) other));
         }
 
         private boolean equalTo(AlsoAnIntegerWrapper other) {
@@ -559,8 +547,7 @@ public final class UnionTypeExample {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof InterfaceWrapper && equalTo((InterfaceWrapper) other));
+            return this == other || (other instanceof InterfaceWrapper && equalTo((InterfaceWrapper) other));
         }
 
         private boolean equalTo(InterfaceWrapper other) {
@@ -617,8 +604,7 @@ public final class UnionTypeExample {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
+            return this == other || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
         }
 
         private boolean equalTo(UnknownWrapper other) {

@@ -31,9 +31,7 @@ public final class OptionalAlias {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof OptionalAlias
-                        && this.value.equals(((OptionalAlias) other).value));
+        return this == other || (other instanceof OptionalAlias && this.value.equals(((OptionalAlias) other).value));
     }
 
     @Override

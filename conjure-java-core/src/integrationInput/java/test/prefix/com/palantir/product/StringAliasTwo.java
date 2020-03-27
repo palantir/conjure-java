@@ -31,9 +31,7 @@ public final class StringAliasTwo {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof StringAliasTwo
-                        && this.value.equals(((StringAliasTwo) other).value));
+        return this == other || (other instanceof StringAliasTwo && this.value.equals(((StringAliasTwo) other).value));
     }
 
     @Override

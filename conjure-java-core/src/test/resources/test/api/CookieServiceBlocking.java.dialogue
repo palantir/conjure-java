@@ -10,7 +10,9 @@ import javax.annotation.Generated;
 public interface CookieServiceBlocking {
     void eatCookies(BearerToken token);
 
-    /** Creates a synchronous/blocking client for a CookieService service. */
+    /**
+     * Creates a synchronous/blocking client for a CookieService service.
+     */
     static CookieServiceBlocking of(Channel channel, ConjureRuntime runtime) {
         CookieServiceAsync delegate = CookieServiceAsync.of(channel, runtime);
         return new CookieServiceBlocking() {

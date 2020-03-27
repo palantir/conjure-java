@@ -21,19 +21,18 @@ import javax.annotation.Generated;
 public interface EteServiceBlocking {
     /**
      * foo bar baz.
-     *
      * <h2>Very Important Documentation</h2>
-     *
-     * <p>This documentation provides a <em>list</em>:
-     *
+     * <p>This documentation provides a <em>list</em>:</p>
      * <ul>
-     *   <li>Docs rule
-     *   <li>Lists are wonderful
+     * <li>Docs rule</li>
+     * <li>Lists are wonderful</li>
      * </ul>
      */
     String string(AuthHeader authHeader);
 
-    /** one <em>two</em> three. */
+    /**
+     * one <em>two</em> three.
+     */
     int integer(AuthHeader authHeader);
 
     double double_(AuthHeader authHeader);
@@ -56,7 +55,6 @@ public interface EteServiceBlocking {
 
     /**
      * Path endpoint.
-     *
      * @param param Documentation for <code>param</code>
      */
     String path(AuthHeader authHeader, String param);
@@ -69,20 +67,15 @@ public interface EteServiceBlocking {
 
     StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);
 
-    StringAliasExample optionalAliasOne(
-            AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
+    StringAliasExample optionalAliasOne(AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
 
-    NestedStringAliasExample aliasTwo(
-            AuthHeader authHeader, NestedStringAliasExample queryParamName);
+    NestedStringAliasExample aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName);
 
-    StringAliasExample notNullBodyExternalImport(
-            AuthHeader authHeader, StringAliasExample notNullBody);
+    StringAliasExample notNullBodyExternalImport(AuthHeader authHeader, StringAliasExample notNullBody);
 
-    Optional<StringAliasExample> optionalBodyExternalImport(
-            AuthHeader authHeader, Optional<StringAliasExample> body);
+    Optional<StringAliasExample> optionalBodyExternalImport(AuthHeader authHeader, Optional<StringAliasExample> body);
 
-    Optional<StringAliasExample> optionalQueryExternalImport(
-            AuthHeader authHeader, Optional<StringAliasExample> query);
+    Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader, Optional<StringAliasExample> query);
 
     void noReturn(AuthHeader authHeader);
 
@@ -90,8 +83,7 @@ public interface EteServiceBlocking {
 
     List<SimpleEnum> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
 
-    Optional<SimpleEnum> optionalEnumQuery(
-            AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
+    Optional<SimpleEnum> optionalEnumQuery(AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
     SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
@@ -104,7 +96,9 @@ public interface EteServiceBlocking {
             Set<Long> longs,
             Set<Integer> ints);
 
-    /** Creates a synchronous/blocking client for a EteService service. */
+    /**
+     * Creates a synchronous/blocking client for a EteService service.
+     */
     static EteServiceBlocking of(Channel channel, ConjureRuntime runtime) {
         EteServiceAsync delegate = EteServiceAsync.of(channel, runtime);
         return new EteServiceBlocking() {
@@ -174,56 +168,46 @@ public interface EteServiceBlocking {
             }
 
             @Override
-            public Optional<Long> optionalExternalLongQuery(
-                    AuthHeader authHeader, Optional<Long> param) {
-                return runtime.clients()
-                        .block(delegate.optionalExternalLongQuery(authHeader, param));
+            public Optional<Long> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param) {
+                return runtime.clients().block(delegate.optionalExternalLongQuery(authHeader, param));
             }
 
             @Override
-            public StringAliasExample notNullBody(
-                    AuthHeader authHeader, StringAliasExample notNullBody) {
+            public StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody) {
                 return runtime.clients().block(delegate.notNullBody(authHeader, notNullBody));
             }
 
             @Override
-            public StringAliasExample aliasOne(
-                    AuthHeader authHeader, StringAliasExample queryParamName) {
+            public StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName) {
                 return runtime.clients().block(delegate.aliasOne(authHeader, queryParamName));
             }
 
             @Override
             public StringAliasExample optionalAliasOne(
                     AuthHeader authHeader, Optional<StringAliasExample> queryParamName) {
-                return runtime.clients()
-                        .block(delegate.optionalAliasOne(authHeader, queryParamName));
+                return runtime.clients().block(delegate.optionalAliasOne(authHeader, queryParamName));
             }
 
             @Override
-            public NestedStringAliasExample aliasTwo(
-                    AuthHeader authHeader, NestedStringAliasExample queryParamName) {
+            public NestedStringAliasExample aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName) {
                 return runtime.clients().block(delegate.aliasTwo(authHeader, queryParamName));
             }
 
             @Override
-            public StringAliasExample notNullBodyExternalImport(
-                    AuthHeader authHeader, StringAliasExample notNullBody) {
-                return runtime.clients()
-                        .block(delegate.notNullBodyExternalImport(authHeader, notNullBody));
+            public StringAliasExample notNullBodyExternalImport(AuthHeader authHeader, StringAliasExample notNullBody) {
+                return runtime.clients().block(delegate.notNullBodyExternalImport(authHeader, notNullBody));
             }
 
             @Override
             public Optional<StringAliasExample> optionalBodyExternalImport(
                     AuthHeader authHeader, Optional<StringAliasExample> body) {
-                return runtime.clients()
-                        .block(delegate.optionalBodyExternalImport(authHeader, body));
+                return runtime.clients().block(delegate.optionalBodyExternalImport(authHeader, body));
             }
 
             @Override
             public Optional<StringAliasExample> optionalQueryExternalImport(
                     AuthHeader authHeader, Optional<StringAliasExample> query) {
-                return runtime.clients()
-                        .block(delegate.optionalQueryExternalImport(authHeader, query));
+                return runtime.clients().block(delegate.optionalQueryExternalImport(authHeader, query));
             }
 
             @Override
@@ -237,16 +221,13 @@ public interface EteServiceBlocking {
             }
 
             @Override
-            public List<SimpleEnum> enumListQuery(
-                    AuthHeader authHeader, List<SimpleEnum> queryParamName) {
+            public List<SimpleEnum> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName) {
                 return runtime.clients().block(delegate.enumListQuery(authHeader, queryParamName));
             }
 
             @Override
-            public Optional<SimpleEnum> optionalEnumQuery(
-                    AuthHeader authHeader, Optional<SimpleEnum> queryParamName) {
-                return runtime.clients()
-                        .block(delegate.optionalEnumQuery(authHeader, queryParamName));
+            public Optional<SimpleEnum> optionalEnumQuery(AuthHeader authHeader, Optional<SimpleEnum> queryParamName) {
+                return runtime.clients().block(delegate.optionalEnumQuery(authHeader, queryParamName));
             }
 
             @Override
@@ -255,8 +236,7 @@ public interface EteServiceBlocking {
             }
 
             @Override
-            public Optional<LongAlias> aliasLongEndpoint(
-                    AuthHeader authHeader, Optional<LongAlias> input) {
+            public Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input) {
                 return runtime.clients().block(delegate.aliasLongEndpoint(authHeader, input));
             }
 
@@ -267,10 +247,7 @@ public interface EteServiceBlocking {
                     Set<StringAliasExample> strings,
                     Set<Long> longs,
                     Set<Integer> ints) {
-                runtime.clients()
-                        .block(
-                                delegate.complexQueryParameters(
-                                        authHeader, datasetRid, strings, longs, ints));
+                runtime.clients().block(delegate.complexQueryParameters(authHeader, datasetRid, strings, longs, ints));
             }
         };
     }

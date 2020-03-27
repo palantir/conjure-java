@@ -12,7 +12,8 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueCookieEndpoints implements Endpoint {
     eatCookies {
-        private final PathTemplate pathTemplate = PathTemplate.builder().fixed("cookies").build();
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("cookies").build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {

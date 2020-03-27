@@ -36,7 +36,9 @@ public final class Union {
         return new Union(new FooWrapper(value));
     }
 
-    /** @deprecated Int is deprecated. */
+    /**
+     * @deprecated Int is deprecated.
+     */
     @Deprecated
     public static Union bar(int value) {
         return new Union(new BarWrapper(value));
@@ -44,7 +46,6 @@ public final class Union {
 
     /**
      * 64-bit integer.
-     *
      * @deprecated Prefer <code>foo</code>.
      */
     @Deprecated
@@ -63,8 +64,7 @@ public final class Union {
         } else if (value instanceof UnknownWrapper) {
             return visitor.visitUnknown(((UnknownWrapper) value).getType());
         }
-        throw new IllegalStateException(
-                String.format("Could not identify type %s", value.getClass()));
+        throw new IllegalStateException(String.format("Could not identify type %s", value.getClass()));
     }
 
     @Override
@@ -89,13 +89,14 @@ public final class Union {
     public interface Visitor<T> {
         T visitFoo(String value);
 
-        /** @deprecated Int is deprecated. */
+        /**
+         * @deprecated Int is deprecated.
+         */
         @Deprecated
         T visitBar(int value);
 
         /**
          * 64-bit integer.
-         *
          * @deprecated Prefer <code>foo</code>.
          */
         @Deprecated
@@ -144,8 +145,7 @@ public final class Union {
         }
 
         @Override
-        public CompletedStageVisitorBuilder<T> unknown(
-                @Nonnull Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -201,11 +201,7 @@ public final class Union {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
         @JsonSubTypes.Type(FooWrapper.class),
         @JsonSubTypes.Type(BarWrapper.class),
@@ -358,8 +354,7 @@ public final class Union {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
+            return this == other || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
         }
 
         private boolean equalTo(UnknownWrapper other) {

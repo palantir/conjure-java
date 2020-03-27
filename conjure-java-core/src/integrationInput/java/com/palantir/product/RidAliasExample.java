@@ -28,8 +28,7 @@ public final class RidAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof RidAliasExample
-                        && this.value.equals(((RidAliasExample) other).value));
+                || (other instanceof RidAliasExample && this.value.equals(((RidAliasExample) other).value));
     }
 
     @Override

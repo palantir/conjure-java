@@ -25,8 +25,7 @@ public final class IntegerExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof IntegerExample && equalTo((IntegerExample) other));
+        return this == other || (other instanceof IntegerExample && equalTo((IntegerExample) other));
     }
 
     private boolean equalTo(IntegerExample other) {
@@ -76,13 +75,11 @@ public final class IntegerExample {
             missingFields = addFieldIfMissing(missingFields, _integerInitialized, "integer");
             if (missingFields != null) {
                 throw new SafeIllegalArgumentException(
-                        "Some required fields have not been set",
-                        SafeArg.of("missingFields", missingFields));
+                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
             }
         }
 
-        private static List<String> addFieldIfMissing(
-                List<String> prev, boolean initialized, String fieldName) {
+        private static List<String> addFieldIfMissing(List<String> prev, boolean initialized, String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {

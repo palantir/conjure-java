@@ -74,17 +74,14 @@ public final class DoubleExample {
 
         private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
-            missingFields =
-                    addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
+            missingFields = addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
             if (missingFields != null) {
                 throw new SafeIllegalArgumentException(
-                        "Some required fields have not been set",
-                        SafeArg.of("missingFields", missingFields));
+                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
             }
         }
 
-        private static List<String> addFieldIfMissing(
-                List<String> prev, boolean initialized, String fieldName) {
+        private static List<String> addFieldIfMissing(List<String> prev, boolean initialized, String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {

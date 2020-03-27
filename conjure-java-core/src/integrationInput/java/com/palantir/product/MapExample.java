@@ -76,13 +76,8 @@ public final class MapExample {
 
     @Override
     public String toString() {
-        return "MapExample{items: "
-                + items
-                + ", optionalItems: "
-                + optionalItems
-                + ", aliasOptionalItems: "
-                + aliasOptionalItems
-                + '}';
+        return "MapExample{items: " + items + ", optionalItems: " + optionalItems + ", aliasOptionalItems: "
+                + aliasOptionalItems + '}';
     }
 
     public static MapExample of(
@@ -106,13 +101,11 @@ public final class MapExample {
         missingFields = addFieldIfMissing(missingFields, aliasOptionalItems, "aliasOptionalItems");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -164,14 +157,12 @@ public final class MapExample {
         @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder optionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
             this.optionalItems.clear();
-            this.optionalItems.putAll(
-                    Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
+            this.optionalItems.putAll(Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
         public Builder putAllOptionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
-            this.optionalItems.putAll(
-                    Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
+            this.optionalItems.putAll(Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
@@ -184,16 +175,13 @@ public final class MapExample {
         public Builder aliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
             this.aliasOptionalItems.clear();
             this.aliasOptionalItems.putAll(
-                    Preconditions.checkNotNull(
-                            aliasOptionalItems, "aliasOptionalItems cannot be null"));
+                    Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
             return this;
         }
 
-        public Builder putAllAliasOptionalItems(
-                @Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
+        public Builder putAllAliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
             this.aliasOptionalItems.putAll(
-                    Preconditions.checkNotNull(
-                            aliasOptionalItems, "aliasOptionalItems cannot be null"));
+                    Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
             return this;
         }
 

@@ -6,7 +6,9 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
-    /** Different package. */
+    /**
+     * Different package.
+     */
     public static final ErrorType DIFFERENT_PACKAGE =
             ErrorType.create(ErrorType.Code.INTERNAL, "Conjure:DifferentPackage");
 
@@ -22,7 +24,6 @@ public final class ConjureErrors {
 
     /**
      * Throws a {@link ServiceException} of type DifferentPackage when {@code shouldThrow} is true.
-     *
      * @param shouldThrow Cause the method to throw when true
      */
     public static void throwIfDifferentPackage(boolean shouldThrow) {

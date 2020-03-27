@@ -30,8 +30,7 @@ public final class SafeLongExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof SafeLongExample && equalTo((SafeLongExample) other));
+        return this == other || (other instanceof SafeLongExample && equalTo((SafeLongExample) other));
     }
 
     private boolean equalTo(SafeLongExample other) {
@@ -57,13 +56,11 @@ public final class SafeLongExample {
         missingFields = addFieldIfMissing(missingFields, safeLongValue, "safeLongValue");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -91,8 +88,7 @@ public final class SafeLongExample {
 
         @JsonSetter("safeLongValue")
         public Builder safeLongValue(@Nonnull SafeLong safeLongValue) {
-            this.safeLongValue =
-                    Preconditions.checkNotNull(safeLongValue, "safeLongValue cannot be null");
+            this.safeLongValue = Preconditions.checkNotNull(safeLongValue, "safeLongValue cannot be null");
             return this;
         }
 

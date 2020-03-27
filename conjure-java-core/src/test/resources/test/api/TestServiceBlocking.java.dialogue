@@ -21,14 +21,17 @@ import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
 
-/** A Markdown description of the service. */
+/**
+ * A Markdown description of the service.
+ */
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface TestServiceBlocking {
-    /** Returns a mapping from file system id to backing file system configuration. */
+    /**
+     * Returns a mapping from file system id to backing file system configuration.
+     */
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
 
-    Dataset createDataset(
-            AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
+    Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
     Optional<Dataset> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
@@ -44,20 +47,20 @@ public interface TestServiceBlocking {
 
     void uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
-    /** @param datasetRid A valid dataset resource identifier. */
+    /**
+     * @param datasetRid A valid dataset resource identifier.
+     */
     Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
-     *
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
     @Deprecated
     Set<String> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    Optional<String> resolveBranch(
-            AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
+    Optional<String> resolveBranch(AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
 
     Optional<String> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
@@ -87,13 +90,13 @@ public interface TestServiceBlocking {
 
     Optional<String> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
 
-    void testOptionalIntegerAndDouble(
-            AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
+    void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
 
-    void getForStrings(
-            AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
+    void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 
-    /** Creates a synchronous/blocking client for a TestService service. */
+    /**
+     * Creates a synchronous/blocking client for a TestService service.
+     */
     static TestServiceBlocking of(Channel channel, ConjureRuntime runtime) {
         TestServiceAsync delegate = TestServiceAsync.of(channel, runtime);
         return new TestServiceBlocking() {
@@ -103,15 +106,12 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            public Dataset createDataset(
-                    AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request) {
-                return runtime.clients()
-                        .block(delegate.createDataset(authHeader, testHeaderArg, request));
+            public Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request) {
+                return runtime.clients().block(delegate.createDataset(authHeader, testHeaderArg, request));
             }
 
             @Override
-            public Optional<Dataset> getDataset(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+            public Optional<Dataset> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.getDataset(authHeader, datasetRid));
             }
 
@@ -121,20 +121,17 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            public InputStream getAliasedRawData(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+            public InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.getAliasedRawData(authHeader, datasetRid));
             }
 
             @Override
-            public Optional<InputStream> maybeGetRawData(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+            public Optional<InputStream> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.maybeGetRawData(authHeader, datasetRid));
             }
 
             @Override
-            public AliasedString getAliasedString(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+            public AliasedString getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.getAliasedString(authHeader, datasetRid));
             }
 
@@ -155,22 +152,17 @@ public interface TestServiceBlocking {
 
             @Override
             @SuppressWarnings("deprecation")
-            public Set<String> getBranchesDeprecated(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
-                return runtime.clients()
-                        .block(delegate.getBranchesDeprecated(authHeader, datasetRid));
+            public Set<String> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                return runtime.clients().block(delegate.getBranchesDeprecated(authHeader, datasetRid));
             }
 
             @Override
-            public Optional<String> resolveBranch(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid, String branch) {
-                return runtime.clients()
-                        .block(delegate.resolveBranch(authHeader, datasetRid, branch));
+            public Optional<String> resolveBranch(AuthHeader authHeader, ResourceIdentifier datasetRid, String branch) {
+                return runtime.clients().block(delegate.resolveBranch(authHeader, datasetRid, branch));
             }
 
             @Override
-            public Optional<String> testParam(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+            public Optional<String> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return runtime.clients().block(delegate.testParam(authHeader, datasetRid));
             }
 
@@ -184,15 +176,8 @@ public interface TestServiceBlocking {
                     Optional<ResourceIdentifier> optionalEnd,
                     String query) {
                 return runtime.clients()
-                        .block(
-                                delegate.testQueryParams(
-                                        authHeader,
-                                        something,
-                                        implicit,
-                                        optionalMiddle,
-                                        setEnd,
-                                        optionalEnd,
-                                        query));
+                        .block(delegate.testQueryParams(
+                                authHeader, something, implicit, optionalMiddle, setEnd, optionalEnd, query));
             }
 
             @Override
@@ -205,15 +190,8 @@ public interface TestServiceBlocking {
                     Optional<ResourceIdentifier> optionalEnd,
                     String query) {
                 runtime.clients()
-                        .block(
-                                delegate.testNoResponseQueryParams(
-                                        authHeader,
-                                        something,
-                                        implicit,
-                                        optionalMiddle,
-                                        setEnd,
-                                        optionalEnd,
-                                        query));
+                        .block(delegate.testNoResponseQueryParams(
+                                authHeader, something, implicit, optionalMiddle, setEnd, optionalEnd, query));
             }
 
             @Override
@@ -232,25 +210,19 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            public Optional<String> testPostOptional(
-                    AuthHeader authHeader, Optional<String> maybeString) {
+            public Optional<String> testPostOptional(AuthHeader authHeader, Optional<String> maybeString) {
                 return runtime.clients().block(delegate.testPostOptional(authHeader, maybeString));
             }
 
             @Override
             public void testOptionalIntegerAndDouble(
                     AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble) {
-                runtime.clients()
-                        .block(
-                                delegate.testOptionalIntegerAndDouble(
-                                        authHeader, maybeInteger, maybeDouble));
+                runtime.clients().block(delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble));
             }
 
             @Override
             public void getForStrings(
-                    AuthHeader authHeader,
-                    ResourceIdentifier datasetRid,
-                    Set<AliasedString> strings) {
+                    AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings) {
                 runtime.clients().block(delegate.getForStrings(authHeader, datasetRid, strings));
             }
         };

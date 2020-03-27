@@ -29,8 +29,7 @@ public final class EnumFieldExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof EnumFieldExample && equalTo((EnumFieldExample) other));
+        return this == other || (other instanceof EnumFieldExample && equalTo((EnumFieldExample) other));
     }
 
     private boolean equalTo(EnumFieldExample other) {
@@ -56,13 +55,11 @@ public final class EnumFieldExample {
         missingFields = addFieldIfMissing(missingFields, enum_, "enum");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {

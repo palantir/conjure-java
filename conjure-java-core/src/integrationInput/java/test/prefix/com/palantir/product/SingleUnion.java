@@ -41,8 +41,7 @@ public final class SingleUnion {
         } else if (value instanceof UnknownWrapper) {
             return visitor.visitUnknown(((UnknownWrapper) value).getType());
         }
-        throw new IllegalStateException(
-                String.format("Could not identify type %s", value.getClass()));
+        throw new IllegalStateException(String.format("Could not identify type %s", value.getClass()));
     }
 
     @Override
@@ -75,9 +74,7 @@ public final class SingleUnion {
     }
 
     private static final class VisitorBuilder<T>
-            implements FooStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T>,
-                    CompletedStageVisitorBuilder<T> {
+            implements FooStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, CompletedStageVisitorBuilder<T> {
         private Function<String, T> fooVisitor;
 
         private Function<String, T> unknownVisitor;
@@ -90,8 +87,7 @@ public final class SingleUnion {
         }
 
         @Override
-        public CompletedStageVisitorBuilder<T> unknown(
-                @Nonnull Function<String, T> unknownVisitor) {
+        public CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -127,11 +123,7 @@ public final class SingleUnion {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            property = "type",
-            visible = true,
-            defaultImpl = UnknownWrapper.class)
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
     @JsonSubTypes(@JsonSubTypes.Type(FooWrapper.class))
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {}
@@ -210,8 +202,7 @@ public final class SingleUnion {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
+            return this == other || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
         }
 
         private boolean equalTo(UnknownWrapper other) {

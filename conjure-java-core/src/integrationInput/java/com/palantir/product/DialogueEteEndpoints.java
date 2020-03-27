@@ -13,14 +13,11 @@ import javax.annotation.Generated;
 enum DialogueEteEndpoints implements Endpoint {
     /**
      * foo bar baz.
-     *
      * <h2>Very Important Documentation</h2>
-     *
-     * <p>This documentation provides a <em>list</em>:
-     *
+     * <p>This documentation provides a <em>list</em>:</p>
      * <ul>
-     *   <li>Docs rule
-     *   <li>Lists are wonderful
+     * <li>Docs rule</li>
+     * <li>Lists are wonderful</li>
      * </ul>
      */
     string {
@@ -53,7 +50,9 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
-    /** one <em>two</em> three. */
+    /**
+     * one <em>two</em> three.
+     */
     integer {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("base").fixed("integer").build();
@@ -354,10 +353,15 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
-    /** Path endpoint. */
+    /**
+     * Path endpoint.
+     */
     path {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("path").variable("param").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("path")
+                .variable("param")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -386,12 +390,11 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     externalLongPath {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("base")
-                        .fixed("externalLong")
-                        .variable("param")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("externalLong")
+                .variable("param")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -420,8 +423,10 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     optionalExternalLongQuery {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("optionalExternalLong").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("optionalExternalLong")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -570,8 +575,11 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     notNullBodyExternalImport {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("external").fixed("notNullBody").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("external")
+                .fixed("notNullBody")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -600,12 +608,11 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     optionalBodyExternalImport {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("base")
-                        .fixed("external")
-                        .fixed("optional-body")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("external")
+                .fixed("optional-body")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -634,12 +641,11 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     optionalQueryExternalImport {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("base")
-                        .fixed("external")
-                        .fixed("optional-query")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("external")
+                .fixed("optional-query")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -698,8 +704,11 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     enumQuery {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("enum").fixed("query").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("enum")
+                .fixed("query")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -728,13 +737,12 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     enumListQuery {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("base")
-                        .fixed("enum")
-                        .fixed("list")
-                        .fixed("query")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("enum")
+                .fixed("list")
+                .fixed("query")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -763,13 +771,12 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     optionalEnumQuery {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("base")
-                        .fixed("enum")
-                        .fixed("optional")
-                        .fixed("query")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("enum")
+                .fixed("optional")
+                .fixed("query")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -798,8 +805,11 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     enumHeader {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("base").fixed("enum").fixed("header").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("enum")
+                .fixed("header")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -858,13 +868,12 @@ enum DialogueEteEndpoints implements Endpoint {
     },
 
     complexQueryParameters {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder()
-                        .fixed("base")
-                        .fixed("datasets")
-                        .variable("datasetRid")
-                        .fixed("strings")
-                        .build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("strings")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {

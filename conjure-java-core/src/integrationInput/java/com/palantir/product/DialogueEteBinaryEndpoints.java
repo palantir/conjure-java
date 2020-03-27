@@ -12,7 +12,8 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueEteBinaryEndpoints implements Endpoint {
     postBinary {
-        private final PathTemplate pathTemplate = PathTemplate.builder().fixed("binary").build();
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("binary").build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -41,8 +42,11 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
     },
 
     getOptionalBinaryPresent {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("binary").fixed("optional").fixed("present").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("binary")
+                .fixed("optional")
+                .fixed("present")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -71,8 +75,11 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
     },
 
     getOptionalBinaryEmpty {
-        private final PathTemplate pathTemplate =
-                PathTemplate.builder().fixed("binary").fixed("optional").fixed("empty").build();
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("binary")
+                .fixed("optional")
+                .fixed("empty")
+                .build();
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -100,7 +107,9 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
         }
     },
 
-    /** Throws an exception after partially writing a binary response. */
+    /**
+     * Throws an exception after partially writing a binary response.
+     */
     getBinaryFailure {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("binary").fixed("failure").build();

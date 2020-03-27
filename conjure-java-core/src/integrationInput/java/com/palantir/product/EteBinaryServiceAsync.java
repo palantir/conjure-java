@@ -20,21 +20,22 @@ public interface EteBinaryServiceAsync {
 
     ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(AuthHeader authHeader);
 
-    /** Throws an exception after partially writing a binary response. */
+    /**
+     * Throws an exception after partially writing a binary response.
+     */
     ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes);
 
-    /** Creates an asynchronous/non-blocking client for a EteBinaryService service. */
+    /**
+     * Creates an asynchronous/non-blocking client for a EteBinaryService service.
+     */
     static EteBinaryServiceAsync of(Channel channel, ConjureRuntime runtime) {
         return new EteBinaryServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
 
             @Override
-            public ListenableFuture<InputStream> postBinary(
-                    AuthHeader authHeader, BinaryRequestBody body) {
+            public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(runtime.bodySerDe().serialize(body));
                 return runtime.clients()
                         .call(
@@ -45,12 +46,9 @@ public interface EteBinaryServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(
-                    AuthHeader authHeader) {
+            public ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
                         .call(
                                 channel,
@@ -60,12 +58,9 @@ public interface EteBinaryServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(
-                    AuthHeader authHeader) {
+            public ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
                         .call(
                                 channel,
@@ -75,12 +70,9 @@ public interface EteBinaryServiceAsync {
             }
 
             @Override
-            public ListenableFuture<InputStream> getBinaryFailure(
-                    AuthHeader authHeader, int numBytes) {
+            public ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putQueryParams("numBytes", plainSerDe.serializeInteger(numBytes));
                 return runtime.clients()
                         .call(

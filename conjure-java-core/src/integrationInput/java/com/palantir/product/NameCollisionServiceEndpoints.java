@@ -58,38 +58,25 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
             String deserializer_ = deserializer.deserialize(exchange);
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "deserializer", deserializer_, exchange);
+            runtime.markers().param("com.palantir.redaction.Safe", "deserializer", deserializer_, exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             String runtime_ = runtime.plainSerDe().deserializeString(pathParams.get("runtime"));
             runtime.markers().param("com.palantir.redaction.Safe", "runtime", runtime_, exchange);
             HeaderMap headerParams = exchange.getRequestHeaders();
-            String serializer_ =
-                    runtime.plainSerDe().deserializeString(headerParams.get("Serializer"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "serializer", serializer_, exchange);
+            String serializer_ = runtime.plainSerDe().deserializeString(headerParams.get("Serializer"));
+            runtime.markers().param("com.palantir.redaction.Safe", "serializer", serializer_, exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
-            String authHeader_ =
-                    runtime.plainSerDe().deserializeString(queryParams.get("authHeader"));
-            runtime.markers()
-                    .param("com.palantir.redaction.Safe", "authHeader", authHeader_, exchange);
+            String authHeader_ = runtime.plainSerDe().deserializeString(queryParams.get("authHeader"));
+            runtime.markers().param("com.palantir.redaction.Safe", "authHeader", authHeader_, exchange);
             String long_ = runtime.plainSerDe().deserializeString(queryParams.get("long"));
             runtime.markers().param("com.palantir.redaction.Safe", "long", long_, exchange);
             String delegate_ = runtime.plainSerDe().deserializeString(queryParams.get("delegate"));
             runtime.markers().param("com.palantir.redaction.Safe", "delegate", delegate_, exchange);
             String result_ = runtime.plainSerDe().deserializeString(queryParams.get("result"));
             runtime.markers().param("com.palantir.redaction.Safe", "result", result_, exchange);
-            String result =
-                    delegate.int_(
-                            authHeader,
-                            serializer_,
-                            runtime_,
-                            authHeader_,
-                            long_,
-                            delegate_,
-                            result_,
-                            deserializer_);
+            String result = delegate.int_(
+                    authHeader, serializer_, runtime_, authHeader_, long_, delegate_, result_, deserializer_);
             serializer.serialize(result, exchange);
         }
 

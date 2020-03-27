@@ -30,51 +30,49 @@ import test.prefix.com.palantir.product.CreateDatasetRequest;
 import test.prefix.com.palantir.product.datasets.BackingFileSystem;
 import test.prefix.com.palantir.product.datasets.Dataset;
 
-/** A Markdown description of the service. */
+/**
+ * A Markdown description of the service.
+ */
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface TestServiceAsync {
-    /** Returns a mapping from file system id to backing file system configuration. */
+    /**
+     * Returns a mapping from file system id to backing file system configuration.
+     */
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 
-    ListenableFuture<Dataset> createDataset(
-            AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
+    ListenableFuture<Dataset> createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
-    ListenableFuture<Optional<Dataset>> getDataset(
-            AuthHeader authHeader, ResourceIdentifier datasetRid);
+    ListenableFuture<Optional<Dataset>> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     ListenableFuture<InputStream> getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    ListenableFuture<InputStream> getAliasedRawData(
-            AuthHeader authHeader, ResourceIdentifier datasetRid);
+    ListenableFuture<InputStream> getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    ListenableFuture<Optional<InputStream>> maybeGetRawData(
-            AuthHeader authHeader, ResourceIdentifier datasetRid);
+    ListenableFuture<Optional<InputStream>> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
-    ListenableFuture<AliasedString> getAliasedString(
-            AuthHeader authHeader, ResourceIdentifier datasetRid);
+    ListenableFuture<AliasedString> getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     ListenableFuture<Void> uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
 
     ListenableFuture<Void> uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
-    /** @param datasetRid A valid dataset resource identifier. */
+    /**
+     * @param datasetRid A valid dataset resource identifier.
+     */
     ListenableFuture<Set<String>> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
-     *
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
     @Deprecated
-    ListenableFuture<Set<String>> getBranchesDeprecated(
-            AuthHeader authHeader, ResourceIdentifier datasetRid);
+    ListenableFuture<Set<String>> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     ListenableFuture<Optional<String>> resolveBranch(
             AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
 
-    ListenableFuture<Optional<String>> testParam(
-            AuthHeader authHeader, ResourceIdentifier datasetRid);
+    ListenableFuture<Optional<String>> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     ListenableFuture<Integer> testQueryParams(
             AuthHeader authHeader,
@@ -100,8 +98,7 @@ public interface TestServiceAsync {
 
     ListenableFuture<Integer> testInteger(AuthHeader authHeader);
 
-    ListenableFuture<Optional<String>> testPostOptional(
-            AuthHeader authHeader, Optional<String> maybeString);
+    ListenableFuture<Optional<String>> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
 
     ListenableFuture<Void> testOptionalIntegerAndDouble(
             AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
@@ -109,14 +106,15 @@ public interface TestServiceAsync {
     ListenableFuture<Void> getForStrings(
             AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 
-    /** Creates an asynchronous/non-blocking client for a TestService service. */
+    /**
+     * Creates an asynchronous/non-blocking client for a TestService service.
+     */
     static TestServiceAsync of(Channel channel, ConjureRuntime runtime) {
         return new TestServiceAsync() {
             private final PlainSerDe plainSerDe = runtime.plainSerDe();
 
             private final Deserializer<Map<String, BackingFileSystem>> getFileSystemsDeserializer =
-                    runtime.bodySerDe()
-                            .deserializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
+                    runtime.bodySerDe().deserializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
 
             private final Serializer<CreateDatasetRequest> createDatasetSerializer =
                     runtime.bodySerDe().serializer(new TypeMarker<CreateDatasetRequest>() {});
@@ -185,12 +183,9 @@ public interface TestServiceAsync {
                     runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
-            public ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(
-                    AuthHeader authHeader) {
+            public ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
                         .call(
                                 channel,
@@ -203,9 +198,7 @@ public interface TestServiceAsync {
             public ListenableFuture<Dataset> createDataset(
                     AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(createDatasetSerializer.serialize(request));
                 _request.putHeaderParams("Test-Header", plainSerDe.serializeString(testHeaderArg));
                 return runtime.clients()
@@ -220,25 +213,16 @@ public interface TestServiceAsync {
             public ListenableFuture<Optional<Dataset>> getDataset(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueTestEndpoints.getDataset,
-                                _request.build(),
-                                getDatasetDeserializer);
+                        .call(channel, DialogueTestEndpoints.getDataset, _request.build(), getDatasetDeserializer);
             }
 
             @Override
-            public ListenableFuture<InputStream> getRawData(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+            public ListenableFuture<InputStream> getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return runtime.clients()
                         .call(
@@ -252,9 +236,7 @@ public interface TestServiceAsync {
             public ListenableFuture<InputStream> getAliasedRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return runtime.clients()
                         .call(
@@ -268,9 +250,7 @@ public interface TestServiceAsync {
             public ListenableFuture<Optional<InputStream>> maybeGetRawData(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return runtime.clients()
                         .call(
@@ -284,9 +264,7 @@ public interface TestServiceAsync {
             public ListenableFuture<AliasedString> getAliasedString(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return runtime.clients()
                         .call(
@@ -297,12 +275,9 @@ public interface TestServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Void> uploadRawData(
-                    AuthHeader authHeader, BinaryRequestBody input) {
+            public ListenableFuture<Void> uploadRawData(AuthHeader authHeader, BinaryRequestBody input) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(runtime.bodySerDe().serialize(input));
                 return runtime.clients()
                         .call(
@@ -313,12 +288,9 @@ public interface TestServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Void> uploadAliasedRawData(
-                    AuthHeader authHeader, BinaryRequestBody input) {
+            public ListenableFuture<Void> uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(runtime.bodySerDe().serialize(input));
                 return runtime.clients()
                         .call(
@@ -329,28 +301,19 @@ public interface TestServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Set<String>> getBranches(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+            public ListenableFuture<Set<String>> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueTestEndpoints.getBranches,
-                                _request.build(),
-                                getBranchesDeserializer);
+                        .call(channel, DialogueTestEndpoints.getBranches, _request.build(), getBranchesDeserializer);
             }
 
             @Override
             public ListenableFuture<Set<String>> getBranchesDeprecated(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return runtime.clients()
                         .call(
@@ -364,9 +327,7 @@ public interface TestServiceAsync {
             public ListenableFuture<Optional<String>> resolveBranch(
                     AuthHeader authHeader, ResourceIdentifier datasetRid, String branch) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 _request.putPathParams("branch", plainSerDe.serializeString(branch));
                 return runtime.clients()
@@ -378,19 +339,12 @@ public interface TestServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Optional<String>> testParam(
-                    AuthHeader authHeader, ResourceIdentifier datasetRid) {
+            public ListenableFuture<Optional<String>> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueTestEndpoints.testParam,
-                                _request.build(),
-                                testParamDeserializer);
+                        .call(channel, DialogueTestEndpoints.testParam, _request.build(), testParamDeserializer);
             }
 
             @Override
@@ -403,22 +357,18 @@ public interface TestServiceAsync {
                     Optional<ResourceIdentifier> optionalEnd,
                     String query) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(testQueryParamsSerializer.serialize(query));
                 _request.putQueryParams("different", plainSerDe.serializeRid(something));
                 if (optionalMiddle.isPresent()) {
-                    _request.putQueryParams(
-                            "optionalMiddle", plainSerDe.serializeRid(optionalMiddle.get()));
+                    _request.putQueryParams("optionalMiddle", plainSerDe.serializeRid(optionalMiddle.get()));
                 }
                 _request.putQueryParams("implicit", plainSerDe.serializeRid(implicit));
                 for (String setEndElement : setEnd) {
                     _request.putQueryParams("setEnd", plainSerDe.serializeString(setEndElement));
                 }
                 if (optionalEnd.isPresent()) {
-                    _request.putQueryParams(
-                            "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
+                    _request.putQueryParams("optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
                 }
                 return runtime.clients()
                         .call(
@@ -438,22 +388,18 @@ public interface TestServiceAsync {
                     Optional<ResourceIdentifier> optionalEnd,
                     String query) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(testNoResponseQueryParamsSerializer.serialize(query));
                 _request.putQueryParams("different", plainSerDe.serializeRid(something));
                 if (optionalMiddle.isPresent()) {
-                    _request.putQueryParams(
-                            "optionalMiddle", plainSerDe.serializeRid(optionalMiddle.get()));
+                    _request.putQueryParams("optionalMiddle", plainSerDe.serializeRid(optionalMiddle.get()));
                 }
                 _request.putQueryParams("implicit", plainSerDe.serializeRid(implicit));
                 for (String setEndElement : setEnd) {
                     _request.putQueryParams("setEnd", plainSerDe.serializeString(setEndElement));
                 }
                 if (optionalEnd.isPresent()) {
-                    _request.putQueryParams(
-                            "optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
+                    _request.putQueryParams("optionalEnd", plainSerDe.serializeRid(optionalEnd.get()));
                 }
                 return runtime.clients()
                         .call(
@@ -466,52 +412,32 @@ public interface TestServiceAsync {
             @Override
             public ListenableFuture<Boolean> testBoolean(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueTestEndpoints.testBoolean,
-                                _request.build(),
-                                testBooleanDeserializer);
+                        .call(channel, DialogueTestEndpoints.testBoolean, _request.build(), testBooleanDeserializer);
             }
 
             @Override
             public ListenableFuture<Double> testDouble(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueTestEndpoints.testDouble,
-                                _request.build(),
-                                testDoubleDeserializer);
+                        .call(channel, DialogueTestEndpoints.testDouble, _request.build(), testDoubleDeserializer);
             }
 
             @Override
             public ListenableFuture<Integer> testInteger(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 return runtime.clients()
-                        .call(
-                                channel,
-                                DialogueTestEndpoints.testInteger,
-                                _request.build(),
-                                testIntegerDeserializer);
+                        .call(channel, DialogueTestEndpoints.testInteger, _request.build(), testIntegerDeserializer);
             }
 
             @Override
             public ListenableFuture<Optional<String>> testPostOptional(
                     AuthHeader authHeader, Optional<String> maybeString) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.body(testPostOptionalSerializer.serialize(maybeString));
                 return runtime.clients()
                         .call(
@@ -525,16 +451,12 @@ public interface TestServiceAsync {
             public ListenableFuture<Void> testOptionalIntegerAndDouble(
                     AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 if (maybeInteger.isPresent()) {
-                    _request.putQueryParams(
-                            "maybeInteger", plainSerDe.serializeInteger(maybeInteger.getAsInt()));
+                    _request.putQueryParams("maybeInteger", plainSerDe.serializeInteger(maybeInteger.getAsInt()));
                 }
                 if (maybeDouble.isPresent()) {
-                    _request.putQueryParams(
-                            "maybeDouble", plainSerDe.serializeDouble(maybeDouble.getAsDouble()));
+                    _request.putQueryParams("maybeDouble", plainSerDe.serializeDouble(maybeDouble.getAsDouble()));
                 }
                 return runtime.clients()
                         .call(
@@ -546,17 +468,12 @@ public interface TestServiceAsync {
 
             @Override
             public ListenableFuture<Void> getForStrings(
-                    AuthHeader authHeader,
-                    ResourceIdentifier datasetRid,
-                    Set<AliasedString> strings) {
+                    AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization",
-                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
                 _request.putPathParams("datasetRid", plainSerDe.serializeRid(datasetRid));
                 for (AliasedString stringsElement : strings) {
-                    _request.putQueryParams(
-                            "strings", plainSerDe.serializeString(stringsElement.get()));
+                    _request.putQueryParams("strings", plainSerDe.serializeString(stringsElement.get()));
                 }
                 return runtime.clients()
                         .call(

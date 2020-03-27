@@ -44,8 +44,7 @@ public final class CovariantListExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof CovariantListExample && equalTo((CovariantListExample) other));
+        return this == other || (other instanceof CovariantListExample && equalTo((CovariantListExample) other));
     }
 
     private boolean equalTo(CovariantListExample other) {
@@ -67,25 +66,21 @@ public final class CovariantListExample {
         return "CovariantListExample{items: " + items + ", externalItems: " + externalItems + '}';
     }
 
-    public static CovariantListExample of(
-            List<Object> items, List<ExampleExternalReference> externalItems) {
+    public static CovariantListExample of(List<Object> items, List<ExampleExternalReference> externalItems) {
         return builder().items(items).externalItems(externalItems).build();
     }
 
-    private static void validateFields(
-            List<Object> items, List<ExampleExternalReference> externalItems) {
+    private static void validateFields(List<Object> items, List<ExampleExternalReference> externalItems) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, externalItems, "externalItems");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -118,14 +113,12 @@ public final class CovariantListExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<?> items) {
             this.items.clear();
-            ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<?> items) {
-            ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -135,20 +128,16 @@ public final class CovariantListExample {
         }
 
         @JsonSetter(value = "externalItems", nulls = Nulls.SKIP)
-        public Builder externalItems(
-                @Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
+        public Builder externalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             this.externalItems.clear();
             ConjureCollections.addAll(
-                    this.externalItems,
-                    Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
+                    this.externalItems, Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 
-        public Builder addAllExternalItems(
-                @Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
+        public Builder addAllExternalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             ConjureCollections.addAll(
-                    this.externalItems,
-                    Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
+                    this.externalItems, Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 

@@ -61,43 +61,57 @@ public final class ManyFieldExample {
         this.alias = alias;
     }
 
-    /** docs for string field */
+    /**
+     * docs for string field
+     */
     @JsonProperty("string")
     public String getString() {
         return this.string;
     }
 
-    /** docs for integer field */
+    /**
+     * docs for integer field
+     */
     @JsonProperty("integer")
     public int getInteger() {
         return this.integer;
     }
 
-    /** docs for doubleValue field */
+    /**
+     * docs for doubleValue field
+     */
     @JsonProperty("doubleValue")
     public double getDoubleValue() {
         return this.doubleValue;
     }
 
-    /** docs for optionalItem field */
+    /**
+     * docs for optionalItem field
+     */
     @JsonProperty("optionalItem")
     public Optional<String> getOptionalItem() {
         return this.optionalItem;
     }
 
-    /** docs for items field */
+    /**
+     * docs for items field
+     */
     @JsonProperty("items")
     public List<String> getItems() {
         return this.items;
     }
 
-    /** docs for set field */
+    /**
+     * docs for set field
+     */
     @JsonProperty("set")
     public Set<String> getSet() {
         return this.set;
     }
 
-    /** @deprecated deprecation documentation. */
+    /**
+     * @deprecated deprecation documentation.
+     */
     @JsonProperty("map")
     @Deprecated
     public Map<String, String> getMap() {
@@ -106,7 +120,6 @@ public final class ManyFieldExample {
 
     /**
      * docs for alias field
-     *
      * @deprecated This field is deprecated.
      */
     @JsonProperty("alias")
@@ -117,8 +130,7 @@ public final class ManyFieldExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof ManyFieldExample && equalTo((ManyFieldExample) other));
+        return this == other || (other instanceof ManyFieldExample && equalTo((ManyFieldExample) other));
     }
 
     private boolean equalTo(ManyFieldExample other) {
@@ -136,16 +148,15 @@ public final class ManyFieldExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result =
-                    Objects.hash(
-                            this.string,
-                            this.integer,
-                            this.doubleValue,
-                            this.optionalItem,
-                            this.items,
-                            this.set,
-                            this.map,
-                            this.alias);
+            result = Objects.hash(
+                    this.string,
+                    this.integer,
+                    this.doubleValue,
+                    this.optionalItem,
+                    this.items,
+                    this.set,
+                    this.map,
+                    this.alias);
             memoizedHashCode = result;
         }
         return result;
@@ -153,23 +164,9 @@ public final class ManyFieldExample {
 
     @Override
     public String toString() {
-        return "ManyFieldExample{string: "
-                + string
-                + ", integer: "
-                + integer
-                + ", doubleValue: "
-                + doubleValue
-                + ", optionalItem: "
-                + optionalItem
-                + ", items: "
-                + items
-                + ", set: "
-                + set
-                + ", map: "
-                + map
-                + ", alias: "
-                + alias
-                + '}';
+        return "ManyFieldExample{string: " + string + ", integer: " + integer + ", doubleValue: " + doubleValue
+                + ", optionalItem: " + optionalItem + ", items: " + items + ", set: " + set + ", map: " + map
+                + ", alias: " + alias + '}';
     }
 
     private static void validateFields(
@@ -188,13 +185,11 @@ public final class ManyFieldExample {
         missingFields = addFieldIfMissing(missingFields, alias, "alias");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set",
-                    SafeArg.of("missingFields", missingFields));
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
-    private static List<String> addFieldIfMissing(
-            List<String> prev, Object fieldValue, String fieldName) {
+    private static List<String> addFieldIfMissing(List<String> prev, Object fieldValue, String fieldName) {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
@@ -245,14 +240,18 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for string field */
+        /**
+         * docs for string field
+         */
         @JsonSetter("string")
         public Builder string(@Nonnull String string) {
             this.string = Preconditions.checkNotNull(string, "string cannot be null");
             return this;
         }
 
-        /** docs for integer field */
+        /**
+         * docs for integer field
+         */
         @JsonSetter("integer")
         public Builder integer(int integer) {
             this.integer = integer;
@@ -260,7 +259,9 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for doubleValue field */
+        /**
+         * docs for doubleValue field
+         */
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
             this.doubleValue = doubleValue;
@@ -268,68 +269,78 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** docs for optionalItem field */
+        /**
+         * docs for optionalItem field
+         */
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
-            this.optionalItem =
-                    Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
+            this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
 
-        /** docs for optionalItem field */
+        /**
+         * docs for optionalItem field
+         */
         public Builder optionalItem(@Nonnull String optionalItem) {
-            this.optionalItem =
-                    Optional.of(
-                            Preconditions.checkNotNull(
-                                    optionalItem, "optionalItem cannot be null"));
+            this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
 
-        /** docs for items field */
+        /**
+         * docs for items field
+         */
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
             this.items.clear();
-            ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        /** docs for items field */
+        /**
+         * docs for items field
+         */
         public Builder addAllItems(@Nonnull Iterable<String> items) {
-            ConjureCollections.addAll(
-                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        /** docs for items field */
+        /**
+         * docs for items field
+         */
         public Builder items(String items) {
             this.items.add(items);
             return this;
         }
 
-        /** docs for set field */
+        /**
+         * docs for set field
+         */
         @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder set(@Nonnull Iterable<String> set) {
             this.set.clear();
-            ConjureCollections.addAll(
-                    this.set, Preconditions.checkNotNull(set, "set cannot be null"));
+            ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
-        /** docs for set field */
+        /**
+         * docs for set field
+         */
         public Builder addAllSet(@Nonnull Iterable<String> set) {
-            ConjureCollections.addAll(
-                    this.set, Preconditions.checkNotNull(set, "set cannot be null"));
+            ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
-        /** docs for set field */
+        /**
+         * docs for set field
+         */
         public Builder set(String set) {
             this.set.add(set);
             return this;
         }
 
-        /** @deprecated deprecation documentation. */
+        /**
+         * @deprecated deprecation documentation.
+         */
         @Deprecated
         @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(@Nonnull Map<String, String> map) {
@@ -338,14 +349,18 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /** @deprecated deprecation documentation. */
+        /**
+         * @deprecated deprecation documentation.
+         */
         @Deprecated
         public Builder putAllMap(@Nonnull Map<String, String> map) {
             this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
         }
 
-        /** @deprecated deprecation documentation. */
+        /**
+         * @deprecated deprecation documentation.
+         */
         @Deprecated
         public Builder map(String key, String value) {
             this.map.put(key, value);
@@ -354,7 +369,6 @@ public final class ManyFieldExample {
 
         /**
          * docs for alias field
-         *
          * @deprecated This field is deprecated.
          */
         @Deprecated
@@ -367,17 +381,14 @@ public final class ManyFieldExample {
         private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(missingFields, _integerInitialized, "integer");
-            missingFields =
-                    addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
+            missingFields = addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
             if (missingFields != null) {
                 throw new SafeIllegalArgumentException(
-                        "Some required fields have not been set",
-                        SafeArg.of("missingFields", missingFields));
+                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
             }
         }
 
-        private static List<String> addFieldIfMissing(
-                List<String> prev, boolean initialized, String fieldName) {
+        private static List<String> addFieldIfMissing(List<String> prev, boolean initialized, String fieldName) {
             List<String> missingFields = prev;
             if (!initialized) {
                 if (missingFields == null) {
@@ -390,8 +401,7 @@ public final class ManyFieldExample {
 
         public ManyFieldExample build() {
             validatePrimitiveFieldsHaveBeenInitialized();
-            return new ManyFieldExample(
-                    string, integer, doubleValue, optionalItem, items, set, map, alias);
+            return new ManyFieldExample(string, integer, doubleValue, optionalItem, items, set, map, alias);
         }
     }
 }

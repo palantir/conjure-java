@@ -11,22 +11,20 @@ import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 /**
- * This class is used instead of a native enum to support unknown values. Rather than throw an
- * exception, the {@link SimpleEnum#valueOf} method defaults to a new instantiation of {@link
- * SimpleEnum} where {@link SimpleEnum#get} will return {@link SimpleEnum.Value#UNKNOWN}.
- *
- * <p>For example, {@code SimpleEnum.valueOf("corrupted value").get()} will return {@link
- * SimpleEnum.Value#UNKNOWN}, but {@link SimpleEnum#toString} will return "corrupted value".
- *
- * <p>There is no method to access all instantiations of this class, since they cannot be known at
- * compile time.
+ * This class is used instead of a native enum to support unknown values.
+ * Rather than throw an exception, the {@link SimpleEnum#valueOf} method defaults to a new instantiation of
+ * {@link SimpleEnum} where {@link SimpleEnum#get} will return {@link SimpleEnum.Value#UNKNOWN}.
+ * <p>
+ * For example, {@code SimpleEnum.valueOf("corrupted value").get()} will return {@link SimpleEnum.Value#UNKNOWN},
+ * but {@link SimpleEnum#toString} will return "corrupted value".
+ * <p>
+ * There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 public final class SimpleEnum {
     public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
 
-    private static final List<SimpleEnum> values =
-            Collections.unmodifiableList(Arrays.asList(VALUE));
+    private static final List<SimpleEnum> values = Collections.unmodifiableList(Arrays.asList(VALUE));
 
     private final Value value;
 
@@ -49,8 +47,7 @@ public final class SimpleEnum {
 
     @Override
     public boolean equals(Object other) {
-        return (this == other)
-                || (other instanceof SimpleEnum && this.string.equals(((SimpleEnum) other).string));
+        return (this == other) || (other instanceof SimpleEnum && this.string.equals(((SimpleEnum) other).string));
     }
 
     @Override
