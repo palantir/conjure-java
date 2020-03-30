@@ -81,7 +81,9 @@ public final class DialogueServiceGeneratorTests extends TestBase {
     @Test
     public void generateEteServices() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
-                new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
+                new File("src/test/resources/cookie-service.yml"),
+                new File("src/test/resources/ete-service.yml"),
+                new File("src/test/resources/ete-binary.yml")));
         List<Path> files = new DialogueServiceGenerator(Options.empty(), "").emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
