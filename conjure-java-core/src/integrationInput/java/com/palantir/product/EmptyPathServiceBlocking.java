@@ -12,12 +12,12 @@ public interface EmptyPathServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a EmptyPathService service.
      */
-    static EmptyPathServiceBlocking of(Channel channel, ConjureRuntime runtime) {
-        EmptyPathServiceAsync delegate = EmptyPathServiceAsync.of(channel, runtime);
+    static EmptyPathServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        EmptyPathServiceAsync delegate = EmptyPathServiceAsync.of(_channel, _runtime);
         return new EmptyPathServiceBlocking() {
             @Override
             public boolean emptyPath() {
-                return runtime.clients().block(delegate.emptyPath());
+                return _runtime.clients().block(delegate.emptyPath());
             }
         };
     }

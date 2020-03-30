@@ -66,8 +66,9 @@ import javax.lang.model.element.Modifier;
 
 public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     private static final String REQUEST = "_request";
-    private static final String CHANNEL = "channel";
-    private static final String RUNTIME = "runtime";
+    private static final String CHANNEL = "_channel";
+    private static final String RUNTIME = "_runtime";
+    private static final String PLAIN_SER_DE = "_plainSerDe";
 
     private final Options options;
     private final TypeNameResolver typeNameResolver;
@@ -90,9 +91,9 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
         TypeSpec.Builder impl =
                 TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.asyncClassName(def, options));
 
-        impl.addField(FieldSpec.builder(PlainSerDe.class, "plainSerDe")
+        impl.addField(FieldSpec.builder(PlainSerDe.class, PLAIN_SER_DE)
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .initializer("runtime.plainSerDe()")
+                .initializer(CodeBlock.of("$L.plainSerDe()", RUNTIME))
                 .build());
 
         def.getEndpoints().forEach(endpoint -> {
@@ -210,7 +211,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 if (parameterTypes
                         .baseType(param.getType())
                         .equals(parameterTypes.baseType(Type.primitive(PrimitiveType.BINARY)))) {
-                    return CodeBlock.of("$L.body(runtime.bodySerDe().serialize($L));", REQUEST, param.getArgName());
+                    return CodeBlock.of("$L.body($L.bodySerDe().serialize($L));", REQUEST, RUNTIME, param.getArgName());
                 }
                 return CodeBlock.of("$L.body($LSerializer.serialize($L));", REQUEST, endpointName, param.getArgName());
             }
@@ -266,10 +267,11 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
             @Override
             public CodeBlock visitPrimitive(PrimitiveType primitiveType) {
                 return CodeBlock.of(
-                        "$L.$L($S, plainSerDe.serialize$L($L));",
+                        "$L.$L($S, $L.serialize$L($L));",
                         "_request",
                         method,
                         key,
+                        PLAIN_SER_DE,
                         primitiveTypeName(primitiveType),
                         argName);
             }
@@ -346,19 +348,21 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
             @Override
             public CodeBlock visitHeader(HeaderAuthType value) {
                 return CodeBlock.of(
-                        "$L.putHeaderParams($S, plainSerDe.serializeBearerToken($L.getBearerToken()));",
+                        "$L.putHeaderParams($S, $L.serializeBearerToken($L.getBearerToken()));",
                         REQUEST,
                         Auth.AUTH_HEADER_NAME,
+                        PLAIN_SER_DE,
                         Auth.AUTH_HEADER_PARAM_NAME);
             }
 
             @Override
             public CodeBlock visitCookie(CookieAuthType value) {
                 return CodeBlock.of(
-                        "$L.putHeaderParam($S, \"$L=\" + planSerDe.serializeBearerToken($L));",
+                        "$L.putHeaderParam($S, \"$L=\" + $L.serializeBearerToken($L));",
                         REQUEST,
                         "Cookie",
                         value.getCookieName(),
+                        PLAIN_SER_DE,
                         Auth.COOKIE_AUTH_PARAM_NAME);
             }
 

@@ -18,19 +18,19 @@ public interface CookieServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a CookieService service.
      */
-    static CookieServiceAsync of(Channel channel, ConjureRuntime runtime) {
+    static CookieServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
         return new CookieServiceAsync() {
-            private final PlainSerDe plainSerDe = runtime.plainSerDe();
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final Deserializer<Void> eatCookiesDeserializer =
-                    runtime.bodySerDe().emptyBodyDeserializer();
+                    _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
             public ListenableFuture<Void> eatCookies(BearerToken token) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParam("Cookie", "PALANTIR_TOKEN=" + planSerDe.serializeBearerToken(token));
-                return runtime.clients()
-                        .call(channel, DialogueCookieEndpoints.eatCookies, _request.build(), eatCookiesDeserializer);
+                _request.putHeaderParam("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
+                return _runtime.clients()
+                        .call(_channel, DialogueCookieEndpoints.eatCookies, _request.build(), eatCookiesDeserializer);
             }
         };
     }

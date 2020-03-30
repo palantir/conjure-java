@@ -28,58 +28,62 @@ public interface EteBinaryServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a EteBinaryService service.
      */
-    static EteBinaryServiceAsync of(Channel channel, ConjureRuntime runtime) {
+    static EteBinaryServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
         return new EteBinaryServiceAsync() {
-            private final PlainSerDe plainSerDe = runtime.plainSerDe();
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                _request.body(runtime.bodySerDe().serialize(body));
-                return runtime.clients()
+                _request.putHeaderParams(
+                        "Authorization", _plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.body(_runtime.bodySerDe().serialize(body));
+                return _runtime.clients()
                         .call(
-                                channel,
+                                _channel,
                                 DialogueEteBinaryEndpoints.postBinary,
                                 _request.build(),
-                                runtime.bodySerDe().inputStreamDeserializer());
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
             public ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return runtime.clients()
+                _request.putHeaderParams(
+                        "Authorization", _plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                return _runtime.clients()
                         .call(
-                                channel,
+                                _channel,
                                 DialogueEteBinaryEndpoints.getOptionalBinaryPresent,
                                 _request.build(),
-                                runtime.bodySerDe().optionalInputStreamDeserializer());
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
             public ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                return runtime.clients()
+                _request.putHeaderParams(
+                        "Authorization", _plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                return _runtime.clients()
                         .call(
-                                channel,
+                                _channel,
                                 DialogueEteBinaryEndpoints.getOptionalBinaryEmpty,
                                 _request.build(),
-                                runtime.bodySerDe().optionalInputStreamDeserializer());
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
             public ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams("Authorization", plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
-                _request.putQueryParams("numBytes", plainSerDe.serializeInteger(numBytes));
-                return runtime.clients()
+                _request.putHeaderParams(
+                        "Authorization", _plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
+                return _runtime.clients()
                         .call(
-                                channel,
+                                _channel,
                                 DialogueEteBinaryEndpoints.getBinaryFailure,
                                 _request.build(),
-                                runtime.bodySerDe().inputStreamDeserializer());
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
         };
     }
