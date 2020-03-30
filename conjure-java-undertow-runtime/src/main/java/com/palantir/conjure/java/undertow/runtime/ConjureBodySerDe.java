@@ -51,7 +51,7 @@ final class ConjureBodySerDe implements BodySerDe {
      */
     ConjureBodySerDe(List<Encoding> encodings) {
         // Defensive copy
-        this.encodings = ImmutableList.copyOf(encodings);
+        this.encodings = encodings.stream().map(DeferredEncoding::new).collect(ImmutableList.toImmutableList());
         Preconditions.checkArgument(encodings.size() > 0, "At least one Encoding is required");
     }
 
