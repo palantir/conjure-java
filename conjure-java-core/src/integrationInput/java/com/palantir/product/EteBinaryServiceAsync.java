@@ -35,8 +35,7 @@ public interface EteBinaryServiceAsync {
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization", _plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(body));
                 return _runtime.clients()
                         .call(
@@ -49,8 +48,7 @@ public interface EteBinaryServiceAsync {
             @Override
             public ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization", _plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients()
                         .call(
                                 _channel,
@@ -62,8 +60,7 @@ public interface EteBinaryServiceAsync {
             @Override
             public ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization", _plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients()
                         .call(
                                 _channel,
@@ -75,8 +72,7 @@ public interface EteBinaryServiceAsync {
             @Override
             public ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParams(
-                        "Authorization", _plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
                 return _runtime.clients()
                         .call(

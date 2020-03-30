@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Fix dialogue auth header serialization by providing the expected `Bearer
+    ` prefix.
+  links:
+  - https://github.com/palantir/conjure-java/pull/860
