@@ -348,10 +348,9 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
             @Override
             public CodeBlock visitHeader(HeaderAuthType value) {
                 return CodeBlock.of(
-                        "$L.putHeaderParams($S, $L.serializeBearerToken($L.getBearerToken()));",
+                        "$L.putHeaderParams($S, $L.toString());",
                         REQUEST,
                         Auth.AUTH_HEADER_NAME,
-                        PLAIN_SER_DE,
                         Auth.AUTH_HEADER_PARAM_NAME);
             }
 
