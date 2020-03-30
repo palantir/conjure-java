@@ -28,7 +28,7 @@ public interface CookieServiceAsync {
             @Override
             public ListenableFuture<Void> eatCookies(BearerToken token) {
                 Request.Builder _request = Request.builder();
-                _request.putHeaderParam("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
+                _request.putHeaderParams("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
                 return _runtime.clients()
                         .call(_channel, DialogueCookieEndpoints.eatCookies, _request.build(), eatCookiesDeserializer);
             }

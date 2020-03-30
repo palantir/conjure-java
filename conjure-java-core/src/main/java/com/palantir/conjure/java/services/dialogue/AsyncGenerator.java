@@ -357,7 +357,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
             @Override
             public CodeBlock visitCookie(CookieAuthType value) {
                 return CodeBlock.of(
-                        "$L.putHeaderParam($S, \"$L=\" + $L.serializeBearerToken($L));",
+                        "$L.putHeaderParams($S, \"$L=\" + $L.serializeBearerToken($L));",
                         REQUEST,
                         "Cookie",
                         value.getCookieName(),
