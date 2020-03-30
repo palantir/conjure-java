@@ -99,145 +99,145 @@ public interface EteServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a EteService service.
      */
-    static EteServiceBlocking of(Channel channel, ConjureRuntime runtime) {
-        EteServiceAsync delegate = EteServiceAsync.of(channel, runtime);
+    static EteServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        EteServiceAsync delegate = EteServiceAsync.of(_channel, _runtime);
         return new EteServiceBlocking() {
             @Override
             public String string(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.string(authHeader));
+                return _runtime.clients().block(delegate.string(authHeader));
             }
 
             @Override
             public int integer(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.integer(authHeader));
+                return _runtime.clients().block(delegate.integer(authHeader));
             }
 
             @Override
             public double double_(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.double_(authHeader));
+                return _runtime.clients().block(delegate.double_(authHeader));
             }
 
             @Override
             public boolean boolean_(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.boolean_(authHeader));
+                return _runtime.clients().block(delegate.boolean_(authHeader));
             }
 
             @Override
             public SafeLong safelong(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.safelong(authHeader));
+                return _runtime.clients().block(delegate.safelong(authHeader));
             }
 
             @Override
             public ResourceIdentifier rid(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.rid(authHeader));
+                return _runtime.clients().block(delegate.rid(authHeader));
             }
 
             @Override
             public BearerToken bearertoken(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.bearertoken(authHeader));
+                return _runtime.clients().block(delegate.bearertoken(authHeader));
             }
 
             @Override
             public Optional<String> optionalString(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.optionalString(authHeader));
+                return _runtime.clients().block(delegate.optionalString(authHeader));
             }
 
             @Override
             public Optional<String> optionalEmpty(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.optionalEmpty(authHeader));
+                return _runtime.clients().block(delegate.optionalEmpty(authHeader));
             }
 
             @Override
             public OffsetDateTime datetime(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.datetime(authHeader));
+                return _runtime.clients().block(delegate.datetime(authHeader));
             }
 
             @Override
             public InputStream binary(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.binary(authHeader));
+                return _runtime.clients().block(delegate.binary(authHeader));
             }
 
             @Override
             public String path(AuthHeader authHeader, String param) {
-                return runtime.clients().block(delegate.path(authHeader, param));
+                return _runtime.clients().block(delegate.path(authHeader, param));
             }
 
             @Override
             public long externalLongPath(AuthHeader authHeader, long param) {
-                return runtime.clients().block(delegate.externalLongPath(authHeader, param));
+                return _runtime.clients().block(delegate.externalLongPath(authHeader, param));
             }
 
             @Override
             public Optional<Long> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param) {
-                return runtime.clients().block(delegate.optionalExternalLongQuery(authHeader, param));
+                return _runtime.clients().block(delegate.optionalExternalLongQuery(authHeader, param));
             }
 
             @Override
             public StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody) {
-                return runtime.clients().block(delegate.notNullBody(authHeader, notNullBody));
+                return _runtime.clients().block(delegate.notNullBody(authHeader, notNullBody));
             }
 
             @Override
             public StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName) {
-                return runtime.clients().block(delegate.aliasOne(authHeader, queryParamName));
+                return _runtime.clients().block(delegate.aliasOne(authHeader, queryParamName));
             }
 
             @Override
             public StringAliasExample optionalAliasOne(
                     AuthHeader authHeader, Optional<StringAliasExample> queryParamName) {
-                return runtime.clients().block(delegate.optionalAliasOne(authHeader, queryParamName));
+                return _runtime.clients().block(delegate.optionalAliasOne(authHeader, queryParamName));
             }
 
             @Override
             public NestedStringAliasExample aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName) {
-                return runtime.clients().block(delegate.aliasTwo(authHeader, queryParamName));
+                return _runtime.clients().block(delegate.aliasTwo(authHeader, queryParamName));
             }
 
             @Override
             public StringAliasExample notNullBodyExternalImport(AuthHeader authHeader, StringAliasExample notNullBody) {
-                return runtime.clients().block(delegate.notNullBodyExternalImport(authHeader, notNullBody));
+                return _runtime.clients().block(delegate.notNullBodyExternalImport(authHeader, notNullBody));
             }
 
             @Override
             public Optional<StringAliasExample> optionalBodyExternalImport(
                     AuthHeader authHeader, Optional<StringAliasExample> body) {
-                return runtime.clients().block(delegate.optionalBodyExternalImport(authHeader, body));
+                return _runtime.clients().block(delegate.optionalBodyExternalImport(authHeader, body));
             }
 
             @Override
             public Optional<StringAliasExample> optionalQueryExternalImport(
                     AuthHeader authHeader, Optional<StringAliasExample> query) {
-                return runtime.clients().block(delegate.optionalQueryExternalImport(authHeader, query));
+                return _runtime.clients().block(delegate.optionalQueryExternalImport(authHeader, query));
             }
 
             @Override
             public void noReturn(AuthHeader authHeader) {
-                runtime.clients().block(delegate.noReturn(authHeader));
+                _runtime.clients().block(delegate.noReturn(authHeader));
             }
 
             @Override
             public SimpleEnum enumQuery(AuthHeader authHeader, SimpleEnum queryParamName) {
-                return runtime.clients().block(delegate.enumQuery(authHeader, queryParamName));
+                return _runtime.clients().block(delegate.enumQuery(authHeader, queryParamName));
             }
 
             @Override
             public List<SimpleEnum> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName) {
-                return runtime.clients().block(delegate.enumListQuery(authHeader, queryParamName));
+                return _runtime.clients().block(delegate.enumListQuery(authHeader, queryParamName));
             }
 
             @Override
             public Optional<SimpleEnum> optionalEnumQuery(AuthHeader authHeader, Optional<SimpleEnum> queryParamName) {
-                return runtime.clients().block(delegate.optionalEnumQuery(authHeader, queryParamName));
+                return _runtime.clients().block(delegate.optionalEnumQuery(authHeader, queryParamName));
             }
 
             @Override
             public SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter) {
-                return runtime.clients().block(delegate.enumHeader(authHeader, headerParameter));
+                return _runtime.clients().block(delegate.enumHeader(authHeader, headerParameter));
             }
 
             @Override
             public Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input) {
-                return runtime.clients().block(delegate.aliasLongEndpoint(authHeader, input));
+                return _runtime.clients().block(delegate.aliasLongEndpoint(authHeader, input));
             }
 
             @Override
@@ -247,7 +247,7 @@ public interface EteServiceBlocking {
                     Set<StringAliasExample> strings,
                     Set<Long> longs,
                     Set<Integer> ints) {
-                runtime.clients().block(delegate.complexQueryParameters(authHeader, datasetRid, strings, longs, ints));
+                _runtime.clients().block(delegate.complexQueryParameters(authHeader, datasetRid, strings, longs, ints));
             }
         };
     }

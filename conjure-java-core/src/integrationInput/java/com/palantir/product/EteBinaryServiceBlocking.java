@@ -25,27 +25,27 @@ public interface EteBinaryServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a EteBinaryService service.
      */
-    static EteBinaryServiceBlocking of(Channel channel, ConjureRuntime runtime) {
-        EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(channel, runtime);
+    static EteBinaryServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(_channel, _runtime);
         return new EteBinaryServiceBlocking() {
             @Override
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {
-                return runtime.clients().block(delegate.postBinary(authHeader, body));
+                return _runtime.clients().block(delegate.postBinary(authHeader, body));
             }
 
             @Override
             public Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.getOptionalBinaryPresent(authHeader));
+                return _runtime.clients().block(delegate.getOptionalBinaryPresent(authHeader));
             }
 
             @Override
             public Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader) {
-                return runtime.clients().block(delegate.getOptionalBinaryEmpty(authHeader));
+                return _runtime.clients().block(delegate.getOptionalBinaryEmpty(authHeader));
             }
 
             @Override
             public InputStream getBinaryFailure(AuthHeader authHeader, int numBytes) {
-                return runtime.clients().block(delegate.getBinaryFailure(authHeader, numBytes));
+                return _runtime.clients().block(delegate.getBinaryFailure(authHeader, numBytes));
             }
         };
     }

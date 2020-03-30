@@ -18,18 +18,18 @@ public interface EmptyPathServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a EmptyPathService service.
      */
-    static EmptyPathServiceAsync of(Channel channel, ConjureRuntime runtime) {
+    static EmptyPathServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
         return new EmptyPathServiceAsync() {
-            private final PlainSerDe plainSerDe = runtime.plainSerDe();
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final Deserializer<Boolean> emptyPathDeserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
 
             @Override
             public ListenableFuture<Boolean> emptyPath() {
                 Request.Builder _request = Request.builder();
-                return runtime.clients()
-                        .call(channel, DialogueEmptyPathEndpoints.emptyPath, _request.build(), emptyPathDeserializer);
+                return _runtime.clients()
+                        .call(_channel, DialogueEmptyPathEndpoints.emptyPath, _request.build(), emptyPathDeserializer);
             }
         };
     }
