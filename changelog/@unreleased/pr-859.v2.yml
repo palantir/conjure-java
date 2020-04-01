@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Defer expensive ser/de initialization for faster startup
+  links:
+  - https://github.com/palantir/conjure-java/pull/859
