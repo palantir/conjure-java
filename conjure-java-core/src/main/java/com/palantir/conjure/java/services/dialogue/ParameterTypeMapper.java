@@ -77,7 +77,7 @@ public final class ParameterTypeMapper {
 
     private Set<AnnotationSpec> markers(List<Type> markers) {
         if (!markers.isEmpty()) {
-            log.warn("conjure-dialogue does not support markers. In particular, it ignores @Safe annotations");
+            log.debug("conjure-dialogue does not support markers. In particular, it ignores @Safe annotations");
         }
         return ImmutableSet.of();
     }
