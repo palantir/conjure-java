@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix misleading console logging in dialogue code gen
+  links:
+  - https://github.com/palantir/conjure-java/pull/874
