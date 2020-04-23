@@ -37,20 +37,27 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.Map;
+import java.util.Optional;
 import javax.lang.model.element.Modifier;
 import org.glassfish.jersey.uri.internal.UriTemplateParser;
 
 final class DialogueEndpointsGenerator {
     private final Options options;
-    private final String apiVersion;
+    private final Optional<String> apiVersion;
 
-    DialogueEndpointsGenerator(Options options, String apiVersion) {
+    DialogueEndpointsGenerator(Options options, Optional<String> apiVersion) {
         this.options = options;
         this.apiVersion = apiVersion;
     }
 
     public JavaFile endpointsClass(ServiceDefinition def) {
         ClassName serviceClassName = Names.endpointsClassName(def, options);
+        CodeBlock versionBlock = apiVersion
+                .map(version -> CodeBlock.of("return $S;", apiVersion))
+                .orElseGet(() -> CodeBlock.of(
+                        "return Optional.ofNullable($T.class.getPackage().getImplementationVersion())"
+                                + ".orElse(\"0.0.0\");",
+                        serviceClassName));
 
         TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(serviceClassName)
                 .addSuperinterface(ClassName.get(Endpoint.class))
@@ -59,7 +66,7 @@ final class DialogueEndpointsGenerator {
         def.getEndpoints().forEach(endpoint -> {
             enumBuilder.addEnumConstant(
                     endpoint.getEndpointName().get(),
-                    endpointField(endpoint, def.getServiceName().getName(), apiVersion));
+                    endpointField(endpoint, def.getServiceName().getName(), versionBlock));
         });
 
         return JavaFile.builder(
@@ -68,7 +75,7 @@ final class DialogueEndpointsGenerator {
                 .build();
     }
 
-    private static TypeSpec endpointField(EndpointDefinition def, String serviceName, String apiVersion) {
+    private static TypeSpec endpointField(EndpointDefinition def, String serviceName, CodeBlock versionBlock) {
         TypeSpec.Builder builder = TypeSpec.anonymousClassBuilder("");
         def.getDocs().map(Javadoc::render).ifPresent(builder::addJavadoc);
 
@@ -114,9 +121,7 @@ final class DialogueEndpointsGenerator {
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(String.class)
-                        .addCode(CodeBlock.builder()
-                                .add("return $S;", apiVersion)
-                                .build())
+                        .addCode(versionBlock)
                         .build())
                 .build();
     }

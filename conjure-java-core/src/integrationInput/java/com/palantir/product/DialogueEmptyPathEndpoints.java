@@ -36,7 +36,9 @@ enum DialogueEmptyPathEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return Optional.ofNullable(
+                            DialogueEmptyPathEndpoints.class.getPackage().getImplementationVersion())
+                    .orElse("0.0.0");
         }
     }
 }

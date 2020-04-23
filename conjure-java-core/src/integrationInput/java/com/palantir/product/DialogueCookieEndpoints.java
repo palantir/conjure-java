@@ -37,7 +37,9 @@ enum DialogueCookieEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return Optional.ofNullable(
+                            DialogueCookieEndpoints.class.getPackage().getImplementationVersion())
+                    .orElse("0.0.0");
         }
     }
 }

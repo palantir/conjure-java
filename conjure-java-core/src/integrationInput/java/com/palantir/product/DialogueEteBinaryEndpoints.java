@@ -37,7 +37,9 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return Optional.ofNullable(
+                            DialogueEteBinaryEndpoints.class.getPackage().getImplementationVersion())
+                    .orElse("0.0.0");
         }
     },
 
@@ -70,7 +72,9 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return Optional.ofNullable(
+                            DialogueEteBinaryEndpoints.class.getPackage().getImplementationVersion())
+                    .orElse("0.0.0");
         }
     },
 
@@ -103,7 +107,9 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return Optional.ofNullable(
+                            DialogueEteBinaryEndpoints.class.getPackage().getImplementationVersion())
+                    .orElse("0.0.0");
         }
     },
 
@@ -136,7 +142,9 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return Optional.ofNullable(
+                            DialogueEteBinaryEndpoints.class.getPackage().getImplementationVersion())
+                    .orElse("0.0.0");
         }
     }
 }

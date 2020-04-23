@@ -27,6 +27,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.squareup.javapoet.JavaFile;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,9 +37,9 @@ import java.util.stream.Stream;
 public final class DialogueServiceGenerator implements ServiceGenerator {
 
     private final Options options;
-    private final String apiVersion;
+    private final Optional<String> apiVersion;
 
-    public DialogueServiceGenerator(Options options, String apiVersion) {
+    public DialogueServiceGenerator(Options options, Optional<String> apiVersion) {
         this.options = options;
         this.apiVersion = apiVersion;
     }
