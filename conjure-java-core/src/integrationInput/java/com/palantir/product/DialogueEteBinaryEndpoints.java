@@ -37,7 +37,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -70,7 +70,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -103,7 +103,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -136,7 +136,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     }
 }

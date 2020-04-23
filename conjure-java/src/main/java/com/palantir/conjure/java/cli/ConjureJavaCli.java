@@ -157,6 +157,12 @@ public final class ConjureJavaCli implements Runnable {
         @Nullable
         private String packagePrefix;
 
+        @CommandLine.Option(names = "--apiVersion", description = "A optional version number (e.g. '1.2.3') to be "
+                + "embedded in the generated Java code. If omitted, the version will be read from the Jar Manifest's "
+                + "Implementation-Version.")
+        @Nullable
+        private String apiVersion;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -175,7 +181,7 @@ public final class ConjureJavaCli implements Runnable {
                 ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.options());
                 ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.options());
                 ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.options());
-                ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options(), "0.0.0");
+                ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options());
 
                 if (config.generateObjects()) {
                     typeGenerator.emit(conjureDefinition, config.outputDirectory());
@@ -217,6 +223,7 @@ public final class ConjureJavaCli implements Runnable {
                             .strictObjects(strictObjects)
                             .nonNullCollections(nonNullCollections)
                             .packagePrefix(Optional.ofNullable(packagePrefix))
+                            .apiVersion(Optional.ofNullable(apiVersion))
                             .build())
                     .build();
         }

@@ -46,7 +46,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -79,7 +79,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -109,7 +109,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -139,7 +139,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -169,7 +169,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -199,7 +199,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -229,7 +229,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -259,7 +259,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -289,7 +289,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -319,7 +319,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -349,7 +349,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -385,7 +385,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -418,7 +418,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -450,7 +450,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -480,7 +480,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -510,7 +510,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -540,7 +540,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -570,7 +570,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -603,7 +603,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -636,7 +636,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -669,7 +669,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -699,7 +699,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -732,7 +732,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -766,7 +766,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -800,7 +800,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -833,7 +833,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -863,7 +863,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     },
 
@@ -897,7 +897,7 @@ enum DialogueEteEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     }
 }

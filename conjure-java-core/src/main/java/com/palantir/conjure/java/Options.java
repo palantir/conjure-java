@@ -96,6 +96,8 @@ public interface Options {
 
     Optional<String> packagePrefix();
 
+    Optional<String> apiVersion();
+
     class Builder extends ImmutableOptions.Builder {}
 
     static Builder builder() {

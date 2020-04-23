@@ -36,16 +36,14 @@ import java.util.stream.Stream;
 public final class DialogueServiceGenerator implements ServiceGenerator {
 
     private final Options options;
-    private final String apiVersion;
 
-    public DialogueServiceGenerator(Options options, String apiVersion) {
+    public DialogueServiceGenerator(Options options) {
         this.options = options;
-        this.apiVersion = apiVersion;
     }
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options, apiVersion);
+        DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options);
 
         TypeMapper parameterTypes = new TypeMapper(
                 conjureDefinition.getTypes(),
