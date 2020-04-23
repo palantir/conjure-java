@@ -37,7 +37,7 @@ enum DialogueCookieEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "";
+            return "1.2.3";
         }
     }
 }

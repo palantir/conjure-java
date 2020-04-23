@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: Generated dialogue clients now use the jar's Implementation-Version
+    instead of a hard-coded "0.0.0". This can be overridden using the `--apiVersion`
+    flag if necessary (e.g. for local codegen).
+  links:
+  - https://github.com/palantir/conjure-java/pull/879
