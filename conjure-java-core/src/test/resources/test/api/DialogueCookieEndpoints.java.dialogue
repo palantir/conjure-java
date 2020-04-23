@@ -37,7 +37,10 @@ enum DialogueCookieEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return "Optional[0.0.0]";
+            return packageVersion;
         }
-    }
+    };
+
+    private static final String packageVersion = "0.0.0";
+    ;
 }

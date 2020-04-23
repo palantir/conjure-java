@@ -7,6 +7,7 @@ import com.palantir.dialogue.UrlBuilder;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
@@ -36,9 +37,12 @@ enum DialogueEmptyPathEndpoints implements Endpoint {
 
         @Override
         public String version() {
-            return Optional.ofNullable(
-                            DialogueEmptyPathEndpoints.class.getPackage().getImplementationVersion())
-                    .orElse("0.0.0");
+            return packageVersion;
         }
-    }
+    };
+
+    private static final String packageVersion = Optional.ofNullable(
+                    DialogueEmptyPathEndpoints.class.getPackage().getImplementationVersion())
+            .orElse("0.0.0");
+    ;
 }

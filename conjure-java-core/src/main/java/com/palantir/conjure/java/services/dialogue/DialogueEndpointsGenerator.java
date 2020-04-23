@@ -53,20 +53,24 @@ final class DialogueEndpointsGenerator {
     public JavaFile endpointsClass(ServiceDefinition def) {
         ClassName serviceClassName = Names.endpointsClassName(def, options);
         CodeBlock versionBlock = apiVersion
-                .map(version -> CodeBlock.of("return $S;", apiVersion))
+                .map(version -> CodeBlock.of("$S;", version))
                 .orElseGet(() -> CodeBlock.of(
-                        "return Optional.ofNullable($T.class.getPackage().getImplementationVersion())"
-                                + ".orElse(\"0.0.0\");",
+                        "$T.ofNullable($T.class.getPackage().getImplementationVersion()).orElse(\"0.0.0\");",
+                        Optional.class,
                         serviceClassName));
 
         TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(serviceClassName)
                 .addSuperinterface(ClassName.get(Endpoint.class))
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueEndpointsGenerator.class));
+        enumBuilder.addField(
+                FieldSpec.builder(String.class, "packageVersion", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                        .initializer(versionBlock)
+                        .build());
 
         def.getEndpoints().forEach(endpoint -> {
             enumBuilder.addEnumConstant(
                     endpoint.getEndpointName().get(),
-                    endpointField(endpoint, def.getServiceName().getName(), versionBlock));
+                    endpointField(endpoint, def.getServiceName().getName(), CodeBlock.of("return packageVersion;")));
         });
 
         return JavaFile.builder(
