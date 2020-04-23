@@ -19,7 +19,6 @@ package com.palantir.conjure.java.cli;
 import com.palantir.conjure.java.Options;
 import com.palantir.logsafe.Preconditions;
 import java.io.File;
-import java.util.Optional;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -52,9 +51,6 @@ public interface CliConfiguration {
     default boolean generateDialogue() {
         return false;
     }
-
-    @Value.Default
-    default Optional<String> apiVersion() { return Optional.empty(); }
 
     @Value.Default
     default Options options() {
