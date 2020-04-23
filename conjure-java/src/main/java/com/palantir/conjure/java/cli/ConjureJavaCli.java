@@ -157,9 +157,10 @@ public final class ConjureJavaCli implements Runnable {
         @Nullable
         private String packagePrefix;
 
-        @CommandLine.Option(names = "--apiVersion", description = "A optional version number (e.g. '1.2.3') to be "
-                + "embedded in the generated Java code. If omitted, the version will be read from the Jar Manifest's "
-                + "Implementation-Version.")
+        @CommandLine.Option(
+                names = "--apiVersion",
+                description = "A optional version number (e.g. '1.2.3') to be embedded in the generated Java code. If"
+                        + " omitted, the version will be read from the Jar Manifest's Implementation-Version.")
         @Nullable
         private String apiVersion;
 
