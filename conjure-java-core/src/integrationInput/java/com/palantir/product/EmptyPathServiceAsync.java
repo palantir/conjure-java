@@ -9,6 +9,7 @@ import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
 import java.lang.Boolean;
 import java.lang.Override;
+import java.lang.String;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
@@ -30,6 +31,11 @@ public interface EmptyPathServiceAsync {
                 Request.Builder _request = Request.builder();
                 return _runtime.clients()
                         .call(_channel, DialogueEmptyPathEndpoints.emptyPath, _request.build(), emptyPathDeserializer);
+            }
+
+            @Override
+            public String toString() {
+                return "EmptyPathService{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
     }

@@ -482,6 +482,11 @@ public interface TestServiceAsync {
                                 _request.build(),
                                 getForStringsDeserializer);
             }
+
+            @Override
+            public String toString() {
+                return "TestService{channel=" + _channel + ", runtime=" + _runtime + '}';
+            }
         };
     }
 }

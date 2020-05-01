@@ -49,6 +49,8 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                 TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.blockingClassName(def, options));
         def.getEndpoints().forEach(endpoint -> impl.addMethod(blockingClientImpl(endpoint)));
 
+        impl.addMethod(toStringMethod(def));
+
         MethodSpec blockingImpl = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(
@@ -66,6 +68,17 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return blockingImpl;
+    }
+
+    static MethodSpec toStringMethod(ServiceDefinition def) {
+        return MethodSpec.methodBuilder("toString")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(String.class)
+                .addAnnotation(Override.class)
+                .addCode(
+                        "return \"$L{channel=\" + _channel + \", runtime=\" + _runtime + '}';",
+                        def.getServiceName().getName())
+                .build();
     }
 
     private MethodSpec blockingClientImpl(EndpointDefinition def) {

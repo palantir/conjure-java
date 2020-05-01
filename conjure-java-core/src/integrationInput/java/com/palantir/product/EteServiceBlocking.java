@@ -249,6 +249,11 @@ public interface EteServiceBlocking {
                     Set<Integer> ints) {
                 _runtime.clients().block(delegate.complexQueryParameters(authHeader, datasetRid, strings, longs, ints));
             }
+
+            @Override
+            public String toString() {
+                return "EteService{channel=" + _channel + ", runtime=" + _runtime + '}';
+            }
         };
     }
 }

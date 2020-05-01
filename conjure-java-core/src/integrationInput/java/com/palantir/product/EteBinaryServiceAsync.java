@@ -9,6 +9,7 @@ import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
+import java.lang.String;
 import java.util.Optional;
 import javax.annotation.Generated;
 
@@ -80,6 +81,11 @@ public interface EteBinaryServiceAsync {
                                 DialogueEteBinaryEndpoints.getBinaryFailure,
                                 _request.build(),
                                 _runtime.bodySerDe().inputStreamDeserializer());
+            }
+
+            @Override
+            public String toString() {
+                return "EteBinaryService{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
     }
