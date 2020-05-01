@@ -131,11 +131,10 @@ final class UndertowServiceInterfaceGenerator {
 
     private ParameterSpec createServiceMethodParameterArg(
             TypeMapper typeMapper, ArgumentDefinition def, EndpointDefinition endpoint) {
-        ParameterSpec.Builder param = ParameterSpec.builder(
+        return ParameterSpec.builder(
                         typeMapper.getClassName(def.getType()),
-                        JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint));
-        // param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
-        return param.build();
+                        JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint))
+                .build();
     }
 
     private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
