@@ -16,11 +16,11 @@
 
 package com.palantir.conjure.java.services;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.Annotations;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -31,11 +31,8 @@ import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.conjure.spec.Type;
-import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -43,7 +40,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
@@ -84,7 +80,7 @@ final class UndertowServiceInterfaceGenerator {
                 JavaNameSanitizer.sanitize(endpointDef.getEndpointName().get());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addAnnotations(createMarkers(typeMapper, endpointDef.getMarkers()))
+                .addAnnotations(Annotations.createMarkers(typeMapper, endpointDef.getMarkers()))
                 .addParameters(createServiceMethodParameters(endpointDef, typeMapper));
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
@@ -135,17 +131,5 @@ final class UndertowServiceInterfaceGenerator {
                         typeMapper.getClassName(def.getType()),
                         JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint))
                 .build();
-    }
-
-    private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
-        Preconditions.checkArgument(
-                markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
-                "Markers must refer to reference types.");
-        return markers.stream()
-                .map(typeMapper::getClassName)
-                .map(ClassName.class::cast)
-                .map(AnnotationSpec::builder)
-                .map(AnnotationSpec.Builder::build)
-                .collect(Collectors.toSet());
     }
 }

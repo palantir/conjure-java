@@ -23,6 +23,7 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.Annotations;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
@@ -33,11 +34,9 @@ import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.palantir.logsafe.Preconditions;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -275,7 +274,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 typeMapper.getClassName(def.getType()), def.getArgName().get());
         if (withAnnotations) {
             getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
-            param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
+            param.addAnnotations(Annotations.createMarkers(typeMapper, def.getMarkers()));
         }
         return param.build();
     }
@@ -340,18 +339,6 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
         }
 
         return Optional.of(annotationSpecBuilder.build());
-    }
-
-    private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
-        Preconditions.checkArgument(
-                markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
-                "Markers must refer to reference types.");
-        return markers.stream()
-                .map(typeMapper::getClassName)
-                .map(ClassName.class::cast)
-                .map(AnnotationSpec::builder)
-                .map(AnnotationSpec.Builder::build)
-                .collect(Collectors.toSet());
     }
 
     private static ClassName httpMethodToClassName(String method) {
