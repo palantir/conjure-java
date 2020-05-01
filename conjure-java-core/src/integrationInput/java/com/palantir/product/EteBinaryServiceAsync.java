@@ -85,7 +85,7 @@ public interface EteBinaryServiceAsync {
 
             @Override
             public String toString() {
-                return "EteBinaryService{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "EteBinaryServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
     }

@@ -542,7 +542,7 @@ public interface EteServiceAsync {
 
             @Override
             public String toString() {
-                return "EteService{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "EteServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
     }

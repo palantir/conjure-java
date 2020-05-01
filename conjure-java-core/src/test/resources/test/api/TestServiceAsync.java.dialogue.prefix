@@ -485,7 +485,7 @@ public interface TestServiceAsync {
 
             @Override
             public String toString() {
-                return "TestService{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "TestServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
     }

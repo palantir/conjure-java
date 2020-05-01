@@ -36,7 +36,7 @@ public interface CookieServiceAsync {
 
             @Override
             public String toString() {
-                return "CookieService{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "CookieServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
     }

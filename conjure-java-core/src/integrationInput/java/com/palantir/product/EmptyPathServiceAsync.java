@@ -35,7 +35,7 @@ public interface EmptyPathServiceAsync {
 
             @Override
             public String toString() {
-                return "EmptyPathService{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "EmptyPathServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
     }
