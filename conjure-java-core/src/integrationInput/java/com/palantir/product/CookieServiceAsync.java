@@ -7,6 +7,9 @@ import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.BearerToken;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.Void;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
@@ -28,7 +31,7 @@ public interface CookieServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
                 return _runtime.clients()
-                        .call(_channel, test.api.DialogueCookieEndpoints.eatCookies, _request.build(), eatCookiesDeserializer);
+                        .call(_channel, DialogueCookieEndpoints.eatCookies, _request.build(), eatCookiesDeserializer);
             }
 
             @Override
