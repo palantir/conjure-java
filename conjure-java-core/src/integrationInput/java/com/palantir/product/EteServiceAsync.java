@@ -539,6 +539,11 @@ public interface EteServiceAsync {
                                 _request.build(),
                                 complexQueryParametersDeserializer);
             }
+
+            @Override
+            public String toString() {
+                return "EteServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+            }
         };
     }
 }

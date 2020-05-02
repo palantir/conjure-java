@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Dialogue blocking and async implementations now have a human-readable
+    `toString` method
+  links:
+  - https://github.com/palantir/conjure-java/pull/886

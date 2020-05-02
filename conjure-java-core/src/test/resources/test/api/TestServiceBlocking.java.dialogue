@@ -225,6 +225,11 @@ public interface TestServiceBlocking {
                     AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings) {
                 _runtime.clients().block(delegate.getForStrings(authHeader, datasetRid, strings));
             }
+
+            @Override
+            public String toString() {
+                return "TestServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+            }
         };
     }
 }

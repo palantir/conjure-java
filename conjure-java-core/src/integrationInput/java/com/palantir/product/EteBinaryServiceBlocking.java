@@ -6,6 +6,7 @@ import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
+import java.lang.String;
 import java.util.Optional;
 import javax.annotation.Generated;
 
@@ -46,6 +47,11 @@ public interface EteBinaryServiceBlocking {
             @Override
             public InputStream getBinaryFailure(AuthHeader authHeader, int numBytes) {
                 return _runtime.clients().block(delegate.getBinaryFailure(authHeader, numBytes));
+            }
+
+            @Override
+            public String toString() {
+                return "EteBinaryServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
     }

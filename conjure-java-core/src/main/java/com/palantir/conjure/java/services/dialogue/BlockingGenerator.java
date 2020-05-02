@@ -22,6 +22,7 @@ import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -49,6 +50,8 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                 TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.blockingClassName(def, options));
         def.getEndpoints().forEach(endpoint -> impl.addMethod(blockingClientImpl(endpoint)));
 
+        impl.addMethod(toStringMethod(Names.blockingClassName(def, options)));
+
         MethodSpec blockingImpl = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(
@@ -66,6 +69,15 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return blockingImpl;
+    }
+
+    static MethodSpec toStringMethod(ClassName className) {
+        return MethodSpec.methodBuilder("toString")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(String.class)
+                .addAnnotation(Override.class)
+                .addCode("return \"$L{channel=\" + _channel + \", runtime=\" + _runtime + '}';", className.simpleName())
+                .build();
     }
 
     private MethodSpec blockingClientImpl(EndpointDefinition def) {
