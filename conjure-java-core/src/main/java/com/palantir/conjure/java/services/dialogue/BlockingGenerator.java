@@ -20,7 +20,6 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.squareup.javapoet.AnnotationSpec;
@@ -28,7 +27,9 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.io.InputStream;
 import java.util.List;
 import javax.lang.model.element.Modifier;
 
@@ -96,11 +97,12 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                     .build());
         }
 
-        if (def.getReturns().map(type -> type.accept(TypeVisitor.IS_BINARY)).orElse(false)) {
+        TypeName returnType = returnTypes.baseType(def.getReturns());
+        methodBuilder.returns(returnType);
+
+        if (TypeName.get(InputStream.class).equals(returnType)) {
             methodBuilder.addAnnotation(MustBeClosed.class);
         }
-
-        methodBuilder.returns(returnTypes.baseType(def.getReturns()));
 
         CodeBlock argList =
                 params.stream().map(argDef -> CodeBlock.of("$L", argDef.name)).collect(CodeBlock.joining(", "));

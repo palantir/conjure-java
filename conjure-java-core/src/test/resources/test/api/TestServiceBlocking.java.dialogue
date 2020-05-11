@@ -123,6 +123,7 @@ public interface TestServiceBlocking {
             }
 
             @Override
+            @MustBeClosed
             public InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return _runtime.clients().block(delegate.getAliasedRawData(authHeader, datasetRid));
             }
