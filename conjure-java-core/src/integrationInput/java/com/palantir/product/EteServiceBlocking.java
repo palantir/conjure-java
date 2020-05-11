@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -153,6 +154,7 @@ public interface EteServiceBlocking {
             }
 
             @Override
+            @MustBeClosed
             public InputStream binary(AuthHeader authHeader) {
                 return _runtime.clients().block(delegate.binary(authHeader));
             }

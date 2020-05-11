@@ -16,9 +16,11 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.squareup.javapoet.AnnotationSpec;
@@ -92,6 +94,10 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
             methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
                     .addMember("value", "$S", "deprecation")
                     .build());
+        }
+
+        if (def.getReturns().map(type -> type.accept(TypeVisitor.IS_BINARY)).orElse(false)) {
+            methodBuilder.addAnnotation(MustBeClosed.class);
         }
 
         methodBuilder.returns(returnTypes.baseType(def.getReturns()));
