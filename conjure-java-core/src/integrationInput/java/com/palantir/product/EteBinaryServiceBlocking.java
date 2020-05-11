@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -30,6 +31,7 @@ public interface EteBinaryServiceBlocking {
         EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(_channel, _runtime);
         return new EteBinaryServiceBlocking() {
             @Override
+            @MustBeClosed
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 return _runtime.clients().block(delegate.postBinary(authHeader, body));
             }
@@ -45,6 +47,7 @@ public interface EteBinaryServiceBlocking {
             }
 
             @Override
+            @MustBeClosed
             public InputStream getBinaryFailure(AuthHeader authHeader, int numBytes) {
                 return _runtime.clients().block(delegate.getBinaryFailure(authHeader, numBytes));
             }

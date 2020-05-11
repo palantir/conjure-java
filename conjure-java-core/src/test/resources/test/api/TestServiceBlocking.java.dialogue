@@ -1,5 +1,6 @@
 package com.palantir.another;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -116,11 +117,13 @@ public interface TestServiceBlocking {
             }
 
             @Override
+            @MustBeClosed
             public InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return _runtime.clients().block(delegate.getRawData(authHeader, datasetRid));
             }
 
             @Override
+            @MustBeClosed
             public InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return _runtime.clients().block(delegate.getAliasedRawData(authHeader, datasetRid));
             }
