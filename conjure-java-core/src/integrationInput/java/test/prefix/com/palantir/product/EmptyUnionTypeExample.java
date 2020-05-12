@@ -64,11 +64,11 @@ public final class EmptyUnionTypeExample {
     }
 
     private static final class VisitorBuilder<T>
-            implements UnknownStageVisitorBuilder<T>, CompletedStageVisitorBuilder<T> {
+            implements UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
         private Function<String, T> unknownVisitor;
 
         @Override
-        public CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -87,10 +87,10 @@ public final class EmptyUnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
     }
 
-    public interface CompletedStageVisitorBuilder<T> {
+    public interface Completed_StageVisitorBuilder<T> {
         Visitor<T> build();
     }
 

@@ -67,6 +67,10 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new InterfaceWrapper(value));
     }
 
+    public static UnionTypeExample completed(int value) {
+        return new UnionTypeExample(new CompletedWrapper(value));
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         if (value instanceof StringExampleWrapper) {
             return visitor.visitStringExample(((StringExampleWrapper) value).value);
@@ -82,6 +86,8 @@ public final class UnionTypeExample {
             return visitor.visitNew(((NewWrapper) value).value);
         } else if (value instanceof InterfaceWrapper) {
             return visitor.visitInterface(((InterfaceWrapper) value).value);
+        } else if (value instanceof CompletedWrapper) {
+            return visitor.visitCompleted(((CompletedWrapper) value).value);
         } else if (value instanceof UnknownWrapper) {
             return visitor.visitUnknown(((UnknownWrapper) value).getType());
         }
@@ -125,6 +131,8 @@ public final class UnionTypeExample {
 
         T visitInterface(int value);
 
+        T visitCompleted(int value);
+
         T visitUnknown(String unknownType);
 
         static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
@@ -134,6 +142,7 @@ public final class UnionTypeExample {
 
     private static final class VisitorBuilder<T>
             implements AlsoAnIntegerStageVisitorBuilder<T>,
+                    CompletedStageVisitorBuilder<T>,
                     IfStageVisitorBuilder<T>,
                     InterfaceStageVisitorBuilder<T>,
                     NewStageVisitorBuilder<T>,
@@ -141,8 +150,10 @@ public final class UnionTypeExample {
                     StringExampleStageVisitorBuilder<T>,
                     ThisFieldIsAnIntegerStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
-                    CompletedStageVisitorBuilder<T> {
+                    Completed_StageVisitorBuilder<T> {
         private IntFunction<T> alsoAnIntegerVisitor;
+
+        private IntFunction<T> completedVisitor;
 
         private IntFunction<T> ifVisitor;
 
@@ -159,9 +170,16 @@ public final class UnionTypeExample {
         private Function<String, T> unknownVisitor;
 
         @Override
-        public IfStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
+        public CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
             Preconditions.checkNotNull(alsoAnIntegerVisitor, "alsoAnIntegerVisitor cannot be null");
             this.alsoAnIntegerVisitor = alsoAnIntegerVisitor;
+            return this;
+        }
+
+        @Override
+        public IfStageVisitorBuilder<T> completed(@Nonnull IntFunction<T> completedVisitor) {
+            Preconditions.checkNotNull(completedVisitor, "completedVisitor cannot be null");
+            this.completedVisitor = completedVisitor;
             return this;
         }
 
@@ -209,7 +227,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -218,6 +236,7 @@ public final class UnionTypeExample {
         @Override
         public Visitor<T> build() {
             final IntFunction<T> alsoAnIntegerVisitor = this.alsoAnIntegerVisitor;
+            final IntFunction<T> completedVisitor = this.completedVisitor;
             final IntFunction<T> ifVisitor = this.ifVisitor;
             final IntFunction<T> interfaceVisitor = this.interfaceVisitor;
             final IntFunction<T> newVisitor = this.newVisitor;
@@ -229,6 +248,11 @@ public final class UnionTypeExample {
                 @Override
                 public T visitAlsoAnInteger(int value) {
                     return alsoAnIntegerVisitor.apply(value);
+                }
+
+                @Override
+                public T visitCompleted(int value) {
+                    return completedVisitor.apply(value);
                 }
 
                 @Override
@@ -270,7 +294,11 @@ public final class UnionTypeExample {
     }
 
     public interface AlsoAnIntegerStageVisitorBuilder<T> {
-        IfStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor);
+        CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor);
+    }
+
+    public interface CompletedStageVisitorBuilder<T> {
+        IfStageVisitorBuilder<T> completed(@Nonnull IntFunction<T> completedVisitor);
     }
 
     public interface IfStageVisitorBuilder<T> {
@@ -299,10 +327,10 @@ public final class UnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
     }
 
-    public interface CompletedStageVisitorBuilder<T> {
+    public interface Completed_StageVisitorBuilder<T> {
         Visitor<T> build();
     }
 
@@ -314,7 +342,8 @@ public final class UnionTypeExample {
         @JsonSubTypes.Type(AlsoAnIntegerWrapper.class),
         @JsonSubTypes.Type(IfWrapper.class),
         @JsonSubTypes.Type(NewWrapper.class),
-        @JsonSubTypes.Type(InterfaceWrapper.class)
+        @JsonSubTypes.Type(InterfaceWrapper.class),
+        @JsonSubTypes.Type(CompletedWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {}
@@ -562,6 +591,41 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return "InterfaceWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("completed")
+    private static final class CompletedWrapper implements Base {
+        private final int value;
+
+        @JsonCreator
+        private CompletedWrapper(@JsonProperty("completed") @Nonnull int value) {
+            Preconditions.checkNotNull(value, "completed cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("completed")
+        private int getValue() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof CompletedWrapper && equalTo((CompletedWrapper) other));
+        }
+
+        private boolean equalTo(CompletedWrapper other) {
+            return this.value == other.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "CompletedWrapper{value: " + value + '}';
         }
     }
 
