@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix compilation failure when union types are called `completed`
+  links:
+  - https://github.com/palantir/conjure-java/pull/893

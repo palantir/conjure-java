@@ -74,7 +74,7 @@ public final class SingleUnion {
     }
 
     private static final class VisitorBuilder<T>
-            implements FooStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, CompletedStageVisitorBuilder<T> {
+            implements FooStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
         private Function<String, T> fooVisitor;
 
         private Function<String, T> unknownVisitor;
@@ -87,7 +87,7 @@ public final class SingleUnion {
         }
 
         @Override
-        public CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -116,10 +116,10 @@ public final class SingleUnion {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
     }
 
-    public interface CompletedStageVisitorBuilder<T> {
+    public interface Completed_StageVisitorBuilder<T> {
         Visitor<T> build();
     }
 

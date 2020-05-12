@@ -468,6 +468,11 @@ public final class WireFormatTests {
         }
 
         @Override
+        public Integer visitCompleted(int value) {
+            return value;
+        }
+
+        @Override
         public Integer visitIf(int value) {
             return value;
         }

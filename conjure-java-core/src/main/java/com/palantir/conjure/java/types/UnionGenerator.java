@@ -68,7 +68,7 @@ public final class UnionGenerator {
     private static final String VALUE_FIELD_NAME = "value";
     private static final String UNKNOWN_WRAPPER_CLASS_NAME = "UnknownWrapper";
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
-    private static final String COMPLETED = "completed";
+    private static final String COMPLETED = "completed_";
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
 
     // If the member type is not known, a String containing the name of the unknown type is used.

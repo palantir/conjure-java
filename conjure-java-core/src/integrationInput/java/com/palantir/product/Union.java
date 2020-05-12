@@ -114,7 +114,7 @@ public final class Union {
                     BazStageVisitorBuilder<T>,
                     FooStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
-                    CompletedStageVisitorBuilder<T> {
+                    Completed_StageVisitorBuilder<T> {
         private IntFunction<T> barVisitor;
 
         private Function<Long, T> bazVisitor;
@@ -145,7 +145,7 @@ public final class Union {
         }
 
         @Override
-        public CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -194,10 +194,10 @@ public final class Union {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
     }
 
-    public interface CompletedStageVisitorBuilder<T> {
+    public interface Completed_StageVisitorBuilder<T> {
         Visitor<T> build();
     }
 
