@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.compliance;
 
-import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
+import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServicesConfigBlock;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
@@ -98,19 +98,18 @@ public final class VerificationClients {
 
     private static <T> T dialogue(Class<T> clazz, VerificationServerRule server) {
         ClientConfiguration config = server.getClientConfiguration();
-        return DialogueClients.create(Refreshable.only(ServicesConfigBlock.builder()
-                        .putServices(
-                                "service",
-                                PartialServiceConfiguration.builder()
-                                        .uris(server.getClientConfiguration().uris())
-                                        .build())
-                        .defaultSecurity(server.getSslConfiguration())
-                        .build()))
+        return DialogueClients.create(
+                        Refreshable.only(ServicesConfigBlock.builder().build()))
                 .withUserAgent(config.userAgent().orElseThrow(AssertionError::new))
                 .withTaggedMetrics(config.taggedMetricRegistry())
                 .withClientQoS(config.clientQoS())
                 .withServerQoS(config.serverQoS())
                 .withRuntime(DEFAULT_CONJURE_RUNTIME)
-                .get(clazz, "service");
+                .getNonReloading(
+                        clazz,
+                        ServiceConfiguration.builder()
+                                .security(server.getSslConfiguration())
+                                .uris(server.getClientConfiguration().uris())
+                                .build());
     }
 }
