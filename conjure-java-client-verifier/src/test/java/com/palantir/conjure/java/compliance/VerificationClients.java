@@ -16,6 +16,9 @@
 
 package com.palantir.conjure.java.compliance;
 
+import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
+import com.palantir.conjure.java.api.config.service.ServicesConfigBlock;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeService;
@@ -28,7 +31,8 @@ import com.palantir.conjure.java.com.palantir.conjure.verification.server.Single
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.SingleQueryParamServiceBlocking;
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import com.palantir.dialogue.JavaChannels;
+import com.palantir.dialogue.clients.DialogueClients;
+import com.palantir.refreshable.Refreshable;
 
 public final class VerificationClients {
     private VerificationClients() {}
@@ -45,8 +49,7 @@ public final class VerificationClients {
     }
 
     public static AutoDeserializeServiceBlocking dialogueAutoDeserializeService(VerificationServerRule server) {
-        return AutoDeserializeServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
+        return dialogue(AutoDeserializeServiceBlocking.class, server);
     }
 
     public static AutoDeserializeConfirmService confirmService(VerificationServerRule server) {
@@ -66,8 +69,7 @@ public final class VerificationClients {
     }
 
     public static SinglePathParamServiceBlocking dialogueSinglePathParamService(VerificationServerRule server) {
-        return SinglePathParamServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
+        return dialogue(SinglePathParamServiceBlocking.class, server);
     }
 
     public static SingleHeaderService singleHeaderService(VerificationServerRule server) {
@@ -79,8 +81,7 @@ public final class VerificationClients {
     }
 
     public static SingleHeaderServiceBlocking dialogueSingleHeaderService(VerificationServerRule server) {
-        return SingleHeaderServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
+        return dialogue(SingleHeaderServiceBlocking.class, server);
     }
 
     public static SingleQueryParamService singleQueryParamService(VerificationServerRule server) {
@@ -92,7 +93,24 @@ public final class VerificationClients {
     }
 
     public static SingleQueryParamServiceBlocking dialogueSingleQueryParamService(VerificationServerRule server) {
-        return SingleQueryParamServiceBlocking.of(
-                JavaChannels.create(server.getClientConfiguration()), DEFAULT_CONJURE_RUNTIME);
+        return dialogue(SingleQueryParamServiceBlocking.class, server);
+    }
+
+    private static <T> T dialogue(Class<T> clazz, VerificationServerRule server) {
+        ClientConfiguration config = server.getClientConfiguration();
+        return DialogueClients.create(Refreshable.only(ServicesConfigBlock.builder()
+                        .putServices(
+                                "service",
+                                PartialServiceConfiguration.builder()
+                                        .uris(server.getClientConfiguration().uris())
+                                        .build())
+                        .defaultSecurity(server.getSslConfiguration())
+                        .build()))
+                .withUserAgent(config.userAgent().orElseThrow(AssertionError::new))
+                .withTaggedMetrics(config.taggedMetricRegistry())
+                .withClientQoS(config.clientQoS())
+                .withServerQoS(config.serverQoS())
+                .withRuntime(DEFAULT_CONJURE_RUNTIME)
+                .get(clazz, "service");
     }
 }

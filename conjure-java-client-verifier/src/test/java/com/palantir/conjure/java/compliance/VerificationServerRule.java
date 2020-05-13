@@ -60,6 +60,10 @@ public final class VerificationServerRule extends ExternalResource {
         return clientConfiguration;
     }
 
+    public SslConfiguration getSslConfiguration() {
+        return TRUST_STORE_CONFIGURATION;
+    }
+
     @Override
     public void before() throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder(

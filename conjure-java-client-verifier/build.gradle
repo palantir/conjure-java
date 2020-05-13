@@ -37,7 +37,7 @@ dependencies {
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
     testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'io.dropwizard:dropwizard-testing'
-    testCompile 'com.palantir.dialogue:dialogue-java-client'
+    testCompile 'com.palantir.dialogue:dialogue-clients'
     testCompile 'com.palantir.dialogue:dialogue-serde'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
@@ -50,7 +50,7 @@ project('verification-server-api') {
     dependencies {
         compile project(':conjure-java-core')
         compile project(':conjure-lib')
-        compile 'com.palantir.dialogue:dialogue-java-client'
+        compile 'com.palantir.dialogue:dialogue-clients'
         compile 'com.palantir.dialogue:dialogue-serde'
     }
 }
