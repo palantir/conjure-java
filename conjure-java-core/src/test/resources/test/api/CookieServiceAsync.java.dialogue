@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.BearerToken;
@@ -23,6 +24,9 @@ public interface CookieServiceAsync {
         return new CookieServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
+            private final EndpointChannel eatCookiesChannel =
+                    _runtime.clients().bind(_channel, DialogueCookieEndpoints.eatCookies);
+
             private final Deserializer<Void> eatCookiesDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
@@ -30,8 +34,7 @@ public interface CookieServiceAsync {
             public ListenableFuture<Void> eatCookies(BearerToken token) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
-                return _runtime.clients()
-                        .call(_channel, DialogueCookieEndpoints.eatCookies, _request.build(), eatCookiesDeserializer);
+                return _runtime.clients().call(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
             }
 
             @Override
