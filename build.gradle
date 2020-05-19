@@ -52,7 +52,6 @@ allprojects {
         maven {
             url 'https://dl.bintray.com/palantir/releases/'
         }
-        mavenLocal()
     }
 
     configurations.all {
