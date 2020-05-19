@@ -104,7 +104,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                     .flatMap(body -> serializer(endpoint.getEndpointName(), body.getType()))
                     .ifPresent(impl::addField);
 
-            impl.addField(bindEndpointChannel(def, endpoint.getEndpointName()));
+            impl.addField(bindEndpointChannel(def, endpoint));
             deserializer(endpoint.getEndpointName(), endpoint.getReturns()).ifPresent(impl::addField);
             impl.addMethod(asyncClientImpl(def, endpoint));
         });
@@ -124,15 +124,15 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
         return asyncImpl;
     }
 
-    private FieldSpec bindEndpointChannel(ServiceDefinition def, EndpointName endpointName) {
-        return FieldSpec.builder(ClassName.get(EndpointChannel.class), endpointName + "Channel")
+    private FieldSpec bindEndpointChannel(ServiceDefinition def, EndpointDefinition endpoint) {
+        return FieldSpec.builder(ClassName.get(EndpointChannel.class), Names.endpointChannel(endpoint))
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(
                         "$L.clients().bind($L, $T.$L)",
                         RUNTIME,
                         CHANNEL,
                         Names.endpointsClassName(def, options),
-                        endpointName)
+                        endpoint.getEndpointName().get())
                 .build();
     }
 
