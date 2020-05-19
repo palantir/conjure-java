@@ -45,6 +45,7 @@ import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -103,6 +104,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                     .flatMap(body -> serializer(endpoint.getEndpointName(), body.getType()))
                     .ifPresent(impl::addField);
 
+            impl.addField(bindEndpointChannel(def, endpoint.getEndpointName()));
             deserializer(endpoint.getEndpointName(), endpoint.getReturns()).ifPresent(impl::addField);
             impl.addMethod(asyncClientImpl(def, endpoint));
         });
@@ -120,6 +122,18 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return asyncImpl;
+    }
+
+    private FieldSpec bindEndpointChannel(ServiceDefinition def, EndpointName endpointName) {
+        return FieldSpec.builder(ClassName.get(EndpointChannel.class), endpointName + "Channel")
+                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                .initializer(
+                        "$L.clients().bind($L, $L.$L)",
+                        RUNTIME,
+                        CHANNEL,
+                        Names.endpointsClassName(def, options),
+                        endpointName)
+                .build();
     }
 
     private Optional<FieldSpec> serializer(EndpointName endpointName, Type type) {
