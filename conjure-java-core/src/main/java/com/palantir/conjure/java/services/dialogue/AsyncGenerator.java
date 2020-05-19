@@ -128,7 +128,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
         return FieldSpec.builder(ClassName.get(EndpointChannel.class), endpointName + "Channel")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(
-                        "$L.clients().bind($L, $L.$L)",
+                        "$L.clients().bind($L, $T.$L)",
                         RUNTIME,
                         CHANNEL,
                         Names.endpointsClassName(def, options),
@@ -202,11 +202,9 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .add(requestParams.build())
                 .build();
         CodeBlock execute = CodeBlock.of(
-                "return $L.clients().call($L, $T.$L, $L.build(), $L);",
+                "return $L.clients().call($L, $L.build(), $L);",
                 RUNTIME,
-                CHANNEL,
-                Names.endpointsClassName(serviceDefinition, options),
-                def.getEndpointName().get(),
+                Names.endpointChannel(def),
                 REQUEST,
                 def.getReturns()
                         .filter(type -> isBinaryOrOptionalBinary(returnTypes.baseType(type), returnTypes))
