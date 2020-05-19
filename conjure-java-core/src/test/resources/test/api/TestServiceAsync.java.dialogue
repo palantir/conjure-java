@@ -5,6 +5,7 @@ import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -113,20 +114,44 @@ public interface TestServiceAsync {
         return new TestServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
+            private final EndpointChannel getFileSystemsChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getFileSystems);
+
             private final Deserializer<Map<String, BackingFileSystem>> getFileSystemsDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
 
             private final Serializer<CreateDatasetRequest> createDatasetSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<CreateDatasetRequest>() {});
 
+            private final EndpointChannel createDatasetChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.createDataset);
+
             private final Deserializer<Dataset> createDatasetDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Dataset>() {});
+
+            private final EndpointChannel getDatasetChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getDataset);
 
             private final Deserializer<Optional<Dataset>> getDatasetDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<Dataset>>() {});
 
+            private final EndpointChannel getRawDataChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getRawData);
+
+            private final EndpointChannel getAliasedRawDataChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getAliasedRawData);
+
+            private final EndpointChannel maybeGetRawDataChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.maybeGetRawData);
+
+            private final EndpointChannel getAliasedStringChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getAliasedString);
+
             private final Deserializer<AliasedString> getAliasedStringDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<AliasedString>() {});
+
+            private final EndpointChannel uploadRawDataChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.uploadRawData);
 
             private final Deserializer<Void> uploadRawDataDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -134,17 +159,32 @@ public interface TestServiceAsync {
             private final Serializer<InputStream> uploadAliasedRawDataSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<InputStream>() {});
 
+            private final EndpointChannel uploadAliasedRawDataChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.uploadAliasedRawData);
+
             private final Deserializer<Void> uploadAliasedRawDataDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final EndpointChannel getBranchesChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getBranches);
 
             private final Deserializer<Set<String>> getBranchesDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
 
+            private final EndpointChannel getBranchesDeprecatedChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getBranchesDeprecated);
+
             private final Deserializer<Set<String>> getBranchesDeprecatedDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
 
+            private final EndpointChannel resolveBranchChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.resolveBranch);
+
             private final Deserializer<Optional<String>> resolveBranchDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+
+            private final EndpointChannel testParamChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testParam);
 
             private final Deserializer<Optional<String>> testParamDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
@@ -152,20 +192,35 @@ public interface TestServiceAsync {
             private final Serializer<String> testQueryParamsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
 
+            private final EndpointChannel testQueryParamsChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testQueryParams);
+
             private final Deserializer<Integer> testQueryParamsDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
 
             private final Serializer<String> testNoResponseQueryParamsSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
 
+            private final EndpointChannel testNoResponseQueryParamsChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testNoResponseQueryParams);
+
             private final Deserializer<Void> testNoResponseQueryParamsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final EndpointChannel testBooleanChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testBoolean);
 
             private final Deserializer<Boolean> testBooleanDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
 
+            private final EndpointChannel testDoubleChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testDouble);
+
             private final Deserializer<Double> testDoubleDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
+
+            private final EndpointChannel testIntegerChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testInteger);
 
             private final Deserializer<Integer> testIntegerDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
@@ -173,11 +228,20 @@ public interface TestServiceAsync {
             private final Serializer<Optional<String>> testPostOptionalSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
 
+            private final EndpointChannel testPostOptionalChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testPostOptional);
+
             private final Deserializer<Optional<String>> testPostOptionalDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
+            private final EndpointChannel testOptionalIntegerAndDoubleChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testOptionalIntegerAndDouble);
+
             private final Deserializer<Void> testOptionalIntegerAndDoubleDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final EndpointChannel getForStringsChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getForStrings);
 
             private final Deserializer<Void> getForStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -186,12 +250,7 @@ public interface TestServiceAsync {
             public ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.getFileSystems,
-                                _request.build(),
-                                getFileSystemsDeserializer);
+                return _runtime.clients().call(getFileSystemsChannel, _request.build(), getFileSystemsDeserializer);
             }
 
             @Override
@@ -201,12 +260,7 @@ public interface TestServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(createDatasetSerializer.serialize(request));
                 _request.putHeaderParams("Test-Header", _plainSerDe.serializeString(testHeaderArg));
-                return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.createDataset,
-                                _request.build(),
-                                createDatasetDeserializer);
+                return _runtime.clients().call(createDatasetChannel, _request.build(), createDatasetDeserializer);
             }
 
             @Override
@@ -215,8 +269,7 @@ public interface TestServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
-                return _runtime.clients()
-                        .call(_channel, DialogueTestEndpoints.getDataset, _request.build(), getDatasetDeserializer);
+                return _runtime.clients().call(getDatasetChannel, _request.build(), getDatasetDeserializer);
             }
 
             @Override
@@ -226,8 +279,7 @@ public interface TestServiceAsync {
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueTestEndpoints.getRawData,
+                                getRawDataChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().inputStreamDeserializer());
             }
@@ -240,8 +292,7 @@ public interface TestServiceAsync {
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueTestEndpoints.getAliasedRawData,
+                                getAliasedRawDataChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().inputStreamDeserializer());
             }
@@ -254,8 +305,7 @@ public interface TestServiceAsync {
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueTestEndpoints.maybeGetRawData,
+                                maybeGetRawDataChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
@@ -266,12 +316,7 @@ public interface TestServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
-                return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.getAliasedString,
-                                _request.build(),
-                                getAliasedStringDeserializer);
+                return _runtime.clients().call(getAliasedStringChannel, _request.build(), getAliasedStringDeserializer);
             }
 
             @Override
@@ -279,12 +324,7 @@ public interface TestServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(input));
-                return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.uploadRawData,
-                                _request.build(),
-                                uploadRawDataDeserializer);
+                return _runtime.clients().call(uploadRawDataChannel, _request.build(), uploadRawDataDeserializer);
             }
 
             @Override
@@ -293,11 +333,7 @@ public interface TestServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(_runtime.bodySerDe().serialize(input));
                 return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.uploadAliasedRawData,
-                                _request.build(),
-                                uploadAliasedRawDataDeserializer);
+                        .call(uploadAliasedRawDataChannel, _request.build(), uploadAliasedRawDataDeserializer);
             }
 
             @Override
@@ -305,8 +341,7 @@ public interface TestServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
-                return _runtime.clients()
-                        .call(_channel, DialogueTestEndpoints.getBranches, _request.build(), getBranchesDeserializer);
+                return _runtime.clients().call(getBranchesChannel, _request.build(), getBranchesDeserializer);
             }
 
             @Override
@@ -316,11 +351,7 @@ public interface TestServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
                 return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.getBranchesDeprecated,
-                                _request.build(),
-                                getBranchesDeprecatedDeserializer);
+                        .call(getBranchesDeprecatedChannel, _request.build(), getBranchesDeprecatedDeserializer);
             }
 
             @Override
@@ -330,12 +361,7 @@ public interface TestServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
                 _request.putPathParams("branch", _plainSerDe.serializeString(branch));
-                return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.resolveBranch,
-                                _request.build(),
-                                resolveBranchDeserializer);
+                return _runtime.clients().call(resolveBranchChannel, _request.build(), resolveBranchDeserializer);
             }
 
             @Override
@@ -343,8 +369,7 @@ public interface TestServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
-                return _runtime.clients()
-                        .call(_channel, DialogueTestEndpoints.testParam, _request.build(), testParamDeserializer);
+                return _runtime.clients().call(testParamChannel, _request.build(), testParamDeserializer);
             }
 
             @Override
@@ -370,12 +395,7 @@ public interface TestServiceAsync {
                 if (optionalEnd.isPresent()) {
                     _request.putQueryParams("optionalEnd", _plainSerDe.serializeRid(optionalEnd.get()));
                 }
-                return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.testQueryParams,
-                                _request.build(),
-                                testQueryParamsDeserializer);
+                return _runtime.clients().call(testQueryParamsChannel, _request.build(), testQueryParamsDeserializer);
             }
 
             @Override
@@ -403,8 +423,7 @@ public interface TestServiceAsync {
                 }
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueTestEndpoints.testNoResponseQueryParams,
+                                testNoResponseQueryParamsChannel,
                                 _request.build(),
                                 testNoResponseQueryParamsDeserializer);
             }
@@ -413,24 +432,21 @@ public interface TestServiceAsync {
             public ListenableFuture<Boolean> testBoolean(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients()
-                        .call(_channel, DialogueTestEndpoints.testBoolean, _request.build(), testBooleanDeserializer);
+                return _runtime.clients().call(testBooleanChannel, _request.build(), testBooleanDeserializer);
             }
 
             @Override
             public ListenableFuture<Double> testDouble(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients()
-                        .call(_channel, DialogueTestEndpoints.testDouble, _request.build(), testDoubleDeserializer);
+                return _runtime.clients().call(testDoubleChannel, _request.build(), testDoubleDeserializer);
             }
 
             @Override
             public ListenableFuture<Integer> testInteger(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients()
-                        .call(_channel, DialogueTestEndpoints.testInteger, _request.build(), testIntegerDeserializer);
+                return _runtime.clients().call(testIntegerChannel, _request.build(), testIntegerDeserializer);
             }
 
             @Override
@@ -439,12 +455,7 @@ public interface TestServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.body(testPostOptionalSerializer.serialize(maybeString));
-                return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.testPostOptional,
-                                _request.build(),
-                                testPostOptionalDeserializer);
+                return _runtime.clients().call(testPostOptionalChannel, _request.build(), testPostOptionalDeserializer);
             }
 
             @Override
@@ -460,8 +471,7 @@ public interface TestServiceAsync {
                 }
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueTestEndpoints.testOptionalIntegerAndDouble,
+                                testOptionalIntegerAndDoubleChannel,
                                 _request.build(),
                                 testOptionalIntegerAndDoubleDeserializer);
             }
@@ -475,12 +485,7 @@ public interface TestServiceAsync {
                 for (AliasedString stringsElement : strings) {
                     _request.putQueryParams("strings", _plainSerDe.serializeString(stringsElement.get()));
                 }
-                return _runtime.clients()
-                        .call(
-                                _channel,
-                                DialogueTestEndpoints.getForStrings,
-                                _request.build(),
-                                getForStringsDeserializer);
+                return _runtime.clients().call(getForStringsChannel, _request.build(), getForStringsDeserializer);
             }
 
             @Override

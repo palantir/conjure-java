@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: conjure-java generates more efficient code for dialogue Async clients,
+    by using the `bind` method to build EndpointChannels upfront.
+  links:
+  - https://github.com/palantir/conjure-java/pull/910

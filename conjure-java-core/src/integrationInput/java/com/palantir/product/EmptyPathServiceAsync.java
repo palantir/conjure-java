@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
@@ -23,14 +24,16 @@ public interface EmptyPathServiceAsync {
         return new EmptyPathServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
+            private final EndpointChannel emptyPathChannel =
+                    _runtime.clients().bind(_channel, DialogueEmptyPathEndpoints.emptyPath);
+
             private final Deserializer<Boolean> emptyPathDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
 
             @Override
             public ListenableFuture<Boolean> emptyPath() {
                 Request.Builder _request = Request.builder();
-                return _runtime.clients()
-                        .call(_channel, DialogueEmptyPathEndpoints.emptyPath, _request.build(), emptyPathDeserializer);
+                return _runtime.clients().call(emptyPathChannel, _request.build(), emptyPathDeserializer);
             }
 
             @Override

@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.AuthHeader;
@@ -33,6 +34,18 @@ public interface EteBinaryServiceAsync {
         return new EteBinaryServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
+            private final EndpointChannel postBinaryChannel =
+                    _runtime.clients().bind(_channel, DialogueEteBinaryEndpoints.postBinary);
+
+            private final EndpointChannel getOptionalBinaryPresentChannel =
+                    _runtime.clients().bind(_channel, DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
+
+            private final EndpointChannel getOptionalBinaryEmptyChannel =
+                    _runtime.clients().bind(_channel, DialogueEteBinaryEndpoints.getOptionalBinaryEmpty);
+
+            private final EndpointChannel getBinaryFailureChannel =
+                    _runtime.clients().bind(_channel, DialogueEteBinaryEndpoints.getBinaryFailure);
+
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 Request.Builder _request = Request.builder();
@@ -40,8 +53,7 @@ public interface EteBinaryServiceAsync {
                 _request.body(_runtime.bodySerDe().serialize(body));
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueEteBinaryEndpoints.postBinary,
+                                postBinaryChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().inputStreamDeserializer());
             }
@@ -52,8 +64,7 @@ public interface EteBinaryServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueEteBinaryEndpoints.getOptionalBinaryPresent,
+                                getOptionalBinaryPresentChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
@@ -64,8 +75,7 @@ public interface EteBinaryServiceAsync {
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueEteBinaryEndpoints.getOptionalBinaryEmpty,
+                                getOptionalBinaryEmptyChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
@@ -77,8 +87,7 @@ public interface EteBinaryServiceAsync {
                 _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
                 return _runtime.clients()
                         .call(
-                                _channel,
-                                DialogueEteBinaryEndpoints.getBinaryFailure,
+                                getBinaryFailureChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().inputStreamDeserializer());
             }
