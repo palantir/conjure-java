@@ -25,6 +25,9 @@ import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -84,6 +87,14 @@ public final class DialogueInterfaceGenerator {
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(parameterTypes.methodParams(endpointDef));
+        endpointDef.getMarkers().forEach(marker -> {
+            Preconditions.checkState(
+                    marker.accept(TypeVisitor.IS_REFERENCE),
+                    "Endpoint marker must be a reference type",
+                    SafeArg.of("marker", marker));
+            com.palantir.conjure.spec.TypeName referenceType = marker.accept(TypeVisitor.REFERENCE);
+            methodBuilder.addAnnotation(ClassName.get(referenceType.getPackage(), referenceType.getName()));
+        });
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
         ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
