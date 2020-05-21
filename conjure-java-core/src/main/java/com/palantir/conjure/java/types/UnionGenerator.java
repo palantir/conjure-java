@@ -277,7 +277,8 @@ public final class UnionGenerator {
                             .addJavadoc(Javadoc.render(
                                             entry.getKey().getDocs(),
                                             entry.getKey().getDeprecated())
-                                    .orElse(""))
+                                    .map(rendered -> CodeBlock.of("$L", rendered))
+                                    .orElseGet(() -> CodeBlock.builder().build()))
                             .addAnnotations(ConjureAnnotations.deprecation(
                                     entry.getKey().getDeprecated()))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)

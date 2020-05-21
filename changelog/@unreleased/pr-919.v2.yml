@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Properly escape object documentation strings
+  links:
+  - https://github.com/palantir/conjure-java/pull/919

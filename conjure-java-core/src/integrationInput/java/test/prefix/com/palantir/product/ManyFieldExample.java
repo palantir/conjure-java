@@ -95,7 +95,7 @@ public final class ManyFieldExample {
     }
 
     /**
-     * docs for items field
+     * docs for items field with exciting character$ used by javapoet.
      */
     @JsonProperty("items")
     public List<String> getItems() {
@@ -289,7 +289,7 @@ public final class ManyFieldExample {
         }
 
         /**
-         * docs for items field
+         * docs for items field with exciting character$ used by javapoet.
          */
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
@@ -299,7 +299,7 @@ public final class ManyFieldExample {
         }
 
         /**
-         * docs for items field
+         * docs for items field with exciting character$ used by javapoet.
          */
         public Builder addAllItems(@Nonnull Iterable<String> items) {
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
@@ -307,7 +307,7 @@ public final class ManyFieldExample {
         }
 
         /**
-         * docs for items field
+         * docs for items field with exciting character$ used by javapoet.
          */
         public Builder items(String items) {
             this.items.add(items);
