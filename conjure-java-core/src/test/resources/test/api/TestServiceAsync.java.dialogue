@@ -30,6 +30,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 /**
  * A Markdown description of the service.
@@ -39,6 +40,7 @@ public interface TestServiceAsync {
     /**
      * Returns a mapping from file system id to backing file system configuration.
      */
+    @Nonnull
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 
     ListenableFuture<Dataset> createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
