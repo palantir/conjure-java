@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Generate endpoint markers as annotations on Dialogue interfaces
+  links:
+  - https://github.com/palantir/conjure-java/pull/921
