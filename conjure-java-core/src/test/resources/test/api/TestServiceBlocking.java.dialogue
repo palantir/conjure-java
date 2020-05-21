@@ -21,6 +21,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 
 /**
  * A Markdown description of the service.
@@ -30,6 +31,7 @@ public interface TestServiceBlocking {
     /**
      * Returns a mapping from file system id to backing file system configuration.
      */
+    @Nonnull
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
 
     Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);

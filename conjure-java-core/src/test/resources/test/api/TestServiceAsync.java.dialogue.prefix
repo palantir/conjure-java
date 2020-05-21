@@ -26,6 +26,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
 import test.prefix.com.palantir.product.AliasedString;
 import test.prefix.com.palantir.product.CreateDatasetRequest;
 import test.prefix.com.palantir.product.datasets.BackingFileSystem;
@@ -39,6 +40,7 @@ public interface TestServiceAsync {
     /**
      * Returns a mapping from file system id to backing file system configuration.
      */
+    @Nonnull
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 
     ListenableFuture<Dataset> createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
