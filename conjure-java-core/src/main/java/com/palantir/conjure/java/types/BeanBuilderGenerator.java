@@ -278,7 +278,8 @@ public final class BeanBuilderGenerator {
         boolean shouldClearFirst = false;
         return MethodSpec.methodBuilder(prefix + StringUtils.capitalize(field.name))
                 .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
-                        .orElse(""))
+                        .map(rendered -> CodeBlock.of("$L", rendered))
+                        .orElseGet(() -> CodeBlock.builder().build()))
                 .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
@@ -490,7 +491,8 @@ public final class BeanBuilderGenerator {
         FieldDefinition definition = enriched.conjureDef();
         return MethodSpec.methodBuilder(enriched.poetSpec().name)
                 .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
-                        .orElse(""))
+                        .map(rendered -> CodeBlock.of("$L", rendered))
+                        .orElseGet(() -> CodeBlock.builder().build()))
                 .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass);

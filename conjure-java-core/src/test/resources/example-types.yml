@@ -153,7 +153,7 @@ types:
             docs: docs for optionalItem field
           items:
             type: list<string>
-            docs: docs for items field
+            docs: docs for items field with exciting character$ used by javapoet.
           set:
             type: set<string>
             docs: docs for set field
