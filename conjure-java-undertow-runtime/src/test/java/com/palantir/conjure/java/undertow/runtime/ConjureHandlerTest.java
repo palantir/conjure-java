@@ -62,7 +62,7 @@ public final class ConjureHandlerTest {
     @BeforeEach
     public void before() {
         wrappersBeforeBlockingCallOrder = new ArrayList<>();
-        HttpHandler httpHandler = exchange -> {
+        HttpHandler httpHandler = _exchange -> {
             if (wrapperObserver.control() > 0) {
                 innerObserver.control();
             }
@@ -83,7 +83,7 @@ public final class ConjureHandlerTest {
                     }
                 }))
                 // check that an empty wrapper is similar in behavior to an identity wrapper
-                .addWrapperBeforeBlocking(endpoint -> Optional.empty())
+                .addWrapperBeforeBlocking(_endpoint -> Optional.empty())
                 .addWrapperBeforeBlocking(endpoint -> Optional.of(exchange -> {
                     if (exchange.isInIoThread()) {
                         wrappersBeforeBlockingCallOrder.add(2);

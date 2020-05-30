@@ -143,7 +143,7 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
                     @Override
                     public void onSuccess(@Nullable T result) {
                         exchange.dispatch(
-                                wrapCallback(serverExchange -> returnValueWriter.write(result, exchange), tracer));
+                                wrapCallback(_serverExchange -> returnValueWriter.write(result, exchange), tracer));
                     }
 
                     @Override

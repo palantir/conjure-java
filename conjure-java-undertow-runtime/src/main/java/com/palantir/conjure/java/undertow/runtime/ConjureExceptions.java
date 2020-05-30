@@ -270,7 +270,7 @@ final class ConjureExceptions {
 
                 @Override
                 public Consumer<HttpServerExchange> visit(QosException.Unavailable _exception) {
-                    return exchange -> {};
+                    return _exchange -> {};
                 }
             };
 }

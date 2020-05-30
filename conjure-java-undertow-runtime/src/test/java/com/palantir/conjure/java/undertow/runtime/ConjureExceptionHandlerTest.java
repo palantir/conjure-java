@@ -55,7 +55,7 @@ public final class ConjureExceptionHandlerTest {
     public void before() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(_exchange -> {
                     throw exception;
                 })))
                 .build();
@@ -202,7 +202,7 @@ public final class ConjureExceptionHandlerTest {
         server.stop();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(exchange -> {
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(_exchange -> {
                     throw new Error();
                 })))
                 .build();
@@ -215,7 +215,7 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void handlesErrorWithoutRethrowing() {
-        HttpHandler handler = new ConjureExceptionHandler(exchange -> {
+        HttpHandler handler = new ConjureExceptionHandler(_exchange -> {
             throw new Error();
         });
         assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))

@@ -63,7 +63,7 @@ public class BearerTokenLoggingTest {
             ConjureUndertowRuntime.builder().build();
 
     private AtomicReference<Runnable> delegateRunnable = new AtomicReference<>();
-    private HttpHandler delegate = request -> delegateRunnable.get().run();
+    private HttpHandler delegate = _request -> delegateRunnable.get().run();
     private HttpServerExchange exchange = HttpServerExchanges.createStub();
 
     private HttpHandler handler;

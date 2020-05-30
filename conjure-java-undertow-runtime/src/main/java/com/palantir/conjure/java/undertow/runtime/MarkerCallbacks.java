@@ -29,7 +29,7 @@ final class MarkerCallbacks {
     static MarkerCallback fold(List<ParamMarker> paramMarkers) {
         return paramMarkers.stream()
                 .reduce(
-                        (markerClass, parameterName, parameterValue, exchange) -> {},
+                        (_markerClass, _parameterName, _parameterValue, _exchange) -> {},
                         (paramMarker1, paramMarker2) -> (markerClass, parameterName, parameterValue, exchange) -> {
                             paramMarker1.mark(markerClass, parameterName, parameterValue, exchange);
                             paramMarker2.mark(markerClass, parameterName, parameterValue, exchange);

@@ -59,7 +59,7 @@ public class EnumTests {
     @Test
     public void testValues() {
         Set<EnumExample.Value> valuesFromClass =
-                EnumExample.values().stream().map(v -> v.get()).collect(Collectors.toSet());
+                EnumExample.values().stream().map(EnumExample::get).collect(Collectors.toSet());
         Set<EnumExample.Value> valuesFromEnum = Arrays.stream(EnumExample.Value.values())
                 .filter(v -> !v.equals(EnumExample.Value.UNKNOWN))
                 .collect(Collectors.toSet());
