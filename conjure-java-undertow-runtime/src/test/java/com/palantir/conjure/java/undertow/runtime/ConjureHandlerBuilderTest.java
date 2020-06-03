@@ -90,7 +90,7 @@ public class ConjureHandlerBuilderTest {
                 .method(method)
                 .template(template)
                 .serviceName(serviceName)
-                .handler(exchange -> {})
+                .handler(_exchange -> {})
                 .name(name)
                 .build();
     }

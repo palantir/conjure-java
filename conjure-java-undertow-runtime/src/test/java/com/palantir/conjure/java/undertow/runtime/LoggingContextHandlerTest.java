@@ -38,7 +38,7 @@ public class LoggingContextHandlerTest {
     @Test
     public void testClearsExistingValues() throws Exception {
         HttpHandler handler = new LoggingContextHandler(
-                exchange -> assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty());
+                _exchange -> assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty());
         MDC.put("foo", "bar");
         handler.handleRequest(HttpServerExchanges.createStub());
         assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
@@ -46,7 +46,7 @@ public class LoggingContextHandlerTest {
 
     @Test
     public void testValuesSetInHandlerAreCleared() throws Exception {
-        HttpHandler handler = new LoggingContextHandler(exchange -> MDC.put("foo", "bar"));
+        HttpHandler handler = new LoggingContextHandler(_exchange -> MDC.put("foo", "bar"));
         handler.handleRequest(HttpServerExchanges.createStub());
         assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
     }

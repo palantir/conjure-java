@@ -89,12 +89,12 @@ public class TracedEncodingTest {
 
         @Override
         public <T> Serializer<T> serializer(TypeMarker<T> _type) {
-            return (value, output) -> {};
+            return (_value, _output) -> {};
         }
 
         @Override
         public <T> Deserializer<T> deserializer(TypeMarker<T> _type) {
-            return input -> null;
+            return _input -> null;
         }
 
         @Override

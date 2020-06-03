@@ -38,7 +38,7 @@ public class WebSecurityHandlerTest {
     public static void beforeClass() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new WebSecurityHandler(exchange -> {}))
+                .setHandler(new WebSecurityHandler(_exchange -> {}))
                 .build();
         server.start();
     }
