@@ -813,12 +813,12 @@ final class UndertowServiceHandlerGenerator {
 
     /**
      * Returns a CodeBlock that constructs the given type given the provided variable that holds the decoded value for
-     * the type. inType must be a type that resolves to (primitive|optional<primitive>) and must use an alias type
-     * somewhere in its type definition. This means that inType must be one of the following:
-     * - optional<alias that resolves to a primitive>
+     * the type. inType must be a type that resolves to {@code (primitive|optional<primitive>)} and must use an alias
+     * type somewhere in its type definition. This means that inType must be one of the following:
+     * - {@code optional<alias that resolves to a primitive>}
      * - alias of a primitive
-     * - alias of an optional<primitive>
-     * - alias of an optional<alias that resolves to a primitive>
+     * - alias of an {@code optional<primitive>}
+     * - alias of an {@code optional<alias that resolves to a primitive>}
      * - alias of an alias that follows one of these rules (recursive definition)
      *
      * An "alias that resolves to a primitive" is either an alias of a primitive or an alias of an alias that follows
