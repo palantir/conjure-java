@@ -811,7 +811,7 @@ final class UndertowServiceHandlerGenerator {
         }
     }
 
-    /*
+    /**
      * Returns a CodeBlock that constructs the given type given the provided variable that holds the decoded value for
      * the type. inType must be a type that resolves to (primitive|optional<primitive>) and must use an alias type
      * somewhere in its type definition. This means that inType must be one of the following:

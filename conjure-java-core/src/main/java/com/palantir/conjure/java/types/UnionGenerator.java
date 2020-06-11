@@ -389,7 +389,7 @@ public final class UnionGenerator {
     }
 
     /**
-     * Convenience method for generating a {@code Function&lt;MemberType, T&gt;} used for fields and setters of the
+     * Convenience method for generating a {@code Function<MemberType, T>} used for fields and setters of the
      * visitor builder.
      */
     private static TypeName visitorObjectTypeName(TypeName memberType, TypeName visitResultType) {
