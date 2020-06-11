@@ -30,10 +30,7 @@ public final class EmptyUnionTypeExample {
     }
 
     public <T> T accept(Visitor<T> visitor) {
-        if (value instanceof UnknownWrapper) {
-            return visitor.visitUnknown(((UnknownWrapper) value).getType());
-        }
-        throw new IllegalStateException(String.format("Could not identify type %s", value.getClass()));
+        return value.accept(visitor);
     }
 
     @Override
@@ -96,7 +93,9 @@ public final class EmptyUnionTypeExample {
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private interface Base {}
+    private interface Base {
+        <T> T accept(Visitor<T> visitor);
+    }
 
     @JsonTypeInfo(
             use = JsonTypeInfo.Id.NAME,
@@ -133,6 +132,11 @@ public final class EmptyUnionTypeExample {
         @JsonAnySetter
         private void put(String key, Object val) {
             value.put(key, val);
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnknown(type);
         }
 
         @Override

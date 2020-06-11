@@ -36,12 +36,7 @@ public final class SingleUnion {
     }
 
     public <T> T accept(Visitor<T> visitor) {
-        if (value instanceof FooWrapper) {
-            return visitor.visitFoo(((FooWrapper) value).value);
-        } else if (value instanceof UnknownWrapper) {
-            return visitor.visitUnknown(((UnknownWrapper) value).getType());
-        }
-        throw new IllegalStateException(String.format("Could not identify type %s", value.getClass()));
+        return value.accept(visitor);
     }
 
     @Override
@@ -126,7 +121,9 @@ public final class SingleUnion {
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
     @JsonSubTypes(@JsonSubTypes.Type(FooWrapper.class))
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private interface Base {}
+    private interface Base {
+        <T> T accept(Visitor<T> visitor);
+    }
 
     @JsonTypeName("foo")
     private static final class FooWrapper implements Base {
@@ -141,6 +138,11 @@ public final class SingleUnion {
         @JsonProperty("foo")
         private String getValue() {
             return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitFoo(value);
         }
 
         @Override
@@ -198,6 +200,11 @@ public final class SingleUnion {
         @JsonAnySetter
         private void put(String key, Object val) {
             value.put(key, val);
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnknown(type);
         }
 
         @Override

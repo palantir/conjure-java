@@ -53,18 +53,8 @@ public final class Union {
         return new Union(new BazWrapper(value));
     }
 
-    @SuppressWarnings("deprecation")
     public <T> T accept(Visitor<T> visitor) {
-        if (value instanceof FooWrapper) {
-            return visitor.visitFoo(((FooWrapper) value).value);
-        } else if (value instanceof BarWrapper) {
-            return visitor.visitBar(((BarWrapper) value).value);
-        } else if (value instanceof BazWrapper) {
-            return visitor.visitBaz(((BazWrapper) value).value);
-        } else if (value instanceof UnknownWrapper) {
-            return visitor.visitUnknown(((UnknownWrapper) value).getType());
-        }
-        throw new IllegalStateException(String.format("Could not identify type %s", value.getClass()));
+        return value.accept(visitor);
     }
 
     @Override
@@ -208,7 +198,9 @@ public final class Union {
         @JsonSubTypes.Type(BazWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private interface Base {}
+    private interface Base {
+        <T> T accept(Visitor<T> visitor);
+    }
 
     @JsonTypeName("foo")
     private static final class FooWrapper implements Base {
@@ -223,6 +215,11 @@ public final class Union {
         @JsonProperty("foo")
         private String getValue() {
             return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitFoo(value);
         }
 
         @Override
@@ -261,6 +258,12 @@ public final class Union {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitBar(value);
+        }
+
+        @Override
         public boolean equals(Object other) {
             return this == other || (other instanceof BarWrapper && equalTo((BarWrapper) other));
         }
@@ -293,6 +296,12 @@ public final class Union {
         @JsonProperty("baz")
         private long getValue() {
             return value;
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitBaz(value);
         }
 
         @Override
@@ -350,6 +359,11 @@ public final class Union {
         @JsonAnySetter
         private void put(String key, Object val) {
             value.put(key, val);
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnknown(type);
         }
 
         @Override
