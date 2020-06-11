@@ -92,5 +92,5 @@ dependencies {
 
 tasks.withType(JavaCompile) {
     // this complains about the integrationInput directory
-    options.errorprone.errorproneArgs += '-Xep:StrictUnusedVariable:OFF'
+    options.errorprone.disable 'StrictUnusedVariable'
 }
