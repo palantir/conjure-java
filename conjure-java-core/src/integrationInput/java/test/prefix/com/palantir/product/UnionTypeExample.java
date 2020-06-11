@@ -72,26 +72,7 @@ public final class UnionTypeExample {
     }
 
     public <T> T accept(Visitor<T> visitor) {
-        if (value instanceof StringExampleWrapper) {
-            return visitor.visitStringExample(((StringExampleWrapper) value).value);
-        } else if (value instanceof SetWrapper) {
-            return visitor.visitSet(((SetWrapper) value).value);
-        } else if (value instanceof ThisFieldIsAnIntegerWrapper) {
-            return visitor.visitThisFieldIsAnInteger(((ThisFieldIsAnIntegerWrapper) value).value);
-        } else if (value instanceof AlsoAnIntegerWrapper) {
-            return visitor.visitAlsoAnInteger(((AlsoAnIntegerWrapper) value).value);
-        } else if (value instanceof IfWrapper) {
-            return visitor.visitIf(((IfWrapper) value).value);
-        } else if (value instanceof NewWrapper) {
-            return visitor.visitNew(((NewWrapper) value).value);
-        } else if (value instanceof InterfaceWrapper) {
-            return visitor.visitInterface(((InterfaceWrapper) value).value);
-        } else if (value instanceof CompletedWrapper) {
-            return visitor.visitCompleted(((CompletedWrapper) value).value);
-        } else if (value instanceof UnknownWrapper) {
-            return visitor.visitUnknown(((UnknownWrapper) value).getType());
-        }
-        throw new IllegalStateException(String.format("Could not identify type %s", value.getClass()));
+        return value.accept(visitor);
     }
 
     @Override
@@ -346,7 +327,9 @@ public final class UnionTypeExample {
         @JsonSubTypes.Type(CompletedWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private interface Base {}
+    private interface Base {
+        <T> T accept(Visitor<T> visitor);
+    }
 
     @JsonTypeName("stringExample")
     private static final class StringExampleWrapper implements Base {
@@ -361,6 +344,11 @@ public final class UnionTypeExample {
         @JsonProperty("stringExample")
         private StringExample getValue() {
             return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitStringExample(value);
         }
 
         @Override
@@ -399,6 +387,11 @@ public final class UnionTypeExample {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitSet(value);
+        }
+
+        @Override
         public boolean equals(Object other) {
             return this == other || (other instanceof SetWrapper && equalTo((SetWrapper) other));
         }
@@ -431,6 +424,11 @@ public final class UnionTypeExample {
         @JsonProperty("thisFieldIsAnInteger")
         private int getValue() {
             return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitThisFieldIsAnInteger(value);
         }
 
         @Override
@@ -470,6 +468,11 @@ public final class UnionTypeExample {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitAlsoAnInteger(value);
+        }
+
+        @Override
         public boolean equals(Object other) {
             return this == other || (other instanceof AlsoAnIntegerWrapper && equalTo((AlsoAnIntegerWrapper) other));
         }
@@ -502,6 +505,11 @@ public final class UnionTypeExample {
         @JsonProperty("if")
         private int getValue() {
             return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitIf(value);
         }
 
         @Override
@@ -540,6 +548,11 @@ public final class UnionTypeExample {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitNew(value);
+        }
+
+        @Override
         public boolean equals(Object other) {
             return this == other || (other instanceof NewWrapper && equalTo((NewWrapper) other));
         }
@@ -575,6 +588,11 @@ public final class UnionTypeExample {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitInterface(value);
+        }
+
+        @Override
         public boolean equals(Object other) {
             return this == other || (other instanceof InterfaceWrapper && equalTo((InterfaceWrapper) other));
         }
@@ -607,6 +625,11 @@ public final class UnionTypeExample {
         @JsonProperty("completed")
         private int getValue() {
             return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitCompleted(value);
         }
 
         @Override
@@ -664,6 +687,11 @@ public final class UnionTypeExample {
         @JsonAnySetter
         private void put(String key, Object val) {
             value.put(key, val);
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnknown(type);
         }
 
         @Override
