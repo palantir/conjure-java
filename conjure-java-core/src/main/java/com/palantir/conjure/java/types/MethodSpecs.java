@@ -166,7 +166,7 @@ public final class MethodSpecs {
         return CodeBlock.of("$N", "this." + field.name);
     }
 
-    private static <T> Collector<T, ArrayList<T>, ArrayList<T>> joining(T delim) {
+    private static <T> Collector<T, List<T>, List<T>> joining(T delim) {
         return Collector.of(
                 ArrayList::new,
                 (list, element) -> {
