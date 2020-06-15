@@ -42,7 +42,7 @@ import picocli.CommandLine;
         name = "conjure-java",
         description = "CLI to generate Java POJOs and interfaces from Conjure API definitions.",
         mixinStandardHelpOptions = true,
-        subcommands = {ConjureJavaCli.GenerateCommand.class})
+        subcommands = ConjureJavaCli.GenerateCommand.class)
 public final class ConjureJavaCli implements Runnable {
     public static void main(String[] args) {
         CommandLine.run(new ConjureJavaCli(), args);
