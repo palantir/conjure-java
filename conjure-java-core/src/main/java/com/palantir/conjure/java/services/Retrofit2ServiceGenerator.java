@@ -19,7 +19,6 @@ package com.palantir.conjure.java.services;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
@@ -221,7 +220,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
             for (int i = 0; i <= queryArgs.size(); i++) {
                 List<ArgumentDefinition> extraHeaderArgs = headerArgs.subList(j, headerArgs.size());
                 List<ArgumentDefinition> extraQueryArgs = queryArgs.subList(i, queryArgs.size());
-                List<ArgumentDefinition> extraArgs = Lists.newArrayList(extraHeaderArgs);
+                List<ArgumentDefinition> extraArgs = new ArrayList<>(extraHeaderArgs);
                 extraArgs.addAll(extraQueryArgs);
                 if (!extraArgs.isEmpty()) {
                     alternateMethods.add(createCompatibilityBackfillMethod(
