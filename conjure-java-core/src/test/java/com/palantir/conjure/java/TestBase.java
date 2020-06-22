@@ -56,7 +56,7 @@ public abstract class TestBase {
                 Files.deleteIfExists(output);
                 Files.copy(file, output);
             }
-            assertThat(readFromFile(file)).isEqualTo(readFromFile(output));
+            assertThat(readFromFile(file)).describedAs(output.toString()).isEqualTo(readFromFile(output));
         }
     }
 }

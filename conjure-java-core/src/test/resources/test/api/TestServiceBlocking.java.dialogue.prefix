@@ -85,6 +85,13 @@ public interface TestServiceBlocking {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
+    void testOptionalHeaderParam(
+            AuthHeader authHeader,
+            Optional<String> maybeHeader,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> maybeQuery,
+            String query);
+
     boolean testBoolean(AuthHeader authHeader);
 
     double testDouble(AuthHeader authHeader);
@@ -197,6 +204,17 @@ public interface TestServiceBlocking {
                 _runtime.clients()
                         .block(delegate.testNoResponseQueryParams(
                                 authHeader, something, implicit, optionalMiddle, setEnd, optionalEnd, query));
+            }
+
+            @Override
+            public void testOptionalHeaderParam(
+                    AuthHeader authHeader,
+                    Optional<String> maybeHeader,
+                    ResourceIdentifier implicit,
+                    Optional<ResourceIdentifier> maybeQuery,
+                    String query) {
+                _runtime.clients()
+                        .block(delegate.testOptionalHeaderParam(authHeader, maybeHeader, implicit, maybeQuery, query));
             }
 
             @Override

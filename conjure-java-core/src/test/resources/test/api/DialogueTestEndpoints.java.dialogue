@@ -515,6 +515,38 @@ enum DialogueTestEndpoints implements Endpoint {
         }
     },
 
+    testOptionalHeaderParam {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("test-optional-header-param")
+                .build();
+
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "testOptionalHeaderParam";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+    },
+
     testBoolean {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("catalog").fixed("boolean").build();

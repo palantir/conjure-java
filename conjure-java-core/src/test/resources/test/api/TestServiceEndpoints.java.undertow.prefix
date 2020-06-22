@@ -64,6 +64,7 @@ public final class TestServiceEndpoints implements UndertowService {
                 new TestParamEndpoint(runtime, delegate),
                 new TestQueryParamsEndpoint(runtime, delegate),
                 new TestNoResponseQueryParamsEndpoint(runtime, delegate),
+                new TestOptionalHeaderParamEndpoint(runtime, delegate),
                 new TestBooleanEndpoint(runtime, delegate),
                 new TestDoubleEndpoint(runtime, delegate),
                 new TestIntegerEndpoint(runtime, delegate),
@@ -839,6 +840,60 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "testNoResponseQueryParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestOptionalHeaderParamEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Deserializer<String> deserializer;
+
+        TestOptionalHeaderParamEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            String query = deserializer.deserialize(exchange);
+            HeaderMap headerParams = exchange.getRequestHeaders();
+            Optional<String> maybeHeader =
+                    runtime.plainSerDe().deserializeOptionalString(headerParams.get("MaybeHeader"));
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            ResourceIdentifier implicit = runtime.plainSerDe().deserializeRid(queryParams.get("implicit"));
+            Optional<ResourceIdentifier> maybeQuery =
+                    runtime.plainSerDe().deserializeOptionalRid(queryParams.get("maybeQuery"));
+            delegate.testOptionalHeaderParam(authHeader, maybeHeader, implicit, maybeQuery, query);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/test-optional-header-param";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testOptionalHeaderParam";
         }
 
         @Override

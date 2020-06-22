@@ -77,6 +77,13 @@ public interface TestService {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
+    void testOptionalHeaderParam(
+            AuthHeader authHeader,
+            Optional<String> maybeHeader,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> maybeQuery,
+            String query);
+
     boolean testBoolean(AuthHeader authHeader);
 
     double testDouble(AuthHeader authHeader);

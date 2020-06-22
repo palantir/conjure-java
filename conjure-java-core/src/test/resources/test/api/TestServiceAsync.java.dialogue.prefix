@@ -95,6 +95,13 @@ public interface TestServiceAsync {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
+    ListenableFuture<Void> testOptionalHeaderParam(
+            AuthHeader authHeader,
+            Optional<String> maybeHeader,
+            ResourceIdentifier implicit,
+            Optional<ResourceIdentifier> maybeQuery,
+            String query);
+
     ListenableFuture<Boolean> testBoolean(AuthHeader authHeader);
 
     ListenableFuture<Double> testDouble(AuthHeader authHeader);
@@ -207,6 +214,15 @@ public interface TestServiceAsync {
                     _runtime.clients().bind(_channel, DialogueTestEndpoints.testNoResponseQueryParams);
 
             private final Deserializer<Void> testNoResponseQueryParamsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Serializer<String> testOptionalHeaderParamSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+
+            private final EndpointChannel testOptionalHeaderParamChannel =
+                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testOptionalHeaderParam);
+
+            private final Deserializer<Void> testOptionalHeaderParamDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             private final EndpointChannel testBooleanChannel =
@@ -428,6 +444,27 @@ public interface TestServiceAsync {
                                 testNoResponseQueryParamsChannel,
                                 _request.build(),
                                 testNoResponseQueryParamsDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<Void> testOptionalHeaderParam(
+                    AuthHeader authHeader,
+                    Optional<String> maybeHeader,
+                    ResourceIdentifier implicit,
+                    Optional<ResourceIdentifier> maybeQuery,
+                    String query) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(testOptionalHeaderParamSerializer.serialize(query));
+                if (maybeHeader.isPresent()) {
+                    _request.putHeaderParams("MaybeHeader", _plainSerDe.serializeString(maybeHeader.get()));
+                }
+                _request.putQueryParams("implicit", _plainSerDe.serializeRid(implicit));
+                if (maybeQuery.isPresent()) {
+                    _request.putQueryParams("maybeQuery", _plainSerDe.serializeRid(maybeQuery.get()));
+                }
+                return _runtime.clients()
+                        .call(testOptionalHeaderParamChannel, _request.build(), testOptionalHeaderParamDeserializer);
             }
 
             @Override
