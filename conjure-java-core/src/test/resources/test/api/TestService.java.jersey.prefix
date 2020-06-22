@@ -148,6 +148,15 @@ public interface TestService {
             @QueryParam("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
             String query);
 
+    @POST
+    @Path("catalog/test-optional-header-param")
+    void testOptionalHeaderParam(
+            @HeaderParam("Authorization") AuthHeader authHeader,
+            @HeaderParam("MaybeHeader") Optional<String> maybeHeader,
+            @QueryParam("implicit") ResourceIdentifier implicit,
+            @QueryParam("maybeQuery") Optional<ResourceIdentifier> maybeQuery,
+            String query);
+
     @GET
     @Path("catalog/boolean")
     boolean testBoolean(@HeaderParam("Authorization") AuthHeader authHeader);
@@ -235,6 +244,23 @@ public interface TestService {
             Set<String> setEnd,
             String query) {
         testNoResponseQueryParams(authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
+    }
+
+    @Deprecated
+    default void testOptionalHeaderParam(AuthHeader authHeader, ResourceIdentifier implicit, String query) {
+        testOptionalHeaderParam(authHeader, Optional.empty(), implicit, Optional.empty(), query);
+    }
+
+    @Deprecated
+    default void testOptionalHeaderParam(
+            AuthHeader authHeader, ResourceIdentifier implicit, Optional<ResourceIdentifier> maybeQuery, String query) {
+        testOptionalHeaderParam(authHeader, Optional.empty(), implicit, maybeQuery, query);
+    }
+
+    @Deprecated
+    default void testOptionalHeaderParam(
+            AuthHeader authHeader, Optional<String> maybeHeader, ResourceIdentifier implicit, String query) {
+        testOptionalHeaderParam(authHeader, maybeHeader, implicit, Optional.empty(), query);
     }
 
     @Deprecated
