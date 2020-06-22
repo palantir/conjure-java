@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: When optional header params are added, Retrofit and Jersey generated
+    code now includes deprecated methods without these headers - similar to those
+    generated when optional query params are added.
+  links:
+  - https://github.com/palantir/conjure-java/pull/967
