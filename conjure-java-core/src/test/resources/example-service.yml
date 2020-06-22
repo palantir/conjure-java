@@ -224,6 +224,21 @@ services:
             type: optional<rid>
             param-type: query
 
+      testOptionalHeaderParam:
+        http: POST /test-optional-header-param
+        args:
+          query: string
+          maybeHeader:
+            type: optional<string>
+            param-type: header
+            param-id: MaybeHeader
+          implicit:
+            type: rid
+            param-type: query
+          maybeQuery:
+            type: optional<rid>
+            param-type: query
+
       testBoolean:
         http: GET /boolean
         returns: boolean

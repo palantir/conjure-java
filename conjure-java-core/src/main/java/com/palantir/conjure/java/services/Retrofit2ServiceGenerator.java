@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
@@ -201,9 +202,14 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
     private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
             EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         Set<ArgumentName> encodedPathArgs = extractEncodedPathArgs(endpointDef.getHttpPath());
+        List<ArgumentDefinition> headerArgs = new ArrayList<>();
         List<ArgumentDefinition> queryArgs = new ArrayList<>();
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {
+            if (arg.getParamType().accept(ParameterTypeVisitor.IS_HEADER)
+                    && arg.getType().accept(DefaultableTypeVisitor.INSTANCE)) {
+                headerArgs.add(arg);
+            }
             if (arg.getParamType().accept(ParameterTypeVisitor.IS_QUERY)
                     && arg.getType().accept(DefaultableTypeVisitor.INSTANCE)) {
                 queryArgs.add(arg);
@@ -211,13 +217,17 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
         }
 
         List<MethodSpec> alternateMethods = new ArrayList<>();
-        for (int i = 0; i < queryArgs.size(); i++) {
-            alternateMethods.add(createCompatibilityBackfillMethod(
-                    endpointDef,
-                    returnTypeMapper,
-                    argumentTypeMapper,
-                    encodedPathArgs,
-                    queryArgs.subList(i, queryArgs.size())));
+        for (int j = 0; j <= headerArgs.size(); j++) {
+            for (int i = 0; i <= queryArgs.size(); i++) {
+                List<ArgumentDefinition> extraHeaderArgs = headerArgs.subList(j, headerArgs.size());
+                List<ArgumentDefinition> extraQueryArgs = queryArgs.subList(i, queryArgs.size());
+                List<ArgumentDefinition> extraArgs = Lists.newArrayList(extraHeaderArgs);
+                extraArgs.addAll(extraQueryArgs);
+                if (!extraArgs.isEmpty()) {
+                    alternateMethods.add(createCompatibilityBackfillMethod(
+                            endpointDef, returnTypeMapper, argumentTypeMapper, encodedPathArgs, extraArgs));
+                }
+            }
         }
 
         return alternateMethods;

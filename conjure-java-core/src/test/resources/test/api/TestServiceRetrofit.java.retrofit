@@ -135,6 +135,15 @@ public interface TestServiceRetrofit {
             @Query("optionalEnd") Optional<ResourceIdentifier> optionalEnd,
             @Body String query);
 
+    @POST("./catalog/test-optional-header-param")
+    @Headers({"hr-path-template: /catalog/test-optional-header-param", "Accept: application/json"})
+    ListenableFuture<Void> testOptionalHeaderParam(
+            @Header("Authorization") AuthHeader authHeader,
+            @Header("MaybeHeader") Optional<String> maybeHeader,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Query("maybeQuery") Optional<ResourceIdentifier> maybeQuery,
+            @Body String query);
+
     @GET("./catalog/boolean")
     @Headers({"hr-path-template: /catalog/boolean", "Accept: application/json"})
     ListenableFuture<Boolean> testBoolean(@Header("Authorization") AuthHeader authHeader);
@@ -228,6 +237,32 @@ public interface TestServiceRetrofit {
             @Query("setEnd") Set<String> setEnd,
             @Body String query) {
         testNoResponseQueryParams(authHeader, something, implicit, optionalMiddle, setEnd, Optional.empty(), query);
+    }
+
+    @Deprecated
+    default void testOptionalHeaderParam(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Body String query) {
+        testOptionalHeaderParam(authHeader, Optional.empty(), implicit, Optional.empty(), query);
+    }
+
+    @Deprecated
+    default void testOptionalHeaderParam(
+            @Header("Authorization") AuthHeader authHeader,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Query("maybeQuery") Optional<ResourceIdentifier> maybeQuery,
+            @Body String query) {
+        testOptionalHeaderParam(authHeader, Optional.empty(), implicit, maybeQuery, query);
+    }
+
+    @Deprecated
+    default void testOptionalHeaderParam(
+            @Header("Authorization") AuthHeader authHeader,
+            @Header("MaybeHeader") Optional<String> maybeHeader,
+            @Query("implicit") ResourceIdentifier implicit,
+            @Body String query) {
+        testOptionalHeaderParam(authHeader, maybeHeader, implicit, Optional.empty(), query);
     }
 
     @Deprecated
