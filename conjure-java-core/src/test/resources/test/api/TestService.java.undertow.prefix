@@ -1,9 +1,27 @@
 package test.prefix.com.palantir.another;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderMap;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.PathTemplateMatch;
+import io.undertow.util.StatusCodes;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -20,7 +38,7 @@ import test.prefix.com.palantir.product.datasets.Dataset;
  * A Markdown description of the service.
  */
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-public interface TestService {
+public interface TestService extends UndertowService {
     /**
      * Returns a mapping from file system id to backing file system configuration.
      */
@@ -88,4 +106,1093 @@ public interface TestService {
     void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
 
     void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
+
+    @Override
+    default List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return Collections.unmodifiableList(Arrays.asList(
+                new UndertowTestService.GetFileSystemsEndpoint(runtime, this),
+                new UndertowTestService.CreateDatasetEndpoint(runtime, this),
+                new UndertowTestService.GetDatasetEndpoint(runtime, this),
+                new UndertowTestService.GetRawDataEndpoint(runtime, this),
+                new UndertowTestService.GetAliasedRawDataEndpoint(runtime, this),
+                new UndertowTestService.MaybeGetRawDataEndpoint(runtime, this),
+                new UndertowTestService.GetAliasedStringEndpoint(runtime, this),
+                new UndertowTestService.UploadRawDataEndpoint(runtime, this),
+                new UndertowTestService.UploadAliasedRawDataEndpoint(runtime, this),
+                new UndertowTestService.GetBranchesEndpoint(runtime, this),
+                new UndertowTestService.GetBranchesDeprecatedEndpoint(runtime, this),
+                new UndertowTestService.ResolveBranchEndpoint(runtime, this),
+                new UndertowTestService.TestParamEndpoint(runtime, this),
+                new UndertowTestService.TestQueryParamsEndpoint(runtime, this),
+                new UndertowTestService.TestNoResponseQueryParamsEndpoint(runtime, this),
+                new UndertowTestService.TestBooleanEndpoint(runtime, this),
+                new UndertowTestService.TestDoubleEndpoint(runtime, this),
+                new UndertowTestService.TestIntegerEndpoint(runtime, this),
+                new UndertowTestService.TestPostOptionalEndpoint(runtime, this),
+                new UndertowTestService.TestOptionalIntegerAndDoubleEndpoint(runtime, this),
+                new UndertowTestService.GetForStringsEndpoint(runtime, this)));
+    }
+
+    final class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Map<String, BackingFileSystem>> serializer;
+
+        GetFileSystemsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, BackingFileSystem> result = delegate.getFileSystems(authHeader);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/fileSystems";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getFileSystems";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class CreateDatasetEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Deserializer<CreateDatasetRequest> deserializer;
+
+        private final Serializer<Dataset> serializer;
+
+        CreateDatasetEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<CreateDatasetRequest>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Dataset>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            CreateDatasetRequest request = deserializer.deserialize(exchange);
+            HeaderMap headerParams = exchange.getRequestHeaders();
+            String testHeaderArg = runtime.plainSerDe().deserializeString(headerParams.get("Test-Header"));
+            runtime.markers().param("com.palantir.redaction.Safe", "testHeaderArg", testHeaderArg, exchange);
+            Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "createDataset";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class GetDatasetEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Optional<Dataset>> serializer;
+
+        GetDatasetEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<Dataset>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            Optional<Dataset> result = delegate.getDataset(authHeader, datasetRid);
+            if (result.isPresent()) {
+                serializer.serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getDataset";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class GetRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
+            runtime.bodySerDe().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/raw";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getRawData";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class GetAliasedRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<NestedAliasedBinary> serializer;
+
+        GetAliasedRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<NestedAliasedBinary>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/raw-aliased";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getAliasedRawData";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class MaybeGetRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        MaybeGetRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            runtime.markers().param("javax.annotation.Nonnull", "datasetRid", datasetRid, exchange);
+            Optional<BinaryResponseBody> result = delegate.maybeGetRawData(authHeader, datasetRid);
+            if (result.isPresent()) {
+                runtime.bodySerDe().serialize(result.get(), exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/raw-maybe";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "maybeGetRawData";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class GetAliasedStringEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<AliasedString> serializer;
+
+        GetAliasedStringEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<AliasedString>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/string-aliased";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getAliasedString";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class UploadRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        UploadRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            InputStream input = runtime.bodySerDe().deserializeInputStream(exchange);
+            runtime.markers().param("com.palantir.redaction.Safe", "input", input, exchange);
+            delegate.uploadRawData(authHeader, input);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/upload-raw";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "uploadRawData";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class UploadAliasedRawDataEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Deserializer<NestedAliasedBinary> deserializer;
+
+        UploadAliasedRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<NestedAliasedBinary>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            NestedAliasedBinary input = deserializer.deserialize(exchange);
+            delegate.uploadAliasedRawData(authHeader, input);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/upload-raw-aliased";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "uploadAliasedRawData";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class GetBranchesEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Set<String>> serializer;
+
+        GetBranchesEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Set<String>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            Set<String> result = delegate.getBranches(authHeader, datasetRid);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/branches";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getBranches";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class GetBranchesDeprecatedEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Set<String>> serializer;
+
+        GetBranchesDeprecatedEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Set<String>>() {});
+        }
+
+        @Override
+        @SuppressWarnings("deprecation")
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/branchesDeprecated";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getBranchesDeprecated";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+
+        @Override
+        public Optional<String> deprecated() {
+            return Optional.of("use getBranches instead");
+        }
+    }
+
+    final class ResolveBranchEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Optional<String>> serializer;
+
+        ResolveBranchEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            String branch = runtime.plainSerDe().deserializeString(pathParams.get("branch"));
+            Optional<String> result = delegate.resolveBranch(authHeader, datasetRid, branch);
+            if (result.isPresent()) {
+                serializer.serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "resolveBranch";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class TestParamEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Optional<String>> serializer;
+
+        TestParamEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            Optional<String> result = delegate.testParam(authHeader, datasetRid);
+            if (result.isPresent()) {
+                serializer.serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/testParam";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testParam";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class TestQueryParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Deserializer<String> deserializer;
+
+        private final Serializer<Integer> serializer;
+
+        TestQueryParamsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Integer>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            String query = deserializer.deserialize(exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            ResourceIdentifier something = runtime.plainSerDe().deserializeRid(queryParams.get("different"));
+            runtime.markers().param("com.palantir.redaction.Safe", "something", something, exchange);
+            Optional<ResourceIdentifier> optionalMiddle =
+                    runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalMiddle"));
+            ResourceIdentifier implicit = runtime.plainSerDe().deserializeRid(queryParams.get("implicit"));
+            Set<String> setEnd = runtime.plainSerDe().deserializeStringSet(queryParams.get("setEnd"));
+            Optional<ResourceIdentifier> optionalEnd =
+                    runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalEnd"));
+            int result = delegate.testQueryParams(
+                    authHeader, something, implicit, optionalMiddle, setEnd, optionalEnd, query);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/test-query-params";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testQueryParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class TestNoResponseQueryParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Deserializer<String> deserializer;
+
+        TestNoResponseQueryParamsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            String query = deserializer.deserialize(exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            ResourceIdentifier something = runtime.plainSerDe().deserializeRid(queryParams.get("different"));
+            Optional<ResourceIdentifier> optionalMiddle =
+                    runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalMiddle"));
+            ResourceIdentifier implicit = runtime.plainSerDe().deserializeRid(queryParams.get("implicit"));
+            Set<String> setEnd = runtime.plainSerDe().deserializeStringSet(queryParams.get("setEnd"));
+            Optional<ResourceIdentifier> optionalEnd =
+                    runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalEnd"));
+            delegate.testNoResponseQueryParams(
+                    authHeader, something, implicit, optionalMiddle, setEnd, optionalEnd, query);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/test-no-response-query-params";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testNoResponseQueryParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class TestBooleanEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Boolean> serializer;
+
+        TestBooleanEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Boolean>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            boolean result = delegate.testBoolean(authHeader);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/boolean";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testBoolean";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class TestDoubleEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Double> serializer;
+
+        TestDoubleEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Double>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            double result = delegate.testDouble(authHeader);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/double";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testDouble";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class TestIntegerEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Integer> serializer;
+
+        TestIntegerEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Integer>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            int result = delegate.testInteger(authHeader);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/integer";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testInteger";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class TestPostOptionalEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Deserializer<Optional<String>> deserializer;
+
+        private final Serializer<Optional<String>> serializer;
+
+        TestPostOptionalEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Optional<String> maybeString = deserializer.deserialize(exchange);
+            Optional<String> result = delegate.testPostOptional(authHeader, maybeString);
+            if (result.isPresent()) {
+                serializer.serialize(result, exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/optional";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testPostOptional";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class TestOptionalIntegerAndDoubleEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        TestOptionalIntegerAndDoubleEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            OptionalInt maybeInteger = runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("maybeInteger"));
+            OptionalDouble maybeDouble = runtime.plainSerDe().deserializeOptionalDouble(queryParams.get("maybeDouble"));
+            delegate.testOptionalIntegerAndDouble(authHeader, maybeInteger, maybeDouble);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/optional-integer-double";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testOptionalIntegerAndDouble";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    final class GetForStringsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        GetForStringsEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
+            runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            Set<AliasedString> strings =
+                    runtime.plainSerDe().deserializeComplexSet(queryParams.get("strings"), AliasedString::valueOf);
+            delegate.getForStrings(authHeader, datasetRid, strings);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/datasets/{datasetRid}/strings";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "getForStrings";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
 }
