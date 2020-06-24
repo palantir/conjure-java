@@ -71,6 +71,7 @@ services:
             markers:
               - Safe
         returns: Dataset
+        docs: foo $bar
 
       getDataset:
         http: GET /datasets/{datasetRid}

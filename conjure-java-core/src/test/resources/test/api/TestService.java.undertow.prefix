@@ -26,6 +26,9 @@ public interface TestService {
      */
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
 
+    /**
+     * foo $bar
+     */
     Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
     Optional<Dataset> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
