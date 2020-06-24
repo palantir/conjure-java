@@ -58,7 +58,8 @@ public final class UndertowServiceGenerator implements ServiceGenerator {
             TypeMapper returnTypeMapper) {
         return ImmutableList.of(
                 new UndertowServiceInterfaceGenerator(options)
-                        .generateServiceInterface(serviceDefinition, typeDefinitions, typeMapper, returnTypeMapper),
-                new UndertowServiceHandlerGenerator(options).generateServiceHandler(serviceDefinition));
+                        .generateServiceInterface(serviceDefinition, typeMapper, returnTypeMapper),
+                new UndertowServiceHandlerGenerator(options)
+                        .generateServiceHandler(serviceDefinition, typeDefinitions, typeMapper, returnTypeMapper));
     }
 }

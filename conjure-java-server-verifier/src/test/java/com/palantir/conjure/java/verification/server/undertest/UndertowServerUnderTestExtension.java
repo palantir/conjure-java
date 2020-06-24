@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.verification.server.undertest;
 
 import com.google.common.collect.Iterables;
+import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoints;
 import com.palantir.conjure.java.com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
@@ -32,12 +33,16 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public final class UndertowServerUnderTestExtension implements BeforeAllCallback, AfterAllCallback {
 
+    private final boolean useEndpointsWrapper;
     private Undertow server;
+
+    public UndertowServerUnderTestExtension(boolean useEndpointsWrapper) {
+        this.useEndpointsWrapper = useEndpointsWrapper;
+    }
 
     @Override
     public void beforeAll(ExtensionContext _context) {
-        UndertowAutoDeserializeService autoDeserialize = new EchoUndertowAutoDeserializeService();
-        UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
+        UndertowService service = getAutoDeserializeService();
 
         HttpHandler handler = ConjureHandler.builder()
                 .addAllEndpoints(
@@ -62,5 +67,14 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
         return ((InetSocketAddress)
                         Iterables.getOnlyElement(server.getListenerInfo()).getAddress())
                 .getPort();
+    }
+
+    private UndertowService getAutoDeserializeService() {
+        if (!useEndpointsWrapper) {
+            UndertowAutoDeserializeService autoDeserialize =
+                    Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
+            return AutoDeserializeServiceEndpoints.of(autoDeserialize);
+        }
+        return new EchoUndertowAutoDeserializeService();
     }
 }

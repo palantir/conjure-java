@@ -4,13 +4,6 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HttpString;
-import io.undertow.util.Methods;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Generated;
 
@@ -20,48 +13,6 @@ public interface TestService extends UndertowService {
 
     @Override
     default List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(new UndertowTestService.GetBinaryEndpoint(runtime, this)));
-    }
-
-    final class GetBinaryEndpoint implements HttpHandler, Endpoint {
-        private final UndertowRuntime runtime;
-
-        private final TestService delegate;
-
-        GetBinaryEndpoint(UndertowRuntime runtime, TestService delegate) {
-            this.runtime = runtime;
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void handleRequest(HttpServerExchange exchange) throws IOException {
-            BinaryResponseBody result = delegate.getBinary();
-            runtime.bodySerDe().serialize(result, exchange);
-        }
-
-        @Override
-        public HttpString method() {
-            return Methods.GET;
-        }
-
-        @Override
-        public String template() {
-            return "/";
-        }
-
-        @Override
-        public String serviceName() {
-            return "TestService";
-        }
-
-        @Override
-        public String name() {
-            return "getBinary";
-        }
-
-        @Override
-        public HttpHandler handler() {
-            return this;
-        }
+        return TestServiceEndpoints.of(this).endpoints(runtime);
     }
 }

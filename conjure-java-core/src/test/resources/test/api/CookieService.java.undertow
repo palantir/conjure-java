@@ -4,14 +4,6 @@ import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.tokens.auth.BearerToken;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HttpString;
-import io.undertow.util.Methods;
-import io.undertow.util.StatusCodes;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Generated;
 
@@ -21,49 +13,6 @@ public interface CookieService extends UndertowService {
 
     @Override
     default List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(new UndertowCookieService.EatCookiesEndpoint(runtime, this)));
-    }
-
-    final class EatCookiesEndpoint implements HttpHandler, Endpoint {
-        private final UndertowRuntime runtime;
-
-        private final CookieService delegate;
-
-        EatCookiesEndpoint(UndertowRuntime runtime, CookieService delegate) {
-            this.runtime = runtime;
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void handleRequest(HttpServerExchange exchange) throws IOException {
-            BearerToken cookieToken = runtime.auth().cookie(exchange, "PALANTIR_TOKEN");
-            delegate.eatCookies(cookieToken);
-            exchange.setStatusCode(StatusCodes.NO_CONTENT);
-        }
-
-        @Override
-        public HttpString method() {
-            return Methods.GET;
-        }
-
-        @Override
-        public String template() {
-            return "/cookies";
-        }
-
-        @Override
-        public String serviceName() {
-            return "CookieService";
-        }
-
-        @Override
-        public String name() {
-            return "eatCookies";
-        }
-
-        @Override
-        public HttpHandler handler() {
-            return this;
-        }
+        return CookieServiceEndpoints.of(this).endpoints(runtime);
     }
 }

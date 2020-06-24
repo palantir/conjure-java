@@ -1,17 +1,8 @@
 package test.api;
 
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.Serializer;
-import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HttpString;
-import io.undertow.util.Methods;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Generated;
 
@@ -23,98 +14,6 @@ public interface AsyncMarkers extends UndertowService {
 
     @Override
     default List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(
-                new UndertowAsyncMarkers.AsyncEndpoint(runtime, this),
-                new UndertowAsyncMarkers.SyncEndpoint(runtime, this)));
-    }
-
-    final class AsyncEndpoint implements HttpHandler, Endpoint {
-        private final UndertowRuntime runtime;
-
-        private final AsyncMarkers delegate;
-
-        private final Serializer<String> serializer;
-
-        AsyncEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
-            this.runtime = runtime;
-            this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
-        }
-
-        @Override
-        public void handleRequest(HttpServerExchange exchange) throws IOException {
-            String result = delegate.async();
-            serializer.serialize(result, exchange);
-        }
-
-        @Override
-        public HttpString method() {
-            return Methods.GET;
-        }
-
-        @Override
-        public String template() {
-            return "/async";
-        }
-
-        @Override
-        public String serviceName() {
-            return "AsyncMarkers";
-        }
-
-        @Override
-        public String name() {
-            return "async";
-        }
-
-        @Override
-        public HttpHandler handler() {
-            return this;
-        }
-    }
-
-    final class SyncEndpoint implements HttpHandler, Endpoint {
-        private final UndertowRuntime runtime;
-
-        private final AsyncMarkers delegate;
-
-        private final Serializer<String> serializer;
-
-        SyncEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
-            this.runtime = runtime;
-            this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
-        }
-
-        @Override
-        public void handleRequest(HttpServerExchange exchange) throws IOException {
-            String result = delegate.sync();
-            serializer.serialize(result, exchange);
-        }
-
-        @Override
-        public HttpString method() {
-            return Methods.GET;
-        }
-
-        @Override
-        public String template() {
-            return "/sync";
-        }
-
-        @Override
-        public String serviceName() {
-            return "AsyncMarkers";
-        }
-
-        @Override
-        public String name() {
-            return "sync";
-        }
-
-        @Override
-        public HttpHandler handler() {
-            return this;
-        }
+        return AsyncMarkersEndpoints.of(this).endpoints(runtime);
     }
 }
