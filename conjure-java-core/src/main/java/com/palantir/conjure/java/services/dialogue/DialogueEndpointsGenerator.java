@@ -79,7 +79,7 @@ final class DialogueEndpointsGenerator {
 
     private static TypeSpec endpointField(EndpointDefinition def, String serviceName, Optional<String> apiVersion) {
         TypeSpec.Builder builder = TypeSpec.anonymousClassBuilder("");
-        def.getDocs().map(Javadoc::render).ifPresent(builder::addJavadoc);
+        def.getDocs().ifPresent(docs -> builder.addJavadoc("$L", Javadoc.render(docs)));
 
         return builder.addField(FieldSpec.builder(
                                 TypeName.get(PathTemplate.class), "pathTemplate", Modifier.PRIVATE, Modifier.FINAL)

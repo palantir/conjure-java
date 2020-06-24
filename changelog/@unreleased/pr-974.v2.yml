@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix Dialogue Endpoint javadoc rendering with javapoet escape chars
+  links:
+  - https://github.com/palantir/conjure-java/pull/974

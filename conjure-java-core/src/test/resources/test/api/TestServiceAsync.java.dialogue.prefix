@@ -43,6 +43,9 @@ public interface TestServiceAsync {
     @Nonnull
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 
+    /**
+     * foo $bar
+     */
     ListenableFuture<Dataset> createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
     ListenableFuture<Optional<Dataset>> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
