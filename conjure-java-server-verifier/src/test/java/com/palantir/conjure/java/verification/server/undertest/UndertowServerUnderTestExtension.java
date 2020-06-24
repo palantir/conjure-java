@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.verification.server.undertest;
 
 import com.google.common.collect.Iterables;
-import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoints;
 import com.palantir.conjure.java.com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
@@ -37,8 +36,7 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
 
     @Override
     public void beforeAll(ExtensionContext _context) {
-        UndertowAutoDeserializeService autoDeserialize =
-                Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
+        UndertowAutoDeserializeService autoDeserialize = new EchoUndertowAutoDeserializeService();
         UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
         HttpHandler handler = ConjureHandler.builder()
