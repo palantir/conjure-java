@@ -200,6 +200,39 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
             }
         }
 
+        if (!headerArgs.isEmpty()) {
+            // ensure the correct ordering of parameters by creating the complete sorted parameter list
+            List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, argumentTypeMapper, false);
+            List<ArgumentDefinition> sortedArgs = sortedParams.stream()
+                    .map(param -> endpointDef.getArgs().stream()
+                            .filter(arg -> arg.getArgName().get().equals(param.name))
+                            .findFirst())
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
+
+            Optional<ArgumentDefinition> firstParameterAfterLastHeader = Optional.empty();
+            for (int i = 0; i < sortedArgs.size(); i++) {
+                ArgumentDefinition arg = sortedArgs.get(i);
+                boolean isOptionalHeaderArg = arg.getParamType().accept(ParameterTypeVisitor.IS_HEADER)
+                        && arg.getType().accept(DefaultableTypeVisitor.INSTANCE);
+                if (isOptionalHeaderArg) {
+                    if (i < (sortedArgs.size() - 1)) {
+                        firstParameterAfterLastHeader = Optional.of(sortedArgs.get(i + 1));
+                    } else {
+                        firstParameterAfterLastHeader = Optional.empty();
+                    }
+                }
+            }
+
+            if (!firstParameterAfterLastHeader.isPresent()
+                    || firstParameterAfterLastHeader.get().getType().accept(DefaultableTypeVisitor.INSTANCE)) {
+                // The last optional header is not followed by a non-optional parameter, so we can't guarantee
+                // uniqueness of signatures if we generate backfill methods for headers.
+                headerArgs = ImmutableList.of();
+            }
+        }
+
         List<MethodSpec> alternateMethods = new ArrayList<>();
         for (int j = 0; j <= headerArgs.size(); j++) {
             for (int i = 0; i <= queryArgs.size(); i++) {
