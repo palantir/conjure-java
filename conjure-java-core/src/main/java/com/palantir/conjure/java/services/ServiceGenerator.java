@@ -50,14 +50,14 @@ public abstract class ServiceGenerator {
     }
 
     public static Optional<String> getJavaDoc(EndpointDefinition endpointDef) {
-        return getJavaDoc(endpointDef, false);
+        return getJavaDocInternal(endpointDef, false);
     }
 
     public static String getJavaDocWithRequestLine(EndpointDefinition endpointDef) {
-        return getJavaDoc(endpointDef, true).get();
+        return getJavaDocInternal(endpointDef, true).get();
     }
 
-    private static Optional<String> getJavaDoc(EndpointDefinition endpointDef, boolean includeRequestLine) {
+    private static Optional<String> getJavaDocInternal(EndpointDefinition endpointDef, boolean includeRequestLine) {
         Optional<String> depr = endpointDef.getDeprecated().map(Javadoc::getDeprecatedJavadoc);
 
         Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
