@@ -6,12 +6,12 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface AsyncMarkers {
     /**
-     * @apiNote GET /async
+     * @apiNote {@code GET /async}
      */
     ListenableFuture<String> async();
 
     /**
-     * @apiNote GET /sync
+     * @apiNote {@code GET /sync}
      */
     String sync();
 }

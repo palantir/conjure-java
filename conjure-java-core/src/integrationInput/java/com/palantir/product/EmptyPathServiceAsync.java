@@ -16,7 +16,7 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface EmptyPathServiceAsync {
     /**
-     * @apiNote GET /
+     * @apiNote {@code GET /}
      */
     ListenableFuture<Boolean> emptyPath();
 

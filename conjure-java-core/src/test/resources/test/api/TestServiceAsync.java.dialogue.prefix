@@ -39,61 +39,61 @@ import test.prefix.com.palantir.product.datasets.Dataset;
 public interface TestServiceAsync {
     /**
      * Returns a mapping from file system id to backing file system configuration.
-     * @apiNote GET /catalog/fileSystems
+     * @apiNote {@code GET /catalog/fileSystems}
      */
     @Nonnull
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 
     /**
      * foo $bar
-     * @apiNote POST /catalog/datasets
+     * @apiNote {@code POST /catalog/datasets}
      */
     ListenableFuture<Dataset> createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}}
      */
     ListenableFuture<Optional<Dataset>> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}/raw
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw}
      */
     ListenableFuture<InputStream> getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}/raw-aliased
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased}
      */
     ListenableFuture<InputStream> getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}/raw-maybe
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe}
      */
     ListenableFuture<Optional<InputStream>> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}/string-aliased
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased}
      */
     ListenableFuture<AliasedString> getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
-     * @apiNote POST /catalog/datasets/upload-raw
+     * @apiNote {@code POST /catalog/datasets/upload-raw}
      */
     ListenableFuture<Void> uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
 
     /**
-     * @apiNote POST /catalog/datasets/upload-raw-aliased
+     * @apiNote {@code POST /catalog/datasets/upload-raw-aliased}
      */
     ListenableFuture<Void> uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}/branches
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches}
      * @param datasetRid A valid dataset resource identifier.
      */
     ListenableFuture<Set<String>> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
-     * @apiNote GET /catalog/datasets/{datasetRid}/branchesDeprecated
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branchesDeprecated}
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
@@ -101,18 +101,18 @@ public interface TestServiceAsync {
     ListenableFuture<Set<String>> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve}
      */
     ListenableFuture<Optional<String>> resolveBranch(
             AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}/testParam
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/testParam}
      */
     ListenableFuture<Optional<String>> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
-     * @apiNote POST /catalog/test-query-params
+     * @apiNote {@code POST /catalog/test-query-params}
      */
     ListenableFuture<Integer> testQueryParams(
             AuthHeader authHeader,
@@ -124,7 +124,7 @@ public interface TestServiceAsync {
             String query);
 
     /**
-     * @apiNote POST /catalog/test-no-response-query-params
+     * @apiNote {@code POST /catalog/test-no-response-query-params}
      */
     ListenableFuture<Void> testNoResponseQueryParams(
             AuthHeader authHeader,
@@ -136,33 +136,33 @@ public interface TestServiceAsync {
             String query);
 
     /**
-     * @apiNote GET /catalog/boolean
+     * @apiNote {@code GET /catalog/boolean}
      */
     ListenableFuture<Boolean> testBoolean(AuthHeader authHeader);
 
     /**
-     * @apiNote GET /catalog/double
+     * @apiNote {@code GET /catalog/double}
      */
     ListenableFuture<Double> testDouble(AuthHeader authHeader);
 
     /**
-     * @apiNote GET /catalog/integer
+     * @apiNote {@code GET /catalog/integer}
      */
     ListenableFuture<Integer> testInteger(AuthHeader authHeader);
 
     /**
-     * @apiNote POST /catalog/optional
+     * @apiNote {@code POST /catalog/optional}
      */
     ListenableFuture<Optional<String>> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
 
     /**
-     * @apiNote GET /catalog/optional-integer-double
+     * @apiNote {@code GET /catalog/optional-integer-double}
      */
     ListenableFuture<Void> testOptionalIntegerAndDouble(
             AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
 
     /**
-     * @apiNote GET /catalog/datasets/{datasetRid}/strings
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/strings}
      */
     ListenableFuture<Void> getForStrings(
             AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);

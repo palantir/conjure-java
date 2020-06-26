@@ -6,7 +6,7 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface TestService {
     /**
-     * @apiNote GET /
+     * @apiNote {@code GET /}
      */
     BinaryResponseBody getBinary();
 }

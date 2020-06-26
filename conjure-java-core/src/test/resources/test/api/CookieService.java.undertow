@@ -6,7 +6,7 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface CookieService {
     /**
-     * @apiNote GET /cookies
+     * @apiNote {@code GET /cookies}
      */
     void eatCookies(BearerToken cookieToken);
 }
