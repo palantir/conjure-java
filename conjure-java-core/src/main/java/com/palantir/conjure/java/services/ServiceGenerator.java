@@ -49,10 +49,16 @@ public interface ServiceGenerator {
         return emittedPaths;
     }
 
-    static Optional<String> getJavaDoc(EndpointDefinition endpointDef) {
+    static Optional<String> getJavaDoc(EndpointDefinition endpointDef, boolean includeRequestLine) {
         Optional<String> depr = endpointDef.getDeprecated().map(Javadoc::getDeprecatedJavadoc);
 
         Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
+
+        Optional<String> requestLine = Optional.empty();
+
+        if (includeRequestLine) {
+            requestLine = Optional.of(Javadoc.getRequestLine(endpointDef.getHttpMethod(), endpointDef.getHttpPath()));
+        }
 
         Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDef.getArgs().stream()
                 .flatMap(argument -> Streams.stream(Javadoc.getParameterJavadoc(argument, endpointDef)))
@@ -60,6 +66,7 @@ public interface ServiceGenerator {
 
         StringBuilder sb = new StringBuilder();
         docs.ifPresent(sb::append);
+        requestLine.ifPresent(sb::append);
         params.ifPresent(sb::append);
         depr.ifPresent(sb::append);
         return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();

@@ -159,7 +159,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerator.getJavaDoc(endpointDef, false).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box()));
 

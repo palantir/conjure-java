@@ -4,7 +4,13 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface AsyncMarkers {
+    /**
+     * GET /async
+     */
     String async();
 
+    /**
+     * GET /sync
+     */
     String sync();
 }

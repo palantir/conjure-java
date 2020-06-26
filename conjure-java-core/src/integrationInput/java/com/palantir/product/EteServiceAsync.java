@@ -38,73 +38,151 @@ public interface EteServiceAsync {
      * <li>Docs rule</li>
      * <li>Lists are wonderful</li>
      * </ul>
+     * GET /base/string
      */
     ListenableFuture<String> string(AuthHeader authHeader);
 
     /**
      * one <em>two</em> three.
+     * GET /base/integer
      */
     ListenableFuture<Integer> integer(AuthHeader authHeader);
 
+    /**
+     * GET /base/double
+     */
     ListenableFuture<Double> double_(AuthHeader authHeader);
 
+    /**
+     * GET /base/boolean
+     */
     ListenableFuture<Boolean> boolean_(AuthHeader authHeader);
 
+    /**
+     * GET /base/safelong
+     */
     ListenableFuture<SafeLong> safelong(AuthHeader authHeader);
 
+    /**
+     * GET /base/rid
+     */
     ListenableFuture<ResourceIdentifier> rid(AuthHeader authHeader);
 
+    /**
+     * GET /base/bearertoken
+     */
     ListenableFuture<BearerToken> bearertoken(AuthHeader authHeader);
 
+    /**
+     * GET /base/optionalString
+     */
     ListenableFuture<Optional<String>> optionalString(AuthHeader authHeader);
 
+    /**
+     * GET /base/optionalEmpty
+     */
     ListenableFuture<Optional<String>> optionalEmpty(AuthHeader authHeader);
 
+    /**
+     * GET /base/datetime
+     */
     ListenableFuture<OffsetDateTime> datetime(AuthHeader authHeader);
 
+    /**
+     * GET /base/binary
+     */
     ListenableFuture<InputStream> binary(AuthHeader authHeader);
 
     /**
      * Path endpoint.
+     * GET /base/path/{param}
      * @param param Documentation for <code>param</code>
      */
     ListenableFuture<String> path(AuthHeader authHeader, String param);
 
+    /**
+     * GET /base/externalLong/{param}
+     */
     ListenableFuture<Long> externalLongPath(AuthHeader authHeader, long param);
 
+    /**
+     * GET /base/optionalExternalLong
+     */
     ListenableFuture<Optional<Long>> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param);
 
+    /**
+     * POST /base/notNullBody
+     */
     ListenableFuture<StringAliasExample> notNullBody(AuthHeader authHeader, StringAliasExample notNullBody);
 
+    /**
+     * GET /base/aliasOne
+     */
     ListenableFuture<StringAliasExample> aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);
 
+    /**
+     * GET /base/optionalAliasOne
+     */
     ListenableFuture<StringAliasExample> optionalAliasOne(
             AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
 
+    /**
+     * GET /base/aliasTwo
+     */
     ListenableFuture<NestedStringAliasExample> aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName);
 
+    /**
+     * POST /base/external/notNullBody
+     */
     ListenableFuture<StringAliasExample> notNullBodyExternalImport(
             AuthHeader authHeader, StringAliasExample notNullBody);
 
+    /**
+     * POST /base/external/optional-body
+     */
     ListenableFuture<Optional<StringAliasExample>> optionalBodyExternalImport(
             AuthHeader authHeader, Optional<StringAliasExample> body);
 
+    /**
+     * POST /base/external/optional-query
+     */
     ListenableFuture<Optional<StringAliasExample>> optionalQueryExternalImport(
             AuthHeader authHeader, Optional<StringAliasExample> query);
 
+    /**
+     * POST /base/no-return
+     */
     ListenableFuture<Void> noReturn(AuthHeader authHeader);
 
+    /**
+     * GET /base/enum/query
+     */
     ListenableFuture<SimpleEnum> enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
 
+    /**
+     * GET /base/enum/list/query
+     */
     ListenableFuture<List<SimpleEnum>> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
 
+    /**
+     * GET /base/enum/optional/query
+     */
     ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(
             AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
+    /**
+     * GET /base/enum/header
+     */
     ListenableFuture<SimpleEnum> enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
+    /**
+     * GET /base/alias-long
+     */
     ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 
+    /**
+     * GET /base/datasets/{datasetRid}/strings
+     */
     ListenableFuture<Void> complexQueryParameters(
             AuthHeader authHeader,
             ResourceIdentifier datasetRid,

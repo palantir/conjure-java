@@ -19,6 +19,8 @@ package com.palantir.conjure.java.util;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.HttpMethod;
+import com.palantir.conjure.spec.HttpPath;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.commonmark.node.Paragraph;
@@ -78,6 +80,10 @@ public final class Javadoc {
                                 argument.getArgName().get(), endpoint)
                         + " "
                         + Javadoc.render(argument.getDocs().get()));
+    }
+
+    public static String getRequestLine(HttpMethod httpMethod, HttpPath httpPath) {
+        return String.format("%s %s\n", httpMethod, httpPath);
     }
 
     public static String getDeprecatedJavadoc(Documentation deprecationDocs) {

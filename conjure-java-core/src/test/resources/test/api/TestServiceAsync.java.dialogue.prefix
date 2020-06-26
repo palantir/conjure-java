@@ -39,47 +39,81 @@ import test.prefix.com.palantir.product.datasets.Dataset;
 public interface TestServiceAsync {
     /**
      * Returns a mapping from file system id to backing file system configuration.
+     * GET /catalog/fileSystems
      */
     @Nonnull
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 
     /**
      * foo $bar
+     * POST /catalog/datasets
      */
     ListenableFuture<Dataset> createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
+    /**
+     * GET /catalog/datasets/{datasetRid}
+     */
     ListenableFuture<Optional<Dataset>> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * GET /catalog/datasets/{datasetRid}/raw
+     */
     ListenableFuture<InputStream> getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * GET /catalog/datasets/{datasetRid}/raw-aliased
+     */
     ListenableFuture<InputStream> getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * GET /catalog/datasets/{datasetRid}/raw-maybe
+     */
     ListenableFuture<Optional<InputStream>> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * GET /catalog/datasets/{datasetRid}/string-aliased
+     */
     ListenableFuture<AliasedString> getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * POST /catalog/datasets/upload-raw
+     */
     ListenableFuture<Void> uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
 
+    /**
+     * POST /catalog/datasets/upload-raw-aliased
+     */
     ListenableFuture<Void> uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
     /**
+     * GET /catalog/datasets/{datasetRid}/branches
      * @param datasetRid A valid dataset resource identifier.
      */
     ListenableFuture<Set<String>> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
+     * GET /catalog/datasets/{datasetRid}/branchesDeprecated
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
     @Deprecated
     ListenableFuture<Set<String>> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve
+     */
     ListenableFuture<Optional<String>> resolveBranch(
             AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
 
+    /**
+     * GET /catalog/datasets/{datasetRid}/testParam
+     */
     ListenableFuture<Optional<String>> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * POST /catalog/test-query-params
+     */
     ListenableFuture<Integer> testQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -89,6 +123,9 @@ public interface TestServiceAsync {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
+    /**
+     * POST /catalog/test-no-response-query-params
+     */
     ListenableFuture<Void> testNoResponseQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -98,17 +135,35 @@ public interface TestServiceAsync {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
+    /**
+     * GET /catalog/boolean
+     */
     ListenableFuture<Boolean> testBoolean(AuthHeader authHeader);
 
+    /**
+     * GET /catalog/double
+     */
     ListenableFuture<Double> testDouble(AuthHeader authHeader);
 
+    /**
+     * GET /catalog/integer
+     */
     ListenableFuture<Integer> testInteger(AuthHeader authHeader);
 
+    /**
+     * POST /catalog/optional
+     */
     ListenableFuture<Optional<String>> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
 
+    /**
+     * GET /catalog/optional-integer-double
+     */
     ListenableFuture<Void> testOptionalIntegerAndDouble(
             AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
 
+    /**
+     * GET /catalog/datasets/{datasetRid}/strings
+     */
     ListenableFuture<Void> getForStrings(
             AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 

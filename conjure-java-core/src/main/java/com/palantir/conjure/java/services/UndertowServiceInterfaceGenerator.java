@@ -83,7 +83,7 @@ final class UndertowServiceInterfaceGenerator {
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
 
-        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerator.getJavaDoc(endpointDef, true).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         if (UndertowTypeFunctions.isAsync(endpointDef, options)) {
             methodBuilder.returns(UndertowTypeFunctions.getAsyncReturnType(endpointDef, returnTypeMapper, options));

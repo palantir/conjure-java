@@ -97,7 +97,7 @@ public final class DialogueInterfaceGenerator {
         });
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
-        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerator.getJavaDoc(endpointDef, true).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         methodBuilder.returns(returnTypeMapper.apply(endpointDef.getReturns()));
 
