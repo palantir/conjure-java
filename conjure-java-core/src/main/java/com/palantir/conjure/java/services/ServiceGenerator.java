@@ -31,16 +31,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface ServiceGenerator {
+public abstract class ServiceGenerator {
 
     /** Returns the set of Java files generated from the service definitions in the given conjure specification. */
-    Set<JavaFile> generate(ConjureDefinition conjureDefinition);
+    public abstract Set<JavaFile> generate(ConjureDefinition conjureDefinition);
 
     /**
      * Generates and emits to the given output directory all services and types of the given conjure definition, using
      * the instance's service and type generators.
      */
-    default List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
+    public List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
         List<Path> emittedPaths = new ArrayList<>();
         generate(conjureDefinition).forEach(f -> {
             Path emittedPath = Goethe.formatAndEmit(f, outputDir.toPath());
@@ -49,10 +49,24 @@ public interface ServiceGenerator {
         return emittedPaths;
     }
 
-    static Optional<String> getJavaDoc(EndpointDefinition endpointDef) {
+    public static Optional<String> getJavaDoc(EndpointDefinition endpointDef) {
+        return getJavaDocInternal(endpointDef, false);
+    }
+
+    public static String getJavaDocWithRequestLine(EndpointDefinition endpointDef) {
+        return getJavaDocInternal(endpointDef, true).get();
+    }
+
+    private static Optional<String> getJavaDocInternal(EndpointDefinition endpointDef, boolean includeRequestLine) {
         Optional<String> depr = endpointDef.getDeprecated().map(Javadoc::getDeprecatedJavadoc);
 
         Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
+
+        Optional<String> requestLine = Optional.empty();
+
+        if (includeRequestLine) {
+            requestLine = Optional.of(Javadoc.getRequestLine(endpointDef.getHttpMethod(), endpointDef.getHttpPath()));
+        }
 
         Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDef.getArgs().stream()
                 .flatMap(argument -> Streams.stream(Javadoc.getParameterJavadoc(argument, endpointDef)))
@@ -60,6 +74,7 @@ public interface ServiceGenerator {
 
         StringBuilder sb = new StringBuilder();
         docs.ifPresent(sb::append);
+        requestLine.ifPresent(sb::append);
         params.ifPresent(sb::append);
         depr.ifPresent(sb::append);
         return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();

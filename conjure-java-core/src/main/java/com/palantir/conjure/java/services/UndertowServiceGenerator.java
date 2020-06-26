@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class UndertowServiceGenerator implements ServiceGenerator {
+public final class UndertowServiceGenerator extends ServiceGenerator {
 
     private final Options options;
 

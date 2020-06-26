@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // TODO(rfink): Add unit tests for misc edge cases, e.g.: docs/no-docs, auth/no-auth, binary return type.
-public final class DialogueServiceGenerator implements ServiceGenerator {
+public final class DialogueServiceGenerator extends ServiceGenerator {
 
     private final Options options;
 

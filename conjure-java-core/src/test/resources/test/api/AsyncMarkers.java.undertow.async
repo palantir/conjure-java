@@ -5,7 +5,13 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface AsyncMarkers {
+    /**
+     * @apiNote {@code GET /async}
+     */
     ListenableFuture<String> async();
 
+    /**
+     * @apiNote {@code GET /sync}
+     */
     String sync();
 }
