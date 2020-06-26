@@ -17,23 +17,23 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface EteBinaryServiceAsync {
     /**
-     * POST /binary
+     * @apiNote POST /binary
      */
     ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     /**
-     * GET /binary/optional/present
+     * @apiNote GET /binary/optional/present
      */
     ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(AuthHeader authHeader);
 
     /**
-     * GET /binary/optional/empty
+     * @apiNote GET /binary/optional/empty
      */
     ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /**
      * Throws an exception after partially writing a binary response.
-     * GET /binary/failure
+     * @apiNote GET /binary/failure
      */
     ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes);
 

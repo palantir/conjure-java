@@ -9,27 +9,27 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowAsyncRequestProcessingTestService {
     /**
-     * GET /async/delay
+     * @apiNote GET /async/delay
      */
     ListenableFuture<String> delay(OptionalInt delayMillis);
 
     /**
-     * GET /async/throws
+     * @apiNote GET /async/throws
      */
     ListenableFuture<Void> throwsInHandler();
 
     /**
-     * GET /async/failed-future
+     * @apiNote GET /async/failed-future
      */
     ListenableFuture<Void> failedFuture(OptionalInt delayMillis);
 
     /**
-     * GET /async/binary
+     * @apiNote GET /async/binary
      */
     ListenableFuture<Optional<BinaryResponseBody>> binary(Optional<String> stringValue);
 
     /**
-     * GET /async/future-trace
+     * @apiNote GET /async/future-trace
      */
     ListenableFuture<Object> futureTraceId(OptionalInt delayMillis);
 }

@@ -10,7 +10,7 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface CookieServiceBlocking {
     /**
-     * GET /cookies
+     * @apiNote GET /cookies
      */
     void eatCookies(BearerToken token);
 

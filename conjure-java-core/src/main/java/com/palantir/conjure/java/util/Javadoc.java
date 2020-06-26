@@ -83,7 +83,7 @@ public final class Javadoc {
     }
 
     public static String getRequestLine(HttpMethod httpMethod, HttpPath httpPath) {
-        return String.format("%s %s\n", httpMethod, httpPath);
+        return String.format("@apiNote %s %s\n", httpMethod, httpPath);
     }
 
     public static String getDeprecatedJavadoc(Documentation deprecationDocs) {

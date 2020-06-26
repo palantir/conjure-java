@@ -5,7 +5,7 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowEmptyPathService {
     /**
-     * GET /
+     * @apiNote GET /
      */
     boolean emptyPath();
 }

@@ -16,7 +16,7 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface CookieServiceAsync {
     /**
-     * GET /cookies
+     * @apiNote GET /cookies
      */
     ListenableFuture<Void> eatCookies(BearerToken token);
 

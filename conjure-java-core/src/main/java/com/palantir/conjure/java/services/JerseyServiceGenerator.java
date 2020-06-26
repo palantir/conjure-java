@@ -58,7 +58,7 @@ import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-public final class JerseyServiceGenerator implements ServiceGenerator {
+public final class JerseyServiceGenerator extends ServiceGenerator {
 
     private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
 
@@ -178,7 +178,7 @@ public final class JerseyServiceGenerator implements ServiceGenerator {
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        ServiceGenerator.getJavaDoc(endpointDef, false).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         return methodBuilder.build();
     }

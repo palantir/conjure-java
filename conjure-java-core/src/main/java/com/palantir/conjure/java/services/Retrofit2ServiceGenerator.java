@@ -63,7 +63,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Retrofit2ServiceGenerator implements ServiceGenerator {
+public final class Retrofit2ServiceGenerator extends ServiceGenerator {
 
     private static final ClassName LISTENABLE_FUTURE_TYPE =
             ClassName.get("com.google.common.util.concurrent", "ListenableFuture");
@@ -159,7 +159,7 @@ public final class Retrofit2ServiceGenerator implements ServiceGenerator {
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        ServiceGenerator.getJavaDoc(endpointDef, false).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box()));
 

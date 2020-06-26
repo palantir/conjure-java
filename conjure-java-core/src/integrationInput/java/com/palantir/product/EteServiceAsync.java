@@ -38,150 +38,150 @@ public interface EteServiceAsync {
      * <li>Docs rule</li>
      * <li>Lists are wonderful</li>
      * </ul>
-     * GET /base/string
+     * @apiNote GET /base/string
      */
     ListenableFuture<String> string(AuthHeader authHeader);
 
     /**
      * one <em>two</em> three.
-     * GET /base/integer
+     * @apiNote GET /base/integer
      */
     ListenableFuture<Integer> integer(AuthHeader authHeader);
 
     /**
-     * GET /base/double
+     * @apiNote GET /base/double
      */
     ListenableFuture<Double> double_(AuthHeader authHeader);
 
     /**
-     * GET /base/boolean
+     * @apiNote GET /base/boolean
      */
     ListenableFuture<Boolean> boolean_(AuthHeader authHeader);
 
     /**
-     * GET /base/safelong
+     * @apiNote GET /base/safelong
      */
     ListenableFuture<SafeLong> safelong(AuthHeader authHeader);
 
     /**
-     * GET /base/rid
+     * @apiNote GET /base/rid
      */
     ListenableFuture<ResourceIdentifier> rid(AuthHeader authHeader);
 
     /**
-     * GET /base/bearertoken
+     * @apiNote GET /base/bearertoken
      */
     ListenableFuture<BearerToken> bearertoken(AuthHeader authHeader);
 
     /**
-     * GET /base/optionalString
+     * @apiNote GET /base/optionalString
      */
     ListenableFuture<Optional<String>> optionalString(AuthHeader authHeader);
 
     /**
-     * GET /base/optionalEmpty
+     * @apiNote GET /base/optionalEmpty
      */
     ListenableFuture<Optional<String>> optionalEmpty(AuthHeader authHeader);
 
     /**
-     * GET /base/datetime
+     * @apiNote GET /base/datetime
      */
     ListenableFuture<OffsetDateTime> datetime(AuthHeader authHeader);
 
     /**
-     * GET /base/binary
+     * @apiNote GET /base/binary
      */
     ListenableFuture<InputStream> binary(AuthHeader authHeader);
 
     /**
      * Path endpoint.
-     * GET /base/path/{param}
+     * @apiNote GET /base/path/{param}
      * @param param Documentation for <code>param</code>
      */
     ListenableFuture<String> path(AuthHeader authHeader, String param);
 
     /**
-     * GET /base/externalLong/{param}
+     * @apiNote GET /base/externalLong/{param}
      */
     ListenableFuture<Long> externalLongPath(AuthHeader authHeader, long param);
 
     /**
-     * GET /base/optionalExternalLong
+     * @apiNote GET /base/optionalExternalLong
      */
     ListenableFuture<Optional<Long>> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param);
 
     /**
-     * POST /base/notNullBody
+     * @apiNote POST /base/notNullBody
      */
     ListenableFuture<StringAliasExample> notNullBody(AuthHeader authHeader, StringAliasExample notNullBody);
 
     /**
-     * GET /base/aliasOne
+     * @apiNote GET /base/aliasOne
      */
     ListenableFuture<StringAliasExample> aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);
 
     /**
-     * GET /base/optionalAliasOne
+     * @apiNote GET /base/optionalAliasOne
      */
     ListenableFuture<StringAliasExample> optionalAliasOne(
             AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
 
     /**
-     * GET /base/aliasTwo
+     * @apiNote GET /base/aliasTwo
      */
     ListenableFuture<NestedStringAliasExample> aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName);
 
     /**
-     * POST /base/external/notNullBody
+     * @apiNote POST /base/external/notNullBody
      */
     ListenableFuture<StringAliasExample> notNullBodyExternalImport(
             AuthHeader authHeader, StringAliasExample notNullBody);
 
     /**
-     * POST /base/external/optional-body
+     * @apiNote POST /base/external/optional-body
      */
     ListenableFuture<Optional<StringAliasExample>> optionalBodyExternalImport(
             AuthHeader authHeader, Optional<StringAliasExample> body);
 
     /**
-     * POST /base/external/optional-query
+     * @apiNote POST /base/external/optional-query
      */
     ListenableFuture<Optional<StringAliasExample>> optionalQueryExternalImport(
             AuthHeader authHeader, Optional<StringAliasExample> query);
 
     /**
-     * POST /base/no-return
+     * @apiNote POST /base/no-return
      */
     ListenableFuture<Void> noReturn(AuthHeader authHeader);
 
     /**
-     * GET /base/enum/query
+     * @apiNote GET /base/enum/query
      */
     ListenableFuture<SimpleEnum> enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
 
     /**
-     * GET /base/enum/list/query
+     * @apiNote GET /base/enum/list/query
      */
     ListenableFuture<List<SimpleEnum>> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
 
     /**
-     * GET /base/enum/optional/query
+     * @apiNote GET /base/enum/optional/query
      */
     ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(
             AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
     /**
-     * GET /base/enum/header
+     * @apiNote GET /base/enum/header
      */
     ListenableFuture<SimpleEnum> enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
     /**
-     * GET /base/alias-long
+     * @apiNote GET /base/alias-long
      */
     ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 
     /**
-     * GET /base/datasets/{datasetRid}/strings
+     * @apiNote GET /base/datasets/{datasetRid}/strings
      */
     ListenableFuture<Void> complexQueryParameters(
             AuthHeader authHeader,

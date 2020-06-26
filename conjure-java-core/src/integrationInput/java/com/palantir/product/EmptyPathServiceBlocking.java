@@ -9,7 +9,7 @@ import javax.annotation.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface EmptyPathServiceBlocking {
     /**
-     * GET /
+     * @apiNote GET /
      */
     boolean emptyPath();
 
