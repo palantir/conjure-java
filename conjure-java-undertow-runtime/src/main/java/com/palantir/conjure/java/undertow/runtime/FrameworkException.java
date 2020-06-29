@@ -25,7 +25,7 @@ import io.undertow.util.StatusCodes;
 import java.util.List;
 
 /** Internal type to signal a conjure protocol-level failure with a specific response code. */
-final class FrameworkException extends RuntimeException implements SafeLoggable {
+public final class FrameworkException extends RuntimeException implements SafeLoggable {
 
     private static final ErrorType UNPROCESSABLE_ENTITY =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:UnprocessableEntity");
