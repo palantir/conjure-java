@@ -54,6 +54,7 @@ final class ConjureExceptions {
     }
 
     static void handle(HttpServerExchange exchange, Serializer<SerializableError> serializer, Throwable throwable) {
+        setFailure(exchange, throwable);
         if (throwable instanceof ServiceException) {
             serviceException(exchange, serializer, (ServiceException) throwable);
         } else if (throwable instanceof QosException) {
@@ -233,6 +234,18 @@ final class ConjureExceptions {
 
     private static void log(ServiceException exception) {
         log(exception, exception);
+    }
+
+    private static void setFailure(HttpServerExchange exchange, Throwable failure) {
+        // Optimistically set the value, and revert in the unlikely case it has already been set.
+        Throwable previous = exchange.putAttachment(Attachments.FAILURE, failure);
+        if (previous != null) {
+            exchange.putAttachment(Attachments.FAILURE, previous);
+            log.info(
+                    "Failure has already been set to a {} and will not be updated to the following",
+                    SafeArg.of("existingFailureType", previous.getClass()),
+                    failure);
+        }
     }
 
     private static final QosException.Visitor<Integer> QOS_EXCEPTION_STATUS_CODE = new QosException.Visitor<Integer>() {

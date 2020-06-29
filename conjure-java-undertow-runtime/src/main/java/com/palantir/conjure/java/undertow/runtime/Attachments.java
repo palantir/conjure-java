@@ -25,5 +25,7 @@ public final class Attachments {
     public static final AttachmentKey<Optional<UnverifiedJsonWebToken>> UNVERIFIED_JWT =
             AttachmentKey.create(Optional.class);
 
+    public static final AttachmentKey<Throwable> FAILURE = AttachmentKey.create(Throwable.class);
+
     private Attachments() {}
 }
