@@ -29,10 +29,6 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
         this.delegate = delegate;
     }
 
-    /**
-     * @Deprecated: You can now use {@link UndertowNameCollisionService} directly as it implements {@link UndertowService}.
-     */
-    @Deprecated
     public static UndertowService of(UndertowNameCollisionService delegate) {
         return new NameCollisionServiceEndpoints(delegate);
     }

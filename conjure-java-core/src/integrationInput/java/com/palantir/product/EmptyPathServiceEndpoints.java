@@ -23,10 +23,6 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
         this.delegate = delegate;
     }
 
-    /**
-     * @Deprecated: You can now use {@link UndertowEmptyPathService} directly as it implements {@link UndertowService}.
-     */
-    @Deprecated
     public static UndertowService of(UndertowEmptyPathService delegate) {
         return new EmptyPathServiceEndpoints(delegate);
     }

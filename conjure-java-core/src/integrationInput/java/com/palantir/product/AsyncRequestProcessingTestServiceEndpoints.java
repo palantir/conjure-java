@@ -31,10 +31,6 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         this.delegate = delegate;
     }
 
-    /**
-     * @Deprecated: You can now use {@link UndertowAsyncRequestProcessingTestService} directly as it implements {@link UndertowService}.
-     */
-    @Deprecated
     public static UndertowService of(UndertowAsyncRequestProcessingTestService delegate) {
         return new AsyncRequestProcessingTestServiceEndpoints(delegate);
     }

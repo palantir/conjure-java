@@ -42,10 +42,6 @@ public final class TestServiceEndpoints implements UndertowService {
         this.delegate = delegate;
     }
 
-    /**
-     * @Deprecated: You can now use {@link TestService} directly as it implements {@link UndertowService}.
-     */
-    @Deprecated
     public static UndertowService of(TestService delegate) {
         return new TestServiceEndpoints(delegate);
     }

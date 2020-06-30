@@ -28,10 +28,6 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         this.delegate = delegate;
     }
 
-    /**
-     * @Deprecated: You can now use {@link UndertowEteBinaryService} directly as it implements {@link UndertowService}.
-     */
-    @Deprecated
     public static UndertowService of(UndertowEteBinaryService delegate) {
         return new EteBinaryServiceEndpoints(delegate);
     }

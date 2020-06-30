@@ -151,11 +151,6 @@ final class UndertowServiceHandlerGenerator {
                 .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("of")
-                        .addAnnotation(Deprecated.class)
-                        .addJavadoc(
-                                "@Deprecated: You can now use {@link $1T} directly as it implements {@link $2T}.",
-                                serviceClass,
-                                UndertowService.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .addParameter(serviceClass, DELEGATE_VAR_NAME)
                         .addStatement("return new $T($N)", serviceType, DELEGATE_VAR_NAME)

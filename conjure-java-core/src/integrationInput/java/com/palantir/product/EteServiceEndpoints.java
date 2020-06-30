@@ -37,10 +37,6 @@ public final class EteServiceEndpoints implements UndertowService {
         this.delegate = delegate;
     }
 
-    /**
-     * @Deprecated: You can now use {@link UndertowEteService} directly as it implements {@link UndertowService}.
-     */
-    @Deprecated
     public static UndertowService of(UndertowEteService delegate) {
         return new EteServiceEndpoints(delegate);
     }
