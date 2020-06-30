@@ -70,11 +70,11 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
     }
 
     private UndertowService getAutoDeserializeService() {
-        if (!useEndpointsWrapper) {
-            UndertowAutoDeserializeService autoDeserialize =
-                    Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
+        UndertowAutoDeserializeService autoDeserialize =
+                Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
+        if (useEndpointsWrapper) {
             return AutoDeserializeServiceEndpoints.of(autoDeserialize);
         }
-        return new EchoUndertowAutoDeserializeService();
+        return autoDeserialize;
     }
 }
