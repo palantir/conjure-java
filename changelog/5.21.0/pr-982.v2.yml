@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Conjure-undertow failures are exposed via an attachment
+  links:
+  - https://github.com/palantir/conjure-java/pull/982

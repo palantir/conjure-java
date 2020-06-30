@@ -9,6 +9,9 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface CookieService extends UndertowService {
+    /**
+     * @apiNote {@code GET /cookies}
+     */
     void eatCookies(BearerToken cookieToken);
 
     @Override

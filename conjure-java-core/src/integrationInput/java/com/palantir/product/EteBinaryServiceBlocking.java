@@ -13,14 +13,24 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 public interface EteBinaryServiceBlocking {
+    /**
+     * @apiNote {@code POST /binary}
+     */
     InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
+    /**
+     * @apiNote {@code GET /binary/optional/present}
+     */
     Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader);
 
+    /**
+     * @apiNote {@code GET /binary/optional/empty}
+     */
     Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /**
      * Throws an exception after partially writing a binary response.
+     * @apiNote {@code GET /binary/failure}
      */
     InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
 

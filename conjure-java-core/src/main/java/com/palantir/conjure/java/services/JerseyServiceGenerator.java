@@ -58,7 +58,7 @@ import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-public final class JerseyServiceGenerator implements ServiceGenerator {
+public final class JerseyServiceGenerator extends ServiceGenerator {
 
     private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
 

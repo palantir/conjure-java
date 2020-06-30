@@ -38,6 +38,9 @@ public interface TestServiceRetrofit {
     @Headers({"hr-path-template: /catalog/fileSystems", "Accept: application/json"})
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(@Header("Authorization") AuthHeader authHeader);
 
+    /**
+     * foo $bar
+     */
     @POST("./catalog/datasets")
     @Headers({"hr-path-template: /catalog/datasets", "Accept: application/json"})
     ListenableFuture<Dataset> createDataset(

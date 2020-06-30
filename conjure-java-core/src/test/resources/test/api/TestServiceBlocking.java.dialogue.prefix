@@ -30,43 +30,80 @@ import test.prefix.com.palantir.product.datasets.Dataset;
 public interface TestServiceBlocking {
     /**
      * Returns a mapping from file system id to backing file system configuration.
+     * @apiNote {@code GET /catalog/fileSystems}
      */
     @Nonnull
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
 
+    /**
+     * foo $bar
+     * @apiNote {@code POST /catalog/datasets}
+     */
     Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}}
+     */
     Optional<Dataset> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw}
+     */
     InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased}
+     */
     InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe}
+     */
     Optional<InputStream> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased}
+     */
     AliasedString getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * @apiNote {@code POST /catalog/datasets/upload-raw}
+     */
     void uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
 
+    /**
+     * @apiNote {@code POST /catalog/datasets/upload-raw-aliased}
+     */
     void uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
     /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches}
      * @param datasetRid A valid dataset resource identifier.
      */
     Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branchesDeprecated}
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
     @Deprecated
     Set<String> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve}
+     */
     Optional<String> resolveBranch(AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
 
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/testParam}
+     */
     Optional<String> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
+    /**
+     * @apiNote {@code POST /catalog/test-query-params}
+     */
     int testQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -76,6 +113,9 @@ public interface TestServiceBlocking {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
+    /**
+     * @apiNote {@code POST /catalog/test-no-response-query-params}
+     */
     void testNoResponseQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -85,16 +125,34 @@ public interface TestServiceBlocking {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
+    /**
+     * @apiNote {@code GET /catalog/boolean}
+     */
     boolean testBoolean(AuthHeader authHeader);
 
+    /**
+     * @apiNote {@code GET /catalog/double}
+     */
     double testDouble(AuthHeader authHeader);
 
+    /**
+     * @apiNote {@code GET /catalog/integer}
+     */
     int testInteger(AuthHeader authHeader);
 
+    /**
+     * @apiNote {@code POST /catalog/optional}
+     */
     Optional<String> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
 
+    /**
+     * @apiNote {@code GET /catalog/optional-integer-double}
+     */
     void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
 
+    /**
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/strings}
+     */
     void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 
     /**

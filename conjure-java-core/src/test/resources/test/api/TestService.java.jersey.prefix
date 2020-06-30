@@ -43,6 +43,9 @@ public interface TestService {
     @Path("catalog/fileSystems")
     Map<String, BackingFileSystem> getFileSystems(@HeaderParam("Authorization") AuthHeader authHeader);
 
+    /**
+     * foo $bar
+     */
     @POST
     @Path("catalog/datasets")
     Dataset createDataset(

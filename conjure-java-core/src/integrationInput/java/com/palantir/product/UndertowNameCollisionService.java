@@ -9,6 +9,9 @@ import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowNameCollisionService extends UndertowService {
+    /**
+     * @apiNote {@code POST /{runtime}}
+     */
     String int_(
             AuthHeader authHeader,
             String serializer,

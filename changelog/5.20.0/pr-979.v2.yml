@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Include request line in generated dialogue/undertow services
+  links:
+  - https://github.com/palantir/conjure-java/pull/979
