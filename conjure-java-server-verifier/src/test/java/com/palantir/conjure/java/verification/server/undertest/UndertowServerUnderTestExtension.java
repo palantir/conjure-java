@@ -33,13 +33,16 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public final class UndertowServerUnderTestExtension implements BeforeAllCallback, AfterAllCallback {
 
+    private final boolean useEndpointsWrapper;
     private Undertow server;
+
+    public UndertowServerUnderTestExtension(boolean useEndpointsWrapper) {
+        this.useEndpointsWrapper = useEndpointsWrapper;
+    }
 
     @Override
     public void beforeAll(ExtensionContext _context) {
-        UndertowAutoDeserializeService autoDeserialize =
-                Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
-        UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
+        UndertowService service = getAutoDeserializeService();
 
         HttpHandler handler = ConjureHandler.builder()
                 .addAllEndpoints(
@@ -64,5 +67,14 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
         return ((InetSocketAddress)
                         Iterables.getOnlyElement(server.getListenerInfo()).getAddress())
                 .getPort();
+    }
+
+    private UndertowService getAutoDeserializeService() {
+        UndertowAutoDeserializeService autoDeserialize =
+                Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
+        if (useEndpointsWrapper) {
+            return AutoDeserializeServiceEndpoints.of(autoDeserialize);
+        }
+        return autoDeserialize;
     }
 }

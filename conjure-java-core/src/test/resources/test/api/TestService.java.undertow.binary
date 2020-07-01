@@ -1,12 +1,21 @@
 package test.api;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-public interface TestService {
+public interface TestService extends UndertowService {
     /**
      * @apiNote {@code GET /}
      */
     BinaryResponseBody getBinary();
+
+    @Override
+    default List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return TestServiceEndpoints.of(this).endpoints(runtime);
+    }
 }

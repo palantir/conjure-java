@@ -1,9 +1,13 @@
 package test.prefix.com.palantir.another;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -20,7 +24,7 @@ import test.prefix.com.palantir.product.datasets.Dataset;
  * A Markdown description of the service.
  */
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-public interface TestService {
+public interface TestService extends UndertowService {
     /**
      * Returns a mapping from file system id to backing file system configuration.
      * @apiNote {@code GET /catalog/fileSystems}
@@ -146,4 +150,9 @@ public interface TestService {
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/strings}
      */
     void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
+
+    @Override
+    default List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return TestServiceEndpoints.of(this).endpoints(runtime);
+    }
 }

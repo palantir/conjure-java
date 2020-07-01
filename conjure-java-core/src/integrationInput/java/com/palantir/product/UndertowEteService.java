@@ -2,6 +2,9 @@ package com.palantir.product;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -12,7 +15,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-public interface UndertowEteService {
+public interface UndertowEteService extends UndertowService {
     /**
      * foo bar baz.
      * <h2>Very Important Documentation</h2>
@@ -167,4 +170,9 @@ public interface UndertowEteService {
             Set<StringAliasExample> strings,
             Set<Long> longs,
             Set<Integer> ints);
+
+    @Override
+    default List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return EteServiceEndpoints.of(this).endpoints(runtime);
+    }
 }
