@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Revert generated undertow service interfaces extend UndertowService
+    now
+  links:
+  - https://github.com/palantir/conjure-java/pull/993
