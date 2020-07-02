@@ -20,9 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
-import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
-import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -39,7 +36,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +43,6 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 final class UndertowServiceInterfaceGenerator {
-
-    private static final String RUNTIME_VAR_NAME = "runtime";
 
     private final Options options;
 
@@ -61,27 +55,14 @@ final class UndertowServiceInterfaceGenerator {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder((options.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
-                .addSuperinterface(UndertowService.class)
                 .addAnnotation(
                         ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceInterfaceGenerator.class));
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
-        ClassName endpointsServiceType = ClassName.get(
-                Packages.getPrefixedPackage(serviceDefinition.getServiceName().getPackage(), options.packagePrefix()),
-                serviceDefinition.getServiceName().getName() + "Endpoints");
-
-        serviceBuilder
-                .addMethods(serviceDefinition.getEndpoints().stream()
-                        .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper))
-                        .collect(Collectors.toList()))
-                .addMethod(MethodSpec.methodBuilder("endpoints")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
-                        .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
-                        .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
-                        .addStatement("return $1T.of(this).endpoints($2L)", endpointsServiceType, RUNTIME_VAR_NAME)
-                        .build());
+        serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
+                .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper))
+                .collect(Collectors.toList()));
 
         return JavaFile.builder(
                         Packages.getPrefixedPackage(

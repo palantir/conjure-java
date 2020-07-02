@@ -19,11 +19,6 @@ package com.palantir.conjure.java.verification.server.undertest;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.palantir.conjure.java.com.palantir.conjure.verification.client.AutoDeserializeService;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
@@ -32,25 +27,9 @@ import java.lang.reflect.Method;
  * parameter.
  */
 final class EchoResourceInvocationHandler extends AbstractInvocationHandler {
-
     @Override
-    protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.isDefault()) {
-            return getMethodHandle(method).bindTo(proxy).invokeWithArguments(args);
-        }
+    protected Object handleInvocation(Object _proxy, Method method, Object[] args) {
         Preconditions.checkArgument(args.length == 1, "Expected single argument. Method: %s", method);
         return com.palantir.logsafe.Preconditions.checkNotNull(args[0], "Null values are not allowed");
-    }
-
-    private static MethodHandle getMethodHandle(Method method) {
-        Class<?> declaringClass = method.getDeclaringClass();
-        try {
-            Constructor<MethodHandles.Lookup> constructor =
-                    MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(declaringClass).unreflectSpecial(method, declaringClass);
-        } catch (ReflectiveOperationException e) {
-            throw new SafeRuntimeException("Failed to find method handle", e, SafeArg.of("method", method));
-        }
     }
 }

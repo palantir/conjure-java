@@ -1,13 +1,9 @@
 package test.api;
 
-import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
-import com.palantir.conjure.java.undertow.lib.UndertowService;
-import java.util.List;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-public interface AsyncMarkers extends UndertowService {
+public interface AsyncMarkers {
     /**
      * @apiNote {@code GET /async}
      */
@@ -17,9 +13,4 @@ public interface AsyncMarkers extends UndertowService {
      * @apiNote {@code GET /sync}
      */
     String sync();
-
-    @Override
-    default List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return AsyncMarkersEndpoints.of(this).endpoints(runtime);
-    }
 }
