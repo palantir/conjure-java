@@ -52,12 +52,8 @@ public final class AutoDeserializeTest {
             Resources.getResource("config.yml").getPath());
 
     @RegisterExtension
-    public static final UndertowServerUnderTestExtension undertowServerUnderTestWithWrapper =
-            new UndertowServerUnderTestExtension(true);
-
-    @RegisterExtension
-    public static final UndertowServerUnderTestExtension undertowServerUnderTestWithoutWrapper =
-            new UndertowServerUnderTestExtension(false);
+    public static final UndertowServerUnderTestExtension undertowServerUnderTest =
+            new UndertowServerUnderTestExtension();
 
     @RegisterExtension
     public static final VerificationClientExtension VERIFICATION_CLIENT_EXTENSION = new VerificationClientExtension();
@@ -99,16 +95,8 @@ public final class AutoDeserializeTest {
     }
 
     @AutoDeserializeTestCases
-    public void runUndertowWithEndpointsWrapperTestCase(
-            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
-        runTestCase(endpointName, index, shouldSucceed, jsonString, undertowServerUnderTestWithWrapper.getLocalPort());
-    }
-
-    @AutoDeserializeTestCases
-    public void runUndertowWithoutEndpointsWrapperTestCase(
-            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
-        runTestCase(
-                endpointName, index, shouldSucceed, jsonString, undertowServerUnderTestWithoutWrapper.getLocalPort());
+    public void runUndertowTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
+        runTestCase(endpointName, index, shouldSucceed, jsonString, undertowServerUnderTest.getLocalPort());
     }
 
     public void runTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString, int port) {
