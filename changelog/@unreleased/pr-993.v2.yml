@@ -1,5 +1,5 @@
-type: improvement
-improvement:
+type: fix
+fix:
   description: Revert generated undertow service interfaces extend UndertowService
     now
   links:
