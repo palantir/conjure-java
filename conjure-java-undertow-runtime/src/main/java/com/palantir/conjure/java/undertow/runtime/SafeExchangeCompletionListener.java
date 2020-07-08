@@ -47,7 +47,11 @@ public final class SafeExchangeCompletionListener implements ExchangeCompletionL
         } catch (RuntimeException | Error e) {
             log.error("ExchangeCompletionListener threw an exception", e);
         } finally {
-            nextListener.proceed();
+            try {
+                nextListener.proceed();
+            } catch (RuntimeException | Error e) {
+                log.error("NextListener.proceed threw an exception", e);
+            }
         }
     }
 }

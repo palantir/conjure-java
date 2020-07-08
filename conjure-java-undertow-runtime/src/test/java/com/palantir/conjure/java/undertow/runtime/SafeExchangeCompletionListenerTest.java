@@ -68,4 +68,14 @@ public class SafeExchangeCompletionListenerTest {
         Mockito.verify(nextListener).proceed();
         Mockito.verifyNoMoreInteractions(nextListener, action);
     }
+
+    @Test
+    public void test_proceedThrowsRuntimeException() {
+        Mockito.doThrow(new SafeIllegalArgumentException()).when(nextListener).proceed();
+        ExchangeCompletionListener listener = SafeExchangeCompletionListener.of(action);
+        listener.exchangeEvent(exchange, nextListener);
+        Mockito.verify(action).accept(exchange);
+        Mockito.verify(nextListener).proceed();
+        Mockito.verifyNoMoreInteractions(nextListener, action);
+    }
 }
