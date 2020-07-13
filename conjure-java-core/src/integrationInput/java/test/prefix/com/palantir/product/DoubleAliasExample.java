@@ -2,6 +2,7 @@ package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.conjure.java.lib.SafeLong;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
@@ -44,7 +45,8 @@ public final class DoubleAliasExample {
 
     @JsonCreator
     public static DoubleAliasExample of(long value) {
-        return new DoubleAliasExample((double) value);
+        long safeValue = SafeLong.of(value).longValue();
+        return new DoubleAliasExample((double) safeValue);
     }
 
     @JsonCreator

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.visitor.MoreVisitors;
@@ -120,7 +121,12 @@ public final class AliasGenerator {
 
         if (typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE)
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE)) {
-            CodeBlock codeBlock = CodeBlock.builder()
+            CodeBlock longCastCodeBlock = CodeBlock.builder()
+                    .addStatement("long safeValue = $T.of(value).longValue()", SafeLong.class)
+                    .addStatement("return new $T((double) safeValue)", thisClass)
+                    .build();
+
+            CodeBlock intCastCodeBlock = CodeBlock.builder()
                     .addStatement("return new $T((double) value)", thisClass)
                     .build();
 
@@ -129,7 +135,7 @@ public final class AliasGenerator {
                     .addAnnotation(JsonCreator.class)
                     .addParameter(TypeName.LONG, "value")
                     .returns(thisClass)
-                    .addCode(codeBlock)
+                    .addCode(longCastCodeBlock)
                     .build());
 
             spec.addMethod(MethodSpec.methodBuilder("of")
@@ -137,7 +143,7 @@ public final class AliasGenerator {
                     .addAnnotation(JsonCreator.class)
                     .addParameter(TypeName.INT, "value")
                     .returns(thisClass)
-                    .addCode(codeBlock)
+                    .addCode(intCastCodeBlock)
                     .build());
 
             CodeBlock doubleFromStringCodeBlock = CodeBlock.builder()
