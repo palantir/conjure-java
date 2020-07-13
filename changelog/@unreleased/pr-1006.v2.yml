@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix for bug with alias'd doubles with whole numbers larger than 2^31
+  links:
+  - https://github.com/palantir/conjure-java/pull/1006
