@@ -50,6 +50,13 @@ public class AliasTests {
     }
 
     @Test
+    public void testValueOf_largeDouble_lossyDouble() throws JsonProcessingException {
+        // So large it doesn't fit in a double; jackson silently drops precision
+        assertThat(TEST_MAPPER.readValue("9007199254740992.234", DoubleAliasExample.class))
+                .isEqualTo(DoubleAliasExample.of(9007199254740992.0));
+    }
+
+    @Test
     public void testValueOf_largeDouble_double() throws JsonProcessingException {
         // Doesn't fit in an int, but does fit comfortably in a double
         assertThat(TEST_MAPPER.readValue("9667500000.0", DoubleAliasExample.class))
