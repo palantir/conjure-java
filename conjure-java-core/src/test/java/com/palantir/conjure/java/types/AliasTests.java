@@ -19,13 +19,18 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
+import com.palantir.product.DoubleAliasExample;
 import com.palantir.product.ExternalLongAliasOne;
 import com.palantir.product.ExternalLongAliasTwo;
 import com.palantir.product.UuidAliasExample;
 import org.junit.jupiter.api.Test;
 
 public class AliasTests {
+    private static final ObjectMapper TEST_MAPPER = ObjectMappers.newServerObjectMapper();
 
     @Test
     public void testNullValueSafeLoggable() {
@@ -42,5 +47,19 @@ public class AliasTests {
     @Test
     public void testValueOf_externalNested() {
         assertThat(ExternalLongAliasTwo.valueOf("3")).isEqualTo(ExternalLongAliasTwo.of(ExternalLongAliasOne.of(3L)));
+    }
+
+    @Test
+    public void testValueOf_largeDouble_double() throws JsonProcessingException {
+        // Doesn't fit in an int, but does fit comfortably in a double
+        assertThat(TEST_MAPPER.readValue("9667500000.0", DoubleAliasExample.class))
+                .isEqualTo(DoubleAliasExample.of(9667500000.0));
+    }
+
+    @Test
+    public void testValueOf_largeDouble_long() throws JsonProcessingException {
+        // Doesn't fit in an int, but does fit comfortably in a double; looks like a long
+        assertThat(TEST_MAPPER.readValue("9667500000", DoubleAliasExample.class))
+                .isEqualTo(DoubleAliasExample.of(9667500000.0));
     }
 }

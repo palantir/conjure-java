@@ -127,6 +127,14 @@ public final class AliasGenerator {
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addAnnotation(JsonCreator.class)
+                    .addParameter(TypeName.LONG, "value")
+                    .returns(thisClass)
+                    .addCode(codeBlock)
+                    .build());
+
+            spec.addMethod(MethodSpec.methodBuilder("of")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addAnnotation(JsonCreator.class)
                     .addParameter(TypeName.INT, "value")
                     .returns(thisClass)
                     .addCode(codeBlock)

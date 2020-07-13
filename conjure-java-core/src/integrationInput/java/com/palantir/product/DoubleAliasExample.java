@@ -48,6 +48,11 @@ public final class DoubleAliasExample {
     }
 
     @JsonCreator
+    public static DoubleAliasExample of(long value) {
+        return new DoubleAliasExample((double) value);
+    }
+
+    @JsonCreator
     public static DoubleAliasExample of(String value) {
         switch (value) {
             case "NaN":
