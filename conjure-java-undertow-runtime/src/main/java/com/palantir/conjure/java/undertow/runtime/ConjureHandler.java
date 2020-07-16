@@ -19,7 +19,6 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -174,11 +173,14 @@ public final class ConjureHandler implements HttpHandler {
         }
 
         public HttpHandler build() {
-            ImmutableList<Endpoint> allEndpoints = Streams.concat(
-                            endpoints.stream(), services.stream().flatMap(service -> service.endpoints(runtime).stream()
-                                    .map(Builder::checkEndpoint)))
+            ImmutableList<Endpoint> serviceEndpoints = services.stream()
+                    .flatMap(service -> service.endpoints(runtime).stream())
+                    .map(Builder::checkEndpoint)
                     .collect(ImmutableList.toImmutableList());
-
+            ImmutableList<Endpoint> allEndpoints = ImmutableList.<Endpoint>builder()
+                    .addAll(endpoints)
+                    .addAll(serviceEndpoints)
+                    .build();
             checkOverlappingPaths(allEndpoints);
 
             ImmutableList<EndpointHandlerWrapper> wrappers = ImmutableList.<EndpointHandlerWrapper>builder()
@@ -214,7 +216,7 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> Optional.of(new TracedOperationHandler(
                                     endpoint.handler(), endpoint.method() + " " + endpoint.template())),
                             endpoint -> Optional.of(
-                                    new ConjureExceptionHandlerHttpHandler(endpoint.handler(), runtime.exceptions())))
+                                    new ConjureExceptionHandler(endpoint.handler(), runtime.exceptionHandler())))
                     .build()
                     .reverse();
 

@@ -36,12 +36,13 @@ public class ConjureHandlerBuilderTest {
     @Test
     public void addOverlappingEndpoints() {
         ConjureHandler.Builder builder = ConjureHandler.builder()
-                .services(EndpointService.of(buildEndpoint(Methods.GET, "/foo/{a}/foo/{b}", "serviceName1", "bar")))
-                .services(EndpointService.of(buildEndpoint(Methods.GET, "/foo/{c}/foo/{d}", "serviceName1", "bar2")))
-                .services(EndpointService.of(buildEndpoint(Methods.GET, "/foo/{e}/foo/{f}", "serviceName2", "bar")))
-                .services(EndpointService.of(buildEndpoint(Methods.POST, "/foo", "serviceName1", "bar")))
-                .services(EndpointService.of(buildEndpoint(Methods.POST, "/foo", "serviceName2", "bar")))
-                .services(EndpointService.of(buildEndpoint(Methods.GET, "/foo2", "serviceName1", "bar")));
+                .services(EndpointService.of(
+                        buildEndpoint(Methods.GET, "/foo/{a}/foo/{b}", "serviceName1", "bar"),
+                        buildEndpoint(Methods.GET, "/foo/{c}/foo/{d}", "serviceName1", "bar2"),
+                        buildEndpoint(Methods.GET, "/foo/{e}/foo/{f}", "serviceName2", "bar"),
+                        buildEndpoint(Methods.POST, "/foo", "serviceName1", "bar"),
+                        buildEndpoint(Methods.POST, "/foo", "serviceName2", "bar"),
+                        buildEndpoint(Methods.GET, "/foo2", "serviceName1", "bar")));
         assertThatThrownBy(builder::build)
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("The same route is declared by multiple UndertowServices")

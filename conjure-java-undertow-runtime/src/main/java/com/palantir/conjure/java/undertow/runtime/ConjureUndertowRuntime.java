@@ -37,6 +37,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final AuthorizationExtractor auth;
     private final MarkerCallback markerCallback;
     private final AsyncRequestProcessing async;
+    private final ExceptionHandler exceptionHandler;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(
@@ -44,8 +45,9 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
                         ? ImmutableList.of(Encodings.json(), Encodings.smile(), Encodings.cbor())
                         : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
+        this.exceptionHandler = builder.exceptionHandler;
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
-        this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout, exceptions());
+        this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout, builder.exceptionHandler);
     }
 
     public static Builder builder() {
@@ -78,13 +80,14 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     }
 
     @Override
-    public ExceptionHandler exceptions() {
-        return ConjureExceptionHandler.INSTANCE;
+    public ExceptionHandler exceptionHandler() {
+        return exceptionHandler;
     }
 
     public static final class Builder {
 
         private Duration asyncTimeout = Duration.ofMinutes(3);
+        private ExceptionHandler exceptionHandler = ConjureExceptions.INSTANCE;
         private final List<Encoding> encodings = new ArrayList<>();
         private final List<ParamMarker> paramMarkers = new ArrayList<>();
 
@@ -105,6 +108,12 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         @CanIgnoreReturnValue
         public Builder paramMarker(ParamMarker value) {
             paramMarkers.add(Preconditions.checkNotNull(value, "paramMarker is required"));
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder exceptionHandler(ExceptionHandler value) {
+            exceptionHandler = Preconditions.checkNotNull(value, "exceptionHandler is required");
             return this;
         }
 

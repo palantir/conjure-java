@@ -42,7 +42,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public final class ConjureExceptionHandlerHttpHandlerTest {
+public final class ConjureExceptionHandlerTest {
 
     private static final OkHttpClient client = new OkHttpClient.Builder()
             .followRedirects(false) // we want to explicitly test the 'Location' header
@@ -55,11 +55,11 @@ public final class ConjureExceptionHandlerHttpHandlerTest {
     public void before() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandlerHttpHandler(
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
                         _exchange -> {
                             throw exception;
                         },
-                        ConjureExceptionHandler.INSTANCE)))
+                        ConjureExceptions.INSTANCE)))
                 .build();
         server.start();
     }
@@ -204,11 +204,11 @@ public final class ConjureExceptionHandlerHttpHandlerTest {
         server.stop();
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandlerHttpHandler(
+                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
                         _exchange -> {
                             throw new Error();
                         },
-                        ConjureExceptionHandler.INSTANCE)))
+                        ConjureExceptions.INSTANCE)))
                 .build();
         server.start();
 
@@ -219,11 +219,11 @@ public final class ConjureExceptionHandlerHttpHandlerTest {
 
     @Test
     public void handlesErrorWithoutRethrowing() {
-        HttpHandler handler = new ConjureExceptionHandlerHttpHandler(
+        HttpHandler handler = new ConjureExceptionHandler(
                 _exchange -> {
                     throw new Error();
                 },
-                ConjureExceptionHandler.INSTANCE);
+                ConjureExceptions.INSTANCE);
         assertThatCode(() -> handler.handleRequest(HttpServerExchanges.createStub()))
                 .doesNotThrowAnyException();
     }

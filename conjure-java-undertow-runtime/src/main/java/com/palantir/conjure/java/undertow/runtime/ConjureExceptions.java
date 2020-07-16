@@ -21,6 +21,7 @@ import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
@@ -41,7 +42,8 @@ import org.xnio.IoUtils;
  * Maps caught {@link Throwable} instances into HTTP responses. The result is written into the
  * {@link HttpServerExchange exchange's} response, and an appropriate HTTP status code is set.
  */
-final class ConjureExceptions {
+public enum ConjureExceptions implements ExceptionHandler {
+    INSTANCE;
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
     // Exceptions should always be serialized using JSON
@@ -49,9 +51,8 @@ final class ConjureExceptions {
                     Collections.singletonList(Encodings.json()))
             .serializer(new TypeMarker<SerializableError>() {});
 
-    private ConjureExceptions() {}
-
-    static void handle(HttpServerExchange exchange, Throwable throwable) {
+    @Override
+    public void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
         if (throwable instanceof ServiceException) {
             serviceException(exchange, (ServiceException) throwable);

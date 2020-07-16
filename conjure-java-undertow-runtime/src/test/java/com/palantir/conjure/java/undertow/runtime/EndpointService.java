@@ -25,18 +25,18 @@ import java.util.List;
 /** Test utility to migrate away from deprecated methods. */
 final class EndpointService implements UndertowService {
 
-    private final Endpoint endpoint;
+    private final ImmutableList<Endpoint> endpoints;
 
-    static UndertowService of(Endpoint endpoint) {
-        return new EndpointService(endpoint);
+    static UndertowService of(Endpoint... endpoints) {
+        return new EndpointService(ImmutableList.copyOf(endpoints));
     }
 
-    private EndpointService(Endpoint endpoint) {
-        this.endpoint = endpoint;
+    private EndpointService(ImmutableList<Endpoint> endpoints) {
+        this.endpoints = endpoints;
     }
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime _runtime) {
-        return ImmutableList.of(endpoint);
+        return endpoints;
     }
 }

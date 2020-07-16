@@ -39,5 +39,6 @@ public interface UndertowRuntime {
     /** Provides the {@link AsyncRequestProcessing} used to detach execution from the request thread. */
     AsyncRequestProcessing async();
 
-    ExceptionHandler exceptions();
+    /** Provides the {@link ExceptionHandler} used to map {@link Throwable failures} to Conjure responses. */
+    ExceptionHandler exceptionHandler();
 }
