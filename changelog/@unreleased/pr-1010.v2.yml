@@ -1,0 +1,11 @@
+type: improvement
+improvement:
+  description: |-
+    Improve the ConjureHandler builder ergonomics and composition
+
+    This allows UndertowService objects to be registered with the
+    ConjureHandler much more easily, and reuses the same non-static
+    object to handle exceptions in both blocking and async request
+    processing.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1010
