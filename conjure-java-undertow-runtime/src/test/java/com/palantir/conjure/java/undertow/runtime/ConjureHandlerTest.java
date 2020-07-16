@@ -68,14 +68,14 @@ public final class ConjureHandlerTest {
             }
         };
         HttpHandler handler = ConjureHandler.builder()
-                .endpoints(Endpoint.builder()
+                .services(EndpointService.of(Endpoint.builder()
                         .method(Methods.GET)
                         .template("/test")
                         .handler(httpHandler)
                         .serviceName("TestService")
                         .name("test")
                         .handler(httpHandler)
-                        .build())
+                        .build()))
                 .addWrapperBeforeBlocking(endpoint -> Optional.of(exchange -> {
                     if (exchange.isInIoThread()) {
                         wrappersBeforeBlockingCallOrder.add(1);

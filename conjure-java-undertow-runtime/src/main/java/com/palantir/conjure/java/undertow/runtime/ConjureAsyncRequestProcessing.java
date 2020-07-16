@@ -20,10 +20,9 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
+import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
-import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tracing.DeferredTracer;
 import io.undertow.server.ExchangeCompletionListener;
@@ -75,12 +74,12 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
                 }
             });
 
-    private final Serializer<SerializableError> exceptionSerializer = ConjureExceptions.serializer();
-
     private final Duration timeout;
+    private final ExceptionHandler exceptionHandler;
 
-    ConjureAsyncRequestProcessing(Duration timeout) {
+    ConjureAsyncRequestProcessing(Duration timeout, ExceptionHandler exceptionHandler) {
         this.timeout = timeout;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -106,9 +105,9 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
             T result = Futures.getDone(future);
             returnValueWriter.write(result, exchange);
         } catch (ExecutionException e) {
-            ConjureExceptions.handle(exchange, exceptionSerializer, e.getCause());
+            exceptionHandler.handle(exchange, e.getCause());
         } catch (RuntimeException e) {
-            ConjureExceptions.handle(exchange, exceptionSerializer, e);
+            exceptionHandler.handle(exchange, e);
         }
     }
 
@@ -149,18 +148,19 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
                     @Override
                     public void onFailure(Throwable throwable) {
                         exchange.dispatch(wrapCallback(
-                                serverExchange ->
-                                        ConjureExceptions.handle(serverExchange, exceptionSerializer, throwable),
-                                tracer));
+                                serverExchange -> exceptionHandler.handle(serverExchange, throwable), tracer));
                     }
                 },
                 DIRECT_EXECUTOR));
     }
 
     private HttpHandler wrapCallback(HttpHandler action, DeferredTracer tracer) {
-        HttpHandler next = new ConjureExceptionHandler(action, exceptionSerializer);
         return exchange -> tracer.withTrace(() -> {
-            next.handleRequest(exchange);
+            try {
+                action.handleRequest(exchange);
+            } catch (Throwable t) {
+                exceptionHandler.handle(exchange, t);
+            }
             return null;
         });
     }

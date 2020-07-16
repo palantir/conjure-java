@@ -47,9 +47,9 @@ public final class OptionsRequestTest {
         server = Undertow.builder()
                 .addHttpListener(12346, "localhost")
                 .setHandler(ConjureHandler.builder()
-                        .endpoints(endpoint(Methods.GET, "/first"))
-                        .endpoints(endpoint(Methods.POST, "/first"))
-                        .endpoints(endpoint(Methods.PUT, "/second/{p1}/and/{p2}"))
+                        .services(EndpointService.of(endpoint(Methods.GET, "/first")))
+                        .services(EndpointService.of(endpoint(Methods.POST, "/first")))
+                        .services(EndpointService.of(endpoint(Methods.PUT, "/second/{p1}/and/{p2}")))
                         .build())
                 .build();
         server.start();

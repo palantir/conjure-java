@@ -35,7 +35,6 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
-import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -97,20 +96,17 @@ public final class AsyncRequestProcessingTest extends TestBase {
     @BeforeEach
     public void before() {
         executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
-        UndertowRuntime context = ConjureUndertowRuntime.builder()
-                // Use a 1 second timeout so we can wait for the timeout to be hit without tests running too long.
-                .asyncTimeout(Duration.ofSeconds(1))
-                .build();
-
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)
                 .addHttpListener(PORT, "0.0.0.0")
                 .setHandler(ConjureHandler.builder()
-                        .addAllEndpoints(ImmutableList.of(AsyncRequestProcessingTestServiceEndpoints.of(
-                                        new AsyncRequestProcessingTestResource(executor)))
-                                .stream()
-                                .flatMap(service -> service.endpoints(context).stream())
-                                .collect(ImmutableList.toImmutableList()))
+                        .runtime(ConjureUndertowRuntime.builder()
+                                // Use a 1 second timeout so we can wait for the timeout to be hit without tests running
+                                // too long.
+                                .asyncTimeout(Duration.ofSeconds(1))
+                                .build())
+                        .services(AsyncRequestProcessingTestServiceEndpoints.of(
+                                new AsyncRequestProcessingTestResource(executor)))
                         .build())
                 .build();
         server.start();

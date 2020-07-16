@@ -223,8 +223,7 @@ public static void main(String[] args) {
     Undertow server = Undertow.builder()
             .addHttpListener(8080, "0.0.0.0")
             .setHandler(ConjureHandler.builder()
-                    .addAllEndpoints(RecipeBookServiceEndpoints.of(new RecipeBookResource())
-                            .endpoints(ConjureUndertowRuntime.builder().build()))
+                    .services(RecipeBookServiceEndpoints.of(new RecipeBookResource()))
                     .build())
             .build();
     server.start();

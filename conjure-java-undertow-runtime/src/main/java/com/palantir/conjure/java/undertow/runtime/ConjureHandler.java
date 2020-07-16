@@ -21,6 +21,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -92,30 +94,52 @@ public final class ConjureHandler implements HttpHandler {
         private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
         private final List<Endpoint> endpoints = new ArrayList<>();
+        private final List<UndertowService> services = new ArrayList<>();
         private HttpHandler fallback = ResponseCodeHandler.HANDLE_404;
+        private UndertowRuntime runtime = ConjureUndertowRuntime.builder().build();
 
         private Builder() {}
 
+        /**
+         * Use {@link #services(UndertowService)} instead to take advantage of the configured {@link UndertowRuntime}
+         * automatically.
+         *
+         * @deprecated prefer {@link #services}
+         */
+        @Deprecated
         @CanIgnoreReturnValue
         public Builder endpoints(Endpoint value) {
-            Preconditions.checkNotNull(value, "Value is required");
-            if (!ALLOWED_METHODS.contains(value.method())) {
-                throw new SafeIllegalStateException(
-                        "Endpoint method is not recognized",
-                        SafeArg.of("method", value.method()),
-                        SafeArg.of("template", value.template()),
-                        SafeArg.of("service", value.serviceName()),
-                        SafeArg.of("name", value.name()));
-            }
-            endpoints.add(value);
+            endpoints.add(checkEndpoint(value));
             return this;
         }
 
+        /**
+         * Use {@link #services(UndertowService)} instead to take advantage of the configured {@link UndertowRuntime}
+         * automatically.
+         *
+         * @deprecated prefer {@link #services}
+         */
+        @Deprecated
         @CanIgnoreReturnValue
         public Builder addAllEndpoints(Iterable<Endpoint> values) {
             Preconditions.checkNotNull(values, "Values is required");
             for (Endpoint endpoint : values) {
                 endpoints(endpoint);
+            }
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder services(UndertowService value) {
+            services.add(Preconditions.checkNotNull(value, "Value is required"));
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder addAllServices(Iterable<? extends UndertowService> values) {
+            Preconditions.checkNotNull(values, "Values is required");
+            for (UndertowService service : values) {
+                services(service);
             }
             return this;
         }
@@ -141,8 +165,23 @@ public final class ConjureHandler implements HttpHandler {
             return this;
         }
 
+        /** Configures the runtime instance to use with this handler. */
+        @CanIgnoreReturnValue
+        public Builder runtime(UndertowRuntime value) {
+            this.runtime = Preconditions.checkNotNull(value, "UndertowRuntime");
+            return this;
+        }
+
         public HttpHandler build() {
-            checkOverlappingPaths();
+            ImmutableList<Endpoint> serviceEndpoints = services.stream()
+                    .flatMap(service -> service.endpoints(runtime).stream())
+                    .map(Builder::checkEndpoint)
+                    .collect(ImmutableList.toImmutableList());
+            ImmutableList<Endpoint> allEndpoints = ImmutableList.<Endpoint>builder()
+                    .addAll(endpoints)
+                    .addAll(serviceEndpoints)
+                    .build();
+            checkOverlappingPaths(allEndpoints);
 
             ImmutableList<EndpointHandlerWrapper> wrappers = ImmutableList.<EndpointHandlerWrapper>builder()
                     .add(
@@ -176,18 +215,19 @@ public final class ConjureHandler implements HttpHandler {
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
                             endpoint -> Optional.of(new TracedOperationHandler(
                                     endpoint.handler(), endpoint.method() + " " + endpoint.template())),
-                            endpoint -> Optional.of(new ConjureExceptionHandler(endpoint.handler())))
+                            endpoint -> Optional.of(
+                                    new ConjureExceptionHandler(endpoint.handler(), runtime.exceptionHandler())))
                     .build()
                     .reverse();
 
             return new ConjureHandler(
                     fallback,
-                    endpoints.stream()
+                    allEndpoints.stream()
                             .map(endpoint -> wrap(endpoint, wrappers))
                             .collect(ImmutableList.toImmutableList()));
         }
 
-        private Endpoint wrap(Endpoint input, List<EndpointHandlerWrapper> wrappers) {
+        private static Endpoint wrap(Endpoint input, List<EndpointHandlerWrapper> wrappers) {
             Endpoint current = input;
             for (EndpointHandlerWrapper wrapper : wrappers) {
                 current = Endpoints.map(current, wrapper);
@@ -195,7 +235,20 @@ public final class ConjureHandler implements HttpHandler {
             return current;
         }
 
-        private void checkOverlappingPaths() {
+        private static Endpoint checkEndpoint(Endpoint value) {
+            Preconditions.checkNotNull(value, "Value is required");
+            if (!ALLOWED_METHODS.contains(value.method())) {
+                throw new SafeIllegalStateException(
+                        "Endpoint method is not recognized",
+                        SafeArg.of("method", value.method()),
+                        SafeArg.of("template", value.template()),
+                        SafeArg.of("service", value.serviceName()),
+                        SafeArg.of("name", value.name()));
+            }
+            return value;
+        }
+
+        private static void checkOverlappingPaths(List<Endpoint> endpoints) {
             Set<String> duplicates = endpoints.stream()
                     .collect(Collectors.groupingBy(endpoint ->
                             String.format("%s: %s", endpoint.method(), normalizeTemplate(endpoint.template()))))
@@ -203,10 +256,10 @@ public final class ConjureHandler implements HttpHandler {
                     .stream()
                     .filter(groups -> groups.getValue().size() > 1)
                     .map(entry -> {
-                        String services = entry.getValue().stream()
+                        String descriptions = entry.getValue().stream()
                                 .map(endpoint -> String.format("%s.%s", endpoint.serviceName(), endpoint.name()))
                                 .collect(Collectors.joining(", "));
-                        return String.format("%s: %s", entry.getKey(), services);
+                        return String.format("%s: %s", entry.getKey(), descriptions);
                     })
                     .collect(Collectors.toSet());
             if (!duplicates.isEmpty()) {

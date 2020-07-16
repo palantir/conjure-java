@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.api.errors.SerializableError;
-import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 
@@ -28,17 +28,12 @@ import io.undertow.server.HttpServerExchange;
  */
 final class ConjureExceptionHandler implements HttpHandler {
 
-    private final Serializer<SerializableError> serializer;
     private final HttpHandler delegate;
+    private final ExceptionHandler exceptionHandler;
 
-    ConjureExceptionHandler(HttpHandler delegate) {
-        this(delegate, ConjureExceptions.serializer());
-    }
-
-    // Constructor allows new exception handlers to be created without creating new serializer instances.
-    ConjureExceptionHandler(HttpHandler delegate, Serializer<SerializableError> serializer) {
+    ConjureExceptionHandler(HttpHandler delegate, ExceptionHandler exceptionHandler) {
         this.delegate = delegate;
-        this.serializer = serializer;
+        this.exceptionHandler = exceptionHandler;
     }
 
     @Override
@@ -46,7 +41,7 @@ final class ConjureExceptionHandler implements HttpHandler {
         try {
             delegate.handleRequest(exchange);
         } catch (Throwable throwable) {
-            ConjureExceptions.handle(exchange, serializer, throwable);
+            exceptionHandler.handle(exchange, throwable);
         }
     }
 }
