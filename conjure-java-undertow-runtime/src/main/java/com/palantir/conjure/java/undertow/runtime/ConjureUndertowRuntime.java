@@ -21,6 +21,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
+import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.MarkerCallback;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -44,7 +45,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
                         : builder.encodings);
         this.auth = new ConjureAuthorizationExtractor(plainSerDe());
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
-        this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout);
+        this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout, exceptions());
     }
 
     public static Builder builder() {
@@ -74,6 +75,11 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     @Override
     public AsyncRequestProcessing async() {
         return async;
+    }
+
+    @Override
+    public ExceptionHandler exceptions() {
+        return ConjureExceptionHandler.INSTANCE;
     }
 
     public static final class Builder {

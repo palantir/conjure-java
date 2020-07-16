@@ -44,55 +44,49 @@ import org.xnio.IoUtils;
 final class ConjureExceptions {
 
     private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
+    // Exceptions should always be serialized using JSON
+    private static final Serializer<SerializableError> serializer = new ConjureBodySerDe(
+                    Collections.singletonList(Encodings.json()))
+            .serializer(new TypeMarker<SerializableError>() {});
 
     private ConjureExceptions() {}
 
-    static Serializer<SerializableError> serializer() {
-        // Exceptions should always be serialized using JSON
-        return new ConjureBodySerDe(Collections.singletonList(Encodings.json()))
-                .serializer(new TypeMarker<SerializableError>() {});
-    }
-
-    static void handle(HttpServerExchange exchange, Serializer<SerializableError> serializer, Throwable throwable) {
+    static void handle(HttpServerExchange exchange, Throwable throwable) {
         setFailure(exchange, throwable);
         if (throwable instanceof ServiceException) {
-            serviceException(exchange, serializer, (ServiceException) throwable);
+            serviceException(exchange, (ServiceException) throwable);
         } else if (throwable instanceof QosException) {
-            qosException(exchange, serializer, (QosException) throwable);
+            qosException(exchange, (QosException) throwable);
         } else if (throwable instanceof RemoteException) {
-            remoteException(exchange, serializer, (RemoteException) throwable);
+            remoteException(exchange, (RemoteException) throwable);
         } else if (throwable instanceof IllegalArgumentException) {
-            illegalArgumentException(exchange, serializer, throwable);
+            illegalArgumentException(exchange, throwable);
         } else if (throwable instanceof FrameworkException) {
-            frameworkException(exchange, serializer, (FrameworkException) throwable);
+            frameworkException(exchange, (FrameworkException) throwable);
         } else if (throwable instanceof Error) {
-            error(exchange, serializer, (Error) throwable);
+            error(exchange, (Error) throwable);
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
             log(exception, throwable);
             writeResponse(
                     exchange,
                     Optional.of(SerializableError.forException(exception)),
-                    exception.getErrorType().httpErrorCode(),
-                    serializer);
+                    exception.getErrorType().httpErrorCode());
         }
     }
 
-    private static void serviceException(
-            HttpServerExchange exchange, Serializer<SerializableError> serializer, ServiceException exception) {
+    private static void serviceException(HttpServerExchange exchange, ServiceException exception) {
         log(exception);
         writeResponse(
                 exchange,
                 Optional.of(SerializableError.forException(exception)),
-                exception.getErrorType().httpErrorCode(),
-                serializer);
+                exception.getErrorType().httpErrorCode());
     }
 
-    private static void qosException(
-            HttpServerExchange exchange, Serializer<SerializableError> serializer, QosException exception) {
+    private static void qosException(HttpServerExchange exchange, QosException exception) {
         exception.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
         log.debug("Possible quality-of-service intervention", exception);
-        writeResponse(exchange, Optional.empty(), exception.accept(QOS_EXCEPTION_STATUS_CODE), serializer);
+        writeResponse(exchange, Optional.empty(), exception.accept(QOS_EXCEPTION_STATUS_CODE));
     }
 
     // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
@@ -100,8 +94,7 @@ final class ConjureExceptions {
     // considered internal to *this* service rather than the originating service. This means in particular
     // that Conjure errors are defined only local to a given service and these error types don't
     // propagate through other services.
-    private static void remoteException(
-            HttpServerExchange exchange, Serializer<SerializableError> serializer, RemoteException exception) {
+    private static void remoteException(HttpServerExchange exchange, RemoteException exception) {
         ErrorType errorType = mapRemoteExceptionErrorType(exception);
         writeResponse(
                 exchange,
@@ -110,8 +103,7 @@ final class ConjureExceptions {
                         .errorCode(errorType.code().toString())
                         .errorInstanceId(exception.getError().errorInstanceId())
                         .build()),
-                errorType.httpErrorCode(),
-                serializer);
+                errorType.httpErrorCode());
     }
 
     private static ErrorType mapRemoteExceptionErrorType(RemoteException exception) {
@@ -148,41 +140,33 @@ final class ConjureExceptions {
         }
     }
 
-    private static void illegalArgumentException(
-            HttpServerExchange exchange, Serializer<SerializableError> serializer, Throwable throwable) {
+    private static void illegalArgumentException(HttpServerExchange exchange, Throwable throwable) {
         ServiceException exception = new ServiceException(ErrorType.INVALID_ARGUMENT, throwable);
         log(exception, throwable);
         writeResponse(
                 exchange,
                 Optional.of(SerializableError.forException(exception)),
-                exception.getErrorType().httpErrorCode(),
-                serializer);
+                exception.getErrorType().httpErrorCode());
     }
 
-    private static void frameworkException(
-            HttpServerExchange exchange,
-            Serializer<SerializableError> serializer,
-            FrameworkException frameworkException) {
+    private static void frameworkException(HttpServerExchange exchange, FrameworkException frameworkException) {
         int statusCode = frameworkException.getStatusCode();
         ServiceException exception = new ServiceException(frameworkException.getErrorType(), frameworkException);
         log(exception, frameworkException);
-        writeResponse(exchange, Optional.of(SerializableError.forException(exception)), statusCode, serializer);
+        writeResponse(exchange, Optional.of(SerializableError.forException(exception)), statusCode);
     }
 
-    private static void error(HttpServerExchange exchange, Serializer<SerializableError> serializer, Error error) {
+    private static void error(HttpServerExchange exchange, Error error) {
         // log errors in order to associate the log line with the correct traceId but
         // avoid doing work beyond setting a 500 response code, no response body is sent.
         log.error("Error handling request", error);
         // The writeResponse method terminates responses if data has already been sent to clients
         // do not interpret partial data as a full response.
-        writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode(), serializer);
+        writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode());
     }
 
     private static void writeResponse(
-            HttpServerExchange exchange,
-            Optional<SerializableError> maybeBody,
-            int statusCode,
-            Serializer<SerializableError> serializer) {
+            HttpServerExchange exchange, Optional<SerializableError> maybeBody, int statusCode) {
         // Do not attempt to write the failure if data has already been written
         if (!isResponseStarted(exchange)) {
             exchange.setStatusCode(statusCode);

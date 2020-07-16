@@ -16,14 +16,27 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
-import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
-import io.undertow.server.HttpServerExchange;
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import java.util.List;
 
-enum ConjureExceptionHandler implements ExceptionHandler {
-    INSTANCE;
+/** Test utility to migrate away from deprecated methods. */
+final class EndpointService implements UndertowService {
+
+    private final Endpoint endpoint;
+
+    static UndertowService of(Endpoint endpoint) {
+        return new EndpointService(endpoint);
+    }
+
+    private EndpointService(Endpoint endpoint) {
+        this.endpoint = endpoint;
+    }
 
     @Override
-    public void handle(HttpServerExchange exchange, Throwable throwable) {
-        ConjureExceptions.handle(exchange, throwable);
+    public List<Endpoint> endpoints(UndertowRuntime _runtime) {
+        return ImmutableList.of(endpoint);
     }
 }

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.runtime;
+package com.palantir.conjure.java.undertow.lib;
 
-import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import io.undertow.server.HttpServerExchange;
 
-enum ConjureExceptionHandler implements ExceptionHandler {
-    INSTANCE;
+/**
+ * The {@link ExceptionHandler} is responsible for setting a response status code and logging the provided
+ * {@link Throwable}. The handler may optionally encode a response body.
+ */
+public interface ExceptionHandler {
 
-    @Override
-    public void handle(HttpServerExchange exchange, Throwable throwable) {
-        ConjureExceptions.handle(exchange, throwable);
-    }
+    /** Handles a {@link Throwable} for the given {@link HttpServerExchange}. */
+    void handle(HttpServerExchange exchange, Throwable throwable);
 }

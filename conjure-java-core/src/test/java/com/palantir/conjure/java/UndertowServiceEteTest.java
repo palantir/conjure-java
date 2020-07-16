@@ -37,9 +37,7 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
-import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
@@ -112,16 +110,11 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @BeforeAll
     public static void before() {
-        UndertowRuntime context = ConjureUndertowRuntime.builder().build();
 
         HttpHandler handler = ConjureHandler.builder()
-                .addAllEndpoints(ImmutableList.of(
-                                EteServiceEndpoints.of(new UndertowEteResource()),
-                                EmptyPathServiceEndpoints.of(() -> true),
-                                EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
-                        .stream()
-                        .flatMap(service -> service.endpoints(context).stream())
-                        .collect(ImmutableList.toImmutableList()))
+                .services(EteServiceEndpoints.of(new UndertowEteResource()))
+                .services(EmptyPathServiceEndpoints.of(() -> true))
+                .services(EteBinaryServiceEndpoints.of(new UndertowBinaryResource()))
                 .build();
 
         server = Undertow.builder()

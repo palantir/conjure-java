@@ -20,9 +20,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.com.palantir.conjure.verification.client.AutoDeserializeServiceEndpoints;
 import com.palantir.conjure.java.com.palantir.conjure.verification.client.UndertowAutoDeserializeService;
-import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
-import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -39,11 +37,9 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
     public void beforeAll(ExtensionContext _context) {
         UndertowAutoDeserializeService autoDeserialize =
                 Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());
-        UndertowService service = AutoDeserializeServiceEndpoints.of(autoDeserialize);
 
         HttpHandler handler = ConjureHandler.builder()
-                .addAllEndpoints(
-                        service.endpoints(ConjureUndertowRuntime.builder().build()))
+                .services(AutoDeserializeServiceEndpoints.of(autoDeserialize))
                 .build();
 
         server = Undertow.builder()

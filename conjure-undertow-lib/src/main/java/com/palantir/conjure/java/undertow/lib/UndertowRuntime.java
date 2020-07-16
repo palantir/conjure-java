@@ -38,4 +38,6 @@ public interface UndertowRuntime {
 
     /** Provides the {@link AsyncRequestProcessing} used to detach execution from the request thread. */
     AsyncRequestProcessing async();
+
+    ExceptionHandler exceptions();
 }
