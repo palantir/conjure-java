@@ -1,0 +1,7 @@
+type: feature
+feature:
+  description: All dialogue bindings now have a first-class factory method that takes
+    the preferred `EndpointChannelFactory` type, which allows better performance than
+    the plain Channel signature.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1015
