@@ -16,6 +16,13 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import java.io.InputStream;
+import java.lang.Boolean;
+import java.lang.Double;
+import java.lang.Integer;
+import java.lang.Long;
+import java.lang.Override;
+import java.lang.String;
+import java.lang.Void;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -188,85 +195,76 @@ public interface EteServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a EteService service.
      */
-    static EteServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+    static EteServiceAsync of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
         return new EteServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
-            private final EndpointChannel stringChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.string);
+            private final EndpointChannel stringChannel = _channel.endpoint(DialogueEteEndpoints.string);
 
             private final Deserializer<String> stringDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
-            private final EndpointChannel integerChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.integer);
+            private final EndpointChannel integerChannel = _channel.endpoint(DialogueEteEndpoints.integer);
 
             private final Deserializer<Integer> integerDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
 
-            private final EndpointChannel double_Channel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.double_);
+            private final EndpointChannel double_Channel = _channel.endpoint(DialogueEteEndpoints.double_);
 
             private final Deserializer<Double> double_Deserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
 
-            private final EndpointChannel boolean_Channel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.boolean_);
+            private final EndpointChannel boolean_Channel = _channel.endpoint(DialogueEteEndpoints.boolean_);
 
             private final Deserializer<Boolean> boolean_Deserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
 
-            private final EndpointChannel safelongChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.safelong);
+            private final EndpointChannel safelongChannel = _channel.endpoint(DialogueEteEndpoints.safelong);
 
             private final Deserializer<SafeLong> safelongDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<SafeLong>() {});
 
-            private final EndpointChannel ridChannel = _runtime.clients().bind(_channel, DialogueEteEndpoints.rid);
+            private final EndpointChannel ridChannel = _channel.endpoint(DialogueEteEndpoints.rid);
 
             private final Deserializer<ResourceIdentifier> ridDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<ResourceIdentifier>() {});
 
-            private final EndpointChannel bearertokenChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.bearertoken);
+            private final EndpointChannel bearertokenChannel = _channel.endpoint(DialogueEteEndpoints.bearertoken);
 
             private final Deserializer<BearerToken> bearertokenDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<BearerToken>() {});
 
             private final EndpointChannel optionalStringChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.optionalString);
+                    _channel.endpoint(DialogueEteEndpoints.optionalString);
 
             private final Deserializer<Optional<String>> optionalStringDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
-            private final EndpointChannel optionalEmptyChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.optionalEmpty);
+            private final EndpointChannel optionalEmptyChannel = _channel.endpoint(DialogueEteEndpoints.optionalEmpty);
 
             private final Deserializer<Optional<String>> optionalEmptyDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
-            private final EndpointChannel datetimeChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.datetime);
+            private final EndpointChannel datetimeChannel = _channel.endpoint(DialogueEteEndpoints.datetime);
 
             private final Deserializer<OffsetDateTime> datetimeDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<OffsetDateTime>() {});
 
-            private final EndpointChannel binaryChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.binary);
+            private final EndpointChannel binaryChannel = _channel.endpoint(DialogueEteEndpoints.binary);
 
-            private final EndpointChannel pathChannel = _runtime.clients().bind(_channel, DialogueEteEndpoints.path);
+            private final EndpointChannel pathChannel = _channel.endpoint(DialogueEteEndpoints.path);
 
             private final Deserializer<String> pathDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel externalLongPathChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.externalLongPath);
+                    _channel.endpoint(DialogueEteEndpoints.externalLongPath);
 
             private final Deserializer<Long> externalLongPathDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Long>() {});
 
             private final EndpointChannel optionalExternalLongQueryChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.optionalExternalLongQuery);
+                    _channel.endpoint(DialogueEteEndpoints.optionalExternalLongQuery);
 
             private final Deserializer<Optional<Long>> optionalExternalLongQueryDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<Long>>() {});
@@ -274,26 +272,23 @@ public interface EteServiceAsync {
             private final Serializer<StringAliasExample> notNullBodySerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
 
-            private final EndpointChannel notNullBodyChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.notNullBody);
+            private final EndpointChannel notNullBodyChannel = _channel.endpoint(DialogueEteEndpoints.notNullBody);
 
             private final Deserializer<StringAliasExample> notNullBodyDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
-            private final EndpointChannel aliasOneChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.aliasOne);
+            private final EndpointChannel aliasOneChannel = _channel.endpoint(DialogueEteEndpoints.aliasOne);
 
             private final Deserializer<StringAliasExample> aliasOneDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
             private final EndpointChannel optionalAliasOneChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.optionalAliasOne);
+                    _channel.endpoint(DialogueEteEndpoints.optionalAliasOne);
 
             private final Deserializer<StringAliasExample> optionalAliasOneDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
 
-            private final EndpointChannel aliasTwoChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.aliasTwo);
+            private final EndpointChannel aliasTwoChannel = _channel.endpoint(DialogueEteEndpoints.aliasTwo);
 
             private final Deserializer<NestedStringAliasExample> aliasTwoDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<NestedStringAliasExample>() {});
@@ -302,7 +297,7 @@ public interface EteServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<StringAliasExample>() {});
 
             private final EndpointChannel notNullBodyExternalImportChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.notNullBodyExternalImport);
+                    _channel.endpoint(DialogueEteEndpoints.notNullBodyExternalImport);
 
             private final Deserializer<StringAliasExample> notNullBodyExternalImportDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<StringAliasExample>() {});
@@ -311,55 +306,51 @@ public interface EteServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<Optional<StringAliasExample>>() {});
 
             private final EndpointChannel optionalBodyExternalImportChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.optionalBodyExternalImport);
+                    _channel.endpoint(DialogueEteEndpoints.optionalBodyExternalImport);
 
             private final Deserializer<Optional<StringAliasExample>> optionalBodyExternalImportDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<StringAliasExample>>() {});
 
             private final EndpointChannel optionalQueryExternalImportChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.optionalQueryExternalImport);
+                    _channel.endpoint(DialogueEteEndpoints.optionalQueryExternalImport);
 
             private final Deserializer<Optional<StringAliasExample>> optionalQueryExternalImportDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<StringAliasExample>>() {});
 
-            private final EndpointChannel noReturnChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.noReturn);
+            private final EndpointChannel noReturnChannel = _channel.endpoint(DialogueEteEndpoints.noReturn);
 
             private final Deserializer<Void> noReturnDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
-            private final EndpointChannel enumQueryChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.enumQuery);
+            private final EndpointChannel enumQueryChannel = _channel.endpoint(DialogueEteEndpoints.enumQuery);
 
             private final Deserializer<SimpleEnum> enumQueryDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<SimpleEnum>() {});
 
-            private final EndpointChannel enumListQueryChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.enumListQuery);
+            private final EndpointChannel enumListQueryChannel = _channel.endpoint(DialogueEteEndpoints.enumListQuery);
 
             private final Deserializer<List<SimpleEnum>> enumListQueryDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<List<SimpleEnum>>() {});
 
             private final EndpointChannel optionalEnumQueryChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.optionalEnumQuery);
+                    _channel.endpoint(DialogueEteEndpoints.optionalEnumQuery);
 
             private final Deserializer<Optional<SimpleEnum>> optionalEnumQueryDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<SimpleEnum>>() {});
 
-            private final EndpointChannel enumHeaderChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.enumHeader);
+            private final EndpointChannel enumHeaderChannel = _channel.endpoint(DialogueEteEndpoints.enumHeader);
 
             private final Deserializer<SimpleEnum> enumHeaderDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<SimpleEnum>() {});
 
             private final EndpointChannel aliasLongEndpointChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.aliasLongEndpoint);
+                    _channel.endpoint(DialogueEteEndpoints.aliasLongEndpoint);
 
             private final Deserializer<Optional<LongAlias>> aliasLongEndpointDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<LongAlias>>() {});
 
             private final EndpointChannel complexQueryParametersChannel =
-                    _runtime.clients().bind(_channel, DialogueEteEndpoints.complexQueryParameters);
+                    _channel.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
             private final Deserializer<Void> complexQueryParametersDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -646,5 +637,22 @@ public interface EteServiceAsync {
                 return "EteServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a EteService service.
+     */
+    static EteServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }

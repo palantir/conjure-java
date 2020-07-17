@@ -4,7 +4,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
@@ -23,12 +25,11 @@ public interface EmptyPathServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a EmptyPathService service.
      */
-    static EmptyPathServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+    static EmptyPathServiceAsync of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
         return new EmptyPathServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
-            private final EndpointChannel emptyPathChannel =
-                    _runtime.clients().bind(_channel, DialogueEmptyPathEndpoints.emptyPath);
+            private final EndpointChannel emptyPathChannel = _channel.endpoint(DialogueEmptyPathEndpoints.emptyPath);
 
             private final Deserializer<Boolean> emptyPathDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
@@ -44,5 +45,22 @@ public interface EmptyPathServiceAsync {
                 return "EmptyPathServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a EmptyPathService service.
+     */
+    static EmptyPathServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }

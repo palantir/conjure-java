@@ -2,6 +2,9 @@ package com.palantir.product;
 
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import java.lang.Override;
 import java.lang.String;
 import javax.annotation.Generated;
@@ -16,7 +19,7 @@ public interface EmptyPathServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a EmptyPathService service.
      */
-    static EmptyPathServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+    static EmptyPathServiceBlocking of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
         EmptyPathServiceAsync delegate = EmptyPathServiceAsync.of(_channel, _runtime);
         return new EmptyPathServiceBlocking() {
             @Override
@@ -29,5 +32,22 @@ public interface EmptyPathServiceBlocking {
                 return "EmptyPathServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a EmptyPathService service.
+     */
+    static EmptyPathServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }

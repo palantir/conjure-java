@@ -4,6 +4,9 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -178,7 +181,7 @@ public interface EteServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a EteService service.
      */
-    static EteServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+    static EteServiceBlocking of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
         EteServiceAsync delegate = EteServiceAsync.of(_channel, _runtime);
         return new EteServiceBlocking() {
             @Override
@@ -335,5 +338,22 @@ public interface EteServiceBlocking {
                 return "EteServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a EteService service.
+     */
+    static EteServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }

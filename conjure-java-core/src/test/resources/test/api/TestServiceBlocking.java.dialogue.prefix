@@ -4,6 +4,9 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
@@ -158,7 +161,7 @@ public interface TestServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a TestService service.
      */
-    static TestServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+    static TestServiceBlocking of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
         TestServiceAsync delegate = TestServiceAsync.of(_channel, _runtime);
         return new TestServiceBlocking() {
             @Override
@@ -294,5 +297,22 @@ public interface TestServiceBlocking {
                 return "TestServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a TestService service.
+     */
+    static TestServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }

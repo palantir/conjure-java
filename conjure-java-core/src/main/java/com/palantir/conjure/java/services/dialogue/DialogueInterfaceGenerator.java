@@ -83,7 +83,6 @@ public final class DialogueInterfaceGenerator {
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
         serviceBuilder.addMethod(staticFactoryMethod);
 
-
         serviceBuilder.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(

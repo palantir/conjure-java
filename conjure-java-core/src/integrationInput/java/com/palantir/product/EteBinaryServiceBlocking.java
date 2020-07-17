@@ -4,6 +4,9 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
@@ -37,7 +40,7 @@ public interface EteBinaryServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a EteBinaryService service.
      */
-    static EteBinaryServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+    static EteBinaryServiceBlocking of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
         EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(_channel, _runtime);
         return new EteBinaryServiceBlocking() {
             @Override
@@ -67,5 +70,22 @@ public interface EteBinaryServiceBlocking {
                 return "EteBinaryServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a EteBinaryService service.
+     */
+    static EteBinaryServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }

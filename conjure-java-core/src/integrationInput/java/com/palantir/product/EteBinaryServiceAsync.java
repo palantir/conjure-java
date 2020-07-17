@@ -4,7 +4,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.AuthHeader;
@@ -40,21 +42,20 @@ public interface EteBinaryServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a EteBinaryService service.
      */
-    static EteBinaryServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+    static EteBinaryServiceAsync of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
         return new EteBinaryServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
-            private final EndpointChannel postBinaryChannel =
-                    _runtime.clients().bind(_channel, DialogueEteBinaryEndpoints.postBinary);
+            private final EndpointChannel postBinaryChannel = _channel.endpoint(DialogueEteBinaryEndpoints.postBinary);
 
             private final EndpointChannel getOptionalBinaryPresentChannel =
-                    _runtime.clients().bind(_channel, DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
+                    _channel.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
 
             private final EndpointChannel getOptionalBinaryEmptyChannel =
-                    _runtime.clients().bind(_channel, DialogueEteBinaryEndpoints.getOptionalBinaryEmpty);
+                    _channel.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryEmpty);
 
             private final EndpointChannel getBinaryFailureChannel =
-                    _runtime.clients().bind(_channel, DialogueEteBinaryEndpoints.getBinaryFailure);
+                    _channel.endpoint(DialogueEteBinaryEndpoints.getBinaryFailure);
 
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {
@@ -107,5 +108,22 @@ public interface EteBinaryServiceAsync {
                 return "EteBinaryServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a EteBinaryService service.
+     */
+    static EteBinaryServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }
