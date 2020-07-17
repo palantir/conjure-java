@@ -18,8 +18,7 @@ package com.palantir.conjure.java.services.dialogue;
 
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.squareup.javapoet.MethodSpec;
-import java.util.List;
 
 public interface StaticFactoryMethodGenerator {
-    List<MethodSpec> generate(ServiceDefinition def);
+    MethodSpec generate(ServiceDefinition def);
 }

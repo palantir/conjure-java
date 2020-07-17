@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.Auth;
@@ -89,7 +88,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     }
 
     @Override
-    public List<MethodSpec> generate(ServiceDefinition def) {
+    public MethodSpec generate(ServiceDefinition def) {
         TypeSpec.Builder impl =
                 TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.asyncClassName(def, options));
 
@@ -122,7 +121,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .addParameter(ConjureRuntime.class, RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
-        return ImmutableList.of(asyncImpl);
+        return asyncImpl;
     }
     //
     // /**
