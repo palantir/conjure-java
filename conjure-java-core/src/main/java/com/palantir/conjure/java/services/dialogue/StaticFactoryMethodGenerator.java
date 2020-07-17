@@ -20,5 +20,8 @@ import com.palantir.conjure.spec.ServiceDefinition;
 import com.squareup.javapoet.MethodSpec;
 
 public interface StaticFactoryMethodGenerator {
+    String CHANNEL = "_channel";
+    String RUNTIME = "_runtime";
+
     MethodSpec generate(ServiceDefinition def);
 }

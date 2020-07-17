@@ -34,8 +34,6 @@ import java.util.List;
 import javax.lang.model.element.Modifier;
 
 public final class BlockingGenerator implements StaticFactoryMethodGenerator {
-    private static final String RUNTIME = "_runtime";
-    private static final String CHANNEL = "_channel";
 
     private final Options options;
     private final ParameterTypeMapper parameterTypes;
