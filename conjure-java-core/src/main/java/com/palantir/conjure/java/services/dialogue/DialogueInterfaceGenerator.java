@@ -28,6 +28,9 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.squareup.javapoet.ClassName;
@@ -80,6 +83,7 @@ public final class DialogueInterfaceGenerator {
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
         serviceBuilder.addMethod(staticFactoryMethod);
 
+
         serviceBuilder.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(
@@ -90,8 +94,27 @@ public final class DialogueInterfaceGenerator {
                 .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
                 .addCode(CodeBlock.builder()
                         .add(
-                                "return $L($L, $L);",
+                                "if ($L instanceof $T) { return $L(($T) $L, $L); }\n",
+                                StaticFactoryMethodGenerator.CHANNEL,
+                                EndpointChannelFactory.class,
                                 staticFactoryMethod.name,
+                                EndpointChannelFactory.class,
+                                StaticFactoryMethodGenerator.CHANNEL,
+                                StaticFactoryMethodGenerator.RUNTIME)
+                        .add(
+                                "return $L(new $T() { "
+                                        + "  @$T "
+                                        + "  public $T endpoint($T endpoint) { "
+                                        + "    return $L.clients().bind($L, endpoint);"
+                                        + "  } "
+                                        + "}, "
+                                        + "$L);",
+                                staticFactoryMethod.name,
+                                EndpointChannelFactory.class,
+                                Override.class,
+                                EndpointChannel.class,
+                                Endpoint.class,
+                                StaticFactoryMethodGenerator.RUNTIME,
                                 StaticFactoryMethodGenerator.CHANNEL,
                                 StaticFactoryMethodGenerator.RUNTIME)
                         .build())

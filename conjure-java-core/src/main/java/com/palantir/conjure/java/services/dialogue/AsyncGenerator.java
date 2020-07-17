@@ -121,20 +121,6 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .build();
         return asyncImpl;
     }
-    //
-    // /**
-    //  * Creates an asynchronous/non-blocking client for a EteService service.
-    //  */
-    // static EteServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
-    //     return of(
-    //             new EndpointChannelFactory() {
-    //                 @Override
-    //                 public EndpointChannel endpoint(Endpoint endpoint) {
-    //                     return _runtime.clients().bind(_channel, endpoint);
-    //                 }
-    //             },
-    //             _runtime);
-    // }
 
     private FieldSpec bindEndpointChannel(ServiceDefinition def, EndpointDefinition endpoint) {
         return FieldSpec.builder(ClassName.get(EndpointChannel.class), Names.endpointChannel(endpoint))
