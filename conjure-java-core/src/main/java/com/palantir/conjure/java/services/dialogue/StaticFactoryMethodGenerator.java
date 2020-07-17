@@ -21,6 +21,7 @@ import com.squareup.javapoet.MethodSpec;
 
 public interface StaticFactoryMethodGenerator {
     String CHANNEL = "_channel";
+    String ENDPOINT_CHANNEL_FACTORY = "_endpointChannelFactory";
     String RUNTIME = "_runtime";
 
     MethodSpec generate(ServiceDefinition def);

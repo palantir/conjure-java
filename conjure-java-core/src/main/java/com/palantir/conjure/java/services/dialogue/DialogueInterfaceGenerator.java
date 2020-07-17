@@ -114,7 +114,7 @@ public final class DialogueInterfaceGenerator {
                                 EndpointChannel.class,
                                 Endpoint.class,
                                 StaticFactoryMethodGenerator.RUNTIME,
-                                StaticFactoryMethodGenerator.CHANNEL,
+                                StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
                                 StaticFactoryMethodGenerator.RUNTIME)
                         .build())
                 .build());

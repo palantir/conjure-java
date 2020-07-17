@@ -59,13 +59,13 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                         "Creates a synchronous/blocking client for a $L service.",
                         def.getServiceName().getName())
                 .returns(Names.blockingClassName(def, options))
-                .addParameter(EndpointChannelFactory.class, CHANNEL)
+                .addParameter(EndpointChannelFactory.class, ENDPOINT_CHANNEL_FACTORY)
                 .addParameter(ConjureRuntime.class, RUNTIME)
                 .addCode(
                         "$T delegate = $T.of($L, $L);",
                         Names.asyncClassName(def, options),
                         Names.asyncClassName(def, options),
-                        CHANNEL,
+                        ENDPOINT_CHANNEL_FACTORY,
                         RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
@@ -77,7 +77,11 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(String.class)
                 .addAnnotation(Override.class)
-                .addCode("return \"$L{channel=\" + _channel + \", runtime=\" + _runtime + '}';", className.simpleName())
+                .addCode(
+                        "return \"$L{$L=\" + $L + \", runtime=\" + _runtime + '}';",
+                        className.simpleName(),
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
                 .build();
     }
 

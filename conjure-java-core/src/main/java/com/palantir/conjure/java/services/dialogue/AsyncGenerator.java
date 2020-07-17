@@ -115,7 +115,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                         "Creates an asynchronous/non-blocking client for a $L service.",
                         def.getServiceName().getName())
                 .returns(Names.asyncClassName(def, options))
-                .addParameter(EndpointChannelFactory.class, StaticFactoryMethodGenerator.CHANNEL)
+                .addParameter(EndpointChannelFactory.class, StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
                 .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
@@ -127,7 +127,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(
                         "$L.endpoint($T.$L)",
-                        StaticFactoryMethodGenerator.CHANNEL,
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
                         Names.endpointsClassName(def, options),
                         endpoint.getEndpointName().get())
                 .build();
