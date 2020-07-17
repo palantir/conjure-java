@@ -43,10 +43,10 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -118,19 +118,32 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                         "Creates an asynchronous/non-blocking client for a $L service.",
                         def.getServiceName().getName())
                 .returns(Names.asyncClassName(def, options))
-                .addParameter(Channel.class, CHANNEL)
+                .addParameter(EndpointChannelFactory.class, CHANNEL)
                 .addParameter(ConjureRuntime.class, RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return ImmutableList.of(asyncImpl);
     }
+    //
+    // /**
+    //  * Creates an asynchronous/non-blocking client for a EteService service.
+    //  */
+    // static EteServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+    //     return of(
+    //             new EndpointChannelFactory() {
+    //                 @Override
+    //                 public EndpointChannel endpoint(Endpoint endpoint) {
+    //                     return _runtime.clients().bind(_channel, endpoint);
+    //                 }
+    //             },
+    //             _runtime);
+    // }
 
     private FieldSpec bindEndpointChannel(ServiceDefinition def, EndpointDefinition endpoint) {
         return FieldSpec.builder(ClassName.get(EndpointChannel.class), Names.endpointChannel(endpoint))
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(
-                        "$L.clients().bind($L, $T.$L)",
-                        RUNTIME,
+                        "$L.endpoint($T.$L)",
                         CHANNEL,
                         Names.endpointsClassName(def, options),
                         endpoint.getEndpointName().get())

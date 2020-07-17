@@ -21,8 +21,8 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -62,7 +62,7 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                         "Creates a synchronous/blocking client for a $L service.",
                         def.getServiceName().getName())
                 .returns(Names.blockingClassName(def, options))
-                .addParameter(Channel.class, CHANNEL)
+                .addParameter(EndpointChannelFactory.class, CHANNEL)
                 .addParameter(ConjureRuntime.class, RUNTIME)
                 .addCode(
                         "$T delegate = $T.of($L, $L);",
