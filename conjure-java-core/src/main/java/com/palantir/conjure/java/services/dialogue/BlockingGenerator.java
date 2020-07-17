@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.EndpointDefinition;
@@ -48,7 +49,7 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
     }
 
     @Override
-    public MethodSpec generate(ServiceDefinition def) {
+    public List<MethodSpec> generate(ServiceDefinition def) {
         TypeSpec.Builder impl =
                 TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.blockingClassName(def, options));
         def.getEndpoints().forEach(endpoint -> impl.addMethod(blockingClientImpl(endpoint)));
@@ -71,7 +72,7 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                         RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
-        return blockingImpl;
+        return ImmutableList.of(blockingImpl);
     }
 
     static MethodSpec toStringMethod(ClassName className) {

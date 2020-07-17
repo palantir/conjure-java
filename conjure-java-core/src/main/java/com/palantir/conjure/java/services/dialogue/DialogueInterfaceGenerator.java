@@ -74,7 +74,7 @@ public final class DialogueInterfaceGenerator {
                 .map(endpoint -> apiMethod(endpoint, returnTypeMapper))
                 .collect(toList()));
 
-        serviceBuilder.addMethod(methodGenerator.generate(def));
+        serviceBuilder.addMethods(methodGenerator.generate(def));
 
         return JavaFile.builder(
                         Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
