@@ -42,20 +42,21 @@ public interface EteBinaryServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a EteBinaryService service.
      */
-    static EteBinaryServiceAsync of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
+    static EteBinaryServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteBinaryServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
-            private final EndpointChannel postBinaryChannel = _channel.endpoint(DialogueEteBinaryEndpoints.postBinary);
+            private final EndpointChannel postBinaryChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinary);
 
             private final EndpointChannel getOptionalBinaryPresentChannel =
-                    _channel.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
 
             private final EndpointChannel getOptionalBinaryEmptyChannel =
-                    _channel.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryEmpty);
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryEmpty);
 
             private final EndpointChannel getBinaryFailureChannel =
-                    _channel.endpoint(DialogueEteBinaryEndpoints.getBinaryFailure);
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getBinaryFailure);
 
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {
@@ -105,7 +106,8 @@ public interface EteBinaryServiceAsync {
 
             @Override
             public String toString() {
-                return "EteBinaryServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "EteBinaryServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
             }
         };
     }
@@ -121,7 +123,7 @@ public interface EteBinaryServiceAsync {
                 new EndpointChannelFactory() {
                     @Override
                     public EndpointChannel endpoint(Endpoint endpoint) {
-                        return _runtime.clients().bind(_channel, endpoint);
+                        return _runtime.clients().bind(_endpointChannelFactory, endpoint);
                     }
                 },
                 _runtime);
