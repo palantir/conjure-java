@@ -161,8 +161,8 @@ public interface TestServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a TestService service.
      */
-    static TestServiceBlocking of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
-        TestServiceAsync delegate = TestServiceAsync.of(_channel, _runtime);
+    static TestServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
+        TestServiceAsync delegate = TestServiceAsync.of(_endpointChannelFactory, _runtime);
         return new TestServiceBlocking() {
             @Override
             public Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader) {
@@ -294,7 +294,8 @@ public interface TestServiceBlocking {
 
             @Override
             public String toString() {
-                return "TestServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "TestServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
             }
         };
     }

@@ -25,11 +25,12 @@ public interface EmptyPathServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a EmptyPathService service.
      */
-    static EmptyPathServiceAsync of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
+    static EmptyPathServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EmptyPathServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
-            private final EndpointChannel emptyPathChannel = _channel.endpoint(DialogueEmptyPathEndpoints.emptyPath);
+            private final EndpointChannel emptyPathChannel =
+                    _endpointChannelFactory.endpoint(DialogueEmptyPathEndpoints.emptyPath);
 
             private final Deserializer<Boolean> emptyPathDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
@@ -42,7 +43,8 @@ public interface EmptyPathServiceAsync {
 
             @Override
             public String toString() {
-                return "EmptyPathServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "EmptyPathServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
             }
         };
     }

@@ -172,12 +172,12 @@ public interface TestServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a TestService service.
      */
-    static TestServiceAsync of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
+    static TestServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new TestServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final EndpointChannel getFileSystemsChannel =
-                    _channel.endpoint(DialogueTestEndpoints.getFileSystems);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getFileSystems);
 
             private final Deserializer<Map<String, BackingFileSystem>> getFileSystemsDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
@@ -185,31 +185,35 @@ public interface TestServiceAsync {
             private final Serializer<CreateDatasetRequest> createDatasetSerializer =
                     _runtime.bodySerDe().serializer(new TypeMarker<CreateDatasetRequest>() {});
 
-            private final EndpointChannel createDatasetChannel = _channel.endpoint(DialogueTestEndpoints.createDataset);
+            private final EndpointChannel createDatasetChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.createDataset);
 
             private final Deserializer<Dataset> createDatasetDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Dataset>() {});
 
-            private final EndpointChannel getDatasetChannel = _channel.endpoint(DialogueTestEndpoints.getDataset);
+            private final EndpointChannel getDatasetChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getDataset);
 
             private final Deserializer<Optional<Dataset>> getDatasetDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<Dataset>>() {});
 
-            private final EndpointChannel getRawDataChannel = _channel.endpoint(DialogueTestEndpoints.getRawData);
+            private final EndpointChannel getRawDataChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getRawData);
 
             private final EndpointChannel getAliasedRawDataChannel =
-                    _channel.endpoint(DialogueTestEndpoints.getAliasedRawData);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getAliasedRawData);
 
             private final EndpointChannel maybeGetRawDataChannel =
-                    _channel.endpoint(DialogueTestEndpoints.maybeGetRawData);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.maybeGetRawData);
 
             private final EndpointChannel getAliasedStringChannel =
-                    _channel.endpoint(DialogueTestEndpoints.getAliasedString);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getAliasedString);
 
             private final Deserializer<AliasedString> getAliasedStringDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<AliasedString>() {});
 
-            private final EndpointChannel uploadRawDataChannel = _channel.endpoint(DialogueTestEndpoints.uploadRawData);
+            private final EndpointChannel uploadRawDataChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.uploadRawData);
 
             private final Deserializer<Void> uploadRawDataDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -218,28 +222,31 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<InputStream>() {});
 
             private final EndpointChannel uploadAliasedRawDataChannel =
-                    _channel.endpoint(DialogueTestEndpoints.uploadAliasedRawData);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.uploadAliasedRawData);
 
             private final Deserializer<Void> uploadAliasedRawDataDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
-            private final EndpointChannel getBranchesChannel = _channel.endpoint(DialogueTestEndpoints.getBranches);
+            private final EndpointChannel getBranchesChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranches);
 
             private final Deserializer<Set<String>> getBranchesDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
 
             private final EndpointChannel getBranchesDeprecatedChannel =
-                    _channel.endpoint(DialogueTestEndpoints.getBranchesDeprecated);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranchesDeprecated);
 
             private final Deserializer<Set<String>> getBranchesDeprecatedDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
 
-            private final EndpointChannel resolveBranchChannel = _channel.endpoint(DialogueTestEndpoints.resolveBranch);
+            private final EndpointChannel resolveBranchChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.resolveBranch);
 
             private final Deserializer<Optional<String>> resolveBranchDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
-            private final EndpointChannel testParamChannel = _channel.endpoint(DialogueTestEndpoints.testParam);
+            private final EndpointChannel testParamChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testParam);
 
             private final Deserializer<Optional<String>> testParamDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
@@ -248,7 +255,7 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
 
             private final EndpointChannel testQueryParamsChannel =
-                    _channel.endpoint(DialogueTestEndpoints.testQueryParams);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testQueryParams);
 
             private final Deserializer<Integer> testQueryParamsDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
@@ -257,22 +264,25 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
 
             private final EndpointChannel testNoResponseQueryParamsChannel =
-                    _channel.endpoint(DialogueTestEndpoints.testNoResponseQueryParams);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testNoResponseQueryParams);
 
             private final Deserializer<Void> testNoResponseQueryParamsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
-            private final EndpointChannel testBooleanChannel = _channel.endpoint(DialogueTestEndpoints.testBoolean);
+            private final EndpointChannel testBooleanChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testBoolean);
 
             private final Deserializer<Boolean> testBooleanDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
 
-            private final EndpointChannel testDoubleChannel = _channel.endpoint(DialogueTestEndpoints.testDouble);
+            private final EndpointChannel testDoubleChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testDouble);
 
             private final Deserializer<Double> testDoubleDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
 
-            private final EndpointChannel testIntegerChannel = _channel.endpoint(DialogueTestEndpoints.testInteger);
+            private final EndpointChannel testIntegerChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testInteger);
 
             private final Deserializer<Integer> testIntegerDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
@@ -281,18 +291,19 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel testPostOptionalChannel =
-                    _channel.endpoint(DialogueTestEndpoints.testPostOptional);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testPostOptional);
 
             private final Deserializer<Optional<String>> testPostOptionalDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel testOptionalIntegerAndDoubleChannel =
-                    _channel.endpoint(DialogueTestEndpoints.testOptionalIntegerAndDouble);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testOptionalIntegerAndDouble);
 
             private final Deserializer<Void> testOptionalIntegerAndDoubleDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
-            private final EndpointChannel getForStringsChannel = _channel.endpoint(DialogueTestEndpoints.getForStrings);
+            private final EndpointChannel getForStringsChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getForStrings);
 
             private final Deserializer<Void> getForStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -541,7 +552,8 @@ public interface TestServiceAsync {
 
             @Override
             public String toString() {
-                return "TestServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "TestServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
             }
         };
     }

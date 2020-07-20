@@ -40,8 +40,8 @@ public interface EteBinaryServiceBlocking {
     /**
      * Creates a synchronous/blocking client for a EteBinaryService service.
      */
-    static EteBinaryServiceBlocking of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
-        EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(_channel, _runtime);
+    static EteBinaryServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
+        EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(_endpointChannelFactory, _runtime);
         return new EteBinaryServiceBlocking() {
             @Override
             @MustBeClosed
@@ -67,7 +67,8 @@ public interface EteBinaryServiceBlocking {
 
             @Override
             public String toString() {
-                return "EteBinaryServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "EteBinaryServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
             }
         };
     }

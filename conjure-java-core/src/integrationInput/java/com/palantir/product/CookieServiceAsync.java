@@ -25,11 +25,12 @@ public interface CookieServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a CookieService service.
      */
-    static CookieServiceAsync of(EndpointChannelFactory _channel, ConjureRuntime _runtime) {
+    static CookieServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
-            private final EndpointChannel eatCookiesChannel = _channel.endpoint(DialogueCookieEndpoints.eatCookies);
+            private final EndpointChannel eatCookiesChannel =
+                    _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
 
             private final Deserializer<Void> eatCookiesDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -43,7 +44,8 @@ public interface CookieServiceAsync {
 
             @Override
             public String toString() {
-                return "CookieServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "CookieServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
             }
         };
     }
