@@ -136,7 +136,7 @@ public final class ManyFieldExample {
     private boolean equalTo(ManyFieldExample other) {
         return this.string.equals(other.string)
                 && this.integer == other.integer
-                && this.doubleValue == other.doubleValue
+                && Double.doubleToLongBits(this.doubleValue) == Double.doubleToLongBits(other.doubleValue)
                 && this.optionalItem.equals(other.optionalItem)
                 && this.items.equals(other.items)
                 && this.set.equals(other.set)

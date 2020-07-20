@@ -26,7 +26,9 @@ public final class DoubleAliasExample {
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (other instanceof DoubleAliasExample && this.value == ((DoubleAliasExample) other).value);
+                || (other instanceof DoubleAliasExample
+                        && Double.doubleToLongBits(this.value)
+                                == Double.doubleToLongBits(((DoubleAliasExample) other).value));
     }
 
     @Override
