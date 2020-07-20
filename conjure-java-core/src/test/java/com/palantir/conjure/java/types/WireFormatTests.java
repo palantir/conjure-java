@@ -75,6 +75,16 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void double_alias_should_deserialize_negative_zero() throws IOException {
+        DoubleAliasExample conjureType = mapper.readValue("-0.0", DoubleAliasExample.class);
+        assertThat(conjureType).hasToString("-0.0");
+        assertThat(conjureType).isEqualTo(DoubleAliasExample.of(-0.0d));
+        assertThat(conjureType)
+                .describedAs("Java is weird: == gets this wrong, but .equals gets it right")
+                .isNotEqualTo(DoubleAliasExample.of(0.0d));
+    }
+
+    @Test
     public void double_alias_should_deserialize_infinity() throws IOException {
         assertThat(mapper.readValue("\"Infinity\"", DoubleAliasExample.class).get())
                 .isEqualTo(Double.POSITIVE_INFINITY);

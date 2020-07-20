@@ -1,0 +1,8 @@
+type: fix
+fix:
+  description: |-
+    Conjure types involving `double` now have more sane behaviour:
+    - for negative zero: `0.0d` is no longer considered equal to `-0.0d` (previously it was)
+    - `NaN` values produced in different ways are now considered to be equal (e.g. `Math.sqrt(-1)` and `0d/0d`)
+  links:
+  - https://github.com/palantir/conjure-java/pull/1018
