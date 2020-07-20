@@ -50,7 +50,10 @@ public final class MethodSpecs {
     }
 
     public static MethodSpec createEqualTo(TypeName thisClass, Collection<FieldSpec> fields) {
-        CodeBlock equalsTo = createEqualsToStatement(fields);
+        CodeBlock equalsTo = fields.isEmpty()
+                ? CodeBlock.of("$L", true)
+                : CodeBlocks.of(
+                        fields.stream().map(MethodSpecs::createEqualsStatement).collect(joining(CodeBlock.of(" && "))));
 
         return MethodSpec.methodBuilder("equalTo")
                 .addModifiers(Modifier.PRIVATE)
@@ -58,6 +61,22 @@ public final class MethodSpecs {
                 .returns(TypeName.BOOLEAN)
                 .addStatement("return $L", equalsTo)
                 .build();
+    }
+
+    private static CodeBlock createEqualsStatement(FieldSpec field) {
+        String thisField = "this." + field.name;
+        String otherField = "other." + field.name;
+
+        if (field.type.equals(TypeName.DOUBLE)) {
+            return CodeBlock.of(
+                    "$1T.doubleToLongBits($2L) == $1T.doubleToLongBits($3L)", Double.class, thisField, otherField);
+        } else if (field.type.isPrimitive()) {
+            return CodeBlock.of("$L == $L", thisField, otherField);
+        } else if (field.type.equals(ClassName.get(OffsetDateTime.class))) {
+            return CodeBlock.of("$L.isEqual($L)", thisField, otherField);
+        }
+
+        return CodeBlock.of("$L.equals($L)", thisField, otherField);
     }
 
     public static MethodSpec createHashCode(Collection<FieldSpec> fields) {
@@ -133,28 +152,6 @@ public final class MethodSpecs {
             builder.add(" + $N", JavaNameSanitizer.sanitize(fieldName));
         }
         return builder.add(" + '}'").build();
-    }
-
-    private static CodeBlock createEqualsToStatement(Collection<FieldSpec> fields) {
-        if (fields.isEmpty()) {
-            return CodeBlock.of("$L", true);
-        }
-
-        return CodeBlocks.of(
-                fields.stream().map(MethodSpecs::createEqualsStatement).collect(joining(CodeBlock.of(" && "))));
-    }
-
-    private static CodeBlock createEqualsStatement(FieldSpec field) {
-        String thisField = "this." + field.name;
-        String otherField = "other." + field.name;
-
-        if (field.type.isPrimitive()) {
-            return CodeBlock.of("$L == $L", thisField, otherField);
-        } else if (field.type.equals(ClassName.get(OffsetDateTime.class))) {
-            return CodeBlock.of("$L.isEqual($L)", thisField, otherField);
-        }
-
-        return CodeBlock.of("$L.equals($L)", thisField, otherField);
     }
 
     private static CodeBlock createHashInput(FieldSpec field) {

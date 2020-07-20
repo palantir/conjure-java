@@ -30,7 +30,7 @@ public final class DoubleExample {
     }
 
     private boolean equalTo(DoubleExample other) {
-        return this.doubleValue == other.doubleValue;
+        return Double.doubleToLongBits(this.doubleValue) == Double.doubleToLongBits(other.doubleValue);
     }
 
     @Override
