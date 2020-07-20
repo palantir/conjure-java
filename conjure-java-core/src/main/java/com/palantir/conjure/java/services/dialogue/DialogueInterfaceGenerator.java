@@ -26,9 +26,15 @@ import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -74,7 +80,44 @@ public final class DialogueInterfaceGenerator {
                 .map(endpoint -> apiMethod(endpoint, returnTypeMapper))
                 .collect(toList()));
 
-        serviceBuilder.addMethod(methodGenerator.generate(def));
+        MethodSpec staticFactoryMethod = methodGenerator.generate(def);
+        serviceBuilder.addMethod(staticFactoryMethod);
+
+        serviceBuilder.addMethod(MethodSpec.methodBuilder("of")
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .addJavadoc(
+                        "Creates an asynchronous/non-blocking client for a $L service.",
+                        def.getServiceName().getName())
+                .returns(staticFactoryMethod.returnType)
+                .addParameter(Channel.class, StaticFactoryMethodGenerator.CHANNEL)
+                .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
+                .addCode(CodeBlock.builder()
+                        .add(
+                                "if ($L instanceof $T) { return $L(($T) $L, $L); }\n",
+                                StaticFactoryMethodGenerator.CHANNEL,
+                                EndpointChannelFactory.class,
+                                staticFactoryMethod.name,
+                                EndpointChannelFactory.class,
+                                StaticFactoryMethodGenerator.CHANNEL,
+                                StaticFactoryMethodGenerator.RUNTIME)
+                        .add(
+                                "return $L(new $T() { "
+                                        + "  @$T "
+                                        + "  public $T endpoint($T endpoint) { "
+                                        + "    return $L.clients().bind($L, endpoint);"
+                                        + "  } "
+                                        + "}, "
+                                        + "$L);",
+                                staticFactoryMethod.name,
+                                EndpointChannelFactory.class,
+                                Override.class,
+                                EndpointChannel.class,
+                                Endpoint.class,
+                                StaticFactoryMethodGenerator.RUNTIME,
+                                StaticFactoryMethodGenerator.CHANNEL,
+                                StaticFactoryMethodGenerator.RUNTIME)
+                        .build())
+                .build());
 
         return JavaFile.builder(
                         Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),

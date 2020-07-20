@@ -42,10 +42,10 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -67,8 +67,6 @@ import javax.lang.model.element.Modifier;
 
 public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     private static final String REQUEST = "_request";
-    private static final String CHANNEL = "_channel";
-    private static final String RUNTIME = "_runtime";
     private static final String PLAIN_SER_DE = "_plainSerDe";
 
     private final Options options;
@@ -94,7 +92,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
 
         impl.addField(FieldSpec.builder(PlainSerDe.class, PLAIN_SER_DE)
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .initializer(CodeBlock.of("$L.plainSerDe()", RUNTIME))
+                .initializer(CodeBlock.of("$L.plainSerDe()", StaticFactoryMethodGenerator.RUNTIME))
                 .build());
 
         def.getEndpoints().forEach(endpoint -> {
@@ -117,8 +115,8 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                         "Creates an asynchronous/non-blocking client for a $L service.",
                         def.getServiceName().getName())
                 .returns(Names.asyncClassName(def, options))
-                .addParameter(Channel.class, CHANNEL)
-                .addParameter(ConjureRuntime.class, RUNTIME)
+                .addParameter(EndpointChannelFactory.class, StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
+                .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return asyncImpl;
@@ -128,9 +126,8 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
         return FieldSpec.builder(ClassName.get(EndpointChannel.class), Names.endpointChannel(endpoint))
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .initializer(
-                        "$L.clients().bind($L, $T.$L)",
-                        RUNTIME,
-                        CHANNEL,
+                        "$L.endpoint($T.$L)",
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
                         Names.endpointsClassName(def, options),
                         endpoint.getEndpointName().get())
                 .build();
@@ -144,7 +141,11 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
         ParameterizedTypeName deserializerType = ParameterizedTypeName.get(ClassName.get(Serializer.class), className);
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Serializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .initializer("$L.bodySerDe().serializer(new $T<$T>() {})", RUNTIME, TypeMarker.class, className)
+                .initializer(
+                        "$L.bodySerDe().serializer(new $T<$T>() {})",
+                        StaticFactoryMethodGenerator.RUNTIME,
+                        TypeMarker.class,
+                        className)
                 .build());
     }
 
@@ -158,8 +159,10 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
 
         CodeBlock realDeserializer = CodeBlock.of("deserializer(new $T<$T>() {})", TypeMarker.class, className);
         CodeBlock voidDeserializer = CodeBlock.of("emptyBodyDeserializer()");
-        CodeBlock initializer =
-                CodeBlock.of("$L.bodySerDe().$L", RUNTIME, type.isPresent() ? realDeserializer : voidDeserializer);
+        CodeBlock initializer = CodeBlock.of(
+                "$L.bodySerDe().$L",
+                StaticFactoryMethodGenerator.RUNTIME,
+                type.isPresent() ? realDeserializer : voidDeserializer);
 
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Deserializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -203,12 +206,12 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .build();
         CodeBlock execute = CodeBlock.of(
                 "return $L.clients().call($L, $L.build(), $L);",
-                RUNTIME,
+                StaticFactoryMethodGenerator.RUNTIME,
                 Names.endpointChannel(def),
                 REQUEST,
                 def.getReturns()
                         .filter(type -> isBinaryOrOptionalBinary(returnTypes.baseType(type), returnTypes))
-                        .map(type -> RUNTIME
+                        .map(type -> StaticFactoryMethodGenerator.RUNTIME
                                 + (isOptionalBinary(returnTypes.baseType(type), returnTypes)
                                         ? ".bodySerDe().optionalInputStreamDeserializer()"
                                         : ".bodySerDe().inputStreamDeserializer()"))
@@ -225,7 +228,11 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 if (parameterTypes
                         .baseType(param.getType())
                         .equals(parameterTypes.baseType(Type.primitive(PrimitiveType.BINARY)))) {
-                    return CodeBlock.of("$L.body($L.bodySerDe().serialize($L));", REQUEST, RUNTIME, param.getArgName());
+                    return CodeBlock.of(
+                            "$L.body($L.bodySerDe().serialize($L));",
+                            REQUEST,
+                            StaticFactoryMethodGenerator.RUNTIME,
+                            param.getArgName());
                 }
                 return CodeBlock.of("$L.body($LSerializer.serialize($L));", REQUEST, endpointName, param.getArgName());
             }

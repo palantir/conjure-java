@@ -20,8 +20,8 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -34,8 +34,6 @@ import java.util.List;
 import javax.lang.model.element.Modifier;
 
 public final class BlockingGenerator implements StaticFactoryMethodGenerator {
-    private static final String RUNTIME = "_runtime";
-    private static final String CHANNEL = "_channel";
 
     private final Options options;
     private final ParameterTypeMapper parameterTypes;
@@ -61,13 +59,13 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                         "Creates a synchronous/blocking client for a $L service.",
                         def.getServiceName().getName())
                 .returns(Names.blockingClassName(def, options))
-                .addParameter(Channel.class, CHANNEL)
+                .addParameter(EndpointChannelFactory.class, ENDPOINT_CHANNEL_FACTORY)
                 .addParameter(ConjureRuntime.class, RUNTIME)
                 .addCode(
                         "$T delegate = $T.of($L, $L);",
                         Names.asyncClassName(def, options),
                         Names.asyncClassName(def, options),
-                        CHANNEL,
+                        ENDPOINT_CHANNEL_FACTORY,
                         RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
@@ -79,7 +77,11 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(String.class)
                 .addAnnotation(Override.class)
-                .addCode("return \"$L{channel=\" + _channel + \", runtime=\" + _runtime + '}';", className.simpleName())
+                .addCode(
+                        "return \"$L{$L=\" + $L + \", runtime=\" + _runtime + '}';",
+                        className.simpleName(),
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
                 .build();
     }
 

@@ -5,7 +5,9 @@ import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
@@ -170,12 +172,12 @@ public interface TestServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a TestService service.
      */
-    static TestServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+    static TestServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new TestServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final EndpointChannel getFileSystemsChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getFileSystems);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getFileSystems);
 
             private final Deserializer<Map<String, BackingFileSystem>> getFileSystemsDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
@@ -184,34 +186,34 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<CreateDatasetRequest>() {});
 
             private final EndpointChannel createDatasetChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.createDataset);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.createDataset);
 
             private final Deserializer<Dataset> createDatasetDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Dataset>() {});
 
             private final EndpointChannel getDatasetChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getDataset);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getDataset);
 
             private final Deserializer<Optional<Dataset>> getDatasetDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<Dataset>>() {});
 
             private final EndpointChannel getRawDataChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getRawData);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getRawData);
 
             private final EndpointChannel getAliasedRawDataChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getAliasedRawData);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getAliasedRawData);
 
             private final EndpointChannel maybeGetRawDataChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.maybeGetRawData);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.maybeGetRawData);
 
             private final EndpointChannel getAliasedStringChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getAliasedString);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getAliasedString);
 
             private final Deserializer<AliasedString> getAliasedStringDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<AliasedString>() {});
 
             private final EndpointChannel uploadRawDataChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.uploadRawData);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.uploadRawData);
 
             private final Deserializer<Void> uploadRawDataDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -220,31 +222,31 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<InputStream>() {});
 
             private final EndpointChannel uploadAliasedRawDataChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.uploadAliasedRawData);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.uploadAliasedRawData);
 
             private final Deserializer<Void> uploadAliasedRawDataDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             private final EndpointChannel getBranchesChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getBranches);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranches);
 
             private final Deserializer<Set<String>> getBranchesDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
 
             private final EndpointChannel getBranchesDeprecatedChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getBranchesDeprecated);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranchesDeprecated);
 
             private final Deserializer<Set<String>> getBranchesDeprecatedDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
 
             private final EndpointChannel resolveBranchChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.resolveBranch);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.resolveBranch);
 
             private final Deserializer<Optional<String>> resolveBranchDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel testParamChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testParam);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testParam);
 
             private final Deserializer<Optional<String>> testParamDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
@@ -253,7 +255,7 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
 
             private final EndpointChannel testQueryParamsChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testQueryParams);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testQueryParams);
 
             private final Deserializer<Integer> testQueryParamsDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
@@ -262,25 +264,25 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<String>() {});
 
             private final EndpointChannel testNoResponseQueryParamsChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testNoResponseQueryParams);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testNoResponseQueryParams);
 
             private final Deserializer<Void> testNoResponseQueryParamsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             private final EndpointChannel testBooleanChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testBoolean);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testBoolean);
 
             private final Deserializer<Boolean> testBooleanDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
 
             private final EndpointChannel testDoubleChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testDouble);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testDouble);
 
             private final Deserializer<Double> testDoubleDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
 
             private final EndpointChannel testIntegerChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testInteger);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testInteger);
 
             private final Deserializer<Integer> testIntegerDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
@@ -289,19 +291,19 @@ public interface TestServiceAsync {
                     _runtime.bodySerDe().serializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel testPostOptionalChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testPostOptional);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testPostOptional);
 
             private final Deserializer<Optional<String>> testPostOptionalDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Optional<String>>() {});
 
             private final EndpointChannel testOptionalIntegerAndDoubleChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.testOptionalIntegerAndDouble);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testOptionalIntegerAndDouble);
 
             private final Deserializer<Void> testOptionalIntegerAndDoubleDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             private final EndpointChannel getForStringsChannel =
-                    _runtime.clients().bind(_channel, DialogueTestEndpoints.getForStrings);
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getForStrings);
 
             private final Deserializer<Void> getForStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -550,8 +552,26 @@ public interface TestServiceAsync {
 
             @Override
             public String toString() {
-                return "TestServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "TestServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a TestService service.
+     */
+    static TestServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }

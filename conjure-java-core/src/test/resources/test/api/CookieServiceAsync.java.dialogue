@@ -4,7 +4,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
+import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.BearerToken;
@@ -23,12 +25,12 @@ public interface CookieServiceAsync {
     /**
      * Creates an asynchronous/non-blocking client for a CookieService service.
      */
-    static CookieServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+    static CookieServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             private final EndpointChannel eatCookiesChannel =
-                    _runtime.clients().bind(_channel, DialogueCookieEndpoints.eatCookies);
+                    _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
 
             private final Deserializer<Void> eatCookiesDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
@@ -42,8 +44,26 @@ public interface CookieServiceAsync {
 
             @Override
             public String toString() {
-                return "CookieServiceBlocking{channel=" + _channel + ", runtime=" + _runtime + '}';
+                return "CookieServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                        + _runtime + '}';
             }
         };
+    }
+
+    /**
+     * Creates an asynchronous/non-blocking client for a CookieService service.
+     */
+    static CookieServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
+        if (_channel instanceof EndpointChannelFactory) {
+            return of((EndpointChannelFactory) _channel, _runtime);
+        }
+        return of(
+                new EndpointChannelFactory() {
+                    @Override
+                    public EndpointChannel endpoint(Endpoint endpoint) {
+                        return _runtime.clients().bind(_channel, endpoint);
+                    }
+                },
+                _runtime);
     }
 }
