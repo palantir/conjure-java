@@ -77,7 +77,7 @@ public final class AliasGenerator {
                         .addAnnotation(Override.class)
                         .addParameter(TypeName.OBJECT, "other")
                         .returns(TypeName.BOOLEAN)
-                        .addCode(primitiveSafeEquality(thisClass, aliasTypeName))
+                        .addCode(primitiveSafeEquality(thisClass, aliasTypeName, typeDef))
                         .build())
                 .addMethod(MethodSpec.methodBuilder("hashCode")
                         .addModifiers(Modifier.PUBLIC)
@@ -119,8 +119,7 @@ public final class AliasGenerator {
             spec.addMethod(createDefaultConstructor(aliasTypeName));
         }
 
-        if (typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE)
-                && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE)) {
+        if (isAliasOfDouble(typeDef)) {
             CodeBlock longCastCodeBlock = CodeBlock.builder()
                     .addStatement("long safeValue = $T.of(value).longValue()", SafeLong.class)
                     .addStatement("return new $T((double) safeValue)", thisClass)
@@ -184,6 +183,11 @@ public final class AliasGenerator {
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static boolean isAliasOfDouble(AliasDefinition typeDef) {
+        return typeDef.getAlias().accept(TypeVisitor.IS_PRIMITIVE)
+                && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE);
     }
 
     private static MethodSpec createDefaultConstructor(TypeName aliasTypeName) {
@@ -304,11 +308,26 @@ public final class AliasGenerator {
         return builder.build();
     }
 
-    private static CodeBlock primitiveSafeEquality(ClassName thisClass, TypeName aliasTypeName) {
+    private static CodeBlock primitiveSafeEquality(
+            ClassName thisClass, TypeName aliasTypeName, AliasDefinition typeDef) {
+        if (isAliasOfDouble(typeDef)) {
+            return CodeBlocks.statement(
+                    "return this == other || "
+                            + "("
+                            + "other instanceof $1T "
+                            + "&& "
+                            + "$2T.doubleToLongBits(this.value) == "
+                            + "$2T.doubleToLongBits((($1T) other).value)"
+                            + ")",
+                    thisClass,
+                    Double.class);
+        }
+
         if (aliasTypeName.isPrimitive()) {
             return CodeBlocks.statement(
                     "return this == other || (other instanceof $1T && this.value == (($1T) other).value)", thisClass);
         }
+
         return CodeBlocks.statement(
                 "return this == other || (other instanceof $1T && this.value.equals((($1T) other).value))", thisClass);
     }
