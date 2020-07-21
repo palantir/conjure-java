@@ -41,6 +41,36 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
         }
     },
 
+    postBinaryThrows {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("binary").fixed("throws").build();
+
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.POST;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteBinaryService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "postBinaryThrows";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
     getOptionalBinaryPresent {
         private final PathTemplate pathTemplate = PathTemplate.builder()
                 .fixed("binary")

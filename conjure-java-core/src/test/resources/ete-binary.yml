@@ -10,6 +10,14 @@ services:
         args:
           body: binary
         returns: binary
+      postBinaryThrows:
+        http: POST /throws
+        args:
+          body: binary
+          bytesToRead:
+            param-type: query
+            type: integer
+        returns: binary
       getOptionalBinaryPresent:
         http: GET /optional/present
         returns: optional<binary>

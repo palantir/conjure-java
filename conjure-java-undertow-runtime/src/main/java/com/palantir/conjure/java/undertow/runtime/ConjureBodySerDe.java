@@ -26,14 +26,17 @@ import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.Tracer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
+import io.undertow.util.Protocols;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.List;
+import org.xnio.IoUtils;
 
 /** Package private internal API. */
 final class ConjureBodySerDe implements BodySerDe {
@@ -106,6 +109,7 @@ final class ConjureBodySerDe implements BodySerDe {
         @Override
         public void serialize(T value, HttpServerExchange exchange) throws IOException {
             Preconditions.checkNotNull(value, "cannot serialize null value");
+            safelyDrainRequestBody(exchange);
             EncodingSerializerContainer<T> container = getResponseSerializer(exchange);
             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, container.encoding.getContentType());
             container.serializer.serialize(value, exchange.getOutputStream());
@@ -221,6 +225,20 @@ final class ConjureBodySerDe implements BodySerDe {
         EncodingDeserializerContainer(Encoding encoding, TypeMarker<T> token) {
             this.encoding = encoding;
             this.deserializer = TracedEncoding.wrap(encoding).deserializer(token);
+        }
+    }
+
+    /**
+     * Ensure the client isn't blocked sending additional data. It's very uncommon for this to be necessary, in most
+     * cases exceptional responses are far below the 16k buffer threshold, not even considering socket buffers.
+     */
+    private static void safelyDrainRequestBody(HttpServerExchange exchange) {
+        // No need to impact http/2 which supports out-of-band responses.
+        if ((Protocols.HTTP_1_1.equals(exchange.getProtocol()) || Protocols.HTTP_1_0.equals(exchange.getProtocol()))
+                && !exchange.isRequestComplete()) {
+            try (CloseableTracer ignored = CloseableTracer.startSpan("Undertow: drain request body")) {
+                IoUtils.safeClose(exchange.getInputStream());
+            }
         }
     }
 }

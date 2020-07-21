@@ -24,6 +24,11 @@ public interface EteBinaryServiceAsync {
     ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     /**
+     * @apiNote {@code POST /binary/throws}
+     */
+    ListenableFuture<InputStream> postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body);
+
+    /**
      * @apiNote {@code GET /binary/optional/present}
      */
     ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(AuthHeader authHeader);
@@ -49,6 +54,9 @@ public interface EteBinaryServiceAsync {
             private final EndpointChannel postBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinary);
 
+            private final EndpointChannel postBinaryThrowsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinaryThrows);
+
             private final EndpointChannel getOptionalBinaryPresentChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
 
@@ -66,6 +74,20 @@ public interface EteBinaryServiceAsync {
                 return _runtime.clients()
                         .call(
                                 postBinaryChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
+            }
+
+            @Override
+            public ListenableFuture<InputStream> postBinaryThrows(
+                    AuthHeader authHeader, int bytesToRead, BinaryRequestBody body) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(_runtime.bodySerDe().serialize(body));
+                _request.putQueryParams("bytesToRead", _plainSerDe.serializeInteger(bytesToRead));
+                return _runtime.clients()
+                        .call(
+                                postBinaryThrowsChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().inputStreamDeserializer());
             }

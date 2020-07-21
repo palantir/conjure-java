@@ -16,20 +16,40 @@
 
 package com.palantir.conjure.java;
 
+import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.product.UndertowEteBinaryService;
 import com.palantir.tokens.auth.AuthHeader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Random;
+import javax.validation.constraints.NotNull;
 
 final class UndertowBinaryResource implements UndertowEteBinaryService {
     @Override
     public BinaryResponseBody postBinary(AuthHeader _authHeader, InputStream body) {
         return output -> output.write(ByteStreams.toByteArray(body));
+    }
+
+    @Override
+    public BinaryResponseBody postBinaryThrows(
+            @NotNull AuthHeader authHeader, int bytesToRead, @NotNull InputStream body) {
+        if (bytesToRead > 0) {
+            try {
+                ByteStreams.copy(ByteStreams.limit(body, bytesToRead), ByteStreams.nullOutputStream());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new ServiceException(
+                ErrorType.INVALID_ARGUMENT, SafeArg.of("large", Strings.repeat("Hello, World!", 1024 * 1024)));
     }
 
     @Override

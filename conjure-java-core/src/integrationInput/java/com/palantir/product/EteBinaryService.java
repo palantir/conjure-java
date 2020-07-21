@@ -26,6 +26,15 @@ public interface EteBinaryService {
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     StreamingOutput postBinary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull InputStream body);
 
+    @POST
+    @Path("binary/throws")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    StreamingOutput postBinaryThrows(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("bytesToRead") int bytesToRead,
+            @NotNull InputStream body);
+
     @GET
     @Path("binary/optional/present")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)

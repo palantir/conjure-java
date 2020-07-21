@@ -22,6 +22,11 @@ public interface EteBinaryServiceBlocking {
     InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     /**
+     * @apiNote {@code POST /binary/throws}
+     */
+    InputStream postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body);
+
+    /**
      * @apiNote {@code GET /binary/optional/present}
      */
     Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader);
@@ -47,6 +52,12 @@ public interface EteBinaryServiceBlocking {
             @MustBeClosed
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 return _runtime.clients().block(delegate.postBinary(authHeader, body));
+            }
+
+            @Override
+            @MustBeClosed
+            public InputStream postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body) {
+                return _runtime.clients().block(delegate.postBinaryThrows(authHeader, bytesToRead, body));
             }
 
             @Override
