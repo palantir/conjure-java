@@ -36,6 +36,7 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return Collections.unmodifiableList(Arrays.asList(
                 new PostBinaryEndpoint(runtime, delegate),
+                new PostBinaryThrowsEndpoint(runtime, delegate),
                 new GetOptionalBinaryPresentEndpoint(runtime, delegate),
                 new GetOptionalBinaryEmptyEndpoint(runtime, delegate),
                 new GetBinaryFailureEndpoint(runtime, delegate)));
@@ -77,6 +78,52 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "postBinary";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class PostBinaryThrowsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteBinaryService delegate;
+
+        PostBinaryThrowsEndpoint(UndertowRuntime runtime, UndertowEteBinaryService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            InputStream body = runtime.bodySerDe().deserializeInputStream(exchange);
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            int bytesToRead = runtime.plainSerDe().deserializeInteger(queryParams.get("bytesToRead"));
+            BinaryResponseBody result = delegate.postBinaryThrows(authHeader, bytesToRead, body);
+            runtime.bodySerDe().serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/binary/throws";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteBinaryService";
+        }
+
+        @Override
+        public String name() {
+            return "postBinaryThrows";
         }
 
         @Override

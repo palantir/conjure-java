@@ -14,6 +14,11 @@ public interface UndertowEteBinaryService {
     BinaryResponseBody postBinary(AuthHeader authHeader, InputStream body);
 
     /**
+     * @apiNote {@code POST /binary/throws}
+     */
+    BinaryResponseBody postBinaryThrows(AuthHeader authHeader, int bytesToRead, InputStream body);
+
+    /**
      * @apiNote {@code GET /binary/optional/present}
      */
     Optional<BinaryResponseBody> getOptionalBinaryPresent(AuthHeader authHeader);

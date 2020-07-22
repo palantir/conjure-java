@@ -72,12 +72,15 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okio.BufferedSink;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -426,6 +429,36 @@ public final class UndertowServiceEteTest extends TestBase {
                     }
                 })
                 .isInstanceOf(RemoteException.class);
+    }
+
+    @Test
+    @Timeout(20)
+    public void testBinaryServerSideFailureAfterFewBytesReceived() {
+        byte[] data = new byte[1024];
+        ThreadLocalRandom.current().nextBytes(data);
+        assertThatThrownBy(() -> {
+                    try {
+                        Futures.getUnchecked(binaryClient.postBinaryThrows(
+                                AuthHeader.valueOf("authHeader"), 1024 * 1024, new RequestBody() {
+                                    @Override
+                                    public MediaType contentType() {
+                                        return MediaType.get("application/octet-stream");
+                                    }
+
+                                    @Override
+                                    public void writeTo(BufferedSink sink) throws IOException {
+                                        // 1gb
+                                        for (int i = 0; i < 1024 * 1024; i++) {
+                                            sink.write(data);
+                                        }
+                                    }
+                                }));
+                    } catch (UncheckedExecutionException e) {
+                        throw e.getCause();
+                    }
+                })
+                .isInstanceOfSatisfying(
+                        RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
     }
 
     @Test
