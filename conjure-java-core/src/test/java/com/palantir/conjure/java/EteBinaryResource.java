@@ -43,7 +43,7 @@ final class EteBinaryResource implements EteBinaryService {
             @NotNull AuthHeader authHeader, int bytesToRead, @NotNull InputStream body) {
         if (bytesToRead > 0) {
             try {
-                ByteStreams.copy(ByteStreams.limit(body, bytesToRead), ByteStreams.nullOutputStream());
+                ByteStreams.exhaust(ByteStreams.limit(body, bytesToRead));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
