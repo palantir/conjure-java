@@ -20,6 +20,7 @@ import static java.util.stream.Collectors.toList;
 
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
@@ -130,14 +131,17 @@ public final class DialogueInterfaceGenerator {
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(parameterTypes.methodParams(endpointDef));
-        endpointDef.getMarkers().forEach(marker -> {
-            Preconditions.checkState(
-                    marker.accept(TypeVisitor.IS_REFERENCE),
-                    "Endpoint marker must be a reference type",
-                    SafeArg.of("marker", marker));
-            com.palantir.conjure.spec.TypeName referenceType = marker.accept(TypeVisitor.REFERENCE);
-            methodBuilder.addAnnotation(ClassName.get(referenceType.getPackage(), referenceType.getName()));
-        });
+        endpointDef.getMarkers().stream()
+                .filter(marker -> marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE))
+                .map(marker -> {
+                    Preconditions.checkState(
+                            marker.accept(TypeVisitor.IS_REFERENCE),
+                            "Endpoint marker must be a reference type",
+                            SafeArg.of("marker", marker));
+                    return marker.accept(TypeVisitor.REFERENCE);
+                })
+                .forEach(referenceType -> methodBuilder.addAnnotation(
+                        ClassName.get(referenceType.getPackage(), referenceType.getName())));
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
         methodBuilder.addJavadoc("$L", ServiceGenerator.getJavaDocWithRequestLine(endpointDef));
