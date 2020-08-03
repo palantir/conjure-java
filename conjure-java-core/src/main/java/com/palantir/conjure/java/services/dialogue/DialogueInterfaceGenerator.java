@@ -132,7 +132,7 @@ public final class DialogueInterfaceGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(parameterTypes.methodParams(endpointDef));
         endpointDef.getMarkers().stream()
-                .filter(marker -> marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE))
+                .filter(marker -> !marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE))
                 .map(marker -> {
                     Preconditions.checkState(
                             marker.accept(TypeVisitor.IS_REFERENCE),
