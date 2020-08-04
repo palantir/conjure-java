@@ -89,8 +89,7 @@ public final class MethodSpecs {
     }
 
     public static void addCachedHashCode(TypeSpec.Builder typeBuilder, Collection<FieldSpec> fields) {
-        FieldSpec.Builder hashFieldSpec =
-                FieldSpec.builder(TypeName.INT, "memoizedHashCode", Modifier.PRIVATE, Modifier.VOLATILE);
+        FieldSpec.Builder hashFieldSpec = FieldSpec.builder(TypeName.INT, "memoizedHashCode", Modifier.PRIVATE);
         typeBuilder.addField(hashFieldSpec.build());
 
         typeBuilder.addMethod(MethodSpec.methodBuilder("hashCode")
