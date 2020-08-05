@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services.dialogue;
 
 import static java.util.stream.Collectors.toList;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerator;
@@ -39,6 +40,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.lang.model.element.Modifier;
@@ -142,7 +144,12 @@ public final class DialogueInterfaceGenerator {
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
         methodBuilder.addJavadoc("$L", ServiceGenerator.getJavaDocWithRequestLine(endpointDef));
 
-        methodBuilder.returns(returnTypeMapper.apply(endpointDef.getReturns()));
+        TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());
+        methodBuilder.returns(returnType);
+
+        if (TypeName.get(InputStream.class).equals(returnType)) {
+            methodBuilder.addAnnotation(MustBeClosed.class);
+        }
 
         return methodBuilder.build();
     }

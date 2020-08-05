@@ -19,11 +19,13 @@ public interface EteBinaryServiceBlocking {
     /**
      * @apiNote {@code POST /binary}
      */
+    @MustBeClosed
     InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     /**
      * @apiNote {@code POST /binary/throws}
      */
+    @MustBeClosed
     InputStream postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body);
 
     /**
@@ -40,6 +42,7 @@ public interface EteBinaryServiceBlocking {
      * Throws an exception after partially writing a binary response.
      * @apiNote {@code GET /binary/failure}
      */
+    @MustBeClosed
     InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
 
     /**
@@ -49,13 +52,11 @@ public interface EteBinaryServiceBlocking {
         EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(_endpointChannelFactory, _runtime);
         return new EteBinaryServiceBlocking() {
             @Override
-            @MustBeClosed
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {
                 return _runtime.clients().block(delegate.postBinary(authHeader, body));
             }
 
             @Override
-            @MustBeClosed
             public InputStream postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body) {
                 return _runtime.clients().block(delegate.postBinaryThrows(authHeader, bytesToRead, body));
             }
@@ -71,7 +72,6 @@ public interface EteBinaryServiceBlocking {
             }
 
             @Override
-            @MustBeClosed
             public InputStream getBinaryFailure(AuthHeader authHeader, int numBytes) {
                 return _runtime.clients().block(delegate.getBinaryFailure(authHeader, numBytes));
             }

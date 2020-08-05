@@ -84,6 +84,7 @@ public interface EteServiceBlocking {
     /**
      * @apiNote {@code GET /base/binary}
      */
+    @MustBeClosed
     InputStream binary(AuthHeader authHeader);
 
     /**
@@ -235,7 +236,6 @@ public interface EteServiceBlocking {
             }
 
             @Override
-            @MustBeClosed
             public InputStream binary(AuthHeader authHeader) {
                 return _runtime.clients().block(delegate.binary(authHeader));
             }
