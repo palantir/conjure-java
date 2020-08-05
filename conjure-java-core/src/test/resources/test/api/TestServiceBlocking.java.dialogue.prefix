@@ -52,11 +52,13 @@ public interface TestServiceBlocking {
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw}
      */
+    @MustBeClosed
     InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased}
      */
+    @MustBeClosed
     InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
@@ -180,13 +182,11 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            @MustBeClosed
             public InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return _runtime.clients().block(delegate.getRawData(authHeader, datasetRid));
             }
 
             @Override
-            @MustBeClosed
             public InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 return _runtime.clients().block(delegate.getAliasedRawData(authHeader, datasetRid));
             }
