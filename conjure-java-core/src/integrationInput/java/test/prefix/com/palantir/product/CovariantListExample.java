@@ -24,7 +24,7 @@ public final class CovariantListExample {
 
     private final List<ExampleExternalReference> externalItems;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private CovariantListExample(List<Object> items, List<ExampleExternalReference> externalItems) {
         validateFields(items, externalItems);

@@ -40,7 +40,7 @@ public final class ManyFieldExample {
 
     private final StringAliasExample alias;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private ManyFieldExample(
             String string,

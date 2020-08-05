@@ -23,7 +23,7 @@ public final class CovariantOptionalExample {
 
     private final Optional<Set<StringAliasExample>> setItem;
 
-    private volatile int memoizedHashCode;
+    private int memoizedHashCode;
 
     private CovariantOptionalExample(Optional<Object> item, Optional<Set<StringAliasExample>> setItem) {
         validateFields(item, setItem);
