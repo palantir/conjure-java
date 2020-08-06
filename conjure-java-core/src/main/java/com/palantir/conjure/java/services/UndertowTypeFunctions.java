@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.services;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -234,21 +233,6 @@ final class UndertowTypeFunctions {
                         .map(mapper::getClassName)
                         .orElseGet(() -> ClassName.get(Void.class))
                         .box());
-    }
-
-    @Beta
-    private static final class IsUndertowAsyncMarkerVisitor extends DefaultTypeVisitor<Boolean> {
-        static final IsUndertowAsyncMarkerVisitor INSTANCE = new IsUndertowAsyncMarkerVisitor();
-
-        @Override
-        public Boolean visitExternal(ExternalReference value) {
-            return "Async".equals(value.getExternalReference().getName());
-        }
-
-        @Override
-        public Boolean visitDefault() {
-            return false;
-        }
     }
 
     private UndertowTypeFunctions() {}
