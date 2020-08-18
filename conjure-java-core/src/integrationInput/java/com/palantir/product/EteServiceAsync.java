@@ -193,6 +193,16 @@ public interface EteServiceAsync {
             Set<Integer> ints);
 
     /**
+     * @apiNote {@code PUT /base/list/optionals}
+     */
+    ListenableFuture<Void> receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value);
+
+    /**
+     * @apiNote {@code PUT /base/set/optionals}
+     */
+    ListenableFuture<Void> receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
+
+    /**
      * Creates an asynchronous/non-blocking client for a EteService service.
      */
     static EteServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -367,6 +377,24 @@ public interface EteServiceAsync {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.complexQueryParameters);
 
             private final Deserializer<Void> complexQueryParametersDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Serializer<List<Optional<String>>> receiveListOfOptionalsSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<List<Optional<String>>>() {});
+
+            private final EndpointChannel receiveListOfOptionalsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfOptionals);
+
+            private final Deserializer<Void> receiveListOfOptionalsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Serializer<Set<Optional<String>>> receiveSetOfOptionalsSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<Set<Optional<String>>>() {});
+
+            private final EndpointChannel receiveSetOfOptionalsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
+
+            private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
@@ -644,6 +672,24 @@ public interface EteServiceAsync {
                 }
                 return _runtime.clients()
                         .call(complexQueryParametersChannel, _request.build(), complexQueryParametersDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<Void> receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(receiveListOfOptionalsSerializer.serialize(value));
+                return _runtime.clients()
+                        .call(receiveListOfOptionalsChannel, _request.build(), receiveListOfOptionalsDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<Void> receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(receiveSetOfOptionalsSerializer.serialize(value));
+                return _runtime.clients()
+                        .call(receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
             }
 
             @Override

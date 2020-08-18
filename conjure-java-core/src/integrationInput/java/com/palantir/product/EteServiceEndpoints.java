@@ -71,7 +71,9 @@ public final class EteServiceEndpoints implements UndertowService {
                 new OptionalEnumQueryEndpoint(runtime, delegate),
                 new EnumHeaderEndpoint(runtime, delegate),
                 new AliasLongEndpointEndpoint(runtime, delegate),
-                new ComplexQueryParametersEndpoint(runtime, delegate)));
+                new ComplexQueryParametersEndpoint(runtime, delegate),
+                new ReceiveListOfOptionalsEndpoint(runtime, delegate),
+                new ReceiveSetOfOptionalsEndpoint(runtime, delegate)));
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
@@ -1433,6 +1435,100 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "complexQueryParameters";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ReceiveListOfOptionalsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Deserializer<List<Optional<String>>> deserializer;
+
+        ReceiveListOfOptionalsEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<List<Optional<String>>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            List<Optional<String>> value = deserializer.deserialize(exchange);
+            delegate.receiveListOfOptionals(authHeader, value);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.PUT;
+        }
+
+        @Override
+        public String template() {
+            return "/base/list/optionals";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "receiveListOfOptionals";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ReceiveSetOfOptionalsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Deserializer<Set<Optional<String>>> deserializer;
+
+        ReceiveSetOfOptionalsEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Set<Optional<String>>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Set<Optional<String>> value = deserializer.deserialize(exchange);
+            delegate.receiveSetOfOptionals(authHeader, value);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.PUT;
+        }
+
+        @Override
+        public String template() {
+            return "/base/set/optionals";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "receiveSetOfOptionals";
         }
 
         @Override

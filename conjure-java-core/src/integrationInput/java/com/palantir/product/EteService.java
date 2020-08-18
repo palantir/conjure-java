@@ -15,6 +15,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -182,6 +183,16 @@ public interface EteService {
             @QueryParam("strings") Set<StringAliasExample> strings,
             @QueryParam("longs") Set<Long> longs,
             @QueryParam("ints") Set<Integer> ints);
+
+    @PUT
+    @Path("base/list/optionals")
+    void receiveListOfOptionals(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull List<Optional<String>> value);
+
+    @PUT
+    @Path("base/set/optionals")
+    void receiveSetOfOptionals(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull Set<Optional<String>> value);
 
     @Deprecated
     default Optional<Long> optionalExternalLongQuery(AuthHeader authHeader) {

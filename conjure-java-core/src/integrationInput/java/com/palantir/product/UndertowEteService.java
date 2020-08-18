@@ -167,4 +167,14 @@ public interface UndertowEteService {
             Set<StringAliasExample> strings,
             Set<Long> longs,
             Set<Integer> ints);
+
+    /**
+     * @apiNote {@code PUT /base/list/optionals}
+     */
+    void receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value);
+
+    /**
+     * @apiNote {@code PUT /base/set/optionals}
+     */
+    void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
 }
