@@ -348,6 +348,8 @@ final class UndertowServiceHandlerGenerator {
     private static final ClassName IMMUTABLE_SET_NAME = ClassName.get(ImmutableSet.class);
 
     private TypeName immutableCollection(TypeName input) {
+        // Note that only the outermost collection is considered for replacement to avoid
+        // generic type incompatibilities.
         if (options.nonNullCollections() && input instanceof ParameterizedTypeName) {
             ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
             if (LIST_NAME.equals(parameterized.rawType)) {

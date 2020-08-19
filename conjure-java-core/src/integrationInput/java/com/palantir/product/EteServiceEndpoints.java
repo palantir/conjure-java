@@ -1,5 +1,7 @@
 package com.palantir.product;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -1448,12 +1450,12 @@ public final class EteServiceEndpoints implements UndertowService {
 
         private final UndertowEteService delegate;
 
-        private final Deserializer<List<Optional<String>>> deserializer;
+        private final Deserializer<ImmutableList<Optional<String>>> deserializer;
 
         ReceiveListOfOptionalsEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<List<Optional<String>>>() {});
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<ImmutableList<Optional<String>>>() {});
         }
 
         @Override
@@ -1495,12 +1497,12 @@ public final class EteServiceEndpoints implements UndertowService {
 
         private final UndertowEteService delegate;
 
-        private final Deserializer<Set<Optional<String>>> deserializer;
+        private final Deserializer<ImmutableSet<Optional<String>>> deserializer;
 
         ReceiveSetOfOptionalsEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<Set<Optional<String>>>() {});
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<ImmutableSet<Optional<String>>>() {});
         }
 
         @Override
