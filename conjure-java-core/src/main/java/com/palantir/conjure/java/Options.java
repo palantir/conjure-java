@@ -100,7 +100,7 @@ public interface Options {
      */
     @Value.Default
     default boolean nonNullTopLevelCollectionValues() {
-        return false;
+        return nonNullCollections();
     }
 
     Optional<String> packagePrefix();
