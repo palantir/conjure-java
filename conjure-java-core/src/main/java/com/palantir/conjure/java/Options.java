@@ -94,6 +94,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Instructs the service generator to use top-level collections that fail to deserialize collections with null
+     * values.
+     */
+    @Value.Default
+    default boolean nonNullTopLevelCollectionValues() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

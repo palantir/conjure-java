@@ -51,8 +51,11 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .build();
-        ConjureJavaCli.GenerateCommand cmd =
-                new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
+                .parseArgs(args)
+                .asCommandLineList()
+                .get(1)
+                .getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
@@ -78,8 +81,33 @@ public final class ConjureJavaCliTest {
                         .useImmutableBytes(true)
                         .build())
                 .build();
-        ConjureJavaCli.GenerateCommand cmd =
-                new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
+                .parseArgs(args)
+                .asCommandLineList()
+                .get(1)
+                .getCommand();
+        assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
+    }
+
+    @Test
+    public void nonNullCollectionsImpliesTopLevelNonNullValues() {
+        String[] args = {
+            "generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects", "--nonNullCollections"
+        };
+        CliConfiguration expectedConfiguration = CliConfiguration.builder()
+                .input(targetFile)
+                .outputDirectory(tempDir)
+                .generateObjects(true)
+                .options(Options.builder()
+                        .nonNullCollections(true)
+                        .nonNullTopLevelCollectionValues(true)
+                        .build())
+                .build();
+        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
+                .parseArgs(args)
+                .asCommandLineList()
+                .get(1)
+                .getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
