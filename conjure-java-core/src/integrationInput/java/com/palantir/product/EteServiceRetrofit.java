@@ -17,6 +17,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
@@ -172,6 +173,16 @@ public interface EteServiceRetrofit {
             @Query("strings") Set<StringAliasExample> strings,
             @Query("longs") Set<Long> longs,
             @Query("ints") Set<Integer> ints);
+
+    @PUT("./base/list/optionals")
+    @Headers({"hr-path-template: /base/list/optionals", "Accept: application/json"})
+    ListenableFuture<Void> receiveListOfOptionals(
+            @Header("Authorization") AuthHeader authHeader, @Body List<Optional<String>> value);
+
+    @PUT("./base/set/optionals")
+    @Headers({"hr-path-template: /base/set/optionals", "Accept: application/json"})
+    ListenableFuture<Void> receiveSetOfOptionals(
+            @Header("Authorization") AuthHeader authHeader, @Body Set<Optional<String>> value);
 
     @Deprecated
     default ListenableFuture<Optional<Long>> optionalExternalLongQuery(@Header("Authorization") AuthHeader authHeader) {

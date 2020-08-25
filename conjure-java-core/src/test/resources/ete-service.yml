@@ -223,3 +223,13 @@ services:
           ints:
             type: set<integer>
             param-type: query
+
+      receiveListOfOptionals:
+        http: PUT /list/optionals
+        args:
+          value: list<optional<string>>
+
+      receiveSetOfOptionals:
+        http: PUT /set/optionals
+        args:
+          value: set<optional<string>>

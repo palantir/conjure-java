@@ -511,7 +511,10 @@ public final class UndertowServiceEteTest extends TestBase {
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
-        Options options = Options.builder().undertowServicePrefix(true).build();
+        Options options = Options.builder()
+                .undertowServicePrefix(true)
+                .nonNullCollections(true)
+                .build();
         List<Path> files = ImmutableList.<Path>builder()
                 .addAll(new UndertowServiceGenerator(options).emit(def, folder))
                 .addAll(new ObjectGenerator(options).emit(def, folder))

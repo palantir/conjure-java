@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.services;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -79,6 +80,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
@@ -241,6 +243,7 @@ final class UndertowServiceHandlerGenerator {
                 .flatMap(type -> type.accept(TypeVisitor.IS_BINARY) ? Optional.empty() : Optional.of(type))
                 .map(typeMapper::getClassName)
                 .map(TypeName::box)
+                .map(this::immutableCollection)
                 .ifPresent(typeName -> {
                     TypeName type = ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
                     endpointBuilder.addField(
@@ -337,6 +340,28 @@ final class UndertowServiceHandlerGenerator {
                         .build()));
 
         return endpointBuilder.build();
+    }
+
+    private static final ClassName LIST_NAME = ClassName.get(List.class);
+    private static final ClassName IMMUTABLE_LIST_NAME = ClassName.get(ImmutableList.class);
+    private static final ClassName SET_NAME = ClassName.get(Set.class);
+    private static final ClassName IMMUTABLE_SET_NAME = ClassName.get(ImmutableSet.class);
+
+    private TypeName immutableCollection(TypeName input) {
+        // Note that only the outermost collection is considered for replacement to avoid
+        // generic type incompatibilities.
+        if (options.nonNullTopLevelCollectionValues() && input instanceof ParameterizedTypeName) {
+            ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
+            if (LIST_NAME.equals(parameterized.rawType)) {
+                return ParameterizedTypeName.get(
+                        IMMUTABLE_LIST_NAME, parameterized.typeArguments.toArray(new TypeName[0]));
+            } else if (SET_NAME.equals(parameterized.rawType)) {
+                return ParameterizedTypeName.get(
+                        IMMUTABLE_SET_NAME, parameterized.typeArguments.toArray(new TypeName[0]));
+            }
+        }
+
+        return input;
     }
 
     private static final String PATH_PARAMS_VAR_NAME = "pathParams";

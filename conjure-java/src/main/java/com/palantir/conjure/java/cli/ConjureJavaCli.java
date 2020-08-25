@@ -139,6 +139,14 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generate POJOs that by default will fail to deserialize collections with null values")
         private boolean nonNullCollections;
 
+        @CommandLine.Option(
+                names = "--nonNullTopLevelCollectionValues",
+                defaultValue = "false",
+                description = "Generate services that by default will fail to deserialize top-level collections with "
+                        + "null values. This option is always enabled when --nonNullCollections is used, this option "
+                        + "exists to allow consumers which cannot use the broader flag yet.")
+        private boolean nonNullTopLevelCollectionValues;
+
         @Beta
         @CommandLine.Option(
                 names = "--experimentalUndertowAsyncMarkers",
@@ -223,6 +231,7 @@ public final class ConjureJavaCli implements Runnable {
                             .experimentalUndertowAsyncMarkers(experimentalUndertowAsyncMarkers)
                             .strictObjects(strictObjects)
                             .nonNullCollections(nonNullCollections)
+                            .nonNullTopLevelCollectionValues(nonNullCollections || nonNullTopLevelCollectionValues)
                             .packagePrefix(Optional.ofNullable(packagePrefix))
                             .apiVersion(Optional.ofNullable(apiVersion))
                             .build())

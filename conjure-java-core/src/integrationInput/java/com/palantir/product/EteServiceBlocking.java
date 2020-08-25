@@ -180,6 +180,16 @@ public interface EteServiceBlocking {
             Set<Integer> ints);
 
     /**
+     * @apiNote {@code PUT /base/list/optionals}
+     */
+    void receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value);
+
+    /**
+     * @apiNote {@code PUT /base/set/optionals}
+     */
+    void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
+
+    /**
      * Creates a synchronous/blocking client for a EteService service.
      */
     static EteServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -331,6 +341,16 @@ public interface EteServiceBlocking {
                     Set<Long> longs,
                     Set<Integer> ints) {
                 _runtime.clients().block(delegate.complexQueryParameters(authHeader, datasetRid, strings, longs, ints));
+            }
+
+            @Override
+            public void receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value) {
+                _runtime.clients().block(delegate.receiveListOfOptionals(authHeader, value));
+            }
+
+            @Override
+            public void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value) {
+                _runtime.clients().block(delegate.receiveSetOfOptionals(authHeader, value));
             }
 
             @Override

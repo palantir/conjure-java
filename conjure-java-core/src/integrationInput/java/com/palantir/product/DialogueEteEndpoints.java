@@ -899,5 +899,71 @@ enum DialogueEteEndpoints implements Endpoint {
         public String version() {
             return "1.2.3";
         }
+    },
+
+    receiveListOfOptionals {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("list")
+                .fixed("optionals")
+                .build();
+
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.PUT;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "receiveListOfOptionals";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
+    receiveSetOfOptionals {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("set")
+                .fixed("optionals")
+                .build();
+
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.PUT;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "receiveSetOfOptionals";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
     }
 }
