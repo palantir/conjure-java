@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.Javadoc;
@@ -74,6 +75,7 @@ public final class EnumGenerator {
             EnumDefinition typeDef, ClassName thisClass, ClassName enumClass, ClassName visitorClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
+                .addAnnotation(Immutable.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addType(createEnum(enumClass, typeDef.getValues(), true))
                 .addType(createVisitor(visitorClass, typeDef.getValues()))
