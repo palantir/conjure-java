@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Dialogue async service toString uses the correct class name
+  links:
+  - https://github.com/palantir/conjure-java/pull/1092
