@@ -43,7 +43,7 @@ public interface EmptyPathServiceAsync {
 
             @Override
             public String toString() {
-                return "EmptyPathServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                return "EmptyPathServiceAsync{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
                         + _runtime + '}';
             }
         };

@@ -128,7 +128,7 @@ public interface EteBinaryServiceAsync {
 
             @Override
             public String toString() {
-                return "EteBinaryServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
+                return "EteBinaryServiceAsync{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
                         + _runtime + '}';
             }
         };

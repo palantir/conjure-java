@@ -107,7 +107,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
             impl.addMethod(asyncClientImpl(def, endpoint));
         });
 
-        impl.addMethod(BlockingGenerator.toStringMethod(Names.blockingClassName(def, options)));
+        impl.addMethod(BlockingGenerator.toStringMethod(Names.asyncClassName(def, options)));
 
         MethodSpec asyncImpl = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
