@@ -552,8 +552,8 @@ public interface TestServiceAsync {
 
             @Override
             public String toString() {
-                return "TestServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
-                        + _runtime + '}';
+                return "TestServiceAsync{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime=" + _runtime
+                        + '}';
             }
         };
     }

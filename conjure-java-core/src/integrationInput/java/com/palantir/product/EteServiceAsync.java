@@ -694,7 +694,7 @@ public interface EteServiceAsync {
 
             @Override
             public String toString() {
-                return "EteServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime=" + _runtime
+                return "EteServiceAsync{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime=" + _runtime
                         + '}';
             }
         };

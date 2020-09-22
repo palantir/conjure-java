@@ -44,8 +44,8 @@ public interface CookieServiceAsync {
 
             @Override
             public String toString() {
-                return "CookieServiceBlocking{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime="
-                        + _runtime + '}';
+                return "CookieServiceAsync{_endpointChannelFactory=" + _endpointChannelFactory + ", runtime=" + _runtime
+                        + '}';
             }
         };
     }
