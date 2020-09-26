@@ -19,6 +19,7 @@ package com.palantir.conjure.java.cli;
 import com.palantir.conjure.java.Options;
 import com.palantir.logsafe.Preconditions;
 import java.io.File;
+import java.util.Arrays;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -61,9 +62,12 @@ public interface CliConfiguration {
     default void check() {
         Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
         Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
-        Preconditions.checkArgument(
-                generateObjects() ^ generateJersey() ^ generateRetrofit() ^ generateUndertow() ^ generateDialogue(),
-                "Must specify exactly one project to generate");
+        long count = Arrays.asList(
+                        generateObjects(), generateJersey(), generateRetrofit(), generateUndertow(), generateDialogue())
+                .stream()
+                .filter(b -> b)
+                .count();
+        Preconditions.checkArgument(count == 1, "Must specify exactly one project to generate");
     }
 
     class Builder extends ImmutableCliConfiguration.Builder {}
