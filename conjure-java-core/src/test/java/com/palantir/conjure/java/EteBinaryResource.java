@@ -75,6 +75,7 @@ final class EteBinaryResource implements EteBinaryService {
 
     @Override
     public AliasOptionalDoubleAliasedBinaryResult getAliased(@NotNull AuthHeader authHeader) {
+        // BUG: This should be dealiased to return Optional<StreamingOutput>
         return AliasOptionalDoubleAliasedBinaryResult.of(Optional.empty());
     }
 }
