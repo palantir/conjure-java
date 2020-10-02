@@ -71,4 +71,9 @@ final class UndertowBinaryResource implements UndertowEteBinaryService {
             throw new SafeRuntimeException("failure");
         };
     }
+
+    @Override
+    public Optional<BinaryResponseBody> getAliased(AuthHeader _authHeader) {
+        return Optional.empty();
+    }
 }

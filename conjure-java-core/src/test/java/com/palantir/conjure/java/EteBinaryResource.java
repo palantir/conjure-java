@@ -22,6 +22,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.product.AliasOptionalDoubleAliasedBinaryResult;
 import com.palantir.product.EteBinaryService;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.IOException;
@@ -70,5 +71,10 @@ final class EteBinaryResource implements EteBinaryService {
             responseBody.write(data);
             throw new SafeRuntimeException("failure");
         };
+    }
+
+    @Override
+    public AliasOptionalDoubleAliasedBinaryResult getAliased(@NotNull AuthHeader authHeader) {
+        return AliasOptionalDoubleAliasedBinaryResult.of(Optional.empty());
     }
 }

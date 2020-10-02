@@ -26,6 +26,7 @@ import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
+import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.ClassName;
@@ -37,8 +38,10 @@ import java.util.Optional;
 public final class UndertowReturnValueClassNameVisitor implements ClassNameVisitor {
 
     private final ClassNameVisitor delegate;
+    private final List<TypeDefinition> types;
 
     public UndertowReturnValueClassNameVisitor(List<TypeDefinition> types, Options featureFlags) {
+        this.types = types;
         delegate = new DefaultClassNameVisitor(types, featureFlags);
     }
 
@@ -57,9 +60,9 @@ public final class UndertowReturnValueClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitOptional(OptionalType optionalType) {
-        if (optionalType.getItemType().accept(TypeVisitor.IS_BINARY)) {
-            return ParameterizedTypeName.get(
-                    ClassName.get(Optional.class), optionalType.getItemType().accept(this));
+        Type dealiased = dealiasBinary(optionalType.getItemType());
+        if (dealiased.accept(TypeVisitor.IS_BINARY)) {
+            return ParameterizedTypeName.get(ClassName.get(Optional.class), dealiased.accept(this));
         }
         return delegate.visitOptional(optionalType);
     }
@@ -81,11 +84,26 @@ public final class UndertowReturnValueClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName typeName) {
+        Optional<Type> type = UndertowTypeFunctions.getAliasedType(typeName, types);
+        if (type.isPresent()) {
+            Type dealiased = dealiasBinary(type.get());
+            if (UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+                return dealiased.accept(this);
+            }
+        }
         return delegate.visitReference(typeName);
     }
 
     @Override
     public TypeName visitExternal(ExternalReference externalReference) {
         return delegate.visitExternal(externalReference);
+    }
+
+    private Type dealiasBinary(Type input) {
+        Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(input, types);
+        if (UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+            return dealiased;
+        }
+        return input;
     }
 }

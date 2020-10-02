@@ -46,7 +46,7 @@ public interface TestService {
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased}
      */
-    NestedAliasedBinary getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    BinaryResponseBody getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe}

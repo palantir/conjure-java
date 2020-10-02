@@ -1,3 +1,14 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      AliasedBinaryResult:
+        alias: binary
+      DoubleAliasedBinaryResult:
+        alias: AliasedBinaryResult
+      AliasOptionalDoubleAliasedBinaryResult:
+        alias: optional<DoubleAliasedBinaryResult>
+
 services:
   EteBinaryService:
     default-auth: header
@@ -32,3 +43,6 @@ services:
             param-type: query
         docs: Throws an exception after partially writing a binary response.
         returns: binary
+      getAliased:
+        http: GET /aliased
+        returns: AliasOptionalDoubleAliasedBinaryResult

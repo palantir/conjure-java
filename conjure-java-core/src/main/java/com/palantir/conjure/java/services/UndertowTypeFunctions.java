@@ -60,6 +60,10 @@ final class UndertowTypeFunctions {
         });
     }
 
+    static boolean isBinaryOrOptionalBinary(Type type) {
+        return type.accept(TypeVisitor.IS_BINARY) || isOptionalBinary(type);
+    }
+
     static boolean isCollectionType(Type type) {
         return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET);
     }
@@ -70,16 +74,7 @@ final class UndertowTypeFunctions {
     static Type getAliasedType(Type type, List<TypeDefinition> typeDefinitions) {
         com.palantir.logsafe.Preconditions.checkArgument(
                 isAliasType(type), "Expected an alias", SafeArg.of("type", type));
-        return getAliasedType(
-                        type.accept(new AbstractTypeVisitor<com.palantir.conjure.spec.TypeName>() {
-                            @Override
-                            public com.palantir.conjure.spec.TypeName visitReference(
-                                    com.palantir.conjure.spec.TypeName value) {
-                                return value;
-                            }
-                        }),
-                        typeDefinitions)
-                .get();
+        return maybeGetAliasedType(type, typeDefinitions).get();
     }
 
     static Optional<Type> getAliasedType(
@@ -99,6 +94,22 @@ final class UndertowTypeFunctions {
             return Optional.of(aliasDefinition.getAlias());
         }
         return Optional.empty();
+    }
+
+    // Dealias the given type if possible, otherwise returns empty. This may occur if the type cannot be
+    // located, or if it is not an alias.
+    static Optional<Type> maybeGetAliasedType(Type type, List<TypeDefinition> typeDefinitions) {
+        if (!isAliasType(type)) {
+            return Optional.empty();
+        }
+        return getAliasedType(
+                type.accept(new AbstractTypeVisitor<com.palantir.conjure.spec.TypeName>() {
+                    @Override
+                    public com.palantir.conjure.spec.TypeName visitReference(com.palantir.conjure.spec.TypeName value) {
+                        return value;
+                    }
+                }),
+                typeDefinitions);
     }
 
     private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME = new ImmutableMap.Builder<

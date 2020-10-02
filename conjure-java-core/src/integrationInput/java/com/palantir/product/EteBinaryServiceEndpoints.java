@@ -2,6 +2,8 @@ package com.palantir.product;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.tokens.auth.AuthHeader;
@@ -39,7 +41,8 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
                 new PostBinaryThrowsEndpoint(runtime, delegate),
                 new GetOptionalBinaryPresentEndpoint(runtime, delegate),
                 new GetOptionalBinaryEmptyEndpoint(runtime, delegate),
-                new GetBinaryFailureEndpoint(runtime, delegate)));
+                new GetBinaryFailureEndpoint(runtime, delegate),
+                new GetAliasedEndpoint(runtime, delegate)));
     }
 
     private static final class PostBinaryEndpoint implements HttpHandler, Endpoint {
@@ -263,6 +266,56 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "getBinaryFailure";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GetAliasedEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteBinaryService delegate;
+
+        private final Serializer<Optional<BinaryResponseBody>> serializer;
+
+        GetAliasedEndpoint(UndertowRuntime runtime, UndertowEteBinaryService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<BinaryResponseBody>>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Optional<BinaryResponseBody> result = delegate.getAliased(authHeader);
+            if (result.isPresent()) {
+                runtime.bodySerDe().serialize(result.get(), exchange);
+            } else {
+                exchange.setStatusCode(StatusCodes.NO_CONTENT);
+            }
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/binary/aliased";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteBinaryService";
+        }
+
+        @Override
+        public String name() {
+            return "getAliased";
         }
 
         @Override

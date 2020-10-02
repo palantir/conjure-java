@@ -33,4 +33,9 @@ public interface UndertowEteBinaryService {
      * @apiNote {@code GET /binary/failure}
      */
     BinaryResponseBody getBinaryFailure(AuthHeader authHeader, int numBytes);
+
+    /**
+     * @apiNote {@code GET /binary/aliased}
+     */
+    Optional<BinaryResponseBody> getAliased(AuthHeader authHeader);
 }

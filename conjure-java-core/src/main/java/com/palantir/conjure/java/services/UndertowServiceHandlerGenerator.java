@@ -452,31 +452,41 @@ final class UndertowServiceHandlerGenerator {
         if (endpointDefinition.getReturns().isPresent()) {
             Type returnType = endpointDefinition.getReturns().get();
             // optional<> handling
-            // TODO(ckozak): Support aliased binary types
-            if (UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions)
-                    .accept(TypeVisitor.IS_OPTIONAL)) {
-                CodeBlock serializer = UndertowTypeFunctions.isOptionalBinary(returnType)
-                        ? CodeBlock.builder()
-                                .add(
-                                        "$1N.bodySerDe().serialize($2N.get(), $3N)",
-                                        RUNTIME_VAR_NAME,
-                                        RESULT_VAR_NAME,
-                                        EXCHANGE_VAR_NAME)
-                                .build()
-                        : CodeBlock.builder()
-                                .add("$1N.serialize($2N, $3N)", SERIALIZER_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME)
-                                .build();
+            Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
+            if (dealiased.accept(TypeVisitor.IS_OPTIONAL)) {
+                CodeBlock serializer;
+                if (UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+                    serializer = CodeBlock.builder()
+                            .add(
+                                    dealiased.accept(TypeVisitor.IS_BINARY)
+                                            ? "$1N.bodySerDe().serialize($2N, $3N)"
+                                            : "$1N.bodySerDe().serialize($2N.get(), $3N)",
+                                    RUNTIME_VAR_NAME,
+                                    RESULT_VAR_NAME,
+                                    EXCHANGE_VAR_NAME)
+                            .build();
+                } else {
+                    serializer = CodeBlock.builder()
+                            .add("$1N.serialize($2N, $3N)", SERIALIZER_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME)
+                            .build();
+                }
                 // For optional<>: set response code to 204/NO_CONTENT if result is absent
                 code.add(CodeBlock.builder()
                         .beginControlFlow(
-                                "if ($1L)", createIsOptionalPresentCall(returnType, RESULT_VAR_NAME, typeDefinitions))
+                                "if ($1L)",
+                                createIsOptionalPresentCall(
+                                        UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)
+                                                ? dealiased
+                                                : returnType,
+                                        RESULT_VAR_NAME,
+                                        typeDefinitions))
                         .addStatement(serializer)
                         .nextControlFlow("else")
                         .addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class)
                         .endControlFlow()
                         .build());
             } else {
-                if (returnType.accept(TypeVisitor.IS_BINARY)) {
+                if (dealiased.accept(TypeVisitor.IS_BINARY)) {
                     code.addStatement(
                             "$1N.bodySerDe().serialize($2N, $3N)",
                             RUNTIME_VAR_NAME,
