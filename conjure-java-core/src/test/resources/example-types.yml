@@ -177,6 +177,10 @@ types:
           new: integer
           interface: integer
           completed: integer
+          unknown: integer
+      UnionWithUnknownString:
+        union:
+          unknown: string
       EmptyUnionTypeExample:
         union: {}
       EmptyObjectExample:

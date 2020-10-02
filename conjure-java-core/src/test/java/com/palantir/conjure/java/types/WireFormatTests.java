@@ -316,10 +316,18 @@ public final class WireFormatTests {
 
     @Test
     public void testUnionType_unknownType() throws Exception {
-        String serializedUnionTypeUnknown = "{\"type\":\"unknown\",\"value\":5}";
+        String serializedUnionTypeUnknown = "{\"type\":\"notknown\",\"notknown\":5}";
         UnionTypeExample unionTypeUnknown = mapper.readValue(serializedUnionTypeUnknown, UnionTypeExample.class);
         assertThat(mapper.writeValueAsString(unionTypeUnknown)).isEqualTo(serializedUnionTypeUnknown);
         assertThat(unionTypeUnknown.accept(new TestVisitor())).isZero();
+    }
+
+    @Test
+    public void testUnionType_knownUnknown() throws Exception {
+        String serializedUnionTypeUnknown = "{\"type\":\"unknown\",\"unknown\":5}";
+        UnionTypeExample unionTypeUnknown = mapper.readValue(serializedUnionTypeUnknown, UnionTypeExample.class);
+        assertThat(mapper.writeValueAsString(unionTypeUnknown)).isEqualTo(serializedUnionTypeUnknown);
+        assertThat(unionTypeUnknown.accept(new TestVisitor())).isEqualTo(5);
     }
 
     @Test
@@ -479,6 +487,11 @@ public final class WireFormatTests {
 
         @Override
         public Integer visitCompleted(int value) {
+            return value;
+        }
+
+        @Override
+        public Integer visitUnknown_(int value) {
             return value;
         }
 
