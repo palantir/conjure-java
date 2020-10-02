@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Unions with type `unknown` compile as expected
+  links:
+  - https://github.com/palantir/conjure-java/pull/1103
