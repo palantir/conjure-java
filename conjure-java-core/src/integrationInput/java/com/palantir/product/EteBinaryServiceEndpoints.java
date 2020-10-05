@@ -2,8 +2,6 @@ package com.palantir.product;
 
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.Serializer;
-import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.tokens.auth.AuthHeader;
@@ -279,12 +277,9 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
         private final UndertowEteBinaryService delegate;
 
-        private final Serializer<Optional<BinaryResponseBody>> serializer;
-
         GetAliasedEndpoint(UndertowRuntime runtime, UndertowEteBinaryService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Optional<BinaryResponseBody>>() {});
         }
 
         @Override

@@ -3,7 +3,6 @@ package com.palantir.another;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
-import com.palantir.product.NestedAliasedBinary;
 import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
@@ -66,7 +65,7 @@ public interface TestService {
     /**
      * @apiNote {@code POST /catalog/datasets/upload-raw-aliased}
      */
-    void uploadAliasedRawData(AuthHeader authHeader, NestedAliasedBinary input);
+    void uploadAliasedRawData(AuthHeader authHeader, InputStream input);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches}

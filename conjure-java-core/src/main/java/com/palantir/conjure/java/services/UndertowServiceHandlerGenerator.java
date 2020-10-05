@@ -240,7 +240,12 @@ final class UndertowServiceHandlerGenerator {
         getBodyParamTypeArgument(endpointDefinition.getArgs())
                 .map(ArgumentDefinition::getType)
                 // Filter out binary data
-                .flatMap(type -> type.accept(TypeVisitor.IS_BINARY) ? Optional.empty() : Optional.of(type))
+                .flatMap(type -> {
+                    Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(type, typeDefinitions);
+                    return UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)
+                            ? Optional.empty()
+                            : Optional.of(type);
+                })
                 .map(typeMapper::getClassName)
                 .map(TypeName::box)
                 .map(this::immutableCollection)
@@ -257,7 +262,8 @@ final class UndertowServiceHandlerGenerator {
                 });
 
         endpointDefinition.getReturns().ifPresent(returnType -> {
-            if (!UndertowTypeFunctions.isOptionalBinary(returnType) && !returnType.accept(TypeVisitor.IS_BINARY)) {
+            Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
+            if (!UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                 TypeName typeName = returnTypeMapper.getClassName(returnType).box();
                 TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
                 endpointBuilder.addField(FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
@@ -381,8 +387,8 @@ final class UndertowServiceHandlerGenerator {
         // body parameter
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
             String paramName = sanitizeVarName(bodyParam.getArgName().get(), endpointDefinition);
-            if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
-                // TODO(ckozak): Support aliased and optional binary types
+            Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(bodyParam.getType(), typeDefinitions);
+            if (UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                 code.addStatement(
                         "$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
                         InputStream.class,
