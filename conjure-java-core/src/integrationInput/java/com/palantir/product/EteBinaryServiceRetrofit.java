@@ -49,6 +49,7 @@ public interface EteBinaryServiceRetrofit {
             @Header("Authorization") AuthHeader authHeader, @Query("numBytes") int numBytes);
 
     @GET("./binary/aliased")
-    @Headers({"hr-path-template: /binary/aliased", "Accept: application/json"})
-    ListenableFuture<AliasOptionalDoubleAliasedBinaryResult> getAliased(@Header("Authorization") AuthHeader authHeader);
+    @Headers({"hr-path-template: /binary/aliased", "Accept: application/octet-stream"})
+    @Streaming
+    ListenableFuture<Optional<ResponseBody>> getAliased(@Header("Authorization") AuthHeader authHeader);
 }

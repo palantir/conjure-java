@@ -56,5 +56,6 @@ public interface EteBinaryService {
 
     @GET
     @Path("binary/aliased")
-    AliasOptionalDoubleAliasedBinaryResult getAliased(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    Optional<StreamingOutput> getAliased(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 }
