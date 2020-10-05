@@ -48,7 +48,7 @@ public interface EteBinaryServiceBlocking {
     /**
      * @apiNote {@code GET /binary/aliased}
      */
-    AliasOptionalDoubleAliasedBinaryResult getAliased(AuthHeader authHeader);
+    Optional<InputStream> getAliased(AuthHeader authHeader);
 
     /**
      * Creates a synchronous/blocking client for a EteBinaryService service.
@@ -82,7 +82,7 @@ public interface EteBinaryServiceBlocking {
             }
 
             @Override
-            public AliasOptionalDoubleAliasedBinaryResult getAliased(AuthHeader authHeader) {
+            public Optional<InputStream> getAliased(AuthHeader authHeader) {
                 return _runtime.clients().block(delegate.getAliased(authHeader));
             }
 

@@ -20,6 +20,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -84,10 +85,10 @@ public final class UndertowReturnValueClassNameVisitor implements ClassNameVisit
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName typeName) {
-        Optional<Type> type = UndertowTypeFunctions.getAliasedType(typeName, types);
+        Optional<Type> type = TypeFunctions.getAliasedType(typeName, types);
         if (type.isPresent()) {
             Type dealiased = dealiasBinary(type.get());
-            if (UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+            if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                 return dealiased.accept(this);
             }
         }
@@ -100,8 +101,8 @@ public final class UndertowReturnValueClassNameVisitor implements ClassNameVisit
     }
 
     private Type dealiasBinary(Type input) {
-        Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(input, types);
-        if (UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+        Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(input, types);
+        if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
             return dealiased;
         }
         return input;

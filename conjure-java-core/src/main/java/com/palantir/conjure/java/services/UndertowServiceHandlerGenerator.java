@@ -35,6 +35,7 @@ import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -241,10 +242,8 @@ final class UndertowServiceHandlerGenerator {
                 .map(ArgumentDefinition::getType)
                 // Filter out binary data
                 .flatMap(type -> {
-                    Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(type, typeDefinitions);
-                    return UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)
-                            ? Optional.empty()
-                            : Optional.of(type);
+                    Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(type, typeDefinitions);
+                    return TypeFunctions.isBinaryOrOptionalBinary(dealiased) ? Optional.empty() : Optional.of(type);
                 })
                 .map(typeMapper::getClassName)
                 .map(TypeName::box)
@@ -262,8 +261,8 @@ final class UndertowServiceHandlerGenerator {
                 });
 
         endpointDefinition.getReturns().ifPresent(returnType -> {
-            Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
-            if (!UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+            Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
+            if (!TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                 TypeName typeName = returnTypeMapper.getClassName(returnType).box();
                 TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
                 endpointBuilder.addField(FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
@@ -387,8 +386,8 @@ final class UndertowServiceHandlerGenerator {
         // body parameter
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
             String paramName = sanitizeVarName(bodyParam.getArgName().get(), endpointDefinition);
-            Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(bodyParam.getType(), typeDefinitions);
-            if (UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+            Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(bodyParam.getType(), typeDefinitions);
+            if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                 code.addStatement(
                         "$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
                         InputStream.class,
@@ -458,10 +457,10 @@ final class UndertowServiceHandlerGenerator {
         if (endpointDefinition.getReturns().isPresent()) {
             Type returnType = endpointDefinition.getReturns().get();
             // optional<> handling
-            Type dealiased = UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
+            Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
             if (dealiased.accept(TypeVisitor.IS_OPTIONAL)) {
                 CodeBlock serializer;
-                if (UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+                if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                     serializer = CodeBlock.builder()
                             .add(
                                     dealiased.accept(TypeVisitor.IS_BINARY)
@@ -481,9 +480,7 @@ final class UndertowServiceHandlerGenerator {
                         .beginControlFlow(
                                 "if ($1L)",
                                 createIsOptionalPresentCall(
-                                        UndertowTypeFunctions.isBinaryOrOptionalBinary(dealiased)
-                                                ? dealiased
-                                                : returnType,
+                                        TypeFunctions.isBinaryOrOptionalBinary(dealiased) ? dealiased : returnType,
                                         RESULT_VAR_NAME,
                                         typeDefinitions))
                         .addStatement(serializer)
@@ -682,13 +679,12 @@ final class UndertowServiceHandlerGenerator {
         return CodeBlocks.of(endpoint.getArgs().stream()
                 .filter(param -> param.getParamType().accept(paramTypeVisitor))
                 .map(arg -> {
-                    Type normalizedType =
-                            UndertowTypeFunctions.toConjureTypeWithoutAliases(arg.getType(), typeDefinitions);
+                    Type normalizedType = TypeFunctions.toConjureTypeWithoutAliases(arg.getType(), typeDefinitions);
                     String paramName = sanitizeVarName(arg.getArgName().get(), endpoint);
                     final CodeBlock retrieveParam;
                     if (normalizedType.equals(arg.getType())
                             // Collections of alias types are handled the same way as external imports
-                            || UndertowTypeFunctions.isCollectionType(arg.getType())) {
+                            || TypeFunctions.isCollectionType(arg.getType())) {
                         // type is not an alias or optional of an alias
                         retrieveParam = decodePlainParameterCodeBlock(
                                 arg.getType(), typeMapper, paramName, paramsVarName, toParamId.apply(arg));
@@ -843,9 +839,9 @@ final class UndertowServiceHandlerGenerator {
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // current type is optional type: call isPresent
             return CodeBlock.of("$1N.isPresent()", varName);
-        } else if (UndertowTypeFunctions.isAliasType(inType)) {
+        } else if (TypeFunctions.isAliasType(inType)) {
             // current type is an alias type: call "get()" to resolve alias and generate recursively on aliased type
-            Type aliasedType = UndertowTypeFunctions.getAliasedType(inType, typeDefinitions);
+            Type aliasedType = TypeFunctions.getAliasedType(inType, typeDefinitions);
             return createIsOptionalPresentCall(aliasedType, varName + ".get()", typeDefinitions);
         } else {
             throw new IllegalArgumentException("inType must be either an optional or alias type, was " + inType);
@@ -886,7 +882,7 @@ final class UndertowServiceHandlerGenerator {
             //   * optional<primitive>
             //   * optional<alias that resolves to a primitive>
             //   * alias that follows one of these rules (recursive definition)
-            Type aliasedType = UndertowTypeFunctions.getAliasedType(inType, typeDefinitions);
+            Type aliasedType = TypeFunctions.getAliasedType(inType, typeDefinitions);
             if (aliasedType.accept(TypeVisitor.IS_PRIMITIVE) || aliasedType.accept(MoreVisitors.IS_EXTERNAL)) {
                 // primitive
                 ofContent = CodeBlock.of("$1N", decodedVarName);
@@ -915,14 +911,12 @@ final class UndertowServiceHandlerGenerator {
 
     private static String deserializeFunctionName(Type type) {
         if (type.accept(TypeVisitor.IS_PRIMITIVE)) {
-            return "deserialize"
-                    + UndertowTypeFunctions.primitiveTypeName(type.accept(UndertowTypeFunctions.PRIMITIVE_VISITOR));
+            return "deserialize" + TypeFunctions.primitiveTypeName(type.accept(TypeFunctions.PRIMITIVE_VISITOR));
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)
                 && type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
-            PrimitiveType innerPrimitiveType = type.accept(UndertowTypeFunctions.OPTIONAL_VISITOR)
-                    .getItemType()
-                    .accept(UndertowTypeFunctions.PRIMITIVE_VISITOR);
-            return "deserializeOptional" + UndertowTypeFunctions.primitiveTypeName(innerPrimitiveType);
+            PrimitiveType innerPrimitiveType =
+                    type.accept(TypeFunctions.OPTIONAL_VISITOR).getItemType().accept(TypeFunctions.PRIMITIVE_VISITOR);
+            return "deserializeOptional" + TypeFunctions.primitiveTypeName(innerPrimitiveType);
         } else if (type.accept(TypeVisitor.IS_LIST)
                 && type.accept(TypeVisitor.LIST).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
             Type subtype = type.accept(TypeVisitor.LIST).getItemType();

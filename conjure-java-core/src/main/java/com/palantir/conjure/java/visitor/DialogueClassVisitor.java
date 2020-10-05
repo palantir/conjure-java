@@ -19,6 +19,7 @@ package com.palantir.conjure.java.visitor;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -74,14 +75,14 @@ public final class DialogueClassVisitor implements ClassNameVisitor {
     @Override
     public TypeName visitOptional(OptionalType value) {
         Type itemType = value.getItemType();
-        if (itemType.accept(TypeVisitor.IS_BINARY) || itemType.accept(TypeVisitor.IS_REFERENCE)) {
+        Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(itemType, types.values());
+        if (dealiased.accept(TypeVisitor.IS_BINARY)) {
+            return ParameterizedTypeName.get(ClassName.get(Optional.class), dealiased.accept(this));
+        }
+        if (itemType.accept(TypeVisitor.IS_REFERENCE)) {
             return ParameterizedTypeName.get(ClassName.get(Optional.class), box(itemType.accept(this)));
         }
         return delegate.visitOptional(value);
-    }
-
-    private static TypeName box(TypeName input) {
-        return input.isPrimitive() ? input.box() : input;
     }
 
     @Override
@@ -100,25 +101,36 @@ public final class DialogueClassVisitor implements ClassNameVisitor {
     }
 
     @Override
-    public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
-        if (!types.containsKey(type)) {
-            throw new IllegalStateException("Unknown LocalReferenceType type: " + type);
+    public TypeName visitReference(com.palantir.conjure.spec.TypeName typeName) {
+        if (!types.containsKey(typeName)) {
+            throw new IllegalStateException("Unknown LocalReferenceType type: " + typeName);
         }
 
-        TypeDefinition def = types.get(type);
-        if (def.accept(TypeDefinitionVisitor.IS_ALIAS)) {
-            Type aliasType = def.accept(TypeDefinitionVisitor.ALIAS).getAlias();
-            TypeName aliasTypeName = aliasType.accept(this);
-            if (aliasTypeName.equals(visitPrimitive(PrimitiveType.BINARY))) {
-                return aliasTypeName;
+        Optional<Type> type = TypeFunctions.getAliasedType(typeName, types.values());
+        if (type.isPresent()) {
+            Type dealiased = dealiasBinary(type.get());
+            if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+                return dealiased.accept(this);
             }
         }
 
-        return delegate.visitReference(type);
+        return delegate.visitReference(typeName);
     }
 
     @Override
     public TypeName visitExternal(ExternalReference value) {
         return delegate.visitExternal(value);
+    }
+
+    private static TypeName box(TypeName input) {
+        return input.isPrimitive() ? input.box() : input;
+    }
+
+    private Type dealiasBinary(Type input) {
+        Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(input, types.values());
+        if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+            return dealiased;
+        }
+        return input;
     }
 }

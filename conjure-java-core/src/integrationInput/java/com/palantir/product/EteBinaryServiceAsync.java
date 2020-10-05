@@ -4,13 +4,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
-import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
-import com.palantir.dialogue.TypeMarker;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
@@ -49,7 +47,7 @@ public interface EteBinaryServiceAsync {
     /**
      * @apiNote {@code GET /binary/aliased}
      */
-    ListenableFuture<AliasOptionalDoubleAliasedBinaryResult> getAliased(AuthHeader authHeader);
+    ListenableFuture<Optional<InputStream>> getAliased(AuthHeader authHeader);
 
     /**
      * Creates an asynchronous/non-blocking client for a EteBinaryService service.
@@ -75,9 +73,6 @@ public interface EteBinaryServiceAsync {
 
             private final EndpointChannel getAliasedChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getAliased);
-
-            private final Deserializer<AliasOptionalDoubleAliasedBinaryResult> getAliasedDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<AliasOptionalDoubleAliasedBinaryResult>() {});
 
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {
@@ -140,10 +135,14 @@ public interface EteBinaryServiceAsync {
             }
 
             @Override
-            public ListenableFuture<AliasOptionalDoubleAliasedBinaryResult> getAliased(AuthHeader authHeader) {
+            public ListenableFuture<Optional<InputStream>> getAliased(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients().call(getAliasedChannel, _request.build(), getAliasedDeserializer);
+                return _runtime.clients()
+                        .call(
+                                getAliasedChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
