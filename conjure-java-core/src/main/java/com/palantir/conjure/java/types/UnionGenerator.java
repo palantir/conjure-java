@@ -142,7 +142,7 @@ public final class UnionGenerator {
             TypeMapper typeMapper, ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
         return memberTypeDefs.stream()
                 .map(memberTypeDef -> {
-                    FieldName memberName = memberTypeDef.getFieldName();
+                    FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
                     String variableName = variableName();
                     // memberName is guarded to be a valid Java identifier and not to end in an underscore, so this is
@@ -225,8 +225,8 @@ public final class UnionGenerator {
         return memberTypes.entrySet().stream()
                 .map(entry -> {
                     String variableName = variableName();
-                    return MethodSpec.methodBuilder(visitMethodName(
-                                    entry.getKey().getFieldName().get()))
+                    return MethodSpec.methodBuilder(visitMethodName(sanitizeUnknown(
+                                    entry.getKey().getFieldName().get())))
                             .addJavadoc(Javadoc.render(
                                             entry.getKey().getDocs(),
                                             entry.getKey().getDeprecated())
@@ -448,8 +448,8 @@ public final class UnionGenerator {
     private static Stream<NameTypePair> sortedStageNameTypePairs(Map<FieldDefinition, TypeName> memberTypes) {
         return Stream.concat(
                 memberTypes.entrySet().stream()
-                        .map(entry ->
-                                new NameTypePair(entry.getKey().getFieldName().get(), entry.getValue()))
+                        .map(entry -> new NameTypePair(
+                                sanitizeUnknown(entry.getKey().getFieldName().get()), entry.getValue()))
                         .sorted(Comparator.comparing(p -> p.memberName)),
                 Stream.of(NameTypePair.UNKNOWN));
     }
@@ -489,7 +489,9 @@ public final class UnionGenerator {
                             .addMember(
                                     "value",
                                     "$T.class",
-                                    peerWrapperClass(baseClass, entry.getKey().getFieldName()))
+                                    peerWrapperClass(
+                                            baseClass,
+                                            sanitizeUnknown(entry.getKey().getFieldName())))
                             .build())
                     .collect(Collectors.toList());
             AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
@@ -516,12 +518,13 @@ public final class UnionGenerator {
         return memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
-                    FieldName memberName = memberTypeDef.getFieldName();
+                    FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
                     ClassName wrapperClass = peerWrapperClass(baseClass, memberName);
 
                     AnnotationSpec jsonPropertyAnnotation = AnnotationSpec.builder(JsonProperty.class)
-                            .addMember("value", "$S", memberName.get())
+                            .addMember(
+                                    "value", "$S", memberTypeDef.getFieldName().get())
                             .build();
                     List<FieldSpec> fields = ImmutableList.of(
                             FieldSpec.builder(memberType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
@@ -531,7 +534,7 @@ public final class UnionGenerator {
                             .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                             .addSuperinterface(baseClass)
                             .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
-                                    .addMember("value", "$S", memberName.get())
+                                    .addMember("value", "$S", memberTypeDef.getFieldName())
                                     .build())
                             .addFields(fields)
                             .addMethod(MethodSpec.constructorBuilder()
@@ -695,6 +698,14 @@ public final class UnionGenerator {
 
     private static String variableName() {
         return "value";
+    }
+
+    private static String sanitizeUnknown(String input) {
+        return "unknown".equalsIgnoreCase(input) ? input + '_' : input;
+    }
+
+    private static FieldName sanitizeUnknown(FieldName input) {
+        return "unknown".equalsIgnoreCase(input.get()) ? FieldName.of(input.get() + '_') : input;
     }
 
     private UnionGenerator() {}

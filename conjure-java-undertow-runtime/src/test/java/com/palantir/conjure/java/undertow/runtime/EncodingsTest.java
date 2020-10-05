@@ -120,6 +120,8 @@ final class EncodingsTest {
         public static final class Builder {
             private String value;
 
+            private Builder() {}
+
             @JsonSetter("value")
             public Builder value(String val) {
                 this.value = Preconditions.checkNotNull(val, "value");

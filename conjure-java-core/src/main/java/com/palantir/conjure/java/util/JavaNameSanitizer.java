@@ -34,7 +34,13 @@ public final class JavaNameSanitizer {
 
     /** Sanitizes the given {@link FieldName} for use as a java specifier. */
     public static String sanitize(FieldName fieldName) {
-        String identifier = CaseConverter.toCase(fieldName.get(), CaseConverter.Case.LOWER_CAMEL_CASE);
+        String identifier = null;
+        try {
+            identifier = CaseConverter.toCase(fieldName.get(), CaseConverter.Case.LOWER_CAMEL_CASE);
+        } catch (IllegalArgumentException e) {
+            identifier =
+                    CaseConverter.Case.LOWER_CAMEL_CASE.convertTo(fieldName.get(), CaseConverter.Case.LOWER_CAMEL_CASE);
+        }
         return sanitizeFieldName(identifier);
     }
 

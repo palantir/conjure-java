@@ -71,6 +71,10 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new CompletedWrapper(value));
     }
 
+    public static UnionTypeExample unknown_(int value) {
+        return new UnionTypeExample(new Unknown_Wrapper(value));
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         return value.accept(visitor);
     }
@@ -114,6 +118,8 @@ public final class UnionTypeExample {
 
         T visitCompleted(int value);
 
+        T visitUnknown_(int value);
+
         T visitUnknown(String unknownType);
 
         static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
@@ -130,6 +136,7 @@ public final class UnionTypeExample {
                     SetStageVisitorBuilder<T>,
                     StringExampleStageVisitorBuilder<T>,
                     ThisFieldIsAnIntegerStageVisitorBuilder<T>,
+                    Unknown_StageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
                     Completed_StageVisitorBuilder<T> {
         private IntFunction<T> alsoAnIntegerVisitor;
@@ -147,6 +154,8 @@ public final class UnionTypeExample {
         private Function<StringExample, T> stringExampleVisitor;
 
         private IntFunction<T> thisFieldIsAnIntegerVisitor;
+
+        private IntFunction<T> unknown_Visitor;
 
         private Function<String, T> unknownVisitor;
 
@@ -201,9 +210,17 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(@Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor) {
+        public Unknown_StageVisitorBuilder<T> thisFieldIsAnInteger(
+                @Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor) {
             Preconditions.checkNotNull(thisFieldIsAnIntegerVisitor, "thisFieldIsAnIntegerVisitor cannot be null");
             this.thisFieldIsAnIntegerVisitor = thisFieldIsAnIntegerVisitor;
+            return this;
+        }
+
+        @Override
+        public UnknownStageVisitorBuilder<T> unknown_(@Nonnull IntFunction<T> unknown_Visitor) {
+            Preconditions.checkNotNull(unknown_Visitor, "unknown_Visitor cannot be null");
+            this.unknown_Visitor = unknown_Visitor;
             return this;
         }
 
@@ -224,6 +241,7 @@ public final class UnionTypeExample {
             final Function<Set<String>, T> setVisitor = this.setVisitor;
             final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
             final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
+            final IntFunction<T> unknown_Visitor = this.unknown_Visitor;
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
@@ -267,6 +285,11 @@ public final class UnionTypeExample {
                 }
 
                 @Override
+                public T visitUnknown_(int value) {
+                    return unknown_Visitor.apply(value);
+                }
+
+                @Override
                 public T visitUnknown(String value) {
                     return unknownVisitor.apply(value);
                 }
@@ -304,7 +327,11 @@ public final class UnionTypeExample {
     }
 
     public interface ThisFieldIsAnIntegerStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> thisFieldIsAnInteger(@Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor);
+        Unknown_StageVisitorBuilder<T> thisFieldIsAnInteger(@Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor);
+    }
+
+    public interface Unknown_StageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> unknown_(@Nonnull IntFunction<T> unknown_Visitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
@@ -324,7 +351,8 @@ public final class UnionTypeExample {
         @JsonSubTypes.Type(IfWrapper.class),
         @JsonSubTypes.Type(NewWrapper.class),
         @JsonSubTypes.Type(InterfaceWrapper.class),
-        @JsonSubTypes.Type(CompletedWrapper.class)
+        @JsonSubTypes.Type(CompletedWrapper.class),
+        @JsonSubTypes.Type(Unknown_Wrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
@@ -649,6 +677,46 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return "CompletedWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("unknown")
+    private static final class Unknown_Wrapper implements Base {
+        private final int value;
+
+        @JsonCreator
+        private Unknown_Wrapper(@JsonProperty("unknown") @Nonnull int value) {
+            Preconditions.checkNotNull(value, "unknown_ cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("unknown")
+        private int getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnknown_(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof Unknown_Wrapper && equalTo((Unknown_Wrapper) other));
+        }
+
+        private boolean equalTo(Unknown_Wrapper other) {
+            return this.value == other.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "Unknown_Wrapper{value: " + value + '}';
         }
     }
 
