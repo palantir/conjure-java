@@ -49,12 +49,16 @@ public final class Goethe {
             Path outputFile = getFilePath(file, baseDir);
             StringBuilder code = new StringBuilder();
             file.writeTo(code);
-
             CharSink sink = com.google.common.io.Files.asCharSink(outputFile.toFile(), StandardCharsets.UTF_8);
-            try {
-                JAVA_FORMATTER.formatSource(CharSource.wrap(code), sink);
-            } catch (FormatterException e) {
-                throw new RuntimeException(generateMessage(file, code.toString(), e.diagnostics()), e);
+            boolean noFormat = Boolean.parseBoolean(System.getenv("CONJURE_JAVA_NO_FORMAT"));
+            if (noFormat) {
+                sink.write(code);
+            } else {
+                try {
+                    JAVA_FORMATTER.formatSource(CharSource.wrap(code), sink);
+                } catch (FormatterException e) {
+                    throw new RuntimeException(generateMessage(file, code.toString(), e.diagnostics()), e);
+                }
             }
             return outputFile;
         } catch (IOException e) {
