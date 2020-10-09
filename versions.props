@@ -1,6 +1,5 @@
 ch.qos.logback:* = 1.2.3
 com.atlassian.commonmark:* = 0.12.1
-com.fasterxml.jackson.*:jackson-* = 2.11.1
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.errorprone:error_prone_annotations = 2.4.0
 com.palantir.javaformat:palantir-java-format = 1.0.1
@@ -36,3 +35,8 @@ org.junit.jupiter:* = 5.7.0
 org.junit.vintage:* = 5.4.2
 org.mockito:* = 3.5.13
 org.slf4j:* = 1.7.30
+
+# dependency-upgrader:OFF
+# Avoid forcing consumers to upgrade jackson
+com.fasterxml.jackson.*:jackson-* = 2.11.1
+# dependency-upgrader:ON
