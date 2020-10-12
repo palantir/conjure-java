@@ -186,25 +186,25 @@ public final class ConjureJavaCli implements Runnable {
             }
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
-                TypeGenerator typeGenerator = new ObjectGenerator(config.options());
-                ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.options());
-                ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.options());
-                ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.options());
-                ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options());
 
                 if (config.generateObjects()) {
+                    TypeGenerator typeGenerator = new ObjectGenerator(config.options());
                     typeGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
                 if (config.generateJersey()) {
+                    ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.options());
                     jerseyGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
                 if (config.generateRetrofit()) {
+                    ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.options());
                     retrofitGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
                 if (config.generateUndertow()) {
+                    ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.options());
                     undertowGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
                 if (config.generateDialogue()) {
+                    ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options());
                     dialogueServiceGenerator.emit(conjureDefinition, config.outputDirectory());
                 }
             } catch (IOException e) {
