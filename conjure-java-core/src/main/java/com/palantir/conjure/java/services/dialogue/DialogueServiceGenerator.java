@@ -18,14 +18,18 @@ package com.palantir.conjure.java.services.dialogue;
 
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerator;
+import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
-import com.palantir.conjure.java.visitor.DialogueClassVisitor;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
+import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -44,14 +48,18 @@ public final class DialogueServiceGenerator extends ServiceGenerator {
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
         DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options);
-
         TypeMapper parameterTypes = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new DialogueClassVisitor(conjureDefinition.getTypes(), options, DialogueClassVisitor.Mode.PARAMETER));
+                new SpecializeBinaryClassNameVisitor(
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), options),
+                        conjureDefinition.getTypes(),
+                        ClassName.get(BinaryRequestBody.class)));
         TypeMapper returnTypes = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new DialogueClassVisitor(
-                        conjureDefinition.getTypes(), options, DialogueClassVisitor.Mode.RETURN_VALUE));
+                new SpecializeBinaryClassNameVisitor(
+                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), options),
+                        conjureDefinition.getTypes(),
+                        ClassName.get(InputStream.class)));
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitionsByName =
                 conjureDefinition.getTypes().stream()
                         .collect(Collectors.toMap(

@@ -19,8 +19,8 @@ package com.palantir.conjure.java.services;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
-import com.palantir.conjure.java.types.ReturnTypeClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
@@ -82,15 +82,16 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
         TypeName optionalBinaryReturnType =
                 options.jerseyBinaryAsResponse() ? BINARY_RETURN_TYPE_RESPONSE : OPTIONAL_BINARY_RETURN_TYPE;
 
+        ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(conjureDefinition.getTypes(), options);
         TypeMapper returnTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
-                new ReturnTypeClassNameVisitor(
-                        conjureDefinition.getTypes(), binaryReturnType, optionalBinaryReturnType, options));
+                new SpecializeBinaryClassNameVisitor(
+                        defaultVisitor, conjureDefinition.getTypes(), binaryReturnType, optionalBinaryReturnType));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
                 conjureDefinition.getTypes(),
                 new SpecializeBinaryClassNameVisitor(
-                        new DefaultClassNameVisitor(conjureDefinition.getTypes(), options), BINARY_ARGUMENT_TYPE));
+                        defaultVisitor, conjureDefinition.getTypes(), BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))

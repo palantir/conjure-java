@@ -18,11 +18,17 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.types.ClassNameVisitor;
+import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,16 +43,17 @@ public final class UndertowServiceGenerator extends ServiceGenerator {
 
     @Override
     public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
+        ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(conjureDefinition.getTypes(), options);
+        ClassNameVisitor argumentVisitor = new SpecializeBinaryClassNameVisitor(
+                defaultVisitor, conjureDefinition.getTypes(), ClassName.get(InputStream.class));
+        ClassNameVisitor returnVisitor = new SpecializeBinaryClassNameVisitor(
+                defaultVisitor, conjureDefinition.getTypes(), ClassName.get(BinaryResponseBody.class));
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateService(
                         serviceDef,
                         conjureDefinition.getTypes(),
-                        new TypeMapper(
-                                conjureDefinition.getTypes(),
-                                new UndertowRequestBodyClassNameVisitor(conjureDefinition.getTypes(), options)),
-                        new TypeMapper(
-                                conjureDefinition.getTypes(),
-                                new UndertowReturnValueClassNameVisitor(conjureDefinition.getTypes(), options)))
+                        new TypeMapper(conjureDefinition.getTypes(), argumentVisitor),
+                        new TypeMapper(conjureDefinition.getTypes(), returnVisitor))
                         .stream())
                 .collect(Collectors.toSet());
     }
