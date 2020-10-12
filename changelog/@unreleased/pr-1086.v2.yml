@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: The java classes for conjure enums are now annotated with `@com.google.errorprone.annotations.Immutable`,
+    which ensures that if they're used inside hand-rolled enums, Google's [ImmutableEnumChecker](https://errorprone.info/bugpattern/ImmutableEnumChecker)
+    won't complain.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1086
