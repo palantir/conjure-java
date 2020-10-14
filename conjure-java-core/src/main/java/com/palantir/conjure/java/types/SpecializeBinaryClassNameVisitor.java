@@ -42,10 +42,11 @@ public final class SpecializeBinaryClassNameVisitor implements ClassNameVisitor 
             ClassNameVisitor delegate,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
             ClassName binaryClassName) {
-        this.delegate = delegate;
-        this.types = types;
-        this.binaryClassName = binaryClassName;
-        this.optionalBinaryTypeName = ParameterizedTypeName.get(ClassName.get(Optional.class), binaryClassName);
+        this(
+                delegate,
+                types,
+                binaryClassName,
+                ParameterizedTypeName.get(ClassName.get(Optional.class), binaryClassName));
     }
 
     public SpecializeBinaryClassNameVisitor(

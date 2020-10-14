@@ -52,29 +52,19 @@ public final class TypeFunctions {
             .put(PrimitiveType.Value.UUID, "Uuid")
             .build();
 
-    public static boolean isAliasType(Type type) {
-        return type.accept(new IsTypeVisitor() {
-            @Override
-            public Boolean visitReference(TypeName _value) {
-                return true;
-            }
-        });
+    public static boolean isReferenceType(Type type) {
+        return type.accept(IS_REFERENCE_VISITOR);
     }
 
     public static boolean isOptionalBinary(Type type) {
-        return type.accept(new IsTypeVisitor() {
-            @Override
-            public Boolean visitOptional(OptionalType value) {
-                return value.getItemType().accept(TypeVisitor.IS_BINARY);
-            }
-        });
+        return type.accept(IS_OPTIONAL_BINARY_VISITOR);
     }
 
     public static boolean isBinaryOrOptionalBinary(Type type) {
         return type.accept(TypeVisitor.IS_BINARY) || isOptionalBinary(type);
     }
 
-    public static boolean isCollectionType(Type type) {
+    public static boolean isListOrSet(Type type) {
         return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET);
     }
 
@@ -83,7 +73,7 @@ public final class TypeFunctions {
     // (reference) type.
     public static Type getAliasedType(Type type, Map<TypeName, TypeDefinition> typeDefinitions) {
         com.palantir.logsafe.Preconditions.checkArgument(
-                isAliasType(type), "Expected an alias", SafeArg.of("type", type));
+                isReferenceType(type), "Expected an alias", SafeArg.of("type", type));
         return getAliasedType(
                         type.accept(new AbstractTypeVisitor<TypeName>() {
                             @Override
@@ -189,6 +179,20 @@ public final class TypeFunctions {
         @Override
         public OptionalType visitOptional(OptionalType value) {
             return value;
+        }
+    };
+
+    public static final IsTypeVisitor IS_REFERENCE_VISITOR = new IsTypeVisitor() {
+        @Override
+        public Boolean visitReference(TypeName _value) {
+            return true;
+        }
+    };
+
+    public static final IsTypeVisitor IS_OPTIONAL_BINARY_VISITOR = new IsTypeVisitor() {
+        @Override
+        public Boolean visitOptional(OptionalType value) {
+            return value.getItemType().accept(TypeVisitor.IS_BINARY);
         }
     };
 

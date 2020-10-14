@@ -691,7 +691,7 @@ final class UndertowServiceHandlerGenerator {
                     final CodeBlock retrieveParam;
                     if (normalizedType.equals(arg.getType())
                             // Collections of alias types are handled the same way as external imports
-                            || TypeFunctions.isCollectionType(arg.getType())) {
+                            || TypeFunctions.isListOrSet(arg.getType())) {
                         // type is not an alias or optional of an alias
                         retrieveParam = decodePlainParameterCodeBlock(
                                 arg.getType(), typeMapper, paramName, paramsVarName, toParamId.apply(arg));
@@ -846,7 +846,7 @@ final class UndertowServiceHandlerGenerator {
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // current type is optional type: call isPresent
             return CodeBlock.of("$1N.isPresent()", varName);
-        } else if (TypeFunctions.isAliasType(inType)) {
+        } else if (TypeFunctions.isReferenceType(inType)) {
             // current type is an alias type: call "get()" to resolve alias and generate recursively on aliased type
             Type aliasedType = TypeFunctions.getAliasedType(inType, typeDefinitions);
             return createIsOptionalPresentCall(aliasedType, varName + ".get()", typeDefinitions);
