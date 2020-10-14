@@ -28,13 +28,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class ServiceGenerator {
 
     /** Returns the set of Java files generated from the service definitions in the given conjure specification. */
-    public abstract Set<JavaFile> generate(ConjureDefinition conjureDefinition);
+    public abstract List<JavaFile> generate(ConjureDefinition conjureDefinition);
 
     /**
      * Generates and emits to the given output directory all services and types of the given conjure definition, using

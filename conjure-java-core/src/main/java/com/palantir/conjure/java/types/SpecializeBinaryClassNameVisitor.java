@@ -28,18 +28,20 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public final class SpecializeBinaryClassNameVisitor implements ClassNameVisitor {
 
     private final ClassNameVisitor delegate;
-    private final List<TypeDefinition> types;
+    private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
     private final ClassName binaryClassName;
     private final TypeName optionalBinaryTypeName;
 
     public SpecializeBinaryClassNameVisitor(
-            ClassNameVisitor delegate, List<TypeDefinition> types, ClassName binaryClassName) {
+            ClassNameVisitor delegate,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
+            ClassName binaryClassName) {
         this.delegate = delegate;
         this.types = types;
         this.binaryClassName = binaryClassName;
@@ -48,7 +50,7 @@ public final class SpecializeBinaryClassNameVisitor implements ClassNameVisitor 
 
     public SpecializeBinaryClassNameVisitor(
             ClassNameVisitor delegate,
-            List<TypeDefinition> types,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
             ClassName binaryClassName,
             TypeName optionalBinaryTypeName) {
         this.delegate = delegate;

@@ -109,7 +109,7 @@ final class UndertowServiceHandlerGenerator {
 
     public JavaFile generateServiceHandler(
             ServiceDefinition serviceDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
         String serviceName = serviceDefinition.getServiceName().getName();
@@ -205,7 +205,7 @@ final class UndertowServiceHandlerGenerator {
             EndpointDefinition endpointDefinition,
             ServiceDefinition serviceDefinition,
             ClassName serviceClass,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
         MethodSpec.Builder handleMethodBuilder = MethodSpec.methodBuilder("handleRequest")
@@ -375,7 +375,7 @@ final class UndertowServiceHandlerGenerator {
 
     private CodeBlock endpointInvocation(
             EndpointDefinition endpointDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
         CodeBlock.Builder code = CodeBlock.builder();
@@ -452,7 +452,8 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock generateReturnValueCodeBlock(
-            EndpointDefinition endpointDefinition, List<TypeDefinition> typeDefinitions) {
+            EndpointDefinition endpointDefinition,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions) {
         CodeBlock.Builder code = CodeBlock.builder();
         if (endpointDefinition.getReturns().isPresent()) {
             Type returnType = endpointDefinition.getReturns().get();
@@ -571,7 +572,7 @@ final class UndertowServiceHandlerGenerator {
     private void addPathParamsCode(
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasPathArgument(endpointDefinition.getArgs())) {
             code.addStatement(
@@ -588,7 +589,7 @@ final class UndertowServiceHandlerGenerator {
     private void addHeaderParamsCode(
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasHeaderArgument(endpointDefinition.getArgs())) {
             code.addStatement(
@@ -603,7 +604,7 @@ final class UndertowServiceHandlerGenerator {
     private void addQueryParamsCode(
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasQueryArgument(endpointDefinition.getArgs())) {
             code.addStatement(
@@ -631,7 +632,9 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock generatePathParameterCodeBlock(
-            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+            EndpointDefinition endpoint,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_PATH,
@@ -642,7 +645,9 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock generateQueryParameterCodeBlock(
-            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+            EndpointDefinition endpoint,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_QUERY,
@@ -656,7 +661,9 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock generateHeaderParameterCodeBlock(
-            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+            EndpointDefinition endpoint,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_HEADER,
@@ -674,7 +681,7 @@ final class UndertowServiceHandlerGenerator {
             ParameterType.Visitor<Boolean> paramTypeVisitor,
             String paramsVarName,
             Function<ArgumentDefinition, String> toParamId,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         return CodeBlocks.of(endpoint.getArgs().stream()
                 .filter(param -> param.getParamType().accept(paramTypeVisitor))
@@ -835,7 +842,7 @@ final class UndertowServiceHandlerGenerator {
      * optional.
      */
     private static CodeBlock createIsOptionalPresentCall(
-            Type inType, String varName, List<TypeDefinition> typeDefinitions) {
+            Type inType, String varName, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions) {
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // current type is optional type: call isPresent
             return CodeBlock.of("$1N.isPresent()", varName);
@@ -862,7 +869,10 @@ final class UndertowServiceHandlerGenerator {
      * these rules (recursive definition).
      */
     private static CodeBlock createConstructorForTypeWithReference(
-            Type inType, String decodedVarName, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+            Type inType,
+            String decodedVarName,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper) {
         // "in" must be 1 of 2 types: optional<alias that resolves to a primitive> or alias
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // optional<alias that resolves to a primitive>

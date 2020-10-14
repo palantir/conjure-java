@@ -16,14 +16,14 @@
 
 package com.palantir.conjure.java.types;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.squareup.javapoet.JavaFile;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class ObjectGenerator implements TypeGenerator {
@@ -35,8 +35,8 @@ public final class ObjectGenerator implements TypeGenerator {
     }
 
     @Override
-    public Set<JavaFile> generateTypes(List<TypeDefinition> types) {
-        TypeMapper typeMapper = new TypeMapper(types, options);
+    public List<JavaFile> generateTypes(List<TypeDefinition> types) {
+        TypeMapper typeMapper = new TypeMapper(TypeFunctions.toTypesMap(types), options);
 
         return types.stream()
                 .map(typeDef -> {
@@ -55,16 +55,16 @@ public final class ObjectGenerator implements TypeGenerator {
                         throw new IllegalArgumentException("Unknown object definition type " + typeDef.getClass());
                     }
                 })
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Set<JavaFile> generateErrors(List<TypeDefinition> types, List<ErrorDefinition> errors) {
+    public List<JavaFile> generateErrors(List<TypeDefinition> types, List<ErrorDefinition> errors) {
         if (errors.isEmpty()) {
-            return ImmutableSet.of();
+            return ImmutableList.of();
         }
 
-        TypeMapper typeMapper = new TypeMapper(types, options);
+        TypeMapper typeMapper = new TypeMapper(TypeFunctions.toTypesMap(types), options);
         return ErrorGenerator.generateErrorTypes(typeMapper, errors, options);
     }
 }

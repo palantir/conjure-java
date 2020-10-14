@@ -19,6 +19,7 @@ package com.palantir.conjure.java.util;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.AliasDefinition;
+import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -27,19 +28,34 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.SafeArg;
-import java.util.Collection;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public final class TypeFunctions {
 
+    private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME = new ImmutableMap.Builder<
+                    PrimitiveType.Value, String>()
+            .put(PrimitiveType.Value.BEARERTOKEN, "BearerToken")
+            .put(PrimitiveType.Value.BOOLEAN, "Boolean")
+            .put(PrimitiveType.Value.DATETIME, "DateTime")
+            .put(PrimitiveType.Value.DOUBLE, "Double")
+            .put(PrimitiveType.Value.INTEGER, "Integer")
+            .put(PrimitiveType.Value.RID, "Rid")
+            .put(PrimitiveType.Value.SAFELONG, "SafeLong")
+            .put(PrimitiveType.Value.STRING, "String")
+            .put(PrimitiveType.Value.UUID, "Uuid")
+            .build();
+
     public static boolean isAliasType(Type type) {
         return type.accept(new IsTypeVisitor() {
             @Override
-            public Boolean visitReference(com.palantir.conjure.spec.TypeName _value) {
+            public Boolean visitReference(TypeName _value) {
                 return true;
             }
         });
@@ -65,14 +81,13 @@ public final class TypeFunctions {
     // Returns the type that the given alias type refers to. For example, if the input type is defined as
     // "alias: integer", the returned type will be the type for "integer". The provided type must be an alias
     // (reference) type.
-    public static Type getAliasedType(Type type, List<TypeDefinition> typeDefinitions) {
+    public static Type getAliasedType(Type type, Map<TypeName, TypeDefinition> typeDefinitions) {
         com.palantir.logsafe.Preconditions.checkArgument(
                 isAliasType(type), "Expected an alias", SafeArg.of("type", type));
         return getAliasedType(
-                        type.accept(new AbstractTypeVisitor<com.palantir.conjure.spec.TypeName>() {
+                        type.accept(new AbstractTypeVisitor<TypeName>() {
                             @Override
-                            public com.palantir.conjure.spec.TypeName visitReference(
-                                    com.palantir.conjure.spec.TypeName value) {
+                            public TypeName visitReference(TypeName value) {
                                 return value;
                             }
                         }),
@@ -80,37 +95,18 @@ public final class TypeFunctions {
                 .get();
     }
 
-    public static Optional<Type> getAliasedType(
-            com.palantir.conjure.spec.TypeName typeName, Collection<TypeDefinition> typeDefinitions) {
+    public static Optional<Type> getAliasedType(TypeName typeName, Map<TypeName, TypeDefinition> typeDefinitions) {
         // return type definition for the provided alias type
-        TypeDefinition typeDefinition = typeDefinitions.stream()
-                .filter(typeDef -> {
-                    com.palantir.conjure.spec.TypeName currName = typeDef.accept(TypeDefinitionVisitor.TYPE_NAME);
-                    String currClassName = currName.getPackage() + "." + currName.getName();
-                    return currClassName.equals(typeName.getPackage() + "." + typeName.getName());
-                })
-                .findFirst()
-                .get();
-
+        TypeDefinition typeDefinition = typeDefinitions.get(typeName);
+        if (typeDefinition == null) {
+            throw new SafeIllegalStateException("Failed to find definition for type", SafeArg.of("name", typeName));
+        }
         if (typeDefinition.accept(TypeDefinitionVisitor.IS_ALIAS)) {
             AliasDefinition aliasDefinition = typeDefinition.accept(TypeDefinitionVisitor.ALIAS);
             return Optional.of(aliasDefinition.getAlias());
         }
         return Optional.empty();
     }
-
-    private static final ImmutableMap<PrimitiveType.Value, String> PRIMITIVE_TO_TYPE_NAME = new ImmutableMap.Builder<
-                    PrimitiveType.Value, String>()
-            .put(PrimitiveType.Value.BEARERTOKEN, "BearerToken")
-            .put(PrimitiveType.Value.BOOLEAN, "Boolean")
-            .put(PrimitiveType.Value.DATETIME, "DateTime")
-            .put(PrimitiveType.Value.DOUBLE, "Double")
-            .put(PrimitiveType.Value.INTEGER, "Integer")
-            .put(PrimitiveType.Value.RID, "Rid")
-            .put(PrimitiveType.Value.SAFELONG, "SafeLong")
-            .put(PrimitiveType.Value.STRING, "String")
-            .put(PrimitiveType.Value.UUID, "Uuid")
-            .build();
 
     public static String primitiveTypeName(PrimitiveType in) {
         String typeName = PRIMITIVE_TO_TYPE_NAME.get(in.get());
@@ -120,7 +116,8 @@ public final class TypeFunctions {
         return typeName;
     }
 
-    public static Type toConjureTypeWithoutAliases(final Type in, final Collection<TypeDefinition> typeDefinitions) {
+    public static Type toConjureTypeWithoutAliases(
+            final Type in, final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions) {
         return in.accept(new Type.Visitor<Type>() {
             @Override
             public Type visitPrimitive(PrimitiveType _value) {
@@ -151,7 +148,7 @@ public final class TypeFunctions {
             }
 
             @Override
-            public Type visitReference(com.palantir.conjure.spec.TypeName value) {
+            public Type visitReference(TypeName value) {
                 return getAliasedType(value, typeDefinitions)
                         .map(aliasedType -> toConjureTypeWithoutAliases(aliasedType, typeDefinitions))
                         .orElse(in);
@@ -167,6 +164,18 @@ public final class TypeFunctions {
                 return in;
             }
         });
+    }
+
+    public static Map<com.palantir.conjure.spec.TypeName, TypeDefinition> toTypesMap(ConjureDefinition definition) {
+        return toTypesMap(definition.getTypes());
+    }
+
+    public static Map<com.palantir.conjure.spec.TypeName, TypeDefinition> toTypesMap(
+            List<TypeDefinition> typeDefinitions) {
+        ImmutableMap.Builder<com.palantir.conjure.spec.TypeName, TypeDefinition> builder =
+                ImmutableMap.builderWithExpectedSize(typeDefinitions.size());
+        typeDefinitions.forEach(def -> builder.put(def.accept(TypeDefinitionVisitor.TYPE_NAME), def));
+        return builder.build();
     }
 
     public static final GetTypeVisitor<PrimitiveType> PRIMITIVE_VISITOR = new GetTypeVisitor<PrimitiveType>() {

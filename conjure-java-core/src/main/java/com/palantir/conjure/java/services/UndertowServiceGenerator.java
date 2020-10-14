@@ -23,14 +23,16 @@ import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class UndertowServiceGenerator extends ServiceGenerator {
@@ -42,25 +44,23 @@ public final class UndertowServiceGenerator extends ServiceGenerator {
     }
 
     @Override
-    public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(conjureDefinition.getTypes(), options);
-        ClassNameVisitor argumentVisitor = new SpecializeBinaryClassNameVisitor(
-                defaultVisitor, conjureDefinition.getTypes(), ClassName.get(InputStream.class));
-        ClassNameVisitor returnVisitor = new SpecializeBinaryClassNameVisitor(
-                defaultVisitor, conjureDefinition.getTypes(), ClassName.get(BinaryResponseBody.class));
+    public List<JavaFile> generate(ConjureDefinition conjureDefinition) {
+        Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
+        ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
+        ClassNameVisitor argumentVisitor =
+                new SpecializeBinaryClassNameVisitor(defaultVisitor, types, ClassName.get(InputStream.class));
+        ClassNameVisitor returnVisitor =
+                new SpecializeBinaryClassNameVisitor(defaultVisitor, types, ClassName.get(BinaryResponseBody.class));
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> generateService(
-                        serviceDef,
-                        conjureDefinition.getTypes(),
-                        new TypeMapper(conjureDefinition.getTypes(), argumentVisitor),
-                        new TypeMapper(conjureDefinition.getTypes(), returnVisitor))
+                        serviceDef, types, new TypeMapper(types, argumentVisitor), new TypeMapper(types, returnVisitor))
                         .stream())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     private List<JavaFile> generateService(
             ServiceDefinition serviceDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
         return ImmutableList.of(

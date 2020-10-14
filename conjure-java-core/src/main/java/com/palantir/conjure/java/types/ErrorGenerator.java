@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,7 +50,7 @@ public final class ErrorGenerator {
 
     private ErrorGenerator() {}
 
-    public static Set<JavaFile> generateErrorTypes(
+    public static List<JavaFile> generateErrorTypes(
             TypeMapper typeMapper, List<ErrorDefinition> errorTypeNameToDef, Options options) {
         return splitErrorDefsByNamespace(errorTypeNameToDef).entrySet().stream()
                 .flatMap(entry -> entry.getValue().entrySet().stream()
@@ -60,7 +59,7 @@ public final class ErrorGenerator {
                                 Packages.getPrefixedPackage(entry.getKey(), options.packagePrefix()),
                                 innerEntry.getKey(),
                                 innerEntry.getValue())))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     private static Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> splitErrorDefsByNamespace(

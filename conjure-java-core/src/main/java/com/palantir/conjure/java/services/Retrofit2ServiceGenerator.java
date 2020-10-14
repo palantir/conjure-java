@@ -28,6 +28,7 @@ import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
 import com.palantir.conjure.spec.AuthType;
@@ -37,6 +38,7 @@ import com.palantir.conjure.spec.HttpPath;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.util.syntacticpath.Path;
@@ -52,6 +54,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -83,21 +86,20 @@ public final class Retrofit2ServiceGenerator extends ServiceGenerator {
     }
 
     @Override
-    public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(conjureDefinition.getTypes(), options);
+    public List<JavaFile> generate(ConjureDefinition conjureDefinition) {
+        Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
+        ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
         TypeMapper returnTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(),
+                types,
                 new SpecializeBinaryClassNameVisitor(
-                        defaultVisitor, conjureDefinition.getTypes(), BINARY_RETURN_TYPE, OPTIONAL_BINARY_RETURN_TYPE));
+                        defaultVisitor, types, BINARY_RETURN_TYPE, OPTIONAL_BINARY_RETURN_TYPE));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
-                conjureDefinition.getTypes(),
-                new SpecializeBinaryClassNameVisitor(
-                        defaultVisitor, conjureDefinition.getTypes(), BINARY_ARGUMENT_TYPE));
+                types, new SpecializeBinaryClassNameVisitor(defaultVisitor, types, BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
                 .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     private JavaFile generateService(
