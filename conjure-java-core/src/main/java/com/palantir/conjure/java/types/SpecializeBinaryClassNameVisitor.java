@@ -88,7 +88,7 @@ public final class SpecializeBinaryClassNameVisitor implements ClassNameVisitor 
 
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName typeName) {
-        return TypeFunctions.getAliasedType(typeName, types)
+        return TypeFunctions.getReferencedType(typeName, types)
                 .flatMap(this::dealiasBinary)
                 .map(value -> value.accept(SpecializeBinaryClassNameVisitor.this))
                 .orElseGet(() -> delegate.visitReference(typeName));

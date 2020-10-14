@@ -848,7 +848,7 @@ final class UndertowServiceHandlerGenerator {
             return CodeBlock.of("$1N.isPresent()", varName);
         } else if (TypeFunctions.isReferenceType(inType)) {
             // current type is an alias type: call "get()" to resolve alias and generate recursively on aliased type
-            Type aliasedType = TypeFunctions.getAliasedType(inType, typeDefinitions);
+            Type aliasedType = TypeFunctions.getReferencedType(inType, typeDefinitions);
             return createIsOptionalPresentCall(aliasedType, varName + ".get()", typeDefinitions);
         } else {
             throw new IllegalArgumentException("inType must be either an optional or alias type, was " + inType);
@@ -892,7 +892,7 @@ final class UndertowServiceHandlerGenerator {
             //   * optional<primitive>
             //   * optional<alias that resolves to a primitive>
             //   * alias that follows one of these rules (recursive definition)
-            Type aliasedType = TypeFunctions.getAliasedType(inType, typeDefinitions);
+            Type aliasedType = TypeFunctions.getReferencedType(inType, typeDefinitions);
             if (aliasedType.accept(TypeVisitor.IS_PRIMITIVE) || aliasedType.accept(MoreVisitors.IS_EXTERNAL)) {
                 // primitive
                 ofContent = CodeBlock.of("$1N", decodedVarName);

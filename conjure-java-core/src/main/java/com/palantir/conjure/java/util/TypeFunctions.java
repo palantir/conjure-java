@@ -68,13 +68,13 @@ public final class TypeFunctions {
         return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET);
     }
 
-    // Returns the type that the given alias type refers to. For example, if the input type is defined as
+    // Returns the type that the given reference type refers to. For example, if the input type is defined as
     // "alias: integer", the returned type will be the type for "integer". The provided type must be an alias
     // (reference) type.
-    public static Type getAliasedType(Type type, Map<TypeName, TypeDefinition> typeDefinitions) {
+    public static Type getReferencedType(Type type, Map<TypeName, TypeDefinition> typeDefinitions) {
         com.palantir.logsafe.Preconditions.checkArgument(
-                isReferenceType(type), "Expected an alias", SafeArg.of("type", type));
-        return getAliasedType(
+                isReferenceType(type), "Expected a reference", SafeArg.of("type", type));
+        return getReferencedType(
                         type.accept(new AbstractTypeVisitor<TypeName>() {
                             @Override
                             public TypeName visitReference(TypeName value) {
@@ -85,7 +85,7 @@ public final class TypeFunctions {
                 .get();
     }
 
-    public static Optional<Type> getAliasedType(TypeName typeName, Map<TypeName, TypeDefinition> typeDefinitions) {
+    public static Optional<Type> getReferencedType(TypeName typeName, Map<TypeName, TypeDefinition> typeDefinitions) {
         // return type definition for the provided alias type
         TypeDefinition typeDefinition = typeDefinitions.get(typeName);
         if (typeDefinition == null) {
@@ -139,7 +139,7 @@ public final class TypeFunctions {
 
             @Override
             public Type visitReference(TypeName value) {
-                return getAliasedType(value, typeDefinitions)
+                return getReferencedType(value, typeDefinitions)
                         .map(aliasedType -> toConjureTypeWithoutAliases(aliasedType, typeDefinitions))
                         .orElse(in);
             }
