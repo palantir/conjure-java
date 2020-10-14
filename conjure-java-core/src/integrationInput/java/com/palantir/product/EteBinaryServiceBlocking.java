@@ -46,6 +46,11 @@ public interface EteBinaryServiceBlocking {
     InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
 
     /**
+     * @apiNote {@code GET /binary/aliased}
+     */
+    Optional<InputStream> getAliased(AuthHeader authHeader);
+
+    /**
      * Creates a synchronous/blocking client for a EteBinaryService service.
      */
     static EteBinaryServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -74,6 +79,11 @@ public interface EteBinaryServiceBlocking {
             @Override
             public InputStream getBinaryFailure(AuthHeader authHeader, int numBytes) {
                 return _runtime.clients().block(delegate.getBinaryFailure(authHeader, numBytes));
+            }
+
+            @Override
+            public Optional<InputStream> getAliased(AuthHeader authHeader) {
+                return _runtime.clients().block(delegate.getAliased(authHeader));
             }
 
             @Override

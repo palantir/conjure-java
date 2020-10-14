@@ -24,14 +24,12 @@ import com.squareup.javapoet.JavaFile;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 public interface TypeGenerator {
 
-    default Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
-        Set<JavaFile> files = new LinkedHashSet<>();
+    default List<JavaFile> generate(ConjureDefinition conjureDefinition) {
+        List<JavaFile> files = new ArrayList<>(conjureDefinition.getTypes().size());
 
         // Generate java files for type definitions
         generateTypes(conjureDefinition.getTypes()).forEach(files::add);
@@ -56,7 +54,7 @@ public interface TypeGenerator {
         return emittedPaths;
     }
 
-    Set<JavaFile> generateTypes(List<TypeDefinition> types);
+    List<JavaFile> generateTypes(List<TypeDefinition> types);
 
-    Set<JavaFile> generateErrors(List<TypeDefinition> types, List<ErrorDefinition> errors);
+    List<JavaFile> generateErrors(List<TypeDefinition> types, List<ErrorDefinition> errors);
 }

@@ -22,7 +22,6 @@ import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 import test.prefix.com.palantir.product.AliasedString;
 import test.prefix.com.palantir.product.CreateDatasetRequest;
-import test.prefix.com.palantir.product.NestedAliasedBinary;
 import test.prefix.com.palantir.product.datasets.BackingFileSystem;
 import test.prefix.com.palantir.product.datasets.Dataset;
 
@@ -83,7 +82,7 @@ public interface TestServiceRetrofit {
     @POST("./catalog/datasets/upload-raw-aliased")
     @Headers({"hr-path-template: /catalog/datasets/upload-raw-aliased", "Accept: application/json"})
     ListenableFuture<Void> uploadAliasedRawData(
-            @Header("Authorization") AuthHeader authHeader, @Body NestedAliasedBinary input);
+            @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
 
     /**
      * @param datasetRid A valid dataset resource identifier.

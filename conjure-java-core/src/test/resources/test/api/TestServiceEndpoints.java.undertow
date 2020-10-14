@@ -9,7 +9,6 @@ import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
-import com.palantir.product.NestedAliasedBinary;
 import com.palantir.product.datasets.BackingFileSystem;
 import com.palantir.product.datasets.Dataset;
 import com.palantir.ri.ResourceIdentifier;
@@ -277,12 +276,9 @@ public final class TestServiceEndpoints implements UndertowService {
 
         private final TestService delegate;
 
-        private final Serializer<NestedAliasedBinary> serializer;
-
         GetAliasedRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<NestedAliasedBinary>() {});
         }
 
         @Override
@@ -292,8 +288,8 @@ public final class TestServiceEndpoints implements UndertowService {
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
             runtime.markers().param("com.palantir.redaction.Safe", "datasetRid", datasetRid, exchange);
-            NestedAliasedBinary result = delegate.getAliasedRawData(authHeader, datasetRid);
-            serializer.serialize(result, exchange);
+            BinaryResponseBody result = delegate.getAliasedRawData(authHeader, datasetRid);
+            runtime.bodySerDe().serialize(result, exchange);
         }
 
         @Override
@@ -474,18 +470,15 @@ public final class TestServiceEndpoints implements UndertowService {
 
         private final TestService delegate;
 
-        private final Deserializer<NestedAliasedBinary> deserializer;
-
         UploadAliasedRawDataEndpoint(UndertowRuntime runtime, TestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<NestedAliasedBinary>() {});
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
-            NestedAliasedBinary input = deserializer.deserialize(exchange);
+            InputStream input = runtime.bodySerDe().deserializeInputStream(exchange);
             delegate.uploadAliasedRawData(authHeader, input);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }

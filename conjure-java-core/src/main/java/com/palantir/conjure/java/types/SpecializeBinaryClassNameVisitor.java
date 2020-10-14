@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,60 +16,99 @@
 
 package com.palantir.conjure.java.types;
 
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
+import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.spec.TypeDefinition;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import java.util.Map;
+import java.util.Optional;
 
 public final class SpecializeBinaryClassNameVisitor implements ClassNameVisitor {
 
     private final ClassNameVisitor delegate;
-    private final TypeName binaryClassName;
+    private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
+    private final ClassName binaryClassName;
+    private final TypeName optionalBinaryTypeName;
 
-    public SpecializeBinaryClassNameVisitor(ClassNameVisitor delegate, TypeName binaryClassName) {
+    public SpecializeBinaryClassNameVisitor(
+            ClassNameVisitor delegate,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
+            ClassName binaryClassName) {
+        this(
+                delegate,
+                types,
+                binaryClassName,
+                ParameterizedTypeName.get(ClassName.get(Optional.class), binaryClassName));
+    }
+
+    public SpecializeBinaryClassNameVisitor(
+            ClassNameVisitor delegate,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types,
+            ClassName binaryClassName,
+            TypeName optionalBinaryTypeName) {
         this.delegate = delegate;
+        this.types = types;
         this.binaryClassName = binaryClassName;
+        this.optionalBinaryTypeName = optionalBinaryTypeName;
     }
 
     @Override
-    public TypeName visitPrimitive(PrimitiveType value) {
-        if (value.get() == PrimitiveType.Value.BINARY) {
+    public TypeName visitList(ListType type) {
+        return delegate.visitList(type);
+    }
+
+    @Override
+    public TypeName visitMap(MapType type) {
+        return delegate.visitMap(type);
+    }
+
+    @Override
+    public TypeName visitOptional(OptionalType type) {
+        return dealiasBinary(type.getItemType())
+                .map(_ignored -> optionalBinaryTypeName)
+                .orElseGet(() -> delegate.visitOptional(type));
+    }
+
+    @Override
+    public TypeName visitPrimitive(PrimitiveType type) {
+        if (type.get() == PrimitiveType.Value.BINARY) {
             return binaryClassName;
         } else {
-            return delegate.visitPrimitive(value);
+            return delegate.visitPrimitive(type);
         }
     }
 
     @Override
-    public TypeName visitOptional(OptionalType value) {
-        return delegate.visitOptional(value);
+    public TypeName visitReference(com.palantir.conjure.spec.TypeName typeName) {
+        return TypeFunctions.getReferencedType(typeName, types)
+                .flatMap(this::dealiasBinary)
+                .map(value -> value.accept(SpecializeBinaryClassNameVisitor.this))
+                .orElseGet(() -> delegate.visitReference(typeName));
     }
 
     @Override
-    public TypeName visitList(ListType value) {
-        return delegate.visitList(value);
+    public TypeName visitExternal(ExternalReference type) {
+        return delegate.visitExternal(type);
     }
 
     @Override
-    public TypeName visitSet(SetType value) {
-        return delegate.visitSet(value);
+    public TypeName visitSet(SetType type) {
+        return delegate.visitSet(type);
     }
 
-    @Override
-    public TypeName visitMap(MapType value) {
-        return delegate.visitMap(value);
-    }
-
-    @Override
-    public TypeName visitReference(com.palantir.conjure.spec.TypeName value) {
-        return delegate.visitReference(value);
-    }
-
-    @Override
-    public TypeName visitExternal(ExternalReference value) {
-        return delegate.visitExternal(value);
+    private Optional<Type> dealiasBinary(Type input) {
+        Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(input, types);
+        if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+            return Optional.of(dealiased);
+        }
+        return Optional.empty();
     }
 }

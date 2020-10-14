@@ -35,6 +35,7 @@ import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -108,7 +109,7 @@ final class UndertowServiceHandlerGenerator {
 
     public JavaFile generateServiceHandler(
             ServiceDefinition serviceDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
         String serviceName = serviceDefinition.getServiceName().getName();
@@ -204,7 +205,7 @@ final class UndertowServiceHandlerGenerator {
             EndpointDefinition endpointDefinition,
             ServiceDefinition serviceDefinition,
             ClassName serviceClass,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
         MethodSpec.Builder handleMethodBuilder = MethodSpec.methodBuilder("handleRequest")
@@ -240,7 +241,10 @@ final class UndertowServiceHandlerGenerator {
         getBodyParamTypeArgument(endpointDefinition.getArgs())
                 .map(ArgumentDefinition::getType)
                 // Filter out binary data
-                .flatMap(type -> type.accept(TypeVisitor.IS_BINARY) ? Optional.empty() : Optional.of(type))
+                .flatMap(type -> {
+                    Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(type, typeDefinitions);
+                    return TypeFunctions.isBinaryOrOptionalBinary(dealiased) ? Optional.empty() : Optional.of(type);
+                })
                 .map(typeMapper::getClassName)
                 .map(TypeName::box)
                 .map(this::immutableCollection)
@@ -257,7 +261,8 @@ final class UndertowServiceHandlerGenerator {
                 });
 
         endpointDefinition.getReturns().ifPresent(returnType -> {
-            if (!UndertowTypeFunctions.isOptionalBinary(returnType) && !returnType.accept(TypeVisitor.IS_BINARY)) {
+            Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
+            if (!TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                 TypeName typeName = returnTypeMapper.getClassName(returnType).box();
                 TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
                 endpointBuilder.addField(FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
@@ -370,7 +375,7 @@ final class UndertowServiceHandlerGenerator {
 
     private CodeBlock endpointInvocation(
             EndpointDefinition endpointDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
             TypeMapper returnTypeMapper) {
         CodeBlock.Builder code = CodeBlock.builder();
@@ -381,8 +386,8 @@ final class UndertowServiceHandlerGenerator {
         // body parameter
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
             String paramName = sanitizeVarName(bodyParam.getArgName().get(), endpointDefinition);
-            if (bodyParam.getType().accept(TypeVisitor.IS_BINARY)) {
-                // TODO(ckozak): Support aliased and optional binary types
+            Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(bodyParam.getType(), typeDefinitions);
+            if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                 code.addStatement(
                         "$1T $2N = $3N.bodySerDe().deserializeInputStream($4N)",
                         InputStream.class,
@@ -447,36 +452,45 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock generateReturnValueCodeBlock(
-            EndpointDefinition endpointDefinition, List<TypeDefinition> typeDefinitions) {
+            EndpointDefinition endpointDefinition,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions) {
         CodeBlock.Builder code = CodeBlock.builder();
         if (endpointDefinition.getReturns().isPresent()) {
             Type returnType = endpointDefinition.getReturns().get();
             // optional<> handling
-            // TODO(ckozak): Support aliased binary types
-            if (UndertowTypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions)
-                    .accept(TypeVisitor.IS_OPTIONAL)) {
-                CodeBlock serializer = UndertowTypeFunctions.isOptionalBinary(returnType)
-                        ? CodeBlock.builder()
-                                .add(
-                                        "$1N.bodySerDe().serialize($2N.get(), $3N)",
-                                        RUNTIME_VAR_NAME,
-                                        RESULT_VAR_NAME,
-                                        EXCHANGE_VAR_NAME)
-                                .build()
-                        : CodeBlock.builder()
-                                .add("$1N.serialize($2N, $3N)", SERIALIZER_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME)
-                                .build();
+            Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
+            if (dealiased.accept(TypeVisitor.IS_OPTIONAL)) {
+                CodeBlock serializer;
+                if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
+                    serializer = CodeBlock.builder()
+                            .add(
+                                    dealiased.accept(TypeVisitor.IS_BINARY)
+                                            ? "$1N.bodySerDe().serialize($2N, $3N)"
+                                            : "$1N.bodySerDe().serialize($2N.get(), $3N)",
+                                    RUNTIME_VAR_NAME,
+                                    RESULT_VAR_NAME,
+                                    EXCHANGE_VAR_NAME)
+                            .build();
+                } else {
+                    serializer = CodeBlock.builder()
+                            .add("$1N.serialize($2N, $3N)", SERIALIZER_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME)
+                            .build();
+                }
                 // For optional<>: set response code to 204/NO_CONTENT if result is absent
                 code.add(CodeBlock.builder()
                         .beginControlFlow(
-                                "if ($1L)", createIsOptionalPresentCall(returnType, RESULT_VAR_NAME, typeDefinitions))
+                                "if ($1L)",
+                                createIsOptionalPresentCall(
+                                        TypeFunctions.isBinaryOrOptionalBinary(dealiased) ? dealiased : returnType,
+                                        RESULT_VAR_NAME,
+                                        typeDefinitions))
                         .addStatement(serializer)
                         .nextControlFlow("else")
                         .addStatement("$1N.setStatusCode($2T.NO_CONTENT)", EXCHANGE_VAR_NAME, StatusCodes.class)
                         .endControlFlow()
                         .build());
             } else {
-                if (returnType.accept(TypeVisitor.IS_BINARY)) {
+                if (dealiased.accept(TypeVisitor.IS_BINARY)) {
                     code.addStatement(
                             "$1N.bodySerDe().serialize($2N, $3N)",
                             RUNTIME_VAR_NAME,
@@ -558,7 +572,7 @@ final class UndertowServiceHandlerGenerator {
     private void addPathParamsCode(
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasPathArgument(endpointDefinition.getArgs())) {
             code.addStatement(
@@ -575,7 +589,7 @@ final class UndertowServiceHandlerGenerator {
     private void addHeaderParamsCode(
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasHeaderArgument(endpointDefinition.getArgs())) {
             code.addStatement(
@@ -590,7 +604,7 @@ final class UndertowServiceHandlerGenerator {
     private void addQueryParamsCode(
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasQueryArgument(endpointDefinition.getArgs())) {
             code.addStatement(
@@ -618,7 +632,9 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock generatePathParameterCodeBlock(
-            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+            EndpointDefinition endpoint,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_PATH,
@@ -629,7 +645,9 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock generateQueryParameterCodeBlock(
-            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+            EndpointDefinition endpoint,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_QUERY,
@@ -643,7 +661,9 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock generateHeaderParameterCodeBlock(
-            EndpointDefinition endpoint, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+            EndpointDefinition endpoint,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_HEADER,
@@ -661,18 +681,17 @@ final class UndertowServiceHandlerGenerator {
             ParameterType.Visitor<Boolean> paramTypeVisitor,
             String paramsVarName,
             Function<ArgumentDefinition, String> toParamId,
-            List<TypeDefinition> typeDefinitions,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         return CodeBlocks.of(endpoint.getArgs().stream()
                 .filter(param -> param.getParamType().accept(paramTypeVisitor))
                 .map(arg -> {
-                    Type normalizedType =
-                            UndertowTypeFunctions.toConjureTypeWithoutAliases(arg.getType(), typeDefinitions);
+                    Type normalizedType = TypeFunctions.toConjureTypeWithoutAliases(arg.getType(), typeDefinitions);
                     String paramName = sanitizeVarName(arg.getArgName().get(), endpoint);
                     final CodeBlock retrieveParam;
                     if (normalizedType.equals(arg.getType())
                             // Collections of alias types are handled the same way as external imports
-                            || UndertowTypeFunctions.isCollectionType(arg.getType())) {
+                            || TypeFunctions.isListOrSet(arg.getType())) {
                         // type is not an alias or optional of an alias
                         retrieveParam = decodePlainParameterCodeBlock(
                                 arg.getType(), typeMapper, paramName, paramsVarName, toParamId.apply(arg));
@@ -823,13 +842,13 @@ final class UndertowServiceHandlerGenerator {
      * optional.
      */
     private static CodeBlock createIsOptionalPresentCall(
-            Type inType, String varName, List<TypeDefinition> typeDefinitions) {
+            Type inType, String varName, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions) {
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // current type is optional type: call isPresent
             return CodeBlock.of("$1N.isPresent()", varName);
-        } else if (UndertowTypeFunctions.isAliasType(inType)) {
+        } else if (TypeFunctions.isReferenceType(inType)) {
             // current type is an alias type: call "get()" to resolve alias and generate recursively on aliased type
-            Type aliasedType = UndertowTypeFunctions.getAliasedType(inType, typeDefinitions);
+            Type aliasedType = TypeFunctions.getReferencedType(inType, typeDefinitions);
             return createIsOptionalPresentCall(aliasedType, varName + ".get()", typeDefinitions);
         } else {
             throw new IllegalArgumentException("inType must be either an optional or alias type, was " + inType);
@@ -850,7 +869,10 @@ final class UndertowServiceHandlerGenerator {
      * these rules (recursive definition).
      */
     private static CodeBlock createConstructorForTypeWithReference(
-            Type inType, String decodedVarName, List<TypeDefinition> typeDefinitions, TypeMapper typeMapper) {
+            Type inType,
+            String decodedVarName,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
+            TypeMapper typeMapper) {
         // "in" must be 1 of 2 types: optional<alias that resolves to a primitive> or alias
         if (inType.accept(TypeVisitor.IS_OPTIONAL)) {
             // optional<alias that resolves to a primitive>
@@ -870,7 +892,7 @@ final class UndertowServiceHandlerGenerator {
             //   * optional<primitive>
             //   * optional<alias that resolves to a primitive>
             //   * alias that follows one of these rules (recursive definition)
-            Type aliasedType = UndertowTypeFunctions.getAliasedType(inType, typeDefinitions);
+            Type aliasedType = TypeFunctions.getReferencedType(inType, typeDefinitions);
             if (aliasedType.accept(TypeVisitor.IS_PRIMITIVE) || aliasedType.accept(MoreVisitors.IS_EXTERNAL)) {
                 // primitive
                 ofContent = CodeBlock.of("$1N", decodedVarName);
@@ -899,14 +921,12 @@ final class UndertowServiceHandlerGenerator {
 
     private static String deserializeFunctionName(Type type) {
         if (type.accept(TypeVisitor.IS_PRIMITIVE)) {
-            return "deserialize"
-                    + UndertowTypeFunctions.primitiveTypeName(type.accept(UndertowTypeFunctions.PRIMITIVE_VISITOR));
+            return "deserialize" + TypeFunctions.primitiveTypeName(type.accept(TypeFunctions.PRIMITIVE_VISITOR));
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)
                 && type.accept(TypeVisitor.OPTIONAL).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
-            PrimitiveType innerPrimitiveType = type.accept(UndertowTypeFunctions.OPTIONAL_VISITOR)
-                    .getItemType()
-                    .accept(UndertowTypeFunctions.PRIMITIVE_VISITOR);
-            return "deserializeOptional" + UndertowTypeFunctions.primitiveTypeName(innerPrimitiveType);
+            PrimitiveType innerPrimitiveType =
+                    type.accept(TypeFunctions.OPTIONAL_VISITOR).getItemType().accept(TypeFunctions.PRIMITIVE_VISITOR);
+            return "deserializeOptional" + TypeFunctions.primitiveTypeName(innerPrimitiveType);
         } else if (type.accept(TypeVisitor.IS_LIST)
                 && type.accept(TypeVisitor.LIST).getItemType().accept(TypeVisitor.IS_PRIMITIVE)) {
             Type subtype = type.accept(TypeVisitor.LIST).getItemType();

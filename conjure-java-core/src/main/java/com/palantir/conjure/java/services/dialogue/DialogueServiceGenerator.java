@@ -18,16 +18,22 @@ package com.palantir.conjure.java.services.dialogue;
 
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.ServiceGenerator;
+import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
-import com.palantir.conjure.java.visitor.DialogueClassVisitor;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
+import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,16 +48,19 @@ public final class DialogueServiceGenerator extends ServiceGenerator {
     }
 
     @Override
-    public Set<JavaFile> generate(ConjureDefinition conjureDefinition) {
+    public List<JavaFile> generate(ConjureDefinition conjureDefinition) {
+        Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options);
-
         TypeMapper parameterTypes = new TypeMapper(
-                conjureDefinition.getTypes(),
-                new DialogueClassVisitor(conjureDefinition.getTypes(), options, DialogueClassVisitor.Mode.PARAMETER));
+                types,
+                new SpecializeBinaryClassNameVisitor(
+                        new DefaultClassNameVisitor(types.keySet(), options),
+                        types,
+                        ClassName.get(BinaryRequestBody.class)));
         TypeMapper returnTypes = new TypeMapper(
-                conjureDefinition.getTypes(),
-                new DialogueClassVisitor(
-                        conjureDefinition.getTypes(), options, DialogueClassVisitor.Mode.RETURN_VALUE));
+                types,
+                new SpecializeBinaryClassNameVisitor(
+                        new DefaultClassNameVisitor(types.keySet(), options), types, ClassName.get(InputStream.class)));
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitionsByName =
                 conjureDefinition.getTypes().stream()
                         .collect(Collectors.toMap(
@@ -70,12 +79,10 @@ public final class DialogueServiceGenerator extends ServiceGenerator {
                 options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
 
         return conjureDefinition.getServices().stream()
-                .flatMap(serviceDef -> {
-                    return Stream.of(
-                            endpoints.endpointsClass(serviceDef),
-                            interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
-                            interfaceGenerator.generateAsync(serviceDef, asyncGenerator));
-                })
-                .collect(Collectors.toSet());
+                .flatMap(serviceDef -> Stream.of(
+                        endpoints.endpointsClass(serviceDef),
+                        interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
+                        interfaceGenerator.generateAsync(serviceDef, asyncGenerator)))
+                .collect(Collectors.toList());
     }
 }

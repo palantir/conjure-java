@@ -19,26 +19,22 @@ package com.palantir.conjure.java.types;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
-import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.squareup.javapoet.TypeName;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public final class TypeMapper {
 
     private final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types;
     private final ClassNameVisitor classNameVisitor;
 
-    public TypeMapper(List<TypeDefinition> types, Options options) {
-        this(types, new DefaultClassNameVisitor(types, options));
+    public TypeMapper(Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types, Options options) {
+        this(types, new DefaultClassNameVisitor(types.keySet(), options));
     }
 
-    public TypeMapper(List<TypeDefinition> types, ClassNameVisitor classNameVisitor) {
-        this.types = types.stream()
-                .collect(Collectors.toMap(t -> t.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
+    public TypeMapper(
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types, ClassNameVisitor classNameVisitor) {
+        this.types = types;
         this.classNameVisitor = classNameVisitor;
     }
 

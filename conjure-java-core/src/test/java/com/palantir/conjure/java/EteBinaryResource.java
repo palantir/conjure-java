@@ -71,4 +71,9 @@ final class EteBinaryResource implements EteBinaryService {
             throw new SafeRuntimeException("failure");
         };
     }
+
+    @Override
+    public Optional<StreamingOutput> getAliased(@NotNull AuthHeader authHeader) {
+        return Optional.empty();
+    }
 }

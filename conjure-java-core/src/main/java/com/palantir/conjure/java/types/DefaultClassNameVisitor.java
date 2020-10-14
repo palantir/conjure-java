@@ -26,8 +26,6 @@ import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
-import com.palantir.conjure.spec.TypeDefinition;
-import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
@@ -36,13 +34,11 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Maps the conjure type into the 'standard' java type i.e. the type one would use in beans/normal variables (as opposed
@@ -50,13 +46,11 @@ import java.util.stream.Collectors;
  */
 public final class DefaultClassNameVisitor implements ClassNameVisitor {
 
-    private final Set<com.palantir.conjure.spec.TypeName> typesByName;
+    private final Set<com.palantir.conjure.spec.TypeName> typeNames;
     private final Options options;
 
-    public DefaultClassNameVisitor(List<TypeDefinition> types, Options options) {
-        this.typesByName = types.stream()
-                .map(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME))
-                .collect(Collectors.toSet());
+    public DefaultClassNameVisitor(Set<com.palantir.conjure.spec.TypeName> typeNames, Options options) {
+        this.typeNames = typeNames;
         this.options = options;
     }
 
@@ -144,7 +138,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     @Override
     public TypeName visitReference(com.palantir.conjure.spec.TypeName type) {
         // Types without namespace are either defined locally in this conjure definition, or raw imports.
-        if (typesByName.contains(type)) {
+        if (typeNames.contains(type)) {
             return ClassName.get(
                     Packages.getPrefixedPackage(type.getPackage(), options.packagePrefix()), type.getName());
         } else {

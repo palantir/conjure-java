@@ -168,5 +168,35 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
         public String version() {
             return "1.2.3";
         }
+    },
+
+    getAliased {
+        private final PathTemplate pathTemplate =
+                PathTemplate.builder().fixed("binary").fixed("aliased").build();
+
+        @Override
+        public void renderPath(Map<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteBinaryService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getAliased";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
     }
 }

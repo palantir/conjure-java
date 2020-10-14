@@ -45,6 +45,11 @@ public interface EteBinaryServiceAsync {
     ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes);
 
     /**
+     * @apiNote {@code GET /binary/aliased}
+     */
+    ListenableFuture<Optional<InputStream>> getAliased(AuthHeader authHeader);
+
+    /**
      * Creates an asynchronous/non-blocking client for a EteBinaryService service.
      */
     static EteBinaryServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -65,6 +70,9 @@ public interface EteBinaryServiceAsync {
 
             private final EndpointChannel getBinaryFailureChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getBinaryFailure);
+
+            private final EndpointChannel getAliasedChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getAliased);
 
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {
@@ -124,6 +132,17 @@ public interface EteBinaryServiceAsync {
                                 getBinaryFailureChannel,
                                 _request.build(),
                                 _runtime.bodySerDe().inputStreamDeserializer());
+            }
+
+            @Override
+            public ListenableFuture<Optional<InputStream>> getAliased(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .call(
+                                getAliasedChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
