@@ -61,10 +61,8 @@ public final class DialogueServiceGenerator extends ServiceGenerator {
                 types,
                 new SpecializeBinaryClassNameVisitor(
                         new DefaultClassNameVisitor(types.keySet(), options), types, ClassName.get(InputStream.class)));
-        Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitionsByName =
-                conjureDefinition.getTypes().stream()
-                        .collect(Collectors.toMap(
-                                type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
+        Map<TypeName, TypeDefinition> typeDefinitionsByName = conjureDefinition.getTypes().stream()
+                .collect(Collectors.toMap(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
 
         DialogueInterfaceGenerator interfaceGenerator = new DialogueInterfaceGenerator(
                 options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));

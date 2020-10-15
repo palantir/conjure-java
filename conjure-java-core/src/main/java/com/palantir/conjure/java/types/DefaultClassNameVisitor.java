@@ -157,7 +157,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     @Override
     public TypeName visitSet(SetType type) {
         TypeName itemType = type.getItemType().accept(this).box();
-        return ParameterizedTypeName.get(ClassName.get(java.util.Set.class), itemType);
+        return ParameterizedTypeName.get(ClassName.get(Set.class), itemType);
     }
 
     @Override

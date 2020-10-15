@@ -206,7 +206,7 @@ public final class ErrorGenerator {
     private static void processArg(
             TypeMapper typeMapper, MethodSpec.Builder methodBuilder, FieldDefinition argDefinition, boolean isSafe) {
         String argName = argDefinition.getFieldName().get();
-        com.squareup.javapoet.TypeName argType = typeMapper.getClassName(argDefinition.getType());
+        TypeName argType = typeMapper.getClassName(argDefinition.getType());
         methodBuilder.addParameter(argType, argName);
         Class<?> clazz = isSafe ? SafeArg.class : UnsafeArg.class;
         methodBuilder.addCode(",\n    $T.of($S, $L)", clazz, argName, argName);
