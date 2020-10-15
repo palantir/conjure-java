@@ -276,8 +276,8 @@ public final class BeanGenerator {
         ParameterizedTypeName listOfStringType = ParameterizedTypeName.get(List.class, String.class);
         ParameterSpec listParam =
                 ParameterSpec.builder(listOfStringType, "prev").build();
-        ParameterSpec fieldValueParam = ParameterSpec.builder(com.squareup.javapoet.TypeName.OBJECT, "fieldValue")
-                .build();
+        ParameterSpec fieldValueParam =
+                ParameterSpec.builder(TypeName.OBJECT, "fieldValue").build();
         ParameterSpec fieldNameParam =
                 ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
 
@@ -306,7 +306,7 @@ public final class BeanGenerator {
                 .build();
     }
 
-    private static com.squareup.javapoet.TypeName getTypeNameWithoutOptional(FieldSpec spec) {
+    private static TypeName getTypeNameWithoutOptional(FieldSpec spec) {
         if (!isOptional(spec)) {
             return spec.type;
         }

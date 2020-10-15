@@ -106,8 +106,7 @@ public final class TypeFunctions {
         return typeName;
     }
 
-    public static Type toConjureTypeWithoutAliases(
-            final Type in, final Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions) {
+    public static Type toConjureTypeWithoutAliases(final Type in, final Map<TypeName, TypeDefinition> typeDefinitions) {
         return in.accept(new Type.Visitor<Type>() {
             @Override
             public Type visitPrimitive(PrimitiveType _value) {
@@ -156,13 +155,12 @@ public final class TypeFunctions {
         });
     }
 
-    public static Map<com.palantir.conjure.spec.TypeName, TypeDefinition> toTypesMap(ConjureDefinition definition) {
+    public static Map<TypeName, TypeDefinition> toTypesMap(ConjureDefinition definition) {
         return toTypesMap(definition.getTypes());
     }
 
-    public static Map<com.palantir.conjure.spec.TypeName, TypeDefinition> toTypesMap(
-            List<TypeDefinition> typeDefinitions) {
-        ImmutableMap.Builder<com.palantir.conjure.spec.TypeName, TypeDefinition> builder =
+    public static Map<TypeName, TypeDefinition> toTypesMap(List<TypeDefinition> typeDefinitions) {
+        ImmutableMap.Builder<TypeName, TypeDefinition> builder =
                 ImmutableMap.builderWithExpectedSize(typeDefinitions.size());
         typeDefinitions.forEach(def -> builder.put(def.accept(TypeDefinitionVisitor.TYPE_NAME), def));
         return builder.build();
