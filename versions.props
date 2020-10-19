@@ -33,7 +33,7 @@ org.immutables:value = 2.8.8
 org.javassist:javassist = 3.22.0-GA
 org.junit.jupiter:* = 5.7.0
 org.junit.vintage:* = 5.7.0
-org.mockito:* = 3.5.13
+org.mockito:* = 3.5.15
 org.slf4j:* = 1.7.30
 
 # dependency-upgrader:OFF
