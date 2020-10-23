@@ -71,10 +71,13 @@ public final class Bytes {
 
     @Override
     public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = Arrays.hashCode(safe);
+        // same implementation as java.lang.String except Arrays.hashCode(new byte[0]) == 1 so no length check.
+        int hash = hashCode;
+        if (hash == 0) {
+            hash = Arrays.hashCode(safe);
+            hashCode = hash;
         }
-        return hashCode;
+        return hash;
     }
 
     @Override
