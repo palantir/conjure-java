@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: cache hashcode in Bytes
+  links:
+  - https://github.com/palantir/conjure-java/pull/1132
