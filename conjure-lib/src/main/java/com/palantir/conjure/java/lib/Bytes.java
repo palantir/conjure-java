@@ -35,6 +35,7 @@ import java.util.Arrays;
 @JsonDeserialize(using = Bytes.Deserializer.class)
 public final class Bytes {
     private final byte[] safe;
+    private int hashCode;
 
     /** Constructs a new {@link Bytes} assuming the provided array is not held by any other class. */
     private Bytes(byte[] array) {
@@ -70,7 +71,10 @@ public final class Bytes {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(safe);
+        if (hashCode == 0) {
+            hashCode = Arrays.hashCode(safe);
+        }
+        return hashCode;
     }
 
     @Override
