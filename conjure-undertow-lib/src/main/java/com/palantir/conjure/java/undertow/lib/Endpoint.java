@@ -16,10 +16,13 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.logsafe.Preconditions;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -60,6 +63,11 @@ public interface Endpoint {
         return Optional.empty();
     }
 
+    /** Endpoint tags corresponding to the endpoint definition. */
+    default List<String> tags() {
+        return Collections.emptyList();
+    }
+
     static Builder builder() {
         return new Builder();
     }
@@ -74,6 +82,7 @@ public interface Endpoint {
         private String serviceName;
         private String name;
         private Optional<String> deprecated = Optional.empty();
+        private ImmutableList<String> tags = ImmutableList.of();
 
         @CanIgnoreReturnValue
         public Builder method(HttpString value) {
@@ -112,6 +121,12 @@ public interface Endpoint {
         }
 
         @CanIgnoreReturnValue
+        public Builder tags(Iterable<String> value) {
+            tags = ImmutableList.copyOf(Preconditions.checkNotNull(value, "tags are required"));
+            return this;
+        }
+
+        @CanIgnoreReturnValue
         public Builder from(Endpoint endpoint) {
             method = endpoint.method();
             template = endpoint.template();
@@ -119,6 +134,7 @@ public interface Endpoint {
             serviceName = endpoint.serviceName();
             name = endpoint.name();
             deprecated = endpoint.deprecated();
+            tags = ImmutableList.copyOf(endpoint.tags());
             return this;
         }
 
@@ -158,6 +174,11 @@ public interface Endpoint {
                 @Override
                 public Optional<String> deprecated() {
                     return deprecated;
+                }
+
+                @Override
+                public List<String> tags() {
+                    return tags;
                 }
             };
         }

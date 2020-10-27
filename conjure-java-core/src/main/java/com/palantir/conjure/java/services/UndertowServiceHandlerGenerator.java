@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.services;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -238,6 +239,8 @@ final class UndertowServiceHandlerGenerator {
                 .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
 
+        addTags(endpointDefinition, endpointBuilder);
+
         getBodyParamTypeArgument(endpointDefinition.getArgs())
                 .map(ArgumentDefinition::getType)
                 // Filter out binary data
@@ -345,6 +348,28 @@ final class UndertowServiceHandlerGenerator {
                         .build()));
 
         return endpointBuilder.build();
+    }
+
+    private static void addTags(EndpointDefinition endpointDefinition, TypeSpec.Builder endpointBuilder) {
+        if (!endpointDefinition.getTags().isEmpty()) {
+            CodeBlock arrayValues = CodeBlock.join(
+                    Collections2.transform(endpointDefinition.getTags(), value -> CodeBlock.of("$S", value)), ", ");
+            endpointBuilder.addField(FieldSpec.builder(
+                            ParameterizedTypeName.get(List.class, String.class),
+                            "TAGS",
+                            Modifier.PRIVATE,
+                            Modifier.STATIC,
+                            Modifier.FINAL)
+                    .initializer(CodeBlock.of(
+                            "$T.unmodifiableList($T.asList(" + arrayValues + "))", Collections.class, Arrays.class))
+                    .build());
+            endpointBuilder.addMethod(MethodSpec.methodBuilder("tags")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .returns(ParameterizedTypeName.get(List.class, String.class))
+                    .addStatement("return TAGS")
+                    .build());
+        }
     }
 
     private static final ClassName LIST_NAME = ClassName.get(List.class);
