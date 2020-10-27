@@ -79,6 +79,8 @@ public final class EteServiceEndpoints implements UndertowService {
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
+        private static final List<String> TAGS = Collections.unmodifiableList(Arrays.asList("bar", "foo"));
+
         private final UndertowRuntime runtime;
 
         private final UndertowEteService delegate;
@@ -89,6 +91,11 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public List<String> tags() {
+            return TAGS;
         }
 
         @Override
