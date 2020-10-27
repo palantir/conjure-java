@@ -110,7 +110,7 @@ final class EncodingsTest {
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return Objects.hashCode(value);
         }
 
         public static Builder builder() {
