@@ -83,6 +83,8 @@ public final class AsyncMarkersEndpoints implements UndertowService {
     }
 
     private static final class AsyncTagEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private static final List<String> TAGS = Collections.unmodifiableList(Arrays.asList("server-async"));
+
         private final UndertowRuntime runtime;
 
         private final AsyncMarkers delegate;
@@ -93,6 +95,11 @@ public final class AsyncMarkersEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public List<String> tags() {
+            return TAGS;
         }
 
         @Override
