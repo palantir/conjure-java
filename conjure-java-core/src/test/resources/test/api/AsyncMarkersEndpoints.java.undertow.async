@@ -31,18 +31,20 @@ public final class AsyncMarkersEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(
-                Arrays.asList(new AsyncEndpoint(runtime, delegate), new SyncEndpoint(runtime, delegate)));
+        return Collections.unmodifiableList(Arrays.asList(
+                new AsyncMarkerEndpoint(runtime, delegate),
+                new AsyncTagEndpoint(runtime, delegate),
+                new SyncEndpoint(runtime, delegate)));
     }
 
-    private static final class AsyncEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+    private static final class AsyncMarkerEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
         private final UndertowRuntime runtime;
 
         private final AsyncMarkers delegate;
 
         private final Serializer<String> serializer;
 
-        AsyncEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
+        AsyncMarkerEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
@@ -50,7 +52,7 @@ public final class AsyncMarkersEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            ListenableFuture<String> result = delegate.async();
+            ListenableFuture<String> result = delegate.asyncMarker();
             runtime.async().register(result, this, exchange);
         }
 
@@ -66,7 +68,7 @@ public final class AsyncMarkersEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/async";
+            return "/async/marker";
         }
 
         @Override
@@ -76,7 +78,64 @@ public final class AsyncMarkersEndpoints implements UndertowService {
 
         @Override
         public String name() {
-            return "async";
+            return "asyncMarker";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class AsyncTagEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private static final List<String> TAGS = Collections.unmodifiableList(Arrays.asList("server-async"));
+
+        private final UndertowRuntime runtime;
+
+        private final AsyncMarkers delegate;
+
+        private final Serializer<String> serializer;
+
+        AsyncTagEndpoint(UndertowRuntime runtime, AsyncMarkers delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public List<String> tags() {
+            return TAGS;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            ListenableFuture<String> result = delegate.asyncTag();
+            runtime.async().register(result, this, exchange);
+        }
+
+        @Override
+        public void write(String result, HttpServerExchange exchange) throws IOException {
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/async/tag";
+        }
+
+        @Override
+        public String serviceName() {
+            return "AsyncMarkers";
+        }
+
+        @Override
+        public String name() {
+            return "asyncTag";
         }
 
         @Override

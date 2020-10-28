@@ -11,11 +11,16 @@ services:
     package: test.api
     name: Async Endpoint Test
     endpoints:
-      async:
-        http: GET /async
+      asyncMarker:
+        http: GET /async/marker
         returns: string
         markers:
           - Async
+      asyncTag:
+        http: GET /async/tag
+        returns: string
+        tags:
+          - server-async
       sync:
         http: GET /sync
         returns: string
