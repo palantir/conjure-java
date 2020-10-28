@@ -21,7 +21,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MoreCollectors;
+import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
@@ -76,6 +78,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -83,7 +86,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -402,8 +404,7 @@ final class UndertowServiceHandlerGenerator {
                         DESERIALIZER_VAR_NAME,
                         EXCHANGE_VAR_NAME);
             }
-            code.add(generateParamMarkers(
-                    bodyParam.getMarkers(), bodyParam.getArgName().get(), paramName, typeMapper));
+            code.add(generateParamMetadata(bodyParam, bodyParam.getArgName().get(), paramName, typeMapper));
         });
 
         // path parameters
@@ -420,7 +421,7 @@ final class UndertowServiceHandlerGenerator {
         methodArgs.addAll(ParameterOrder.sorted(endpointDefinition.getArgs()).stream()
                 .map(arg -> arg.getArgName().get())
                 .map(arg -> sanitizeVarName(arg, endpointDefinition))
-                .collect(Collectors.toList()));
+                .collect(ImmutableList.toImmutableList()));
 
         boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, options);
         if (async || endpointDefinition.getReturns().isPresent()) {
@@ -509,21 +510,36 @@ final class UndertowServiceHandlerGenerator {
         return code.build();
     }
 
-    private CodeBlock generateParamMarkers(
-            List<Type> markers,
+    private CodeBlock generateParamMetadata(
+            ArgumentDefinition argument, String paramName, String variableName, TypeMapper typeMapper) {
+        Set<String> mergedTags = Streams.concat(
+                        argument.getMarkers().stream().map(marker -> typeMapper
+                                .getClassName(marker)
+                                .box()
+                                .withoutAnnotations()
+                                .toString()),
+                        argument.getTags().stream())
+                .collect(ImmutableSet.toImmutableSet());
+        return generateParamTags(mergedTags, paramName, variableName);
+    }
+
+    private CodeBlock generateParamTags(
+            Collection<String> tags,
             String paramName,
-            // Variable may be sanitized
-            String variableName,
-            TypeMapper typeMapper) {
-        return CodeBlocks.of(markers.stream()
+            // Variable may be sanitized and does not necessarily match the paramName.
+            // For example paramName may be 'int' where the variable name would be
+            // sanitized to 'int_'.
+            String variableName) {
+        ConjureTags.validateTags(tags);
+        return CodeBlocks.of(tags.stream()
                 .map(marker -> CodeBlock.of(
                         "$1N.markers().param($2S, $3S, $4N, $5N);",
                         RUNTIME_VAR_NAME,
-                        typeMapper.getClassName(marker).box(),
+                        marker,
                         paramName,
                         variableName,
                         EXCHANGE_VAR_NAME))
-                .collect(Collectors.toList()));
+                .collect(ImmutableList.toImmutableList()));
     }
 
     // Adds code for authorization. Returns an optional that contains the name of the variable that contains the
@@ -710,10 +726,9 @@ final class UndertowServiceHandlerGenerator {
                     }
                     return CodeBlocks.of(
                             retrieveParam,
-                            generateParamMarkers(
-                                    arg.getMarkers(), arg.getArgName().get(), paramName, typeMapper));
+                            generateParamMetadata(arg, arg.getArgName().get(), paramName, typeMapper));
                 })
-                .collect(Collectors.toList()));
+                .collect(ImmutableList.toImmutableList()));
     }
 
     private CodeBlock decodePlainParameterCodeBlock(

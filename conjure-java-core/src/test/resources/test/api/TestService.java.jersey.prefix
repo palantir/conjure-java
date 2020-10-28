@@ -1,6 +1,6 @@
 package test.prefix.com.palantir.another;
 
-import com.palantir.redaction.Safe;
+import com.palantir.logsafe.Safe;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;

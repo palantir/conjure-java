@@ -2,7 +2,7 @@ types:
   imports:
     Safe:
       external:
-        java: com.palantir.redaction.Safe
+        java: com.palantir.logsafe.Safe
 
     Nonnull:
       external:
@@ -115,8 +115,8 @@ services:
         args:
           datasetRid:
             type: rid
-            markers:
-             - Safe
+            tags:
+             - safe
         returns: AliasedString
 
       uploadRawData:
