@@ -17,7 +17,9 @@
 package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
@@ -54,7 +56,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.lang.model.element.Modifier;
@@ -278,7 +279,10 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
                 typeMapper.getClassName(def.getType()), def.getArgName().get());
         if (withAnnotations) {
             getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
-            param.addAnnotations(createMarkers(typeMapper, def.getMarkers()));
+            param.addAnnotations(ImmutableSet.<AnnotationSpec>builder()
+                    .addAll(createMarkers(typeMapper, def.getMarkers()))
+                    .addAll(ConjureTags.tagAnnotations(def))
+                    .build());
         }
         return param.build();
     }
@@ -345,7 +349,7 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
         return Optional.of(annotationSpecBuilder.build());
     }
 
-    private static Set<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
+    private static List<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
         Preconditions.checkArgument(
                 markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
                 "Markers must refer to reference types.");
@@ -354,7 +358,7 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
                 .map(ClassName.class::cast)
                 .map(AnnotationSpec::builder)
                 .map(AnnotationSpec.Builder::build)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     private static ClassName httpMethodToClassName(String method) {
