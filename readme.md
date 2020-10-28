@@ -239,8 +239,17 @@ implemented synchronously by replacing `return object` with `return Futures.imme
 Asynchronous request processing decouples the HTTP request lifecycle from server task threads, allowing you to replace
 waiting on shared resources with callbacks, reducing the number of required threads.
 
-This feature is enabled using:
+This feature is enabled on individual endpoints using the `server-async` endpoint tag:
 
+```yaml
+getEvents:
+  http: GET /events
+  returns: list<Event>
+  tags:
+    - server-async
+```
+
+Or for all endpoints using the `undertowListenableFutures` generator flag:
 ```groovy
 conjure {
     java {

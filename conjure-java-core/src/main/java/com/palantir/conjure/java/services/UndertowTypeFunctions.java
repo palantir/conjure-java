@@ -28,9 +28,10 @@ import com.squareup.javapoet.ParameterizedTypeName;
 final class UndertowTypeFunctions {
 
     /**
-     * Asynchronous-processing capable endpoints are generated if either of the following are true.
+     * Asynchronous-processing capable endpoints are generated if any of the following are true.
      *
      * <ul>
+     *   <li>The {@link EndpointDefinition} is {@link EndpointDefinition#getTags() tagged} with {@code server-async}
      *   <li>The {@link Options#undertowListenableFutures()} is set
      *   <li>Experimental: Both {@link Options#experimentalUndertowAsyncMarkers()} is set and
      *       {@link EndpointDefinition#getMarkers()} contains an imported annotation with name
@@ -42,7 +43,8 @@ final class UndertowTypeFunctions {
         return options.undertowListenableFutures()
                 || (options.experimentalUndertowAsyncMarkers()
                         && endpoint.getMarkers().stream()
-                                .anyMatch(marker -> marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)));
+                                .anyMatch(marker -> marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE)))
+                || endpoint.getTags().contains("server-async");
     }
 
     static ParameterizedTypeName getAsyncReturnType(EndpointDefinition endpoint, TypeMapper mapper, Options flags) {
