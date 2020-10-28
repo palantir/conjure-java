@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Undertow Endpoints provide tags when defined
+  links:
+  - https://github.com/palantir/conjure-java/pull/1145
