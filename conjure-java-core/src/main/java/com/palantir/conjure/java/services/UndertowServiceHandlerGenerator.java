@@ -510,8 +510,9 @@ final class UndertowServiceHandlerGenerator {
         return code.build();
     }
 
-    private CodeBlock generateParamMetadata(
+    private static CodeBlock generateParamMetadata(
             ArgumentDefinition argument, String paramName, String variableName, TypeMapper typeMapper) {
+        ConjureTags.validateTags(argument);
         Set<String> mergedTags = Streams.concat(
                         argument.getMarkers().stream().map(marker -> typeMapper
                                 .getClassName(marker)
@@ -523,14 +524,13 @@ final class UndertowServiceHandlerGenerator {
         return generateParamTags(mergedTags, paramName, variableName);
     }
 
-    private CodeBlock generateParamTags(
+    private static CodeBlock generateParamTags(
             Collection<String> tags,
             String paramName,
             // Variable may be sanitized and does not necessarily match the paramName.
             // For example paramName may be 'int' where the variable name would be
             // sanitized to 'int_'.
             String variableName) {
-        ConjureTags.validateTags(tags);
         return CodeBlocks.of(tags.stream()
                 .map(marker -> CodeBlock.of(
                         "$1N.markers().param($2S, $3S, $4N, $5N);",
