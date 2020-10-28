@@ -1,0 +1,9 @@
+type: improvement
+improvement:
+  description: Support conjure tags in place of cumbersome java annotation-based markers.
+    The `safe` and `unsafe` tags are supported by the Jersey generator. The Undertow
+    generator passe through the simpler value to the underlying ParamMarker which
+    has internally been updated to support `safe` in addition to `com.palantir.logsafe.Safe`.
+    The undertow `Async` annotation can be replaced by the `server-async` tag.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1144
