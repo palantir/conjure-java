@@ -16,14 +16,14 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.logsafe.Preconditions;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * An {@link Endpoint} represents a single rpc method. End points provide a location, tuple of {@link Endpoint#method()}
@@ -64,8 +64,8 @@ public interface Endpoint {
     }
 
     /** Endpoint tags corresponding to the endpoint definition. */
-    default List<String> tags() {
-        return Collections.emptyList();
+    default Set<String> tags() {
+        return Collections.emptySet();
     }
 
     static Builder builder() {
@@ -82,7 +82,7 @@ public interface Endpoint {
         private String serviceName;
         private String name;
         private Optional<String> deprecated = Optional.empty();
-        private ImmutableList<String> tags = ImmutableList.of();
+        private ImmutableSet<String> tags = ImmutableSet.of();
 
         @CanIgnoreReturnValue
         public Builder method(HttpString value) {
@@ -122,7 +122,7 @@ public interface Endpoint {
 
         @CanIgnoreReturnValue
         public Builder tags(Iterable<String> value) {
-            tags = ImmutableList.copyOf(Preconditions.checkNotNull(value, "tags are required"));
+            tags = ImmutableSet.copyOf(Preconditions.checkNotNull(value, "tags are required"));
             return this;
         }
 
@@ -134,7 +134,7 @@ public interface Endpoint {
             serviceName = endpoint.serviceName();
             name = endpoint.name();
             deprecated = endpoint.deprecated();
-            tags = ImmutableList.copyOf(endpoint.tags());
+            tags = ImmutableSet.copyOf(endpoint.tags());
             return this;
         }
 
@@ -177,7 +177,7 @@ public interface Endpoint {
                 }
 
                 @Override
-                public List<String> tags() {
+                public Set<String> tags() {
                     return tags;
                 }
             };

@@ -77,7 +77,7 @@ public final class EteServiceEndpoints implements UndertowService {
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
-        private static final ImmutableList<String> TAGS = ImmutableList.of("bar", "foo");
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("bar", "foo");
 
         private final UndertowRuntime runtime;
 
@@ -92,7 +92,7 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public List<String> tags() {
+        public Set<String> tags() {
             return TAGS;
         }
 

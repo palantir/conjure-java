@@ -351,17 +351,17 @@ final class UndertowServiceHandlerGenerator {
             CodeBlock arrayValues = CodeBlock.join(
                     Collections2.transform(endpointDefinition.getTags(), value -> CodeBlock.of("$S", value)), ", ");
             endpointBuilder.addField(FieldSpec.builder(
-                            ParameterizedTypeName.get(ImmutableList.class, String.class),
+                            ParameterizedTypeName.get(ImmutableSet.class, String.class),
                             "TAGS",
                             Modifier.PRIVATE,
                             Modifier.STATIC,
                             Modifier.FINAL)
-                    .initializer(CodeBlock.of("$T.of($L)", ImmutableList.class, arrayValues))
+                    .initializer(CodeBlock.of("$T.of($L)", ImmutableSet.class, arrayValues))
                     .build());
             endpointBuilder.addMethod(MethodSpec.methodBuilder("tags")
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override.class)
-                    .returns(ParameterizedTypeName.get(List.class, String.class))
+                    .returns(ParameterizedTypeName.get(Set.class, String.class))
                     .addStatement("return TAGS")
                     .build());
         }
