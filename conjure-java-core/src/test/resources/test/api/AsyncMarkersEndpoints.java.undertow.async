@@ -1,5 +1,6 @@
 package test.api;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
@@ -88,7 +89,7 @@ public final class AsyncMarkersEndpoints implements UndertowService {
     }
 
     private static final class AsyncTagEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
-        private static final List<String> TAGS = Collections.unmodifiableList(Arrays.asList("server-async"));
+        private static final ImmutableList<String> TAGS = ImmutableList.of("server-async");
 
         private final UndertowRuntime runtime;
 

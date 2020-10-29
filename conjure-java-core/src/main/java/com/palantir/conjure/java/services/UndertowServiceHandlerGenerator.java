@@ -357,13 +357,12 @@ final class UndertowServiceHandlerGenerator {
             CodeBlock arrayValues = CodeBlock.join(
                     Collections2.transform(endpointDefinition.getTags(), value -> CodeBlock.of("$S", value)), ", ");
             endpointBuilder.addField(FieldSpec.builder(
-                            ParameterizedTypeName.get(List.class, String.class),
+                            ParameterizedTypeName.get(ImmutableList.class, String.class),
                             "TAGS",
                             Modifier.PRIVATE,
                             Modifier.STATIC,
                             Modifier.FINAL)
-                    .initializer(CodeBlock.of(
-                            "$T.unmodifiableList($T.asList(" + arrayValues + "))", Collections.class, Arrays.class))
+                    .initializer(CodeBlock.of("$T.of($L)", ImmutableList.class, arrayValues))
                     .build());
             endpointBuilder.addMethod(MethodSpec.methodBuilder("tags")
                     .addModifiers(Modifier.PUBLIC)

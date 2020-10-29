@@ -79,7 +79,7 @@ public final class EteServiceEndpoints implements UndertowService {
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
-        private static final List<String> TAGS = Collections.unmodifiableList(Arrays.asList("bar", "foo"));
+        private static final ImmutableList<String> TAGS = ImmutableList.of("bar", "foo");
 
         private final UndertowRuntime runtime;
 
