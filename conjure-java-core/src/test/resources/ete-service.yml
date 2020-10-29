@@ -43,6 +43,9 @@ services:
       string:
         http: GET /string
         returns: string
+        tags:
+          - foo
+          - bar
         docs: |
           foo bar baz.
 

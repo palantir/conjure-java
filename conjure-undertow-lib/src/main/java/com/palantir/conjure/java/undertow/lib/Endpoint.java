@@ -16,11 +16,14 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.logsafe.Preconditions;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.HttpString;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * An {@link Endpoint} represents a single rpc method. End points provide a location, tuple of {@link Endpoint#method()}
@@ -60,6 +63,11 @@ public interface Endpoint {
         return Optional.empty();
     }
 
+    /** Endpoint tags corresponding to the endpoint definition. */
+    default Set<String> tags() {
+        return Collections.emptySet();
+    }
+
     static Builder builder() {
         return new Builder();
     }
@@ -74,6 +82,7 @@ public interface Endpoint {
         private String serviceName;
         private String name;
         private Optional<String> deprecated = Optional.empty();
+        private ImmutableSet<String> tags = ImmutableSet.of();
 
         @CanIgnoreReturnValue
         public Builder method(HttpString value) {
@@ -112,6 +121,12 @@ public interface Endpoint {
         }
 
         @CanIgnoreReturnValue
+        public Builder tags(Iterable<String> value) {
+            tags = ImmutableSet.copyOf(Preconditions.checkNotNull(value, "tags are required"));
+            return this;
+        }
+
+        @CanIgnoreReturnValue
         public Builder from(Endpoint endpoint) {
             method = endpoint.method();
             template = endpoint.template();
@@ -119,6 +134,7 @@ public interface Endpoint {
             serviceName = endpoint.serviceName();
             name = endpoint.name();
             deprecated = endpoint.deprecated();
+            tags = ImmutableSet.copyOf(endpoint.tags());
             return this;
         }
 
@@ -158,6 +174,11 @@ public interface Endpoint {
                 @Override
                 public Optional<String> deprecated() {
                     return deprecated;
+                }
+
+                @Override
+                public Set<String> tags() {
+                    return tags;
                 }
             };
         }

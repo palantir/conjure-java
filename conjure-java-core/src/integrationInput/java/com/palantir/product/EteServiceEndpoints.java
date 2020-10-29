@@ -22,8 +22,6 @@ import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +43,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(
+        return ImmutableList.of(
                 new StringEndpoint(runtime, delegate),
                 new IntegerEndpoint(runtime, delegate),
                 new Double_Endpoint(runtime, delegate),
@@ -75,10 +73,12 @@ public final class EteServiceEndpoints implements UndertowService {
                 new AliasLongEndpointEndpoint(runtime, delegate),
                 new ComplexQueryParametersEndpoint(runtime, delegate),
                 new ReceiveListOfOptionalsEndpoint(runtime, delegate),
-                new ReceiveSetOfOptionalsEndpoint(runtime, delegate)));
+                new ReceiveSetOfOptionalsEndpoint(runtime, delegate));
     }
 
     private static final class StringEndpoint implements HttpHandler, Endpoint {
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("bar", "foo");
+
         private final UndertowRuntime runtime;
 
         private final UndertowEteService delegate;
@@ -89,6 +89,11 @@ public final class EteServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public Set<String> tags() {
+            return TAGS;
         }
 
         @Override

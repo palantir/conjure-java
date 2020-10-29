@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.services;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -77,9 +78,7 @@ import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -171,11 +170,7 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)
                         .returns(ParameterizedTypeName.get(List.class, Endpoint.class))
-                        .addStatement(
-                                "return $1T.unmodifiableList($2T.asList($3L))",
-                                Collections.class,
-                                Arrays.class,
-                                endpointBlock)
+                        .addStatement("return $1T.of($2L)", ImmutableList.class, endpointBlock)
                         .build())
                 .addTypes(Lists.transform(
                         serviceDefinition.getEndpoints(),
@@ -239,6 +234,8 @@ final class UndertowServiceHandlerGenerator {
                         .build())
                 .addField(FieldSpec.builder(serviceClass, DELEGATE_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
+
+        addTags(endpointDefinition, endpointBuilder);
 
         getBodyParamTypeArgument(endpointDefinition.getArgs())
                 .map(ArgumentDefinition::getType)
@@ -347,6 +344,27 @@ final class UndertowServiceHandlerGenerator {
                         .build()));
 
         return endpointBuilder.build();
+    }
+
+    private static void addTags(EndpointDefinition endpointDefinition, TypeSpec.Builder endpointBuilder) {
+        if (!endpointDefinition.getTags().isEmpty()) {
+            CodeBlock arrayValues = CodeBlock.join(
+                    Collections2.transform(endpointDefinition.getTags(), value -> CodeBlock.of("$S", value)), ", ");
+            endpointBuilder.addField(FieldSpec.builder(
+                            ParameterizedTypeName.get(ImmutableSet.class, String.class),
+                            "TAGS",
+                            Modifier.PRIVATE,
+                            Modifier.STATIC,
+                            Modifier.FINAL)
+                    .initializer(CodeBlock.of("$T.of($L)", ImmutableSet.class, arrayValues))
+                    .build());
+            endpointBuilder.addMethod(MethodSpec.methodBuilder("tags")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .returns(ParameterizedTypeName.get(Set.class, String.class))
+                    .addStatement("return TAGS")
+                    .build());
+        }
     }
 
     private static final ClassName LIST_NAME = ClassName.get(List.class);

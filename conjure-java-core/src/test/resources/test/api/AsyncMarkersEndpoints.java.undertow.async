@@ -1,5 +1,7 @@
 package test.api;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
@@ -12,9 +14,8 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -31,10 +32,10 @@ public final class AsyncMarkersEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(
+        return ImmutableList.of(
                 new AsyncMarkerEndpoint(runtime, delegate),
                 new AsyncTagEndpoint(runtime, delegate),
-                new SyncEndpoint(runtime, delegate)));
+                new SyncEndpoint(runtime, delegate));
     }
 
     private static final class AsyncMarkerEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
@@ -88,6 +89,8 @@ public final class AsyncMarkersEndpoints implements UndertowService {
     }
 
     private static final class AsyncTagEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("server-async");
+
         private final UndertowRuntime runtime;
 
         private final AsyncMarkers delegate;
@@ -98,6 +101,11 @@ public final class AsyncMarkersEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public Set<String> tags() {
+            return TAGS;
         }
 
         @Override
