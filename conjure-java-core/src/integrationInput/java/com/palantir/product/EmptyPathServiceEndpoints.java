@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
@@ -10,8 +11,6 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Generated;
 
@@ -29,7 +28,7 @@ public final class EmptyPathServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(new EmptyPathEndpoint(runtime, delegate)));
+        return ImmutableList.of(new EmptyPathEndpoint(runtime, delegate));
     }
 
     private static final class EmptyPathEndpoint implements HttpHandler, Endpoint {

@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -12,8 +13,6 @@ import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +33,13 @@ public final class EteBinaryServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(
+        return ImmutableList.of(
                 new PostBinaryEndpoint(runtime, delegate),
                 new PostBinaryThrowsEndpoint(runtime, delegate),
                 new GetOptionalBinaryPresentEndpoint(runtime, delegate),
                 new GetOptionalBinaryEmptyEndpoint(runtime, delegate),
                 new GetBinaryFailureEndpoint(runtime, delegate),
-                new GetAliasedEndpoint(runtime, delegate)));
+                new GetAliasedEndpoint(runtime, delegate));
     }
 
     private static final class PostBinaryEndpoint implements HttpHandler, Endpoint {

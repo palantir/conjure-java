@@ -1,5 +1,6 @@
 package test.api;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
@@ -10,8 +11,6 @@ import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Generated;
 
@@ -29,7 +28,7 @@ public final class CookieServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(new EatCookiesEndpoint(runtime, delegate)));
+        return ImmutableList.of(new EatCookiesEndpoint(runtime, delegate));
     }
 
     private static final class EatCookiesEndpoint implements HttpHandler, Endpoint {

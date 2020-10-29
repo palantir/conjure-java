@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -14,8 +15,6 @@ import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +36,12 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(
+        return ImmutableList.of(
                 new DelayEndpoint(runtime, delegate),
                 new ThrowsInHandlerEndpoint(runtime, delegate),
                 new FailedFutureEndpoint(runtime, delegate),
                 new BinaryEndpoint(runtime, delegate),
-                new FutureTraceIdEndpoint(runtime, delegate)));
+                new FutureTraceIdEndpoint(runtime, delegate));
     }
 
     private static final class DelayEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {

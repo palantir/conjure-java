@@ -1,5 +1,6 @@
 package test.prefix.com.palantir.another;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -18,8 +19,6 @@ import io.undertow.util.PathTemplateMatch;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,7 @@ public final class TestServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return Collections.unmodifiableList(Arrays.asList(
+        return ImmutableList.of(
                 new GetFileSystemsEndpoint(runtime, delegate),
                 new CreateDatasetEndpoint(runtime, delegate),
                 new GetDatasetEndpoint(runtime, delegate),
@@ -68,7 +67,7 @@ public final class TestServiceEndpoints implements UndertowService {
                 new TestIntegerEndpoint(runtime, delegate),
                 new TestPostOptionalEndpoint(runtime, delegate),
                 new TestOptionalIntegerAndDoubleEndpoint(runtime, delegate),
-                new GetForStringsEndpoint(runtime, delegate)));
+                new GetForStringsEndpoint(runtime, delegate));
     }
 
     private static final class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
