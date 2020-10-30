@@ -1,5 +1,6 @@
 package test.prefix.com.palantir.another;
 
+import com.google.common.collect.ImmutableSet;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
@@ -8,6 +9,7 @@ import java.lang.Override;
 import java.lang.String;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
@@ -18,6 +20,8 @@ enum DialogueTestEndpoints implements Endpoint {
     getFileSystems {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("catalog").fixed("fileSystems").build();
+
+        private final ImmutableSet<String> tags = ImmutableSet.of("unstable");
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -42,6 +46,11 @@ enum DialogueTestEndpoints implements Endpoint {
         @Override
         public String version() {
             return VERSION;
+        }
+
+        @Override
+        public Set<String> tags() {
+            return tags;
         }
     },
 

@@ -1,5 +1,6 @@
 package test.prefix.com.palantir.another;
 
+import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
@@ -43,6 +44,7 @@ public interface TestServiceAsync {
      * Returns a mapping from file system id to backing file system configuration.
      * @apiNote {@code GET /catalog/fileSystems}
      */
+    @Beta
     @Nonnull
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 

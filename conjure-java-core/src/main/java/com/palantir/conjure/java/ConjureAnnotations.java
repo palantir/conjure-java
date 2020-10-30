@@ -16,8 +16,10 @@
 
 package com.palantir.conjure.java;
 
+import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.spec.Documentation;
+import com.palantir.conjure.spec.EndpointDefinition;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import java.util.Optional;
@@ -34,6 +36,13 @@ public final class ConjureAnnotations {
         return deprecation.isPresent()
                 ? ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build())
                 : ImmutableList.of();
+    }
+
+    public static ImmutableList<AnnotationSpec> unstable(EndpointDefinition definition) {
+        if (definition.getTags().contains("unstable")) {
+            return ImmutableList.of(AnnotationSpec.builder(Beta.class).build());
+        }
+        return ImmutableList.of();
     }
 
     private ConjureAnnotations() {}

@@ -1,5 +1,6 @@
 package test.prefix.com.palantir.another;
 
+import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -35,6 +36,7 @@ public interface TestServiceRetrofit {
      */
     @GET("./catalog/fileSystems")
     @Headers({"hr-path-template: /catalog/fileSystems", "Accept: application/json"})
+    @Beta
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(@Header("Authorization") AuthHeader authHeader);
 
     /**
