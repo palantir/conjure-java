@@ -17,6 +17,8 @@
 package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.Javadoc;
@@ -38,6 +40,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.Modifier;
 import org.glassfish.jersey.uri.internal.UriTemplateParser;
 
@@ -81,7 +84,7 @@ final class DialogueEndpointsGenerator {
         TypeSpec.Builder builder = TypeSpec.anonymousClassBuilder("");
         def.getDocs().ifPresent(docs -> builder.addJavadoc("$L", Javadoc.render(docs)));
 
-        return builder.addField(FieldSpec.builder(
+        builder.addField(FieldSpec.builder(
                                 TypeName.get(PathTemplate.class), "pathTemplate", Modifier.PRIVATE, Modifier.FINAL)
                         .initializer(pathTemplateInitializer(def.getHttpPath()))
                         .build())
@@ -128,8 +131,29 @@ final class DialogueEndpointsGenerator {
                                         .map(s -> CodeBlock.of("return $S;", s))
                                         .orElseGet(() -> CodeBlock.of("return VERSION;")))
                                 .build())
-                        .build())
-                .build();
+                        .build());
+        addTags(def, builder);
+        return builder.build();
+    }
+
+    private static void addTags(EndpointDefinition def, TypeSpec.Builder destination) {
+        if (!def.getTags().isEmpty()) {
+            CodeBlock arrayValues =
+                    CodeBlock.join(Collections2.transform(def.getTags(), value -> CodeBlock.of("$S", value)), ", ");
+            destination.addField(FieldSpec.builder(
+                            ParameterizedTypeName.get(ImmutableSet.class, String.class),
+                            "tags",
+                            Modifier.PRIVATE,
+                            Modifier.FINAL)
+                    .initializer(CodeBlock.of("$T.of($L)", ImmutableSet.class, arrayValues))
+                    .build());
+            destination.addMethod(MethodSpec.methodBuilder("tags")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .returns(ParameterizedTypeName.get(Set.class, String.class))
+                    .addStatement("return tags")
+                    .build());
+        }
     }
 
     // TODO(rfink): Integrate/consolidate with checking code in PathDefinition class

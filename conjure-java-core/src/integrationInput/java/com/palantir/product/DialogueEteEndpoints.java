@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.google.common.collect.ImmutableSet;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
@@ -7,6 +8,7 @@ import com.palantir.dialogue.UrlBuilder;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
@@ -23,6 +25,8 @@ enum DialogueEteEndpoints implements Endpoint {
     string {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("base").fixed("string").build();
+
+        private final ImmutableSet<String> tags = ImmutableSet.of("bar", "foo");
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {
@@ -47,6 +51,11 @@ enum DialogueEteEndpoints implements Endpoint {
         @Override
         public String version() {
             return "1.2.3";
+        }
+
+        @Override
+        public Set<String> tags() {
+            return tags;
         }
     },
 
