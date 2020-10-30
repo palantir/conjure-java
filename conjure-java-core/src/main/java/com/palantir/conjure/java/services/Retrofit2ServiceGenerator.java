@@ -151,7 +151,7 @@ public final class Retrofit2ServiceGenerator extends ServiceGenerator {
                         .addMember("value", "$S", "hr-path-template: " + endpointPathWithoutRegex)
                         .addMember("value", "$S", "Accept: " + getReturnMediaType(returnType))
                         .build())
-                .addAnnotations(ConjureAnnotations.unstable(endpointDef));
+                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
 
         if (returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming"))
@@ -253,7 +253,7 @@ public final class Retrofit2ServiceGenerator extends ServiceGenerator {
                         .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
                         .mapToObj(sortedParams::get)
                         .collect(Collectors.toList()))
-                .addAnnotations(ConjureAnnotations.unstable(endpointDef));
+                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
 
         endpointDef
                 .getReturns()

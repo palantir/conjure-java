@@ -72,7 +72,7 @@ public final class TestServiceEndpoints implements UndertowService {
     }
 
     private static final class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
-        private static final ImmutableSet<String> TAGS = ImmutableSet.of("unstable");
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("incubating");
 
         private final UndertowRuntime runtime;
 

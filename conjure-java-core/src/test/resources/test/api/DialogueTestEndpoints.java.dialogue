@@ -21,7 +21,7 @@ enum DialogueTestEndpoints implements Endpoint {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("catalog").fixed("fileSystems").build();
 
-        private final ImmutableSet<String> tags = ImmutableSet.of("unstable");
+        private final ImmutableSet<String> tags = ImmutableSet.of("incubating");
 
         @Override
         public void renderPath(Map<String, String> params, UrlBuilder url) {

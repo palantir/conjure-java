@@ -146,7 +146,7 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(
                         httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
-                .addAnnotations(ConjureAnnotations.unstable(endpointDef))
+                .addAnnotations(ConjureAnnotations.incubating(endpointDef))
                 .addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, true))
                 .returns(returnType);
 
@@ -227,7 +227,7 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
-                .addAnnotations(ConjureAnnotations.unstable(endpointDef))
+                .addAnnotations(ConjureAnnotations.incubating(endpointDef))
                 .addParameters(IntStream.range(0, sortedParams.size())
                         .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
                         .mapToObj(sortedParams::get)

@@ -56,7 +56,7 @@ services:
         markers:
           - Nonnull
         tags:
-          - unstable
+          - incubating
         http: GET /fileSystems
         returns: map<string, BackingFileSystem>
         docs: |

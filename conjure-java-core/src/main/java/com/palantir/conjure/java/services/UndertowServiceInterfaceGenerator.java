@@ -80,7 +80,7 @@ final class UndertowServiceInterfaceGenerator {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(createServiceMethodParameters(endpointDef, typeMapper))
-                .addAnnotations(ConjureAnnotations.unstable(endpointDef));
+                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
 

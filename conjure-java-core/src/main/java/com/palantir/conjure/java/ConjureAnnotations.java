@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java;
 
-import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.squareup.javapoet.AnnotationSpec;
@@ -38,9 +38,9 @@ public final class ConjureAnnotations {
                 : ImmutableList.of();
     }
 
-    public static ImmutableList<AnnotationSpec> unstable(EndpointDefinition definition) {
-        if (definition.getTags().contains("unstable")) {
-            return ImmutableList.of(AnnotationSpec.builder(Beta.class).build());
+    public static ImmutableList<AnnotationSpec> incubating(EndpointDefinition definition) {
+        if (definition.getTags().contains("incubating")) {
+            return ImmutableList.of(AnnotationSpec.builder(Incubating.class).build());
         }
         return ImmutableList.of();
     }
