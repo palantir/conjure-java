@@ -1,6 +1,7 @@
 package com.palantir.another;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -43,6 +44,7 @@ public interface TestServiceAsync {
      * Returns a mapping from file system id to backing file system configuration.
      * @apiNote {@code GET /catalog/fileSystems}
      */
+    @Incubating
     @Nonnull
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader);
 

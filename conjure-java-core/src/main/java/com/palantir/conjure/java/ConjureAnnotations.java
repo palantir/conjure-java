@@ -17,7 +17,9 @@
 package com.palantir.conjure.java;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
+import com.palantir.conjure.spec.EndpointDefinition;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import java.util.Optional;
@@ -34,6 +36,13 @@ public final class ConjureAnnotations {
         return deprecation.isPresent()
                 ? ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build())
                 : ImmutableList.of();
+    }
+
+    public static ImmutableList<AnnotationSpec> incubating(EndpointDefinition definition) {
+        if (definition.getTags().contains("incubating")) {
+            return ImmutableList.of(AnnotationSpec.builder(Incubating.class).build());
+        }
+        return ImmutableList.of();
     }
 
     private ConjureAnnotations() {}

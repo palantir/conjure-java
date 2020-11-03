@@ -1,5 +1,6 @@
 package com.palantir.another;
 
+import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.logsafe.Safe;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
@@ -40,6 +41,7 @@ public interface TestService {
      * Returns a mapping from file system id to backing file system configuration.
      */
     @GET
+    @Incubating
     @Path("catalog/fileSystems")
     Map<String, BackingFileSystem> getFileSystems(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 

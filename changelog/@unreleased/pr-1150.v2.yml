@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Apply `@Incubating` annotations based on the `incubating` endpoint
+    tag
+  links:
+  - https://github.com/palantir/conjure-java/pull/1150

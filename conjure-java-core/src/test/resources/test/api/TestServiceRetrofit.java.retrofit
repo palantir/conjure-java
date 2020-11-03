@@ -1,6 +1,7 @@
 package com.palantir.another;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.datasets.BackingFileSystem;
@@ -35,6 +36,7 @@ public interface TestServiceRetrofit {
      */
     @GET("./catalog/fileSystems")
     @Headers({"hr-path-template: /catalog/fileSystems", "Accept: application/json"})
+    @Incubating
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(@Header("Authorization") AuthHeader authHeader);
 
     /**

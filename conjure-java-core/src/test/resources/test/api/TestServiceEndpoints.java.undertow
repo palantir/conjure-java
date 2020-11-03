@@ -1,6 +1,7 @@
 package com.palantir.another;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -71,6 +72,8 @@ public final class TestServiceEndpoints implements UndertowService {
     }
 
     private static final class GetFileSystemsEndpoint implements HttpHandler, Endpoint {
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("incubating");
+
         private final UndertowRuntime runtime;
 
         private final TestService delegate;
@@ -81,6 +84,11 @@ public final class TestServiceEndpoints implements UndertowService {
             this.runtime = runtime;
             this.delegate = delegate;
             this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Map<String, BackingFileSystem>>() {});
+        }
+
+        @Override
+        public Set<String> tags() {
+            return TAGS;
         }
 
         @Override

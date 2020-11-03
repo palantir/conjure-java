@@ -1,5 +1,6 @@
 package test.prefix.com.palantir.another;
 
+import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.logsafe.Safe;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -39,6 +40,7 @@ public interface TestService {
      * Returns a mapping from file system id to backing file system configuration.
      */
     @GET
+    @Incubating
     @Path("catalog/fileSystems")
     Map<String, BackingFileSystem> getFileSystems(@HeaderParam("Authorization") AuthHeader authHeader);
 
