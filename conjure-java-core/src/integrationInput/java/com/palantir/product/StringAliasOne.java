@@ -38,7 +38,7 @@ public final class StringAliasOne {
         return of(value);
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static StringAliasOne of(@Nonnull String value) {
         return new StringAliasOne(value);
     }

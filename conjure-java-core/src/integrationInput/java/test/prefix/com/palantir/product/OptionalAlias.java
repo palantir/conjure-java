@@ -39,7 +39,7 @@ public final class OptionalAlias {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static OptionalAlias of(@Nonnull Optional<String> value) {
         return new OptionalAlias(value);
     }

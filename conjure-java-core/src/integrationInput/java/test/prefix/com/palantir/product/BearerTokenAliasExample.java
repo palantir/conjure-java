@@ -41,7 +41,7 @@ public final class BearerTokenAliasExample {
         return of(BearerToken.valueOf(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static BearerTokenAliasExample of(@Nonnull BearerToken value) {
         return new BearerTokenAliasExample(value);
     }

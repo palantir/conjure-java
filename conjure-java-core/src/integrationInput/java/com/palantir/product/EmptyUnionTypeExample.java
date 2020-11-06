@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 public final class EmptyUnionTypeExample {
     private final Base value;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     private EmptyUnionTypeExample(Base value) {
         this.value = value;
     }
@@ -107,7 +107,7 @@ public final class EmptyUnionTypeExample {
 
         private final Map<String, Object> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private UnknownWrapper(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }

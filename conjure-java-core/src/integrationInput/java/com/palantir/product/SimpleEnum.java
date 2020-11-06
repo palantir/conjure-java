@@ -57,7 +57,7 @@ public final class SimpleEnum {
         return this.string.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static SimpleEnum valueOf(@Nonnull String value) {
         Preconditions.checkNotNull(value, "value cannot be null");
         String upperCasedValue = value.toUpperCase(Locale.ROOT);

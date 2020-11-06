@@ -73,7 +73,7 @@ public final class EnumExample {
         return this.string.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     @SuppressWarnings("deprecation")
     public static EnumExample valueOf(@Nonnull String value) {
         Preconditions.checkNotNull(value, "value cannot be null");

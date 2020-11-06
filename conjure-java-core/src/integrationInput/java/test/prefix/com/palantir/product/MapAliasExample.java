@@ -36,7 +36,7 @@ public final class MapAliasExample {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static MapAliasExample of(@Nonnull Map<String, Object> value) {
         return new MapAliasExample(value);
     }

@@ -5,14 +5,18 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -26,7 +30,7 @@ import javax.annotation.Nonnull;
 public final class UnionTypeExample {
     private final Base value;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     private UnionTypeExample(Base value) {
         this.value = value;
     }
@@ -75,6 +79,18 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new Unknown_Wrapper(value));
     }
 
+    public static UnionTypeExample optional(Optional<String> value) {
+        return new UnionTypeExample(new OptionalWrapper(value));
+    }
+
+    public static UnionTypeExample list(List<String> value) {
+        return new UnionTypeExample(new ListWrapper(value));
+    }
+
+    public static UnionTypeExample map(Map<String, String> value) {
+        return new UnionTypeExample(new MapWrapper(value));
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         return value.accept(visitor);
     }
@@ -120,6 +136,12 @@ public final class UnionTypeExample {
 
         T visitUnknown_(int value);
 
+        T visitOptional(Optional<String> value);
+
+        T visitList(List<String> value);
+
+        T visitMap(Map<String, String> value);
+
         T visitUnknown(String unknownType);
 
         static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
@@ -132,7 +154,10 @@ public final class UnionTypeExample {
                     CompletedStageVisitorBuilder<T>,
                     IfStageVisitorBuilder<T>,
                     InterfaceStageVisitorBuilder<T>,
+                    ListStageVisitorBuilder<T>,
+                    MapStageVisitorBuilder<T>,
                     NewStageVisitorBuilder<T>,
+                    OptionalStageVisitorBuilder<T>,
                     SetStageVisitorBuilder<T>,
                     StringExampleStageVisitorBuilder<T>,
                     ThisFieldIsAnIntegerStageVisitorBuilder<T>,
@@ -147,7 +172,13 @@ public final class UnionTypeExample {
 
         private IntFunction<T> interfaceVisitor;
 
+        private Function<List<String>, T> listVisitor;
+
+        private Function<Map<String, String>, T> mapVisitor;
+
         private IntFunction<T> newVisitor;
+
+        private Function<Optional<String>, T> optionalVisitor;
 
         private Function<Set<String>, T> setVisitor;
 
@@ -181,16 +212,37 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public NewStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor) {
+        public ListStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor) {
             Preconditions.checkNotNull(interfaceVisitor, "interfaceVisitor cannot be null");
             this.interfaceVisitor = interfaceVisitor;
             return this;
         }
 
         @Override
-        public SetStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor) {
+        public MapStageVisitorBuilder<T> list(@Nonnull Function<List<String>, T> listVisitor) {
+            Preconditions.checkNotNull(listVisitor, "listVisitor cannot be null");
+            this.listVisitor = listVisitor;
+            return this;
+        }
+
+        @Override
+        public NewStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor) {
+            Preconditions.checkNotNull(mapVisitor, "mapVisitor cannot be null");
+            this.mapVisitor = mapVisitor;
+            return this;
+        }
+
+        @Override
+        public OptionalStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor) {
             Preconditions.checkNotNull(newVisitor, "newVisitor cannot be null");
             this.newVisitor = newVisitor;
+            return this;
+        }
+
+        @Override
+        public SetStageVisitorBuilder<T> optional(@Nonnull Function<Optional<String>, T> optionalVisitor) {
+            Preconditions.checkNotNull(optionalVisitor, "optionalVisitor cannot be null");
+            this.optionalVisitor = optionalVisitor;
             return this;
         }
 
@@ -237,7 +289,10 @@ public final class UnionTypeExample {
             final IntFunction<T> completedVisitor = this.completedVisitor;
             final IntFunction<T> ifVisitor = this.ifVisitor;
             final IntFunction<T> interfaceVisitor = this.interfaceVisitor;
+            final Function<List<String>, T> listVisitor = this.listVisitor;
+            final Function<Map<String, String>, T> mapVisitor = this.mapVisitor;
             final IntFunction<T> newVisitor = this.newVisitor;
+            final Function<Optional<String>, T> optionalVisitor = this.optionalVisitor;
             final Function<Set<String>, T> setVisitor = this.setVisitor;
             final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
             final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
@@ -265,8 +320,23 @@ public final class UnionTypeExample {
                 }
 
                 @Override
+                public T visitList(List<String> value) {
+                    return listVisitor.apply(value);
+                }
+
+                @Override
+                public T visitMap(Map<String, String> value) {
+                    return mapVisitor.apply(value);
+                }
+
+                @Override
                 public T visitNew(int value) {
                     return newVisitor.apply(value);
+                }
+
+                @Override
+                public T visitOptional(Optional<String> value) {
+                    return optionalVisitor.apply(value);
                 }
 
                 @Override
@@ -310,11 +380,23 @@ public final class UnionTypeExample {
     }
 
     public interface InterfaceStageVisitorBuilder<T> {
-        NewStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor);
+        ListStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor);
+    }
+
+    public interface ListStageVisitorBuilder<T> {
+        MapStageVisitorBuilder<T> list(@Nonnull Function<List<String>, T> listVisitor);
+    }
+
+    public interface MapStageVisitorBuilder<T> {
+        NewStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor);
     }
 
     public interface NewStageVisitorBuilder<T> {
-        SetStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor);
+        OptionalStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor);
+    }
+
+    public interface OptionalStageVisitorBuilder<T> {
+        SetStageVisitorBuilder<T> optional(@Nonnull Function<Optional<String>, T> optionalVisitor);
     }
 
     public interface SetStageVisitorBuilder<T> {
@@ -352,7 +434,10 @@ public final class UnionTypeExample {
         @JsonSubTypes.Type(NewWrapper.class),
         @JsonSubTypes.Type(InterfaceWrapper.class),
         @JsonSubTypes.Type(CompletedWrapper.class),
-        @JsonSubTypes.Type(Unknown_Wrapper.class)
+        @JsonSubTypes.Type(Unknown_Wrapper.class),
+        @JsonSubTypes.Type(OptionalWrapper.class),
+        @JsonSubTypes.Type(ListWrapper.class),
+        @JsonSubTypes.Type(MapWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
@@ -363,8 +448,8 @@ public final class UnionTypeExample {
     private static final class StringExampleWrapper implements Base {
         private final StringExample value;
 
-        @JsonCreator
-        private StringExampleWrapper(@JsonProperty("stringExample") @Nonnull StringExample value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private StringExampleWrapper(@JsonSetter("stringExample") @Nonnull StringExample value) {
             Preconditions.checkNotNull(value, "stringExample cannot be null");
             this.value = value;
         }
@@ -403,8 +488,8 @@ public final class UnionTypeExample {
     private static final class SetWrapper implements Base {
         private final Set<String> value;
 
-        @JsonCreator
-        private SetWrapper(@JsonProperty("set") @Nonnull Set<String> value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private SetWrapper(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull Set<String> value) {
             Preconditions.checkNotNull(value, "set cannot be null");
             this.value = value;
         }
@@ -443,8 +528,8 @@ public final class UnionTypeExample {
     private static final class ThisFieldIsAnIntegerWrapper implements Base {
         private final int value;
 
-        @JsonCreator
-        private ThisFieldIsAnIntegerWrapper(@JsonProperty("thisFieldIsAnInteger") @Nonnull int value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private ThisFieldIsAnIntegerWrapper(@JsonSetter("thisFieldIsAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "thisFieldIsAnInteger cannot be null");
             this.value = value;
         }
@@ -484,8 +569,8 @@ public final class UnionTypeExample {
     private static final class AlsoAnIntegerWrapper implements Base {
         private final int value;
 
-        @JsonCreator
-        private AlsoAnIntegerWrapper(@JsonProperty("alsoAnInteger") @Nonnull int value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private AlsoAnIntegerWrapper(@JsonSetter("alsoAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "alsoAnInteger cannot be null");
             this.value = value;
         }
@@ -524,8 +609,8 @@ public final class UnionTypeExample {
     private static final class IfWrapper implements Base {
         private final int value;
 
-        @JsonCreator
-        private IfWrapper(@JsonProperty("if") @Nonnull int value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private IfWrapper(@JsonSetter("if") @Nonnull int value) {
             Preconditions.checkNotNull(value, "if cannot be null");
             this.value = value;
         }
@@ -564,8 +649,8 @@ public final class UnionTypeExample {
     private static final class NewWrapper implements Base {
         private final int value;
 
-        @JsonCreator
-        private NewWrapper(@JsonProperty("new") @Nonnull int value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private NewWrapper(@JsonSetter("new") @Nonnull int value) {
             Preconditions.checkNotNull(value, "new cannot be null");
             this.value = value;
         }
@@ -604,8 +689,8 @@ public final class UnionTypeExample {
     private static final class InterfaceWrapper implements Base {
         private final int value;
 
-        @JsonCreator
-        private InterfaceWrapper(@JsonProperty("interface") @Nonnull int value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private InterfaceWrapper(@JsonSetter("interface") @Nonnull int value) {
             Preconditions.checkNotNull(value, "interface cannot be null");
             this.value = value;
         }
@@ -644,8 +729,8 @@ public final class UnionTypeExample {
     private static final class CompletedWrapper implements Base {
         private final int value;
 
-        @JsonCreator
-        private CompletedWrapper(@JsonProperty("completed") @Nonnull int value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private CompletedWrapper(@JsonSetter("completed") @Nonnull int value) {
             Preconditions.checkNotNull(value, "completed cannot be null");
             this.value = value;
         }
@@ -684,8 +769,8 @@ public final class UnionTypeExample {
     private static final class Unknown_Wrapper implements Base {
         private final int value;
 
-        @JsonCreator
-        private Unknown_Wrapper(@JsonProperty("unknown") @Nonnull int value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private Unknown_Wrapper(@JsonSetter("unknown") @Nonnull int value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
         }
@@ -720,6 +805,126 @@ public final class UnionTypeExample {
         }
     }
 
+    @JsonTypeName("optional")
+    private static final class OptionalWrapper implements Base {
+        private final Optional<String> value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private OptionalWrapper(@JsonSetter("optional") @Nonnull Optional<String> value) {
+            Preconditions.checkNotNull(value, "optional cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("optional")
+        private Optional<String> getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitOptional(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof OptionalWrapper && equalTo((OptionalWrapper) other));
+        }
+
+        private boolean equalTo(OptionalWrapper other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "OptionalWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("list")
+    private static final class ListWrapper implements Base {
+        private final List<String> value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private ListWrapper(@JsonSetter(value = "list", nulls = Nulls.AS_EMPTY) @Nonnull List<String> value) {
+            Preconditions.checkNotNull(value, "list cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("list")
+        private List<String> getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitList(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof ListWrapper && equalTo((ListWrapper) other));
+        }
+
+        private boolean equalTo(ListWrapper other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "ListWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("map")
+    private static final class MapWrapper implements Base {
+        private final Map<String, String> value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private MapWrapper(@JsonSetter(value = "map", nulls = Nulls.AS_EMPTY) @Nonnull Map<String, String> value) {
+            Preconditions.checkNotNull(value, "map cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("map")
+        private Map<String, String> getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitMap(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof MapWrapper && equalTo((MapWrapper) other));
+        }
+
+        private boolean equalTo(MapWrapper other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "MapWrapper{value: " + value + '}';
+        }
+    }
+
     @JsonTypeInfo(
             use = JsonTypeInfo.Id.NAME,
             include = JsonTypeInfo.As.EXISTING_PROPERTY,
@@ -730,7 +935,7 @@ public final class UnionTypeExample {
 
         private final Map<String, Object> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private UnknownWrapper(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }

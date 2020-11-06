@@ -39,7 +39,7 @@ public final class ExternalLongAliasExample {
         return of(Long.valueOf(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ExternalLongAliasExample of(long value) {
         return new ExternalLongAliasExample(value);
     }

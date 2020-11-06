@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -21,7 +22,7 @@ import javax.annotation.Nonnull;
 public final class UnionWithUnknownString {
     private final Base value;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     private UnionWithUnknownString(Base value) {
         this.value = value;
     }
@@ -129,8 +130,8 @@ public final class UnionWithUnknownString {
     private static final class Unknown_Wrapper implements Base {
         private final String value;
 
-        @JsonCreator
-        private Unknown_Wrapper(@JsonProperty("unknown") @Nonnull String value) {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private Unknown_Wrapper(@JsonSetter("unknown") @Nonnull String value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
         }
@@ -175,7 +176,7 @@ public final class UnionWithUnknownString {
 
         private final Map<String, Object> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private UnknownWrapper(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }

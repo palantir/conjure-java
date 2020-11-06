@@ -37,7 +37,7 @@ public final class LongAlias {
         return of(Long.valueOf(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static LongAlias of(long value) {
         return new LongAlias(value);
     }

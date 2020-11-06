@@ -18,13 +18,14 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
@@ -36,7 +37,9 @@ import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.UnionDefinition;
+import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -122,7 +125,7 @@ public final class UnionGenerator {
     private static MethodSpec generateConstructor(ClassName baseClass) {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
-                .addAnnotation(AnnotationSpec.builder(JsonCreator.class).build())
+                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                 .addParameter(baseClass, VALUE_FIELD_NAME)
                 // no null check because this constructor is private and is only called by nice factory methods
                 .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
@@ -522,10 +525,6 @@ public final class UnionGenerator {
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
                     ClassName wrapperClass = peerWrapperClass(baseClass, memberName);
 
-                    AnnotationSpec jsonPropertyAnnotation = AnnotationSpec.builder(JsonProperty.class)
-                            .addMember(
-                                    "value", "$S", memberTypeDef.getFieldName().get())
-                            .build();
                     List<FieldSpec> fields = ImmutableList.of(
                             FieldSpec.builder(memberType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                                     .build());
@@ -539,10 +538,9 @@ public final class UnionGenerator {
                             .addFields(fields)
                             .addMethod(MethodSpec.constructorBuilder()
                                     .addModifiers(Modifier.PRIVATE)
-                                    .addAnnotation(AnnotationSpec.builder(JsonCreator.class)
-                                            .build())
+                                    .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
-                                            .addAnnotation(jsonPropertyAnnotation)
+                                            .addAnnotation(wrapperConstructorParameterAnnotation(memberTypeDef))
                                             .addAnnotation(Nonnull.class)
                                             .build())
                                     .addStatement(
@@ -554,7 +552,12 @@ public final class UnionGenerator {
                                     .build())
                             .addMethod(MethodSpec.methodBuilder("getValue")
                                     .addModifiers(Modifier.PRIVATE)
-                                    .addAnnotation(jsonPropertyAnnotation)
+                                    .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                            .addMember(
+                                                    "value",
+                                                    "$S",
+                                                    memberTypeDef.getFieldName().get())
+                                            .build())
                                     .addStatement("return $L", VALUE_FIELD_NAME)
                                     .returns(memberType)
                                     .build())
@@ -572,6 +575,19 @@ public final class UnionGenerator {
                     return typeBuilder.build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    private static AnnotationSpec wrapperConstructorParameterAnnotation(FieldDefinition field) {
+        AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonSetter.class)
+                .addMember("value", "$S", field.getFieldName().get());
+        if (isListSetOrMap(field.getType())) {
+            builder.addMember("nulls", "$T.AS_EMPTY", Nulls.class);
+        }
+        return builder.build();
+    }
+
+    private static boolean isListSetOrMap(Type type) {
+        return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP);
     }
 
     private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass) {
@@ -604,7 +620,7 @@ public final class UnionGenerator {
                 .addFields(fields)
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)
-                        .addAnnotation(AnnotationSpec.builder(JsonCreator.class).build())
+                        .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                         .addParameter(annotatedTypeParameter)
                         .addStatement("this($N, new $T())", typeParameter, genericHashMapType)
                         .build())
