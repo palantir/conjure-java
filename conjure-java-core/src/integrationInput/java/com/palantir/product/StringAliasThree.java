@@ -35,7 +35,7 @@ public final class StringAliasThree {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static StringAliasThree of(@Nonnull StringAliasTwo value) {
         return new StringAliasThree(value);
     }

@@ -40,7 +40,7 @@ public final class RidAliasExample {
         return of(ResourceIdentifier.valueOf(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static RidAliasExample of(@Nonnull ResourceIdentifier value) {
         return new RidAliasExample(value);
     }

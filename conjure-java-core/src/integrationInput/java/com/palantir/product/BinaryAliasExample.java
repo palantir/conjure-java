@@ -36,7 +36,7 @@ public final class BinaryAliasExample {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static BinaryAliasExample of(@Nonnull Bytes value) {
         return new BinaryAliasExample(value);
     }

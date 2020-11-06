@@ -35,7 +35,7 @@ public final class ReferenceAliasExample {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ReferenceAliasExample of(@Nonnull AnyExample value) {
         return new ReferenceAliasExample(value);
     }

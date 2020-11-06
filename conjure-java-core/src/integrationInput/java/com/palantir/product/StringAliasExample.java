@@ -39,7 +39,7 @@ public final class StringAliasExample {
         return of(value);
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static StringAliasExample of(@Nonnull String value) {
         return new StringAliasExample(value);
     }
