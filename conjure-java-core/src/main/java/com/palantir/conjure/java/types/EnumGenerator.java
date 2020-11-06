@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.types;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
@@ -149,7 +148,7 @@ public final class EnumGenerator {
         } else {
             enumBuilder.addMethod(MethodSpec.methodBuilder("fromString")
                     .addJavadoc("$L", "Preferred, case-insensitive constructor for string-to-enum conversion.\n")
-                    .addAnnotation(JsonCreator.class)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(ClassName.get(String.class), "value")
                     .addStatement("return $T.valueOf(value.toUpperCase($T.ROOT))", enumClass, Locale.class)
@@ -258,7 +257,7 @@ public final class EnumGenerator {
         return MethodSpec.methodBuilder("valueOf")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(thisClass)
-                .addAnnotation(JsonCreator.class)
+                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                 .addAnnotations(
                         anyDeprecatedValues
                                 ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)

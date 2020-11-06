@@ -40,7 +40,7 @@ public final class DateTimeAliasExample {
         return of(OffsetDateTime.parse(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static DateTimeAliasExample of(@Nonnull OffsetDateTime value) {
         return new DateTimeAliasExample(value);
     }

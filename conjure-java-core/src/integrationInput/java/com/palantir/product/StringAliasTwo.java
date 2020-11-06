@@ -39,7 +39,7 @@ public final class StringAliasTwo {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static StringAliasTwo of(@Nonnull Optional<StringAliasOne> value) {
         return new StringAliasTwo(value);
     }

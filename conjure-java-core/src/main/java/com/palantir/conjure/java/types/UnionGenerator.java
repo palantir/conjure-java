@@ -18,7 +18,6 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -126,7 +125,7 @@ public final class UnionGenerator {
     private static MethodSpec generateConstructor(ClassName baseClass) {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
-                .addAnnotation(AnnotationSpec.builder(JsonCreator.class).build())
+                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                 .addParameter(baseClass, VALUE_FIELD_NAME)
                 // no null check because this constructor is private and is only called by nice factory methods
                 .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
@@ -539,8 +538,7 @@ public final class UnionGenerator {
                             .addFields(fields)
                             .addMethod(MethodSpec.constructorBuilder()
                                     .addModifiers(Modifier.PRIVATE)
-                                    .addAnnotation(AnnotationSpec.builder(JsonCreator.class)
-                                            .build())
+                                    .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                                             .addAnnotation(wrapperConstructorParameterAnnotation(memberTypeDef))
                                             .addAnnotation(Nonnull.class)
@@ -622,7 +620,7 @@ public final class UnionGenerator {
                 .addFields(fields)
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)
-                        .addAnnotation(AnnotationSpec.builder(JsonCreator.class).build())
+                        .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                         .addParameter(annotatedTypeParameter)
                         .addStatement("this($N, new $T())", typeParameter, genericHashMapType)
                         .build())

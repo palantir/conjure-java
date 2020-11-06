@@ -35,7 +35,7 @@ public final class BinaryAliasOne {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static BinaryAliasOne of(@Nonnull ByteBuffer value) {
         return new BinaryAliasOne(value);
     }

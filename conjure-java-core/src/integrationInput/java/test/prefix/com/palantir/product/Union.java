@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 public final class Union {
     private final Base value;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     private Union(Base value) {
         this.value = value;
     }
@@ -207,7 +207,7 @@ public final class Union {
     private static final class FooWrapper implements Base {
         private final String value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private FooWrapper(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
@@ -247,7 +247,7 @@ public final class Union {
     private static final class BarWrapper implements Base {
         private final int value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private BarWrapper(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
@@ -288,7 +288,7 @@ public final class Union {
     private static final class BazWrapper implements Base {
         private final long value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private BazWrapper(@JsonSetter("baz") @Nonnull long value) {
             Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
@@ -335,7 +335,7 @@ public final class Union {
 
         private final Map<String, Object> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private UnknownWrapper(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }

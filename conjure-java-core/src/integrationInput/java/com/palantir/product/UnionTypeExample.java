@@ -30,7 +30,7 @@ import javax.annotation.Nonnull;
 public final class UnionTypeExample {
     private final Base value;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     private UnionTypeExample(Base value) {
         this.value = value;
     }
@@ -448,7 +448,7 @@ public final class UnionTypeExample {
     private static final class StringExampleWrapper implements Base {
         private final StringExample value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private StringExampleWrapper(@JsonSetter("stringExample") @Nonnull StringExample value) {
             Preconditions.checkNotNull(value, "stringExample cannot be null");
             this.value = value;
@@ -488,7 +488,7 @@ public final class UnionTypeExample {
     private static final class SetWrapper implements Base {
         private final Set<String> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private SetWrapper(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull Set<String> value) {
             Preconditions.checkNotNull(value, "set cannot be null");
             this.value = value;
@@ -528,7 +528,7 @@ public final class UnionTypeExample {
     private static final class ThisFieldIsAnIntegerWrapper implements Base {
         private final int value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private ThisFieldIsAnIntegerWrapper(@JsonSetter("thisFieldIsAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "thisFieldIsAnInteger cannot be null");
             this.value = value;
@@ -569,7 +569,7 @@ public final class UnionTypeExample {
     private static final class AlsoAnIntegerWrapper implements Base {
         private final int value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private AlsoAnIntegerWrapper(@JsonSetter("alsoAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "alsoAnInteger cannot be null");
             this.value = value;
@@ -609,7 +609,7 @@ public final class UnionTypeExample {
     private static final class IfWrapper implements Base {
         private final int value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private IfWrapper(@JsonSetter("if") @Nonnull int value) {
             Preconditions.checkNotNull(value, "if cannot be null");
             this.value = value;
@@ -649,7 +649,7 @@ public final class UnionTypeExample {
     private static final class NewWrapper implements Base {
         private final int value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private NewWrapper(@JsonSetter("new") @Nonnull int value) {
             Preconditions.checkNotNull(value, "new cannot be null");
             this.value = value;
@@ -689,7 +689,7 @@ public final class UnionTypeExample {
     private static final class InterfaceWrapper implements Base {
         private final int value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private InterfaceWrapper(@JsonSetter("interface") @Nonnull int value) {
             Preconditions.checkNotNull(value, "interface cannot be null");
             this.value = value;
@@ -729,7 +729,7 @@ public final class UnionTypeExample {
     private static final class CompletedWrapper implements Base {
         private final int value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private CompletedWrapper(@JsonSetter("completed") @Nonnull int value) {
             Preconditions.checkNotNull(value, "completed cannot be null");
             this.value = value;
@@ -769,7 +769,7 @@ public final class UnionTypeExample {
     private static final class Unknown_Wrapper implements Base {
         private final int value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private Unknown_Wrapper(@JsonSetter("unknown") @Nonnull int value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
@@ -809,7 +809,7 @@ public final class UnionTypeExample {
     private static final class OptionalWrapper implements Base {
         private final Optional<String> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private OptionalWrapper(@JsonSetter("optional") @Nonnull Optional<String> value) {
             Preconditions.checkNotNull(value, "optional cannot be null");
             this.value = value;
@@ -849,7 +849,7 @@ public final class UnionTypeExample {
     private static final class ListWrapper implements Base {
         private final List<String> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private ListWrapper(@JsonSetter(value = "list", nulls = Nulls.AS_EMPTY) @Nonnull List<String> value) {
             Preconditions.checkNotNull(value, "list cannot be null");
             this.value = value;
@@ -889,7 +889,7 @@ public final class UnionTypeExample {
     private static final class MapWrapper implements Base {
         private final Map<String, String> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private MapWrapper(@JsonSetter(value = "map", nulls = Nulls.AS_EMPTY) @Nonnull Map<String, String> value) {
             Preconditions.checkNotNull(value, "map cannot be null");
             this.value = value;
@@ -935,7 +935,7 @@ public final class UnionTypeExample {
 
         private final Map<String, Object> value;
 
-        @JsonCreator
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         private UnknownWrapper(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }

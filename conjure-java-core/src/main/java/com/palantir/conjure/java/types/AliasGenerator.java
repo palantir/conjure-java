@@ -108,7 +108,7 @@ public final class AliasGenerator {
 
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addAnnotation(JsonCreator.class)
+                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                 .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"))
                 .returns(thisClass)
                 .addStatement("return new $T(value)", thisClass)
@@ -131,7 +131,7 @@ public final class AliasGenerator {
 
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addAnnotation(JsonCreator.class)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(TypeName.LONG, "value")
                     .returns(thisClass)
                     .addCode(longCastCodeBlock)
@@ -139,7 +139,7 @@ public final class AliasGenerator {
 
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addAnnotation(JsonCreator.class)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(TypeName.INT, "value")
                     .returns(thisClass)
                     .addCode(intCastCodeBlock)
@@ -170,7 +170,7 @@ public final class AliasGenerator {
 
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addAnnotation(JsonCreator.class)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(ClassName.get(String.class), "value")
                     .returns(thisClass)
                     .addCode(doubleFromStringCodeBlock)
