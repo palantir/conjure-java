@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -130,7 +131,7 @@ public final class UnionWithUnknownString {
         private final String value;
 
         @JsonCreator
-        private Unknown_Wrapper(@JsonProperty("unknown") @Nonnull String value) {
+        private Unknown_Wrapper(@JsonSetter("unknown") @Nonnull String value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
         }

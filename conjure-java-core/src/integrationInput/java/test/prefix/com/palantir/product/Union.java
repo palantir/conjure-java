@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -207,7 +208,7 @@ public final class Union {
         private final String value;
 
         @JsonCreator
-        private FooWrapper(@JsonProperty("foo") @Nonnull String value) {
+        private FooWrapper(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
@@ -247,7 +248,7 @@ public final class Union {
         private final int value;
 
         @JsonCreator
-        private BarWrapper(@JsonProperty("bar") @Nonnull int value) {
+        private BarWrapper(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
@@ -288,7 +289,7 @@ public final class Union {
         private final long value;
 
         @JsonCreator
-        private BazWrapper(@JsonProperty("baz") @Nonnull long value) {
+        private BazWrapper(@JsonSetter("baz") @Nonnull long value) {
             Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
         }

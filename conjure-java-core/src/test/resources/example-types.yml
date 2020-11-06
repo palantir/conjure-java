@@ -178,6 +178,9 @@ types:
           interface: integer
           completed: integer
           unknown: integer
+          optional: optional<string>
+          list: list<string>
+          map: map<string, string>
       UnionWithUnknownString:
         union:
           unknown: string
