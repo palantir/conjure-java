@@ -32,7 +32,7 @@ public final class LongAlias {
         return Long.hashCode(value);
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static LongAlias valueOf(String value) {
         return of(Long.valueOf(value));
     }

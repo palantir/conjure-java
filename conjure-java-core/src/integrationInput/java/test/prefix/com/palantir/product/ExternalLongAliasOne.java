@@ -33,7 +33,7 @@ public final class ExternalLongAliasOne {
         return Long.hashCode(value);
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ExternalLongAliasOne valueOf(String value) {
         return of(Long.valueOf(value));
     }

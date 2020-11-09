@@ -4,24 +4,24 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class MapAliasExample {
-    private final Map<String, Object> value;
+public final class ListAlias {
+    private final List<String> value;
 
-    private MapAliasExample(@Nonnull Map<String, Object> value) {
+    private ListAlias(@Nonnull List<String> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private MapAliasExample() {
-        this(Collections.emptyMap());
+    private ListAlias() {
+        this(Collections.emptyList());
     }
 
     @JsonValue
-    public Map<String, Object> get() {
+    public List<String> get() {
         return value;
     }
 
@@ -32,8 +32,7 @@ public final class MapAliasExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof MapAliasExample && this.value.equals(((MapAliasExample) other).value));
+        return this == other || (other instanceof ListAlias && this.value.equals(((ListAlias) other).value));
     }
 
     @Override
@@ -42,7 +41,7 @@ public final class MapAliasExample {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static MapAliasExample of(@Nonnull Map<String, Object> value) {
-        return new MapAliasExample(value);
+    public static ListAlias of(@Nonnull List<String> value) {
+        return new ListAlias(value);
     }
 }

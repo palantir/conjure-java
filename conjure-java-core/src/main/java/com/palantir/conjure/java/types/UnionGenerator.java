@@ -35,9 +35,11 @@ import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.StableCollectors;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
@@ -76,7 +78,11 @@ public final class UnionGenerator {
     // If the member type is not known, a String containing the name of the unknown type is used.
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
 
-    public static JavaFile generateUnionType(TypeMapper typeMapper, UnionDefinition typeDef, Options options) {
+    public static JavaFile generateUnionType(
+            TypeMapper typeMapper,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            UnionDefinition typeDef,
+            Options options) {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
         ClassName unionClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
@@ -103,7 +109,7 @@ public final class UnionGenerator {
                 .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes))
                 .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes))
                 .addType(generateBase(baseClass, visitorClass, memberTypes))
-                .addTypes(generateWrapperClasses(typeMapper, baseClass, visitorClass, typeDef.getUnion()))
+                .addTypes(generateWrapperClasses(typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion()))
                 .addType(generateUnknownWrapper(baseClass, visitorClass))
                 .addMethod(generateEquals(unionClass))
                 .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
@@ -517,7 +523,11 @@ public final class UnionGenerator {
     }
 
     private static List<TypeSpec> generateWrapperClasses(
-            TypeMapper typeMapper, ClassName baseClass, ClassName visitorClass, List<FieldDefinition> memberTypeDefs) {
+            TypeMapper typeMapper,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            ClassName baseClass,
+            ClassName visitorClass,
+            List<FieldDefinition> memberTypeDefs) {
         return memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
@@ -540,7 +550,8 @@ public final class UnionGenerator {
                                     .addModifiers(Modifier.PRIVATE)
                                     .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                                     .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
-                                            .addAnnotation(wrapperConstructorParameterAnnotation(memberTypeDef))
+                                            .addAnnotation(
+                                                    wrapperConstructorParameterAnnotation(memberTypeDef, typesMap))
                                             .addAnnotation(Nonnull.class)
                                             .build())
                                     .addStatement(
@@ -577,17 +588,22 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
-    private static AnnotationSpec wrapperConstructorParameterAnnotation(FieldDefinition field) {
+    private static AnnotationSpec wrapperConstructorParameterAnnotation(
+            FieldDefinition field, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonSetter.class)
                 .addMember("value", "$S", field.getFieldName().get());
-        if (isListSetOrMap(field.getType())) {
+        Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(field.getType(), typesMap);
+        if (supportsNullCoercion(dealiased)) {
             builder.addMember("nulls", "$T.AS_EMPTY", Nulls.class);
         }
         return builder.build();
     }
 
-    private static boolean isListSetOrMap(Type type) {
-        return type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP);
+    private static boolean supportsNullCoercion(Type type) {
+        return type.accept(TypeVisitor.IS_LIST)
+                || type.accept(TypeVisitor.IS_SET)
+                || type.accept(TypeVisitor.IS_MAP)
+                || type.accept(TypeVisitor.IS_OPTIONAL);
     }
 
     private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass) {
