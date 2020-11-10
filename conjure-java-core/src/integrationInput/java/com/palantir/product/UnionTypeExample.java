@@ -47,10 +47,6 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new StringExampleWrapper(value));
     }
 
-    public static UnionTypeExample set(Set<String> value) {
-        return new UnionTypeExample(new SetWrapper(value));
-    }
-
     public static UnionTypeExample thisFieldIsAnInteger(int value) {
         return new UnionTypeExample(new ThisFieldIsAnIntegerWrapper(value));
     }
@@ -87,8 +83,28 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new ListWrapper(value));
     }
 
+    public static UnionTypeExample set(Set<String> value) {
+        return new UnionTypeExample(new SetWrapper(value));
+    }
+
     public static UnionTypeExample map(Map<String, String> value) {
         return new UnionTypeExample(new MapWrapper(value));
+    }
+
+    public static UnionTypeExample optionalAlias(OptionalAlias value) {
+        return new UnionTypeExample(new OptionalAliasWrapper(value));
+    }
+
+    public static UnionTypeExample listAlias(ListAlias value) {
+        return new UnionTypeExample(new ListAliasWrapper(value));
+    }
+
+    public static UnionTypeExample setAlias(SetAlias value) {
+        return new UnionTypeExample(new SetAliasWrapper(value));
+    }
+
+    public static UnionTypeExample mapAlias(MapAliasExample value) {
+        return new UnionTypeExample(new MapAliasWrapper(value));
     }
 
     public <T> T accept(Visitor<T> visitor) {
@@ -120,8 +136,6 @@ public final class UnionTypeExample {
          */
         T visitStringExample(StringExample value);
 
-        T visitSet(Set<String> value);
-
         T visitThisFieldIsAnInteger(int value);
 
         T visitAlsoAnInteger(int value);
@@ -140,7 +154,17 @@ public final class UnionTypeExample {
 
         T visitList(List<String> value);
 
+        T visitSet(Set<String> value);
+
         T visitMap(Map<String, String> value);
+
+        T visitOptionalAlias(OptionalAlias value);
+
+        T visitListAlias(ListAlias value);
+
+        T visitSetAlias(SetAlias value);
+
+        T visitMapAlias(MapAliasExample value);
 
         T visitUnknown(String unknownType);
 
@@ -155,10 +179,14 @@ public final class UnionTypeExample {
                     IfStageVisitorBuilder<T>,
                     InterfaceStageVisitorBuilder<T>,
                     ListStageVisitorBuilder<T>,
+                    ListAliasStageVisitorBuilder<T>,
                     MapStageVisitorBuilder<T>,
+                    MapAliasStageVisitorBuilder<T>,
                     NewStageVisitorBuilder<T>,
                     OptionalStageVisitorBuilder<T>,
+                    OptionalAliasStageVisitorBuilder<T>,
                     SetStageVisitorBuilder<T>,
+                    SetAliasStageVisitorBuilder<T>,
                     StringExampleStageVisitorBuilder<T>,
                     ThisFieldIsAnIntegerStageVisitorBuilder<T>,
                     Unknown_StageVisitorBuilder<T>,
@@ -174,13 +202,21 @@ public final class UnionTypeExample {
 
         private Function<List<String>, T> listVisitor;
 
+        private Function<ListAlias, T> listAliasVisitor;
+
         private Function<Map<String, String>, T> mapVisitor;
+
+        private Function<MapAliasExample, T> mapAliasVisitor;
 
         private IntFunction<T> newVisitor;
 
         private Function<Optional<String>, T> optionalVisitor;
 
+        private Function<OptionalAlias, T> optionalAliasVisitor;
+
         private Function<Set<String>, T> setVisitor;
+
+        private Function<SetAlias, T> setAliasVisitor;
 
         private Function<StringExample, T> stringExampleVisitor;
 
@@ -219,16 +255,30 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public MapStageVisitorBuilder<T> list(@Nonnull Function<List<String>, T> listVisitor) {
+        public ListAliasStageVisitorBuilder<T> list(@Nonnull Function<List<String>, T> listVisitor) {
             Preconditions.checkNotNull(listVisitor, "listVisitor cannot be null");
             this.listVisitor = listVisitor;
             return this;
         }
 
         @Override
-        public NewStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor) {
+        public MapStageVisitorBuilder<T> listAlias(@Nonnull Function<ListAlias, T> listAliasVisitor) {
+            Preconditions.checkNotNull(listAliasVisitor, "listAliasVisitor cannot be null");
+            this.listAliasVisitor = listAliasVisitor;
+            return this;
+        }
+
+        @Override
+        public MapAliasStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor) {
             Preconditions.checkNotNull(mapVisitor, "mapVisitor cannot be null");
             this.mapVisitor = mapVisitor;
+            return this;
+        }
+
+        @Override
+        public NewStageVisitorBuilder<T> mapAlias(@Nonnull Function<MapAliasExample, T> mapAliasVisitor) {
+            Preconditions.checkNotNull(mapAliasVisitor, "mapAliasVisitor cannot be null");
+            this.mapAliasVisitor = mapAliasVisitor;
             return this;
         }
 
@@ -240,16 +290,30 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public SetStageVisitorBuilder<T> optional(@Nonnull Function<Optional<String>, T> optionalVisitor) {
+        public OptionalAliasStageVisitorBuilder<T> optional(@Nonnull Function<Optional<String>, T> optionalVisitor) {
             Preconditions.checkNotNull(optionalVisitor, "optionalVisitor cannot be null");
             this.optionalVisitor = optionalVisitor;
             return this;
         }
 
         @Override
-        public StringExampleStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor) {
+        public SetStageVisitorBuilder<T> optionalAlias(@Nonnull Function<OptionalAlias, T> optionalAliasVisitor) {
+            Preconditions.checkNotNull(optionalAliasVisitor, "optionalAliasVisitor cannot be null");
+            this.optionalAliasVisitor = optionalAliasVisitor;
+            return this;
+        }
+
+        @Override
+        public SetAliasStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor) {
             Preconditions.checkNotNull(setVisitor, "setVisitor cannot be null");
             this.setVisitor = setVisitor;
+            return this;
+        }
+
+        @Override
+        public StringExampleStageVisitorBuilder<T> setAlias(@Nonnull Function<SetAlias, T> setAliasVisitor) {
+            Preconditions.checkNotNull(setAliasVisitor, "setAliasVisitor cannot be null");
+            this.setAliasVisitor = setAliasVisitor;
             return this;
         }
 
@@ -290,10 +354,14 @@ public final class UnionTypeExample {
             final IntFunction<T> ifVisitor = this.ifVisitor;
             final IntFunction<T> interfaceVisitor = this.interfaceVisitor;
             final Function<List<String>, T> listVisitor = this.listVisitor;
+            final Function<ListAlias, T> listAliasVisitor = this.listAliasVisitor;
             final Function<Map<String, String>, T> mapVisitor = this.mapVisitor;
+            final Function<MapAliasExample, T> mapAliasVisitor = this.mapAliasVisitor;
             final IntFunction<T> newVisitor = this.newVisitor;
             final Function<Optional<String>, T> optionalVisitor = this.optionalVisitor;
+            final Function<OptionalAlias, T> optionalAliasVisitor = this.optionalAliasVisitor;
             final Function<Set<String>, T> setVisitor = this.setVisitor;
+            final Function<SetAlias, T> setAliasVisitor = this.setAliasVisitor;
             final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
             final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
             final IntFunction<T> unknown_Visitor = this.unknown_Visitor;
@@ -325,8 +393,18 @@ public final class UnionTypeExample {
                 }
 
                 @Override
+                public T visitListAlias(ListAlias value) {
+                    return listAliasVisitor.apply(value);
+                }
+
+                @Override
                 public T visitMap(Map<String, String> value) {
                     return mapVisitor.apply(value);
+                }
+
+                @Override
+                public T visitMapAlias(MapAliasExample value) {
+                    return mapAliasVisitor.apply(value);
                 }
 
                 @Override
@@ -340,8 +418,18 @@ public final class UnionTypeExample {
                 }
 
                 @Override
+                public T visitOptionalAlias(OptionalAlias value) {
+                    return optionalAliasVisitor.apply(value);
+                }
+
+                @Override
                 public T visitSet(Set<String> value) {
                     return setVisitor.apply(value);
+                }
+
+                @Override
+                public T visitSetAlias(SetAlias value) {
+                    return setAliasVisitor.apply(value);
                 }
 
                 @Override
@@ -384,11 +472,19 @@ public final class UnionTypeExample {
     }
 
     public interface ListStageVisitorBuilder<T> {
-        MapStageVisitorBuilder<T> list(@Nonnull Function<List<String>, T> listVisitor);
+        ListAliasStageVisitorBuilder<T> list(@Nonnull Function<List<String>, T> listVisitor);
+    }
+
+    public interface ListAliasStageVisitorBuilder<T> {
+        MapStageVisitorBuilder<T> listAlias(@Nonnull Function<ListAlias, T> listAliasVisitor);
     }
 
     public interface MapStageVisitorBuilder<T> {
-        NewStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor);
+        MapAliasStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor);
+    }
+
+    public interface MapAliasStageVisitorBuilder<T> {
+        NewStageVisitorBuilder<T> mapAlias(@Nonnull Function<MapAliasExample, T> mapAliasVisitor);
     }
 
     public interface NewStageVisitorBuilder<T> {
@@ -396,11 +492,19 @@ public final class UnionTypeExample {
     }
 
     public interface OptionalStageVisitorBuilder<T> {
-        SetStageVisitorBuilder<T> optional(@Nonnull Function<Optional<String>, T> optionalVisitor);
+        OptionalAliasStageVisitorBuilder<T> optional(@Nonnull Function<Optional<String>, T> optionalVisitor);
+    }
+
+    public interface OptionalAliasStageVisitorBuilder<T> {
+        SetStageVisitorBuilder<T> optionalAlias(@Nonnull Function<OptionalAlias, T> optionalAliasVisitor);
     }
 
     public interface SetStageVisitorBuilder<T> {
-        StringExampleStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor);
+        SetAliasStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor);
+    }
+
+    public interface SetAliasStageVisitorBuilder<T> {
+        StringExampleStageVisitorBuilder<T> setAlias(@Nonnull Function<SetAlias, T> setAliasVisitor);
     }
 
     public interface StringExampleStageVisitorBuilder<T> {
@@ -427,7 +531,6 @@ public final class UnionTypeExample {
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
         @JsonSubTypes.Type(StringExampleWrapper.class),
-        @JsonSubTypes.Type(SetWrapper.class),
         @JsonSubTypes.Type(ThisFieldIsAnIntegerWrapper.class),
         @JsonSubTypes.Type(AlsoAnIntegerWrapper.class),
         @JsonSubTypes.Type(IfWrapper.class),
@@ -437,7 +540,12 @@ public final class UnionTypeExample {
         @JsonSubTypes.Type(Unknown_Wrapper.class),
         @JsonSubTypes.Type(OptionalWrapper.class),
         @JsonSubTypes.Type(ListWrapper.class),
-        @JsonSubTypes.Type(MapWrapper.class)
+        @JsonSubTypes.Type(SetWrapper.class),
+        @JsonSubTypes.Type(MapWrapper.class),
+        @JsonSubTypes.Type(OptionalAliasWrapper.class),
+        @JsonSubTypes.Type(ListAliasWrapper.class),
+        @JsonSubTypes.Type(SetAliasWrapper.class),
+        @JsonSubTypes.Type(MapAliasWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
@@ -481,46 +589,6 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return "StringExampleWrapper{value: " + value + '}';
-        }
-    }
-
-    @JsonTypeName("set")
-    private static final class SetWrapper implements Base {
-        private final Set<String> value;
-
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private SetWrapper(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull Set<String> value) {
-            Preconditions.checkNotNull(value, "set cannot be null");
-            this.value = value;
-        }
-
-        @JsonProperty("set")
-        private Set<String> getValue() {
-            return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitSet(value);
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof SetWrapper && equalTo((SetWrapper) other));
-        }
-
-        private boolean equalTo(SetWrapper other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(this.value);
-        }
-
-        @Override
-        public String toString() {
-            return "SetWrapper{value: " + value + '}';
         }
     }
 
@@ -810,7 +878,8 @@ public final class UnionTypeExample {
         private final Optional<String> value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private OptionalWrapper(@JsonSetter("optional") @Nonnull Optional<String> value) {
+        private OptionalWrapper(
+                @JsonSetter(value = "optional", nulls = Nulls.AS_EMPTY) @Nonnull Optional<String> value) {
             Preconditions.checkNotNull(value, "optional cannot be null");
             this.value = value;
         }
@@ -885,6 +954,46 @@ public final class UnionTypeExample {
         }
     }
 
+    @JsonTypeName("set")
+    private static final class SetWrapper implements Base {
+        private final Set<String> value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private SetWrapper(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull Set<String> value) {
+            Preconditions.checkNotNull(value, "set cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("set")
+        private Set<String> getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitSet(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof SetWrapper && equalTo((SetWrapper) other));
+        }
+
+        private boolean equalTo(SetWrapper other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "SetWrapper{value: " + value + '}';
+        }
+    }
+
     @JsonTypeName("map")
     private static final class MapWrapper implements Base {
         private final Map<String, String> value;
@@ -922,6 +1031,168 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return "MapWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("optionalAlias")
+    private static final class OptionalAliasWrapper implements Base {
+        private final OptionalAlias value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private OptionalAliasWrapper(
+                @JsonSetter(value = "optionalAlias", nulls = Nulls.AS_EMPTY) @Nonnull OptionalAlias value) {
+            Preconditions.checkNotNull(value, "optionalAlias cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("optionalAlias")
+        private OptionalAlias getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitOptionalAlias(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof OptionalAliasWrapper && equalTo((OptionalAliasWrapper) other));
+        }
+
+        private boolean equalTo(OptionalAliasWrapper other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "OptionalAliasWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("listAlias")
+    private static final class ListAliasWrapper implements Base {
+        private final ListAlias value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private ListAliasWrapper(@JsonSetter(value = "listAlias", nulls = Nulls.AS_EMPTY) @Nonnull ListAlias value) {
+            Preconditions.checkNotNull(value, "listAlias cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("listAlias")
+        private ListAlias getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitListAlias(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof ListAliasWrapper && equalTo((ListAliasWrapper) other));
+        }
+
+        private boolean equalTo(ListAliasWrapper other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "ListAliasWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("setAlias")
+    private static final class SetAliasWrapper implements Base {
+        private final SetAlias value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private SetAliasWrapper(@JsonSetter(value = "setAlias", nulls = Nulls.AS_EMPTY) @Nonnull SetAlias value) {
+            Preconditions.checkNotNull(value, "setAlias cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("setAlias")
+        private SetAlias getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitSetAlias(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof SetAliasWrapper && equalTo((SetAliasWrapper) other));
+        }
+
+        private boolean equalTo(SetAliasWrapper other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "SetAliasWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("mapAlias")
+    private static final class MapAliasWrapper implements Base {
+        private final MapAliasExample value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private MapAliasWrapper(
+                @JsonSetter(value = "mapAlias", nulls = Nulls.AS_EMPTY) @Nonnull MapAliasExample value) {
+            Preconditions.checkNotNull(value, "mapAlias cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty("mapAlias")
+        private MapAliasExample getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitMapAlias(value);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return this == other || (other instanceof MapAliasWrapper && equalTo((MapAliasWrapper) other));
+        }
+
+        private boolean equalTo(MapAliasWrapper other) {
+            return this.value.equals(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "MapAliasWrapper{value: " + value + '}';
         }
     }
 

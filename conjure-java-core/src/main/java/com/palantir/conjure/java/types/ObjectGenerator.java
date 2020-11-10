@@ -21,9 +21,11 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.squareup.javapoet.JavaFile;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class ObjectGenerator implements TypeGenerator {
@@ -36,7 +38,8 @@ public final class ObjectGenerator implements TypeGenerator {
 
     @Override
     public List<JavaFile> generateTypes(List<TypeDefinition> types) {
-        TypeMapper typeMapper = new TypeMapper(TypeFunctions.toTypesMap(types), options);
+        Map<TypeName, TypeDefinition> typesMap = TypeFunctions.toTypesMap(types);
+        TypeMapper typeMapper = new TypeMapper(typesMap, options);
 
         return types.stream()
                 .map(typeDef -> {
@@ -45,7 +48,7 @@ public final class ObjectGenerator implements TypeGenerator {
                                 typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), options);
                     } else if (typeDef.accept(TypeDefinitionVisitor.IS_UNION)) {
                         return UnionGenerator.generateUnionType(
-                                typeMapper, typeDef.accept(TypeDefinitionVisitor.UNION), options);
+                                typeMapper, typesMap, typeDef.accept(TypeDefinitionVisitor.UNION), options);
                     } else if (typeDef.accept(TypeDefinitionVisitor.IS_ENUM)) {
                         return EnumGenerator.generateEnumType(typeDef.accept(TypeDefinitionVisitor.ENUM), options);
                     } else if (typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)) {
