@@ -36,12 +36,12 @@ import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.java.util.TypeFunctions;
+import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
-import com.palantir.conjure.visitor.TypeVisitor;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -593,17 +593,10 @@ public final class UnionGenerator {
         AnnotationSpec.Builder builder = AnnotationSpec.builder(JsonSetter.class)
                 .addMember("value", "$S", field.getFieldName().get());
         Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(field.getType(), typesMap);
-        if (supportsNullCoercion(dealiased)) {
+        if (dealiased.accept(DefaultableTypeVisitor.INSTANCE)) {
             builder.addMember("nulls", "$T.AS_EMPTY", Nulls.class);
         }
         return builder.build();
-    }
-
-    private static boolean supportsNullCoercion(Type type) {
-        return type.accept(TypeVisitor.IS_LIST)
-                || type.accept(TypeVisitor.IS_SET)
-                || type.accept(TypeVisitor.IS_MAP)
-                || type.accept(TypeVisitor.IS_OPTIONAL);
     }
 
     private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass) {

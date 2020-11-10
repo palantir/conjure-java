@@ -238,6 +238,8 @@ public final class AliasGenerator {
 
         @Override
         public Optional<MethodSpec> visitReference(com.palantir.conjure.spec.TypeName value) {
+            // TODO(ckozak): Ideally this would support recursive aliases, for example an alias of alias of list
+            // should have a default constructor.
             return Optional.empty();
         }
 
