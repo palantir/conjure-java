@@ -21,20 +21,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
+import com.palantir.conjure.java.GenerationCoordinator;
+import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
-import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
+import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
-import com.palantir.conjure.java.types.TypeGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
 import picocli.CommandLine;
 
@@ -187,26 +190,24 @@ public final class ConjureJavaCli implements Runnable {
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
 
+                ImmutableSet.Builder<Generator> generatorBuilder = ImmutableSet.builder();
                 if (config.generateObjects()) {
-                    TypeGenerator typeGenerator = new ObjectGenerator(config.options());
-                    typeGenerator.emit(conjureDefinition, config.outputDirectory());
+                    generatorBuilder.add(new ObjectGenerator(config.options()), new ErrorGenerator(config.options()));
                 }
                 if (config.generateJersey()) {
-                    ServiceGenerator jerseyGenerator = new JerseyServiceGenerator(config.options());
-                    jerseyGenerator.emit(conjureDefinition, config.outputDirectory());
+                    generatorBuilder.add(new JerseyServiceGenerator(config.options()));
                 }
                 if (config.generateRetrofit()) {
-                    ServiceGenerator retrofitGenerator = new Retrofit2ServiceGenerator(config.options());
-                    retrofitGenerator.emit(conjureDefinition, config.outputDirectory());
+                    generatorBuilder.add(new Retrofit2ServiceGenerator(config.options()));
                 }
                 if (config.generateUndertow()) {
-                    ServiceGenerator undertowGenerator = new UndertowServiceGenerator(config.options());
-                    undertowGenerator.emit(conjureDefinition, config.outputDirectory());
+                    generatorBuilder.add(new UndertowServiceGenerator(config.options()));
                 }
                 if (config.generateDialogue()) {
-                    ServiceGenerator dialogueServiceGenerator = new DialogueServiceGenerator(config.options());
-                    dialogueServiceGenerator.emit(conjureDefinition, config.outputDirectory());
+                    generatorBuilder.add(new DialogueServiceGenerator(config.options()));
                 }
+                new GenerationCoordinator(Executors.newCachedThreadPool(), generatorBuilder.build())
+                        .emit(conjureDefinition, config.outputDirectory());
             } catch (IOException e) {
                 throw new SafeRuntimeException("Error parsing definition", e);
             }

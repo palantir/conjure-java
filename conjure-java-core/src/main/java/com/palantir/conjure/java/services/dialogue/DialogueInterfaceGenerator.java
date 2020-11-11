@@ -22,7 +22,7 @@ import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
-import com.palantir.conjure.java.services.ServiceGenerator;
+import com.palantir.conjure.java.services.ServiceGenerators;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -147,7 +147,7 @@ public final class DialogueInterfaceGenerator {
                         ClassName.get(referenceType.getPackage(), referenceType.getName())));
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
-        methodBuilder.addJavadoc("$L", ServiceGenerator.getJavaDocWithRequestLine(endpointDef));
+        methodBuilder.addJavadoc("$L", ServiceGenerators.getJavaDocWithRequestLine(endpointDef));
 
         TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());
         methodBuilder.returns(returnType);

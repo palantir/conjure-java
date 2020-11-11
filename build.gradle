@@ -70,7 +70,7 @@ subprojects {
     apply plugin: 'org.inferred.processors'
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
-    sourceCompatibility = 1.8
+    sourceCompatibility = 11
 
     tasks.withType(JavaCompile) {
         options.compilerArgs += ['-Werror']

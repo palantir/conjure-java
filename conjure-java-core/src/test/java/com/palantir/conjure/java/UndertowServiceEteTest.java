@@ -23,9 +23,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -515,10 +517,10 @@ public final class UndertowServiceEteTest extends TestBase {
                 .undertowServicePrefix(true)
                 .nonNullCollections(true)
                 .build();
-        List<Path> files = ImmutableList.<Path>builder()
-                .addAll(new UndertowServiceGenerator(options).emit(def, folder))
-                .addAll(new ObjectGenerator(options).emit(def, folder))
-                .build();
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new UndertowServiceGenerator(options), new ObjectGenerator(options)))
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 

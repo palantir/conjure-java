@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.services.dialogue;
 
+import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.services.ServiceGenerator;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
@@ -32,14 +32,13 @@ import com.palantir.logsafe.SafeArg;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // TODO(rfink): Add unit tests for misc edge cases, e.g.: docs/no-docs, auth/no-auth, binary return type.
-public final class DialogueServiceGenerator extends ServiceGenerator {
+public final class DialogueServiceGenerator implements Generator {
 
     private final Options options;
 
@@ -48,7 +47,7 @@ public final class DialogueServiceGenerator extends ServiceGenerator {
     }
 
     @Override
-    public List<JavaFile> generate(ConjureDefinition conjureDefinition) {
+    public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
         Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options);
         TypeMapper parameterTypes = new TypeMapper(
@@ -80,7 +79,6 @@ public final class DialogueServiceGenerator extends ServiceGenerator {
                 .flatMap(serviceDef -> Stream.of(
                         endpoints.endpointsClass(serviceDef),
                         interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
-                        interfaceGenerator.generateAsync(serviceDef, asyncGenerator)))
-                .collect(Collectors.toList());
+                        interfaceGenerator.generateAsync(serviceDef, asyncGenerator)));
     }
 }

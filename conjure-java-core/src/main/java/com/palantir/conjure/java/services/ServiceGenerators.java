@@ -18,35 +18,12 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Streams;
-import com.palantir.conjure.java.util.Goethe;
 import com.palantir.conjure.java.util.Javadoc;
-import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
-import com.squareup.javapoet.JavaFile;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public abstract class ServiceGenerator {
-
-    /** Returns the set of Java files generated from the service definitions in the given conjure specification. */
-    public abstract List<JavaFile> generate(ConjureDefinition conjureDefinition);
-
-    /**
-     * Generates and emits to the given output directory all services and types of the given conjure definition, using
-     * the instance's service and type generators.
-     */
-    public List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
-        List<Path> emittedPaths = new ArrayList<>();
-        generate(conjureDefinition).forEach(f -> {
-            Path emittedPath = Goethe.formatAndEmit(f, outputDir.toPath());
-            emittedPaths.add(emittedPath);
-        });
-        return emittedPaths;
-    }
+public final class ServiceGenerators {
 
     public static Optional<String> getJavaDoc(EndpointDefinition endpointDef) {
         return getJavaDocInternal(endpointDef, false);
@@ -78,4 +55,6 @@ public abstract class ServiceGenerator {
         depr.ifPresent(sb::append);
         return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();
     }
+
+    private ServiceGenerators() {}
 }

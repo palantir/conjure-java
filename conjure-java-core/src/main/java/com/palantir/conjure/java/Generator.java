@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-apply from: "$rootDir/gradle/publish-dist.gradle"
-apply plugin: 'com.palantir.graal'
+package com.palantir.conjure.java;
 
-mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
+import com.palantir.conjure.spec.ConjureDefinition;
+import com.squareup.javapoet.JavaFile;
+import java.util.stream.Stream;
 
-dependencies {
-    implementation project(':conjure-java-core')
-    implementation 'info.picocli:picocli'
-    runtime 'org.slf4j:slf4j-simple'
-
-    testImplementation 'org.assertj:assertj-core'
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-
-    annotationProcessor 'org.immutables:value'
-    compileOnly 'org.immutables:value::annotations'
+public interface Generator {
+    Stream<JavaFile> generate(ConjureDefinition definition);
 }

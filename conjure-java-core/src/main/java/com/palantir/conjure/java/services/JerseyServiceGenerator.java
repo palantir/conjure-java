@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureTags;
+import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
@@ -58,11 +59,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-public final class JerseyServiceGenerator extends ServiceGenerator {
+public final class JerseyServiceGenerator implements Generator {
 
     private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
 
@@ -79,7 +81,7 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
     }
 
     @Override
-    public List<JavaFile> generate(ConjureDefinition conjureDefinition) {
+    public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
         ClassName binaryReturnType =
                 options.jerseyBinaryAsResponse() ? BINARY_RETURN_TYPE_RESPONSE : BINARY_RETURN_TYPE_OUTPUT;
 
@@ -97,8 +99,7 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
                 types, new SpecializeBinaryClassNameVisitor(defaultVisitor, types, BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
-                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
-                .collect(Collectors.toList());
+                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper));
     }
 
     private JavaFile generateService(
@@ -183,7 +184,7 @@ public final class JerseyServiceGenerator extends ServiceGenerator {
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         return methodBuilder.build();
     }

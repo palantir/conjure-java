@@ -20,6 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
@@ -61,12 +62,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Retrofit2ServiceGenerator extends ServiceGenerator {
+public final class Retrofit2ServiceGenerator implements Generator {
 
     private static final ClassName LISTENABLE_FUTURE_TYPE =
             ClassName.get("com.google.common.util.concurrent", "ListenableFuture");
@@ -86,7 +88,7 @@ public final class Retrofit2ServiceGenerator extends ServiceGenerator {
     }
 
     @Override
-    public List<JavaFile> generate(ConjureDefinition conjureDefinition) {
+    public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
         TypeMapper returnTypeMapper = new TypeMapper(
@@ -98,8 +100,7 @@ public final class Retrofit2ServiceGenerator extends ServiceGenerator {
                 types, new SpecializeBinaryClassNameVisitor(defaultVisitor, types, BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
-                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper))
-                .collect(Collectors.toList());
+                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper));
     }
 
     private JavaFile generateService(
@@ -163,7 +164,7 @@ public final class Retrofit2ServiceGenerator extends ServiceGenerator {
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        ServiceGenerator.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
+        ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
         methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box()));
 
