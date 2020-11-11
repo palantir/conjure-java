@@ -19,6 +19,8 @@ package com.palantir.conjure.java;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -44,7 +46,9 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
     public void testCompositionVanilla() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
 
-        List<Path> files = new Retrofit2ServiceGenerator(Options.empty()).emit(def, folder);
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new Retrofit2ServiceGenerator(Options.empty())))
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit");
     }
 
@@ -56,8 +60,9 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
                 new File("src/test/resources/example-service.yml")));
 
         File src = Files.createDirectory(folder.toPath().resolve("src")).toFile();
-        Retrofit2ServiceGenerator generator = new Retrofit2ServiceGenerator(Options.empty());
-        generator.emit(conjure, src);
+        new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new Retrofit2ServiceGenerator(Options.empty())))
+                .emit(conjure, src);
 
         // Generated files contain imports
         assertThat(compiledFileContent(src, "test/api/with/imports/ImportServiceRetrofit.java"))
@@ -67,8 +72,10 @@ public final class Retrofit2ServiceGeneratorTests extends TestBase {
     @Test
     void testPrefixedServices() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
-        List<Path> files = new Retrofit2ServiceGenerator(
-                        Options.builder().packagePrefix("test.prefix").build())
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new Retrofit2ServiceGenerator(
+                                Options.builder().packagePrefix("test.prefix").build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".retrofit.prefix");
     }

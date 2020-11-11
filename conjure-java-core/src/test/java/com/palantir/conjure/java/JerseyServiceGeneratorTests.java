@@ -19,6 +19,8 @@ package com.palantir.conjure.java;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -57,8 +59,11 @@ public final class JerseyServiceGeneratorTests extends TestBase {
     @Test
     public void testServiceGeneration_exampleService_requireNotNullAuthHeadersAndRequestBodies() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
-        List<Path> files = new JerseyServiceGenerator(
-                        Options.builder().requireNotNullAuthAndBodyParams(true).build())
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new JerseyServiceGenerator(Options.builder()
+                                .requireNotNullAuthAndBodyParams(true)
+                                .build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey_require_not_null");
     }
@@ -70,8 +75,9 @@ public final class JerseyServiceGeneratorTests extends TestBase {
                 new File("src/test/resources/example-types.yml"),
                 new File("src/test/resources/example-service.yml")));
         File src = Files.createDirectory(folder.toPath().resolve("src")).toFile();
-        JerseyServiceGenerator generator = new JerseyServiceGenerator(Options.empty());
-        generator.emit(conjure, src);
+        new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new JerseyServiceGenerator(Options.empty())))
+                .emit(conjure, src);
 
         // Generated files contain imports
         assertThat(compiledFileContent(src, "test/api/with/imports/ImportService.java"))
@@ -81,15 +87,19 @@ public final class JerseyServiceGeneratorTests extends TestBase {
     @Test
     public void testBinaryReturnInputStream() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary.yml")));
-        List<Path> files = new JerseyServiceGenerator(Options.empty()).emit(def, folder);
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new JerseyServiceGenerator(Options.empty())))
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.binary");
     }
 
     @Test
     public void testBinaryReturnResponse() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary.yml")));
-        List<Path> files = new JerseyServiceGenerator(
-                        Options.builder().jerseyBinaryAsResponse(true).build())
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new JerseyServiceGenerator(
+                                Options.builder().jerseyBinaryAsResponse(true).build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.binary_as_response");
     }
@@ -97,16 +107,21 @@ public final class JerseyServiceGeneratorTests extends TestBase {
     @Test
     void testPrefixedServices() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
-        List<Path> files = new JerseyServiceGenerator(
-                        Options.builder().packagePrefix("test.prefix").build())
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new JerseyServiceGenerator(
+                                Options.builder().packagePrefix("test.prefix").build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey.prefix");
     }
 
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        List<Path> files = new JerseyServiceGenerator(
-                        Options.builder().requireNotNullAuthAndBodyParams(true).build())
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new JerseyServiceGenerator(Options.builder()
+                                .requireNotNullAuthAndBodyParams(true)
+                                .build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".jersey");
     }

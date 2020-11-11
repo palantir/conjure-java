@@ -19,6 +19,8 @@ package com.palantir.conjure.java;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -57,8 +59,10 @@ public final class DialogueServiceGeneratorTests extends TestBase {
     @Test
     void testPrefixedServices() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-service.yml")));
-        List<Path> files = new DialogueServiceGenerator(
-                        Options.builder().packagePrefix("test.prefix").build())
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new DialogueServiceGenerator(
+                                Options.builder().packagePrefix("test.prefix").build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".dialogue.prefix");
     }
@@ -70,8 +74,9 @@ public final class DialogueServiceGeneratorTests extends TestBase {
                 new File("src/test/resources/example-types.yml"),
                 new File("src/test/resources/example-service.yml")));
         File src = Files.createDirectory(folder.toPath().resolve("src")).toFile();
-        DialogueServiceGenerator generator = new DialogueServiceGenerator(Options.empty());
-        generator.emit(conjure, src);
+        new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new DialogueServiceGenerator(Options.empty())))
+                .emit(conjure, src);
 
         // Generated files contain imports
         assertThat(compiledFileContent(src, "test/api/with/imports/ImportServiceBlocking.java"))
@@ -84,15 +89,19 @@ public final class DialogueServiceGeneratorTests extends TestBase {
                 new File("src/test/resources/cookie-service.yml"),
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new DialogueServiceGenerator(
-                        Options.builder().apiVersion("1.2.3").build())
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new DialogueServiceGenerator(
+                                Options.builder().apiVersion("1.2.3").build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
 
     private void testServiceGeneration(String conjureFile) throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/" + conjureFile + ".yml")));
-        List<Path> files = new DialogueServiceGenerator(Options.empty()).emit(def, folder);
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(), ImmutableSet.of(new DialogueServiceGenerator(Options.empty())))
+                .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/test/resources/test/api"), ".dialogue");
     }
 }

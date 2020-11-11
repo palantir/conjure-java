@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,18 @@ package com.palantir.conjure.java.types;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.TypeFunctions;
+import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.FieldDefinition;
+import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.squareup.javapoet.ClassName;
@@ -46,20 +50,25 @@ import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
-public final class ErrorGenerator {
+public final class ErrorGenerator implements Generator {
 
-    private ErrorGenerator() {}
+    private final Options options;
 
-    public static List<JavaFile> generateErrorTypes(
-            TypeMapper typeMapper, List<ErrorDefinition> errorTypeNameToDef, Options options) {
-        return splitErrorDefsByNamespace(errorTypeNameToDef).entrySet().stream()
+    public ErrorGenerator(Options options) {
+        this.options = options;
+    }
+
+    @Override
+    public Stream<JavaFile> generate(ConjureDefinition definition) {
+        List<TypeDefinition> types = definition.getTypes();
+        TypeMapper typeMapper = new TypeMapper(TypeFunctions.toTypesMap(types), options);
+        return splitErrorDefsByNamespace(definition.getErrors()).entrySet().stream()
                 .flatMap(entry -> entry.getValue().entrySet().stream()
                         .map(innerEntry -> generateErrorTypesForNamespace(
                                 typeMapper,
                                 Packages.getPrefixedPackage(entry.getKey(), options.packagePrefix()),
                                 innerEntry.getKey(),
-                                innerEntry.getValue())))
-                .collect(Collectors.toList());
+                                innerEntry.getValue())));
     }
 
     private static Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> splitErrorDefsByNamespace(

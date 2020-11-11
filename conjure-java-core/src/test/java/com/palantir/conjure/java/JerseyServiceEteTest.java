@@ -22,7 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
@@ -179,8 +181,11 @@ public final class JerseyServiceEteTest extends TestBase {
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"), new File("src/test/resources/ete-binary.yml")));
-        List<Path> files = new JerseyServiceGenerator(
-                        Options.builder().requireNotNullAuthAndBodyParams(true).build())
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new JerseyServiceGenerator(Options.builder()
+                                .requireNotNullAuthAndBodyParams(true)
+                                .build())))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }
