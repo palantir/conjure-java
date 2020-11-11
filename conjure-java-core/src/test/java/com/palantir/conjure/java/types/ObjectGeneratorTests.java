@@ -32,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -90,7 +89,7 @@ public final class ObjectGeneratorTests {
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
         new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        Set.of(new ObjectGenerator(
+                        ImmutableSet.of(new ObjectGenerator(
                                 Options.builder().useImmutableBytes(true).build())))
                 .emit(conjure, src);
 
