@@ -45,7 +45,7 @@ public class GenerationCoordinator {
                         generators.stream().flatMap(generator -> generator.generate(conjureDefinition)),
                         f -> Goethe.formatAndEmit(f, outputDir.toPath()),
                         executor,
-                        32)
+                        Runtime.getRuntime().availableProcessors())
                 .collect(Collectors.toList());
     }
 }
