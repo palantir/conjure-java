@@ -36,7 +36,7 @@ public final class ExternalStringAliasExample {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static ExternalStringAliasExample of(@Nonnull String value) {
         return new ExternalStringAliasExample(value);
     }

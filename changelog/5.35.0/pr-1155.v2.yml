@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Conjure types avoid jackson heuristics and ambiguity using `@JsonCreator`.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1155

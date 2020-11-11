@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.services;
+package com.palantir.conjure.java.visitor;
 
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
@@ -25,7 +25,7 @@ import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeName;
 
-enum DefaultableTypeVisitor implements Type.Visitor<Boolean> {
+public enum DefaultableTypeVisitor implements Type.Visitor<Boolean> {
     INSTANCE;
 
     @Override

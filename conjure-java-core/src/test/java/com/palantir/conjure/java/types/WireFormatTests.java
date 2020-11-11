@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.serialization.ObjectMappers;
@@ -34,9 +36,13 @@ import com.palantir.product.EnumExample;
 import com.palantir.product.ExternalLongAliasExample;
 import com.palantir.product.ExternalStringAliasExample;
 import com.palantir.product.IntegerAliasExample;
+import com.palantir.product.ListAlias;
 import com.palantir.product.ListExample;
+import com.palantir.product.MapAliasExample;
 import com.palantir.product.MapExample;
+import com.palantir.product.OptionalAlias;
 import com.palantir.product.OptionalExample;
+import com.palantir.product.SetAlias;
 import com.palantir.product.SetExample;
 import com.palantir.product.StringAliasExample;
 import com.palantir.product.StringExample;
@@ -46,6 +52,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -337,6 +346,102 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void testUnionType_excludedOptionalValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"optional\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.optional(Optional.empty()));
+    }
+
+    @Test
+    public void testUnionType_nullOptionalValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"optional\",\"optional\":null}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.optional(Optional.empty()));
+    }
+
+    @Test
+    public void testUnionType_excludedOptionalAliasValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"optionalAlias\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.optionalAlias(OptionalAlias.of(Optional.empty())));
+    }
+
+    @Test
+    public void testUnionType_nullOptionalAliasValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"optionalAlias\",\"optionalAlias\":null}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.optionalAlias(OptionalAlias.of(Optional.empty())));
+    }
+
+    @Test
+    public void testUnionType_excludedSetValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"set\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.set(ImmutableSet.of()));
+    }
+
+    @Test
+    public void testUnionType_nullSetValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"set\",\"set\":null}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.set(ImmutableSet.of()));
+    }
+
+    @Test
+    public void testUnionType_excludedSetAliasValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"setAlias\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.setAlias(SetAlias.of(ImmutableSet.of())));
+    }
+
+    @Test
+    public void testUnionType_nullSetAliasValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"setAlias\",\"setAlias\":null}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.setAlias(SetAlias.of(ImmutableSet.of())));
+    }
+
+    @Test
+    public void testUnionType_excludedListValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"list\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.list(ImmutableList.of()));
+    }
+
+    @Test
+    public void testUnionType_nullListValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"list\",\"list\":null}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.list(ImmutableList.of()));
+    }
+
+    @Test
+    public void testUnionType_excludedListAliasValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"listAlias\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.listAlias(ListAlias.of(ImmutableList.of())));
+    }
+
+    @Test
+    public void testUnionType_nullListAliasValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"listAlias\",\"listAlias\":null}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.listAlias(ListAlias.of(ImmutableList.of())));
+    }
+
+    @Test
+    public void testUnionType_excludedMapValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"map\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.map(ImmutableMap.of()));
+    }
+
+    @Test
+    public void testUnionType_nullMapValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"map\",\"map\":null}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.map(ImmutableMap.of()));
+    }
+
+    @Test
+    public void testUnionType_excludedMapAliasValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"mapAlias\"}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.mapAlias(MapAliasExample.of(ImmutableMap.of())));
+    }
+
+    @Test
+    public void testUnionType_nullMapAliasValue() throws IOException {
+        assertThat(mapper.readValue("{\"type\":\"mapAlias\",\"mapAlias\":null}", UnionTypeExample.class))
+                .isEqualTo(UnionTypeExample.mapAlias(MapAliasExample.of(ImmutableMap.of())));
+    }
+
+    @Test
     public void testDateTime_roundTrip() throws Exception {
         String serialized = "{\"datetime\":\"2017-01-02T03:04:05.000000006Z\"}";
         DateTimeExample deserialized =
@@ -493,6 +598,41 @@ public final class WireFormatTests {
         @Override
         public Integer visitUnknown_(int value) {
             return value;
+        }
+
+        @Override
+        public Integer visitOptional(Optional<String> value) {
+            return value.map(String::length).orElse(-1);
+        }
+
+        @Override
+        public Integer visitList(List<String> value) {
+            return value.size();
+        }
+
+        @Override
+        public Integer visitMap(Map<String, String> value) {
+            return value.size();
+        }
+
+        @Override
+        public Integer visitOptionalAlias(OptionalAlias _value) {
+            return -1;
+        }
+
+        @Override
+        public Integer visitListAlias(ListAlias value) {
+            return value.get().size();
+        }
+
+        @Override
+        public Integer visitSetAlias(SetAlias value) {
+            return value.get().size();
+        }
+
+        @Override
+        public Integer visitMapAlias(MapAliasExample value) {
+            return value.get().size();
         }
 
         @Override

@@ -1,26 +1,27 @@
-package com.palantir.product;
+package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class OptionalAlias {
-    private final Optional<String> value;
+public final class ListAlias {
+    private final List<String> value;
 
-    private OptionalAlias(@Nonnull Optional<String> value) {
+    private ListAlias(@Nonnull List<String> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private OptionalAlias() {
-        this(Optional.empty());
+    private ListAlias() {
+        this(Collections.emptyList());
     }
 
     @JsonValue
-    public Optional<String> get() {
+    public List<String> get() {
         return value;
     }
 
@@ -31,7 +32,7 @@ public final class OptionalAlias {
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof OptionalAlias && this.value.equals(((OptionalAlias) other).value));
+        return this == other || (other instanceof ListAlias && this.value.equals(((ListAlias) other).value));
     }
 
     @Override
@@ -40,7 +41,7 @@ public final class OptionalAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static OptionalAlias of(@Nonnull Optional<String> value) {
-        return new OptionalAlias(value);
+    public static ListAlias of(@Nonnull List<String> value) {
+        return new ListAlias(value);
     }
 }

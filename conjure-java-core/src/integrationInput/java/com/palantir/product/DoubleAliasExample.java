@@ -40,23 +40,23 @@ public final class DoubleAliasExample {
         return of(Double.parseDouble(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static DoubleAliasExample of(double value) {
         return new DoubleAliasExample(value);
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static DoubleAliasExample of(long value) {
         long safeValue = SafeLong.of(value).longValue();
         return new DoubleAliasExample((double) safeValue);
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static DoubleAliasExample of(int value) {
         return new DoubleAliasExample((double) value);
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static DoubleAliasExample of(String value) {
         switch (value) {
             case "NaN":

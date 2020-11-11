@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix union deserialization of collections with null or omitted values
+  links:
+  - https://github.com/palantir/conjure-java/pull/1154

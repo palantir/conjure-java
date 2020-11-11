@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.types;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -254,7 +253,8 @@ public final class BeanGenerator {
                 .returns(objectClass);
 
         if (fields.isEmpty()) {
-            builder.addAnnotation(JsonCreator.class).addCode("return $L;", SINGLETON_INSTANCE_NAME);
+            builder.addAnnotation(ConjureAnnotations.delegatingJsonCreator())
+                    .addCode("return $L;", SINGLETON_INSTANCE_NAME);
         } else {
             builder.addCode("return builder()");
             for (FieldSpec spec : fields) {

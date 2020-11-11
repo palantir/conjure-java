@@ -40,7 +40,7 @@ public final class SafeLongAliasExample {
         return of(SafeLong.valueOf(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static SafeLongAliasExample of(@Nonnull SafeLong value) {
         return new SafeLongAliasExample(value);
     }

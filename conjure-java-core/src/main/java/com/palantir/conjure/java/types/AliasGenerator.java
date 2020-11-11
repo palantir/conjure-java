@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.types;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
@@ -26,12 +25,16 @@ import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
+import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.MapType;
+import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.spec.Type.Visitor;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -100,24 +103,21 @@ public final class AliasGenerator {
                                     // https://github.com/FasterXML/jackson-databind/issues/2318
                                     // allow jackson to try all possible approaches to deserialize external type
                                     // imports.
-                                    ? Collections.singleton(AnnotationSpec.builder(JsonCreator.class)
-                                            .build())
+                                    ? Collections.singleton(ConjureAnnotations.delegatingJsonCreator())
                                     : Collections.emptySet())
                     .build());
         }
 
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addAnnotation(JsonCreator.class)
+                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                 .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"))
                 .returns(thisClass)
                 .addStatement("return new $T(value)", thisClass)
                 .build());
 
         // Generate a default constructor so that Jackson can construct a default instance when coercing from null
-        if (typeDef.getAlias().accept(TypeVisitor.IS_OPTIONAL)) {
-            spec.addMethod(createDefaultConstructor(aliasTypeName));
-        }
+        typeDef.getAlias().accept(new DefaultConstructorVisitor(aliasTypeName)).ifPresent(spec::addMethod);
 
         if (isAliasOfDouble(typeDef)) {
             CodeBlock longCastCodeBlock = CodeBlock.builder()
@@ -131,7 +131,7 @@ public final class AliasGenerator {
 
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addAnnotation(JsonCreator.class)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(TypeName.LONG, "value")
                     .returns(thisClass)
                     .addCode(longCastCodeBlock)
@@ -139,7 +139,7 @@ public final class AliasGenerator {
 
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addAnnotation(JsonCreator.class)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(TypeName.INT, "value")
                     .returns(thisClass)
                     .addCode(intCastCodeBlock)
@@ -170,7 +170,7 @@ public final class AliasGenerator {
 
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addAnnotation(JsonCreator.class)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(ClassName.get(String.class), "value")
                     .returns(thisClass)
                     .addCode(doubleFromStringCodeBlock)
@@ -190,13 +190,68 @@ public final class AliasGenerator {
                 && typeDef.getAlias().accept(TypeVisitor.PRIMITIVE).equals(PrimitiveType.DOUBLE);
     }
 
-    private static MethodSpec createDefaultConstructor(TypeName aliasTypeName) {
-        return MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PRIVATE)
-                .addStatement(
-                        "this($T.empty())",
-                        aliasTypeName instanceof ParameterizedTypeName ? Optional.class : aliasTypeName)
-                .build();
+    private static final class DefaultConstructorVisitor implements Visitor<Optional<MethodSpec>> {
+        private final TypeName aliasTypeName;
+
+        DefaultConstructorVisitor(TypeName aliasTypeName) {
+            this.aliasTypeName = aliasTypeName;
+        }
+
+        @Override
+        public Optional<MethodSpec> visitPrimitive(PrimitiveType value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitOptional(OptionalType value) {
+            return Optional.of(MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PRIVATE)
+                    .addStatement(
+                            "this($T.empty())",
+                            aliasTypeName instanceof ParameterizedTypeName ? Optional.class : aliasTypeName)
+                    .build());
+        }
+
+        @Override
+        public Optional<MethodSpec> visitList(ListType value) {
+            return Optional.of(MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PRIVATE)
+                    .addStatement("this($T.emptyList())", Collections.class)
+                    .build());
+        }
+
+        @Override
+        public Optional<MethodSpec> visitSet(SetType value) {
+            return Optional.of(MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PRIVATE)
+                    .addStatement("this($T.emptySet())", Collections.class)
+                    .build());
+        }
+
+        @Override
+        public Optional<MethodSpec> visitMap(MapType value) {
+            return Optional.of(MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PRIVATE)
+                    .addStatement("this($T.emptyMap())", Collections.class)
+                    .build());
+        }
+
+        @Override
+        public Optional<MethodSpec> visitReference(com.palantir.conjure.spec.TypeName value) {
+            // TODO(ckozak): Ideally this would support recursive aliases, for example an alias of alias of list
+            // should have a default constructor.
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitExternal(ExternalReference value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitUnknown(String unknownType) {
+            return Optional.empty();
+        }
     }
 
     private static Optional<CodeBlock> valueOfFactoryMethod(

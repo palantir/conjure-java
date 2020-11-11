@@ -170,7 +170,6 @@ types:
           stringExample:
             type: StringExample
             docs: Docs for when UnionTypeExample is of type StringExample.
-          set: set<string>
           thisFieldIsAnInteger: integer
           alsoAnInteger: integer
           if: integer # some 'bad' member names!
@@ -178,6 +177,14 @@ types:
           interface: integer
           completed: integer
           unknown: integer
+          optional: optional<string>
+          list: list<string>
+          set: set<string>
+          map: map<string, string>
+          optionalAlias: OptionalAlias
+          listAlias: ListAlias
+          setAlias: SetAlias
+          mapAlias: MapAliasExample
       UnionWithUnknownString:
         union:
           unknown: string
@@ -241,3 +248,7 @@ types:
         alias: ExternalLongAliasOne
       OptionalAlias:
         alias: optional<string>
+      ListAlias:
+        alias: list<string>
+      SetAlias:
+        alias: set<string>

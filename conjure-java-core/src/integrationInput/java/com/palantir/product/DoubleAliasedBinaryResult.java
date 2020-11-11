@@ -36,7 +36,7 @@ public final class DoubleAliasedBinaryResult {
         return value.hashCode();
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static DoubleAliasedBinaryResult of(@Nonnull AliasedBinaryResult value) {
         return new DoubleAliasedBinaryResult(value);
     }

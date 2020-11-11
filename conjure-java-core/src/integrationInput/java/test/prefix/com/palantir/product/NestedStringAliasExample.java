@@ -40,7 +40,7 @@ public final class NestedStringAliasExample {
         return of(StringAliasExample.valueOf(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static NestedStringAliasExample of(@Nonnull StringAliasExample value) {
         return new NestedStringAliasExample(value);
     }

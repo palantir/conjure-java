@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
@@ -26,6 +27,17 @@ import java.util.Optional;
 
 public final class ConjureAnnotations {
 
+    private static final ImmutableList<AnnotationSpec> DEPRECATED =
+            ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build());
+    private static final ImmutableList<AnnotationSpec> INCUBATING =
+            ImmutableList.of(AnnotationSpec.builder(Incubating.class).build());
+    private static final AnnotationSpec DELEGATING_JSON_CREATOR = AnnotationSpec.builder(JsonCreator.class)
+            .addMember("mode", "$T.DELEGATING", JsonCreator.Mode.class)
+            .build();
+    private static final AnnotationSpec PROPERTIES_JSON_CREATOR = AnnotationSpec.builder(JsonCreator.class)
+            .addMember("mode", "$T.PROPERTIES", JsonCreator.Mode.class)
+            .build();
+
     public static AnnotationSpec getConjureGeneratedAnnotation(Class<?> clazz) {
         return AnnotationSpec.builder(ClassName.get("javax.annotation", "Generated"))
                 .addMember("value", "$S", clazz.getCanonicalName())
@@ -33,16 +45,22 @@ public final class ConjureAnnotations {
     }
 
     public static ImmutableList<AnnotationSpec> deprecation(Optional<Documentation> deprecation) {
-        return deprecation.isPresent()
-                ? ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build())
-                : ImmutableList.of();
+        return deprecation.isPresent() ? DEPRECATED : ImmutableList.of();
     }
 
     public static ImmutableList<AnnotationSpec> incubating(EndpointDefinition definition) {
         if (definition.getTags().contains("incubating")) {
-            return ImmutableList.of(AnnotationSpec.builder(Incubating.class).build());
+            return INCUBATING;
         }
         return ImmutableList.of();
+    }
+
+    public static AnnotationSpec delegatingJsonCreator() {
+        return DELEGATING_JSON_CREATOR;
+    }
+
+    public static AnnotationSpec propertiesJsonCreator() {
+        return PROPERTIES_JSON_CREATOR;
     }
 
     private ConjureAnnotations() {}

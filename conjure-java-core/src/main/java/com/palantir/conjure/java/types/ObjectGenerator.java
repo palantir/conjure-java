@@ -21,9 +21,11 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.squareup.javapoet.JavaFile;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public final class ObjectGenerator implements Generator {
@@ -36,15 +38,18 @@ public final class ObjectGenerator implements Generator {
     @Override
     public Stream<JavaFile> generate(ConjureDefinition definition) {
         List<TypeDefinition> types = definition.getTypes();
-        TypeMapper typeMapper = new TypeMapper(TypeFunctions.toTypesMap(types), options);
-        return types.stream().map(typeDef -> generateInner(typeMapper, typeDef));
+        Map<TypeName, TypeDefinition> typesMap = TypeFunctions.toTypesMap(types);
+        TypeMapper typeMapper = new TypeMapper(typesMap, options);
+        return types.stream().map(typeDef -> generateInner(typeMapper, typesMap, typeDef));
     }
 
-    private JavaFile generateInner(TypeMapper typeMapper, TypeDefinition typeDef) {
+    private JavaFile generateInner(
+            TypeMapper typeMapper, Map<TypeName, TypeDefinition> typesMap, TypeDefinition typeDef) {
         if (typeDef.accept(TypeDefinitionVisitor.IS_OBJECT)) {
             return BeanGenerator.generateBeanType(typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), options);
         } else if (typeDef.accept(TypeDefinitionVisitor.IS_UNION)) {
-            return UnionGenerator.generateUnionType(typeMapper, typeDef.accept(TypeDefinitionVisitor.UNION), options);
+            return UnionGenerator.generateUnionType(
+                    typeMapper, typesMap, typeDef.accept(TypeDefinitionVisitor.UNION), options);
         } else if (typeDef.accept(TypeDefinitionVisitor.IS_ENUM)) {
             return EnumGenerator.generateEnumType(typeDef.accept(TypeDefinitionVisitor.ENUM), options);
         } else if (typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)) {

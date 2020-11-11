@@ -40,7 +40,7 @@ public final class UuidAliasExample {
         return of(UUID.fromString(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static UuidAliasExample of(@Nonnull UUID value) {
         return new UuidAliasExample(value);
     }

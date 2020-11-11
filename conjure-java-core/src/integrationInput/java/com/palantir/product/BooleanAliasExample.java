@@ -37,7 +37,7 @@ public final class BooleanAliasExample {
         return of(Boolean.parseBoolean(value));
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static BooleanAliasExample of(boolean value) {
         return new BooleanAliasExample(value);
     }
