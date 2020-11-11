@@ -61,7 +61,6 @@ dependencies {
     implementation 'com.palantir.dialogue:dialogue-target'
     implementation 'com.palantir.dialogue:dialogue-serde'
     implementation 'com.palantir.common:streams'
-    implementation 'com.palantir.tracing:tracing'
 
     testCompile 'com.palantir.conjure:conjure-core'
     testCompile project(':conjure-java-undertow-runtime')
@@ -77,7 +76,6 @@ dependencies {
     testCompile 'org.mockito:mockito-core'
     testCompile 'jakarta.xml.bind:jakarta.xml.bind-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testImplementation 'com.palantir.tracing:tracing-test-utils'
 
     integrationInputCompile project(':conjure-lib')
     integrationInputCompile project(':conjure-undertow-lib')

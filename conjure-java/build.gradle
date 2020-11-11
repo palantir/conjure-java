@@ -15,7 +15,6 @@
  */
 
 apply from: "$rootDir/gradle/publish-dist.gradle"
-apply plugin: 'com.palantir.graal'
 
 mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
 
