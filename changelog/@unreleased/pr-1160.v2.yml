@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Generate bindings in parallel
+  links:
+  - https://github.com/palantir/conjure-java/pull/1160
