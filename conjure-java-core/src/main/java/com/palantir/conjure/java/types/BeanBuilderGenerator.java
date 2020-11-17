@@ -28,7 +28,9 @@ import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
+import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -39,6 +41,7 @@ import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.SafeArg;
@@ -63,6 +66,7 @@ import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -88,11 +92,13 @@ public final class BeanBuilderGenerator {
             ClassName objectClass,
             ClassName builderClass,
             ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Options options) {
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, options).generate(typeDef);
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, options).generate(typeDef, typesMap);
     }
 
-    private TypeSpec generate(ObjectDefinition typeDef) {
+    private TypeSpec generate(
+            ObjectDefinition typeDef, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
         Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
 
@@ -103,7 +109,7 @@ public final class BeanBuilderGenerator {
                 .addFields(primitivesInitializedFields(enrichedFields))
                 .addMethod(createConstructor())
                 .addMethod(createFromObject(enrichedFields))
-                .addMethods(createSetters(enrichedFields))
+                .addMethods(createSetters(enrichedFields, typesMap))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
                 .addMethod(createBuild(enrichedFields, poetFields));
 
@@ -231,16 +237,18 @@ public final class BeanBuilderGenerator {
         return EnrichedField.of(fieldName, field, spec.build());
     }
 
-    private Iterable<MethodSpec> createSetters(Collection<EnrichedField> fields) {
+    private Iterable<MethodSpec> createSetters(
+            Collection<EnrichedField> fields, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
         Collection<MethodSpec> setters = Lists.newArrayListWithExpectedSize(fields.size());
         for (EnrichedField field : fields) {
-            setters.add(createSetter(field));
+            setters.add(createSetter(field, typesMap));
             setters.addAll(createAuxiliarySetters(field));
         }
         return setters;
     }
 
-    private MethodSpec createSetter(EnrichedField enriched) {
+    private MethodSpec createSetter(
+            EnrichedField enriched, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
@@ -253,6 +261,11 @@ public final class BeanBuilderGenerator {
                 annotationBuilder.addMember("contentNulls", "$T.AS_EMPTY", Nulls.class);
             } else if (options.nonNullCollections()) {
                 annotationBuilder.addMember("contentNulls", "$T.FAIL", Nulls.class);
+            }
+        } else if (type.accept(TypeVisitor.IS_REFERENCE)) {
+            Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(type, typesMap);
+            if (dealiased.accept(DefaultableTypeVisitor.INSTANCE)) {
+                annotationBuilder.addMember("nulls", "$T.AS_EMPTY", Nulls.class);
             }
         }
 

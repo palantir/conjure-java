@@ -46,7 +46,8 @@ public final class ObjectGenerator implements Generator {
     private JavaFile generateInner(
             TypeMapper typeMapper, Map<TypeName, TypeDefinition> typesMap, TypeDefinition typeDef) {
         if (typeDef.accept(TypeDefinitionVisitor.IS_OBJECT)) {
-            return BeanGenerator.generateBeanType(typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), options);
+            return BeanGenerator.generateBeanType(
+                    typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), typesMap, options);
         } else if (typeDef.accept(TypeDefinitionVisitor.IS_UNION)) {
             return UnionGenerator.generateUnionType(
                     typeMapper, typesMap, typeDef.accept(TypeDefinitionVisitor.UNION), options);
