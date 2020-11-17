@@ -41,6 +41,7 @@ import com.palantir.product.ListExample;
 import com.palantir.product.MapAliasExample;
 import com.palantir.product.MapExample;
 import com.palantir.product.OptionalAlias;
+import com.palantir.product.OptionalAliasExample;
 import com.palantir.product.OptionalExample;
 import com.palantir.product.SetAlias;
 import com.palantir.product.SetExample;
@@ -552,6 +553,12 @@ public final class WireFormatTests {
 
         assertThat(uuidA.hashCode()).isEqualTo(uuidC.hashCode());
         assertThat(uuidA.hashCode()).isNotEqualTo(uuidB.hashCode());
+    }
+
+    @Test
+    public void testOptionalAliasExample() throws IOException {
+        assertThat(mapper.readValue("{\"optionalAlias\":null}", OptionalAliasExample.class))
+                .isEqualTo(OptionalAliasExample.of(OptionalAlias.of(Optional.empty())));
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {

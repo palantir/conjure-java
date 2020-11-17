@@ -36,6 +36,7 @@ import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
+import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +70,11 @@ public final class BeanGenerator {
     /** The name of the singleton instance field generated for empty types. */
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
-    public static JavaFile generateBeanType(TypeMapper typeMapper, ObjectDefinition typeDef, Options options) {
+    public static JavaFile generateBeanType(
+            TypeMapper typeMapper,
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options options) {
         com.palantir.conjure.spec.TypeName prefixedName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
         ClassName objectClass = ClassName.get(prefixedName.getPackage(), prefixedName.getName());
@@ -121,7 +127,8 @@ public final class BeanGenerator {
                             .addMember("builder", "$T.class", builderClass)
                             .build())
                     .addMethod(createBuilder(builderClass))
-                    .addType(BeanBuilderGenerator.generate(typeMapper, objectClass, builderClass, typeDef, options));
+                    .addType(BeanBuilderGenerator.generate(
+                            typeMapper, objectClass, builderClass, typeDef, typesMap, options));
         }
 
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));

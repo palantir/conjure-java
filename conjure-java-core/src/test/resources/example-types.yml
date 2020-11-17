@@ -47,6 +47,9 @@ types:
         fields:
           item: optional<any>
           setItem: optional<set<StringAliasExample>>
+      OptionalAliasExample:
+        fields:
+          optionalAlias: OptionalAlias
       ListExample:
         fields:
           items: list<string>
