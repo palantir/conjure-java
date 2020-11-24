@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: The `conjure-java` CLI is now published as a jar so that it can be invoked in process by custom gradle plugins. Note that gradle-conjure does not use this approach to ensure that classpaths remain isolated and that the conjure-java generator can be upgraded independently from the gradle-conjure plugin itself.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1112
