@@ -119,7 +119,12 @@ public final class UnionWithUnknownString {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
+    @JsonTypeInfo(
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "type",
+            visible = true,
+            defaultImpl = UnknownWrapper.class)
     @JsonSubTypes(@JsonSubTypes.Type(Unknown_Wrapper.class))
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
@@ -134,6 +139,11 @@ public final class UnionWithUnknownString {
         private Unknown_Wrapper(@JsonSetter("unknown") @Nonnull String value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "unknown";
         }
 
         @JsonProperty("unknown")
@@ -166,11 +176,6 @@ public final class UnionWithUnknownString {
         }
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "type",
-            visible = true)
     private static final class UnknownWrapper implements Base {
         private final String type;
 

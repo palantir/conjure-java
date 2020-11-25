@@ -192,7 +192,12 @@ public final class Union {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
+    @JsonTypeInfo(
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "type",
+            visible = true,
+            defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
         @JsonSubTypes.Type(FooWrapper.class),
         @JsonSubTypes.Type(BarWrapper.class),
@@ -211,6 +216,11 @@ public final class Union {
         private FooWrapper(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "foo";
         }
 
         @JsonProperty("foo")
@@ -251,6 +261,11 @@ public final class Union {
         private BarWrapper(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "bar";
         }
 
         @JsonProperty("bar")
@@ -294,6 +309,11 @@ public final class Union {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "baz";
+        }
+
         @JsonProperty("baz")
         private long getValue() {
             return value;
@@ -325,11 +345,6 @@ public final class Union {
         }
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "type",
-            visible = true)
     private static final class UnknownWrapper implements Base {
         private final String type;
 
