@@ -528,7 +528,12 @@ public final class UnionTypeExample {
         Visitor<T> build();
     }
 
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, defaultImpl = UnknownWrapper.class)
+    @JsonTypeInfo(
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXISTING_PROPERTY,
+            property = "type",
+            visible = true,
+            defaultImpl = UnknownWrapper.class)
     @JsonSubTypes({
         @JsonSubTypes.Type(StringExampleWrapper.class),
         @JsonSubTypes.Type(ThisFieldIsAnIntegerWrapper.class),
@@ -560,6 +565,11 @@ public final class UnionTypeExample {
         private StringExampleWrapper(@JsonSetter("stringExample") @Nonnull StringExample value) {
             Preconditions.checkNotNull(value, "stringExample cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "stringExample";
         }
 
         @JsonProperty("stringExample")
@@ -600,6 +610,11 @@ public final class UnionTypeExample {
         private ThisFieldIsAnIntegerWrapper(@JsonSetter("thisFieldIsAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "thisFieldIsAnInteger cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "thisFieldIsAnInteger";
         }
 
         @JsonProperty("thisFieldIsAnInteger")
@@ -643,6 +658,11 @@ public final class UnionTypeExample {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "alsoAnInteger";
+        }
+
         @JsonProperty("alsoAnInteger")
         private int getValue() {
             return value;
@@ -681,6 +701,11 @@ public final class UnionTypeExample {
         private IfWrapper(@JsonSetter("if") @Nonnull int value) {
             Preconditions.checkNotNull(value, "if cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "if";
         }
 
         @JsonProperty("if")
@@ -723,6 +748,11 @@ public final class UnionTypeExample {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "new";
+        }
+
         @JsonProperty("new")
         private int getValue() {
             return value;
@@ -761,6 +791,11 @@ public final class UnionTypeExample {
         private InterfaceWrapper(@JsonSetter("interface") @Nonnull int value) {
             Preconditions.checkNotNull(value, "interface cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "interface";
         }
 
         @JsonProperty("interface")
@@ -803,6 +838,11 @@ public final class UnionTypeExample {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "completed";
+        }
+
         @JsonProperty("completed")
         private int getValue() {
             return value;
@@ -841,6 +881,11 @@ public final class UnionTypeExample {
         private Unknown_Wrapper(@JsonSetter("unknown") @Nonnull int value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "unknown";
         }
 
         @JsonProperty("unknown")
@@ -884,6 +929,11 @@ public final class UnionTypeExample {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "optional";
+        }
+
         @JsonProperty("optional")
         private Optional<String> getValue() {
             return value;
@@ -922,6 +972,11 @@ public final class UnionTypeExample {
         private ListWrapper(@JsonSetter(value = "list", nulls = Nulls.AS_EMPTY) @Nonnull List<String> value) {
             Preconditions.checkNotNull(value, "list cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "list";
         }
 
         @JsonProperty("list")
@@ -964,6 +1019,11 @@ public final class UnionTypeExample {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "set";
+        }
+
         @JsonProperty("set")
         private Set<String> getValue() {
             return value;
@@ -1002,6 +1062,11 @@ public final class UnionTypeExample {
         private MapWrapper(@JsonSetter(value = "map", nulls = Nulls.AS_EMPTY) @Nonnull Map<String, String> value) {
             Preconditions.checkNotNull(value, "map cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "map";
         }
 
         @JsonProperty("map")
@@ -1045,6 +1110,11 @@ public final class UnionTypeExample {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "optionalAlias";
+        }
+
         @JsonProperty("optionalAlias")
         private OptionalAlias getValue() {
             return value;
@@ -1085,6 +1155,11 @@ public final class UnionTypeExample {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "listAlias";
+        }
+
         @JsonProperty("listAlias")
         private ListAlias getValue() {
             return value;
@@ -1123,6 +1198,11 @@ public final class UnionTypeExample {
         private SetAliasWrapper(@JsonSetter(value = "setAlias", nulls = Nulls.AS_EMPTY) @Nonnull SetAlias value) {
             Preconditions.checkNotNull(value, "setAlias cannot be null");
             this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "setAlias";
         }
 
         @JsonProperty("setAlias")
@@ -1166,6 +1246,11 @@ public final class UnionTypeExample {
             this.value = value;
         }
 
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "mapAlias";
+        }
+
         @JsonProperty("mapAlias")
         private MapAliasExample getValue() {
             return value;
@@ -1196,11 +1281,6 @@ public final class UnionTypeExample {
         }
     }
 
-    @JsonTypeInfo(
-            use = JsonTypeInfo.Id.NAME,
-            include = JsonTypeInfo.As.EXISTING_PROPERTY,
-            property = "type",
-            visible = true)
     private static final class UnknownWrapper implements Base {
         private final String type;
 

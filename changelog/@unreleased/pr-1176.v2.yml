@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Generate unions compatible with Jackson 2.12 without attempting to
+    override JsonTypeInfo.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1176
