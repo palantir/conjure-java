@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix conjure code generation using a java 8 JRE
+  links:
+  - https://github.com/palantir/conjure-java/pull/1180
