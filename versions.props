@@ -9,7 +9,6 @@ com.palantir.conjure.java.runtime:* = 6.8.0
 com.palantir.conjure.verification:* = 0.18.5
 com.palantir.conjure:* = 4.14.0
 com.palantir.dialogue:* = 1.88.0
-com.palantir.javaformat:palantir-java-format = 2.0.0
 com.palantir.ri:resource-identifier = 1.1.0
 com.palantir.safe-logging:* = 1.14.0
 com.palantir.syntactic-paths:syntactic-paths = 0.6.1
@@ -40,4 +39,6 @@ org.slf4j:* = 1.7.30
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson
 com.fasterxml.jackson.*:jackson-* = 2.11.1
+# Generator should be compatible with java 8
+com.palantir.javaformat:palantir-java-format = 1.1.0
 # dependency-upgrader:ON
