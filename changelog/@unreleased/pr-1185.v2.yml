@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Upgrade jackson to 2.12.0
+  links:
+  - https://github.com/palantir/conjure-java/pull/1185
