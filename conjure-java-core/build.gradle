@@ -61,6 +61,7 @@ dependencies {
     implementation 'com.palantir.dialogue:dialogue-target'
     implementation 'com.palantir.dialogue:dialogue-serde'
     implementation 'com.palantir.common:streams'
+    implementation 'info.picocli:picocli'
 
     testCompile 'com.palantir.conjure:conjure-core'
     testCompile project(':conjure-java-undertow-runtime')

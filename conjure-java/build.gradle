@@ -20,11 +20,11 @@ mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
 
 dependencies {
     implementation project(':conjure-java-core')
-    implementation 'info.picocli:picocli'
     runtime 'org.slf4j:slf4j-simple'
 
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'info.picocli:picocli'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'

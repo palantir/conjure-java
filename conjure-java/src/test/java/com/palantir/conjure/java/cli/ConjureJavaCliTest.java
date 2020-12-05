@@ -51,7 +51,7 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .build();
-        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
+        InternalConjureJavaCli.GenerateCommand cmd = new CommandLine(new InternalConjureJavaCli())
                 .parseArgs(args)
                 .asCommandLineList()
                 .get(1)
@@ -81,7 +81,7 @@ public final class ConjureJavaCliTest {
                         .useImmutableBytes(true)
                         .build())
                 .build();
-        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
+        InternalConjureJavaCli.GenerateCommand cmd = new CommandLine(new InternalConjureJavaCli())
                 .parseArgs(args)
                 .asCommandLineList()
                 .get(1)
@@ -103,7 +103,7 @@ public final class ConjureJavaCliTest {
                         .nonNullTopLevelCollectionValues(true)
                         .build())
                 .build();
-        ConjureJavaCli.GenerateCommand cmd = new CommandLine(new ConjureJavaCli())
+        InternalConjureJavaCli.GenerateCommand cmd = new CommandLine(new InternalConjureJavaCli())
                 .parseArgs(args)
                 .asCommandLineList()
                 .get(1)
@@ -119,15 +119,15 @@ public final class ConjureJavaCliTest {
                 .outputDirectory(tempDir)
                 .generateObjects(true)
                 .build();
-        ConjureJavaCli.GenerateCommand cmd =
-                new CommandLine(new ConjureJavaCli()).parse(args).get(1).getCommand();
+        InternalConjureJavaCli.GenerateCommand cmd =
+                new CommandLine(new InternalConjureJavaCli()).parse(args).get(1).getCommand();
         assertThat(cmd.getConfiguration()).isEqualTo(expectedConfiguration);
     }
 
     @Test
     public void throwsWhenTargetDoesNotExist() {
         String[] args = {"generate", "foo", "bar"};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+        assertThatThrownBy(() -> CommandLine.run(new InternalConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Target must exist and be a file");
     }
@@ -135,7 +135,7 @@ public final class ConjureJavaCliTest {
     @Test
     public void throwsWhenOutputDoesNotExist() {
         String[] args = {"generate", targetFile.getAbsolutePath(), "bar"};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+        assertThatThrownBy(() -> CommandLine.run(new InternalConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Output must exist and be a directory");
     }
@@ -143,7 +143,7 @@ public final class ConjureJavaCliTest {
     @Test
     public void throwsWhenMissingGeneratorFlags() {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath()};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+        assertThatThrownBy(() -> CommandLine.run(new InternalConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Must specify exactly one project to generate");
     }
@@ -151,7 +151,7 @@ public final class ConjureJavaCliTest {
     @Test
     public void throwsWhenTooManyGeneratorFlags() {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects", "--jersey"};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+        assertThatThrownBy(() -> CommandLine.run(new InternalConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Must specify exactly one project to generate");
     }
@@ -169,7 +169,7 @@ public final class ConjureJavaCliTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream recordingStream = new PrintStream(baos);
 
-        CommandLine.run(new ConjureJavaCli(), recordingStream, args);
+        CommandLine.run(new InternalConjureJavaCli(), recordingStream, args);
         assertThat(new File(tempDir, "com/palantir/conjure/spec/ConjureDefinition.java").isFile())
                 .isTrue();
         assertThat(baos.toString()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
@@ -178,7 +178,7 @@ public final class ConjureJavaCliTest {
     @Test
     public void throwsWhenInvalidDefinition() throws Exception {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects"};
-        assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
+        assertThatThrownBy(() -> CommandLine.run(new InternalConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Error parsing definition");
     }
@@ -187,7 +187,7 @@ public final class ConjureJavaCliTest {
     @Disabled("Unable to capture output")
     public void writesWarningWhenBytesIsDisabled() throws IOException {
         String[] args = {"generate", "src/test/resources/conjure-api.json", tempDir.getAbsolutePath(), "--objects"};
-        CommandLine.run(new ConjureJavaCli(), args);
+        CommandLine.run(new InternalConjureJavaCli(), args);
         // assertThat(systemErr.getLog()).contains("[WARNING] Using deprecated ByteBuffer");
     }
 
@@ -195,7 +195,7 @@ public final class ConjureJavaCliTest {
     @Disabled("Unable to capture output")
     public void doesNotWriteWarningWhenObjectsAreNotGenerated() throws IOException {
         String[] args = {"generate", "src/test/resources/conjure-api.json", tempDir.getAbsolutePath(), "--jersey"};
-        CommandLine.run(new ConjureJavaCli(), args);
+        CommandLine.run(new InternalConjureJavaCli(), args);
         // assertThat(systemErr.getLog()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 }
