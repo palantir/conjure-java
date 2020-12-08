@@ -26,7 +26,6 @@ import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.AnnotationSpec;
 import java.util.Collection;
-import java.util.List;
 
 public final class ConjureTags {
 

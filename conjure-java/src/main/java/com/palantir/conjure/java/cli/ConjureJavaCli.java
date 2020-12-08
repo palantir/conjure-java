@@ -21,4 +21,5 @@ public final class ConjureJavaCli {
         InternalConjureJavaCli.main(args);
     }
 
+    private ConjureJavaCli() {}
 }
