@@ -147,7 +147,7 @@ public final class AliasGenerator {
                     .build());
 
             spec.addMethod(MethodSpec.methodBuilder("of")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                     .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
                     .addParameter(BigDecimal.class, "value")
                     .returns(thisClass)

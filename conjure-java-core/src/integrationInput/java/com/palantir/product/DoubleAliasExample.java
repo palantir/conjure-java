@@ -58,7 +58,7 @@ public final class DoubleAliasExample {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static DoubleAliasExample of(BigDecimal value) {
+    private static DoubleAliasExample of(BigDecimal value) {
         return new DoubleAliasExample(value.doubleValue());
     }
 
