@@ -43,6 +43,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
@@ -143,6 +144,16 @@ public final class AliasGenerator {
                     .addParameter(TypeName.INT, "value")
                     .returns(thisClass)
                     .addCode(intCastCodeBlock)
+                    .build());
+
+            spec.addMethod(MethodSpec.methodBuilder("of")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
+                    .addParameter(BigDecimal.class, "value")
+                    .returns(thisClass)
+                    .addCode(CodeBlock.builder()
+                            .addStatement("return new $T(value.doubleValue())", thisClass)
+                            .build())
                     .build());
 
             CodeBlock doubleFromStringCodeBlock = CodeBlock.builder()
