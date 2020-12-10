@@ -5,7 +5,7 @@ com.google.errorprone:error_prone_annotations = 2.4.0
 com.google.guava:guava = 30.0-jre
 com.palantir.common:streams = 1.9.1
 com.palantir.conjure.java.api:* = 2.16.2
-com.palantir.conjure.java.runtime:* = 6.9.3
+com.palantir.conjure.java.runtime:* = 6.9.4
 com.palantir.conjure.verification:* = 0.18.5
 com.palantir.conjure:* = 4.14.0
 com.palantir.dialogue:* = 1.91.1
@@ -38,7 +38,7 @@ org.slf4j:* = 1.7.30
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson
-com.fasterxml.jackson.*:jackson-* = 2.12.0
+com.fasterxml.jackson.*:jackson-* = 2.11.1
 # Generator should be compatible with java 8
 com.palantir.javaformat:palantir-java-format = 1.1.0
 # dependency-upgrader:ON
