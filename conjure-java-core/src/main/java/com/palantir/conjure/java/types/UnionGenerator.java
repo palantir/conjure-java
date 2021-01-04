@@ -187,7 +187,7 @@ public final class UnionGenerator {
     }
 
     private static MethodSpec generateEquals(ClassName unionClass) {
-        ParameterSpec other = ParameterSpec.builder(TypeName.OBJECT, "other").build();
+        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other").build();
         CodeBlock.Builder codeBuilder = CodeBlock.builder()
                 .add("return this == $1N || ($1N instanceof $2T && equalTo(($2T) $1N))", other, unionClass);
 

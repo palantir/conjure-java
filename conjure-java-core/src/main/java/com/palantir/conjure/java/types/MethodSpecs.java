@@ -39,7 +39,7 @@ import javax.lang.model.element.Modifier;
 public final class MethodSpecs {
 
     public static MethodSpec createEquals(TypeName thisClass) {
-        ParameterSpec other = ParameterSpec.builder(TypeName.OBJECT, "other").build();
+        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other").build();
         return MethodSpec.methodBuilder("equals")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)

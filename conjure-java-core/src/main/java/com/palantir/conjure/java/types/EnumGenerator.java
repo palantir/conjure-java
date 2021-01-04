@@ -303,7 +303,7 @@ public final class EnumGenerator {
     }
 
     private static MethodSpec createEquals(TypeName thisClass) {
-        ParameterSpec other = ParameterSpec.builder(TypeName.OBJECT, "other").build();
+        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other").build();
         return MethodSpec.methodBuilder("equals")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)

@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: work around javapoet class loading deadlock between ClassName and TypeName
+  links:
+  - https://github.com/palantir/conjure-java/pull/1211
