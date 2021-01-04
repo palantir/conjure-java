@@ -34,6 +34,7 @@ import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.squareup.javapoet.ClassName;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -49,6 +50,11 @@ import picocli.CommandLine;
         mixinStandardHelpOptions = true,
         subcommands = ConjureJavaCli.GenerateCommand.class)
 public final class ConjureJavaCli implements Runnable {
+    // Load TypeName to prevent a deadlock
+    // https://github.com/square/javapoet/issues/637
+    @SuppressWarnings("unused")
+    private static final ClassName _loaded = ClassName.get(Runnable.class);
+
     public static void main(String[] args) {
         CommandLine.run(new ConjureJavaCli(), args);
     }

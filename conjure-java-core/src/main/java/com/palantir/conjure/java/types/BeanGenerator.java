@@ -284,7 +284,7 @@ public final class BeanGenerator {
         ParameterSpec listParam =
                 ParameterSpec.builder(listOfStringType, "prev").build();
         ParameterSpec fieldValueParam =
-                ParameterSpec.builder(TypeName.OBJECT, "fieldValue").build();
+                ParameterSpec.builder(ClassName.OBJECT, "fieldValue").build();
         ParameterSpec fieldNameParam =
                 ParameterSpec.builder(ClassName.get(String.class), "fieldName").build();
 

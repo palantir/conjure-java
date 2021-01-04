@@ -79,7 +79,7 @@ public final class AliasGenerator {
                 .addMethod(MethodSpec.methodBuilder("equals")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
-                        .addParameter(TypeName.OBJECT, "other")
+                        .addParameter(ClassName.OBJECT, "other")
                         .returns(TypeName.BOOLEAN)
                         .addCode(primitiveSafeEquality(thisClass, aliasTypeName, typeDef))
                         .build())
