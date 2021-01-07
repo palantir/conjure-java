@@ -28,6 +28,7 @@ joda-time:joda-time = 2.10.9
 org.apache.commons:commons-lang3 = 3.11
 org.assertj:* = 3.18.1
 org.glassfish.jersey.core:jersey-server = 2.25.1
+org.graalvm.sdk:graal-sdk = 20.3.0
 org.hamcrest:hamcrest-core = 2.2
 org.immutables:value = 2.8.8
 org.javassist:javassist = 3.22.0-GA
