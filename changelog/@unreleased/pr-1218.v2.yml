@@ -1,0 +1,5 @@
+type: break
+break:
+  description: Remove the retrofit generator entirely
+  links:
+  - https://github.com/palantir/conjure-java/pull/1218
