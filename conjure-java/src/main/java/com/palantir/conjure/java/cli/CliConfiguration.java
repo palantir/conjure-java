@@ -19,7 +19,7 @@ package com.palantir.conjure.java.cli;
 import com.palantir.conjure.java.Options;
 import com.palantir.logsafe.Preconditions;
 import java.io.File;
-import java.util.Arrays;
+import java.util.stream.Stream;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -35,11 +35,6 @@ public interface CliConfiguration {
 
     @Value.Default
     default boolean generateJersey() {
-        return false;
-    }
-
-    @Value.Default
-    default boolean generateRetrofit() {
         return false;
     }
 
@@ -62,9 +57,7 @@ public interface CliConfiguration {
     default void check() {
         Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
         Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
-        long count = Arrays.asList(
-                        generateObjects(), generateJersey(), generateRetrofit(), generateUndertow(), generateDialogue())
-                .stream()
+        long count = Stream.of(generateObjects(), generateJersey(), generateUndertow(), generateDialogue())
                 .filter(b -> b)
                 .count();
         Preconditions.checkArgument(count == 1, "Must specify exactly one project to generate");

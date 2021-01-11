@@ -66,7 +66,6 @@ public final class ConjureJavaCliTest {
             targetFile.getAbsolutePath(),
             tempDir.getAbsolutePath(),
             "--objects",
-            "--retrofitCompletableFutures",
             "--jerseyBinaryAsResponse",
             "--requireNotNullAuthAndBodyParams",
             "--useImmutableBytes"

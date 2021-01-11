@@ -23,28 +23,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
+import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
+import com.palantir.conjure.java.api.config.service.ServicesConfigBlock;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
-import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.product.EmptyPathService;
-import com.palantir.product.EteBinaryServiceRetrofit;
+import com.palantir.product.EteBinaryServiceBlocking;
 import com.palantir.product.EteService;
 import com.palantir.product.StringAliasExample;
+import com.palantir.refreshable.Refreshable;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -56,7 +60,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -78,13 +81,22 @@ public final class JerseyServiceEteTest extends TestBase {
     public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(EteTestServer.class);
 
     private final EteService client;
-    private final EteBinaryServiceRetrofit binary;
+    private final EteBinaryServiceBlocking binary;
 
     public JerseyServiceEteTest() {
         client = JaxRsClient.create(
                 EteService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        binary = Retrofit2Client.create(
-                EteBinaryServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+        binary = DialogueClients.create(
+                        Refreshable.only(ServicesConfigBlock.builder().build()))
+                .withTaggedMetrics(new DefaultTaggedMetricRegistry())
+                .withUserAgent(clientUserAgent())
+                .getNonReloading(
+                        EteBinaryServiceBlocking.class,
+                        ServiceConfiguration.builder()
+                                .uris(EteTestServer.uris())
+                                .security(EteTestServer.sslConfiguration())
+                                .maxNumRetries(0)
+                                .build());
     }
 
     @Test
@@ -163,17 +175,15 @@ public final class JerseyServiceEteTest extends TestBase {
     }
 
     @Test
-    public void test_optionalBinary_present() throws IOException {
-        Optional<ResponseBody> response =
-                Futures.getUnchecked(binary.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")));
+    public void test_optionalBinary_present() {
+        Optional<InputStream> response = binary.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader"));
         assertThat(response).isPresent();
-        assertThat(response.get().string()).isEqualTo("Hello World!");
+        assertThat(response.get()).hasBinaryContent("Hello World!".getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
-    public void test_optionalBinary_empty() throws IOException {
-        Optional<ResponseBody> response =
-                Futures.getUnchecked(binary.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")));
+    public void test_optionalBinary_empty() {
+        Optional<InputStream> response = binary.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader"));
         assertThat(response).isNotPresent();
     }
 

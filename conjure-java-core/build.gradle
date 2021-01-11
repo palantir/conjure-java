@@ -67,21 +67,21 @@ dependencies {
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
     testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
-    testCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
     testCompile 'com.palantir.safe-logging:preconditions-assertj'
     testCompile 'com.palantir.conjure.java.runtime:keystores'
     testCompile 'com.palantir.tracing:tracing'
+    testCompile 'com.palantir.dialogue:dialogue-clients'
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.mockito:mockito-core'
     testCompile 'jakarta.xml.bind:jakarta.xml.bind-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'ch.qos.logback:logback-classic'
 
     integrationInputCompile project(':conjure-lib')
     integrationInputCompile project(':conjure-undertow-lib')
     integrationInputCompile 'com.google.guava:guava'
     integrationInputCompile 'com.palantir.conjure.java.api:errors'
-    integrationInputCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
     integrationInputCompile 'jakarta.annotation:jakarta.annotation-api'
     integrationInputCompile 'jakarta.validation:jakarta.validation-api'
     integrationInputCompile 'jakarta.ws.rs:jakarta.ws.rs-api'
