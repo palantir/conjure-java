@@ -41,7 +41,6 @@ import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
-import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
@@ -61,7 +60,6 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
-import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -388,14 +386,24 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    public void testUnknownContentType() {
-        assertThatThrownBy(() -> {
-                    dialogueBinaryClient.postBinary(
-                            AuthHeader.valueOf("authHeader"),
-                            BinaryRequestBody.of(new ByteArrayInputStream(new byte[] {1, 2, 3})));
-                })
-                .isInstanceOf(RemoteException.class)
-                .hasMessageContaining("INVALID_ARGUMENT");
+    public void testUnknownContentType() throws IOException {
+        // postBinary method
+        HttpURLConnection connection =
+                (HttpURLConnection) new URL("http://localhost:8080/test-example/api/binary").openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/unsupported");
+        connection.setDoOutput(true);
+        try (OutputStream requestBody = connection.getOutputStream()) {
+            requestBody.write(new byte[] {1, 2, 3});
+        }
+        assertThat(connection.getResponseCode()).isEqualTo(415);
+        try (InputStream responseBody = connection.getErrorStream()) {
+            SerializableError error = CLIENT_OBJECT_MAPPER.readValue(responseBody, SerializableError.class);
+            assertThat(error.errorCode()).isEqualTo("INVALID_ARGUMENT");
+            assertThat(error.errorName()).isEqualTo("Conjure:UnsupportedMediaType");
+        }
     }
 
     @Test
