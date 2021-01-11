@@ -1,5 +1,7 @@
 type: break
 break:
-  description: Remove the retrofit generator entirely
+  description: The retrofit generator has been removed due to known vulerabilities
+    and an inability to upgrade the library without breaking conjure. Projects which
+    still use retrofit clients must migrate to dialogue.
   links:
   - https://github.com/palantir/conjure-java/pull/1218
