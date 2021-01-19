@@ -35,7 +35,7 @@ class UnionTests {
         EmptyUnionTypeExample value =
                 MAPPER.readValue("{\"type\":\"foo\",\"foo\":\"bar\"}", EmptyUnionTypeExample.class);
         EmptyUnionTypeExample.Visitor<?> visitor =
-                EmptyUnionTypeExample.Visitor.builder().unknownThrows().build();
+                EmptyUnionTypeExample.Visitor.builder().throwOnUnknown().build();
         assertThatLoggableExceptionThrownBy(() -> value.accept(visitor))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasLogMessage("Unknown variant of the 'EmptyUnionTypeExample' union")

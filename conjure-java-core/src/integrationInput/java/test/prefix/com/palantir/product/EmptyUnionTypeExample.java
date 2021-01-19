@@ -74,7 +74,7 @@ public final class EmptyUnionTypeExample {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknownThrows() {
+        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalStateException(
                         "Unknown variant of the 'EmptyUnionTypeExample' union", SafeArg.of("unknownType", unknownType));
@@ -97,7 +97,7 @@ public final class EmptyUnionTypeExample {
     public interface UnknownStageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
 
-        Completed_StageVisitorBuilder<T> unknownThrows();
+        Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
 
     public interface Completed_StageVisitorBuilder<T> {

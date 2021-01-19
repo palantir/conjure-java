@@ -502,7 +502,7 @@ public final class UnionGenerator {
 
     private static MethodSpec.Builder visitorBuilderUnknownThrowPrototype(
             TypeName visitResultType, ClassName nextBuilderStage) {
-        return MethodSpec.methodBuilder("unknownThrows")
+        return MethodSpec.methodBuilder("throwOnUnknown")
                 .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
     }
 

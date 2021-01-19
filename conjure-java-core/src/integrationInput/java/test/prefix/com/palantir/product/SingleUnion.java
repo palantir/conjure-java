@@ -92,7 +92,7 @@ public final class SingleUnion {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknownThrows() {
+        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalStateException(
                         "Unknown variant of the 'SingleUnion' union", SafeArg.of("unknownType", unknownType));
@@ -125,7 +125,7 @@ public final class SingleUnion {
     public interface UnknownStageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
 
-        Completed_StageVisitorBuilder<T> unknownThrows();
+        Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
 
     public interface Completed_StageVisitorBuilder<T> {
