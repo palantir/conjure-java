@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Union visitor builders provide a helper to throw on unknown variants without writing out the throw statement/lambda explicitly.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1223
