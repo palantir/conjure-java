@@ -39,6 +39,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.InputStream;
@@ -61,18 +62,19 @@ public final class DialogueInterfaceGenerator {
     }
 
     public JavaFile generateBlocking(ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator) {
-        return generate(def, Names.blockingClassName(def, options), returnTypes::baseType, methodGenerator);
+        return generate(def, Names.blockingClassName(def, options), returnTypes::baseType, methodGenerator, true);
     }
 
     public JavaFile generateAsync(ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator) {
-        return generate(def, Names.asyncClassName(def, options), returnTypes::async, methodGenerator);
+        return generate(def, Names.asyncClassName(def, options), returnTypes::async, methodGenerator, false);
     }
 
     private JavaFile generate(
             ServiceDefinition def,
             ClassName className,
             Function<Optional<Type>, TypeName> returnTypeMapper,
-            StaticFactoryMethodGenerator methodGenerator) {
+            StaticFactoryMethodGenerator methodGenerator,
+            boolean isBlocking) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class));
@@ -86,46 +88,63 @@ public final class DialogueInterfaceGenerator {
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
         serviceBuilder.addMethod(staticFactoryMethod);
 
-        serviceBuilder.addMethod(MethodSpec.methodBuilder("of")
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .addJavadoc(
-                        "Creates an asynchronous/non-blocking client for a $L service.",
-                        def.getServiceName().getName())
-                .returns(staticFactoryMethod.returnType)
-                .addParameter(Channel.class, StaticFactoryMethodGenerator.CHANNEL)
-                .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
-                .addCode(CodeBlock.builder()
-                        .add(
-                                "if ($L instanceof $T) { return $L(($T) $L, $L); }\n",
-                                StaticFactoryMethodGenerator.CHANNEL,
-                                EndpointChannelFactory.class,
-                                staticFactoryMethod.name,
-                                EndpointChannelFactory.class,
-                                StaticFactoryMethodGenerator.CHANNEL,
-                                StaticFactoryMethodGenerator.RUNTIME)
-                        .add(
-                                "return $L(new $T() { "
-                                        + "  @$T "
-                                        + "  public $T endpoint($T endpoint) { "
-                                        + "    return $L.clients().bind($L, endpoint);"
-                                        + "  } "
-                                        + "}, "
-                                        + "$L);",
-                                staticFactoryMethod.name,
-                                EndpointChannelFactory.class,
-                                Override.class,
-                                EndpointChannel.class,
-                                Endpoint.class,
-                                StaticFactoryMethodGenerator.RUNTIME,
-                                StaticFactoryMethodGenerator.CHANNEL,
-                                StaticFactoryMethodGenerator.RUNTIME)
-                        .build())
-                .build());
+        serviceBuilder.addMethod(createClientFromEndpoint(isBlocking, def, staticFactoryMethod));
 
         return JavaFile.builder(
                         Packages.getPrefixedPackage(def.getServiceName().getPackage(), options.packagePrefix()),
                         serviceBuilder.build())
                 .build();
+    }
+
+    private MethodSpec createClientFromEndpoint(
+            boolean isBlocking, ServiceDefinition def, MethodSpec staticFactoryMethod) {
+        Builder method = MethodSpec.methodBuilder("of");
+        method.addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .addJavadoc(
+                        "Creates an asynchronous/non-blocking client for a $L service.",
+                        def.getServiceName().getName())
+                .returns(staticFactoryMethod.returnType)
+                .addParameter(Channel.class, StaticFactoryMethodGenerator.CHANNEL)
+                .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME);
+
+        String runtimeVariable =
+                isBlocking ? StaticFactoryMethodGenerator.BLOCKING_RUNTIME : StaticFactoryMethodGenerator.RUNTIME;
+        if (isBlocking) {
+            method.addCode(
+                    "$T $L = $L.toBlocking();",
+                    ConjureRuntime.class,
+                    StaticFactoryMethodGenerator.BLOCKING_RUNTIME,
+                    StaticFactoryMethodGenerator.RUNTIME);
+        }
+
+        method.addCode(CodeBlock.builder()
+                .add(
+                        "if ($L instanceof $T) { return $L(($T) $L, $L); }\n",
+                        StaticFactoryMethodGenerator.CHANNEL,
+                        EndpointChannelFactory.class,
+                        staticFactoryMethod.name,
+                        EndpointChannelFactory.class,
+                        StaticFactoryMethodGenerator.CHANNEL,
+                        runtimeVariable)
+                .add(
+                        "return $L(new $T() { "
+                                + "  @$T "
+                                + "  public $T endpoint($T endpoint) { "
+                                + "    return $L.clients().bind($L, endpoint);"
+                                + "  } "
+                                + "}, "
+                                + "$L);",
+                        staticFactoryMethod.name,
+                        EndpointChannelFactory.class,
+                        Override.class,
+                        EndpointChannel.class,
+                        Endpoint.class,
+                        runtimeVariable,
+                        StaticFactoryMethodGenerator.CHANNEL,
+                        runtimeVariable)
+                .build());
+
+        return method.build();
     }
 
     private MethodSpec apiMethod(EndpointDefinition endpointDef, Function<Optional<Type>, TypeName> returnTypeMapper) {

@@ -59,12 +59,13 @@ public final class BlockingGenerator implements StaticFactoryMethodGenerator {
                 .returns(Names.blockingClassName(def, options))
                 .addParameter(EndpointChannelFactory.class, ENDPOINT_CHANNEL_FACTORY)
                 .addParameter(ConjureRuntime.class, RUNTIME)
+                .addCode("$T $L = $L.toBlocking();", ConjureRuntime.class, BLOCKING_RUNTIME, RUNTIME)
                 .addCode(
-                        "$T delegate = $T.of($L, $L);",
+                        "$T delegate = $T.of($L, $L.toBlocking());",
                         Names.asyncClassName(def, options),
                         Names.asyncClassName(def, options),
                         ENDPOINT_CHANNEL_FACTORY,
-                        RUNTIME)
+                        BLOCKING_RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
         return blockingImpl;

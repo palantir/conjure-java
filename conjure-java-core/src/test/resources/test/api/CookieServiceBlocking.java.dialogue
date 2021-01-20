@@ -21,7 +21,8 @@ public interface CookieServiceBlocking {
      * Creates a synchronous/blocking client for a CookieService service.
      */
     static CookieServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
-        CookieServiceAsync delegate = CookieServiceAsync.of(_endpointChannelFactory, _runtime);
+        ConjureRuntime _blockingRuntime = _runtime.toBlocking();
+        CookieServiceAsync delegate = CookieServiceAsync.of(_endpointChannelFactory, _blockingRuntime.toBlocking());
         return new CookieServiceBlocking() {
             @Override
             public void eatCookies(BearerToken token) {
@@ -40,16 +41,17 @@ public interface CookieServiceBlocking {
      * Creates an asynchronous/non-blocking client for a CookieService service.
      */
     static CookieServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        ConjureRuntime _blockingRuntime = _runtime.toBlocking();
         if (_channel instanceof EndpointChannelFactory) {
-            return of((EndpointChannelFactory) _channel, _runtime);
+            return of((EndpointChannelFactory) _channel, _blockingRuntime);
         }
         return of(
                 new EndpointChannelFactory() {
                     @Override
                     public EndpointChannel endpoint(Endpoint endpoint) {
-                        return _runtime.clients().bind(_channel, endpoint);
+                        return _blockingRuntime.clients().bind(_channel, endpoint);
                     }
                 },
-                _runtime);
+                _blockingRuntime);
     }
 }

@@ -23,6 +23,7 @@ public interface StaticFactoryMethodGenerator {
     String CHANNEL = "_channel";
     String ENDPOINT_CHANNEL_FACTORY = "_endpointChannelFactory";
     String RUNTIME = "_runtime";
+    String BLOCKING_RUNTIME = "_blockingRuntime";
 
     MethodSpec generate(ServiceDefinition def);
 }
