@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Make blocking clients block the current thread.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1224
