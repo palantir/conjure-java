@@ -39,7 +39,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.InputStream;
@@ -98,7 +97,7 @@ public final class DialogueInterfaceGenerator {
 
     private MethodSpec createClientFromEndpoint(
             boolean isBlocking, ServiceDefinition def, MethodSpec staticFactoryMethod) {
-        Builder method = MethodSpec.methodBuilder("of");
+        MethodSpec.Builder method = MethodSpec.methodBuilder("of");
         method.addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .addJavadoc(
                         "Creates an asynchronous/non-blocking client for a $L service.",
