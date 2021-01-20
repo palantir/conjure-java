@@ -54,7 +54,9 @@ public interface EteBinaryServiceBlocking {
      * Creates a synchronous/blocking client for a EteBinaryService service.
      */
     static EteBinaryServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
-        EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(_endpointChannelFactory, _runtime);
+        ConjureRuntime _blockingRuntime = _runtime.toBlocking();
+        EteBinaryServiceAsync delegate =
+                EteBinaryServiceAsync.of(_endpointChannelFactory, _blockingRuntime.toBlocking());
         return new EteBinaryServiceBlocking() {
             @Override
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {
@@ -98,16 +100,17 @@ public interface EteBinaryServiceBlocking {
      * Creates an asynchronous/non-blocking client for a EteBinaryService service.
      */
     static EteBinaryServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        ConjureRuntime _blockingRuntime = _runtime.toBlocking();
         if (_channel instanceof EndpointChannelFactory) {
-            return of((EndpointChannelFactory) _channel, _runtime);
+            return of((EndpointChannelFactory) _channel, _blockingRuntime);
         }
         return of(
                 new EndpointChannelFactory() {
                     @Override
                     public EndpointChannel endpoint(Endpoint endpoint) {
-                        return _runtime.clients().bind(_channel, endpoint);
+                        return _blockingRuntime.clients().bind(_channel, endpoint);
                     }
                 },
-                _runtime);
+                _blockingRuntime);
     }
 }

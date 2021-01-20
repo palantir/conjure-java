@@ -193,7 +193,8 @@ public interface EteServiceBlocking {
      * Creates a synchronous/blocking client for a EteService service.
      */
     static EteServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
-        EteServiceAsync delegate = EteServiceAsync.of(_endpointChannelFactory, _runtime);
+        ConjureRuntime _blockingRuntime = _runtime.toBlocking();
+        EteServiceAsync delegate = EteServiceAsync.of(_endpointChannelFactory, _blockingRuntime.toBlocking());
         return new EteServiceBlocking() {
             @Override
             public String string(AuthHeader authHeader) {
@@ -365,16 +366,17 @@ public interface EteServiceBlocking {
      * Creates an asynchronous/non-blocking client for a EteService service.
      */
     static EteServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        ConjureRuntime _blockingRuntime = _runtime.toBlocking();
         if (_channel instanceof EndpointChannelFactory) {
-            return of((EndpointChannelFactory) _channel, _runtime);
+            return of((EndpointChannelFactory) _channel, _blockingRuntime);
         }
         return of(
                 new EndpointChannelFactory() {
                     @Override
                     public EndpointChannel endpoint(Endpoint endpoint) {
-                        return _runtime.clients().bind(_channel, endpoint);
+                        return _blockingRuntime.clients().bind(_channel, endpoint);
                     }
                 },
-                _runtime);
+                _blockingRuntime);
     }
 }

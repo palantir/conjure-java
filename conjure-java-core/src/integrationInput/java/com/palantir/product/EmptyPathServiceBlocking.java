@@ -20,7 +20,9 @@ public interface EmptyPathServiceBlocking {
      * Creates a synchronous/blocking client for a EmptyPathService service.
      */
     static EmptyPathServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
-        EmptyPathServiceAsync delegate = EmptyPathServiceAsync.of(_endpointChannelFactory, _runtime);
+        ConjureRuntime _blockingRuntime = _runtime.toBlocking();
+        EmptyPathServiceAsync delegate =
+                EmptyPathServiceAsync.of(_endpointChannelFactory, _blockingRuntime.toBlocking());
         return new EmptyPathServiceBlocking() {
             @Override
             public boolean emptyPath() {
@@ -39,16 +41,17 @@ public interface EmptyPathServiceBlocking {
      * Creates an asynchronous/non-blocking client for a EmptyPathService service.
      */
     static EmptyPathServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
+        ConjureRuntime _blockingRuntime = _runtime.toBlocking();
         if (_channel instanceof EndpointChannelFactory) {
-            return of((EndpointChannelFactory) _channel, _runtime);
+            return of((EndpointChannelFactory) _channel, _blockingRuntime);
         }
         return of(
                 new EndpointChannelFactory() {
                     @Override
                     public EndpointChannel endpoint(Endpoint endpoint) {
-                        return _runtime.clients().bind(_channel, endpoint);
+                        return _blockingRuntime.clients().bind(_channel, endpoint);
                     }
                 },
-                _runtime);
+                _blockingRuntime);
     }
 }
