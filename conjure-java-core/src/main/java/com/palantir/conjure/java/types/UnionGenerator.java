@@ -42,6 +42,8 @@ import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -286,11 +288,9 @@ public final class UnionGenerator {
         while (memberIter.hasNext()) {
             NameTypePair pair = memberIter.next();
             String nextBuilderStage = memberIter.hasNext() ? memberIter.peek().memberName : COMPLETED;
+            ClassName nextVisitorStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStage);
             MethodSpec.Builder setterPrototype = visitorBuilderSetterPrototype(
-                    pair.memberName,
-                    pair.type,
-                    visitResultType,
-                    visitorStageInterfaceName(enclosingClass, nextBuilderStage));
+                    pair.memberName, pair.type, visitResultType, nextVisitorStageClassName);
             setterMethods.add(setterPrototype
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override.class)
@@ -302,6 +302,20 @@ public final class UnionGenerator {
                     .addStatement("this.$1L = $1L", visitorFieldName(pair.memberName))
                     .addStatement("return this")
                     .build());
+            if (NameTypePair.UNKNOWN.equals(pair)) {
+                setterMethods.add(visitorBuilderUnknownThrowPrototype(visitResultType, nextVisitorStageClassName)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
+                        .addStatement(
+                                "this.$L = unknownType -> { throw new $T($S, $T.of($S, unknownType)); }",
+                                visitorFieldName(pair.memberName),
+                                SafeIllegalStateException.class,
+                                "Unknown variant of the '" + enclosingClass.simpleName() + "' union",
+                                SafeArg.class,
+                                "unknownType")
+                        .addStatement("return this")
+                        .build());
+            }
         }
         return setterMethods.build();
     }
@@ -431,16 +445,21 @@ public final class UnionGenerator {
         while (memberIter.hasNext()) {
             NameTypePair member = memberIter.next();
             String nextBuilderStageName = memberIter.hasNext() ? memberIter.peek().memberName : COMPLETED;
+            ClassName nextStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStageName);
             interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, member.memberName))
                     .addTypeVariable(visitResultType)
                     .addModifiers(Modifier.PUBLIC)
                     .addMethod(visitorBuilderSetterPrototype(
-                                    member.memberName,
-                                    member.type,
-                                    visitResultType,
-                                    visitorStageInterfaceName(enclosingClass, nextBuilderStageName))
+                                    member.memberName, member.type, visitResultType, nextStageClassName)
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .build())
+                    .addMethods(
+                            NameTypePair.UNKNOWN.equals(member)
+                                    ? ImmutableList.of(
+                                            visitorBuilderUnknownThrowPrototype(visitResultType, nextStageClassName)
+                                                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                                                    .build())
+                                    : ImmutableList.of())
                     .build());
         }
         interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, COMPLETED))
@@ -478,6 +497,12 @@ public final class UnionGenerator {
                 .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName))
                         .addAnnotation(Nonnull.class)
                         .build())
+                .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
+    }
+
+    private static MethodSpec.Builder visitorBuilderUnknownThrowPrototype(
+            TypeName visitResultType, ClassName nextBuilderStage) {
+        return MethodSpec.methodBuilder("throwOnUnknown")
                 .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
     }
 
