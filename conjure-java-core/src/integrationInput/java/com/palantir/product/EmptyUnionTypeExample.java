@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -76,7 +76,7 @@ public final class EmptyUnionTypeExample {
         @Override
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
-                throw new SafeIllegalStateException(
+                throw new SafeIllegalArgumentException(
                         "Unknown variant of the 'EmptyUnionTypeExample' union", SafeArg.of("unknownType", unknownType));
             };
             return this;

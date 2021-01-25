@@ -21,7 +21,7 @@ import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptio
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.product.EmptyUnionTypeExample;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class UnionTests {
         EmptyUnionTypeExample.Visitor<?> visitor =
                 EmptyUnionTypeExample.Visitor.builder().throwOnUnknown().build();
         assertThatLoggableExceptionThrownBy(() -> value.accept(visitor))
-                .isInstanceOf(SafeIllegalStateException.class)
+                .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Unknown variant of the 'EmptyUnionTypeExample' union")
                 .hasExactlyArgs(SafeArg.of("unknownType", "foo"));
     }
