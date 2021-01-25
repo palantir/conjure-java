@@ -43,7 +43,7 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -309,7 +309,7 @@ public final class UnionGenerator {
                         .addStatement(
                                 "this.$L = unknownType -> { throw new $T($S, $T.of($S, unknownType)); }",
                                 visitorFieldName(pair.memberName),
-                                SafeIllegalStateException.class,
+                                SafeIllegalArgumentException.class,
                                 "Unknown variant of the '" + enclosingClass.simpleName() + "' union",
                                 SafeArg.class,
                                 "unknownType")
