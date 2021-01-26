@@ -285,7 +285,7 @@ public final class EnumGenerator {
                         Modifier.STATIC,
                         Modifier.FINAL)
                 .initializer(CodeBlock.of(
-                        "$T.unmodifiableList($T.asList(" + arrayValues + "))", Collections.class, Arrays.class))
+                        "$T.unmodifiableList($T.asList($L))", Collections.class, Arrays.class, arrayValues))
                 .addAnnotations(
                         anyDeprecatedValues
                                 ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)
