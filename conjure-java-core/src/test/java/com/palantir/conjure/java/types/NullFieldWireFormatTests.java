@@ -58,7 +58,7 @@ public class NullFieldWireFormatTests {
     public void null_integer_field_should_throw() {
         assertThatThrownBy(() -> mapper.readValue("{\"integer\":null}", IntegerExample.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("Cannot map `null` into type int");
+                .hasMessageContaining("Cannot map `null` into type `int`");
     }
 
     @Test
@@ -93,7 +93,7 @@ public class NullFieldWireFormatTests {
     public void null_double_field_should_throw() {
         assertThatThrownBy(() -> mapper.readValue("{\"doubleValue\":null}", DoubleExample.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("Cannot map `null` into type double");
+                .hasMessageContaining("Cannot map `null` into type `double`");
     }
 
     @Test
@@ -131,7 +131,7 @@ public class NullFieldWireFormatTests {
     public void null_boolean_field_should_throw() {
         assertThatThrownBy(() -> mapper.readValue("{\"coin\":null}", BooleanExample.class))
                 .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("Cannot map `null` into type boolean");
+                .hasMessageContaining("Cannot map `null` into type `boolean`");
     }
 
     @Test
