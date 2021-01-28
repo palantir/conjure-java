@@ -108,7 +108,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
             impl.addField(bindEndpointChannel(def, endpoint));
             deserializer(endpoint.getEndpointName(), endpoint.getReturns()).ifPresent(impl::addField);
-            impl.addMethod(clientImpl(def, endpoint));
+            impl.addMethod(clientImpl(endpoint));
         });
 
         impl.addMethod(DefaultStaticFactoryMethodGenerator.toStringMethod(className));
@@ -192,7 +192,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 returnTypes.baseType(Type.optional(OptionalType.of(Type.primitive(PrimitiveType.BINARY)))));
     }
 
-    private MethodSpec clientImpl(ServiceDefinition serviceDefinition, EndpointDefinition def) {
+    private MethodSpec clientImpl(EndpointDefinition def) {
         List<ParameterSpec> params = parameterTypes.methodParams(def);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         def.getEndpointName().get())
