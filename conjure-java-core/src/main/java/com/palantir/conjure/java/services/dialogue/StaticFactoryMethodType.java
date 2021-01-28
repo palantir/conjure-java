@@ -19,14 +19,14 @@ package com.palantir.conjure.java.services.dialogue;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 
 enum StaticFactoryMethodType {
-    Blocking,
-    Async;
+    BLOCKING,
+    ASYNC;
 
     public <R> R switchBy(R blocking, R async) {
         switch (this) {
-            case Async:
+            case ASYNC:
                 return async;
-            case Blocking:
+            case BLOCKING:
                 return blocking;
             default:
                 throw new SafeIllegalStateException("Unknown");

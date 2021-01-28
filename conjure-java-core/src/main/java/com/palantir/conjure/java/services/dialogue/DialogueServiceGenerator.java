@@ -74,14 +74,14 @@ public final class DialogueServiceGenerator implements Generator {
                 typeNameResolver,
                 new ParameterTypeMapper(parameterTypes),
                 new ReturnTypeMapper(returnTypes),
-                StaticFactoryMethodType.Async);
+                StaticFactoryMethodType.ASYNC);
 
         StaticFactoryMethodGenerator blockingGenerator = new DefaultStaticFactoryMethodGenerator(
                 options,
                 typeNameResolver,
                 new ParameterTypeMapper(parameterTypes),
                 new ReturnTypeMapper(returnTypes),
-                StaticFactoryMethodType.Blocking);
+                StaticFactoryMethodType.BLOCKING);
 
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> Stream.of(
