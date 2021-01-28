@@ -2,12 +2,16 @@ package test.api;
 
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.PlainSerDe;
+import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.BearerToken;
 import java.lang.Override;
 import java.lang.String;
+import java.lang.Void;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
@@ -21,11 +25,20 @@ public interface CookieServiceBlocking {
      * Creates a synchronous/blocking client for a CookieService service.
      */
     static CookieServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
-        CookieServiceAsync delegate = CookieServiceAsync.of(_endpointChannelFactory, _runtime);
         return new CookieServiceBlocking() {
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final EndpointChannel eatCookiesChannel =
+                    _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
+
+            private final Deserializer<Void> eatCookiesDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
             @Override
             public void eatCookies(BearerToken token) {
-                _runtime.clients().block(delegate.eatCookies(token));
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Cookie", "PALANTIR_TOKEN=" + _plainSerDe.serializeBearerToken(token));
+                _runtime.clients().callBlocking(eatCookiesChannel, _request.build(), eatCookiesDeserializer);
             }
 
             @Override

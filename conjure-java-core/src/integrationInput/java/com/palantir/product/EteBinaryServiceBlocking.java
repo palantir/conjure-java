@@ -7,6 +7,8 @@ import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.PlainSerDe;
+import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Override;
@@ -54,36 +56,95 @@ public interface EteBinaryServiceBlocking {
      * Creates a synchronous/blocking client for a EteBinaryService service.
      */
     static EteBinaryServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
-        EteBinaryServiceAsync delegate = EteBinaryServiceAsync.of(_endpointChannelFactory, _runtime);
         return new EteBinaryServiceBlocking() {
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final EndpointChannel postBinaryChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinary);
+
+            private final EndpointChannel postBinaryThrowsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinaryThrows);
+
+            private final EndpointChannel getOptionalBinaryPresentChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryPresent);
+
+            private final EndpointChannel getOptionalBinaryEmptyChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getOptionalBinaryEmpty);
+
+            private final EndpointChannel getBinaryFailureChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getBinaryFailure);
+
+            private final EndpointChannel getAliasedChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getAliased);
+
             @Override
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {
-                return _runtime.clients().block(delegate.postBinary(authHeader, body));
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(_runtime.bodySerDe().serialize(body));
+                return _runtime.clients()
+                        .callBlocking(
+                                postBinaryChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
             public InputStream postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body) {
-                return _runtime.clients().block(delegate.postBinaryThrows(authHeader, bytesToRead, body));
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(_runtime.bodySerDe().serialize(body));
+                _request.putQueryParams("bytesToRead", _plainSerDe.serializeInteger(bytesToRead));
+                return _runtime.clients()
+                        .callBlocking(
+                                postBinaryThrowsChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
             public Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader) {
-                return _runtime.clients().block(delegate.getOptionalBinaryPresent(authHeader));
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .callBlocking(
+                                getOptionalBinaryPresentChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
             public Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader) {
-                return _runtime.clients().block(delegate.getOptionalBinaryEmpty(authHeader));
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .callBlocking(
+                                getOptionalBinaryEmptyChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
             public InputStream getBinaryFailure(AuthHeader authHeader, int numBytes) {
-                return _runtime.clients().block(delegate.getBinaryFailure(authHeader, numBytes));
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
+                return _runtime.clients()
+                        .callBlocking(
+                                getBinaryFailureChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().inputStreamDeserializer());
             }
 
             @Override
             public Optional<InputStream> getAliased(AuthHeader authHeader) {
-                return _runtime.clients().block(delegate.getAliased(authHeader));
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .callBlocking(
+                                getAliasedChannel,
+                                _request.build(),
+                                _runtime.bodySerDe().optionalInputStreamDeserializer());
             }
 
             @Override
