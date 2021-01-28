@@ -22,12 +22,6 @@ enum StaticFactoryMethodType {
     Blocking,
     Async;
 
-    public void ifBlocking(Runnable ifBlocking) {
-        if (this == Blocking) {
-            ifBlocking.run();
-        }
-    }
-
     public <R> R switchBy(R blocking, R async) {
         switch (this) {
             case Async:
