@@ -52,6 +52,7 @@ import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -65,7 +66,7 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
-public final class AsyncGenerator implements StaticFactoryMethodGenerator {
+public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryMethodGenerator {
     private static final String REQUEST = "_request";
     private static final String PLAIN_SER_DE = "_plainSerDe";
 
@@ -73,22 +74,25 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
     private final TypeNameResolver typeNameResolver;
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
+    private final StaticFactoryMethodType methodType;
 
-    public AsyncGenerator(
+    public DefaultStaticFactoryMethodGenerator(
             Options options,
             TypeNameResolver typeNameResolver,
             ParameterTypeMapper parameterTypes,
-            ReturnTypeMapper returnTypes) {
+            ReturnTypeMapper returnTypes,
+            StaticFactoryMethodType methodType) {
         this.options = options;
         this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
+        this.methodType = methodType;
     }
 
     @Override
     public MethodSpec generate(ServiceDefinition def) {
-        TypeSpec.Builder impl =
-                TypeSpec.anonymousClassBuilder("").addSuperinterface(Names.asyncClassName(def, options));
+        ClassName className = getClassName(def);
+        TypeSpec.Builder impl = TypeSpec.anonymousClassBuilder("").addSuperinterface(className);
 
         impl.addField(FieldSpec.builder(PlainSerDe.class, PLAIN_SER_DE)
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -104,22 +108,27 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
 
             impl.addField(bindEndpointChannel(def, endpoint));
             deserializer(endpoint.getEndpointName(), endpoint.getReturns()).ifPresent(impl::addField);
-            impl.addMethod(asyncClientImpl(def, endpoint));
+            impl.addMethod(clientImpl(endpoint));
         });
 
-        impl.addMethod(BlockingGenerator.toStringMethod(Names.asyncClassName(def, options)));
+        impl.addMethod(DefaultStaticFactoryMethodGenerator.toStringMethod(className));
 
-        MethodSpec asyncImpl = MethodSpec.methodBuilder("of")
+        String javadoc = methodType.switchBy(
+                "Creates a synchronous/blocking client for a $L service.",
+                "Creates an " + "asynchronous/non-blocking client for a $L service.");
+        MethodSpec method = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .addJavadoc(
-                        "Creates an asynchronous/non-blocking client for a $L service.",
-                        def.getServiceName().getName())
-                .returns(Names.asyncClassName(def, options))
+                .addJavadoc(javadoc, def.getServiceName().getName())
+                .returns(className)
                 .addParameter(EndpointChannelFactory.class, StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
                 .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
-        return asyncImpl;
+        return method;
+    }
+
+    private ClassName getClassName(ServiceDefinition def) {
+        return methodType.switchBy(Names.blockingClassName(def, options), Names.asyncClassName(def, options));
     }
 
     private FieldSpec bindEndpointChannel(ServiceDefinition def, EndpointDefinition endpoint) {
@@ -183,7 +192,7 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 returnTypes.baseType(Type.optional(OptionalType.of(Type.primitive(PrimitiveType.BINARY)))));
     }
 
-    private MethodSpec asyncClientImpl(ServiceDefinition serviceDefinition, EndpointDefinition def) {
+    private MethodSpec clientImpl(EndpointDefinition def) {
         List<ParameterSpec> params = parameterTypes.methodParams(def);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         def.getEndpointName().get())
@@ -191,10 +200,20 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .addParameters(params)
                 .addAnnotation(Override.class);
 
-        methodBuilder.returns(returnTypes.async(def.getReturns()));
+        if (def.getDeprecated().isPresent()) {
+            methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                    .addMember("value", "$S", "deprecation")
+                    .build());
+        }
+
+        TypeName returnType =
+                methodType.switchBy(returnTypes.baseType(def.getReturns()), returnTypes.async(def.getReturns()));
+        methodBuilder.returns(returnType);
 
         CodeBlock.Builder requestParams = CodeBlock.builder();
-        def.getAuth().map(AsyncGenerator::generateAuthHeader).ifPresent(requestParams::add);
+        def.getAuth()
+                .map(DefaultStaticFactoryMethodGenerator::generateAuthHeader)
+                .ifPresent(requestParams::add);
 
         def.getArgs().stream()
                 .map(param -> generateParam(def.getEndpointName().get(), param))
@@ -204,8 +223,10 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                 .add("$T $L = $T.builder();", Request.Builder.class, REQUEST, Request.class)
                 .add(requestParams.build())
                 .build();
+        String codeBlock = methodType.switchBy(
+                "$L.clients().callBlocking($L, $L.build(), $L);", "$L.clients().call($L, $L.build" + "(), $L);");
         CodeBlock execute = CodeBlock.of(
-                "return $L.clients().call($L, $L.build(), $L);",
+                codeBlock,
                 StaticFactoryMethodGenerator.RUNTIME,
                 Names.endpointChannel(def),
                 REQUEST,
@@ -217,8 +238,11 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
                                         : ".bodySerDe().inputStreamDeserializer()"))
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
-        MethodSpec asyncClient = methodBuilder.addCode(request).addCode(execute).build();
-        return asyncClient;
+        methodBuilder.addCode(request);
+        methodBuilder.addCode(methodType.switchBy(def.getReturns().isPresent() ? "return " : "", "return "));
+        methodBuilder.addCode(execute);
+
+        return methodBuilder.build();
     }
 
     private CodeBlock generateParam(String endpointName, ArgumentDefinition param) {
@@ -424,5 +448,18 @@ public final class AsyncGenerator implements StaticFactoryMethodGenerator {
             throw new IllegalStateException("unrecognized primitive type: " + in);
         }
         return typeName;
+    }
+
+    private static MethodSpec toStringMethod(ClassName className) {
+        return MethodSpec.methodBuilder("toString")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(String.class)
+                .addAnnotation(Override.class)
+                .addCode(
+                        "return \"$L{$L=\" + $L + \", runtime=\" + _runtime + '}';",
+                        className.simpleName(),
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY,
+                        StaticFactoryMethodGenerator.ENDPOINT_CHANNEL_FACTORY)
+                .build();
     }
 }

@@ -69,11 +69,19 @@ public final class DialogueServiceGenerator implements Generator {
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
                 typeDefinitionsByName.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
 
-        AsyncGenerator asyncGenerator = new AsyncGenerator(
-                options, typeNameResolver, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
+        StaticFactoryMethodGenerator asyncGenerator = new DefaultStaticFactoryMethodGenerator(
+                options,
+                typeNameResolver,
+                new ParameterTypeMapper(parameterTypes),
+                new ReturnTypeMapper(returnTypes),
+                StaticFactoryMethodType.ASYNC);
 
-        BlockingGenerator blockingGenerator = new BlockingGenerator(
-                options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
+        StaticFactoryMethodGenerator blockingGenerator = new DefaultStaticFactoryMethodGenerator(
+                options,
+                typeNameResolver,
+                new ParameterTypeMapper(parameterTypes),
+                new ReturnTypeMapper(returnTypes),
+                StaticFactoryMethodType.BLOCKING);
 
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> Stream.of(

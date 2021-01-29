@@ -2,9 +2,14 @@ package com.palantir.product;
 
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
+import com.palantir.dialogue.PlainSerDe;
+import com.palantir.dialogue.Request;
+import com.palantir.dialogue.TypeMarker;
+import java.lang.Boolean;
 import java.lang.Override;
 import java.lang.String;
 import javax.annotation.Generated;
@@ -20,11 +25,19 @@ public interface EmptyPathServiceBlocking {
      * Creates a synchronous/blocking client for a EmptyPathService service.
      */
     static EmptyPathServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
-        EmptyPathServiceAsync delegate = EmptyPathServiceAsync.of(_endpointChannelFactory, _runtime);
         return new EmptyPathServiceBlocking() {
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
+            private final EndpointChannel emptyPathChannel =
+                    _endpointChannelFactory.endpoint(DialogueEmptyPathEndpoints.emptyPath);
+
+            private final Deserializer<Boolean> emptyPathDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Boolean>() {});
+
             @Override
             public boolean emptyPath() {
-                return _runtime.clients().block(delegate.emptyPath());
+                Request.Builder _request = Request.builder();
+                return _runtime.clients().callBlocking(emptyPathChannel, _request.build(), emptyPathDeserializer);
             }
 
             @Override
