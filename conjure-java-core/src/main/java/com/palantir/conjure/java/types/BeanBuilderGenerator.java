@@ -71,7 +71,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
-import org.apache.commons.lang3.StringUtils;
 
 public final class BeanBuilderGenerator {
     private final TypeMapper typeMapper;
@@ -93,12 +92,16 @@ public final class BeanBuilderGenerator {
             ClassName builderClass,
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            Options options) {
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, options).generate(typeDef, typesMap);
+            Options options,
+            List<ClassName> stageInterfcesClasses) {
+        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, options)
+                .generate(typeDef, typesMap, stageInterfcesClasses);
     }
 
     private TypeSpec generate(
-            ObjectDefinition typeDef, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            List<ClassName> superInterfaces) {
         Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
 
@@ -107,9 +110,16 @@ public final class BeanBuilderGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addFields(primitivesInitializedFields(enrichedFields))
-                .addMethod(createConstructor())
-                .addMethod(createFromObject(enrichedFields))
-                .addMethods(createSetters(enrichedFields, typesMap))
+                .addMethod(createConstructor());
+
+        if (options.useStagedBuilders() && !superInterfaces.isEmpty()) {
+            builder.addSuperinterfaces(
+                    superInterfaces.stream().map(ClassName::box).collect(Collectors.toList()));
+        } else {
+            builder.addMethod(createFromObject(enrichedFields));
+        }
+
+        builder.addMethods(createSetters(enrichedFields, typesMap))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
                 .addMethod(createBuild(enrichedFields, poetFields));
 
@@ -285,18 +295,11 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createCollectionSetter(String prefix, EnrichedField enriched) {
-        FieldSpec field = enriched.poetSpec();
         FieldDefinition definition = enriched.conjureDef();
         Type type = definition.getType();
         boolean shouldClearFirst = false;
-        return MethodSpec.methodBuilder(prefix + StringUtils.capitalize(field.name))
-                .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
-                        .map(rendered -> CodeBlock.of("$L", rendered))
-                        .orElseGet(() -> CodeBlock.builder().build()))
-                .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
-                .addModifiers(Modifier.PUBLIC)
-                .returns(builderClass)
-                .addParameter(Parameters.nonnullParameter(widenParameterIfPossible(field.type, type), field.name))
+        return BeanBuilderAuxiliarySettersUtils.createCollectionSetterBuilder(
+                        prefix, enriched, typeMapper, builderClass)
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
                 .addStatement("return this")
                 .build();
@@ -420,8 +423,7 @@ public final class BeanBuilderGenerator {
     private MethodSpec createOptionalSetter(EnrichedField enriched) {
         FieldSpec field = enriched.poetSpec();
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
-        return publicSetter(enriched)
-                .addParameter(Parameters.nonnullParameter(typeMapper.getClassName(type.getItemType()), field.name))
+        return BeanBuilderAuxiliarySettersUtils.createOptionalSetterBuilder(enriched, typeMapper, builderClass)
                 .addCode(optionalAssignmentStatement(enriched, type))
                 .addStatement("return this")
                 .build();
@@ -483,8 +485,7 @@ public final class BeanBuilderGenerator {
 
     private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {
         FieldSpec field = enriched.poetSpec();
-        return publicSetter(enriched)
-                .addParameter(typeMapper.getClassName(itemType), field.name)
+        return BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(enriched, itemType, typeMapper, builderClass)
                 .addStatement("this.$1N.add($1N)", field.name)
                 .addStatement("return this")
                 .build();
@@ -492,9 +493,7 @@ public final class BeanBuilderGenerator {
 
     private MethodSpec createMapSetter(EnrichedField enriched) {
         MapType type = enriched.conjureDef().getType().accept(TypeVisitor.MAP);
-        return publicSetter(enriched)
-                .addParameter(typeMapper.getClassName(type.getKeyType()), "key")
-                .addParameter(typeMapper.getClassName(type.getValueType()), "value")
+        return BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(enriched, typeMapper, builderClass)
                 .addStatement("this.$1N.put(key, value)", enriched.poetSpec().name)
                 .addStatement("return this")
                 .build();

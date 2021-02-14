@@ -183,6 +183,12 @@ public final class ConjureJavaCli implements Runnable {
         @Nullable
         private String apiVersion;
 
+        @CommandLine.Option(
+                names = "--useStagedBuilders",
+                defaultValue = "false",
+                description = "Enable staged builder.")
+        private boolean useStagedBuilders;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -247,6 +253,7 @@ public final class ConjureJavaCli implements Runnable {
                             .nonNullTopLevelCollectionValues(nonNullCollections || nonNullTopLevelCollectionValues)
                             .packagePrefix(Optional.ofNullable(packagePrefix))
                             .apiVersion(Optional.ofNullable(apiVersion))
+                            .useStagedBuilders(useStagedBuilders)
                             .build())
                     .build();
         }
