@@ -108,7 +108,7 @@ public interface Options {
      */
     @Value.Default
     default boolean useStagedBuilders() {
-        return true;
+        return false;
     }
 
     Optional<String> packagePrefix();
