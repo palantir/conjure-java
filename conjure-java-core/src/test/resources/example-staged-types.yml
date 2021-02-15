@@ -1,4 +1,3 @@
-# don't forget to update conjure-python/src/test/resources/types/example-types.yml
 types:
   definitions:
     default-package: com.palantir.product
