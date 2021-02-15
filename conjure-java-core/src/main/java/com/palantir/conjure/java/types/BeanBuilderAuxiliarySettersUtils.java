@@ -80,7 +80,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(typeMapper.getClassName(type.getValueType()), "value");
     }
 
-    private static MethodSpec.Builder publicSetter(EnrichedField enriched, ClassName returnClass) {
+    public static MethodSpec.Builder publicSetter(EnrichedField enriched, ClassName returnClass) {
         FieldDefinition definition = enriched.conjureDef();
         return MethodSpec.methodBuilder(enriched.poetSpec().name)
                 .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
@@ -91,7 +91,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .returns(returnClass);
     }
 
-    private static TypeName widenParameterIfPossible(TypeName current, Type type, TypeMapper typeMapper) {
+    public static TypeName widenParameterIfPossible(TypeName current, Type type, TypeMapper typeMapper) {
         if (type.accept(TypeVisitor.IS_LIST)) {
             Type innerType = type.accept(TypeVisitor.LIST).getItemType();
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
@@ -125,7 +125,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
 
     // we want to widen containers of anything that's not a primitive, a conjure reference or an optional
     // since we know all of those are final.
-    private static boolean isWidenableContainedType(Type containedType) {
+    public static boolean isWidenableContainedType(Type containedType) {
         return containedType.accept(new DefaultTypeVisitor<Boolean>() {
             @Override
             public Boolean visitPrimitive(PrimitiveType value) {

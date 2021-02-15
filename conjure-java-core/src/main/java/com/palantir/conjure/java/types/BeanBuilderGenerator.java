@@ -27,9 +27,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
-import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.TypeFunctions;
-import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
@@ -56,7 +54,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.WildcardTypeName;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -280,8 +277,10 @@ public final class BeanBuilderGenerator {
         }
 
         boolean shouldClearFirst = true;
-        MethodSpec.Builder setterBuilder = publicSetter(enriched)
-                .addParameter(Parameters.nonnullParameter(widenParameterIfPossible(field.type, type), field.name))
+        MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
+                .addParameter(Parameters.nonnullParameter(
+                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(field.type, type, typeMapper),
+                        field.name))
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
         if (enriched.isPrimitive()) {
@@ -303,38 +302,6 @@ public final class BeanBuilderGenerator {
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
                 .addStatement("return this")
                 .build();
-    }
-
-    private TypeName widenParameterIfPossible(TypeName current, Type type) {
-        if (type.accept(TypeVisitor.IS_LIST)) {
-            Type innerType = type.accept(TypeVisitor.LIST).getItemType();
-            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
-            if (isWidenableContainedType(innerType)) {
-                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
-            }
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
-        }
-
-        if (type.accept(TypeVisitor.IS_SET)) {
-            Type innerType = type.accept(TypeVisitor.SET).getItemType();
-            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
-            if (isWidenableContainedType(innerType)) {
-                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
-            }
-
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
-        }
-
-        if (type.accept(TypeVisitor.IS_OPTIONAL)) {
-            Type innerType = type.accept(TypeVisitor.OPTIONAL).getItemType();
-            if (!isWidenableContainedType(innerType)) {
-                return current;
-            }
-            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
-            return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerTypeName));
-        }
-
-        return current;
     }
 
     private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
@@ -373,7 +340,7 @@ public final class BeanBuilderGenerator {
             CodeBlock nullCheckedValue =
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null");
 
-            if (isWidenableContainedType(optionalType.getItemType())) {
+            if (BeanBuilderAuxiliarySettersUtils.isWidenableContainedType(optionalType.getItemType())) {
                 // we capture covariant type via generic Function#identity mapping before assignment to bind
                 // the resultant optional to the invariant inner variable type
                 return CodeBlock.builder()
@@ -456,33 +423,6 @@ public final class BeanBuilderGenerator {
                         optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
     }
 
-    // we want to widen containers of anything that's not a primitive, a conjure reference or an optional
-    // since we know all of those are final.
-    private boolean isWidenableContainedType(Type containedType) {
-        return containedType.accept(new DefaultTypeVisitor<Boolean>() {
-            @Override
-            public Boolean visitPrimitive(PrimitiveType value) {
-                return value.get() == PrimitiveType.Value.ANY;
-            }
-
-            @Override
-            public Boolean visitOptional(OptionalType _value) {
-                return false;
-            }
-
-            @Override
-            public Boolean visitReference(com.palantir.conjure.spec.TypeName _value) {
-                return false;
-            }
-
-            // collections, external references
-            @Override
-            public Boolean visitDefault() {
-                return true;
-            }
-        });
-    }
-
     private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {
         FieldSpec field = enriched.poetSpec();
         return BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(enriched, itemType, typeMapper, builderClass)
@@ -497,17 +437,6 @@ public final class BeanBuilderGenerator {
                 .addStatement("this.$1N.put(key, value)", enriched.poetSpec().name)
                 .addStatement("return this")
                 .build();
-    }
-
-    private MethodSpec.Builder publicSetter(EnrichedField enriched) {
-        FieldDefinition definition = enriched.conjureDef();
-        return MethodSpec.methodBuilder(enriched.poetSpec().name)
-                .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
-                        .map(rendered -> CodeBlock.of("$L", rendered))
-                        .orElseGet(() -> CodeBlock.builder().build()))
-                .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
-                .addModifiers(Modifier.PUBLIC)
-                .returns(builderClass);
     }
 
     private MethodSpec createBuild(Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields) {
