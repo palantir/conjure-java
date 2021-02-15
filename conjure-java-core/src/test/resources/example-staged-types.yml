@@ -1,0 +1,23 @@
+# don't forget to update conjure-python/src/test/resources/types/example-types.yml
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      OneField:
+        fields:
+          bearerTokenValue: bearertoken
+      OneFieldOnlyFinalStage:
+        fields:
+          optionalItem: optional<string>
+      MultipleFieldsOnlyFinalStage:
+        fields:
+          items: list<string>
+          itemsMap: map<string, integer>
+          optionalItem: optional<string>
+          itemsSet: set<string>
+      MultipleOrderedStages:
+        fields:
+          token: OneField
+          item: string
+          items: set<safelong>
+          mappedRids: map<rid, string>
