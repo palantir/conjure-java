@@ -112,11 +112,10 @@ public final class BeanBuilderGenerator {
         if (options.useStagedBuilders() && !superInterfaces.isEmpty()) {
             builder.addSuperinterfaces(
                     superInterfaces.stream().map(ClassName::box).collect(Collectors.toList()));
-        } else {
-            builder.addMethod(createFromObject(enrichedFields));
         }
 
-        builder.addMethods(createSetters(enrichedFields, typesMap))
+        builder.addMethod(createFromObject(enrichedFields))
+                .addMethods(createSetters(enrichedFields, typesMap))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
                 .addMethod(createBuild(enrichedFields, poetFields));
 

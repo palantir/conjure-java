@@ -122,6 +122,8 @@ public final class MultipleOrderedStages {
 
     public interface ItemStageBuilder {
         TokenStageBuilder item(@Nonnull String item);
+
+        Completed_StageBuilder from(MultipleOrderedStages other);
     }
 
     public interface TokenStageBuilder {
@@ -142,6 +144,10 @@ public final class MultipleOrderedStages {
         Completed_StageBuilder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
         Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
+
+        Completed_StageBuilder token(@Nonnull OneField token);
+
+        Completed_StageBuilder item(@Nonnull String item);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
@@ -156,6 +162,14 @@ public final class MultipleOrderedStages {
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
         private Builder() {}
+
+        public Builder from(MultipleOrderedStages other) {
+            token(other.getToken());
+            item(other.getItem());
+            items(other.getItems());
+            mappedRids(other.getMappedRids());
+            return this;
+        }
 
         @JsonSetter("token")
         public Builder token(@Nonnull OneField token) {

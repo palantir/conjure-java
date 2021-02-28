@@ -203,10 +203,12 @@ public final class BeanGenerator {
             TypeMapper typeMapper,
             Collection<EnrichedField> fieldsNeedingBuilderStage,
             Collection<EnrichedField> otherFields) {
-        List<TypeSpec> interfaces = new ArrayList<>();
+        List<TypeSpec.Builder> interfaces = new ArrayList<>();
 
         PeekingIterator<EnrichedField> fieldPeekingIterator = Iterators.peekingIterator(
                 sortedEnrichedFields(fieldsNeedingBuilderStage).iterator());
+
+        List<MethodSpec.Builder> generatedMethodBuilders = new ArrayList<>();
 
         while (fieldPeekingIterator.hasNext()) {
             EnrichedField field = fieldPeekingIterator.next();
@@ -216,20 +218,22 @@ public final class BeanGenerator {
 
             ClassName nextStageClassName = stageBuilderInterfaceName(objectClass, nextBuilderStageName);
 
+            MethodSpec.Builder method = MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
+                    .addParameter(
+                            ParameterSpec.builder(field.poetSpec().type, JavaNameSanitizer.sanitize(field.fieldName()))
+                                    .addAnnotation(Nonnull.class)
+                                    .build())
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+
+            generatedMethodBuilders.add(method);
             interfaces.add(TypeSpec.interfaceBuilder(
                             stageBuilderInterfaceName(objectClass, JavaNameSanitizer.sanitize(field.fieldName())))
                     .addModifiers(Modifier.PUBLIC)
-                    .addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
-                            .addParameter(ParameterSpec.builder(
-                                            field.poetSpec().type, JavaNameSanitizer.sanitize(field.fieldName()))
-                                    .addAnnotation(Nonnull.class)
-                                    .build())
-                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                            .returns(nextStageClassName.box())
-                            .build())
-                    .build());
+                    .addMethod(method.returns(nextStageClassName.box()).build()));
         }
+
         ClassName completedStageClass = stageBuilderInterfaceName(objectClass, "completed_");
+
         TypeSpec.Builder completedStage = TypeSpec.interfaceBuilder(completedStageClass)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethod(MethodSpec.methodBuilder("build")
@@ -242,9 +246,21 @@ public final class BeanGenerator {
                 .flatMap(List::stream)
                 .collect(Collectors.toList()));
 
-        interfaces.add(completedStage.build());
+        completedStage.addMethods(generatedMethodBuilders.stream()
+                .map(method -> method.returns(completedStageClass).build())
+                .collect(Collectors.toSet()));
 
-        return interfaces;
+        interfaces.add(completedStage);
+
+        interfaces
+                .get(0)
+                .addMethod(MethodSpec.methodBuilder("from")
+                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        .returns(completedStageClass)
+                        .addParameter(objectClass, "other")
+                        .build());
+
+        return interfaces.stream().map(TypeSpec.Builder::build).collect(Collectors.toList());
     }
 
     private static List<MethodSpec> generateMethodsForFinalStageField(
