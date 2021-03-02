@@ -162,6 +162,13 @@ public final class BeanGenerator {
                                 .flatMap(List::stream)
                                 .map(method -> method.toBuilder()
                                         .addAnnotation(Override.class)
+                                        .returns(
+                                                method.name.equals("build")
+                                                        ? method.returnType
+                                                        : ClassName.get(
+                                                                objectClass.packageName(),
+                                                                objectClass.simpleName(),
+                                                                "Builder"))
                                         .build())
                                 .collect(Collectors.toSet()))
                         .addSuperinterfaces(

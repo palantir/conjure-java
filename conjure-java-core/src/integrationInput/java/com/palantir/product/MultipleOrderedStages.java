@@ -148,34 +148,34 @@ public final class MultipleOrderedStages {
 
     public interface Builder extends ItemStageBuilder, TokenStageBuilder, Completed_StageBuilder {
         @Override
-        Completed_StageBuilder token(@Nonnull OneField token);
+        MultipleOrderedStages build();
 
         @Override
-        MultipleOrderedStages build();
+        Builder items(@Nonnull Iterable<SafeLong> items);
+
+        @Override
+        Builder items(SafeLong items);
+
+        @Override
+        Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
         @Override
         Builder from(MultipleOrderedStages other);
 
         @Override
-        Completed_StageBuilder items(SafeLong items);
+        Builder addAllItems(@Nonnull Iterable<SafeLong> items);
 
         @Override
-        Completed_StageBuilder addAllItems(@Nonnull Iterable<SafeLong> items);
+        Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
         @Override
-        Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
+        Builder token(@Nonnull OneField token);
 
         @Override
-        Completed_StageBuilder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+        Builder mappedRids(ResourceIdentifier key, String value);
 
         @Override
-        Completed_StageBuilder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
-
-        @Override
-        TokenStageBuilder item(@Nonnull String item);
-
-        @Override
-        Completed_StageBuilder items(@Nonnull Iterable<SafeLong> items);
+        Builder item(@Nonnull String item);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")

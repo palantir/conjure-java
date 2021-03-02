@@ -88,13 +88,13 @@ public final class OneField {
 
     public interface Builder extends BearerTokenValueStageBuilder, Completed_StageBuilder {
         @Override
+        Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
+
+        @Override
         Builder from(OneField other);
 
         @Override
         OneField build();
-
-        @Override
-        Completed_StageBuilder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
