@@ -232,8 +232,6 @@ public final class BeanGenerator {
         PeekingIterator<EnrichedField> fieldPeekingIterator = Iterators.peekingIterator(
                 sortedEnrichedFields(fieldsNeedingBuilderStage).iterator());
 
-        List<MethodSpec.Builder> generatedMethodBuilders = new ArrayList<>();
-
         while (fieldPeekingIterator.hasNext()) {
             EnrichedField field = fieldPeekingIterator.next();
             String nextBuilderStageName = fieldPeekingIterator.hasNext()
@@ -242,18 +240,17 @@ public final class BeanGenerator {
 
             ClassName nextStageClassName = stageBuilderInterfaceName(objectClass, nextBuilderStageName);
 
-            MethodSpec.Builder method = MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
-                    .addParameter(
-                            ParameterSpec.builder(field.poetSpec().type, JavaNameSanitizer.sanitize(field.fieldName()))
-                                    .addAnnotation(Nonnull.class)
-                                    .build())
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
-
-            generatedMethodBuilders.add(method);
             interfaces.add(TypeSpec.interfaceBuilder(
                             stageBuilderInterfaceName(objectClass, JavaNameSanitizer.sanitize(field.fieldName())))
                     .addModifiers(Modifier.PUBLIC)
-                    .addMethod(method.returns(nextStageClassName.box()).build()));
+                    .addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
+                            .addParameter(ParameterSpec.builder(
+                                            field.poetSpec().type, JavaNameSanitizer.sanitize(field.fieldName()))
+                                    .addAnnotation(Nonnull.class)
+                                    .build())
+                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                            .returns(nextStageClassName.box())
+                            .build()));
         }
 
         ClassName completedStageClass = stageBuilderInterfaceName(objectClass, "completed_");
