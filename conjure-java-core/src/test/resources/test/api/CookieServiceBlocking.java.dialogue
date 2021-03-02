@@ -3,6 +3,8 @@ package test.api;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueService;
+import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
@@ -15,6 +17,7 @@ import java.lang.Void;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@DialogueService(CookieServiceBlocking.Factory.class)
 public interface CookieServiceBlocking {
     /**
      * @apiNote {@code GET /cookies}
@@ -64,5 +67,12 @@ public interface CookieServiceBlocking {
                     }
                 },
                 _runtime);
+    }
+
+    final class Factory implements DialogueServiceFactory<CookieServiceBlocking> {
+        @Override
+        public CookieServiceBlocking create(EndpointChannelFactory endpointChannelFactory, ConjureRuntime runtime) {
+            return CookieServiceBlocking.of(endpointChannelFactory, runtime);
+        }
     }
 }

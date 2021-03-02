@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueService;
+import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
@@ -16,6 +18,7 @@ import java.lang.Void;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@DialogueService(CookieServiceAsync.Factory.class)
 public interface CookieServiceAsync {
     /**
      * @apiNote {@code GET /cookies}
@@ -65,5 +68,12 @@ public interface CookieServiceAsync {
                     }
                 },
                 _runtime);
+    }
+
+    final class Factory implements DialogueServiceFactory<CookieServiceAsync> {
+        @Override
+        public CookieServiceAsync create(EndpointChannelFactory endpointChannelFactory, ConjureRuntime runtime) {
+            return CookieServiceAsync.of(endpointChannelFactory, runtime);
+        }
     }
 }

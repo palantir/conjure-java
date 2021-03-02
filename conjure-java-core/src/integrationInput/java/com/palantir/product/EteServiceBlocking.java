@@ -5,6 +5,8 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueService;
+import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
@@ -31,6 +33,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@DialogueService(EteServiceBlocking.Factory.class)
 public interface EteServiceBlocking {
     /**
      * foo bar baz.
@@ -711,5 +714,12 @@ public interface EteServiceBlocking {
                     }
                 },
                 _runtime);
+    }
+
+    final class Factory implements DialogueServiceFactory<EteServiceBlocking> {
+        @Override
+        public EteServiceBlocking create(EndpointChannelFactory endpointChannelFactory, ConjureRuntime runtime) {
+            return EteServiceBlocking.of(endpointChannelFactory, runtime);
+        }
     }
 }
