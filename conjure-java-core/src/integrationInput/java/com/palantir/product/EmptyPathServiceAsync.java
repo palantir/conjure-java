@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueService;
+import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
@@ -16,6 +18,7 @@ import java.lang.String;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@DialogueService(EmptyPathServiceAsync.Factory.class)
 public interface EmptyPathServiceAsync {
     /**
      * @apiNote {@code GET /}
@@ -64,5 +67,12 @@ public interface EmptyPathServiceAsync {
                     }
                 },
                 _runtime);
+    }
+
+    final class Factory implements DialogueServiceFactory<EmptyPathServiceAsync> {
+        @Override
+        public EmptyPathServiceAsync create(EndpointChannelFactory endpointChannelFactory, ConjureRuntime runtime) {
+            return EmptyPathServiceAsync.of(endpointChannelFactory, runtime);
+        }
     }
 }

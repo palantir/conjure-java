@@ -30,15 +30,19 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.dialogue.DialogueService;
+import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.InputStream;
@@ -75,7 +79,23 @@ public final class DialogueInterfaceGenerator {
             StaticFactoryMethodGenerator methodGenerator) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class))
+                .addAnnotation(AnnotationSpec.builder(DialogueService.class)
+                        .addMember("value", "$T.Factory.class", className)
+                        .build());
+
+        serviceBuilder.addType(TypeSpec.classBuilder("Factory")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(DialogueServiceFactory.class), className))
+                .addMethod(MethodSpec.methodBuilder("create")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(className)
+                        .addParameter(EndpointChannelFactory.class, "endpointChannelFactory")
+                        .addParameter(ConjureRuntime.class, "runtime")
+                        .addStatement("return $T.of($L, $L)", className, "endpointChannelFactory", "runtime")
+                        .build())
+                .build());
 
         def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 

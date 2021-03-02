@@ -6,6 +6,8 @@ import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
+import com.palantir.dialogue.DialogueService;
+import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
@@ -40,6 +42,7 @@ import javax.annotation.Nonnull;
  * A Markdown description of the service.
  */
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@DialogueService(TestServiceAsync.Factory.class)
 public interface TestServiceAsync {
     /**
      * Returns a mapping from file system id to backing file system configuration.
@@ -577,5 +580,12 @@ public interface TestServiceAsync {
                     }
                 },
                 _runtime);
+    }
+
+    final class Factory implements DialogueServiceFactory<TestServiceAsync> {
+        @Override
+        public TestServiceAsync create(EndpointChannelFactory endpointChannelFactory, ConjureRuntime runtime) {
+            return TestServiceAsync.of(endpointChannelFactory, runtime);
+        }
     }
 }
