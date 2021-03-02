@@ -73,27 +73,36 @@ public final class OneField {
     }
 
     public static BearerTokenValueStageBuilder builder() {
-        return new Builder();
+        return new DefaultBuilder();
     }
 
     public interface BearerTokenValueStageBuilder {
         Completed_StageBuilder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
 
-        Completed_StageBuilder from(OneField other);
+        Builder from(OneField other);
     }
 
     public interface Completed_StageBuilder {
         OneField build();
+    }
 
+    public interface Builder extends BearerTokenValueStageBuilder, Completed_StageBuilder {
+        @Override
+        Builder from(OneField other);
+
+        @Override
+        OneField build();
+
+        @Override
         Completed_StageBuilder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements BearerTokenValueStageBuilder, Completed_StageBuilder {
+    private static final class DefaultBuilder implements Builder {
         private BearerToken bearerTokenValue;
 
-        private Builder() {}
+        private DefaultBuilder() {}
 
         public Builder from(OneField other) {
             bearerTokenValue(other.getBearerTokenValue());

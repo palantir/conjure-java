@@ -90,34 +90,34 @@ public final class BeanBuilderGenerator {
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Options options,
-            List<ClassName> stageInterfcesClasses) {
+            Optional<ClassName> builderInterfaceClass) {
         return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, options)
-                .generate(typeDef, typesMap, stageInterfcesClasses);
+                .generate(typeDef, typesMap, builderInterfaceClass);
     }
 
     private TypeSpec generate(
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            List<ClassName> superInterfaces) {
+            Optional<ClassName> builderInterfaceClass) {
         Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
 
-        TypeSpec.Builder builder = TypeSpec.classBuilder("Builder")
+        TypeSpec.Builder builder = TypeSpec.classBuilder(
+                        isInStagedBuilderMode(builderInterfaceClass) ? "DefaultBuilder" : "Builder")
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addModifiers(isInStagedBuilderMode(builderInterfaceClass) ? Modifier.PRIVATE : Modifier.PUBLIC)
+                .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addFields(primitivesInitializedFields(enrichedFields))
-                .addMethod(createConstructor());
-
-        if (options.useStagedBuilders() && !superInterfaces.isEmpty()) {
-            builder.addSuperinterfaces(
-                    superInterfaces.stream().map(ClassName::box).collect(Collectors.toList()));
-        }
-
-        builder.addMethod(createFromObject(enrichedFields))
+                .addMethod(createConstructor())
+                .addMethod(createFromObject(enrichedFields))
                 .addMethods(createSetters(enrichedFields, typesMap))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
                 .addMethod(createBuild(enrichedFields, poetFields));
+
+        if (isInStagedBuilderMode(builderInterfaceClass)) {
+            builder.addSuperinterface(builderInterfaceClass.get());
+        }
 
         if (!options.strictObjects()) {
             builder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
@@ -126,6 +126,10 @@ public final class BeanBuilderGenerator {
         }
 
         return builder.build();
+    }
+
+    private boolean isInStagedBuilderMode(Optional<ClassName> builderInterfaceClass) {
+        return options.useStagedBuilders() && builderInterfaceClass.isPresent();
     }
 
     private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {

@@ -117,13 +117,13 @@ public final class MultipleOrderedStages {
     }
 
     public static ItemStageBuilder builder() {
-        return new Builder();
+        return new DefaultBuilder();
     }
 
     public interface ItemStageBuilder {
         TokenStageBuilder item(@Nonnull String item);
 
-        Completed_StageBuilder from(MultipleOrderedStages other);
+        Builder from(MultipleOrderedStages other);
     }
 
     public interface TokenStageBuilder {
@@ -144,15 +144,43 @@ public final class MultipleOrderedStages {
         Completed_StageBuilder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
         Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
+    }
 
+    public interface Builder extends ItemStageBuilder, TokenStageBuilder, Completed_StageBuilder {
+        @Override
         Completed_StageBuilder token(@Nonnull OneField token);
 
-        Completed_StageBuilder item(@Nonnull String item);
+        @Override
+        MultipleOrderedStages build();
+
+        @Override
+        Builder from(MultipleOrderedStages other);
+
+        @Override
+        Completed_StageBuilder items(SafeLong items);
+
+        @Override
+        Completed_StageBuilder addAllItems(@Nonnull Iterable<SafeLong> items);
+
+        @Override
+        Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
+
+        @Override
+        Completed_StageBuilder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+
+        @Override
+        Completed_StageBuilder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+
+        @Override
+        TokenStageBuilder item(@Nonnull String item);
+
+        @Override
+        Completed_StageBuilder items(@Nonnull Iterable<SafeLong> items);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class Builder implements ItemStageBuilder, TokenStageBuilder, Completed_StageBuilder {
+    private static final class DefaultBuilder implements Builder {
         private OneField token;
 
         private String item;
@@ -161,7 +189,7 @@ public final class MultipleOrderedStages {
 
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
-        private Builder() {}
+        private DefaultBuilder() {}
 
         public Builder from(MultipleOrderedStages other) {
             token(other.getToken());

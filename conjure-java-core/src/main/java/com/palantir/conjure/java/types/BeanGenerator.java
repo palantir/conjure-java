@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
@@ -60,6 +59,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
@@ -139,10 +139,11 @@ public final class BeanGenerator {
                 typeBuilder
                         .addMethod(createBuilder(builderClass))
                         .addType(BeanBuilderGenerator.generate(
-                                typeMapper, objectClass, builderClass, typeDef, typesMap, options, ImmutableList.of()));
+                                typeMapper, objectClass, builderClass, typeDef, typesMap, options, Optional.empty()));
             } else {
                 List<TypeSpec> interfaces = generateStageInterfaces(
                         objectClass,
+                        builderClass,
                         typeMapper,
                         fieldsNeedingBuilderStage,
                         fields.stream()
@@ -154,12 +155,26 @@ public final class BeanGenerator {
                                 ClassName.get(objectClass.packageName(), objectClass.simpleName(), stageInterface.name))
                         .collect(Collectors.toList());
 
+                TypeSpec builderInterface = TypeSpec.interfaceBuilder("Builder")
+                        .addModifiers(Modifier.PUBLIC)
+                        .addMethods(interfaces.stream()
+                                .map(stageInterface -> stageInterface.methodSpecs)
+                                .flatMap(List::stream)
+                                .map(method -> method.toBuilder()
+                                        .addAnnotation(Override.class)
+                                        .build())
+                                .collect(Collectors.toSet()))
+                        .addSuperinterfaces(
+                                interfacesAsClasses.stream().map(ClassName::box).collect(Collectors.toList()))
+                        .build();
+
                 typeBuilder
                         .addTypes(interfaces)
+                        .addType(builderInterface)
                         .addMethod(MethodSpec.methodBuilder("builder")
                                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                                 .returns(interfacesAsClasses.get(0))
-                                .addStatement("return new $T()", builderClass)
+                                .addStatement("return new DefaultBuilder()")
                                 .build())
                         .addType(BeanBuilderGenerator.generate(
                                 typeMapper,
@@ -168,7 +183,8 @@ public final class BeanGenerator {
                                 typeDef,
                                 typesMap,
                                 options,
-                                interfacesAsClasses));
+                                Optional.of(ClassName.get(
+                                        objectClass.packageName(), objectClass.simpleName(), builderInterface.name))));
             }
         }
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
@@ -200,6 +216,7 @@ public final class BeanGenerator {
 
     private static List<TypeSpec> generateStageInterfaces(
             ClassName objectClass,
+            ClassName builderClass,
             TypeMapper typeMapper,
             Collection<EnrichedField> fieldsNeedingBuilderStage,
             Collection<EnrichedField> otherFields) {
@@ -246,17 +263,13 @@ public final class BeanGenerator {
                 .flatMap(List::stream)
                 .collect(Collectors.toList()));
 
-        completedStage.addMethods(generatedMethodBuilders.stream()
-                .map(method -> method.returns(completedStageClass).build())
-                .collect(Collectors.toSet()));
-
         interfaces.add(completedStage);
 
         interfaces
                 .get(0)
                 .addMethod(MethodSpec.methodBuilder("from")
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                        .returns(completedStageClass)
+                        .returns(builderClass)
                         .addParameter(objectClass, "other")
                         .build());
 
