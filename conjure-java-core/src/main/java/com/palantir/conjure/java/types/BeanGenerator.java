@@ -77,6 +77,7 @@ public final class BeanGenerator {
     /** The name of the singleton instance field generated for empty types. */
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
+    @SuppressWarnings("CyclomaticComplexity")
     public static JavaFile generateBeanType(
             TypeMapper typeMapper,
             ObjectDefinition typeDef,
