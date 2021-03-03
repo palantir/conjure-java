@@ -82,15 +82,19 @@ public final class BeanGenerator {
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Options options) {
-        com.palantir.conjure.spec.TypeName prefixedName =
-                Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
-        ClassName objectClass = ClassName.get(prefixedName.getPackage(), prefixedName.getName());
-        ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
-
         Collection<EnrichedField> fields = createFields(typeMapper, typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(fields);
         Collection<EnrichedField> nonPrimitiveEnrichedFields =
                 fields.stream().filter(field -> !field.isPrimitive()).collect(Collectors.toList());
+
+        com.palantir.conjure.spec.TypeName prefixedName =
+                Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
+        ClassName objectClass = ClassName.get(prefixedName.getPackage(), prefixedName.getName());
+        ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
+        ClassName builderImplementation =
+                options.useStagedBuilders() && fields.stream().anyMatch(field -> !fieldShouldBeInFinalStage(field))
+                        ? ClassName.get(objectClass.packageName(), objectClass.simpleName(), "DefaultBuilder")
+                        : builderClass;
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -114,7 +118,7 @@ public final class BeanGenerator {
                 fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList())));
 
         if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
-            typeBuilder.addMethod(createStaticFactoryMethod(poetFields, objectClass));
+            typeBuilder.addMethod(createStaticFactoryMethod(fields, objectClass));
         }
 
         if (!nonPrimitiveEnrichedFields.isEmpty()) {
@@ -133,7 +137,7 @@ public final class BeanGenerator {
                     .filter(field -> !fieldShouldBeInFinalStage(field))
                     .collect(Collectors.toList());
             typeBuilder.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                    .addMember("builder", "$T.class", builderClass)
+                    .addMember("builder", "$T.class", builderImplementation)
                     .build());
             if (!options.useStagedBuilders() || fieldsNeedingBuilderStage.isEmpty()) {
                 typeBuilder
@@ -212,9 +216,14 @@ public final class BeanGenerator {
                 || type.accept(TypeVisitor.IS_OPTIONAL);
     }
 
+    /**
+     * Sorts input fields in the order they should be applied to the builder: Alphabetical order with required
+     * fields prior to optional/collection values.
+     */
     private static Stream<EnrichedField> sortedEnrichedFields(Collection<EnrichedField> enrichedFields) {
         return enrichedFields.stream()
-                .sorted(Comparator.comparing(field -> field.fieldName().get()));
+                .sorted(Comparator.comparing(BeanGenerator::fieldShouldBeInFinalStage)
+                        .thenComparing(field -> field.fieldName().get()));
     }
 
     private static ClassName stageBuilderInterfaceName(ClassName enclosingClass, String stageName) {
@@ -451,7 +460,7 @@ public final class BeanGenerator {
         return builder.build();
     }
 
-    private static MethodSpec createStaticFactoryMethod(Collection<FieldSpec> fields, ClassName objectClass) {
+    private static MethodSpec createStaticFactoryMethod(Collection<EnrichedField> fields, ClassName objectClass) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
@@ -461,7 +470,8 @@ public final class BeanGenerator {
                     .addCode("return $L;", SINGLETON_INSTANCE_NAME);
         } else {
             builder.addCode("return builder()");
-            for (FieldSpec spec : fields) {
+            sortedEnrichedFields(fields).forEach(enrichedField -> {
+                FieldSpec spec = enrichedField.poetSpec();
                 if (isOptional(spec)) {
                     builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
                 } else {
@@ -469,7 +479,7 @@ public final class BeanGenerator {
                 }
                 builder.addParameter(ParameterSpec.builder(getTypeNameWithoutOptional(spec), spec.name)
                         .build());
-            }
+            });
             builder.addCode("\n    .build();\n");
         }
 
