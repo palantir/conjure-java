@@ -14,7 +14,7 @@ import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
-@JsonDeserialize(builder = OneField.Builder.class)
+@JsonDeserialize(builder = OneField.DefaultBuilder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class OneField {
     private final BearerToken bearerTokenValue;
@@ -99,7 +99,7 @@ public final class OneField {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private static final class DefaultBuilder implements Builder {
+    static final class DefaultBuilder implements Builder {
         private BearerToken bearerTokenValue;
 
         private DefaultBuilder() {}
