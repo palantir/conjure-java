@@ -22,7 +22,7 @@ import java.util.Set;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
-@JsonDeserialize(builder = MultipleOrderedStages.Builder.class)
+@JsonDeserialize(builder = MultipleOrderedStages.DefaultBuilder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class MultipleOrderedStages {
     private final OneField token;
@@ -180,7 +180,7 @@ public final class MultipleOrderedStages {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private static final class DefaultBuilder implements Builder {
+    static final class DefaultBuilder implements Builder {
         private OneField token;
 
         private String item;

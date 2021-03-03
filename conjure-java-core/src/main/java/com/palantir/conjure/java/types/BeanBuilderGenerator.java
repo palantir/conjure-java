@@ -105,7 +105,6 @@ public final class BeanBuilderGenerator {
         TypeSpec.Builder builder = TypeSpec.classBuilder(
                         isInStagedBuilderMode(builderInterfaceClass) ? "DefaultBuilder" : "Builder")
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
-                .addModifiers(isInStagedBuilderMode(builderInterfaceClass) ? Modifier.PRIVATE : Modifier.PUBLIC)
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addFields(primitivesInitializedFields(enrichedFields))
@@ -117,6 +116,8 @@ public final class BeanBuilderGenerator {
 
         if (isInStagedBuilderMode(builderInterfaceClass)) {
             builder.addSuperinterface(builderInterfaceClass.get());
+        } else {
+            builder.addModifiers(Modifier.PUBLIC);
         }
 
         if (!options.strictObjects()) {
@@ -391,7 +392,6 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createOptionalSetter(EnrichedField enriched) {
-        FieldSpec field = enriched.poetSpec();
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
         return BeanBuilderAuxiliarySettersUtils.createOptionalSetterBuilder(enriched, typeMapper, builderClass)
                 .addCode(optionalAssignmentStatement(enriched, type))

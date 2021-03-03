@@ -20,6 +20,7 @@ conjure {
     java {
         addFlag 'undertow'
         addFlag 'undertowServicePrefixes'
+        addFlag 'useStagedBuilders'
     }
 }
 

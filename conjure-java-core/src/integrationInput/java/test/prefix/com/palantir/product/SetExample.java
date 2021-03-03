@@ -67,8 +67,8 @@ public final class SetExample {
         return "SetExample{items: " + items + ", doubleItems: " + doubleItems + '}';
     }
 
-    public static SetExample of(Set<String> items, Set<Double> doubleItems) {
-        return builder().items(items).doubleItems(doubleItems).build();
+    public static SetExample of(Set<Double> doubleItems, Set<String> items) {
+        return builder().doubleItems(doubleItems).items(items).build();
     }
 
     private static void validateFields(Set<String> items, Set<Double> doubleItems) {
