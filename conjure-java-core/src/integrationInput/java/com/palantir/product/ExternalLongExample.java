@@ -77,7 +77,7 @@ public final class ExternalLongExample {
                 + ", listExternalLong: " + listExternalLong + '}';
     }
 
-    public static ExternalLongExample of(long externalLong, List<Long> listExternalLong, long optionalExternalLong) {
+    public static ExternalLongExample of(long externalLong, long optionalExternalLong, List<Long> listExternalLong) {
         return builder()
                 .externalLong(externalLong)
                 .listExternalLong(listExternalLong)

@@ -66,7 +66,7 @@ public final class SetExample {
         return "SetExample{items: " + items + ", doubleItems: " + doubleItems + '}';
     }
 
-    public static SetExample of(Set<Double> doubleItems, Set<String> items) {
+    public static SetExample of(Set<String> items, Set<Double> doubleItems) {
         return builder().doubleItems(doubleItems).items(items).build();
     }
 

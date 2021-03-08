@@ -471,15 +471,18 @@ public final class BeanGenerator {
                     .addCode("return $L;", SINGLETON_INSTANCE_NAME);
         } else {
             builder.addCode("return builder()");
-            sortedEnrichedFields(fields).forEach(enrichedField -> {
-                FieldSpec spec = enrichedField.poetSpec();
+            fields.stream()
+                    .map(EnrichedField::poetSpec)
+                    .forEach(spec ->
+                            builder.addParameter(ParameterSpec.builder(getTypeNameWithoutOptional(spec), spec.name)
+                                    .build()));
+            // Follow order on adding methods on builder to comply with staged builders option if set
+            sortedEnrichedFields(fields).map(EnrichedField::poetSpec).forEach(spec -> {
                 if (isOptional(spec)) {
                     builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
                 } else {
                     builder.addCode("\n    .$L($L)", spec.name, spec.name);
                 }
-                builder.addParameter(ParameterSpec.builder(getTypeNameWithoutOptional(spec), spec.name)
-                        .build());
             });
             builder.addCode("\n    .build();\n");
         }

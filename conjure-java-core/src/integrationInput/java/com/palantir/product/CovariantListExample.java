@@ -65,7 +65,7 @@ public final class CovariantListExample {
         return "CovariantListExample{items: " + items + ", externalItems: " + externalItems + '}';
     }
 
-    public static CovariantListExample of(List<ExampleExternalReference> externalItems, List<Object> items) {
+    public static CovariantListExample of(List<Object> items, List<ExampleExternalReference> externalItems) {
         return builder().externalItems(externalItems).items(items).build();
     }
 
