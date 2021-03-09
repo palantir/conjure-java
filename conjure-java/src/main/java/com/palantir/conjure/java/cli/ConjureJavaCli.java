@@ -186,7 +186,7 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(
                 names = "--useStagedBuilders",
                 defaultValue = "false",
-                description = "Enable staged builder.")
+                description = "Generates compile-time safe builders to ensure all required attributes are set.")
         private boolean useStagedBuilders;
 
         @SuppressWarnings("unused")
