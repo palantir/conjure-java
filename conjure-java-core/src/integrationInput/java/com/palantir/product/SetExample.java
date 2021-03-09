@@ -67,7 +67,7 @@ public final class SetExample {
     }
 
     public static SetExample of(Set<String> items, Set<Double> doubleItems) {
-        return builder().items(items).doubleItems(doubleItems).build();
+        return builder().doubleItems(doubleItems).items(items).build();
     }
 
     private static void validateFields(Set<String> items, Set<Double> doubleItems) {

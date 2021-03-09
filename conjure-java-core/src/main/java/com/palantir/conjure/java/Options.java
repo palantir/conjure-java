@@ -103,6 +103,14 @@ public interface Options {
         return nonNullCollections();
     }
 
+    /**
+     * Generates compile-time safe builders to ensure all required attributes are set.
+     */
+    @Value.Default
+    default boolean useStagedBuilders() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

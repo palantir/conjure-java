@@ -85,9 +85,9 @@ public final class MapExample {
             Map<String, Optional<String>> optionalItems,
             Map<String, OptionalAlias> aliasOptionalItems) {
         return builder()
+                .aliasOptionalItems(aliasOptionalItems)
                 .items(items)
                 .optionalItems(optionalItems)
-                .aliasOptionalItems(aliasOptionalItems)
                 .build();
     }
 
