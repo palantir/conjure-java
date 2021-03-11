@@ -1,5 +1,8 @@
 type: feature
 feature:
-  description: Server request context providing access to some parts of the request
+  description: conjure-undertow supports an additional `ServerRequestContext` parameter
+    providing access to arbitrary request headers and query parameters. This feature is
+    enabled on an opt-in basis by adding the `server-request-context` tag to an endpoint.
+    Note that this is still considered an experimental feature.
   links:
   - https://github.com/palantir/conjure-java/pull/1273
