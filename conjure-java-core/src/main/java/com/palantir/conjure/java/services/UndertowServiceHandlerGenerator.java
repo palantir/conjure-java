@@ -915,7 +915,13 @@ final class UndertowServiceHandlerGenerator {
                     Optional.class,
                     decodedVarName,
                     createConstructorForTypeWithReference(
-                            typeOfOptional, decodedVarName + ".get()", typeDefinitions, typeMapper));
+                            typeOfOptional,
+                            decodedVarName + '.'
+                                    + getOptionalAccessor(
+                                            TypeFunctions.toConjureTypeWithoutAliases(typeOfOptional, typeDefinitions))
+                                    + "()",
+                            typeDefinitions,
+                            typeMapper));
         } else {
             // alias
             CodeBlock ofContent;
@@ -950,6 +956,80 @@ final class UndertowServiceHandlerGenerator {
             }
             return CodeBlock.of("$1T.of($2L)", typeMapper.getClassName(inType), ofContent);
         }
+    }
+
+    private static String getOptionalAccessor(Type type) {
+        return type.accept(new DefaultTypeVisitor<String>() {
+            @Override
+            public String visitPrimitive(PrimitiveType value) {
+                return value.accept(new PrimitiveType.Visitor<String>() {
+                    @Override
+                    public String visitString() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitDatetime() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitInteger() {
+                        return "getAsInt";
+                    }
+
+                    @Override
+                    public String visitDouble() {
+                        return "getAsDouble";
+                    }
+
+                    @Override
+                    public String visitSafelong() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitBinary() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitAny() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitBoolean() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitUuid() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitRid() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitBearertoken() {
+                        return "get";
+                    }
+
+                    @Override
+                    public String visitUnknown(String _unknownValue) {
+                        return "get";
+                    }
+                });
+            }
+
+            @Override
+            public String visitDefault() {
+                return "get";
+            }
+        });
     }
 
     private static String deserializeFunctionName(Type type) {

@@ -1,0 +1,36 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      AliasedInteger:
+        alias: integer
+      AliasedDouble:
+        alias: double
+      AliasedSafeLong:
+        alias: safelong
+      AliasedBoolean:
+        alias: boolean
+
+services:
+  AliasTestService:
+    name: Alias Test Service
+    package: com.palantir.product
+    default-auth: header
+    base-path: /alias
+
+    endpoints:
+      testOptionalAliasQueryParams:
+        http: GET /test
+        args:
+          optionalAliasInt:
+            type: optional<AliasedInteger>
+            param-type: query
+          optionalAliasDouble:
+            type: optional<AliasedDouble>
+            param-type: query
+          optionalAliasSafeLong:
+            type: optional<AliasedSafeLong>
+            param-type: query
+          optionalAliasBoolean:
+            type: optional<AliasedBoolean>
+            param-type: query
