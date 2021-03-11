@@ -52,3 +52,12 @@ services:
             markers:
               - Safe
         returns: string
+      noContext:
+        http: POST /no/context
+        args:
+          requestContext: string
+      context:
+        http: POST /context
+        args:
+          requestContext: string
+        tags: [server-request-context]
