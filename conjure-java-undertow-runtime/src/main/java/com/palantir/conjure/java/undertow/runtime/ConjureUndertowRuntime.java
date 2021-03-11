@@ -24,6 +24,7 @@ import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.MarkerCallback;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
+import com.palantir.conjure.java.undertow.lib.ServerContexts;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
 import java.time.Duration;
@@ -82,6 +83,11 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     @Override
     public ExceptionHandler exceptionHandler() {
         return exceptionHandler;
+    }
+
+    @Override
+    public ServerContexts contexts() {
+        return ConjureServerContexts.INSTANCE;
     }
 
     public static final class Builder {
