@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: conjure-undertow properly handles optional-alias-primitive query params
+  links:
+  - https://github.com/palantir/conjure-java/pull/1272
