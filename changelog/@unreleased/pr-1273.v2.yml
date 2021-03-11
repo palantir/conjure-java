@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Server request context providing access to some parts of the request
+  links:
+  - https://github.com/palantir/conjure-java/pull/1273
