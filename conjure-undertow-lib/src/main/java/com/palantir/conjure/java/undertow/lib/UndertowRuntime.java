@@ -44,7 +44,7 @@ public interface UndertowRuntime {
     /** Provides the {@link ExceptionHandler} used to map {@link Throwable failures} to Conjure responses. */
     ExceptionHandler exceptionHandler();
 
-    /** Provides the {@link ServerContexts} which safely expose request details to resources. */
+    /** Provides the {@link Contexts} which safely expose request details to resources. */
     @Beta
-    ServerContexts contexts();
+    Contexts contexts();
 }

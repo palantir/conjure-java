@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
-import com.palantir.conjure.java.undertow.lib.ServerRequestContext;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -124,9 +124,9 @@ final class UndertowServiceInterfaceGenerator {
         sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, endpointDef)));
 
         if (Tags.hasServerRequestContext(endpointDef)) {
-            parameterSpecs.add(ParameterSpec.builder(
-                            ClassName.get(ServerRequestContext.class), Tags.SERVER_REQUEST_CONTEXT_PARAMETER)
-                    .build());
+            parameterSpecs.add(
+                    ParameterSpec.builder(ClassName.get(RequestContext.class), Tags.SERVER_REQUEST_CONTEXT_PARAMETER)
+                            .build());
         }
 
         return ImmutableList.copyOf(parameterSpecs);

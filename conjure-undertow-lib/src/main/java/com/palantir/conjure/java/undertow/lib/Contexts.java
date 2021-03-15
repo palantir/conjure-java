@@ -20,8 +20,8 @@ import com.google.common.annotations.Beta;
 import io.undertow.server.HttpServerExchange;
 
 @Beta
-public interface ServerContexts {
+public interface Contexts {
 
-    /** Returns a new {@link ServerRequestContext} which describes the incoming request. */
-    ServerRequestContext createContext(HttpServerExchange exchange, Endpoint endpoint);
+    /** Returns a new {@link RequestContext} which describes the incoming request. */
+    RequestContext createContext(HttpServerExchange exchange, Endpoint endpoint);
 }

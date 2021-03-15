@@ -18,9 +18,9 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.palantir.conjure.java.undertow.lib.Contexts;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.ServerContexts;
-import com.palantir.conjure.java.undertow.lib.ServerRequestContext;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import java.util.Collections;
@@ -29,15 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-enum ConjureServerContexts implements ServerContexts {
+enum ConjureContexts implements Contexts {
     INSTANCE;
 
     @Override
-    public ServerRequestContext createContext(HttpServerExchange exchange, Endpoint _endpoint) {
+    public RequestContext createContext(HttpServerExchange exchange, Endpoint _endpoint) {
         return new ConjureServerRequestContext(exchange);
     }
 
-    private static final class ConjureServerRequestContext implements ServerRequestContext {
+    private static final class ConjureServerRequestContext implements RequestContext {
 
         private final HttpServerExchange exchange;
 

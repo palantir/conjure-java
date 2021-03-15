@@ -1,6 +1,6 @@
 package com.palantir.product;
 
-import com.palantir.conjure.java.undertow.lib.ServerRequestContext;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.tokens.auth.AuthHeader;
 import javax.annotation.Generated;
 
@@ -27,5 +27,5 @@ public interface UndertowNameCollisionService {
     /**
      * @apiNote {@code POST /context}
      */
-    void context(String requestContext_, ServerRequestContext requestContext);
+    void context(String requestContext_, RequestContext requestContext);
 }

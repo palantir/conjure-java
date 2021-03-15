@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Beta
-public interface ServerRequestContext {
+public interface RequestContext {
 
     /**
      * Returns all values of the header named {@code headerName}. The name is case insensitive. An empty list is
