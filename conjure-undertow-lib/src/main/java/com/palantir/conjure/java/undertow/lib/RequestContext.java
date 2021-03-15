@@ -21,6 +21,10 @@ import com.google.common.collect.ListMultimap;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Interface providing a view over data provided by the the original HTTP request including request headers and query
+ * parameters. This is a read only interface which should only be implemented by {@code conjure-java-undertow-runtime}.
+ */
 @Beta
 public interface RequestContext {
 

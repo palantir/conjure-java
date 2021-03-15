@@ -19,6 +19,11 @@ package com.palantir.conjure.java.undertow.lib;
 import com.google.common.annotations.Beta;
 import io.undertow.server.HttpServerExchange;
 
+/**
+ * Factory for {@link RequestContext} objects when the {@code server-request-context} tag is used.
+ * This is an internal interface that should only be used by generated code, it may change without
+ * warning, and guarantees are only made for generated code.
+ */
 @Beta
 public interface Contexts {
 
