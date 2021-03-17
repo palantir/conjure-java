@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Generated stated builders retain original order for required fields. This is a break for anyone using the `useStagedBuilders` parameter, however it's still very new and experimental.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1274
