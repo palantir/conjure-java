@@ -168,11 +168,11 @@ public final class ErrorGenerator implements Generator {
         List<MethodSpec> methodSpecs = errorTypeDefinitions.stream()
                 .flatMap(entry -> {
                     boolean isChecked = shouldBeChecked.test(entry);
-                    ClassName exceptionClazz = isChecked
+                    ClassName exceptionClass = isChecked
                             ? className.nestedClass(checkedExceptions.get(entry).name)
                             : ClassName.get(ServiceException.class);
-                    MethodSpec withoutCause = generateExceptionFactory(typeMapper, entry, false, exceptionClazz);
-                    MethodSpec withCause = generateExceptionFactory(typeMapper, entry, true, exceptionClazz);
+                    MethodSpec withoutCause = generateExceptionFactory(typeMapper, entry, false, exceptionClass);
+                    MethodSpec withCause = generateExceptionFactory(typeMapper, entry, true, exceptionClass);
                     return Stream.of(withoutCause, withCause);
                 })
                 .collect(Collectors.toList());
