@@ -80,8 +80,8 @@ public final class ExternalLongExample {
     public static ExternalLongExample of(long externalLong, long optionalExternalLong, List<Long> listExternalLong) {
         return builder()
                 .externalLong(externalLong)
-                .listExternalLong(listExternalLong)
                 .optionalExternalLong(Optional.of(optionalExternalLong))
+                .listExternalLong(listExternalLong)
                 .build();
     }
 
