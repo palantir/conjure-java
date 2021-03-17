@@ -245,7 +245,7 @@ public final class ErrorGenerator implements Generator {
     }
 
     private static MethodSpec generateExceptionFactory(
-            TypeMapper typeMapper, ErrorDefinition entry, boolean withCause, ClassName exceptionClazz) {
+            TypeMapper typeMapper, ErrorDefinition entry, boolean withCause, ClassName exceptionClass) {
         String methodName = CaseFormat.UPPER_CAMEL.to(
                 CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
         String typeName = CaseFormat.UPPER_CAMEL.to(
@@ -253,9 +253,9 @@ public final class ErrorGenerator implements Generator {
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(exceptionClazz);
+                .returns(exceptionClass);
 
-        methodBuilder.addCode("return new $T($L", exceptionClazz, typeName);
+        methodBuilder.addCode("return new $T($L", exceptionClass, typeName);
 
         if (withCause) {
             methodBuilder.addParameter(Throwable.class, "cause");
