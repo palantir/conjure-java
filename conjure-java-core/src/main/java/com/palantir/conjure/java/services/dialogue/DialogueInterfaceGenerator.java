@@ -23,6 +23,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.IsUndertowAsyncMarkerVisitor;
 import com.palantir.conjure.java.services.ServiceGenerators;
+import com.palantir.conjure.java.types.ErrorMapper;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.ServiceDefinition;
@@ -64,19 +65,23 @@ public final class DialogueInterfaceGenerator {
         this.returnTypes = returnTypes;
     }
 
-    public JavaFile generateBlocking(ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator) {
-        return generate(def, Names.blockingClassName(def, options), returnTypes::baseType, methodGenerator);
+    public JavaFile generateBlocking(
+            ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator, ErrorMapper errorMapper) {
+        return generate(
+                def, Names.blockingClassName(def, options), returnTypes::baseType, methodGenerator, errorMapper);
     }
 
-    public JavaFile generateAsync(ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator) {
-        return generate(def, Names.asyncClassName(def, options), returnTypes::async, methodGenerator);
+    public JavaFile generateAsync(
+            ServiceDefinition def, StaticFactoryMethodGenerator methodGenerator, ErrorMapper errorMapper) {
+        return generate(def, Names.asyncClassName(def, options), returnTypes::async, methodGenerator, errorMapper);
     }
 
     private JavaFile generate(
             ServiceDefinition def,
             ClassName className,
             Function<Optional<Type>, TypeName> returnTypeMapper,
-            StaticFactoryMethodGenerator methodGenerator) {
+            StaticFactoryMethodGenerator methodGenerator,
+            ErrorMapper errorMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class))
@@ -100,7 +105,7 @@ public final class DialogueInterfaceGenerator {
         def.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", StringUtils.appendIfMissing(docs.get(), "\n")));
 
         serviceBuilder.addMethods(def.getEndpoints().stream()
-                .map(endpoint -> apiMethod(endpoint, returnTypeMapper))
+                .map(endpoint -> apiMethod(endpoint, returnTypeMapper, errorMapper))
                 .collect(toList()));
 
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
@@ -148,7 +153,10 @@ public final class DialogueInterfaceGenerator {
                 .build();
     }
 
-    private MethodSpec apiMethod(EndpointDefinition endpointDef, Function<Optional<Type>, TypeName> returnTypeMapper) {
+    private MethodSpec apiMethod(
+            EndpointDefinition endpointDef,
+            Function<Optional<Type>, TypeName> returnTypeMapper,
+            ErrorMapper errorMapper) {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -165,6 +173,13 @@ public final class DialogueInterfaceGenerator {
                 })
                 .forEach(referenceType -> methodBuilder.addAnnotation(
                         ClassName.get(referenceType.getPackage(), referenceType.getName())));
+
+        endpointDef.getErrors().forEach(errorName -> {
+            ClassName errorClass = errorMapper
+                    .getClassNameForError(errorName)
+                    .orElseThrow(() -> new IllegalStateException("No error found with name " + errorName));
+            methodBuilder.addException(errorClass);
+        });
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
         methodBuilder.addJavadoc("$L", ServiceGenerators.getJavaDocWithRequestLine(endpointDef));

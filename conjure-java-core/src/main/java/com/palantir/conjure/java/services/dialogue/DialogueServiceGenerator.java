@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services.dialogue;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.ErrorMapper;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.TypeFunctions;
@@ -63,6 +64,8 @@ public final class DialogueServiceGenerator implements Generator {
         Map<TypeName, TypeDefinition> typeDefinitionsByName = conjureDefinition.getTypes().stream()
                 .collect(Collectors.toMap(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
 
+        ErrorMapper errorMapper = new ErrorMapper(conjureDefinition.getErrors());
+
         DialogueInterfaceGenerator interfaceGenerator = new DialogueInterfaceGenerator(
                 options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
 
@@ -86,7 +89,7 @@ public final class DialogueServiceGenerator implements Generator {
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> Stream.of(
                         endpoints.endpointsClass(serviceDef),
-                        interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
-                        interfaceGenerator.generateAsync(serviceDef, asyncGenerator)));
+                        interfaceGenerator.generateBlocking(serviceDef, blockingGenerator, errorMapper),
+                        interfaceGenerator.generateAsync(serviceDef, asyncGenerator, errorMapper)));
     }
 }

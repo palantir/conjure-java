@@ -18,6 +18,7 @@ package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.TypeName;
+import com.squareup.javapoet.ClassName;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,5 +35,13 @@ public class ErrorMapper {
 
     public final Optional<ErrorDefinition> getError(TypeName typeName) {
         return Optional.ofNullable(errors.get(typeName));
+    }
+
+    public final Optional<ClassName> getClassNameForError(TypeName typeName) {
+        return getError(typeName)
+                .map(error -> ClassName.get(
+                        typeName.getPackage(),
+                        error.getNamespace().get() + "Errors",
+                        typeName.getName() + "Exception"));
     }
 }

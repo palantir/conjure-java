@@ -29,7 +29,6 @@ import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
-import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.TypeName;
@@ -92,11 +91,10 @@ final class UndertowServiceInterfaceGenerator {
                 .addAnnotations(ConjureAnnotations.incubating(endpointDef));
 
         for (TypeName errorName : endpointDef.getErrors()) {
-            ErrorDefinition error = errorMapper
-                    .getError(errorName)
+            ClassName errorClass = errorMapper
+                    .getClassNameForError(errorName)
                     .orElseThrow(() -> new IllegalStateException("No error found with name " + errorName));
-            methodBuilder.addException(ClassName.get(
-                    errorName.getPackage(), error.getNamespace().get() + "Errors", errorName.getName() + "Exception"));
+            methodBuilder.addException(errorClass);
         }
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));

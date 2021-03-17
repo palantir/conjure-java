@@ -47,7 +47,6 @@ import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
-import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ListType;
@@ -223,11 +222,10 @@ final class UndertowServiceHandlerGenerator {
                 .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
 
         for (com.palantir.conjure.spec.TypeName errorName : endpointDefinition.getErrors()) {
-            ErrorDefinition error = errorMapper
-                    .getError(errorName)
+            ClassName errorClass = errorMapper
+                    .getClassNameForError(errorName)
                     .orElseThrow(() -> new IllegalStateException("No error found with name " + errorName));
-            handleMethodBuilder.addException(ClassName.get(
-                    errorName.getPackage(), error.getNamespace().get() + "Errors", errorName.getName() + "Exception"));
+            handleMethodBuilder.addException(errorClass);
         }
 
         endpointDefinition
