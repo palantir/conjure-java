@@ -202,6 +202,11 @@ public interface EteServiceBlocking {
     void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
 
     /**
+     * @apiNote {@code PUT /base/errors}
+     */
+    void throwsCheckedException(AuthHeader authHeader);
+
+    /**
      * Creates a synchronous/blocking client for a EteService service.
      */
     static EteServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -394,6 +399,12 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
             private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final EndpointChannel throwsCheckedExceptionChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.throwsCheckedException);
+
+            private final Deserializer<Void> throwsCheckedExceptionDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
@@ -689,6 +700,15 @@ public interface EteServiceBlocking {
                 _runtime.clients()
                         .callBlocking(
                                 receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
+            }
+
+            @Override
+            public void throwsCheckedException(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _runtime.clients()
+                        .callBlocking(
+                                throwsCheckedExceptionChannel, _request.build(), throwsCheckedExceptionDeserializer);
             }
 
             @Override

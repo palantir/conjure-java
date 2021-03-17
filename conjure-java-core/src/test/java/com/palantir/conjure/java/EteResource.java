@@ -193,5 +193,10 @@ public class EteResource implements EteService {
     @Override
     public void receiveSetOfOptionals(AuthHeader _authHeader, Set<Optional<String>> _value) {}
 
+    @Override
+    public void throwsCheckedException(@NotNull AuthHeader _authHeader) {
+        // nop
+    }
+
     interface Streaming extends StreamingOutput, BinaryResponseBody {}
 }

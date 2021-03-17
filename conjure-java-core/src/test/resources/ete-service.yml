@@ -20,6 +20,11 @@ types:
           - VALUE
       LongAlias:
         alias: Long
+    errors:
+      ExampleError:
+        namespace: Example
+        code: INVALID_ARGUMENT
+        docs: This should be a checked exception.
 
 services:
   EmptyPathService:
@@ -236,3 +241,8 @@ services:
         http: PUT /set/optionals
         args:
           value: set<optional<string>>
+
+      throwsCheckedException:
+        http: PUT /errors
+        errors:
+          - ExampleError

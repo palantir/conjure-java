@@ -27,6 +27,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.CodeBlocks;
+import com.palantir.conjure.java.types.ErrorMapper;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -46,6 +47,7 @@ import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ListType;
@@ -112,7 +114,8 @@ final class UndertowServiceHandlerGenerator {
             ServiceDefinition serviceDefinition,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            TypeMapper returnTypeMapper,
+            ErrorMapper errorMapper) {
         String serviceName = serviceDefinition.getServiceName().getName();
         // class name
         ClassName serviceClass = ClassName.get(
@@ -175,7 +178,13 @@ final class UndertowServiceHandlerGenerator {
                 .addTypes(Lists.transform(
                         serviceDefinition.getEndpoints(),
                         e -> generateEndpointHandler(
-                                e, serviceDefinition, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
+                                e,
+                                serviceDefinition,
+                                serviceClass,
+                                typeDefinitions,
+                                typeMapper,
+                                returnTypeMapper,
+                                errorMapper)))
                 .build();
 
         return JavaFile.builder(
@@ -204,13 +213,22 @@ final class UndertowServiceHandlerGenerator {
             ClassName serviceClass,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            TypeMapper returnTypeMapper,
+            ErrorMapper errorMapper) {
         MethodSpec.Builder handleMethodBuilder = MethodSpec.methodBuilder("handleRequest")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                 .addException(IOException.class)
                 .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
+
+        for (com.palantir.conjure.spec.TypeName errorName : endpointDefinition.getErrors()) {
+            ErrorDefinition error = errorMapper
+                    .getError(errorName)
+                    .orElseThrow(() -> new IllegalStateException("No error found with name " + errorName));
+            handleMethodBuilder.addException(ClassName.get(
+                    errorName.getPackage(), error.getNamespace().get() + "Errors", errorName.getName() + "Exception"));
+        }
 
         endpointDefinition
                 .getDeprecated()

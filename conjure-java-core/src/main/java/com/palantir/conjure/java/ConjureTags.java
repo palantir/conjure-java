@@ -26,7 +26,7 @@ import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.AnnotationSpec;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 public final class ConjureTags {
 
@@ -46,7 +46,7 @@ public final class ConjureTags {
 
     public static ImmutableList<AnnotationSpec> tagAnnotations(ArgumentDefinition argument) {
         validateTags(argument);
-        List<String> tags = argument.getTags();
+        Set<String> tags = argument.getTags();
         ImmutableList.Builder<AnnotationSpec> builder = ImmutableList.builderWithExpectedSize(1);
         if (isSafe(tags)) {
             builder.add(AnnotationSpec.builder(Safe.class).build());
@@ -58,7 +58,7 @@ public final class ConjureTags {
     }
 
     public static void validateTags(ArgumentDefinition argument) {
-        List<String> tags = argument.getTags();
+        Set<String> tags = argument.getTags();
         validateTags(tags);
 
         boolean hasSafeMarker = argument.getMarkers().stream()

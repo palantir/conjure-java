@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.types.ErrorMapper;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
@@ -28,8 +29,10 @@ import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.ClassName;
@@ -51,7 +54,10 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     public JavaFile generateServiceInterface(
-            ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+            ServiceDefinition serviceDefinition,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper,
+            ErrorMapper errorMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder((options.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
@@ -61,7 +67,7 @@ final class UndertowServiceInterfaceGenerator {
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper))
+                .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper, errorMapper))
                 .collect(Collectors.toList()));
 
         return JavaFile.builder(
@@ -74,13 +80,24 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     private MethodSpec generateServiceInterfaceMethod(
-            EndpointDefinition endpointDef, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+            EndpointDefinition endpointDef,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper,
+            ErrorMapper errorMapper) {
         String methodName =
                 JavaNameSanitizer.sanitize(endpointDef.getEndpointName().get());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(createServiceMethodParameters(endpointDef, typeMapper))
                 .addAnnotations(ConjureAnnotations.incubating(endpointDef));
+
+        for (TypeName errorName : endpointDef.getErrors()) {
+            ErrorDefinition error = errorMapper
+                    .getError(errorName)
+                    .orElseThrow(() -> new IllegalStateException("No error found with name " + errorName));
+            methodBuilder.addException(ClassName.get(
+                    errorName.getPackage(), error.getNamespace().get() + "Errors", errorName.getName() + "Exception"));
+        }
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
 

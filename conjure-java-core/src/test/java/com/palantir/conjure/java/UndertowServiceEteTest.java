@@ -38,6 +38,7 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
+import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -521,7 +522,10 @@ public final class UndertowServiceEteTest extends TestBase {
                 .build();
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new UndertowServiceGenerator(options), new ObjectGenerator(options)))
+                        ImmutableSet.of(
+                                new UndertowServiceGenerator(options),
+                                new ObjectGenerator(options),
+                                new ErrorGenerator(options)))
                 .emit(def, folder);
         validateGeneratorOutput(files, Paths.get("src/integrationInput/java/com/palantir/product"));
     }

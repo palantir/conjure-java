@@ -206,6 +206,11 @@ public interface EteServiceAsync {
     ListenableFuture<Void> receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
 
     /**
+     * @apiNote {@code PUT /base/errors}
+     */
+    ListenableFuture<Void> throwsCheckedException(AuthHeader authHeader);
+
+    /**
      * Creates an asynchronous/non-blocking client for a EteService service.
      */
     static EteServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -398,6 +403,12 @@ public interface EteServiceAsync {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
             private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final EndpointChannel throwsCheckedExceptionChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.throwsCheckedException);
+
+            private final Deserializer<Void> throwsCheckedExceptionDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
@@ -693,6 +704,14 @@ public interface EteServiceAsync {
                 _request.body(receiveSetOfOptionalsSerializer.serialize(value));
                 return _runtime.clients()
                         .call(receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<Void> throwsCheckedException(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients()
+                        .call(throwsCheckedExceptionChannel, _request.build(), throwsCheckedExceptionDeserializer);
             }
 
             @Override

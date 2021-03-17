@@ -194,6 +194,10 @@ public interface EteService {
     void receiveSetOfOptionals(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull Set<Optional<String>> value);
 
+    @PUT
+    @Path("base/errors")
+    void throwsCheckedException(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
+
     @Deprecated
     default Optional<Long> optionalExternalLongQuery(AuthHeader authHeader) {
         return optionalExternalLongQuery(authHeader, Optional.empty());

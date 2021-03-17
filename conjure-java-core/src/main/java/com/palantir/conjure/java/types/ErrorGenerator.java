@@ -21,6 +21,7 @@ import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.Javadoc;
@@ -31,22 +32,30 @@ import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,13 +71,22 @@ public final class ErrorGenerator implements Generator {
     public Stream<JavaFile> generate(ConjureDefinition definition) {
         List<TypeDefinition> types = definition.getTypes();
         TypeMapper typeMapper = new TypeMapper(TypeFunctions.toTypesMap(types), options);
+        Set<com.palantir.conjure.spec.TypeName> checkedExceptions = findCheckedExceptions(definition);
         return splitErrorDefsByNamespace(definition.getErrors()).entrySet().stream()
                 .flatMap(entry -> entry.getValue().entrySet().stream()
                         .map(innerEntry -> generateErrorTypesForNamespace(
                                 typeMapper,
                                 Packages.getPrefixedPackage(entry.getKey(), options.packagePrefix()),
                                 innerEntry.getKey(),
-                                innerEntry.getValue())));
+                                innerEntry.getValue(),
+                                e -> checkedExceptions.contains(e.getErrorName()))));
+    }
+
+    private static Set<com.palantir.conjure.spec.TypeName> findCheckedExceptions(ConjureDefinition definition) {
+        return definition.getServices().stream()
+                .flatMap(stream -> stream.getEndpoints().stream())
+                .flatMap(endpoint -> endpoint.getErrors().stream())
+                .collect(Collectors.toSet());
     }
 
     private static Map<String, Map<ErrorNamespace, List<ErrorDefinition>>> splitErrorDefsByNamespace(
@@ -91,7 +109,8 @@ public final class ErrorGenerator implements Generator {
             TypeMapper typeMapper,
             String conjurePackage,
             ErrorNamespace namespace,
-            List<ErrorDefinition> errorTypeDefinitions) {
+            List<ErrorDefinition> errorTypeDefinitions,
+            Predicate<ErrorDefinition> shouldBeChecked) {
         ClassName className = errorTypesClassName(conjurePackage, namespace);
 
         // Generate ErrorType definitions
@@ -116,14 +135,46 @@ public final class ErrorGenerator implements Generator {
                 })
                 .collect(Collectors.toList());
 
+        Map<ErrorDefinition, TypeSpec> checkedExceptions = errorTypeDefinitions.stream()
+                .filter(shouldBeChecked)
+                .collect(Collectors.toMap(Function.identity(), entry -> TypeSpec.classBuilder(String.format(
+                                "%sException", entry.getErrorName().getName()))
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                        .superclass(CheckedServiceException.class)
+                        .addMethod(MethodSpec.constructorBuilder()
+                                .addParameter(ClassName.get(ErrorType.class), "errorType")
+                                .addParameter(
+                                        ArrayTypeName.of(ParameterizedTypeName.get(
+                                                ClassName.get(Arg.class), WildcardTypeName.subtypeOf(Object.class))),
+                                        "parameters")
+                                .varargs()
+                                .addStatement("super($N, $N)", "errorType", "parameters")
+                                .build())
+                        .addMethod(MethodSpec.constructorBuilder()
+                                .addParameter(ClassName.get(ErrorType.class), "errorType")
+                                .addParameter(ParameterSpec.builder(ClassName.get(Throwable.class), "cause")
+                                        .addAnnotation(Nullable.class)
+                                        .build())
+                                .addParameter(
+                                        ArrayTypeName.of(ParameterizedTypeName.get(
+                                                ClassName.get(Arg.class), WildcardTypeName.subtypeOf(Object.class))),
+                                        "parameters")
+                                .varargs()
+                                .addStatement("super($N, $N, $N)", "errorType", "cause", "parameters")
+                                .build())
+                        .build()));
+
         // Generate ServiceException factory methods
         List<MethodSpec> methodSpecs = errorTypeDefinitions.stream()
-                .map(entry -> {
-                    MethodSpec withoutCause = generateExceptionFactory(typeMapper, entry, false);
-                    MethodSpec withCause = generateExceptionFactory(typeMapper, entry, true);
+                .flatMap(entry -> {
+                    boolean isChecked = shouldBeChecked.test(entry);
+                    ClassName exceptionClazz = isChecked
+                            ? className.nestedClass(checkedExceptions.get(entry).name)
+                            : ClassName.get(ServiceException.class);
+                    MethodSpec withoutCause = generateExceptionFactory(typeMapper, entry, false, exceptionClazz);
+                    MethodSpec withCause = generateExceptionFactory(typeMapper, entry, true, exceptionClazz);
                     return Stream.of(withoutCause, withCause);
                 })
-                .flatMap(Function.identity())
                 .collect(Collectors.toList());
 
         // Generate ServiceException factory check methods
@@ -144,6 +195,12 @@ public final class ErrorGenerator implements Generator {
                             entry.getErrorName().getName(),
                             shouldThrowVar);
                     methodBuilder.addJavadoc("@param $L $L\n", shouldThrowVar, "Cause the method to throw when true");
+
+                    if (shouldBeChecked.test(entry)) {
+                        ClassName exception = className.nestedClass(checkedExceptions.get(entry).name);
+                        methodBuilder.addException(exception);
+                    }
+
                     Streams.concat(entry.getSafeArgs().stream(), entry.getUnsafeArgs().stream())
                             .forEach(arg -> {
                                 methodBuilder.addParameter(
@@ -176,6 +233,7 @@ public final class ErrorGenerator implements Generator {
                 .addMethod(privateConstructor())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fieldSpecs)
+                .addTypes(checkedExceptions.values())
                 .addMethods(methodSpecs)
                 .addMethods(checkMethodSpecs)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class));
@@ -187,7 +245,7 @@ public final class ErrorGenerator implements Generator {
     }
 
     private static MethodSpec generateExceptionFactory(
-            TypeMapper typeMapper, ErrorDefinition entry, boolean withCause) {
+            TypeMapper typeMapper, ErrorDefinition entry, boolean withCause, ClassName exceptionClazz) {
         String methodName = CaseFormat.UPPER_CAMEL.to(
                 CaseFormat.LOWER_CAMEL, entry.getErrorName().getName());
         String typeName = CaseFormat.UPPER_CAMEL.to(
@@ -195,9 +253,9 @@ public final class ErrorGenerator implements Generator {
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(ClassName.get(ServiceException.class));
+                .returns(exceptionClazz);
 
-        methodBuilder.addCode("return new $T($L", ServiceException.class, typeName);
+        methodBuilder.addCode("return new $T($L", exceptionClazz, typeName);
 
         if (withCause) {
             methodBuilder.addParameter(Throwable.class, "cause");

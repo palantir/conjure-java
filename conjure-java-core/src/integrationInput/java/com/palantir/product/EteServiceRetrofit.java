@@ -184,6 +184,10 @@ public interface EteServiceRetrofit {
     ListenableFuture<Void> receiveSetOfOptionals(
             @Header("Authorization") AuthHeader authHeader, @Body Set<Optional<String>> value);
 
+    @PUT("./base/errors")
+    @Headers({"hr-path-template: /base/errors", "Accept: application/json"})
+    ListenableFuture<Void> throwsCheckedException(@Header("Authorization") AuthHeader authHeader);
+
     @Deprecated
     default ListenableFuture<Optional<Long>> optionalExternalLongQuery(@Header("Authorization") AuthHeader authHeader) {
         return optionalExternalLongQuery(authHeader, Optional.empty());

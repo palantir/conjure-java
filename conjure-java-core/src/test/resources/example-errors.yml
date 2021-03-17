@@ -31,3 +31,17 @@ types:
         namespace: Conjure
         docs: Different package.
         code: INTERNAL
+      ShouldBeChecked:
+        namespace: Conjure
+        code: INVALID_ARGUMENT
+        docs: This should be a checked exception.
+services:
+  StubService:
+    name: A stub service.
+    package: com.palantir.product
+    default-auth: header
+    endpoints:
+      stubEndpoint:
+        http: GET /stub
+        errors:
+          - ShouldBeChecked
