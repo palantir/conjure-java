@@ -118,7 +118,7 @@ public final class ConjureErrors {
         }
     }
 
-    static final class ShouldBeCheckedRemoteException extends CheckedRemoteException {
+    public static final class ShouldBeCheckedRemoteException extends CheckedRemoteException {
         ShouldBeCheckedRemoteException(RemoteException remote) {
             super(remote.getError(), remote.getStatus());
         }

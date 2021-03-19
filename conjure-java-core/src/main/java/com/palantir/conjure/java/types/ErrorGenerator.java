@@ -162,7 +162,7 @@ public final class ErrorGenerator implements Generator {
         List<TypeSpec> checkedRemoteExceptions = errorTypeDefinitions.stream()
                 .filter(errorMapper::isChecked)
                 .map(entry -> TypeSpec.classBuilder(errorMapper.getNameForRemoteException(entry))
-                        .addModifiers(Modifier.STATIC, Modifier.FINAL)
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                         .superclass(CheckedRemoteException.class)
                         .addMethod(MethodSpec.constructorBuilder()
                                 .addParameter(ClassName.get(RemoteException.class), "remote")

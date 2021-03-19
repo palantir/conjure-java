@@ -46,7 +46,7 @@ public final class ExampleErrors {
         }
     }
 
-    static final class ExampleErrorRemoteException extends CheckedRemoteException {
+    public static final class ExampleErrorRemoteException extends CheckedRemoteException {
         ExampleErrorRemoteException(RemoteException remote) {
             super(remote.getError(), remote.getStatus());
         }
