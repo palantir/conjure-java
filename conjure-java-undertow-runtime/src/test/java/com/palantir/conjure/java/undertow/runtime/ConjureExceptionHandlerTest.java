@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.api.errors.CheckedRemoteException;
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -27,9 +29,11 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -48,18 +52,39 @@ public final class ConjureExceptionHandlerTest {
             .followRedirects(false) // we want to explicitly test the 'Location' header
             .build();
 
-    private RuntimeException exception;
+    private RuntimeException exception = null;
+    private Exception checkedException;
     private Undertow server;
+
+    private static class TestCheckedServiceException extends CheckedServiceException {
+        protected TestCheckedServiceException(ErrorType errorType, Arg<?>... parameters) {
+            super(errorType, parameters);
+        }
+    }
+
+    private static class TestCheckedRemoteException extends CheckedRemoteException {
+        protected TestCheckedRemoteException(SerializableError error, int status) {
+            super(error, status);
+        }
+    }
+
+    private class Delegate implements HttpHandler {
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            if (exception != null) {
+                throw exception;
+            } else {
+                throw checkedException;
+            }
+        }
+    }
 
     @BeforeEach
     public void before() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
-                .setHandler(new BlockingHandler(new ConjureExceptionHandler(
-                        _exchange -> {
-                            throw exception;
-                        },
-                        ConjureExceptions.INSTANCE)))
+                .setHandler(
+                        new BlockingHandler(new ConjureExceptionHandler(new Delegate(), ConjureExceptions.INSTANCE)))
                 .build();
         server.start();
     }
@@ -80,10 +105,44 @@ public final class ConjureExceptionHandlerTest {
     }
 
     @Test
+    public void handlesCheckedServiceException() throws IOException {
+        exception = null;
+        checkedException = new TestCheckedServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("bar", "baz"));
+        Response response = execute();
+        assertThat(response.body().string())
+                .contains("{\"errorCode\":\"INVALID_ARGUMENT\"")
+                .contains("\"parameters\":{\"bar\":\"baz\"}}");
+        assertThat(response.code()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
+    }
+
+    @Test
     public void handlesRemoteException() throws IOException {
         SerializableError remoteError =
                 SerializableError.forException(new ServiceException(ErrorType.CONFLICT, SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.CONFLICT.httpErrorCode());
+        Response response = execute();
+
+        // Propagates errorInstanceId and changes error code and name to INTERNAL
+        // Does not propagate args
+        SerializableError expectedPropagatedError = SerializableError.builder()
+                .errorCode(ErrorType.INTERNAL.code().toString())
+                .errorName(ErrorType.INTERNAL.name())
+                .errorInstanceId(remoteError.errorInstanceId())
+                .build();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
+
+        assertThat(response.body().string()).isEqualTo(stream.toString());
+        // remote exceptions should result in 500 status
+        assertThat(response.code()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
+    }
+
+    @Test
+    public void handlesCheckedRemoteException() throws IOException {
+        SerializableError remoteError = SerializableError.forException(
+                new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("bar", "baz")));
+        exception = null;
+        checkedException = new TestCheckedRemoteException(remoteError, ErrorType.INVALID_ARGUMENT.httpErrorCode());
         Response response = execute();
 
         // Propagates errorInstanceId and changes error code and name to INTERNAL
