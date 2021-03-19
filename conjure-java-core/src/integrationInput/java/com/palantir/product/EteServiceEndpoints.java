@@ -1556,7 +1556,8 @@ public final class EteServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange) throws IOException, ExampleErrors.ExampleErrorException {
+        public void handleRequest(HttpServerExchange exchange)
+                throws IOException, ExampleErrors.ExampleErrorServiceException {
             AuthHeader authHeader = runtime.auth().header(exchange);
             delegate.throwsCheckedException(authHeader);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);

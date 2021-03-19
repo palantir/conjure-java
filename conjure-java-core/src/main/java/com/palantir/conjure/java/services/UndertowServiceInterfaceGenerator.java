@@ -91,9 +91,7 @@ final class UndertowServiceInterfaceGenerator {
                 .addAnnotations(ConjureAnnotations.incubating(endpointDef));
 
         for (TypeName errorName : endpointDef.getErrors()) {
-            ClassName errorClass = errorMapper
-                    .getClassNameForError(errorName)
-                    .orElseThrow(() -> new IllegalStateException("No error found with name " + errorName));
+            ClassName errorClass = errorMapper.getServiceClassNameForError(errorName);
             methodBuilder.addException(errorClass);
         }
 

@@ -175,9 +175,7 @@ public final class DialogueInterfaceGenerator {
                         ClassName.get(referenceType.getPackage(), referenceType.getName())));
 
         endpointDef.getErrors().forEach(errorName -> {
-            ClassName errorClass = errorMapper
-                    .getClassNameForError(errorName)
-                    .orElseThrow(() -> new IllegalStateException("No error found with name " + errorName));
+            ClassName errorClass = errorMapper.getRemoteClassNameForError(errorName);
             methodBuilder.addException(errorClass);
         });
 

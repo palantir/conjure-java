@@ -1,7 +1,9 @@
 package com.palantir.product;
 
+import com.palantir.conjure.java.api.errors.CheckedRemoteException;
 import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
@@ -64,12 +66,12 @@ public final class ConjureErrors {
                 INVALID_TYPE_DEFINITION, cause, SafeArg.of("typeName", typeName), UnsafeArg.of("typeDef", typeDef));
     }
 
-    public static ShouldBeCheckedException shouldBeChecked() {
-        return new ShouldBeCheckedException(SHOULD_BE_CHECKED);
+    public static ShouldBeCheckedServiceException shouldBeChecked() {
+        return new ShouldBeCheckedServiceException(SHOULD_BE_CHECKED);
     }
 
-    public static ShouldBeCheckedException shouldBeChecked(Throwable cause) {
-        return new ShouldBeCheckedException(SHOULD_BE_CHECKED, cause);
+    public static ShouldBeCheckedServiceException shouldBeChecked(Throwable cause) {
+        return new ShouldBeCheckedServiceException(SHOULD_BE_CHECKED, cause);
     }
 
     /**
@@ -100,19 +102,25 @@ public final class ConjureErrors {
      * Throws a {@link ServiceException} of type ShouldBeChecked when {@code shouldThrow} is true.
      * @param shouldThrow Cause the method to throw when true
      */
-    public static void throwIfShouldBeChecked(boolean shouldThrow) throws ShouldBeCheckedException {
+    public static void throwIfShouldBeChecked(boolean shouldThrow) throws ShouldBeCheckedServiceException {
         if (shouldThrow) {
             throw shouldBeChecked();
         }
     }
 
-    public static final class ShouldBeCheckedException extends CheckedServiceException {
-        ShouldBeCheckedException(ErrorType errorType, Arg<?>... parameters) {
+    public static final class ShouldBeCheckedServiceException extends CheckedServiceException {
+        private ShouldBeCheckedServiceException(ErrorType errorType, Arg<?>... parameters) {
             super(errorType, parameters);
         }
 
-        ShouldBeCheckedException(ErrorType errorType, @Nullable Throwable cause, Arg<?>... parameters) {
+        private ShouldBeCheckedServiceException(ErrorType errorType, @Nullable Throwable cause, Arg<?>... parameters) {
             super(errorType, cause, parameters);
+        }
+    }
+
+    static final class ShouldBeCheckedRemoteException extends CheckedRemoteException {
+        ShouldBeCheckedRemoteException(RemoteException remote) {
+            super(remote.getError(), remote.getStatus());
         }
     }
 }

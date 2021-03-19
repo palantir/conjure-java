@@ -16,11 +16,13 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.palantir.conjure.java.api.errors.CheckedServiceException;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.api.errors.TypedException;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
@@ -56,6 +58,8 @@ public enum ConjureExceptions implements ExceptionHandler {
         setFailure(exchange, throwable);
         if (throwable instanceof ServiceException) {
             serviceException(exchange, (ServiceException) throwable);
+        } else if (throwable instanceof CheckedServiceException) {
+            checkedServiceException(exchange, (CheckedServiceException) throwable);
         } else if (throwable instanceof QosException) {
             qosException(exchange, (QosException) throwable);
         } else if (throwable instanceof RemoteException) {
@@ -81,6 +85,14 @@ public enum ConjureExceptions implements ExceptionHandler {
         writeResponse(
                 exchange,
                 Optional.of(SerializableError.forException(exception)),
+                exception.getErrorType().httpErrorCode());
+    }
+
+    private static void checkedServiceException(HttpServerExchange exchange, CheckedServiceException exception) {
+        log(exception);
+        writeResponse(
+                exchange,
+                Optional.of(SerializableError.forCheckedException(exception)),
                 exception.getErrorType().httpErrorCode());
     }
 
@@ -201,7 +213,7 @@ public enum ConjureExceptions implements ExceptionHandler {
         return false;
     }
 
-    private static void log(ServiceException serviceException, Throwable exceptionForLogging) {
+    private static void log(TypedException serviceException, Throwable exceptionForLogging) {
         if (serviceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
             log.info(
                     "Error handling request",
@@ -218,6 +230,10 @@ public enum ConjureExceptions implements ExceptionHandler {
     }
 
     private static void log(ServiceException exception) {
+        log(exception, exception);
+    }
+
+    private static void log(CheckedServiceException exception) {
         log(exception, exception);
     }
 

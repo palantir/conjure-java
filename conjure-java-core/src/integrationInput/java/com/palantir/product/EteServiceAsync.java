@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -208,7 +209,8 @@ public interface EteServiceAsync {
     /**
      * @apiNote {@code PUT /base/errors}
      */
-    ListenableFuture<Void> throwsCheckedException(AuthHeader authHeader);
+    ListenableFuture<Void> throwsCheckedException(AuthHeader authHeader)
+            throws ExampleErrors.ExampleErrorRemoteException;
 
     /**
      * Creates an asynchronous/non-blocking client for a EteService service.
@@ -707,11 +709,21 @@ public interface EteServiceAsync {
             }
 
             @Override
-            public ListenableFuture<Void> throwsCheckedException(AuthHeader authHeader) {
+            public ListenableFuture<Void> throwsCheckedException(AuthHeader authHeader)
+                    throws ExampleErrors.ExampleErrorRemoteException {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                return _runtime.clients()
-                        .call(throwsCheckedExceptionChannel, _request.build(), throwsCheckedExceptionDeserializer);
+                try {
+                    return _runtime.clients()
+                            .call(throwsCheckedExceptionChannel, _request.build(), throwsCheckedExceptionDeserializer);
+                } catch (RemoteException remoteException) {
+                    String name = remoteException.getError().errorName();
+                    if (name.equals("Example:ExampleError")) {
+                        throw new ExampleErrors.ExampleErrorRemoteException(remoteException);
+                    } else {
+                        throw remoteException;
+                    }
+                }
             }
 
             @Override

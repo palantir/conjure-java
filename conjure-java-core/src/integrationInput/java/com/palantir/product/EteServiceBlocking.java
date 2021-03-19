@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.google.errorprone.annotations.MustBeClosed;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -204,7 +205,7 @@ public interface EteServiceBlocking {
     /**
      * @apiNote {@code PUT /base/errors}
      */
-    void throwsCheckedException(AuthHeader authHeader);
+    void throwsCheckedException(AuthHeader authHeader) throws ExampleErrors.ExampleErrorRemoteException;
 
     /**
      * Creates a synchronous/blocking client for a EteService service.
@@ -703,12 +704,23 @@ public interface EteServiceBlocking {
             }
 
             @Override
-            public void throwsCheckedException(AuthHeader authHeader) {
+            public void throwsCheckedException(AuthHeader authHeader) throws ExampleErrors.ExampleErrorRemoteException {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
-                _runtime.clients()
-                        .callBlocking(
-                                throwsCheckedExceptionChannel, _request.build(), throwsCheckedExceptionDeserializer);
+                try {
+                    _runtime.clients()
+                            .callBlocking(
+                                    throwsCheckedExceptionChannel,
+                                    _request.build(),
+                                    throwsCheckedExceptionDeserializer);
+                } catch (RemoteException remoteException) {
+                    String name = remoteException.getError().errorName();
+                    if (name.equals("Example:ExampleError")) {
+                        throw new ExampleErrors.ExampleErrorRemoteException(remoteException);
+                    } else {
+                        throw remoteException;
+                    }
+                }
             }
 
             @Override

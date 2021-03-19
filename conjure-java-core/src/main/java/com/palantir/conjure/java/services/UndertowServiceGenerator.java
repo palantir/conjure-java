@@ -51,7 +51,7 @@ public final class UndertowServiceGenerator implements Generator {
         TypeMapper returnTypeMapper = new TypeMapper(
                 types,
                 new SpecializeBinaryClassNameVisitor(defaultVisitor, types, ClassName.get(BinaryResponseBody.class)));
-        ErrorMapper errorMapper = new ErrorMapper(conjureDefinition.getErrors());
+        ErrorMapper errorMapper = new ErrorMapper(conjureDefinition);
 
         UndertowServiceInterfaceGenerator interfaceGenerator = new UndertowServiceInterfaceGenerator(options);
         UndertowServiceHandlerGenerator handlerGenerator = new UndertowServiceHandlerGenerator(options);

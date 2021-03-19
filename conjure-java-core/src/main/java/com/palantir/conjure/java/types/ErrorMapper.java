@@ -16,32 +16,55 @@
 
 package com.palantir.conjure.java.types;
 
+import com.google.common.base.Preconditions;
+import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.squareup.javapoet.ClassName;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ErrorMapper {
 
     private final Map<TypeName, ErrorDefinition> errors;
+    private final Set<TypeName> checkedExceptions;
 
-    public ErrorMapper(List<ErrorDefinition> errors) {
-        this.errors = errors.stream().collect(Collectors.toMap(ErrorDefinition::getErrorName, Function.identity()));
+    public ErrorMapper(ConjureDefinition conjureDefinition) {
+        this.errors = conjureDefinition.getErrors().stream()
+                .collect(Collectors.toMap(ErrorDefinition::getErrorName, Function.identity()));
+        this.checkedExceptions = conjureDefinition.getServices().stream()
+                .flatMap(stream -> stream.getEndpoints().stream())
+                .flatMap(endpoint -> endpoint.getErrors().stream())
+                .collect(Collectors.toSet());
     }
 
-    public final Optional<ErrorDefinition> getError(TypeName typeName) {
-        return Optional.ofNullable(errors.get(typeName));
+    public final boolean isChecked(ErrorDefinition errorDefinition) {
+        return checkedExceptions.contains(errorDefinition.getErrorName());
     }
 
-    public final Optional<ClassName> getClassNameForError(TypeName typeName) {
-        return getError(typeName)
-                .map(error -> ClassName.get(
-                        typeName.getPackage(),
-                        error.getNamespace().get() + "Errors",
-                        typeName.getName() + "Exception"));
+    public final ErrorDefinition getError(TypeName typeName) {
+        return Preconditions.checkNotNull(errors.get(typeName), "No error found with name %s", typeName.getName());
+    }
+
+    public final ClassName getServiceClassNameForError(TypeName typeName) {
+        ErrorDefinition error = getError(typeName);
+        return ClassName.get(
+                typeName.getPackage(), error.getNamespace().get() + "Errors", typeName.getName() + "ServiceException");
+    }
+
+    public final ClassName getRemoteClassNameForError(TypeName typeName) {
+        ErrorDefinition error = getError(typeName);
+        return ClassName.get(
+                typeName.getPackage(), error.getNamespace().get() + "Errors", typeName.getName() + "RemoteException");
+    }
+
+    public final String getNameForServiceException(ErrorDefinition error) {
+        return String.format("%sServiceException", error.getErrorName().getName());
+    }
+
+    public final String getNameForRemoteException(ErrorDefinition error) {
+        return String.format("%sRemoteException", error.getErrorName().getName());
     }
 }

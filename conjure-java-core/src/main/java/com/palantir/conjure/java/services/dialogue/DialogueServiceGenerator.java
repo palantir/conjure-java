@@ -64,7 +64,7 @@ public final class DialogueServiceGenerator implements Generator {
         Map<TypeName, TypeDefinition> typeDefinitionsByName = conjureDefinition.getTypes().stream()
                 .collect(Collectors.toMap(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
 
-        ErrorMapper errorMapper = new ErrorMapper(conjureDefinition.getErrors());
+        ErrorMapper errorMapper = new ErrorMapper(conjureDefinition);
 
         DialogueInterfaceGenerator interfaceGenerator = new DialogueInterfaceGenerator(
                 options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
@@ -77,6 +77,7 @@ public final class DialogueServiceGenerator implements Generator {
                 typeNameResolver,
                 new ParameterTypeMapper(parameterTypes),
                 new ReturnTypeMapper(returnTypes),
+                errorMapper,
                 StaticFactoryMethodType.ASYNC);
 
         StaticFactoryMethodGenerator blockingGenerator = new DefaultStaticFactoryMethodGenerator(
@@ -84,6 +85,7 @@ public final class DialogueServiceGenerator implements Generator {
                 typeNameResolver,
                 new ParameterTypeMapper(parameterTypes),
                 new ReturnTypeMapper(returnTypes),
+                errorMapper,
                 StaticFactoryMethodType.BLOCKING);
 
         return conjureDefinition.getServices().stream()

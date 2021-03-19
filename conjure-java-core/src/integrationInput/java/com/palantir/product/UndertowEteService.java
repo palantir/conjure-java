@@ -181,5 +181,5 @@ public interface UndertowEteService {
     /**
      * @apiNote {@code PUT /base/errors}
      */
-    void throwsCheckedException(AuthHeader authHeader) throws ExampleErrors.ExampleErrorException;
+    void throwsCheckedException(AuthHeader authHeader) throws ExampleErrors.ExampleErrorServiceException;
 }

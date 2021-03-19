@@ -222,9 +222,7 @@ final class UndertowServiceHandlerGenerator {
                 .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
 
         for (com.palantir.conjure.spec.TypeName errorName : endpointDefinition.getErrors()) {
-            ClassName errorClass = errorMapper
-                    .getClassNameForError(errorName)
-                    .orElseThrow(() -> new IllegalStateException("No error found with name " + errorName));
+            ClassName errorClass = errorMapper.getServiceClassNameForError(errorName);
             handleMethodBuilder.addException(errorClass);
         }
 

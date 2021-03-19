@@ -18,13 +18,16 @@ package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.services.Auth;
+import com.palantir.conjure.java.types.ErrorMapper;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
+import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.HeaderParameterType;
@@ -64,6 +67,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryMethodGenerator {
@@ -75,18 +79,21 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
     private final StaticFactoryMethodType methodType;
+    private final ErrorMapper errorMapper;
 
     public DefaultStaticFactoryMethodGenerator(
             Options options,
             TypeNameResolver typeNameResolver,
             ParameterTypeMapper parameterTypes,
             ReturnTypeMapper returnTypes,
+            ErrorMapper errorMapper,
             StaticFactoryMethodType methodType) {
         this.options = options;
         this.typeNameResolver = typeNameResolver;
         this.parameterTypes = parameterTypes;
         this.returnTypes = returnTypes;
         this.methodType = methodType;
+        this.errorMapper = errorMapper;
     }
 
     @Override
@@ -225,6 +232,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .build();
         String codeBlock = methodType.switchBy(
                 "$L.clients().callBlocking($L, $L.build(), $L);", "$L.clients().call($L, $L.build" + "(), $L);");
+
         CodeBlock execute = CodeBlock.of(
                 codeBlock,
                 StaticFactoryMethodGenerator.RUNTIME,
@@ -239,8 +247,63 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                         .orElseGet(() -> def.getEndpointName().get() + "Deserializer"));
 
         methodBuilder.addCode(request);
-        methodBuilder.addCode(methodType.switchBy(def.getReturns().isPresent() ? "return " : "", "return "));
-        methodBuilder.addCode(execute);
+
+        CodeBlock contents = CodeBlock.builder()
+                .add(methodType.switchBy(def.getReturns().isPresent() ? "return " : "", "return "))
+                .add(execute)
+                .build();
+
+        if (def.getErrors().size() > 0) {
+            CodeBlock.Builder tryCatchBuilder = CodeBlock.builder()
+                    .beginControlFlow("try")
+                    .add(contents)
+                    .nextControlFlow("catch ($T remoteException)", RemoteException.class)
+                    .addStatement("$T name = $N.getError().errorName()", String.class, "remoteException");
+
+            List<ErrorDefinition> errors =
+                    def.getErrors().stream().map(errorMapper::getError).collect(Collectors.toList());
+
+            errors.forEach(
+                    error -> methodBuilder.addException(errorMapper.getRemoteClassNameForError(error.getErrorName())));
+
+            CodeBlock.Builder ifElseBuilder = CodeBlock.builder();
+
+            // first
+            errors.stream().findFirst().ifPresent(e -> ifElseBuilder
+                    .beginControlFlow(
+                            "if ($N.equals(\"$L:$L\"))",
+                            "name",
+                            e.getNamespace().get(),
+                            e.getErrorName().getName())
+                    .addStatement(
+                            "throw new $T($N)",
+                            errorMapper.getRemoteClassNameForError(e.getErrorName()),
+                            "remoteException"));
+
+            // rest
+            errors.stream().skip(1).forEach(e -> ifElseBuilder
+                    .nextControlFlow(
+                            "else if ($T.equals(\"$L:$L\"))",
+                            "name",
+                            e.getNamespace().get(),
+                            e.getErrorName().getName())
+                    .addStatement(
+                            "throw new $T($N)",
+                            errorMapper.getRemoteClassNameForError(e.getErrorName()),
+                            "remoteException"));
+
+            ifElseBuilder
+                    .nextControlFlow("else")
+                    .addStatement("throw $N", "remoteException")
+                    .endControlFlow();
+
+            tryCatchBuilder.add(ifElseBuilder.build());
+            tryCatchBuilder.endControlFlow();
+
+            methodBuilder.addCode(tryCatchBuilder.build());
+        } else {
+            methodBuilder.addCode(contents);
+        }
 
         return methodBuilder.build();
     }
