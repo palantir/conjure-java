@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
@@ -14,10 +15,12 @@ import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
+import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -34,7 +37,10 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return ImmutableList.of(new IntEndpoint(runtime, delegate));
+        return ImmutableList.of(
+                new IntEndpoint(runtime, delegate),
+                new NoContextEndpoint(runtime, delegate),
+                new ContextEndpoint(runtime, delegate));
     }
 
     private static final class IntEndpoint implements HttpHandler, Endpoint {
@@ -97,6 +103,105 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "int";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class NoContextEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowNameCollisionService delegate;
+
+        private final Deserializer<String> deserializer;
+
+        NoContextEndpoint(UndertowRuntime runtime, UndertowNameCollisionService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            String requestContext = deserializer.deserialize(exchange);
+            delegate.noContext(requestContext);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/no/context";
+        }
+
+        @Override
+        public String serviceName() {
+            return "NameCollisionService";
+        }
+
+        @Override
+        public String name() {
+            return "noContext";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ContextEndpoint implements HttpHandler, Endpoint {
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("server-request-context");
+
+        private final UndertowRuntime runtime;
+
+        private final UndertowNameCollisionService delegate;
+
+        private final Deserializer<String> deserializer;
+
+        ContextEndpoint(UndertowRuntime runtime, UndertowNameCollisionService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public Set<String> tags() {
+            return TAGS;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            String requestContext_ = deserializer.deserialize(exchange);
+            delegate.context(requestContext_, runtime.contexts().createContext(exchange, this));
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/context";
+        }
+
+        @Override
+        public String serviceName() {
+            return "NameCollisionService";
+        }
+
+        @Override
+        public String name() {
+            return "context";
         }
 
         @Override

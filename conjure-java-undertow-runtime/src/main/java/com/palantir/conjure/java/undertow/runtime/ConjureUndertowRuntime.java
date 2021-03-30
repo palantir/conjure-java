@@ -21,6 +21,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
+import com.palantir.conjure.java.undertow.lib.Contexts;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.MarkerCallback;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
@@ -82,6 +83,11 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     @Override
     public ExceptionHandler exceptionHandler() {
         return exceptionHandler;
+    }
+
+    @Override
+    public Contexts contexts() {
+        return ConjureContexts.INSTANCE;
     }
 
     public static final class Builder {

@@ -38,6 +38,7 @@ import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
+import com.palantir.conjure.java.util.Tags;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
@@ -434,12 +435,16 @@ final class UndertowServiceHandlerGenerator {
         // query parameters
         addQueryParamsCode(code, endpointDefinition, typeDefinitions, typeMapper);
 
-        List<String> methodArgs = new ArrayList<>();
-        authVarName.ifPresent(methodArgs::add);
-        methodArgs.addAll(ParameterOrder.sorted(endpointDefinition.getArgs()).stream()
+        List<CodeBlock> methodArgs = new ArrayList<>();
+        authVarName.ifPresent(name -> methodArgs.add(CodeBlock.of("$N", name)));
+        ParameterOrder.sorted(endpointDefinition.getArgs()).stream()
                 .map(arg -> arg.getArgName().get())
                 .map(arg -> sanitizeVarName(arg, endpointDefinition))
-                .collect(ImmutableList.toImmutableList()));
+                .map(arg -> CodeBlock.of("$N", arg))
+                .forEach(methodArgs::add);
+        if (Tags.hasServerRequestContext(endpointDefinition)) {
+            methodArgs.add(CodeBlock.of("$N.contexts().createContext($N, this)", RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME));
+        }
 
         boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, options);
         if (async || endpointDefinition.getReturns().isPresent()) {
@@ -453,13 +458,13 @@ final class UndertowServiceHandlerGenerator {
                     DELEGATE_VAR_NAME,
                     JavaNameSanitizer.sanitize(
                             endpointDefinition.getEndpointName().get()),
-                    String.join(", ", methodArgs));
+                    methodArgs.stream().collect(CodeBlock.joining(",")));
         } else {
             code.addStatement(
                     "$1N.$2L($3L)",
                     DELEGATE_VAR_NAME,
                     endpointDefinition.getEndpointName(),
-                    String.join(", ", methodArgs));
+                    methodArgs.stream().collect(CodeBlock.joining(",")));
         }
         if (UndertowTypeFunctions.isAsync(endpointDefinition, options)) {
             code.add(CodeBlocks.statement(
@@ -1062,7 +1067,8 @@ final class UndertowServiceHandlerGenerator {
     private static String sanitizeVarName(String input, EndpointDefinition endpoint) {
         String value = JavaNameSanitizer.sanitizeParameterName(input, endpoint);
         if (RESERVED_PARAM_NAMES.contains(value)
-                || (endpoint.getReturns().isPresent() && RESULT_VAR_NAME.equals(value))) {
+                || (endpoint.getReturns().isPresent() && RESULT_VAR_NAME.equals(value))
+                || (Tags.hasServerRequestContext(endpoint) && Tags.SERVER_REQUEST_CONTEXT_PARAMETER.equals(value))) {
             return sanitizeVarName(value + "_", endpoint);
         }
         return value;
