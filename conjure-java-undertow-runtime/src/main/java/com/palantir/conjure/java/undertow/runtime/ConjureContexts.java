@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.palantir.conjure.java.undertow.lib.Contexts;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
+import com.palantir.logsafe.Arg;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import java.util.Collections;
@@ -29,22 +30,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-enum ConjureContexts implements Contexts {
-    INSTANCE;
+final class ConjureContexts implements Contexts {
+    private final RequestLogParameterHandler requestLogParameterHandler;
+
+    ConjureContexts(RequestLogParameterHandler requestLogParameterHandler) {
+        this.requestLogParameterHandler = requestLogParameterHandler;
+    }
 
     @Override
     public RequestContext createContext(HttpServerExchange exchange, Endpoint _endpoint) {
-        return new ConjureServerRequestContext(exchange);
+        return new ConjureServerRequestContext(exchange, requestLogParameterHandler);
     }
 
     private static final class ConjureServerRequestContext implements RequestContext {
 
         private final HttpServerExchange exchange;
+        private final RequestLogParameterHandler requestLogParameterHandler;
 
         private ImmutableListMultimap<String, String> cachedQueryParams;
 
-        ConjureServerRequestContext(HttpServerExchange exchange) {
+        ConjureServerRequestContext(
+                HttpServerExchange exchange, RequestLogParameterHandler requestLogParameterHandler) {
             this.exchange = exchange;
+            this.requestLogParameterHandler = requestLogParameterHandler;
         }
 
         @Override
@@ -66,6 +74,11 @@ enum ConjureContexts implements Contexts {
                 cachedQueryParams = cachedQueryParamsSnapshot;
             }
             return cachedQueryParamsSnapshot;
+        }
+
+        @Override
+        public void requestLogParameter(Arg<?> arg) {
+            requestLogParameterHandler.addParameter(exchange, arg);
         }
 
         private ImmutableListMultimap<String, String> buildQueryParameters() {

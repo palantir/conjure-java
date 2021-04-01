@@ -39,6 +39,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final MarkerCallback markerCallback;
     private final AsyncRequestProcessing async;
     private final ExceptionHandler exceptionHandler;
+    private final Contexts contexts;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(
@@ -49,6 +50,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         this.exceptionHandler = builder.exceptionHandler;
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout, builder.exceptionHandler);
+        this.contexts = new ConjureContexts(builder.requestLogParameterHandler);
     }
 
     public static Builder builder() {
@@ -87,13 +89,14 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     @Override
     public Contexts contexts() {
-        return ConjureContexts.INSTANCE;
+        return contexts;
     }
 
     public static final class Builder {
 
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private ExceptionHandler exceptionHandler = ConjureExceptions.INSTANCE;
+        private RequestLogParameterHandler requestLogParameterHandler = DefaultRequestLogParameterHandler.INSTANCE;
         private final List<Encoding> encodings = new ArrayList<>();
         private final List<ParamMarker> paramMarkers = new ArrayList<>();
 
@@ -120,6 +123,12 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         @CanIgnoreReturnValue
         public Builder exceptionHandler(ExceptionHandler value) {
             exceptionHandler = Preconditions.checkNotNull(value, "exceptionHandler is required");
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder requestLogParameterHandler(RequestLogParameterHandler value) {
+            requestLogParameterHandler = Preconditions.checkNotNull(value, "requestLogParameterHandler is required");
             return this;
         }
 
