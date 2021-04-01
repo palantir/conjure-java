@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.palantir.conjure.java.undertow.lib.Contexts;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.MarkerCallback;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
@@ -29,22 +30,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-enum ConjureContexts implements Contexts {
-    INSTANCE;
+final class ConjureContexts implements Contexts {
+    private final MarkerCallback markerCallback;
+
+    ConjureContexts(MarkerCallback markerCallback) {
+        this.markerCallback = markerCallback;
+    }
 
     @Override
     public RequestContext createContext(HttpServerExchange exchange, Endpoint _endpoint) {
-        return new ConjureServerRequestContext(exchange);
+        return new ConjureServerRequestContext(exchange, markerCallback);
     }
 
     private static final class ConjureServerRequestContext implements RequestContext {
 
         private final HttpServerExchange exchange;
+        private final MarkerCallback markerCallback;
 
         private ImmutableListMultimap<String, String> cachedQueryParams;
 
-        ConjureServerRequestContext(HttpServerExchange exchange) {
+        ConjureServerRequestContext(HttpServerExchange exchange, MarkerCallback markerCallback) {
             this.exchange = exchange;
+            this.markerCallback = markerCallback;
         }
 
         @Override
@@ -66,6 +73,11 @@ enum ConjureContexts implements Contexts {
                 cachedQueryParams = cachedQueryParamsSnapshot;
             }
             return cachedQueryParamsSnapshot;
+        }
+
+        @Override
+        public void markParameter(String marker, String parameterName, Object parameterValue) {
+            markerCallback.param(marker, parameterName, parameterValue, exchange);
         }
 
         private ImmutableListMultimap<String, String> buildQueryParameters() {

@@ -39,6 +39,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final MarkerCallback markerCallback;
     private final AsyncRequestProcessing async;
     private final ExceptionHandler exceptionHandler;
+    private final Contexts contexts;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(
@@ -49,6 +50,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         this.exceptionHandler = builder.exceptionHandler;
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout, builder.exceptionHandler);
+        this.contexts = new ConjureContexts(markerCallback);
     }
 
     public static Builder builder() {
@@ -87,7 +89,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
 
     @Override
     public Contexts contexts() {
-        return ConjureContexts.INSTANCE;
+        return contexts;
     }
 
     public static final class Builder {

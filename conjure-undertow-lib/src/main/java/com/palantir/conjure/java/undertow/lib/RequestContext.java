@@ -44,4 +44,11 @@ public interface RequestContext {
      * Returns all query parameters associated with the current request.
      */
     ListMultimap<String, String> queryParameters();
+
+    /**
+     * Applies a marker to a parameter on the current request. This uses the same mechanism as
+     * parameter markers in conjure, but may be applied to data that's not directly accessible
+     * as a top level parameter.
+     */
+    void markParameter(String marker, String parameterName, Object parameterValue);
 }
