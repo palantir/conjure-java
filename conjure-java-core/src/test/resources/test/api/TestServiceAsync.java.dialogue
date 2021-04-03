@@ -15,6 +15,7 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
+import com.palantir.logsafe.Safe;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
 import com.palantir.product.datasets.BackingFileSystem;
@@ -81,7 +82,7 @@ public interface TestServiceAsync {
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased}
      */
-    ListenableFuture<AliasedString> getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    ListenableFuture<AliasedString> getAliasedString(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code POST /catalog/datasets/upload-raw}

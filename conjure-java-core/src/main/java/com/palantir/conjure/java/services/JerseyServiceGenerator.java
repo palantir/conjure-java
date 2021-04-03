@@ -285,7 +285,7 @@ public final class JerseyServiceGenerator implements Generator {
             getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
             param.addAnnotations(ImmutableSet.<AnnotationSpec>builder()
                     .addAll(createMarkers(typeMapper, def.getMarkers()))
-                    .addAll(ConjureTags.tagAnnotations(def))
+                    .addAll(ConjureTags.safetyAnnotations(def))
                     .build());
         }
         return param.build();
