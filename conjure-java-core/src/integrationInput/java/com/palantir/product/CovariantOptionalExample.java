@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -32,11 +33,13 @@ public final class CovariantOptionalExample {
     }
 
     @JsonProperty("item")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<Object> getItem() {
         return this.item;
     }
 
     @JsonProperty("setItem")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<Set<StringAliasExample>> getSetItem() {
         return this.setItem;
     }

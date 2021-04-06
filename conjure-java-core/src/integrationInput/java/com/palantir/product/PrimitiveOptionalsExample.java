@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -58,36 +59,43 @@ public final class PrimitiveOptionalsExample {
     }
 
     @JsonProperty("num")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public OptionalDouble getNum() {
         return this.num;
     }
 
     @JsonProperty("bool")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<Boolean> getBool() {
         return this.bool;
     }
 
     @JsonProperty("integer")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public OptionalInt getInteger() {
         return this.integer;
     }
 
     @JsonProperty("safelong")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<SafeLong> getSafelong() {
         return this.safelong;
     }
 
     @JsonProperty("rid")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<ResourceIdentifier> getRid() {
         return this.rid;
     }
 
     @JsonProperty("bearertoken")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<BearerToken> getBearertoken() {
         return this.bearertoken;
     }
 
     @JsonProperty("uuid")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<UUID> getUuid() {
         return this.uuid;
     }

@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -425,6 +426,11 @@ public final class BeanGenerator {
                         .addMember("value", "$S", field.fieldName().get())
                         .build())
                 .returns(field.poetSpec().type);
+        if (field.conjureDef().getType().accept(TypeVisitor.IS_OPTIONAL)) {
+            getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
+                    .addMember("value", "$T.NON_ABSENT", JsonInclude.Include.class)
+                    .build());
+        }
 
         if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
             getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
