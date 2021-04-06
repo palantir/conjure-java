@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.lib;
 
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ListMultimap;
+import com.palantir.logsafe.Arg;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,4 +45,10 @@ public interface RequestContext {
      * Returns all query parameters associated with the current request.
      */
     ListMultimap<String, String> queryParameters();
+
+    /**
+     * Associates an {@link Arg} with the current request for observability.
+     * Implementations may choose to include this data in the request log.
+     */
+    void requestArg(Arg<?> arg);
 }
