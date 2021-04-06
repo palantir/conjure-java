@@ -44,7 +44,7 @@ public final class ConjureTags {
         return tags.contains(UNSAFE);
     }
 
-    public static ImmutableList<AnnotationSpec> tagAnnotations(ArgumentDefinition argument) {
+    public static ImmutableList<AnnotationSpec> safetyAnnotations(ArgumentDefinition argument) {
         validateTags(argument);
         List<String> tags = argument.getTags();
         ImmutableList.Builder<AnnotationSpec> builder = ImmutableList.builderWithExpectedSize(1);

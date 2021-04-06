@@ -193,7 +193,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     }
 
     private MethodSpec clientImpl(EndpointDefinition def) {
-        List<ParameterSpec> params = parameterTypes.methodParams(def);
+        List<ParameterSpec> params = parameterTypes.implementationMethodParams(def);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         def.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC)

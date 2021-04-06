@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
@@ -137,6 +138,7 @@ final class UndertowServiceInterfaceGenerator {
         return ParameterSpec.builder(
                         typeMapper.getClassName(def.getType()),
                         JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint))
+                .addAnnotations(ConjureTags.safetyAnnotations(def))
                 .build();
     }
 }
