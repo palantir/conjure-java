@@ -50,5 +50,5 @@ public interface RequestContext {
      * Associates an {@link Arg} with the current request for observability.
      * Implementations may choose to include this data in the request log.
      */
-    void requestLogParameter(Arg<?> arg);
+    void requestArg(Arg<?> arg);
 }

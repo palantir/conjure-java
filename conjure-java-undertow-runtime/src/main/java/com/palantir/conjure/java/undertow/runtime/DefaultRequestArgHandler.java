@@ -22,17 +22,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Default {@link RequestLogParameterHandler} implementation which simply {@link Logger#debug(String, Object)} logs
- * provided values immediately upon {@link #addParameter(HttpServerExchange, Arg)}. Server frameworks should provide
+ * Default {@link RequestArgHandler} implementation which simply {@link Logger#debug(String, Object)} logs
+ * provided values immediately upon {@link #arg(HttpServerExchange, Arg)}. Server frameworks should provide
  * a better implementation which allows data to be associated with requests.
  */
-enum DefaultRequestLogParameterHandler implements RequestLogParameterHandler {
+enum DefaultRequestArgHandler implements RequestArgHandler {
     INSTANCE;
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultRequestLogParameterHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultRequestArgHandler.class);
 
     @Override
-    public void addParameter(HttpServerExchange _exchange, Arg<?> value) {
+    public void arg(HttpServerExchange _exchange, Arg<?> value) {
         log.debug("Request parameter {}", value);
     }
 

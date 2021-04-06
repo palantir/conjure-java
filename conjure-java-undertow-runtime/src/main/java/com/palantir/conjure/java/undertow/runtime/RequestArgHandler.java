@@ -21,10 +21,10 @@ import io.undertow.server.HttpServerExchange;
 
 /**
  * Configuration point for servers to associate arguments provided to
- * {@link com.palantir.conjure.java.undertow.lib.RequestContext#requestLogParameter(Arg)}
+ * {@link com.palantir.conjure.java.undertow.lib.RequestContext#requestArg(Arg)}
  * with the request for request logging and other observability needs.
  */
-public interface RequestLogParameterHandler {
+public interface RequestArgHandler {
 
-    void addParameter(HttpServerExchange exchange, Arg<?> value);
+    void arg(HttpServerExchange exchange, Arg<?> value);
 }

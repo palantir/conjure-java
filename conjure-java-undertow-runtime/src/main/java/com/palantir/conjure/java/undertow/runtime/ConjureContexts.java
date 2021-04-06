@@ -31,28 +31,27 @@ import java.util.Map;
 import java.util.Optional;
 
 final class ConjureContexts implements Contexts {
-    private final RequestLogParameterHandler requestLogParameterHandler;
+    private final RequestArgHandler requestArgHandler;
 
-    ConjureContexts(RequestLogParameterHandler requestLogParameterHandler) {
-        this.requestLogParameterHandler = requestLogParameterHandler;
+    ConjureContexts(RequestArgHandler requestArgHandler) {
+        this.requestArgHandler = requestArgHandler;
     }
 
     @Override
     public RequestContext createContext(HttpServerExchange exchange, Endpoint _endpoint) {
-        return new ConjureServerRequestContext(exchange, requestLogParameterHandler);
+        return new ConjureServerRequestContext(exchange, requestArgHandler);
     }
 
     private static final class ConjureServerRequestContext implements RequestContext {
 
         private final HttpServerExchange exchange;
-        private final RequestLogParameterHandler requestLogParameterHandler;
+        private final RequestArgHandler requestArgHandler;
 
         private ImmutableListMultimap<String, String> cachedQueryParams;
 
-        ConjureServerRequestContext(
-                HttpServerExchange exchange, RequestLogParameterHandler requestLogParameterHandler) {
+        ConjureServerRequestContext(HttpServerExchange exchange, RequestArgHandler requestArgHandler) {
             this.exchange = exchange;
-            this.requestLogParameterHandler = requestLogParameterHandler;
+            this.requestArgHandler = requestArgHandler;
         }
 
         @Override
@@ -77,8 +76,8 @@ final class ConjureContexts implements Contexts {
         }
 
         @Override
-        public void requestLogParameter(Arg<?> arg) {
-            requestLogParameterHandler.addParameter(exchange, arg);
+        public void requestArg(Arg<?> arg) {
+            requestArgHandler.arg(exchange, arg);
         }
 
         private ImmutableListMultimap<String, String> buildQueryParameters() {
