@@ -43,6 +43,7 @@ import com.palantir.product.MapExample;
 import com.palantir.product.OptionalAlias;
 import com.palantir.product.OptionalAliasExample;
 import com.palantir.product.OptionalExample;
+import com.palantir.product.PrimitiveOptionalsExample;
 import com.palantir.product.SetAlias;
 import com.palantir.product.SetExample;
 import com.palantir.product.StringAliasExample;
@@ -559,6 +560,28 @@ public final class WireFormatTests {
     public void testOptionalAliasExample() throws IOException {
         assertThat(mapper.readValue("{\"optionalAlias\":null}", OptionalAliasExample.class))
                 .isEqualTo(OptionalAliasExample.of(OptionalAlias.of(Optional.empty())));
+    }
+
+    @Test
+    public void testEmptyOptionalFieldSerialization() throws IOException {
+        assertThat(mapper.writeValueAsString(PrimitiveOptionalsExample.builder().build()))
+                .isEqualTo("{}");
+    }
+
+    @Test
+    public void testEmptyOptionalFieldSerializationOfAlias() throws IOException {
+        assertThat(mapper.writeValueAsString(OptionalAliasExample.builder()
+                        .optionalAlias(OptionalAlias.of(Optional.empty()))
+                        .build()))
+                .isEqualTo("{}");
+    }
+
+    @Test
+    public void testEmptyOptionalFieldSerializationOfAlias_emptyString() throws IOException {
+        assertThat(mapper.writeValueAsString(OptionalAliasExample.builder()
+                        .optionalAlias(OptionalAlias.of(Optional.of("")))
+                        .build()))
+                .isEqualTo("{\"optionalAlias\":\"\"}");
     }
 
     private static final class TestVisitor implements UnionTypeExample.Visitor<Integer> {
