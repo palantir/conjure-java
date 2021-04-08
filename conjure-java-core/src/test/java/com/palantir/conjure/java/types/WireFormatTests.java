@@ -43,10 +43,13 @@ import com.palantir.product.MapExample;
 import com.palantir.product.OptionalAlias;
 import com.palantir.product.OptionalAliasExample;
 import com.palantir.product.OptionalExample;
+import com.palantir.product.OptionalMapAliasExample;
 import com.palantir.product.PrimitiveOptionalsExample;
 import com.palantir.product.SetAlias;
 import com.palantir.product.SetExample;
 import com.palantir.product.StringAliasExample;
+import com.palantir.product.StringAliasOne;
+import com.palantir.product.StringAliasTwo;
 import com.palantir.product.StringExample;
 import com.palantir.product.UnionTypeExample;
 import com.palantir.product.UuidExample;
@@ -57,6 +60,8 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -564,8 +569,32 @@ public final class WireFormatTests {
 
     @Test
     public void testEmptyOptionalFieldSerialization() throws IOException {
-        assertThat(mapper.writeValueAsString(PrimitiveOptionalsExample.builder().build()))
+        assertThat(mapper.writeValueAsString(PrimitiveOptionalsExample.builder()
+                        .aliasTwo(StringAliasTwo.of(Optional.empty()))
+                        .aliasOptional(OptionalAlias.of(Optional.empty()))
+                        .aliasOptionalMap(OptionalMapAliasExample.of(Optional.empty()))
+                        .build()))
                 .isEqualTo("{}");
+    }
+
+    @Test
+    public void testEmptyOptionalFieldSerialization_nonEmptyValues() throws IOException {
+        PrimitiveOptionalsExample original = PrimitiveOptionalsExample.builder()
+                .num(OptionalDouble.of(0D))
+                .bool(Optional.of(Boolean.FALSE))
+                .integer(OptionalInt.of(0))
+                .map(ImmutableMap.of())
+                .list(ImmutableList.of())
+                .set(ImmutableSet.of())
+                .aliasOne(StringAliasOne.of(""))
+                .aliasTwo(StringAliasTwo.of(Optional.of(StringAliasOne.of(""))))
+                .aliasOptional(OptionalAlias.of(Optional.of("")))
+                .aliasOptionalMap(OptionalMapAliasExample.of(Optional.of(ImmutableMap.of())))
+                .aliasMap(MapAliasExample.of(ImmutableMap.of()))
+                .build();
+        PrimitiveOptionalsExample recreated =
+                mapper.readValue(mapper.writeValueAsBytes(original), PrimitiveOptionalsExample.class);
+        assertThat(recreated).isEqualTo(original);
     }
 
     @Test

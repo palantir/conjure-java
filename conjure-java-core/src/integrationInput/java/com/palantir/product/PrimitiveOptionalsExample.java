@@ -13,11 +13,14 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -38,6 +41,24 @@ public final class PrimitiveOptionalsExample {
 
     private final Optional<UUID> uuid;
 
+    private final Optional<Map<String, String>> map;
+
+    private final Optional<List<String>> list;
+
+    private final Optional<Set<String>> set;
+
+    private final Optional<StringAliasOne> aliasOne;
+
+    private final StringAliasTwo aliasTwo;
+
+    private final Optional<ListAlias> aliasList;
+
+    private final Optional<MapAliasExample> aliasMap;
+
+    private final OptionalAlias aliasOptional;
+
+    private final OptionalMapAliasExample aliasOptionalMap;
+
     private int memoizedHashCode;
 
     private PrimitiveOptionalsExample(
@@ -47,8 +68,33 @@ public final class PrimitiveOptionalsExample {
             Optional<SafeLong> safelong,
             Optional<ResourceIdentifier> rid,
             Optional<BearerToken> bearertoken,
-            Optional<UUID> uuid) {
-        validateFields(num, bool, integer, safelong, rid, bearertoken, uuid);
+            Optional<UUID> uuid,
+            Optional<Map<String, String>> map,
+            Optional<List<String>> list,
+            Optional<Set<String>> set,
+            Optional<StringAliasOne> aliasOne,
+            StringAliasTwo aliasTwo,
+            Optional<ListAlias> aliasList,
+            Optional<MapAliasExample> aliasMap,
+            OptionalAlias aliasOptional,
+            OptionalMapAliasExample aliasOptionalMap) {
+        validateFields(
+                num,
+                bool,
+                integer,
+                safelong,
+                rid,
+                bearertoken,
+                uuid,
+                map,
+                list,
+                set,
+                aliasOne,
+                aliasTwo,
+                aliasList,
+                aliasMap,
+                aliasOptional,
+                aliasOptionalMap);
         this.num = num;
         this.bool = bool;
         this.integer = integer;
@@ -56,6 +102,15 @@ public final class PrimitiveOptionalsExample {
         this.rid = rid;
         this.bearertoken = bearertoken;
         this.uuid = uuid;
+        this.map = map;
+        this.list = list;
+        this.set = set;
+        this.aliasOne = aliasOne;
+        this.aliasTwo = aliasTwo;
+        this.aliasList = aliasList;
+        this.aliasMap = aliasMap;
+        this.aliasOptional = aliasOptional;
+        this.aliasOptionalMap = aliasOptionalMap;
     }
 
     @JsonProperty("num")
@@ -100,6 +155,60 @@ public final class PrimitiveOptionalsExample {
         return this.uuid;
     }
 
+    @JsonProperty("map")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    public Optional<Map<String, String>> getMap() {
+        return this.map;
+    }
+
+    @JsonProperty("list")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    public Optional<List<String>> getList() {
+        return this.list;
+    }
+
+    @JsonProperty("set")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    public Optional<Set<String>> getSet() {
+        return this.set;
+    }
+
+    @JsonProperty("aliasOne")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    public Optional<StringAliasOne> getAliasOne() {
+        return this.aliasOne;
+    }
+
+    @JsonProperty("aliasTwo")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public StringAliasTwo getAliasTwo() {
+        return this.aliasTwo;
+    }
+
+    @JsonProperty("aliasList")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    public Optional<ListAlias> getAliasList() {
+        return this.aliasList;
+    }
+
+    @JsonProperty("aliasMap")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    public Optional<MapAliasExample> getAliasMap() {
+        return this.aliasMap;
+    }
+
+    @JsonProperty("aliasOptional")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public OptionalAlias getAliasOptional() {
+        return this.aliasOptional;
+    }
+
+    @JsonProperty("aliasOptionalMap")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public OptionalMapAliasExample getAliasOptionalMap() {
+        return this.aliasOptionalMap;
+    }
+
     @Override
     public boolean equals(Object other) {
         return this == other
@@ -113,7 +222,16 @@ public final class PrimitiveOptionalsExample {
                 && this.safelong.equals(other.safelong)
                 && this.rid.equals(other.rid)
                 && this.bearertoken.equals(other.bearertoken)
-                && this.uuid.equals(other.uuid);
+                && this.uuid.equals(other.uuid)
+                && this.map.equals(other.map)
+                && this.list.equals(other.list)
+                && this.set.equals(other.set)
+                && this.aliasOne.equals(other.aliasOne)
+                && this.aliasTwo.equals(other.aliasTwo)
+                && this.aliasList.equals(other.aliasList)
+                && this.aliasMap.equals(other.aliasMap)
+                && this.aliasOptional.equals(other.aliasOptional)
+                && this.aliasOptionalMap.equals(other.aliasOptionalMap);
     }
 
     @Override
@@ -121,7 +239,22 @@ public final class PrimitiveOptionalsExample {
         int result = memoizedHashCode;
         if (result == 0) {
             result = Objects.hash(
-                    this.num, this.bool, this.integer, this.safelong, this.rid, this.bearertoken, this.uuid);
+                    this.num,
+                    this.bool,
+                    this.integer,
+                    this.safelong,
+                    this.rid,
+                    this.bearertoken,
+                    this.uuid,
+                    this.map,
+                    this.list,
+                    this.set,
+                    this.aliasOne,
+                    this.aliasTwo,
+                    this.aliasList,
+                    this.aliasMap,
+                    this.aliasOptional,
+                    this.aliasOptionalMap);
             memoizedHashCode = result;
         }
         return result;
@@ -130,7 +263,10 @@ public final class PrimitiveOptionalsExample {
     @Override
     public String toString() {
         return "PrimitiveOptionalsExample{num: " + num + ", bool: " + bool + ", integer: " + integer + ", safelong: "
-                + safelong + ", rid: " + rid + ", bearertoken: " + bearertoken + ", uuid: " + uuid + '}';
+                + safelong + ", rid: " + rid + ", bearertoken: " + bearertoken + ", uuid: " + uuid + ", map: " + map
+                + ", list: " + list + ", set: " + set + ", aliasOne: " + aliasOne + ", aliasTwo: " + aliasTwo
+                + ", aliasList: " + aliasList + ", aliasMap: " + aliasMap + ", aliasOptional: " + aliasOptional
+                + ", aliasOptionalMap: " + aliasOptionalMap + '}';
     }
 
     private static void validateFields(
@@ -140,7 +276,16 @@ public final class PrimitiveOptionalsExample {
             Optional<SafeLong> safelong,
             Optional<ResourceIdentifier> rid,
             Optional<BearerToken> bearertoken,
-            Optional<UUID> uuid) {
+            Optional<UUID> uuid,
+            Optional<Map<String, String>> map,
+            Optional<List<String>> list,
+            Optional<Set<String>> set,
+            Optional<StringAliasOne> aliasOne,
+            StringAliasTwo aliasTwo,
+            Optional<ListAlias> aliasList,
+            Optional<MapAliasExample> aliasMap,
+            OptionalAlias aliasOptional,
+            OptionalMapAliasExample aliasOptionalMap) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, num, "num");
         missingFields = addFieldIfMissing(missingFields, bool, "bool");
@@ -149,6 +294,15 @@ public final class PrimitiveOptionalsExample {
         missingFields = addFieldIfMissing(missingFields, rid, "rid");
         missingFields = addFieldIfMissing(missingFields, bearertoken, "bearertoken");
         missingFields = addFieldIfMissing(missingFields, uuid, "uuid");
+        missingFields = addFieldIfMissing(missingFields, map, "map");
+        missingFields = addFieldIfMissing(missingFields, list, "list");
+        missingFields = addFieldIfMissing(missingFields, set, "set");
+        missingFields = addFieldIfMissing(missingFields, aliasOne, "aliasOne");
+        missingFields = addFieldIfMissing(missingFields, aliasTwo, "aliasTwo");
+        missingFields = addFieldIfMissing(missingFields, aliasList, "aliasList");
+        missingFields = addFieldIfMissing(missingFields, aliasMap, "aliasMap");
+        missingFields = addFieldIfMissing(missingFields, aliasOptional, "aliasOptional");
+        missingFields = addFieldIfMissing(missingFields, aliasOptionalMap, "aliasOptionalMap");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -159,7 +313,7 @@ public final class PrimitiveOptionalsExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(7);
+                missingFields = new ArrayList<>(16);
             }
             missingFields.add(fieldName);
         }
@@ -186,6 +340,24 @@ public final class PrimitiveOptionalsExample {
 
         private Optional<UUID> uuid = Optional.empty();
 
+        private Optional<Map<String, String>> map = Optional.empty();
+
+        private Optional<List<String>> list = Optional.empty();
+
+        private Optional<Set<String>> set = Optional.empty();
+
+        private Optional<StringAliasOne> aliasOne = Optional.empty();
+
+        private StringAliasTwo aliasTwo;
+
+        private Optional<ListAlias> aliasList = Optional.empty();
+
+        private Optional<MapAliasExample> aliasMap = Optional.empty();
+
+        private OptionalAlias aliasOptional;
+
+        private OptionalMapAliasExample aliasOptionalMap;
+
         private Builder() {}
 
         public Builder from(PrimitiveOptionalsExample other) {
@@ -196,6 +368,15 @@ public final class PrimitiveOptionalsExample {
             rid(other.getRid());
             bearertoken(other.getBearertoken());
             uuid(other.getUuid());
+            map(other.getMap());
+            list(other.getList());
+            set(other.getSet());
+            aliasOne(other.getAliasOne());
+            aliasTwo(other.getAliasTwo());
+            aliasList(other.getAliasList());
+            aliasMap(other.getAliasMap());
+            aliasOptional(other.getAliasOptional());
+            aliasOptionalMap(other.getAliasOptionalMap());
             return this;
         }
 
@@ -276,8 +457,108 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
+        @JsonSetter(value = "map", nulls = Nulls.SKIP)
+        public Builder map(@Nonnull Optional<? extends Map<String, String>> map) {
+            this.map = Preconditions.checkNotNull(map, "map cannot be null").map(Function.identity());
+            return this;
+        }
+
+        public Builder map(@Nonnull Map<String, String> map) {
+            this.map = Optional.of(Preconditions.checkNotNull(map, "map cannot be null"));
+            return this;
+        }
+
+        @JsonSetter(value = "list", nulls = Nulls.SKIP)
+        public Builder list(@Nonnull Optional<? extends List<String>> list) {
+            this.list = Preconditions.checkNotNull(list, "list cannot be null").map(Function.identity());
+            return this;
+        }
+
+        public Builder list(@Nonnull List<String> list) {
+            this.list = Optional.of(Preconditions.checkNotNull(list, "list cannot be null"));
+            return this;
+        }
+
+        @JsonSetter(value = "set", nulls = Nulls.SKIP)
+        public Builder set(@Nonnull Optional<? extends Set<String>> set) {
+            this.set = Preconditions.checkNotNull(set, "set cannot be null").map(Function.identity());
+            return this;
+        }
+
+        public Builder set(@Nonnull Set<String> set) {
+            this.set = Optional.of(Preconditions.checkNotNull(set, "set cannot be null"));
+            return this;
+        }
+
+        @JsonSetter(value = "aliasOne", nulls = Nulls.SKIP)
+        public Builder aliasOne(@Nonnull Optional<StringAliasOne> aliasOne) {
+            this.aliasOne = Preconditions.checkNotNull(aliasOne, "aliasOne cannot be null");
+            return this;
+        }
+
+        public Builder aliasOne(@Nonnull StringAliasOne aliasOne) {
+            this.aliasOne = Optional.of(Preconditions.checkNotNull(aliasOne, "aliasOne cannot be null"));
+            return this;
+        }
+
+        @JsonSetter(value = "aliasTwo", nulls = Nulls.AS_EMPTY)
+        public Builder aliasTwo(@Nonnull StringAliasTwo aliasTwo) {
+            this.aliasTwo = Preconditions.checkNotNull(aliasTwo, "aliasTwo cannot be null");
+            return this;
+        }
+
+        @JsonSetter(value = "aliasList", nulls = Nulls.SKIP)
+        public Builder aliasList(@Nonnull Optional<ListAlias> aliasList) {
+            this.aliasList = Preconditions.checkNotNull(aliasList, "aliasList cannot be null");
+            return this;
+        }
+
+        public Builder aliasList(@Nonnull ListAlias aliasList) {
+            this.aliasList = Optional.of(Preconditions.checkNotNull(aliasList, "aliasList cannot be null"));
+            return this;
+        }
+
+        @JsonSetter(value = "aliasMap", nulls = Nulls.SKIP)
+        public Builder aliasMap(@Nonnull Optional<MapAliasExample> aliasMap) {
+            this.aliasMap = Preconditions.checkNotNull(aliasMap, "aliasMap cannot be null");
+            return this;
+        }
+
+        public Builder aliasMap(@Nonnull MapAliasExample aliasMap) {
+            this.aliasMap = Optional.of(Preconditions.checkNotNull(aliasMap, "aliasMap cannot be null"));
+            return this;
+        }
+
+        @JsonSetter(value = "aliasOptional", nulls = Nulls.AS_EMPTY)
+        public Builder aliasOptional(@Nonnull OptionalAlias aliasOptional) {
+            this.aliasOptional = Preconditions.checkNotNull(aliasOptional, "aliasOptional cannot be null");
+            return this;
+        }
+
+        @JsonSetter(value = "aliasOptionalMap", nulls = Nulls.AS_EMPTY)
+        public Builder aliasOptionalMap(@Nonnull OptionalMapAliasExample aliasOptionalMap) {
+            this.aliasOptionalMap = Preconditions.checkNotNull(aliasOptionalMap, "aliasOptionalMap cannot be null");
+            return this;
+        }
+
         public PrimitiveOptionalsExample build() {
-            return new PrimitiveOptionalsExample(num, bool, integer, safelong, rid, bearertoken, uuid);
+            return new PrimitiveOptionalsExample(
+                    num,
+                    bool,
+                    integer,
+                    safelong,
+                    rid,
+                    bearertoken,
+                    uuid,
+                    map,
+                    list,
+                    set,
+                    aliasOne,
+                    aliasTwo,
+                    aliasList,
+                    aliasMap,
+                    aliasOptional,
+                    aliasOptionalMap);
         }
     }
 }
