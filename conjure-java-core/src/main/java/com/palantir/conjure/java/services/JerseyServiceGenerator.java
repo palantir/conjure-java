@@ -118,7 +118,8 @@ public final class JerseyServiceGenerator implements Generator {
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
                         .addMember("value", "$S", "/")
                         .build())
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JerseyServiceGenerator.class));
+                .addAnnotations(
+                        ConjureAnnotations.getServiceAnnotations(serviceDefinition, JerseyServiceGenerator.class));
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -148,7 +149,6 @@ public final class JerseyServiceGenerator implements Generator {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(
                         httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef))
                 .addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, true))
                 .returns(returnType);
 
@@ -184,6 +184,8 @@ public final class JerseyServiceGenerator implements Generator {
                 .getDeprecated()
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
+
+        methodBuilder.addAnnotations(ConjureAnnotations.getEndpointAnnotations(endpointDef));
 
         ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
@@ -229,7 +231,7 @@ public final class JerseyServiceGenerator implements Generator {
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef))
+                .addAnnotations(ConjureAnnotations.getEndpointAnnotations(endpointDef))
                 .addParameters(IntStream.range(0, sortedParams.size())
                         .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
                         .mapToObj(sortedParams::get)

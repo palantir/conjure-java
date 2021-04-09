@@ -1,6 +1,8 @@
 package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.ConjureEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureService;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -12,17 +14,16 @@ import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
-import java.lang.Boolean;
-import java.lang.Override;
-import java.lang.String;
 import javax.annotation.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EmptyPathServiceAsync.Factory.class)
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@ConjureService(name = "EmptyPathService", package_ = "com.palantir.product")
 public interface EmptyPathServiceAsync {
     /**
      * @apiNote {@code GET /}
      */
+    @ConjureEndpoint(path = "/", method = "GET")
     ListenableFuture<Boolean> emptyPath();
 
     /**

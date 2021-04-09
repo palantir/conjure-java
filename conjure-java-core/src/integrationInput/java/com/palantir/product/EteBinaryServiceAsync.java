@@ -1,6 +1,8 @@
 package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.ConjureEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureService;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -13,43 +15,48 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
-import java.lang.Override;
-import java.lang.String;
 import java.util.Optional;
 import javax.annotation.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EteBinaryServiceAsync.Factory.class)
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@ConjureService(name = "EteBinaryService", package_ = "com.palantir.product")
 public interface EteBinaryServiceAsync {
     /**
      * @apiNote {@code POST /binary}
      */
+    @ConjureEndpoint(path = "/binary", method = "POST")
     ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     /**
      * @apiNote {@code POST /binary/throws}
      */
+    @ConjureEndpoint(path = "/binary/throws", method = "POST")
     ListenableFuture<InputStream> postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body);
 
     /**
      * @apiNote {@code GET /binary/optional/present}
      */
+    @ConjureEndpoint(path = "/binary/optional/present", method = "GET")
     ListenableFuture<Optional<InputStream>> getOptionalBinaryPresent(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /binary/optional/empty}
      */
+    @ConjureEndpoint(path = "/binary/optional/empty", method = "GET")
     ListenableFuture<Optional<InputStream>> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /**
      * Throws an exception after partially writing a binary response.
      * @apiNote {@code GET /binary/failure}
      */
+    @ConjureEndpoint(path = "/binary/failure", method = "GET")
     ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes);
 
     /**
      * @apiNote {@code GET /binary/aliased}
      */
+    @ConjureEndpoint(path = "/binary/aliased", method = "GET")
     ListenableFuture<Optional<InputStream>> getAliased(AuthHeader authHeader);
 
     /**

@@ -1,12 +1,16 @@
 package test.api;
 
+import com.palantir.conjure.java.lib.internal.ConjureEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureService;
 import com.palantir.tokens.auth.BearerToken;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureService(name = "CookieService", package_ = "test.api")
 public interface CookieService {
     /**
      * @apiNote {@code GET /cookies}
      */
+    @ConjureEndpoint(path = "/cookies", method = "GET")
     void eatCookies(BearerToken cookieToken);
 }

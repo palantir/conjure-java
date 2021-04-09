@@ -1,22 +1,28 @@
 package test.api;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.ConjureEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureService;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+@ConjureService(name = "AsyncMarkers", package_ = "test.api")
 public interface AsyncMarkers {
     /**
      * @apiNote {@code GET /async/marker}
      */
+    @ConjureEndpoint(path = "/async/marker", method = "GET")
     String asyncMarker();
 
     /**
      * @apiNote {@code GET /async/tag}
      */
+    @ConjureEndpoint(path = "/async/tag", method = "GET")
     ListenableFuture<String> asyncTag();
 
     /**
      * @apiNote {@code GET /sync}
      */
+    @ConjureEndpoint(path = "/sync", method = "GET")
     String sync();
 }

@@ -58,8 +58,8 @@ final class UndertowServiceInterfaceGenerator {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder((options.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(
-                        ConjureAnnotations.getConjureGeneratedAnnotation(UndertowServiceInterfaceGenerator.class));
+                .addAnnotations(ConjureAnnotations.getServiceAnnotations(
+                        serviceDefinition, UndertowServiceInterfaceGenerator.class));
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -83,7 +83,7 @@ final class UndertowServiceInterfaceGenerator {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(createServiceMethodParameters(endpointDef, typeMapper))
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
+                .addAnnotations(ConjureAnnotations.getEndpointAnnotations(endpointDef));
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
 

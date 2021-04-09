@@ -79,10 +79,10 @@ public final class DialogueInterfaceGenerator {
             StaticFactoryMethodGenerator methodGenerator) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class))
                 .addAnnotation(AnnotationSpec.builder(DialogueService.class)
                         .addMember("value", "$T.Factory.class", className)
-                        .build());
+                        .build())
+                .addAnnotations(ConjureAnnotations.getServiceAnnotations(def, DialogueInterfaceGenerator.class));
 
         serviceBuilder.addType(TypeSpec.classBuilder("Factory")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
@@ -153,7 +153,7 @@ public final class DialogueInterfaceGenerator {
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(parameterTypes.interfaceMethodParams(endpointDef))
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
+                .addAnnotations(ConjureAnnotations.getEndpointAnnotations(endpointDef));
         endpointDef.getMarkers().stream()
                 .filter(marker -> !marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE))
                 .map(marker -> {

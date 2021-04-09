@@ -18,9 +18,13 @@ package com.palantir.conjure.java;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.lib.internal.ConjureEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureService;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.ServiceDefinition;
+import com.palantir.conjure.spec.TypeName;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import java.util.Optional;
@@ -29,14 +33,30 @@ public final class ConjureAnnotations {
 
     private static final ImmutableList<AnnotationSpec> DEPRECATED =
             ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build());
-    private static final ImmutableList<AnnotationSpec> INCUBATING =
-            ImmutableList.of(AnnotationSpec.builder(Incubating.class).build());
+    private static final AnnotationSpec INCUBATING =
+            AnnotationSpec.builder(Incubating.class).build();
     private static final AnnotationSpec DELEGATING_JSON_CREATOR = AnnotationSpec.builder(JsonCreator.class)
             .addMember("mode", "$T.DELEGATING", JsonCreator.Mode.class)
             .build();
     private static final AnnotationSpec PROPERTIES_JSON_CREATOR = AnnotationSpec.builder(JsonCreator.class)
             .addMember("mode", "$T.PROPERTIES", JsonCreator.Mode.class)
             .build();
+
+    public static ImmutableList<AnnotationSpec> getServiceAnnotations(
+            ServiceDefinition definition, Class<?> generatorClass) {
+        ImmutableList.Builder<AnnotationSpec> result = ImmutableList.builder();
+        result.add(getConjureGeneratedAnnotation(generatorClass));
+        result.add(service(definition));
+        return result.build();
+    }
+
+    private static AnnotationSpec service(ServiceDefinition definition) {
+        TypeName serviceName = definition.getServiceName();
+        return AnnotationSpec.builder(ConjureService.class)
+                .addMember("name", "$S", serviceName.getName())
+                .addMember("package_", "$S", serviceName.getPackage())
+                .build();
+    }
 
     public static AnnotationSpec getConjureGeneratedAnnotation(Class<?> clazz) {
         return AnnotationSpec.builder(ClassName.get("javax.annotation", "Generated"))
@@ -48,11 +68,20 @@ public final class ConjureAnnotations {
         return deprecation.isPresent() ? DEPRECATED : ImmutableList.of();
     }
 
-    public static ImmutableList<AnnotationSpec> incubating(EndpointDefinition definition) {
+    public static ImmutableList<AnnotationSpec> getEndpointAnnotations(EndpointDefinition definition) {
+        ImmutableList.Builder<AnnotationSpec> result = ImmutableList.builder();
         if (definition.getTags().contains("incubating")) {
-            return INCUBATING;
+            result.add(INCUBATING);
         }
-        return ImmutableList.of();
+        result.add(endpoint(definition));
+        return result.build();
+    }
+
+    private static AnnotationSpec endpoint(EndpointDefinition definition) {
+        return AnnotationSpec.builder(ConjureEndpoint.class)
+                .addMember("path", "$S", definition.getHttpPath().get())
+                .addMember("method", "$S", definition.getHttpMethod().get())
+                .build();
     }
 
     public static AnnotationSpec delegatingJsonCreator() {

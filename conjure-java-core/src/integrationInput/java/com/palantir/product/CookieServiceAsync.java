@@ -1,6 +1,8 @@
 package test.api;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.ConjureEndpoint;
+import com.palantir.conjure.java.lib.internal.ConjureService;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -12,17 +14,16 @@ import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.BearerToken;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.Void;
 import javax.annotation.Generated;
 
-@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(CookieServiceAsync.Factory.class)
+@Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
+@ConjureService(name = "CookieService", package_ = "test.api")
 public interface CookieServiceAsync {
     /**
      * @apiNote {@code GET /cookies}
      */
+    @ConjureEndpoint(path = "/cookies", method = "GET")
     ListenableFuture<Void> eatCookies(BearerToken token);
 
     /**
