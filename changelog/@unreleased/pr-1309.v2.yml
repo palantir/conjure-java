@@ -1,5 +1,5 @@
 type: improvement
 improvement:
-  description: The Inherited annotation uses runtime retention rather than class.
+  description: The Incubating annotation uses runtime retention rather than class.
   links:
   - https://github.com/palantir/conjure-java/pull/1309
