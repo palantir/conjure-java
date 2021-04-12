@@ -1,7 +1,7 @@
 package test.prefix.com.palantir.another;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -38,7 +38,7 @@ public interface TestServiceRetrofit {
     @GET("./catalog/fileSystems")
     @Headers({"hr-path-template: /catalog/fileSystems", "Accept: application/json"})
     @Incubating
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/fileSystems")
+    @ClientEndpoint(method = "GET", path = "/catalog/fileSystems")
     ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(@Header("Authorization") AuthHeader authHeader);
 
     /**
@@ -46,7 +46,7 @@ public interface TestServiceRetrofit {
      */
     @POST("./catalog/datasets")
     @Headers({"hr-path-template: /catalog/datasets", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/datasets")
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets")
     ListenableFuture<Dataset> createDataset(
             @Header("Authorization") AuthHeader authHeader,
             @Header("Test-Header") String testHeaderArg,
@@ -54,45 +54,45 @@ public interface TestServiceRetrofit {
 
     @GET("./catalog/datasets/{datasetRid}")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
     ListenableFuture<Optional<Dataset>> getDataset(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/raw")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/raw", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
     ListenableFuture<ResponseBody> getRawData(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/raw-aliased")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/raw-aliased", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
     ListenableFuture<ResponseBody> getAliasedRawData(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/raw-maybe")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/raw-maybe", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
     ListenableFuture<Optional<ResponseBody>> maybeGetRawData(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/string-aliased")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/string-aliased", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/string-aliased")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/string-aliased")
     ListenableFuture<AliasedString> getAliasedString(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @POST("./catalog/datasets/upload-raw")
     @Headers({"hr-path-template: /catalog/datasets/upload-raw", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
     ListenableFuture<Void> uploadRawData(@Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
 
     @POST("./catalog/datasets/upload-raw-aliased")
     @Headers({"hr-path-template: /catalog/datasets/upload-raw-aliased", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw-aliased")
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw-aliased")
     ListenableFuture<Void> uploadAliasedRawData(
             @Header("Authorization") AuthHeader authHeader, @Body RequestBody input);
 
@@ -101,7 +101,7 @@ public interface TestServiceRetrofit {
      */
     @GET("./catalog/datasets/{datasetRid}/branches")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/branches", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
     ListenableFuture<Set<String>> getBranches(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid);
 
@@ -113,13 +113,13 @@ public interface TestServiceRetrofit {
     @GET("./catalog/datasets/{datasetRid}/branchesDeprecated")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/branchesDeprecated", "Accept: application/json"})
     @Deprecated
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecated")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecated")
     ListenableFuture<Set<String>> getBranchesDeprecated(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @GET("./catalog/datasets/{datasetRid}/branches/{branch}/resolve")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/branches/{branch}/resolve", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
     ListenableFuture<Optional<String>> resolveBranch(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
@@ -127,13 +127,13 @@ public interface TestServiceRetrofit {
 
     @GET("./catalog/datasets/{datasetRid}/testParam")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/testParam", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
     ListenableFuture<Optional<String>> testParam(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid);
 
     @POST("./catalog/test-query-params")
     @Headers({"hr-path-template: /catalog/test-query-params", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     ListenableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
@@ -145,7 +145,7 @@ public interface TestServiceRetrofit {
 
     @POST("./catalog/test-no-response-query-params")
     @Headers({"hr-path-template: /catalog/test-no-response-query-params", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     ListenableFuture<Void> testNoResponseQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
@@ -157,28 +157,28 @@ public interface TestServiceRetrofit {
 
     @GET("./catalog/boolean")
     @Headers({"hr-path-template: /catalog/boolean", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/boolean")
+    @ClientEndpoint(method = "GET", path = "/catalog/boolean")
     ListenableFuture<Boolean> testBoolean(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./catalog/double")
     @Headers({"hr-path-template: /catalog/double", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/double")
+    @ClientEndpoint(method = "GET", path = "/catalog/double")
     ListenableFuture<Double> testDouble(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./catalog/integer")
     @Headers({"hr-path-template: /catalog/integer", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/integer")
+    @ClientEndpoint(method = "GET", path = "/catalog/integer")
     ListenableFuture<Integer> testInteger(@Header("Authorization") AuthHeader authHeader);
 
     @POST("./catalog/optional")
     @Headers({"hr-path-template: /catalog/optional", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/optional")
+    @ClientEndpoint(method = "POST", path = "/catalog/optional")
     ListenableFuture<Optional<String>> testPostOptional(
             @Header("Authorization") AuthHeader authHeader, @Body Optional<String> maybeString);
 
     @GET("./catalog/optional-integer-double")
     @Headers({"hr-path-template: /catalog/optional-integer-double", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
     ListenableFuture<Void> testOptionalIntegerAndDouble(
             @Header("Authorization") AuthHeader authHeader,
             @Query("maybeInteger") OptionalInt maybeInteger,
@@ -186,14 +186,14 @@ public interface TestServiceRetrofit {
 
     @GET("./catalog/datasets/{datasetRid}/strings")
     @Headers({"hr-path-template: /catalog/datasets/{datasetRid}/strings", "Accept: application/json"})
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
     ListenableFuture<Void> getForStrings(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
             @Query("strings") Set<AliasedString> strings);
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default ListenableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
@@ -204,7 +204,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default ListenableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
@@ -216,7 +216,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default ListenableFuture<Integer> testQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
@@ -228,7 +228,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     default void testNoResponseQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
@@ -239,7 +239,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     default void testNoResponseQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
@@ -251,7 +251,7 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     default void testNoResponseQueryParams(
             @Header("Authorization") AuthHeader authHeader,
             @Query("different") ResourceIdentifier something,
@@ -263,20 +263,20 @@ public interface TestServiceRetrofit {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
     default void testOptionalIntegerAndDouble(@Header("Authorization") AuthHeader authHeader) {
         testOptionalIntegerAndDouble(authHeader, OptionalInt.empty(), OptionalDouble.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
     default void testOptionalIntegerAndDouble(
             @Header("Authorization") AuthHeader authHeader, @Query("maybeInteger") OptionalInt maybeInteger) {
         testOptionalIntegerAndDouble(authHeader, maybeInteger, OptionalDouble.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
     default void getForStrings(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid) {
         getForStrings(authHeader, datasetRid, Collections.emptySet());

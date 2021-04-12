@@ -1,6 +1,6 @@
 package test.prefix.com.palantir.another;
 
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.logsafe.Safe;
 import com.palantir.ri.ResourceIdentifier;
@@ -43,7 +43,7 @@ public interface TestService {
     @GET
     @Path("catalog/fileSystems")
     @Incubating
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/fileSystems")
+    @ClientEndpoint(method = "GET", path = "/catalog/fileSystems")
     Map<String, BackingFileSystem> getFileSystems(@HeaderParam("Authorization") AuthHeader authHeader);
 
     /**
@@ -51,7 +51,7 @@ public interface TestService {
      */
     @POST
     @Path("catalog/datasets")
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/datasets")
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets")
     Dataset createDataset(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @HeaderParam("Test-Header") @Safe String testHeaderArg,
@@ -59,7 +59,7 @@ public interface TestService {
 
     @GET
     @Path("catalog/datasets/{datasetRid}")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
     Optional<Dataset> getDataset(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
@@ -67,7 +67,7 @@ public interface TestService {
     @GET
     @Path("catalog/datasets/{datasetRid}/raw")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
     StreamingOutput getRawData(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
@@ -75,7 +75,7 @@ public interface TestService {
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-aliased")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
     StreamingOutput getAliasedRawData(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
@@ -83,14 +83,14 @@ public interface TestService {
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-maybe")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
     Optional<StreamingOutput> maybeGetRawData(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe @Nonnull ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/string-aliased")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/string-aliased")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/string-aliased")
     AliasedString getAliasedString(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
@@ -98,13 +98,13 @@ public interface TestService {
     @POST
     @Path("catalog/datasets/upload-raw")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
     void uploadRawData(@HeaderParam("Authorization") AuthHeader authHeader, @Safe InputStream input);
 
     @POST
     @Path("catalog/datasets/upload-raw-aliased")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw-aliased")
+    @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw-aliased")
     void uploadAliasedRawData(@HeaderParam("Authorization") AuthHeader authHeader, InputStream input);
 
     /**
@@ -112,7 +112,7 @@ public interface TestService {
      */
     @GET
     @Path("catalog/datasets/{datasetRid}/branches")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
     Set<String> getBranches(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
@@ -125,14 +125,14 @@ public interface TestService {
     @GET
     @Path("catalog/datasets/{datasetRid}/branchesDeprecated")
     @Deprecated
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecated")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecated")
     Set<String> getBranchesDeprecated(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
     Optional<String> resolveBranch(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid,
@@ -140,14 +140,14 @@ public interface TestService {
 
     @GET
     @Path("catalog/datasets/{datasetRid}/testParam")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
     Optional<String> testParam(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
 
     @POST
     @Path("catalog/test-query-params")
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     int testQueryParams(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @QueryParam("different") @Safe ResourceIdentifier something,
@@ -159,7 +159,7 @@ public interface TestService {
 
     @POST
     @Path("catalog/test-no-response-query-params")
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     void testNoResponseQueryParams(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @QueryParam("different") ResourceIdentifier something,
@@ -171,28 +171,28 @@ public interface TestService {
 
     @GET
     @Path("catalog/boolean")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/boolean")
+    @ClientEndpoint(method = "GET", path = "/catalog/boolean")
     boolean testBoolean(@HeaderParam("Authorization") AuthHeader authHeader);
 
     @GET
     @Path("catalog/double")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/double")
+    @ClientEndpoint(method = "GET", path = "/catalog/double")
     double testDouble(@HeaderParam("Authorization") AuthHeader authHeader);
 
     @GET
     @Path("catalog/integer")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/integer")
+    @ClientEndpoint(method = "GET", path = "/catalog/integer")
     int testInteger(@HeaderParam("Authorization") AuthHeader authHeader);
 
     @POST
     @Path("catalog/optional")
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/optional")
+    @ClientEndpoint(method = "POST", path = "/catalog/optional")
     Optional<String> testPostOptional(
             @HeaderParam("Authorization") AuthHeader authHeader, Optional<String> maybeString);
 
     @GET
     @Path("catalog/optional-integer-double")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
     void testOptionalIntegerAndDouble(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @QueryParam("maybeInteger") OptionalInt maybeInteger,
@@ -200,14 +200,14 @@ public interface TestService {
 
     @GET
     @Path("catalog/datasets/{datasetRid}/strings")
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
     void getForStrings(
             @HeaderParam("Authorization") AuthHeader authHeader,
             @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid,
             @QueryParam("strings") Set<AliasedString> strings);
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default int testQueryParams(
             AuthHeader authHeader, ResourceIdentifier something, ResourceIdentifier implicit, String query) {
         return testQueryParams(
@@ -215,7 +215,7 @@ public interface TestService {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default int testQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -227,7 +227,7 @@ public interface TestService {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default int testQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -239,7 +239,7 @@ public interface TestService {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     default void testNoResponseQueryParams(
             AuthHeader authHeader, ResourceIdentifier something, ResourceIdentifier implicit, String query) {
         testNoResponseQueryParams(
@@ -247,7 +247,7 @@ public interface TestService {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     default void testNoResponseQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -259,7 +259,7 @@ public interface TestService {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
+    @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     default void testNoResponseQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -271,19 +271,19 @@ public interface TestService {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
     default void testOptionalIntegerAndDouble(AuthHeader authHeader) {
         testOptionalIntegerAndDouble(authHeader, OptionalInt.empty(), OptionalDouble.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
+    @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
     default void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger) {
         testOptionalIntegerAndDouble(authHeader, maybeInteger, OptionalDouble.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
     default void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid) {
         getForStrings(authHeader, datasetRid, Collections.emptySet());
     }
