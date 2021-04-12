@@ -79,10 +79,10 @@ public final class DialogueInterfaceGenerator {
             StaticFactoryMethodGenerator methodGenerator) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(DialogueInterfaceGenerator.class))
                 .addAnnotation(AnnotationSpec.builder(DialogueService.class)
                         .addMember("value", "$T.Factory.class", className)
-                        .build())
-                .addAnnotations(ConjureAnnotations.getClientServiceAnnotations(def, DialogueInterfaceGenerator.class));
+                        .build());
 
         serviceBuilder.addType(TypeSpec.classBuilder("Factory")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)

@@ -1,7 +1,6 @@
 package test.prefix.com.palantir.another;
 
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.logsafe.Safe;
 import com.palantir.ri.ResourceIdentifier;
@@ -37,7 +36,6 @@ import test.prefix.com.palantir.product.datasets.Dataset;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
-@ConjureClientService(name = "TestService", package_ = "com.palantir.another")
 public interface TestService {
     /**
      * Returns a mapping from file system id to backing file system configuration.

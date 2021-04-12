@@ -3,7 +3,6 @@ package com.palantir.product;
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -34,9 +33,8 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Generated;
 
-@DialogueService(EteServiceBlocking.Factory.class)
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-@ConjureClientService(name = "EteService", package_ = "com.palantir.product")
+@DialogueService(EteServiceBlocking.Factory.class)
 public interface EteServiceBlocking {
     /**
      * foo bar baz.

@@ -2,7 +2,6 @@ package com.palantir.product;
 
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -29,7 +28,6 @@ import javax.ws.rs.core.StreamingOutput;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
-@ConjureClientService(name = "EteService", package_ = "com.palantir.product")
 public interface EteService {
     /**
      * foo bar baz.

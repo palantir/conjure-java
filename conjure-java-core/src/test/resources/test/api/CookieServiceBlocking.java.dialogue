@@ -1,7 +1,6 @@
 package test.api;
 
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -18,9 +17,8 @@ import java.lang.String;
 import java.lang.Void;
 import javax.annotation.Generated;
 
-@DialogueService(CookieServiceBlocking.Factory.class)
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-@ConjureClientService(name = "CookieService", package_ = "test.api")
+@DialogueService(CookieServiceBlocking.Factory.class)
 public interface CookieServiceBlocking {
     /**
      * @apiNote {@code GET /cookies}

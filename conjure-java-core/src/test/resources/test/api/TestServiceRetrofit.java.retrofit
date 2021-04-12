@@ -2,7 +2,6 @@ package com.palantir.another;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.product.AliasedString;
 import com.palantir.product.CreateDatasetRequest;
@@ -32,7 +31,6 @@ import retrofit2.http.Streaming;
  * A Markdown description of the service.
  */
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
-@ConjureClientService(name = "TestService", package_ = "com.palantir.another")
 public interface TestServiceRetrofit {
     /**
      * Returns a mapping from file system id to backing file system configuration.

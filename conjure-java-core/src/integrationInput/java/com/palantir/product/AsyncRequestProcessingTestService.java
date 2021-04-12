@@ -1,7 +1,6 @@
 package com.palantir.product;
 
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import java.util.Optional;
 import java.util.OptionalInt;
 import javax.annotation.Generated;
@@ -17,7 +16,6 @@ import javax.ws.rs.core.StreamingOutput;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
-@ConjureClientService(name = "AsyncRequestProcessingTestService", package_ = "com.palantir.product")
 public interface AsyncRequestProcessingTestService {
     @GET
     @Path("async/delay")

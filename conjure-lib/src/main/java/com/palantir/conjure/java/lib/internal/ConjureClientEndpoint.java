@@ -30,6 +30,4 @@ public @interface ConjureClientEndpoint {
     String method();
 
     String path();
-
-    String name();
-}
+    }
