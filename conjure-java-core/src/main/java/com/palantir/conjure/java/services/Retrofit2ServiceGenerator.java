@@ -108,8 +108,8 @@ public final class Retrofit2ServiceGenerator implements Generator {
             ServiceDefinition serviceDefinition, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotations(
-                        ConjureAnnotations.getClientServiceAnnotations(serviceDefinition, Retrofit2ServiceGenerator.class));
+                .addAnnotations(ConjureAnnotations.getClientServiceAnnotations(
+                        serviceDefinition, Retrofit2ServiceGenerator.class));
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 

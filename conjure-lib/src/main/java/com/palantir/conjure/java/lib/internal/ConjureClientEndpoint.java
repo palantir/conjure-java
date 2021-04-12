@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Signifies that the given method corresponds to a conjure endpoint with the given http path and method.
+ * Signifies that the given method corresponds to a endpoint invoked by a conjure client.
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
@@ -30,4 +30,6 @@ public @interface ConjureClientEndpoint {
     String method();
 
     String path();
+
+    String name();
 }

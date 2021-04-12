@@ -35,8 +35,7 @@ public final class ConjureAnnotations {
             ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build());
     private static final AnnotationSpec INCUBATING_SPEC =
             AnnotationSpec.builder(Incubating.class).build();
-    private static final ImmutableList<AnnotationSpec> INCUBATING =
-            ImmutableList.of(INCUBATING_SPEC);
+    private static final ImmutableList<AnnotationSpec> INCUBATING = ImmutableList.of(INCUBATING_SPEC);
     private static final AnnotationSpec DELEGATING_JSON_CREATOR = AnnotationSpec.builder(JsonCreator.class)
             .addMember("mode", "$T.DELEGATING", JsonCreator.Mode.class)
             .build();
