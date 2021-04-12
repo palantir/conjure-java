@@ -2,7 +2,6 @@ package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -20,9 +19,8 @@ import java.lang.String;
 import java.util.Optional;
 import javax.annotation.Generated;
 
-@DialogueService(EteBinaryServiceAsync.Factory.class)
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-@ConjureClientService(name = "EteBinaryService", package_ = "com.palantir.product")
+@DialogueService(EteBinaryServiceAsync.Factory.class)
 public interface EteBinaryServiceAsync {
     /**
      * @apiNote {@code POST /binary}

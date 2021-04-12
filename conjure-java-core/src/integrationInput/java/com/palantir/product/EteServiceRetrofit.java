@@ -3,7 +3,6 @@ package com.palantir.product;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -25,7 +24,6 @@ import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
-@ConjureClientService(name = "EteService", package_ = "com.palantir.product")
 public interface EteServiceRetrofit {
     /**
      * foo bar baz.

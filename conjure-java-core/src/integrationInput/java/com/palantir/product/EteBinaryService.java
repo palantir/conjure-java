@@ -1,7 +1,6 @@
 package com.palantir.product;
 
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.util.Optional;
@@ -21,7 +20,6 @@ import javax.ws.rs.core.StreamingOutput;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
-@ConjureClientService(name = "EteBinaryService", package_ = "com.palantir.product")
 public interface EteBinaryService {
     @POST
     @Path("binary")

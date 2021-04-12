@@ -2,7 +2,6 @@ package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.tokens.auth.AuthHeader;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -17,7 +16,6 @@ import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 
 @Generated("com.palantir.conjure.java.services.Retrofit2ServiceGenerator")
-@ConjureClientService(name = "EteBinaryService", package_ = "com.palantir.product")
 public interface EteBinaryServiceRetrofit {
     @POST("./binary")
     @Headers({"hr-path-template: /binary", "Accept: application/octet-stream"})

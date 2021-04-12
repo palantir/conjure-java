@@ -19,12 +19,9 @@ package com.palantir.conjure.java;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
-import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.conjure.spec.TypeName;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import java.util.Optional;
@@ -42,22 +39,6 @@ public final class ConjureAnnotations {
     private static final AnnotationSpec PROPERTIES_JSON_CREATOR = AnnotationSpec.builder(JsonCreator.class)
             .addMember("mode", "$T.PROPERTIES", JsonCreator.Mode.class)
             .build();
-
-    public static ImmutableList<AnnotationSpec> getClientServiceAnnotations(
-            ServiceDefinition definition, Class<?> generatorClass) {
-        ImmutableList.Builder<AnnotationSpec> result = ImmutableList.builder();
-        result.add(getConjureGeneratedAnnotation(generatorClass));
-        result.add(clientService(definition));
-        return result.build();
-    }
-
-    private static AnnotationSpec clientService(ServiceDefinition definition) {
-        TypeName serviceName = definition.getServiceName();
-        return AnnotationSpec.builder(ConjureClientService.class)
-                .addMember("name", "$S", serviceName.getName())
-                .addMember("package_", "$S", serviceName.getPackage())
-                .build();
-    }
 
     public static AnnotationSpec getConjureGeneratedAnnotation(Class<?> clazz) {
         return AnnotationSpec.builder(ClassName.get("javax.annotation", "Generated"))

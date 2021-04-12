@@ -118,8 +118,7 @@ public final class JerseyServiceGenerator implements Generator {
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
                         .addMember("value", "$S", "/")
                         .build())
-                .addAnnotations(ConjureAnnotations.getClientServiceAnnotations(
-                        serviceDefinition, JerseyServiceGenerator.class));
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JerseyServiceGenerator.class));
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 

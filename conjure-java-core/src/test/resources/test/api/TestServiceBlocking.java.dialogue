@@ -2,7 +2,6 @@ package com.palantir.another;
 
 import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
@@ -44,9 +43,8 @@ import javax.annotation.Nonnull;
 /**
  * A Markdown description of the service.
  */
-@DialogueService(TestServiceBlocking.Factory.class)
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-@ConjureClientService(name = "TestService", package_ = "com.palantir.another")
+@DialogueService(TestServiceBlocking.Factory.class)
 public interface TestServiceBlocking {
     /**
      * Returns a mapping from file system id to backing file system configuration.

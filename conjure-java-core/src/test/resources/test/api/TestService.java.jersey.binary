@@ -1,7 +1,6 @@
 package test.api;
 
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import javax.annotation.Generated;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -14,7 +13,6 @@ import javax.ws.rs.core.StreamingOutput;
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
-@ConjureClientService(name = "TestService", package_ = "test.api")
 public interface TestService {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)

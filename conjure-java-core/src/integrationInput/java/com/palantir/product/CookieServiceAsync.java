@@ -2,7 +2,6 @@ package test.api;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureClientService;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -19,9 +18,8 @@ import java.lang.String;
 import java.lang.Void;
 import javax.annotation.Generated;
 
-@DialogueService(CookieServiceAsync.Factory.class)
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
-@ConjureClientService(name = "CookieService", package_ = "test.api")
+@DialogueService(CookieServiceAsync.Factory.class)
 public interface CookieServiceAsync {
     /**
      * @apiNote {@code GET /cookies}
