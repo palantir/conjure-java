@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *   returns: map<string, BackingFileSystem>
  * }</pre>
  */
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
 public @interface Incubating {}
