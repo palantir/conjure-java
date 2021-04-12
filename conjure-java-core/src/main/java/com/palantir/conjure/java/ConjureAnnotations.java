@@ -18,7 +18,7 @@ package com.palantir.conjure.java;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableList;
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
@@ -60,9 +60,9 @@ public final class ConjureAnnotations {
     }
 
     private static AnnotationSpec clientEndpoint(EndpointDefinition definition) {
-        return AnnotationSpec.builder(ConjureClientEndpoint.class)
-                .addMember("path", "$S", definition.getHttpPath().get())
+        return AnnotationSpec.builder(ClientEndpoint.class)
                 .addMember("method", "$S", definition.getHttpMethod().get())
+                .addMember("path", "$S", definition.getHttpPath().get())
                 .build();
     }
 

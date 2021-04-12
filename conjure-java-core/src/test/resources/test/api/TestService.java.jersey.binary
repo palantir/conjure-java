@@ -16,6 +16,6 @@ import javax.ws.rs.core.StreamingOutput;
 public interface TestService {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ConjureClientEndpoint(path = "/", method = "GET")
+    @ConjureClientEndpoint(method = "GET", path = "/")
     StreamingOutput getBinary();
 }

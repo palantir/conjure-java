@@ -1,6 +1,6 @@
 package test.api;
 
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -23,7 +23,7 @@ public interface CookieServiceBlocking {
     /**
      * @apiNote {@code GET /cookies}
      */
-    @ConjureClientEndpoint(path = "/cookies", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/cookies")
     void eatCookies(BearerToken token);
 
     /**

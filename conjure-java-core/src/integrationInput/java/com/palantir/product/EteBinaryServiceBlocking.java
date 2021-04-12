@@ -1,7 +1,7 @@
 package com.palantir.product;
 
 import com.google.errorprone.annotations.MustBeClosed;
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -25,41 +25,41 @@ public interface EteBinaryServiceBlocking {
     /**
      * @apiNote {@code POST /binary}
      */
-    @ConjureClientEndpoint(path = "/binary", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/binary")
     @MustBeClosed
     InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     /**
      * @apiNote {@code POST /binary/throws}
      */
-    @ConjureClientEndpoint(path = "/binary/throws", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/binary/throws")
     @MustBeClosed
     InputStream postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body);
 
     /**
      * @apiNote {@code GET /binary/optional/present}
      */
-    @ConjureClientEndpoint(path = "/binary/optional/present", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/binary/optional/present")
     Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /binary/optional/empty}
      */
-    @ConjureClientEndpoint(path = "/binary/optional/empty", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/binary/optional/empty")
     Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /**
      * Throws an exception after partially writing a binary response.
      * @apiNote {@code GET /binary/failure}
      */
-    @ConjureClientEndpoint(path = "/binary/failure", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/binary/failure")
     @MustBeClosed
     InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
 
     /**
      * @apiNote {@code GET /binary/aliased}
      */
-    @ConjureClientEndpoint(path = "/binary/aliased", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/binary/aliased")
     Optional<InputStream> getAliased(AuthHeader authHeader);
 
     /**

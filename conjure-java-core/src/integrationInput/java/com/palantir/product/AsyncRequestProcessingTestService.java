@@ -1,6 +1,6 @@
 package com.palantir.product;
 
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import java.util.Optional;
 import java.util.OptionalInt;
 import javax.annotation.Generated;
@@ -19,50 +19,50 @@ import javax.ws.rs.core.StreamingOutput;
 public interface AsyncRequestProcessingTestService {
     @GET
     @Path("async/delay")
-    @ConjureClientEndpoint(path = "/async/delay", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/delay")
     String delay(@QueryParam("delayMillis") OptionalInt delayMillis);
 
     @GET
     @Path("async/throws")
-    @ConjureClientEndpoint(path = "/async/throws", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/throws")
     void throwsInHandler();
 
     @GET
     @Path("async/failed-future")
-    @ConjureClientEndpoint(path = "/async/failed-future", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/failed-future")
     void failedFuture(@QueryParam("delayMillis") OptionalInt delayMillis);
 
     @GET
     @Path("async/binary")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ConjureClientEndpoint(path = "/async/binary", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/binary")
     Optional<StreamingOutput> binary(@QueryParam("stringValue") Optional<String> stringValue);
 
     @GET
     @Path("async/future-trace")
-    @ConjureClientEndpoint(path = "/async/future-trace", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/future-trace")
     Object futureTraceId(@QueryParam("delayMillis") OptionalInt delayMillis);
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/async/delay", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/delay")
     default String delay() {
         return delay(OptionalInt.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/async/failed-future", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/failed-future")
     default void failedFuture() {
         failedFuture(OptionalInt.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/async/binary", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/binary")
     default Optional<StreamingOutput> binary() {
         return binary(Optional.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/async/future-trace", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/async/future-trace")
     default Object futureTraceId() {
         return futureTraceId(OptionalInt.empty());
     }

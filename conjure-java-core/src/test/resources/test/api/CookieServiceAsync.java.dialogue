@@ -24,7 +24,7 @@ public interface CookieServiceAsync {
     /**
      * @apiNote {@code GET /cookies}
      */
-    @ConjureClientEndpoint(path = "/cookies", method = "GET")
+    @ConjureClientEndpoint(method = "GET", path = "/cookies")
     ListenableFuture<Void> eatCookies(BearerToken token);
 
     /**

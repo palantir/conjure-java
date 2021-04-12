@@ -23,7 +23,7 @@ public interface CookieServiceBlocking {
     /**
      * @apiNote {@code GET /cookies}
      */
-    @ConjureClientEndpoint(path = "/cookies", method = "GET")
+    @ConjureClientEndpoint(method = "GET", path = "/cookies")
     void eatCookies(BearerToken token);
 
     /**

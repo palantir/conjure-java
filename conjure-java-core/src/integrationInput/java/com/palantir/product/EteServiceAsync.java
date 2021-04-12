@@ -2,7 +2,7 @@ package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -46,68 +46,68 @@ public interface EteServiceAsync {
      * </ul>
      * @apiNote {@code GET /base/string}
      */
-    @ConjureClientEndpoint(path = "/base/string", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/string")
     ListenableFuture<String> string(AuthHeader authHeader);
 
     /**
      * one <em>two</em> three.
      * @apiNote {@code GET /base/integer}
      */
-    @ConjureClientEndpoint(path = "/base/integer", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/integer")
     ListenableFuture<Integer> integer(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/double}
      */
-    @ConjureClientEndpoint(path = "/base/double", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/double")
     ListenableFuture<Double> double_(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/boolean}
      */
-    @ConjureClientEndpoint(path = "/base/boolean", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/boolean")
     ListenableFuture<Boolean> boolean_(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/safelong}
      */
-    @ConjureClientEndpoint(path = "/base/safelong", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/safelong")
     ListenableFuture<SafeLong> safelong(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/rid}
      */
-    @ConjureClientEndpoint(path = "/base/rid", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/rid")
     ListenableFuture<ResourceIdentifier> rid(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/bearertoken}
      */
-    @ConjureClientEndpoint(path = "/base/bearertoken", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/bearertoken")
     ListenableFuture<BearerToken> bearertoken(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/optionalString}
      */
-    @ConjureClientEndpoint(path = "/base/optionalString", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalString")
     ListenableFuture<Optional<String>> optionalString(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/optionalEmpty}
      */
-    @ConjureClientEndpoint(path = "/base/optionalEmpty", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalEmpty")
     ListenableFuture<Optional<String>> optionalEmpty(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/datetime}
      */
-    @ConjureClientEndpoint(path = "/base/datetime", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/datetime")
     ListenableFuture<OffsetDateTime> datetime(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/binary}
      */
-    @ConjureClientEndpoint(path = "/base/binary", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/binary")
     ListenableFuture<InputStream> binary(AuthHeader authHeader);
 
     /**
@@ -115,108 +115,108 @@ public interface EteServiceAsync {
      * @apiNote {@code GET /base/path/{param}}
      * @param param Documentation for <code>param</code>
      */
-    @ConjureClientEndpoint(path = "/base/path/{param}", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/path/{param}")
     ListenableFuture<String> path(AuthHeader authHeader, String param);
 
     /**
      * @apiNote {@code GET /base/externalLong/{param}}
      */
-    @ConjureClientEndpoint(path = "/base/externalLong/{param}", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/externalLong/{param}")
     ListenableFuture<Long> externalLongPath(AuthHeader authHeader, long param);
 
     /**
      * @apiNote {@code GET /base/optionalExternalLong}
      */
-    @ConjureClientEndpoint(path = "/base/optionalExternalLong", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
     ListenableFuture<Optional<Long>> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param);
 
     /**
      * @apiNote {@code POST /base/notNullBody}
      */
-    @ConjureClientEndpoint(path = "/base/notNullBody", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/notNullBody")
     ListenableFuture<StringAliasExample> notNullBody(AuthHeader authHeader, StringAliasExample notNullBody);
 
     /**
      * @apiNote {@code GET /base/aliasOne}
      */
-    @ConjureClientEndpoint(path = "/base/aliasOne", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/aliasOne")
     ListenableFuture<StringAliasExample> aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);
 
     /**
      * @apiNote {@code GET /base/optionalAliasOne}
      */
-    @ConjureClientEndpoint(path = "/base/optionalAliasOne", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalAliasOne")
     ListenableFuture<StringAliasExample> optionalAliasOne(
             AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
 
     /**
      * @apiNote {@code GET /base/aliasTwo}
      */
-    @ConjureClientEndpoint(path = "/base/aliasTwo", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/aliasTwo")
     ListenableFuture<NestedStringAliasExample> aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName);
 
     /**
      * @apiNote {@code POST /base/external/notNullBody}
      */
-    @ConjureClientEndpoint(path = "/base/external/notNullBody", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/external/notNullBody")
     ListenableFuture<StringAliasExample> notNullBodyExternalImport(
             AuthHeader authHeader, StringAliasExample notNullBody);
 
     /**
      * @apiNote {@code POST /base/external/optional-body}
      */
-    @ConjureClientEndpoint(path = "/base/external/optional-body", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/external/optional-body")
     ListenableFuture<Optional<StringAliasExample>> optionalBodyExternalImport(
             AuthHeader authHeader, Optional<StringAliasExample> body);
 
     /**
      * @apiNote {@code POST /base/external/optional-query}
      */
-    @ConjureClientEndpoint(path = "/base/external/optional-query", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/external/optional-query")
     ListenableFuture<Optional<StringAliasExample>> optionalQueryExternalImport(
             AuthHeader authHeader, Optional<StringAliasExample> query);
 
     /**
      * @apiNote {@code POST /base/no-return}
      */
-    @ConjureClientEndpoint(path = "/base/no-return", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/no-return")
     ListenableFuture<Void> noReturn(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /base/enum/query}
      */
-    @ConjureClientEndpoint(path = "/base/enum/query", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/query")
     ListenableFuture<SimpleEnum> enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
 
     /**
      * @apiNote {@code GET /base/enum/list/query}
      */
-    @ConjureClientEndpoint(path = "/base/enum/list/query", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/list/query")
     ListenableFuture<List<SimpleEnum>> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
 
     /**
      * @apiNote {@code GET /base/enum/optional/query}
      */
-    @ConjureClientEndpoint(path = "/base/enum/optional/query", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/optional/query")
     ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(
             AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
     /**
      * @apiNote {@code GET /base/enum/header}
      */
-    @ConjureClientEndpoint(path = "/base/enum/header", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/header")
     ListenableFuture<SimpleEnum> enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
     /**
      * @apiNote {@code GET /base/alias-long}
      */
-    @ConjureClientEndpoint(path = "/base/alias-long", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/alias-long")
     ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 
     /**
      * @apiNote {@code GET /base/datasets/{datasetRid}/strings}
      */
-    @ConjureClientEndpoint(path = "/base/datasets/{datasetRid}/strings", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/datasets/{datasetRid}/strings")
     ListenableFuture<Void> complexQueryParameters(
             AuthHeader authHeader,
             ResourceIdentifier datasetRid,
@@ -227,13 +227,13 @@ public interface EteServiceAsync {
     /**
      * @apiNote {@code PUT /base/list/optionals}
      */
-    @ConjureClientEndpoint(path = "/base/list/optionals", method = "PUT")
+    @ClientEndpoint(method = "PUT", path = "/base/list/optionals")
     ListenableFuture<Void> receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value);
 
     /**
      * @apiNote {@code PUT /base/set/optionals}
      */
-    @ConjureClientEndpoint(path = "/base/set/optionals", method = "PUT")
+    @ClientEndpoint(method = "PUT", path = "/base/set/optionals")
     ListenableFuture<Void> receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
 
     /**

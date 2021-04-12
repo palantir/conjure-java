@@ -2,7 +2,7 @@ package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -36,7 +36,7 @@ public interface EteServiceRetrofit {
      */
     @GET("./base/string")
     @Headers({"hr-path-template: /base/string", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/string", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/string")
     ListenableFuture<String> string(@Header("Authorization") AuthHeader authHeader);
 
     /**
@@ -44,53 +44,53 @@ public interface EteServiceRetrofit {
      */
     @GET("./base/integer")
     @Headers({"hr-path-template: /base/integer", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/integer", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/integer")
     ListenableFuture<Integer> integer(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/double")
     @Headers({"hr-path-template: /base/double", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/double", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/double")
     ListenableFuture<Double> double_(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/boolean")
     @Headers({"hr-path-template: /base/boolean", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/boolean", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/boolean")
     ListenableFuture<Boolean> boolean_(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/safelong")
     @Headers({"hr-path-template: /base/safelong", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/safelong", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/safelong")
     ListenableFuture<SafeLong> safelong(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/rid")
     @Headers({"hr-path-template: /base/rid", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/rid", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/rid")
     ListenableFuture<ResourceIdentifier> rid(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/bearertoken")
     @Headers({"hr-path-template: /base/bearertoken", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/bearertoken", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/bearertoken")
     ListenableFuture<BearerToken> bearertoken(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/optionalString")
     @Headers({"hr-path-template: /base/optionalString", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/optionalString", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalString")
     ListenableFuture<Optional<String>> optionalString(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/optionalEmpty")
     @Headers({"hr-path-template: /base/optionalEmpty", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/optionalEmpty", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalEmpty")
     ListenableFuture<Optional<String>> optionalEmpty(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/datetime")
     @Headers({"hr-path-template: /base/datetime", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/datetime", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/datetime")
     ListenableFuture<OffsetDateTime> datetime(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/binary")
     @Headers({"hr-path-template: /base/binary", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(path = "/base/binary", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/binary")
     ListenableFuture<ResponseBody> binary(@Header("Authorization") AuthHeader authHeader);
 
     /**
@@ -99,103 +99,103 @@ public interface EteServiceRetrofit {
      */
     @GET("./base/path/{param}")
     @Headers({"hr-path-template: /base/path/{param}", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/path/{param}", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/path/{param}")
     ListenableFuture<String> path(@Header("Authorization") AuthHeader authHeader, @Path("param") String param);
 
     @GET("./base/externalLong/{param}")
     @Headers({"hr-path-template: /base/externalLong/{param}", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/externalLong/{param}", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/externalLong/{param}")
     ListenableFuture<Long> externalLongPath(@Header("Authorization") AuthHeader authHeader, @Path("param") long param);
 
     @GET("./base/optionalExternalLong")
     @Headers({"hr-path-template: /base/optionalExternalLong", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/optionalExternalLong", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
     ListenableFuture<Optional<Long>> optionalExternalLongQuery(
             @Header("Authorization") AuthHeader authHeader, @Query("param") Optional<Long> param);
 
     @POST("./base/notNullBody")
     @Headers({"hr-path-template: /base/notNullBody", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/notNullBody", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/notNullBody")
     ListenableFuture<StringAliasExample> notNullBody(
             @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
 
     @GET("./base/aliasOne")
     @Headers({"hr-path-template: /base/aliasOne", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/aliasOne", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/aliasOne")
     ListenableFuture<StringAliasExample> aliasOne(
             @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") StringAliasExample queryParamName);
 
     @GET("./base/optionalAliasOne")
     @Headers({"hr-path-template: /base/optionalAliasOne", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/optionalAliasOne", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalAliasOne")
     ListenableFuture<StringAliasExample> optionalAliasOne(
             @Header("Authorization") AuthHeader authHeader,
             @Query("queryParamName") Optional<StringAliasExample> queryParamName);
 
     @GET("./base/aliasTwo")
     @Headers({"hr-path-template: /base/aliasTwo", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/aliasTwo", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/aliasTwo")
     ListenableFuture<NestedStringAliasExample> aliasTwo(
             @Header("Authorization") AuthHeader authHeader,
             @Query("queryParamName") NestedStringAliasExample queryParamName);
 
     @POST("./base/external/notNullBody")
     @Headers({"hr-path-template: /base/external/notNullBody", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/external/notNullBody", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/external/notNullBody")
     ListenableFuture<StringAliasExample> notNullBodyExternalImport(
             @Header("Authorization") AuthHeader authHeader, @Body StringAliasExample notNullBody);
 
     @POST("./base/external/optional-body")
     @Headers({"hr-path-template: /base/external/optional-body", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/external/optional-body", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/external/optional-body")
     ListenableFuture<Optional<StringAliasExample>> optionalBodyExternalImport(
             @Header("Authorization") AuthHeader authHeader, @Body Optional<StringAliasExample> body);
 
     @POST("./base/external/optional-query")
     @Headers({"hr-path-template: /base/external/optional-query", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/external/optional-query", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/external/optional-query")
     ListenableFuture<Optional<StringAliasExample>> optionalQueryExternalImport(
             @Header("Authorization") AuthHeader authHeader, @Query("query") Optional<StringAliasExample> query);
 
     @POST("./base/no-return")
     @Headers({"hr-path-template: /base/no-return", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/no-return", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/no-return")
     ListenableFuture<Void> noReturn(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./base/enum/query")
     @Headers({"hr-path-template: /base/enum/query", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/enum/query", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/query")
     ListenableFuture<SimpleEnum> enumQuery(
             @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") SimpleEnum queryParamName);
 
     @GET("./base/enum/list/query")
     @Headers({"hr-path-template: /base/enum/list/query", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/enum/list/query", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/list/query")
     ListenableFuture<List<SimpleEnum>> enumListQuery(
             @Header("Authorization") AuthHeader authHeader, @Query("queryParamName") List<SimpleEnum> queryParamName);
 
     @GET("./base/enum/optional/query")
     @Headers({"hr-path-template: /base/enum/optional/query", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/enum/optional/query", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/optional/query")
     ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(
             @Header("Authorization") AuthHeader authHeader,
             @Query("queryParamName") Optional<SimpleEnum> queryParamName);
 
     @GET("./base/enum/header")
     @Headers({"hr-path-template: /base/enum/header", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/enum/header", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/header")
     ListenableFuture<SimpleEnum> enumHeader(
             @Header("Authorization") AuthHeader authHeader, @Header("Custom-Header") SimpleEnum headerParameter);
 
     @GET("./base/alias-long")
     @Headers({"hr-path-template: /base/alias-long", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/alias-long", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/alias-long")
     ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(
             @Header("Authorization") AuthHeader authHeader, @Query("input") Optional<LongAlias> input);
 
     @GET("./base/datasets/{datasetRid}/strings")
     @Headers({"hr-path-template: /base/datasets/{datasetRid}/strings", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/datasets/{datasetRid}/strings", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/datasets/{datasetRid}/strings")
     ListenableFuture<Void> complexQueryParameters(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
@@ -205,55 +205,55 @@ public interface EteServiceRetrofit {
 
     @PUT("./base/list/optionals")
     @Headers({"hr-path-template: /base/list/optionals", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/list/optionals", method = "PUT")
+    @ClientEndpoint(method = "PUT", path = "/base/list/optionals")
     ListenableFuture<Void> receiveListOfOptionals(
             @Header("Authorization") AuthHeader authHeader, @Body List<Optional<String>> value);
 
     @PUT("./base/set/optionals")
     @Headers({"hr-path-template: /base/set/optionals", "Accept: application/json"})
-    @ConjureClientEndpoint(path = "/base/set/optionals", method = "PUT")
+    @ClientEndpoint(method = "PUT", path = "/base/set/optionals")
     ListenableFuture<Void> receiveSetOfOptionals(
             @Header("Authorization") AuthHeader authHeader, @Body Set<Optional<String>> value);
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/optionalExternalLong", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
     default ListenableFuture<Optional<Long>> optionalExternalLongQuery(@Header("Authorization") AuthHeader authHeader) {
         return optionalExternalLongQuery(authHeader, Optional.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/optionalAliasOne", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/optionalAliasOne")
     default ListenableFuture<StringAliasExample> optionalAliasOne(@Header("Authorization") AuthHeader authHeader) {
         return optionalAliasOne(authHeader, Optional.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/external/optional-query", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/base/external/optional-query")
     default ListenableFuture<Optional<StringAliasExample>> optionalQueryExternalImport(
             @Header("Authorization") AuthHeader authHeader) {
         return optionalQueryExternalImport(authHeader, Optional.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/enum/list/query", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/list/query")
     default ListenableFuture<List<SimpleEnum>> enumListQuery(@Header("Authorization") AuthHeader authHeader) {
         return enumListQuery(authHeader, Collections.emptyList());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/enum/optional/query", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/enum/optional/query")
     default ListenableFuture<Optional<SimpleEnum>> optionalEnumQuery(@Header("Authorization") AuthHeader authHeader) {
         return optionalEnumQuery(authHeader, Optional.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/alias-long", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/alias-long")
     default ListenableFuture<Optional<LongAlias>> aliasLongEndpoint(@Header("Authorization") AuthHeader authHeader) {
         return aliasLongEndpoint(authHeader, Optional.empty());
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/datasets/{datasetRid}/strings", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/datasets/{datasetRid}/strings")
     default void complexQueryParameters(
             @Header("Authorization") AuthHeader authHeader, @Path("datasetRid") ResourceIdentifier datasetRid) {
         complexQueryParameters(
@@ -261,7 +261,7 @@ public interface EteServiceRetrofit {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/datasets/{datasetRid}/strings", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/datasets/{datasetRid}/strings")
     default void complexQueryParameters(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,
@@ -270,7 +270,7 @@ public interface EteServiceRetrofit {
     }
 
     @Deprecated
-    @ConjureClientEndpoint(path = "/base/datasets/{datasetRid}/strings", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/base/datasets/{datasetRid}/strings")
     default void complexQueryParameters(
             @Header("Authorization") AuthHeader authHeader,
             @Path("datasetRid") ResourceIdentifier datasetRid,

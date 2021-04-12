@@ -18,6 +18,6 @@ import javax.ws.rs.core.MediaType;
 public interface CookieService {
     @GET
     @Path("cookies")
-    @ConjureClientEndpoint(path = "/cookies", method = "GET")
+    @ConjureClientEndpoint(method = "GET", path = "/cookies")
     void eatCookies(@CookieParam("PALANTIR_TOKEN") @NotNull BearerToken token);
 }

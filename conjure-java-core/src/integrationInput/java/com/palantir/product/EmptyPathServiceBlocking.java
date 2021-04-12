@@ -1,6 +1,6 @@
 package com.palantir.product;
 
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -23,7 +23,7 @@ public interface EmptyPathServiceBlocking {
     /**
      * @apiNote {@code GET /}
      */
-    @ConjureClientEndpoint(path = "/", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/")
     boolean emptyPath();
 
     /**

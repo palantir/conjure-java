@@ -1,7 +1,7 @@
 package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.palantir.conjure.java.lib.internal.ConjureClientEndpoint;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.tokens.auth.AuthHeader;
 import java.util.Optional;
 import javax.annotation.Generated;
@@ -20,13 +20,13 @@ public interface EteBinaryServiceRetrofit {
     @POST("./binary")
     @Headers({"hr-path-template: /binary", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(path = "/binary", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/binary")
     ListenableFuture<ResponseBody> postBinary(@Header("Authorization") AuthHeader authHeader, @Body RequestBody body);
 
     @POST("./binary/throws")
     @Headers({"hr-path-template: /binary/throws", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(path = "/binary/throws", method = "POST")
+    @ClientEndpoint(method = "POST", path = "/binary/throws")
     ListenableFuture<ResponseBody> postBinaryThrows(
             @Header("Authorization") AuthHeader authHeader,
             @Query("bytesToRead") int bytesToRead,
@@ -35,13 +35,13 @@ public interface EteBinaryServiceRetrofit {
     @GET("./binary/optional/present")
     @Headers({"hr-path-template: /binary/optional/present", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(path = "/binary/optional/present", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/binary/optional/present")
     ListenableFuture<Optional<ResponseBody>> getOptionalBinaryPresent(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./binary/optional/empty")
     @Headers({"hr-path-template: /binary/optional/empty", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(path = "/binary/optional/empty", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/binary/optional/empty")
     ListenableFuture<Optional<ResponseBody>> getOptionalBinaryEmpty(@Header("Authorization") AuthHeader authHeader);
 
     /**
@@ -50,13 +50,13 @@ public interface EteBinaryServiceRetrofit {
     @GET("./binary/failure")
     @Headers({"hr-path-template: /binary/failure", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(path = "/binary/failure", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/binary/failure")
     ListenableFuture<ResponseBody> getBinaryFailure(
             @Header("Authorization") AuthHeader authHeader, @Query("numBytes") int numBytes);
 
     @GET("./binary/aliased")
     @Headers({"hr-path-template: /binary/aliased", "Accept: application/octet-stream"})
     @Streaming
-    @ConjureClientEndpoint(path = "/binary/aliased", method = "GET")
+    @ClientEndpoint(method = "GET", path = "/binary/aliased")
     ListenableFuture<Optional<ResponseBody>> getAliased(@Header("Authorization") AuthHeader authHeader);
 }
