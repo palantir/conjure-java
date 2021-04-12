@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
-public @interface ConjureEndpoint {
+public @interface ConjureClientEndpoint {
     String method();
 
     String path();

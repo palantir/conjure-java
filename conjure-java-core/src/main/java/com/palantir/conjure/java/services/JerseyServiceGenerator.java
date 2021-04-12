@@ -119,7 +119,7 @@ public final class JerseyServiceGenerator implements Generator {
                         .addMember("value", "$S", "/")
                         .build())
                 .addAnnotations(
-                        ConjureAnnotations.getServiceAnnotations(serviceDefinition, JerseyServiceGenerator.class));
+                        ConjureAnnotations.getClientServiceAnnotations(serviceDefinition, JerseyServiceGenerator.class));
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -185,7 +185,7 @@ public final class JerseyServiceGenerator implements Generator {
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        methodBuilder.addAnnotations(ConjureAnnotations.getEndpointAnnotations(endpointDef));
+        methodBuilder.addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
         ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
@@ -231,7 +231,7 @@ public final class JerseyServiceGenerator implements Generator {
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
-                .addAnnotations(ConjureAnnotations.getEndpointAnnotations(endpointDef))
+                .addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef))
                 .addParameters(IntStream.range(0, sortedParams.size())
                         .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
                         .mapToObj(sortedParams::get)

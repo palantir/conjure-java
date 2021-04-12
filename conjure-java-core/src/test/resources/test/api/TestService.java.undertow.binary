@@ -1,16 +1,12 @@
 package test.api;
 
-import com.palantir.conjure.java.lib.internal.ConjureEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureService;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-@ConjureService(name = "TestService", package_ = "test.api")
 public interface TestService {
     /**
      * @apiNote {@code GET /}
      */
-    @ConjureEndpoint(path = "/", method = "GET")
     BinaryResponseBody getBinary();
 }

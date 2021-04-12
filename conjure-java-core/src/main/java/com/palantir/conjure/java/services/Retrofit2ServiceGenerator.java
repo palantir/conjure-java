@@ -109,7 +109,7 @@ public final class Retrofit2ServiceGenerator implements Generator {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(serviceName(serviceDefinition))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotations(
-                        ConjureAnnotations.getServiceAnnotations(serviceDefinition, Retrofit2ServiceGenerator.class));
+                        ConjureAnnotations.getClientServiceAnnotations(serviceDefinition, Retrofit2ServiceGenerator.class));
 
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -165,7 +165,7 @@ public final class Retrofit2ServiceGenerator implements Generator {
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
 
-        methodBuilder.addAnnotations(ConjureAnnotations.getEndpointAnnotations(endpointDef));
+        methodBuilder.addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
         ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
@@ -257,7 +257,7 @@ public final class Retrofit2ServiceGenerator implements Generator {
                         .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
                         .mapToObj(sortedParams::get)
                         .collect(Collectors.toList()))
-                .addAnnotations(ConjureAnnotations.getEndpointAnnotations(endpointDef));
+                .addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
         endpointDef
                 .getReturns()

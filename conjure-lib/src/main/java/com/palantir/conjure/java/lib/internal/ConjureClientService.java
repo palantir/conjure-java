@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.TYPE)
-public @interface ConjureService {
+public @interface ConjureClientService {
     String package_() default "";
 
     String name();

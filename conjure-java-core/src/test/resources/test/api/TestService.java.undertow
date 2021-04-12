@@ -1,7 +1,5 @@
 package com.palantir.another;
 
-import com.palantir.conjure.java.lib.internal.ConjureEndpoint;
-import com.palantir.conjure.java.lib.internal.ConjureService;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.logsafe.Safe;
@@ -23,70 +21,59 @@ import javax.annotation.Generated;
  * A Markdown description of the service.
  */
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
-@ConjureService(name = "TestService", package_ = "com.palantir.another")
 public interface TestService {
     /**
      * Returns a mapping from file system id to backing file system configuration.
      * @apiNote {@code GET /catalog/fileSystems}
      */
     @Incubating
-    @ConjureEndpoint(path = "/catalog/fileSystems", method = "GET")
     Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader);
 
     /**
      * foo $bar
      * @apiNote {@code POST /catalog/datasets}
      */
-    @ConjureEndpoint(path = "/catalog/datasets", method = "POST")
     Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}", method = "GET")
     Optional<Dataset> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/raw", method = "GET")
     BinaryResponseBody getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/raw-aliased", method = "GET")
     BinaryResponseBody getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/raw-maybe", method = "GET")
     Optional<BinaryResponseBody> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/string-aliased", method = "GET")
     AliasedString getAliasedString(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code POST /catalog/datasets/upload-raw}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/upload-raw", method = "POST")
     void uploadRawData(AuthHeader authHeader, InputStream input);
 
     /**
      * @apiNote {@code POST /catalog/datasets/upload-raw-aliased}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/upload-raw-aliased", method = "POST")
     void uploadAliasedRawData(AuthHeader authHeader, InputStream input);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches}
      * @param datasetRid A valid dataset resource identifier.
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/branches", method = "GET")
     Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
@@ -95,26 +82,22 @@ public interface TestService {
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/branchesDeprecated", method = "GET")
     @Deprecated
     Set<String> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve", method = "GET")
     Optional<String> resolveBranch(AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/testParam}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/testParam", method = "GET")
     Optional<String> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code POST /catalog/test-query-params}
      */
-    @ConjureEndpoint(path = "/catalog/test-query-params", method = "POST")
     int testQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -127,7 +110,6 @@ public interface TestService {
     /**
      * @apiNote {@code POST /catalog/test-no-response-query-params}
      */
-    @ConjureEndpoint(path = "/catalog/test-no-response-query-params", method = "POST")
     void testNoResponseQueryParams(
             AuthHeader authHeader,
             ResourceIdentifier something,
@@ -140,36 +122,30 @@ public interface TestService {
     /**
      * @apiNote {@code GET /catalog/boolean}
      */
-    @ConjureEndpoint(path = "/catalog/boolean", method = "GET")
     boolean testBoolean(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /catalog/double}
      */
-    @ConjureEndpoint(path = "/catalog/double", method = "GET")
     double testDouble(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /catalog/integer}
      */
-    @ConjureEndpoint(path = "/catalog/integer", method = "GET")
     int testInteger(AuthHeader authHeader);
 
     /**
      * @apiNote {@code POST /catalog/optional}
      */
-    @ConjureEndpoint(path = "/catalog/optional", method = "POST")
     Optional<String> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
 
     /**
      * @apiNote {@code GET /catalog/optional-integer-double}
      */
-    @ConjureEndpoint(path = "/catalog/optional-integer-double", method = "GET")
     void testOptionalIntegerAndDouble(AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/strings}
      */
-    @ConjureEndpoint(path = "/catalog/datasets/{datasetRid}/strings", method = "GET")
     void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
 }
