@@ -1,6 +1,7 @@
 package test.api;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -23,6 +24,7 @@ public interface CookieServiceAsync {
     /**
      * @apiNote {@code GET /cookies}
      */
+    @ClientEndpoint(method = "GET", path = "/cookies")
     ListenableFuture<Void> eatCookies(BearerToken token);
 
     /**

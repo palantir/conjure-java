@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -23,6 +24,7 @@ public interface EmptyPathServiceAsync {
     /**
      * @apiNote {@code GET /}
      */
+    @ClientEndpoint(method = "GET", path = "/")
     ListenableFuture<Boolean> emptyPath();
 
     /**

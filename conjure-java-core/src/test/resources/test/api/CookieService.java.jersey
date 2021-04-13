@@ -1,5 +1,6 @@
 package test.api;
 
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.tokens.auth.BearerToken;
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
@@ -17,5 +18,6 @@ import javax.ws.rs.core.MediaType;
 public interface CookieService {
     @GET
     @Path("cookies")
+    @ClientEndpoint(method = "GET", path = "/cookies")
     void eatCookies(@CookieParam("PALANTIR_TOKEN") @NotNull BearerToken token);
 }

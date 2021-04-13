@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
@@ -29,8 +30,9 @@ public final class ConjureAnnotations {
 
     private static final ImmutableList<AnnotationSpec> DEPRECATED =
             ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build());
-    private static final ImmutableList<AnnotationSpec> INCUBATING =
-            ImmutableList.of(AnnotationSpec.builder(Incubating.class).build());
+    private static final AnnotationSpec INCUBATING_SPEC =
+            AnnotationSpec.builder(Incubating.class).build();
+    private static final ImmutableList<AnnotationSpec> INCUBATING = ImmutableList.of(INCUBATING_SPEC);
     private static final AnnotationSpec DELEGATING_JSON_CREATOR = AnnotationSpec.builder(JsonCreator.class)
             .addMember("mode", "$T.DELEGATING", JsonCreator.Mode.class)
             .build();
@@ -46,6 +48,22 @@ public final class ConjureAnnotations {
 
     public static ImmutableList<AnnotationSpec> deprecation(Optional<Documentation> deprecation) {
         return deprecation.isPresent() ? DEPRECATED : ImmutableList.of();
+    }
+
+    public static ImmutableList<AnnotationSpec> getClientEndpointAnnotations(EndpointDefinition definition) {
+        ImmutableList.Builder<AnnotationSpec> result = ImmutableList.builder();
+        if (definition.getTags().contains("incubating")) {
+            result.add(INCUBATING_SPEC);
+        }
+        result.add(clientEndpoint(definition));
+        return result.build();
+    }
+
+    private static AnnotationSpec clientEndpoint(EndpointDefinition definition) {
+        return AnnotationSpec.builder(ClientEndpoint.class)
+                .addMember("method", "$S", definition.getHttpMethod().get())
+                .addMember("path", "$S", definition.getHttpPath().get())
+                .build();
     }
 
     public static ImmutableList<AnnotationSpec> incubating(EndpointDefinition definition) {

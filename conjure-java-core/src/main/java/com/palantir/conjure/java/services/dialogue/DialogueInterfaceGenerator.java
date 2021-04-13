@@ -153,7 +153,7 @@ public final class DialogueInterfaceGenerator {
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameters(parameterTypes.interfaceMethodParams(endpointDef))
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
+                .addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
         endpointDef.getMarkers().stream()
                 .filter(marker -> !marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE))
                 .map(marker -> {

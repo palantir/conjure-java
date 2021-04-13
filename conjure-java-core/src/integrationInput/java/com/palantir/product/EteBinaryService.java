@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.util.Optional;
@@ -24,12 +25,14 @@ public interface EteBinaryService {
     @Path("binary")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "POST", path = "/binary")
     StreamingOutput postBinary(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull InputStream body);
 
     @POST
     @Path("binary/throws")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "POST", path = "/binary/throws")
     StreamingOutput postBinaryThrows(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
             @QueryParam("bytesToRead") int bytesToRead,
@@ -38,11 +41,13 @@ public interface EteBinaryService {
     @GET
     @Path("binary/optional/present")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "GET", path = "/binary/optional/present")
     Optional<StreamingOutput> getOptionalBinaryPresent(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     @GET
     @Path("binary/optional/empty")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "GET", path = "/binary/optional/empty")
     Optional<StreamingOutput> getOptionalBinaryEmpty(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 
     /**
@@ -51,11 +56,13 @@ public interface EteBinaryService {
     @GET
     @Path("binary/failure")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "GET", path = "/binary/failure")
     StreamingOutput getBinaryFailure(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @QueryParam("numBytes") int numBytes);
 
     @GET
     @Path("binary/aliased")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "GET", path = "/binary/aliased")
     Optional<StreamingOutput> getAliased(@HeaderParam("Authorization") @NotNull AuthHeader authHeader);
 }

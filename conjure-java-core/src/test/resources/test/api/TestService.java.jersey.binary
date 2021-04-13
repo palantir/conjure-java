@@ -1,5 +1,6 @@
 package test.api;
 
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import javax.annotation.Generated;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -15,5 +16,6 @@ import javax.ws.rs.core.StreamingOutput;
 public interface TestService {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ClientEndpoint(method = "GET", path = "/")
     StreamingOutput getBinary();
 }
