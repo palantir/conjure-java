@@ -84,10 +84,7 @@ final class ConjureBodySerDe implements BodySerDe {
 
     @Override
     public InputStream deserializeInputStream(HttpServerExchange exchange) {
-        String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
-        if (contentType == null) {
-            throw new SafeIllegalArgumentException("Request is missing Content-Type header");
-        }
+        String contentType = getContentType(exchange);
         if (!contentType.startsWith(BINARY_CONTENT_TYPE)) {
             throw FrameworkException.unsupportedMediaType(
                     "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
@@ -203,10 +200,7 @@ final class ConjureBodySerDe implements BodySerDe {
         /** Returns the {@link EncodingDeserializerContainer} to use to deserialize the request body. */
         @SuppressWarnings("ForLoopReplaceableByForEach") // performance sensitive code avoids iterator allocation
         EncodingDeserializerContainer<T> getRequestDeserializer(HttpServerExchange exchange) {
-            String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
-            if (contentType == null) {
-                throw new SafeIllegalArgumentException("Request is missing Content-Type header");
-            }
+            String contentType = getContentType(exchange);
             for (int i = 0; i < encodings.size(); i++) {
                 EncodingDeserializerContainer<T> container = encodings.get(i);
                 if (container.encoding.supportsContentType(contentType)) {
@@ -251,5 +245,23 @@ final class ConjureBodySerDe implements BodySerDe {
             adapter.tag(target, "type", "BinaryResponseBody");
             adapter.tag(target, "contentType", BINARY_CONTENT_TYPE);
         }
+    }
+
+    /**
+     * Gets the request {@code Content-Type} header if exactly one value exists, otherwise throws
+     * a {@link SafeIllegalArgumentException}. This prevents unexpected behavior when multiple
+     * content-type headers are incorrectly sent to the server, it's not clear which should
+     * be used.
+     */
+    private static String getContentType(HttpServerExchange exchange) {
+        HeaderValues contentTypeValues = exchange.getRequestHeaders().get(Headers.CONTENT_TYPE);
+        if (contentTypeValues == null || contentTypeValues.isEmpty()) {
+            throw new SafeIllegalArgumentException("Request is missing Content-Type header");
+        } else if (contentTypeValues.size() != 1) {
+            throw new SafeIllegalArgumentException(
+                    "Request has too many Content-Type headers",
+                    SafeArg.of("contentTypes", ImmutableList.copyOf(contentTypeValues)));
+        }
+        return contentTypeValues.get(0);
     }
 }

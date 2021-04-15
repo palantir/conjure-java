@@ -201,6 +201,16 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void multipleContentTypeHeadersAreRejected() throws IOException {
+        HttpURLConnection httpUrlConnection = preparePostRequest();
+        httpUrlConnection.setRequestProperty("Authorization", "Bearer authheader");
+        // First Content-Type is already set by preparePostRequest
+        httpUrlConnection.addRequestProperty("Content-Type", "application/json");
+        sendPostRequestData(httpUrlConnection, CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
+        assertThat(httpUrlConnection.getResponseCode()).isEqualTo(400);
+    }
+
+    @Test
     public void java_url_client_receives_unauthorized_without_authheader() throws IOException {
         HttpURLConnection httpUrlConnection = preparePostRequest();
         sendPostRequestData(httpUrlConnection, CLIENT_OBJECT_MAPPER.writeValueAsString(StringAliasExample.of("foo")));
