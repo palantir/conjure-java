@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add tracing spans to conjure-undertow encodings
+  links:
+  - https://github.com/palantir/conjure-java/pull/1313
