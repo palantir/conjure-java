@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: conjure-undertow validates exactly one Content-Type is received
+  links:
+  - https://github.com/palantir/conjure-java/pull/1312
