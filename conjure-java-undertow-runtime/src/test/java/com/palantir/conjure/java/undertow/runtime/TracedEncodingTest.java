@@ -63,7 +63,8 @@ public class TracedEncodingTest {
         ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(mockObserver).consume(captor.capture());
         Span span = captor.getValue();
-        assertThat(span.getOperation()).isEqualTo("Undertow: serialize String to application/stub");
+        assertThat(span.getOperation()).isEqualTo("Undertow: serialize");
+        assertThat(span.getMetadata()).containsEntry("type", "String").containsEntry("contentType", "application/stub");
     }
 
     @Test
@@ -82,7 +83,8 @@ public class TracedEncodingTest {
         ArgumentCaptor<Span> captor = ArgumentCaptor.forClass(Span.class);
         verify(mockObserver).consume(captor.capture());
         Span span = captor.getValue();
-        assertThat(span.getOperation()).isEqualTo("Undertow: deserialize String from application/stub");
+        assertThat(span.getOperation()).isEqualTo("Undertow: deserialize");
+        assertThat(span.getMetadata()).containsEntry("type", "String").containsEntry("contentType", "application/stub");
     }
 
     private static final class StubEncoding implements Encoding {

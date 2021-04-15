@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.tracing.Tracer;
 import java.io.IOException;
@@ -38,14 +39,20 @@ final class TracedEncoding implements Encoding {
 
     @Override
     public <T> Serializer<T> serializer(TypeMarker<T> type) {
-        String operation = "Undertow: serialize " + toString(type) + " to " + getContentType();
-        return new TracedSerializer<>(encoding.serializer(type), operation);
+        String operation = "Undertow: serialize";
+        return new TracedSerializer<>(
+                encoding.serializer(type),
+                operation,
+                ImmutableMap.of("type", toString(type), "contentType", getContentType()));
     }
 
     @Override
     public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
-        String operation = "Undertow: deserialize " + toString(type) + " from " + getContentType();
-        return new TracedDeserializer<>(encoding.deserializer(type), operation);
+        String operation = "Undertow: deserialize";
+        return new TracedDeserializer<>(
+                encoding.deserializer(type),
+                operation,
+                ImmutableMap.of("type", toString(type), "contentType", getContentType()));
     }
 
     /**
@@ -74,10 +81,12 @@ final class TracedEncoding implements Encoding {
 
         private final Serializer<T> delegate;
         private final String operation;
+        private final ImmutableMap<String, String> tags;
 
-        TracedSerializer(Serializer<T> delegate, String operation) {
+        TracedSerializer(Serializer<T> delegate, String operation, ImmutableMap<String, String> tags) {
             this.delegate = delegate;
             this.operation = operation;
+            this.tags = tags;
         }
 
         @Override
@@ -86,7 +95,7 @@ final class TracedEncoding implements Encoding {
             try {
                 delegate.serialize(value, output);
             } finally {
-                Tracer.fastCompleteSpan();
+                Tracer.fastCompleteSpan(tags);
             }
         }
     }
@@ -95,10 +104,12 @@ final class TracedEncoding implements Encoding {
 
         private final Deserializer<T> delegate;
         private final String operation;
+        private final ImmutableMap<String, String> tags;
 
-        TracedDeserializer(Deserializer<T> delegate, String operation) {
+        TracedDeserializer(Deserializer<T> delegate, String operation, ImmutableMap<String, String> tags) {
             this.delegate = delegate;
             this.operation = operation;
+            this.tags = tags;
         }
 
         @Override
@@ -107,7 +118,7 @@ final class TracedEncoding implements Encoding {
             try {
                 return delegate.deserialize(input);
             } finally {
-                Tracer.fastCompleteSpan();
+                Tracer.fastCompleteSpan(tags);
             }
         }
     }
