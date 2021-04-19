@@ -247,7 +247,7 @@ final class ConjureBodySerDe implements BodySerDe {
         INSTANCE;
 
         @Override
-        public <T> void translate(TagAdapter<T> adapter, T target, Object data) {
+        public <T> void translate(TagAdapter<T> adapter, T target, Object _data) {
             adapter.tag(target, "type", "BinaryResponseBody");
             adapter.tag(target, "contentType", BINARY_CONTENT_TYPE);
         }
