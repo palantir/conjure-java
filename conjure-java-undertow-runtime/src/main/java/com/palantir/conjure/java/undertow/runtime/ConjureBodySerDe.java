@@ -27,6 +27,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tracing.CloseableTracer;
+import com.palantir.tracing.TagTranslator;
 import com.palantir.tracing.Tracer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
@@ -73,11 +74,11 @@ final class ConjureBodySerDe implements BodySerDe {
     public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
         Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
-        Tracer.fastStartSpan("Undertow: serialize binary");
+        Tracer.fastStartSpan(TracedEncoding.SERIALIZE_OPERATION);
         try {
             value.write(exchange.getOutputStream());
         } finally {
-            Tracer.fastCompleteSpan();
+            Tracer.fastCompleteSpan(SerializeBinaryTagTranslator.INSTANCE, SerializeBinaryTagTranslator.INSTANCE);
         }
     }
 
@@ -239,6 +240,16 @@ final class ConjureBodySerDe implements BodySerDe {
             try (CloseableTracer ignored = CloseableTracer.startSpan("Undertow: drain request body")) {
                 IoUtils.safeClose(exchange.getInputStream());
             }
+        }
+    }
+
+    private enum SerializeBinaryTagTranslator implements TagTranslator<Object> {
+        INSTANCE;
+
+        @Override
+        public <T> void translate(TagAdapter<T> adapter, T target, Object data) {
+            adapter.tag(target, "type", "BinaryResponseBody");
+            adapter.tag(target, "contentType", BINARY_CONTENT_TYPE);
         }
     }
 }

@@ -27,6 +27,9 @@ import java.lang.reflect.Type;
 /** Encoding implementation which wraps serialization and deserialization with tracing spans. */
 final class TracedEncoding implements Encoding {
 
+    static final String DESERIALIZE_OPERATION = "Undertow: deserialize";
+    static final String SERIALIZE_OPERATION = "Undertow: serialize";
+
     private final Encoding encoding;
 
     private TracedEncoding(Encoding encoding) {
@@ -39,19 +42,17 @@ final class TracedEncoding implements Encoding {
 
     @Override
     public <T> Serializer<T> serializer(TypeMarker<T> type) {
-        String operation = "Undertow: serialize";
         return new TracedSerializer<>(
                 encoding.serializer(type),
-                operation,
+                SERIALIZE_OPERATION,
                 ImmutableMap.of("type", toString(type), "contentType", getContentType()));
     }
 
     @Override
     public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
-        String operation = "Undertow: deserialize";
         return new TracedDeserializer<>(
                 encoding.deserializer(type),
-                operation,
+                DESERIALIZE_OPERATION,
                 ImmutableMap.of("type", toString(type), "contentType", getContentType()));
     }
 

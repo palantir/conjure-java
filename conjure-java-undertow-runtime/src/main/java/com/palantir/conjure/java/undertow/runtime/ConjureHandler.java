@@ -186,7 +186,10 @@ public final class ConjureHandler implements HttpHandler {
             ImmutableList<EndpointHandlerWrapper> wrappers = ImmutableList.<EndpointHandlerWrapper>builder()
                     .add(
                             // Begin the server span as early as possible to capture the most of the request.
-                            endpoint -> Optional.of(new TracedRequestHandler(endpoint.handler())),
+                            endpoint -> Optional.of(new TracedRequestHandler(
+                                    endpoint.handler(),
+                                    CompletedRequestTagTranslator.INSTANCE.andThen(
+                                            new EndpointTagTranslator(endpoint)))),
                             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
                             // parameters. Servers which do not configure DECODE_URL will still work properly except
                             // for encoded slash values. When DECODE_URL has not been disabled, the following handler
@@ -214,7 +217,9 @@ public final class ConjureHandler implements HttpHandler {
                             // to provide user and trace information on exceptions.
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
                             endpoint -> Optional.of(new TracedOperationHandler(
-                                    endpoint.handler(), endpoint.method() + " " + endpoint.template())),
+                                    endpoint.handler(),
+                                    "conjure-undertow-dispatched",
+                                    new EndpointTagTranslator(endpoint))),
                             endpoint -> Optional.of(
                                     new ConjureExceptionHandler(endpoint.handler(), runtime.exceptionHandler())))
                     .build()
