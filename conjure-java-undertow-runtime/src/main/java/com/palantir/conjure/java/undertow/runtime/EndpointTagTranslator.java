@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.tracing.TagTranslator;
+import com.palantir.tracing.api.TraceTags;
 import io.undertow.server.HttpServerExchange;
 
 /** A {@link TagTranslator} which populates {@link Endpoint} metadata. */
@@ -25,7 +26,6 @@ final class EndpointTagTranslator implements TagTranslator<HttpServerExchange> {
 
     private final String serviceName;
     private final String endpointName;
-    private final String httpMethod;
     private final String httpPath;
     private final boolean deprecated;
     private final boolean incubating;
@@ -33,7 +33,6 @@ final class EndpointTagTranslator implements TagTranslator<HttpServerExchange> {
     EndpointTagTranslator(Endpoint endpoint) {
         this.serviceName = endpoint.serviceName();
         this.endpointName = endpoint.name();
-        this.httpMethod = endpoint.method().toString();
         this.httpPath = endpoint.template();
         this.deprecated = endpoint.deprecated().isPresent();
         this.incubating = endpoint.tags().contains("incubating");
@@ -43,8 +42,8 @@ final class EndpointTagTranslator implements TagTranslator<HttpServerExchange> {
     public <T> void translate(TagAdapter<T> adapter, T target, HttpServerExchange _data) {
         adapter.tag(target, "serviceName", serviceName);
         adapter.tag(target, "endpointName", endpointName);
-        adapter.tag(target, "method", httpMethod);
-        adapter.tag(target, "path", httpPath);
+        // Note: CompletedRequestTagTranslator already provides TraceTags.HTTP_METHOD
+        adapter.tag(target, TraceTags.HTTP_URL_PATH_TEMPLATE, httpPath);
         if (deprecated) {
             adapter.tag(target, "deprecated", "true");
         }
@@ -57,8 +56,7 @@ final class EndpointTagTranslator implements TagTranslator<HttpServerExchange> {
     public String toString() {
         return "TracedRequestTagTranslator{serviceName='"
                 + serviceName + "', endpointName='"
-                + endpointName + "', httpMethod='"
-                + httpMethod + "', httpPath='"
+                + endpointName + "', httpPath='"
                 + httpPath + "', deprecated="
                 + deprecated + ", incubating="
                 + incubating + "}";

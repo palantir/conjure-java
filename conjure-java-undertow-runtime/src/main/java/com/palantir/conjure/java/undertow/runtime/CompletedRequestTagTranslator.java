@@ -16,21 +16,35 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.base.Strings;
 import com.palantir.tracing.TagTranslator;
+import com.palantir.tracing.api.TraceTags;
 import com.palantir.tracing.undertow.TracingAttachments;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HeaderMap;
+import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 
 /** Request tracing {@link TagTranslator} which applies tag data to a top level request span. */
 enum CompletedRequestTagTranslator implements TagTranslator<HttpServerExchange> {
     INSTANCE;
 
+    private static final HttpString FETCH_USER_AGENT = HttpString.tryFromString("Fetch-User-Agent");
+
     @Override
     public <T> void translate(TagAdapter<T> adapter, T target, HttpServerExchange exchange) {
         String maybeRequestId = exchange.getAttachment(TracingAttachments.REQUEST_ID);
         if (maybeRequestId != null) {
-            adapter.tag(target, "requestId", maybeRequestId);
+            adapter.tag(target, TraceTags.HTTP_REQUEST_ID, maybeRequestId);
         }
-        adapter.tag(target, "status", statusString(exchange.getStatusCode()));
+        String agent = conjureUserAgent(exchange);
+        if (!Strings.isNullOrEmpty(agent)) {
+            adapter.tag(target, TraceTags.HTTP_USER_AGENT, agent);
+        }
+        adapter.tag(target, TraceTags.HTTP_STATUS_CODE, statusString(exchange.getStatusCode()));
+        adapter.tag(target, TraceTags.HTTP_METHOD, exchange.getRequestMethod().toString());
+        adapter.tag(target, TraceTags.HTTP_URL_SCHEME, exchange.getRequestScheme());
+        adapter.tag(target, TraceTags.HTTP_VERSION, exchange.getProtocol().toString());
     }
 
     static String statusString(int statusCode) {
@@ -42,5 +56,12 @@ enum CompletedRequestTagTranslator implements TagTranslator<HttpServerExchange> 
                 return "204";
         }
         return Integer.toString(statusCode);
+    }
+
+    // Loads the User-Agent from the request, preferring the 'Fetch-User-Agent' if present.
+    static String conjureUserAgent(HttpServerExchange exchange) {
+        HeaderMap requestHeaders = exchange.getRequestHeaders();
+        String fetchUserAgent = requestHeaders.getFirst(FETCH_USER_AGENT);
+        return Strings.isNullOrEmpty(fetchUserAgent) ? requestHeaders.getFirst(Headers.USER_AGENT) : fetchUserAgent;
     }
 }
