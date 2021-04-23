@@ -76,6 +76,7 @@ dependencies {
     testCompile 'org.mockito:mockito-core'
     testCompile 'jakarta.xml.bind:jakarta.xml.bind-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'io.quarkus.http:quarkus-http-vertx-backend'
 
     integrationInputCompile project(':conjure-lib')
     integrationInputCompile project(':conjure-undertow-lib')

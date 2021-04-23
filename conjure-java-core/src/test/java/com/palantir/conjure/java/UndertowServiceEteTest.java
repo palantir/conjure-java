@@ -114,7 +114,6 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @BeforeAll
     public static void before() {
-
         HttpHandler handler = ConjureHandler.builder()
                 .services(EteServiceEndpoints.of(new UndertowEteResource()))
                 .services(EmptyPathServiceEndpoints.of(() -> true))
