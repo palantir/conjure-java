@@ -27,8 +27,6 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import com.palantir.tracing.undertow.TracedOperationHandler;
-import com.palantir.tracing.undertow.TracedRequestHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -186,11 +184,11 @@ public final class ConjureHandler implements HttpHandler {
             ImmutableList<EndpointHandlerWrapper> wrappers = ImmutableList.<EndpointHandlerWrapper>builder()
                     .add(
                             // Begin the server span as early as possible to capture the most of the request.
-                            endpoint -> Optional.of(new TracedRequestHandler(
-                                    endpoint.handler(),
-                                    "Undertow: " + endpoint.method() + " " + endpoint.template(),
-                                    CompletedRequestTagTranslator.INSTANCE.andThen(
-                                            new EndpointTagTranslator(endpoint)))),
+                            // endpoint -> Optional.of(new TracedRequestHandler(
+                            //         endpoint.handler(),
+                            //         "Undertow: " + endpoint.method() + " " + endpoint.template(),
+                            //         CompletedRequestTagTranslator.INSTANCE.andThen(
+                            //                 new EndpointTagTranslator(endpoint)))),
                             // Allow the server to configure UndertowOptions.DECODE_URL = false to allow slashes in
                             // parameters. Servers which do not configure DECODE_URL will still work properly except
                             // for encoded slash values. When DECODE_URL has not been disabled, the following handler
@@ -217,10 +215,10 @@ public final class ConjureHandler implements HttpHandler {
                             // Logging context and trace handler must execute prior to the exception
                             // to provide user and trace information on exceptions.
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
-                            endpoint -> Optional.of(new TracedOperationHandler(
-                                    endpoint.handler(),
-                                    "conjure-undertow-dispatched: " + endpoint.serviceName() + '.' + endpoint.name(),
-                                    new EndpointTagTranslator(endpoint))),
+                            // endpoint -> Optional.of(new TracedOperationHandler(
+                            //         endpoint.handler(),
+                            //         "conjure-undertow-dispatched: " + endpoint.serviceName() + '.' + endpoint.name(),
+                            //         new EndpointTagTranslator(endpoint))),
                             endpoint -> Optional.of(
                                     new ConjureExceptionHandler(endpoint.handler(), runtime.exceptionHandler())))
                     .build()
