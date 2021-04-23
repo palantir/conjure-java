@@ -21,7 +21,7 @@ import com.google.errorprone.annotations.CompileTimeConstant;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeLoggable;
-import io.undertow.util.StatusCodes;
+import io.undertow.httpcore.StatusCodes;
 import java.util.List;
 
 /** Internal type to signal a conjure protocol-level failure with a specific response code. */

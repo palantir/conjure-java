@@ -20,7 +20,6 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.google.common.net.HttpHeaders;
 import io.undertow.Undertow;
-import io.undertow.util.Headers;
 import java.io.IOException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,7 +40,7 @@ public class NoCachingResponseHandlerTest {
                 .addHttpListener(12345, "localhost")
                 .setHandler(new NoCachingResponseHandler(exchange -> {
                     if (exchange.getQueryParameters().containsKey("override")) {
-                        exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "custom override");
+                        exchange.setResponseHeader(HttpHeaders.CACHE_CONTROL, "custom override");
                     }
                 }))
                 .build();

@@ -17,13 +17,13 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.base.Joiner;
+import com.google.common.net.HttpHeaders;
 import com.palantir.logsafe.Preconditions;
+import io.undertow.httpcore.StatusCodes;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
-import io.undertow.util.StatusCodes;
 import java.util.Set;
 
 final class OptionsHandler implements HttpHandler {
@@ -36,8 +36,9 @@ final class OptionsHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {
-        Preconditions.checkState(Methods.OPTIONS.equals(exchange.getRequestMethod()), "Expected an OPTIONS request");
-        exchange.getResponseHeaders().put(Headers.ALLOW, allowValue);
+        Preconditions.checkState(
+                Methods.OPTIONS_STRING.equals(exchange.getRequestMethod()), "Expected an OPTIONS request");
+        exchange.setResponseHeader(HttpHeaders.ALLOW, allowValue);
         exchange.setStatusCode(StatusCodes.NO_CONTENT);
     }
 }

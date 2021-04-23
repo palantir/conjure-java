@@ -16,11 +16,9 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.net.HttpHeaders;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HeaderMap;
-import io.undertow.util.Headers;
-import io.undertow.util.HttpString;
 
 /**
  * Applies security headers. These headers include:
@@ -48,8 +46,7 @@ final class WebSecurityHandler implements HttpHandler {
 
     private static final String REFERRER_POLICY = "strict-origin-when-cross-origin";
 
-    private static final HttpString HEADER_IE_X_CONTENT_SECURITY_POLICY =
-            HttpString.tryFromString("X-Content-Security-Policy");
+    private static final String HEADER_IE_X_CONTENT_SECURITY_POLICY = "X-Content-Security-Policy";
     private static final String USER_AGENT_IE_10 = "MSIE 10";
     private static final String USER_AGENT_IE_11 = "rv:11.0";
 
@@ -61,17 +58,16 @@ final class WebSecurityHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        HeaderMap headers = exchange.getResponseHeaders();
-        headers.put(Headers.CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY);
-        headers.put(Headers.REFERRER_POLICY, REFERRER_POLICY);
-        headers.put(Headers.X_CONTENT_TYPE_OPTIONS, CONTENT_TYPE_OPTIONS);
-        headers.put(Headers.X_FRAME_OPTIONS, FRAME_OPTIONS);
-        headers.put(Headers.X_XSS_PROTECTION, XSS_PROTECTION);
-        String userAgent = exchange.getRequestHeaders().getFirst(Headers.USER_AGENT);
+        exchange.setResponseHeader(HttpHeaders.CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY);
+        exchange.setResponseHeader(HttpHeaders.REFERRER_POLICY, REFERRER_POLICY);
+        exchange.setResponseHeader(HttpHeaders.X_CONTENT_TYPE_OPTIONS, CONTENT_TYPE_OPTIONS);
+        exchange.setResponseHeader(HttpHeaders.X_FRAME_OPTIONS, FRAME_OPTIONS);
+        exchange.setResponseHeader(HttpHeaders.X_XSS_PROTECTION, XSS_PROTECTION);
+        String userAgent = exchange.getRequestHeader(HttpHeaders.USER_AGENT);
         if (userAgent != null) {
             // send the CSP header so that IE10 and IE11 recognise it
             if (userAgent.contains(USER_AGENT_IE_10) || userAgent.contains(USER_AGENT_IE_11)) {
-                headers.put(HEADER_IE_X_CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY);
+                exchange.setResponseHeader(HEADER_IE_X_CONTENT_SECURITY_POLICY, CONTENT_SECURITY_POLICY);
             }
         }
         next.handleRequest(exchange);

@@ -23,7 +23,6 @@ import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.logsafe.Arg;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HeaderValues;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -56,13 +55,13 @@ final class ConjureContexts implements Contexts {
 
         @Override
         public List<String> header(String headerName) {
-            HeaderValues header = exchange.getRequestHeaders().get(headerName);
+            List<String> header = exchange.getRequestHeaders(headerName);
             return header == null ? ImmutableList.of() : Collections.unmodifiableList(header);
         }
 
         @Override
         public Optional<String> firstHeader(String headerName) {
-            return Optional.ofNullable(exchange.getRequestHeaders().getFirst(headerName));
+            return Optional.ofNullable(exchange.getRequestHeader(headerName));
         }
 
         @Override

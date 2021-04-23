@@ -13,13 +13,12 @@ import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import io.undertow.httpcore.StatusCodes;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
-import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Deque;
@@ -1312,9 +1311,9 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
-            HeaderMap headerParams = exchange.getRequestHeaders();
-            SimpleEnum headerParameter =
-                    runtime.plainSerDe().deserializeComplex(headerParams.get("Custom-Header"), SimpleEnum::valueOf);
+
+            SimpleEnum headerParameter = runtime.plainSerDe()
+                    .deserializeComplex(exchange.getRequestHeaders("Custom-Header"), SimpleEnum::valueOf);
             SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
             serializer.serialize(result, exchange);
         }

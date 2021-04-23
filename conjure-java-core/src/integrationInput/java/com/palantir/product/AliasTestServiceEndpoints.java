@@ -10,7 +10,7 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
-import io.undertow.util.StatusCodes;
+import io.undertow.httpcore.StatusCodes;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.List;

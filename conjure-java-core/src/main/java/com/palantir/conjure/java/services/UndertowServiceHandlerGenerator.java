@@ -71,11 +71,11 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import io.undertow.httpcore.StatusCodes;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
-import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -392,7 +392,6 @@ final class UndertowServiceHandlerGenerator {
 
     private static final String PATH_PARAMS_VAR_NAME = "pathParams";
     private static final String QUERY_PARAMS_VAR_NAME = "queryParams";
-    private static final String HEADER_PARAMS_VAR_NAME = "headerParams";
 
     private CodeBlock endpointInvocation(
             EndpointDefinition endpointDefinition,
@@ -631,11 +630,6 @@ final class UndertowServiceHandlerGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
         if (hasHeaderArgument(endpointDefinition.getArgs())) {
-            code.addStatement(
-                    "$1T $2N = $3N.getRequestHeaders()",
-                    io.undertow.util.HeaderMap.class,
-                    HEADER_PARAMS_VAR_NAME,
-                    EXCHANGE_VAR_NAME);
             code.add(generateHeaderParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper));
         }
     }
@@ -678,6 +672,7 @@ final class UndertowServiceHandlerGenerator {
                 endpoint,
                 ParameterTypeVisitor.IS_PATH,
                 PATH_PARAMS_VAR_NAME,
+                "get",
                 arg -> arg.getArgName().get(),
                 typeDefinitions,
                 typeMapper);
@@ -691,6 +686,7 @@ final class UndertowServiceHandlerGenerator {
                 endpoint,
                 ParameterTypeVisitor.IS_QUERY,
                 QUERY_PARAMS_VAR_NAME,
+                "get",
                 arg -> arg.getParamType()
                         .accept(ParameterTypeVisitor.QUERY)
                         .getParamId()
@@ -706,7 +702,8 @@ final class UndertowServiceHandlerGenerator {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_HEADER,
-                HEADER_PARAMS_VAR_NAME,
+                EXCHANGE_VAR_NAME,
+                "getRequestHeaders",
                 arg -> arg.getParamType()
                         .accept(ParameterTypeVisitor.HEADER)
                         .getParamId()
@@ -719,6 +716,7 @@ final class UndertowServiceHandlerGenerator {
             EndpointDefinition endpoint,
             ParameterType.Visitor<Boolean> paramTypeVisitor,
             String paramsVarName,
+            String paramsAccessorName,
             Function<ArgumentDefinition, String> toParamId,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper) {
@@ -733,13 +731,23 @@ final class UndertowServiceHandlerGenerator {
                             || TypeFunctions.isListOrSet(arg.getType())) {
                         // type is not an alias or optional of an alias
                         retrieveParam = decodePlainParameterCodeBlock(
-                                arg.getType(), typeMapper, paramName, paramsVarName, toParamId.apply(arg));
+                                arg.getType(),
+                                typeMapper,
+                                paramName,
+                                paramsVarName,
+                                paramsAccessorName,
+                                toParamId.apply(arg));
                     } else {
                         // type contains aliases: decode raw value and then construct real value from raw one
                         String rawVarName = arg.getArgName().get() + "Raw";
                         retrieveParam = CodeBlocks.of(
                                 decodePlainParameterCodeBlock(
-                                        normalizedType, typeMapper, rawVarName, paramsVarName, toParamId.apply(arg)),
+                                        normalizedType,
+                                        typeMapper,
+                                        rawVarName,
+                                        paramsVarName,
+                                        paramsAccessorName,
+                                        toParamId.apply(arg)),
                                 CodeBlocks.statement(
                                         "$1T $2N = $3L",
                                         typeMapper.getClassName(arg.getType()),
@@ -755,7 +763,12 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private CodeBlock decodePlainParameterCodeBlock(
-            Type type, TypeMapper typeMapper, String resultVarName, String paramsVarName, String paramId) {
+            Type type,
+            TypeMapper typeMapper,
+            String resultVarName,
+            String paramsVarName,
+            String paramsAccessorName,
+            String paramId) {
         if (type.accept(MoreVisitors.IS_EXTERNAL)) {
             return CodeBlocks.statement(
                     "$1T $2N = $3T.valueOf($4N.plainSerDe().deserializeString($5N.get($6S)))",
@@ -764,6 +777,7 @@ final class UndertowServiceHandlerGenerator {
                     typeMapper.getClassName(type).box(),
                     RUNTIME_VAR_NAME,
                     paramsVarName,
+                    paramsAccessorName,
                     paramId);
         }
         Optional<CodeBlock> complexDeserializer =
@@ -772,12 +786,13 @@ final class UndertowServiceHandlerGenerator {
             return complexDeserializer.get();
         }
         return CodeBlocks.statement(
-                "$1T $2N = $3N.plainSerDe().$4L($5N.get($6S))",
+                "$1T $2N = $3N.plainSerDe().$4L($5N.$6L($7S))",
                 typeMapper.getClassName(type),
                 resultVarName,
                 RUNTIME_VAR_NAME,
                 deserializeFunctionName(type),
                 paramsVarName,
+                paramsAccessorName,
                 paramId);
     }
 

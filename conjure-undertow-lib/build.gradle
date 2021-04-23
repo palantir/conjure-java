@@ -19,7 +19,7 @@ apply plugin: 'com.palantir.external-publish-jar'
 dependencies {
     api project(':conjure-lib')
     // Generated code depends on Undertow APIs
-    api 'io.undertow:undertow-core'
+    api 'io.quarkus.http:quarkus-http-core'
     // Ideally we would declare a dependency on 'com.google.guava:listenablefuture:1.0' without all of guava,
     // however gcv forces consistent versions across the project.
     api 'com.google.guava:guava'

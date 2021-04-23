@@ -18,13 +18,12 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.CookieImpl;
-import io.undertow.util.Headers;
-import io.undertow.util.Methods;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
@@ -73,7 +72,7 @@ public class BearerTokenLoggingTest {
         MDC.clear();
         delegateRunnable.set(null);
         exchange = HttpServerExchanges.createStub();
-        exchange.setRequestMethod(Methods.GET);
+        exchange.requestMethod("GET");
         handler = new LoggingContextHandler(httpServerExchange -> {
             CONTEXT.auth().header(httpServerExchange);
             delegate.handleRequest(httpServerExchange);
@@ -90,7 +89,7 @@ public class BearerTokenLoggingTest {
         MDC.put("userId", "foo");
         MDC.put("sessionId", "foo");
         MDC.put("tokenId", "foo");
-        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "hello");
+        exchange.setRequestHeader(HttpHeaders.AUTHORIZATION, "hello");
         delegateRunnable.set(this::assertMdcUnset);
         handler.handleRequest(exchange);
         assertMdcUnset();
@@ -137,7 +136,7 @@ public class BearerTokenLoggingTest {
     private void runTest(
             String authHeader, @Nullable String userId, @Nullable String sessionId, @Nullable String tokenId)
             throws Exception {
-        exchange.getRequestHeaders().put(Headers.AUTHORIZATION, authHeader);
+        exchange.setRequestHeader(HttpHeaders.AUTHORIZATION, authHeader);
         AtomicBoolean invoked = new AtomicBoolean();
         delegateRunnable.set(() -> {
             assertThat(MDC.get("userId")).isEqualTo(userId);

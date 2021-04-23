@@ -24,8 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Safe implementation of {@link ExchangeCompletionListener} which always calls the {@link NextListener} and logs
- * failures.
+ * Safe implementation of {@link ExchangeCompletionListener} which safe-logs on failure.
  */
 public final class SafeExchangeCompletionListener implements ExchangeCompletionListener {
 
@@ -41,17 +40,11 @@ public final class SafeExchangeCompletionListener implements ExchangeCompletionL
     }
 
     @Override
-    public void exchangeEvent(HttpServerExchange exchange, NextListener nextListener) {
+    public void exchangeEvent(HttpServerExchange exchange) {
         try {
             action.accept(exchange);
         } catch (RuntimeException | Error e) {
             log.error("ExchangeCompletionListener threw an exception", e);
-        } finally {
-            try {
-                nextListener.proceed();
-            } catch (RuntimeException | Error e) {
-                log.error("NextListener.proceed threw an exception", e);
-            }
         }
     }
 }

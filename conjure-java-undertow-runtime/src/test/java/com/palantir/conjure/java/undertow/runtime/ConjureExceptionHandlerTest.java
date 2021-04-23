@@ -150,8 +150,9 @@ public final class ConjureExceptionHandlerTest {
 
         assertThat(response.code()).isEqualTo(429);
         assertThat(response.body().string()).isEmpty();
-        assertThat(response.headers().toMultimap()).doesNotContainKey("Retry-After");
-        assertThat(response.headers().toMultimap()).containsOnlyKeys("connection", "content-length", "date");
+        assertThat(response.headers().toMultimap())
+                .doesNotContainKey("Retry-After")
+                .containsOnlyKeys("content-length");
     }
 
     @Test

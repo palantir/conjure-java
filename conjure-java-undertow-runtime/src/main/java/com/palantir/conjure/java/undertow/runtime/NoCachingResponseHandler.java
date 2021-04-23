@@ -16,9 +16,9 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.net.HttpHeaders;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Headers;
 
 /**
  * Adds HTTP response headers to GET requests to disable caching.
@@ -39,7 +39,7 @@ final class NoCachingResponseHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, DO_NOT_CACHE);
+        exchange.setResponseHeader(HttpHeaders.CACHE_CONTROL, DO_NOT_CACHE);
         next.handleRequest(exchange);
     }
 }

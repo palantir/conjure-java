@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
@@ -25,8 +26,7 @@ import com.palantir.tokens.auth.BearerToken;
 import com.palantir.tokens.auth.UnverifiedJsonWebToken;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
-import io.undertow.util.HeaderValues;
-import io.undertow.util.Headers;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.slf4j.MDC;
@@ -106,7 +106,7 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
     }
 
     private static AuthHeader parseAuthHeader(HttpServerExchange exchange) {
-        HeaderValues authorization = exchange.getRequestHeaders().get(Headers.AUTHORIZATION);
+        List<String> authorization = exchange.getRequestHeaders(HttpHeaders.AUTHORIZATION);
         // Do not use Iterables.getOnlyElement because it includes values in the exception message.
         // We do not want credential material logged to disk, even if it's marked unsafe.
         if (authorization == null) {

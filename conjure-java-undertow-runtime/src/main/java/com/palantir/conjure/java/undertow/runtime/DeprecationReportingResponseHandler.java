@@ -18,7 +18,6 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HttpString;
 
 /**
  * Adds HTTP response headers to indicate endpoint deprecation.
@@ -27,7 +26,7 @@ import io.undertow.util.HttpString;
  */
 final class DeprecationReportingResponseHandler implements HttpHandler {
 
-    private static final HttpString DEPRECATION = HttpString.tryFromString("deprecation");
+    private static final String DEPRECATION = "deprecation";
     private static final String IS_DEPRECATED = "true";
 
     private final HttpHandler next;
@@ -38,7 +37,7 @@ final class DeprecationReportingResponseHandler implements HttpHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        exchange.getResponseHeaders().put(DEPRECATION, IS_DEPRECATED);
+        exchange.setResponseHeader(DEPRECATION, IS_DEPRECATED);
         next.handleRequest(exchange);
     }
 }

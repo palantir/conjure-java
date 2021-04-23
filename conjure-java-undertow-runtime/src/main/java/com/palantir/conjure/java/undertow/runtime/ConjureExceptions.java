@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -25,9 +26,9 @@ import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
-import io.undertow.io.UndertowOutputStream;
+import io.undertow.httpcore.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.Headers;
+import io.undertow.util.IoUtils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
@@ -36,7 +37,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xnio.IoUtils;
 
 /**
  * Maps caught {@link Throwable} instances into HTTP responses. The result is written into the
@@ -184,7 +184,7 @@ public enum ConjureExceptions implements ExceptionHandler {
             // Note that in the case of http/2 this does not close a connection, which
             // would break other active requests, only resets the stream.
             log.warn("Closing the connection to alert the client of an error");
-            IoUtils.safeClose(exchange.getConnection());
+            IoUtils.safeClose(exchange.getDelegate());
         }
     }
 
@@ -255,15 +255,15 @@ public enum ConjureExceptions implements ExceptionHandler {
                 @Override
                 public Consumer<HttpServerExchange> visit(QosException.Throttle exception) {
                     return exchange -> exception.getRetryAfter().ifPresent(duration -> {
-                        exchange.getResponseHeaders()
-                                .put(Headers.RETRY_AFTER, Long.toString(duration.get(ChronoUnit.SECONDS)));
+                        exchange.setResponseHeader(
+                                HttpHeaders.RETRY_AFTER, Long.toString(duration.get(ChronoUnit.SECONDS)));
                     });
                 }
 
                 @Override
                 public Consumer<HttpServerExchange> visit(QosException.RetryOther exception) {
-                    return exchange -> exchange.getResponseHeaders()
-                            .put(Headers.LOCATION, exception.getRedirectTo().toString());
+                    return exchange -> exchange.setResponseHeader(
+                            HttpHeaders.LOCATION, exception.getRedirectTo().toString());
                 }
 
                 @Override

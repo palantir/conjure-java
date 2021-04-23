@@ -55,7 +55,6 @@ import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
-import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -123,7 +122,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 .build();
 
         server = Undertow.builder()
-                .setServerOption(UndertowOptions.DECODE_URL, false)
+                // .setServerOption(UndertowOptions.DECODE_URL, false)
                 .addHttpListener(8080, "0.0.0.0")
                 .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
                 .build();

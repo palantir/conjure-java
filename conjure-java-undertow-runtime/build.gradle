@@ -21,7 +21,9 @@ dependencies {
 
     implementation 'com.google.guava:guava'
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
-    implementation 'com.palantir.tracing:tracing-undertow'
+    implementation 'com.palantir.tracing:tracing-undertow', {
+        exclude module: 'undertow-core'
+    }
     implementation 'org.slf4j:slf4j-api'
 
     testImplementation 'com.squareup.okhttp3:okhttp'
@@ -33,6 +35,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'com.palantir.conjure.java.api:test-utils'
+    testImplementation 'io.quarkus.http:quarkus-http-vertx-backend'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'

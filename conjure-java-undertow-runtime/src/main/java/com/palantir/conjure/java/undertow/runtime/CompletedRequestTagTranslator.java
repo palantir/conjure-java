@@ -17,19 +17,17 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.base.Strings;
+import com.google.common.net.HttpHeaders;
 import com.palantir.tracing.TagTranslator;
 import com.palantir.tracing.api.TraceTags;
 import com.palantir.tracing.undertow.TracingAttachments;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HeaderMap;
-import io.undertow.util.Headers;
-import io.undertow.util.HttpString;
 
 /** Request tracing {@link TagTranslator} which applies tag data to a top level request span. */
 enum CompletedRequestTagTranslator implements TagTranslator<HttpServerExchange> {
     INSTANCE;
 
-    private static final HttpString FETCH_USER_AGENT = HttpString.tryFromString("Fetch-User-Agent");
+    private static final String FETCH_USER_AGENT = "Fetch-User-Agent";
 
     @Override
     public <T> void translate(TagAdapter<T> adapter, T target, HttpServerExchange exchange) {
@@ -60,8 +58,9 @@ enum CompletedRequestTagTranslator implements TagTranslator<HttpServerExchange> 
 
     // Loads the User-Agent from the request, preferring the 'Fetch-User-Agent' if present.
     static String conjureUserAgent(HttpServerExchange exchange) {
-        HeaderMap requestHeaders = exchange.getRequestHeaders();
-        String fetchUserAgent = requestHeaders.getFirst(FETCH_USER_AGENT);
-        return Strings.isNullOrEmpty(fetchUserAgent) ? requestHeaders.getFirst(Headers.USER_AGENT) : fetchUserAgent;
+        String fetchUserAgent = exchange.getRequestHeader(FETCH_USER_AGENT);
+        return Strings.isNullOrEmpty(fetchUserAgent)
+                ? exchange.getRequestHeader(HttpHeaders.USER_AGENT)
+                : fetchUserAgent;
     }
 }

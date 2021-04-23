@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import static com.palantir.conjure.java.api.testing.Assertions.assertThatServiceExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -26,7 +27,6 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.CookieImpl;
-import io.undertow.util.Headers;
 import org.junit.jupiter.api.Test;
 
 public final class AuthTest {
@@ -38,7 +38,7 @@ public final class AuthTest {
     public void testParseAuthHeader() {
         AuthHeader expected = AuthHeader.of(BearerToken.valueOf("token"));
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, expected.toString());
+        exchange.addRequestHeader(HttpHeaders.AUTHORIZATION, expected.toString());
         assertThat(CONTEXT.auth().header(exchange)).isEqualTo(expected);
     }
 
@@ -52,7 +52,7 @@ public final class AuthTest {
     @Test
     public void testAuthHeaderEmptyValue() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "");
+        exchange.addRequestHeader(HttpHeaders.AUTHORIZATION, "");
         assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().header(exchange))
                 .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }
@@ -60,8 +60,8 @@ public final class AuthTest {
     @Test
     public void testAuthHeaderMultipleValues() {
         HttpServerExchange exchange = HttpServerExchanges.createStub();
-        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer foo");
-        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, "Bearer bar");
+        exchange.addRequestHeader(HttpHeaders.AUTHORIZATION, "Bearer foo");
+        exchange.addRequestHeader(HttpHeaders.AUTHORIZATION, "Bearer bar");
         assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().header(exchange))
                 .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
     }

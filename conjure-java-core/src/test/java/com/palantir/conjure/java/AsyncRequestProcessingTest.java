@@ -43,7 +43,6 @@ import com.palantir.product.AsyncRequestProcessingTestService;
 import com.palantir.product.AsyncRequestProcessingTestServiceEndpoints;
 import com.palantir.tracing.Tracer;
 import io.undertow.Undertow;
-import io.undertow.UndertowOptions;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -99,7 +98,7 @@ public final class AsyncRequestProcessingTest extends TestBase {
     public void before() {
         executor = MoreExecutors.listeningDecorator(Executors.newSingleThreadScheduledExecutor());
         server = Undertow.builder()
-                .setServerOption(UndertowOptions.DECODE_URL, false)
+                // .setServerOption(UndertowOptions.DECODE_URL, false)
                 .addHttpListener(PORT, "0.0.0.0")
                 .setHandler(ConjureHandler.builder()
                         .runtime(ConjureUndertowRuntime.builder()

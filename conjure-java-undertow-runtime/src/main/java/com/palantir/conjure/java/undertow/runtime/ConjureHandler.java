@@ -68,7 +68,7 @@ public final class ConjureHandler implements HttpHandler {
                         endpoint -> normalizeTemplate(endpoint.template()), Endpoint::method))
                 .asMap()
                 .forEach((normalizedPath, methods) -> routingHandler.add(
-                        Methods.OPTIONS,
+                        Methods.OPTIONS.toString(),
                         normalizedPath,
                         new WebSecurityHandler(new OptionsHandler(ImmutableSet.copyOf(methods)))));
     }
@@ -79,7 +79,7 @@ public final class ConjureHandler implements HttpHandler {
     }
 
     private void register(Endpoint endpoint) {
-        routingHandler.add(endpoint.method(), endpoint.template(), endpoint.handler());
+        routingHandler.add(endpoint.method().toString(), endpoint.template(), endpoint.handler());
     }
 
     public static Builder builder() {

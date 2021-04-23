@@ -11,13 +11,12 @@ import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
+import io.undertow.httpcore.StatusCodes;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.PathTemplateMatch;
-import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Deque;
@@ -144,8 +143,7 @@ public final class TestServiceEndpoints implements UndertowService {
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
             CreateDatasetRequest request = deserializer.deserialize(exchange);
-            HeaderMap headerParams = exchange.getRequestHeaders();
-            String testHeaderArg = runtime.plainSerDe().deserializeString(headerParams.get("Test-Header"));
+            String testHeaderArg = runtime.plainSerDe().deserializeString(exchange.getRequestHeaders("Test-Header"));
             runtime.markers().param("com.palantir.logsafe.Safe", "testHeaderArg", testHeaderArg, exchange);
             Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
             serializer.serialize(result, exchange);

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -30,14 +31,13 @@ import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.TagTranslator;
 import com.palantir.tracing.Tracer;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
+import io.undertow.util.IoUtils;
 import io.undertow.util.Protocols;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.List;
-import org.xnio.IoUtils;
 
 /** Package private internal API. */
 final class ConjureBodySerDe implements BodySerDe {
@@ -73,7 +73,7 @@ final class ConjureBodySerDe implements BodySerDe {
     @Override
     public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
         Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
-        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
+        exchange.setResponseHeader(HttpHeaders.CONTENT_TYPE, BINARY_CONTENT_TYPE);
         Tracer.fastStartSpan(TracedEncoding.SERIALIZE_OPERATION);
         try {
             value.write(exchange.getOutputStream());
@@ -84,7 +84,7 @@ final class ConjureBodySerDe implements BodySerDe {
 
     @Override
     public InputStream deserializeInputStream(HttpServerExchange exchange) {
-        String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
+        String contentType = exchange.getRequestHeader(HttpHeaders.CONTENT_TYPE);
         if (contentType == null) {
             throw new SafeIllegalArgumentException("Request is missing Content-Type header");
         }
@@ -112,14 +112,14 @@ final class ConjureBodySerDe implements BodySerDe {
             Preconditions.checkNotNull(value, "cannot serialize null value");
             safelyDrainRequestBody(exchange);
             EncodingSerializerContainer<T> container = getResponseSerializer(exchange);
-            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, container.encoding.getContentType());
+            exchange.setResponseHeader(HttpHeaders.CONTENT_TYPE, container.encoding.getContentType());
             container.serializer.serialize(value, exchange.getOutputStream());
         }
 
         /** Returns the {@link EncodingSerializerContainer} to use for the exchange response. */
         @SuppressWarnings("ForLoopReplaceableByForEach") // performance sensitive code avoids iterator allocation
         EncodingSerializerContainer<T> getResponseSerializer(HttpServerExchange exchange) {
-            HeaderValues acceptValues = exchange.getRequestHeaders().get(Headers.ACCEPT);
+            List<String> acceptValues = exchange.getRequestHeaders(HttpHeaders.ACCEPT);
             if (acceptValues != null) {
                 // This implementation prefers the client "Accept" order
                 for (int i = 0; i < acceptValues.size(); i++) {
@@ -196,14 +196,14 @@ final class ConjureBodySerDe implements BodySerDe {
 
         private static boolean maybeEmptyBody(HttpServerExchange exchange) {
             // Content-Length maybe null if "Transfer-Encoding: chunked" is sent with a full body.
-            String contentLength = exchange.getRequestHeaders().getFirst(Headers.CONTENT_LENGTH);
+            String contentLength = exchange.getRequestHeader(HttpHeaders.CONTENT_LENGTH);
             return contentLength == null || "0".equals(contentLength);
         }
 
         /** Returns the {@link EncodingDeserializerContainer} to use to deserialize the request body. */
         @SuppressWarnings("ForLoopReplaceableByForEach") // performance sensitive code avoids iterator allocation
         EncodingDeserializerContainer<T> getRequestDeserializer(HttpServerExchange exchange) {
-            String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
+            String contentType = exchange.getRequestHeader(HttpHeaders.CONTENT_TYPE);
             if (contentType == null) {
                 throw new SafeIllegalArgumentException("Request is missing Content-Type header");
             }
@@ -235,7 +235,8 @@ final class ConjureBodySerDe implements BodySerDe {
      */
     private static void safelyDrainRequestBody(HttpServerExchange exchange) {
         // No need to impact http/2 which supports out-of-band responses.
-        if ((Protocols.HTTP_1_1.equals(exchange.getProtocol()) || Protocols.HTTP_1_0.equals(exchange.getProtocol()))
+        if ((Protocols.HTTP_1_1_STRING.equals(exchange.getProtocol())
+                        || Protocols.HTTP_1_0_STRING.equals(exchange.getProtocol()))
                 && !exchange.isRequestComplete()) {
             try (CloseableTracer ignored = CloseableTracer.startSpan("Undertow: drain request body")) {
                 IoUtils.safeClose(exchange.getInputStream());

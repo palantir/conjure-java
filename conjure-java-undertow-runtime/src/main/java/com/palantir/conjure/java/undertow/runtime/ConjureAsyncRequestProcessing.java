@@ -25,6 +25,7 @@ import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tracing.DeferredTracer;
+import io.netty.util.concurrent.ScheduledFuture;
 import io.undertow.server.ExchangeCompletionListener;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -35,7 +36,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.xnio.XnioExecutor;
 
 /**
  *
@@ -125,9 +125,10 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
             exchange.addExchangeCompleteListener(COMPLETION_LISTENER);
         }
 
-        XnioExecutor.Key timeoutKey = exchange.getIoThread()
-                .executeAfter(() -> future.cancel(INTERRUPT_ON_CANCEL), timeout.toMillis(), TimeUnit.MILLISECONDS);
-        future.addListener(timeoutKey::remove, DIRECT_EXECUTOR);
+        ScheduledFuture<?> timeoutKey = exchange.getIoThread()
+                .schedule(
+                        (Runnable) () -> future.cancel(INTERRUPT_ON_CANCEL), timeout.toMillis(), TimeUnit.MILLISECONDS);
+        future.addListener(() -> timeoutKey.cancel(false), DIRECT_EXECUTOR);
         // Dispatch the registration task, this accomplishes two things:
         // 1. Puts the exchange into a 'dispatched' state, otherwise the request will be terminated when
         //    the endpoint HttpHandler returns. See Connectors.executeRootHandler for more information.
