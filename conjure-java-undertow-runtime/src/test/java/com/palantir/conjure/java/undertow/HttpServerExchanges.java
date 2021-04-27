@@ -45,6 +45,7 @@ public final class HttpServerExchanges {
 
     private HttpServerExchanges() {}
 
+    @SuppressWarnings("checkstyle:MethodLength")
     public static HttpServerExchange createStub() {
         HttpExchange exchange = new HttpExchangeBase() {
 
