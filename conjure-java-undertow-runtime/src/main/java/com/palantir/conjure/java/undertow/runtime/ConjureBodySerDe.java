@@ -251,8 +251,8 @@ final class ConjureBodySerDe implements BodySerDe {
     }
 
     /**
-     * Gets the request {@code Content-Type} header if exactly one value exists, otherwise throws
-     * a {@link SafeIllegalArgumentException}. This prevents unexpected behavior when multiple
+     * Gets the request {@code Content-Type} header if exactly one value exists, otherwise logs
+     * a warning. This notifies us in the unexpected case when multiple
      * content-type headers are incorrectly sent to the server, it's not clear which should
      * be used.
      */
