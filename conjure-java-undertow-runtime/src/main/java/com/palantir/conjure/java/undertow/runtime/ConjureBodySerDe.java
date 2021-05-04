@@ -37,11 +37,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xnio.IoUtils;
 
 /** Package private internal API. */
 final class ConjureBodySerDe implements BodySerDe {
 
+    private static final Logger log = LoggerFactory.getLogger(ConjureBodySerDe.class);
     private static final String BINARY_CONTENT_TYPE = "application/octet-stream";
     private static final Splitter ACCEPT_VALUE_SPLITTER =
             Splitter.on(',').trimResults().omitEmptyStrings();
@@ -258,9 +261,10 @@ final class ConjureBodySerDe implements BodySerDe {
         if (contentTypeValues == null || contentTypeValues.isEmpty()) {
             throw new SafeIllegalArgumentException("Request is missing Content-Type header");
         } else if (contentTypeValues.size() != 1) {
-            throw new SafeIllegalArgumentException(
+            log.warn(
                     "Request has too many Content-Type headers",
                     SafeArg.of("contentTypes", ImmutableList.copyOf(contentTypeValues)));
+            return contentTypeValues.getFirst();
         }
         return contentTypeValues.get(0);
     }
