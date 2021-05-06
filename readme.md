@@ -44,6 +44,19 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
         --useStagedBuilders
                      Generates compile-time safe builders to ensure all required attributes are set.
 
+### Known Tag Values
+
+#### Endpoint Tags
+
+* `incubating`: Describes an endpoint as incubating and likely to change. These endpoints are generated with an `@Incubating` annotation.
+* `server-request-context`: Opt into an additional `RequestContext` parameter in conjure-undertow interfaces, which allows request metadata to be read, and additional arguments to be associated with the request log.
+* `server-async`: Opt into asynchronous request processing in conjure-undertow. The generated interface returns a `ListenableFuture` of the defined return type, allowing processing to occur in the background without blocking the request thread.
+
+#### Endpoint Argument Tags
+
+* `safe`: Annotates parameters as `@Safe` to log using safe-logging annotations. Implementations may add this data to the request log.
+* `unsafe`: Annotates parameters as `@Unsafe` to log using safe-logging annotations. Implementations may add this data to the request log.
+
 ### Feature Flags
 
 Conjure-java supports feature flags to enable additional opt-in features. To enable features provided by a feature
@@ -321,6 +334,54 @@ public ListenableFuture<BigInteger> getValue() {
     Future<BigInteger> future = executor.submit(() -> complexComputation());
     BigInteger result = Uninterruptibles.getUninterruptibly(future);
     return Futures.immediateFuture(result);
+}
+```
+
+### Request Metadata
+
+The [RequestContext](conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/RequestContext.java) may be requested on an opt-in basis per-endpoint using the `server-request-context`
+conjure endpoint `tag`:
+
+```yaml
+services:
+  ExampleService:
+    name: Example
+    package: com.palantir.example
+    base-path: /example
+
+    endpoints:
+      context:
+        http: GET /ping
+        returns: string
+        tags: [server-request-context]
+```
+
+This tag generates an additional parameter in the generated service interface:
+
+```java
+public interface ExampleService {
+  String ping(RequestContext context);
+}
+```
+
+Implementations may read arbitrary headers and query parameters, or associate additional data with the request log:
+
+```java
+import java.util.concurrent.atomic.AtomicInteger;
+
+public final class ExampleResource implements ExampleService {
+  private final AtomicInteger requestIndex = new AtomicInteger();
+
+  @Override
+  public String ping(RequestContext context) {
+    // Apply a unique index value to the request log:
+    context.requestArg(SafeArg.of("requestNumber", requestIndex.getAndIncrement()));
+    // Read the User-Agent header from the current request:
+    String userAgent = context.firstHeader("User-Agent");
+    // And add it to the request log:
+    context.requestArg(SafeArg.of("userAgent", userAgent));
+    return "pong";
+  }
 }
 ```
 
