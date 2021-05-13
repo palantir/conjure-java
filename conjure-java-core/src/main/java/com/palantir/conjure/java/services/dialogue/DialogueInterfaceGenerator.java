@@ -103,6 +103,8 @@ public final class DialogueInterfaceGenerator {
                 .map(endpoint -> apiMethod(endpoint, returnTypeMapper))
                 .collect(toList()));
 
+        serviceBuilder.addMethod(createSessionMethod(className));
+
         MethodSpec staticFactoryMethod = methodGenerator.generate(def);
         serviceBuilder.addMethod(staticFactoryMethod);
 
@@ -176,6 +178,15 @@ public final class DialogueInterfaceGenerator {
             methodBuilder.addAnnotation(MustBeClosed.class);
         }
 
+        return methodBuilder.build();
+    }
+
+    private MethodSpec createSessionMethod(ClassName className) {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("createSession")
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                // All hail useless javadoc.
+                .addJavadoc("$L", "Creates a client instance that will provide fair request execution.")
+                .returns(className);
         return methodBuilder.build();
     }
 }
