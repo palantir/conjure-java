@@ -1,7 +1,7 @@
 ch.qos.logback:* = 1.2.3
 com.atlassian.commonmark:* = 0.12.1
 com.google.code.findbugs:jsr305 = 3.0.2
-com.google.errorprone:error_prone_annotations = 2.6.0
+com.google.errorprone:error_prone_annotations = 2.7.1
 com.google.guava:guava = 30.1.1-jre
 com.palantir.common:streams = 1.9.1
 com.palantir.conjure.java.api:* = 2.18.0
