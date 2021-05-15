@@ -31,8 +31,8 @@ org.glassfish.jersey.core:jersey-server = 2.25.1
 org.hamcrest:hamcrest-core = 2.2
 org.immutables:value = 2.8.8
 org.javassist:javassist = 3.22.0-GA
-org.junit.jupiter:* = 5.7.1
-org.junit.vintage:* = 5.7.1
+org.junit.jupiter:* = 5.7.2
+org.junit.vintage:* = 5.7.2
 org.mockito:* = 3.10.0
 org.slf4j:* = 1.7.30
 
