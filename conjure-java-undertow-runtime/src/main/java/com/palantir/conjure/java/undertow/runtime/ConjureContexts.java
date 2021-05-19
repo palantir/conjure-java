@@ -24,13 +24,19 @@ import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.logsafe.Arg;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
+import java.security.cert.Certificate;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class ConjureContexts implements Contexts {
+    private static final Logger log = LoggerFactory.getLogger(ConjureContexts.class);
     private final RequestArgHandler requestArgHandler;
 
     ConjureContexts(RequestArgHandler requestArgHandler) {
@@ -78,6 +84,19 @@ final class ConjureContexts implements Contexts {
         @Override
         public void requestArg(Arg<?> arg) {
             requestArgHandler.arg(exchange, arg);
+        }
+
+        @Override
+        public ImmutableList<Certificate> peerCertificates() {
+            SSLSession sslSession = exchange.getConnection().getSslSession();
+            if (sslSession != null) {
+                try {
+                    return ImmutableList.copyOf(sslSession.getPeerCertificates());
+                } catch (SSLPeerUnverifiedException e) {
+                    log.debug("Failed to extract peer certificates", e);
+                }
+            }
+            return ImmutableList.of();
         }
 
         private ImmutableListMultimap<String, String> buildQueryParameters() {
