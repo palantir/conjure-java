@@ -87,16 +87,16 @@ final class ConjureContexts implements Contexts {
         }
 
         @Override
-        public Optional<ImmutableList<Certificate>> peerCertificates() {
+        public ImmutableList<Certificate> peerCertificates() {
             SSLSession sslSession = exchange.getConnection().getSslSession();
             if (sslSession != null) {
                 try {
-                    return Optional.of(ImmutableList.copyOf(sslSession.getPeerCertificates()));
+                    return ImmutableList.copyOf(sslSession.getPeerCertificates());
                 } catch (SSLPeerUnverifiedException e) {
                     log.debug("Failed to extract peer certificates", e);
                 }
             }
-            return Optional.empty();
+            return ImmutableList.of();
         }
 
         private ImmutableListMultimap<String, String> buildQueryParameters() {

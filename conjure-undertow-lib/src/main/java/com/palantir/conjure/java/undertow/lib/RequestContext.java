@@ -54,6 +54,8 @@ public interface RequestContext {
 
     /**
      * Returns the client certificates associated with the connection used to make the current request.
+     * If the connection did not use TLS with client certificate authentication, an {@link ImmutableList#of() empty}
+     * list will be returned.
      */
-    Optional<ImmutableList<Certificate>> peerCertificates();
+    ImmutableList<Certificate> peerCertificates();
 }
