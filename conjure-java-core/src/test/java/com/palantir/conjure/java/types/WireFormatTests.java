@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -43,7 +44,9 @@ import com.palantir.product.MapExample;
 import com.palantir.product.OptionalAlias;
 import com.palantir.product.OptionalAliasExample;
 import com.palantir.product.OptionalExample;
+import com.palantir.product.OptionalListAliasExample;
 import com.palantir.product.OptionalMapAliasExample;
+import com.palantir.product.OptionalSetAliasExample;
 import com.palantir.product.PrimitiveOptionalsExample;
 import com.palantir.product.SetAlias;
 import com.palantir.product.SetExample;
@@ -573,6 +576,8 @@ public final class WireFormatTests {
                         .aliasTwo(StringAliasTwo.of(Optional.empty()))
                         .aliasOptional(OptionalAlias.of(Optional.empty()))
                         .aliasOptionalMap(OptionalMapAliasExample.of(Optional.empty()))
+                        .aliasOptionalList(OptionalListAliasExample.of(Optional.empty()))
+                        .aliasOptionalSet(OptionalSetAliasExample.of(Optional.empty()))
                         .build()))
                 .isEqualTo("{}");
     }
@@ -590,11 +595,18 @@ public final class WireFormatTests {
                 .aliasTwo(StringAliasTwo.of(Optional.of(StringAliasOne.of(""))))
                 .aliasOptional(OptionalAlias.of(Optional.of("")))
                 .aliasOptionalMap(OptionalMapAliasExample.of(Optional.of(ImmutableMap.of())))
+                .aliasOptionalList(OptionalListAliasExample.of(Optional.of(ImmutableList.of())))
+                .aliasOptionalSet(OptionalSetAliasExample.of(Optional.of(ImmutableSet.of())))
                 .aliasMap(MapAliasExample.of(ImmutableMap.of()))
                 .build();
-        PrimitiveOptionalsExample recreated =
-                mapper.readValue(mapper.writeValueAsBytes(original), PrimitiveOptionalsExample.class);
-        assertThat(recreated).isEqualTo(original);
+        String json = mapper.writeValueAsString(original);
+        assertThat(mapper.readValue(json, new TypeReference<Map<String, Object>>() {}))
+                .as("Unexpected number of fields in '%s'", json)
+                .hasSize(13);
+        PrimitiveOptionalsExample recreated = mapper.readValue(json, PrimitiveOptionalsExample.class);
+        assertThat(recreated)
+                .as("Failed to recreate the original object using '%s'", json)
+                .isEqualTo(original);
     }
 
     @Test

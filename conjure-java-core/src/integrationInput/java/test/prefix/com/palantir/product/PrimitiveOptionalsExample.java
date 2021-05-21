@@ -60,6 +60,10 @@ public final class PrimitiveOptionalsExample {
 
     private final OptionalMapAliasExample aliasOptionalMap;
 
+    private final OptionalListAliasExample aliasOptionalList;
+
+    private final OptionalSetAliasExample aliasOptionalSet;
+
     private int memoizedHashCode;
 
     private PrimitiveOptionalsExample(
@@ -78,7 +82,9 @@ public final class PrimitiveOptionalsExample {
             Optional<ListAlias> aliasList,
             Optional<MapAliasExample> aliasMap,
             OptionalAlias aliasOptional,
-            OptionalMapAliasExample aliasOptionalMap) {
+            OptionalMapAliasExample aliasOptionalMap,
+            OptionalListAliasExample aliasOptionalList,
+            OptionalSetAliasExample aliasOptionalSet) {
         validateFields(
                 num,
                 bool,
@@ -95,7 +101,9 @@ public final class PrimitiveOptionalsExample {
                 aliasList,
                 aliasMap,
                 aliasOptional,
-                aliasOptionalMap);
+                aliasOptionalMap,
+                aliasOptionalList,
+                aliasOptionalSet);
         this.num = num;
         this.bool = bool;
         this.integer = integer;
@@ -112,6 +120,8 @@ public final class PrimitiveOptionalsExample {
         this.aliasMap = aliasMap;
         this.aliasOptional = aliasOptional;
         this.aliasOptionalMap = aliasOptionalMap;
+        this.aliasOptionalList = aliasOptionalList;
+        this.aliasOptionalSet = aliasOptionalSet;
     }
 
     @JsonProperty("num")
@@ -210,6 +220,18 @@ public final class PrimitiveOptionalsExample {
         return this.aliasOptionalMap;
     }
 
+    @JsonProperty("aliasOptionalList")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public OptionalListAliasExample getAliasOptionalList() {
+        return this.aliasOptionalList;
+    }
+
+    @JsonProperty("aliasOptionalSet")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    public OptionalSetAliasExample getAliasOptionalSet() {
+        return this.aliasOptionalSet;
+    }
+
     @Override
     public boolean equals(Object other) {
         return this == other
@@ -232,7 +254,9 @@ public final class PrimitiveOptionalsExample {
                 && this.aliasList.equals(other.aliasList)
                 && this.aliasMap.equals(other.aliasMap)
                 && this.aliasOptional.equals(other.aliasOptional)
-                && this.aliasOptionalMap.equals(other.aliasOptionalMap);
+                && this.aliasOptionalMap.equals(other.aliasOptionalMap)
+                && this.aliasOptionalList.equals(other.aliasOptionalList)
+                && this.aliasOptionalSet.equals(other.aliasOptionalSet);
     }
 
     @Override
@@ -255,7 +279,9 @@ public final class PrimitiveOptionalsExample {
                     this.aliasList,
                     this.aliasMap,
                     this.aliasOptional,
-                    this.aliasOptionalMap);
+                    this.aliasOptionalMap,
+                    this.aliasOptionalList,
+                    this.aliasOptionalSet);
             memoizedHashCode = result;
         }
         return result;
@@ -267,7 +293,8 @@ public final class PrimitiveOptionalsExample {
                 + safelong + ", rid: " + rid + ", bearertoken: " + bearertoken + ", uuid: " + uuid + ", map: " + map
                 + ", list: " + list + ", set: " + set + ", aliasOne: " + aliasOne + ", aliasTwo: " + aliasTwo
                 + ", aliasList: " + aliasList + ", aliasMap: " + aliasMap + ", aliasOptional: " + aliasOptional
-                + ", aliasOptionalMap: " + aliasOptionalMap + '}';
+                + ", aliasOptionalMap: " + aliasOptionalMap + ", aliasOptionalList: " + aliasOptionalList
+                + ", aliasOptionalSet: " + aliasOptionalSet + '}';
     }
 
     private static void validateFields(
@@ -286,7 +313,9 @@ public final class PrimitiveOptionalsExample {
             Optional<ListAlias> aliasList,
             Optional<MapAliasExample> aliasMap,
             OptionalAlias aliasOptional,
-            OptionalMapAliasExample aliasOptionalMap) {
+            OptionalMapAliasExample aliasOptionalMap,
+            OptionalListAliasExample aliasOptionalList,
+            OptionalSetAliasExample aliasOptionalSet) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, num, "num");
         missingFields = addFieldIfMissing(missingFields, bool, "bool");
@@ -304,6 +333,8 @@ public final class PrimitiveOptionalsExample {
         missingFields = addFieldIfMissing(missingFields, aliasMap, "aliasMap");
         missingFields = addFieldIfMissing(missingFields, aliasOptional, "aliasOptional");
         missingFields = addFieldIfMissing(missingFields, aliasOptionalMap, "aliasOptionalMap");
+        missingFields = addFieldIfMissing(missingFields, aliasOptionalList, "aliasOptionalList");
+        missingFields = addFieldIfMissing(missingFields, aliasOptionalSet, "aliasOptionalSet");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -314,7 +345,7 @@ public final class PrimitiveOptionalsExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(16);
+                missingFields = new ArrayList<>(18);
             }
             missingFields.add(fieldName);
         }
@@ -360,6 +391,10 @@ public final class PrimitiveOptionalsExample {
 
         private OptionalMapAliasExample aliasOptionalMap;
 
+        private OptionalListAliasExample aliasOptionalList;
+
+        private OptionalSetAliasExample aliasOptionalSet;
+
         private Builder() {}
 
         public Builder from(PrimitiveOptionalsExample other) {
@@ -379,6 +414,8 @@ public final class PrimitiveOptionalsExample {
             aliasMap(other.getAliasMap());
             aliasOptional(other.getAliasOptional());
             aliasOptionalMap(other.getAliasOptionalMap());
+            aliasOptionalList(other.getAliasOptionalList());
+            aliasOptionalSet(other.getAliasOptionalSet());
             return this;
         }
 
@@ -543,6 +580,18 @@ public final class PrimitiveOptionalsExample {
             return this;
         }
 
+        @JsonSetter(value = "aliasOptionalList", nulls = Nulls.AS_EMPTY)
+        public Builder aliasOptionalList(@Nonnull OptionalListAliasExample aliasOptionalList) {
+            this.aliasOptionalList = Preconditions.checkNotNull(aliasOptionalList, "aliasOptionalList cannot be null");
+            return this;
+        }
+
+        @JsonSetter(value = "aliasOptionalSet", nulls = Nulls.AS_EMPTY)
+        public Builder aliasOptionalSet(@Nonnull OptionalSetAliasExample aliasOptionalSet) {
+            this.aliasOptionalSet = Preconditions.checkNotNull(aliasOptionalSet, "aliasOptionalSet cannot be null");
+            return this;
+        }
+
         public PrimitiveOptionalsExample build() {
             return new PrimitiveOptionalsExample(
                     num,
@@ -560,7 +609,9 @@ public final class PrimitiveOptionalsExample {
                     aliasList,
                     aliasMap,
                     aliasOptional,
-                    aliasOptionalMap);
+                    aliasOptionalMap,
+                    aliasOptionalList,
+                    aliasOptionalSet);
         }
     }
 }

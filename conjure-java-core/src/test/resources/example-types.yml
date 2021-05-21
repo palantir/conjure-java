@@ -118,6 +118,10 @@ types:
         alias: map<string, any>
       OptionalMapAliasExample:
         alias: optional<map<string, any>>
+      OptionalListAliasExample:
+        alias: optional<list<string>>
+      OptionalSetAliasExample:
+        alias: optional<set<string>>
       ReferenceAliasExample:
         alias: AnyExample
       DateTimeAliasExample:
@@ -142,6 +146,8 @@ types:
           aliasMap: optional<MapAliasExample>
           aliasOptional: OptionalAlias
           aliasOptionalMap: OptionalMapAliasExample
+          aliasOptionalList: OptionalListAliasExample
+          aliasOptionalSet: OptionalSetAliasExample
       ExternalLongAliasExample:
         alias: ExternalLong
       ExternalStringAliasExample:
