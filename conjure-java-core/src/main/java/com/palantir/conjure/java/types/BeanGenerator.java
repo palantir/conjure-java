@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -30,6 +31,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -102,7 +104,7 @@ public final class BeanGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addMethod(createConstructor(fields, poetFields))
-                .addMethods(createGetters(fields, options));
+                .addMethods(createGetters(fields, typesMap, options));
 
         if (!poetFields.isEmpty()) {
             typeBuilder
@@ -412,21 +414,42 @@ public final class BeanGenerator {
         return builder.build();
     }
 
-    private static Collection<MethodSpec> createGetters(Collection<EnrichedField> fields, Options featureFlags) {
+    private static Collection<MethodSpec> createGetters(
+            Collection<EnrichedField> fields,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options featureFlags) {
         return fields.stream()
-                .map(field -> BeanGenerator.createGetter(field, featureFlags))
+                .map(field -> BeanGenerator.createGetter(field, typesMap, featureFlags))
                 .collect(Collectors.toList());
     }
 
-    private static MethodSpec createGetter(EnrichedField field, Options featureFlags) {
+    private static MethodSpec createGetter(
+            EnrichedField field,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options featureFlags) {
         MethodSpec.Builder getterBuilder = MethodSpec.methodBuilder(field.getterName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
                         .build())
                 .returns(field.poetSpec().type);
+        Type conjureDefType = field.conjureDef().getType();
+        if (conjureDefType.accept(TypeVisitor.IS_OPTIONAL)) {
+            // NON_ABSENT is most accurate for java Optional types (including OptionalDouble/OptionalInt, etc)
+            getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
+                    .addMember("value", "$T.NON_ABSENT", JsonInclude.Include.class)
+                    .build());
+        } else if (conjureDefType.accept(TypeVisitor.IS_REFERENCE)
+                && TypeFunctions.toConjureTypeWithoutAliases(conjureDefType, typesMap)
+                        .accept(TypeVisitor.IS_OPTIONAL)) {
+            // Aliases are special, as usual. Inclusion cannot take advantage of the optional delegate types,
+            // however the default (hidden no-arg constructor) can be leveraged using NON_EMPTY.
+            getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
+                    .addMember("value", "$T.NON_EMPTY", JsonInclude.Include.class)
+                    .build());
+        }
 
-        if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
+        if (conjureDefType.accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
             getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
         } else {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);
