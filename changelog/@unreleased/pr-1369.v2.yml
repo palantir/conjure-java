@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Emit bean fields in the same order as the builder stages
+  links:
+  - https://github.com/palantir/conjure-java/pull/1369
