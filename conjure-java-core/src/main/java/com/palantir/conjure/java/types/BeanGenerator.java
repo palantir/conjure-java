@@ -87,6 +87,10 @@ public final class BeanGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Options options) {
         ImmutableList<EnrichedField> fields = createFields(typeMapper, typeDef.getFields());
+        if (options.useStagedBuilders()) {
+            fields = sortedEnrichedFields(fields).collect(ImmutableList.toImmutableList());
+        }
+
         ImmutableList<FieldSpec> poetFields = EnrichedField.toPoetSpecs(fields);
         ImmutableList<EnrichedField> nonPrimitiveEnrichedFields =
                 fields.stream().filter(field -> !field.isPrimitive()).collect(ImmutableList.toImmutableList());
@@ -224,7 +228,7 @@ public final class BeanGenerator {
      * Sorts input fields in the order they should be applied to the builder: Original order with required
      * fields prior to optional/collection values.
      */
-    private static Stream<EnrichedField> sortedEnrichedFields(ImmutableList<EnrichedField> enrichedFields) {
+    static Stream<EnrichedField> sortedEnrichedFields(ImmutableList<EnrichedField> enrichedFields) {
         return enrichedFields.stream()
                 .sorted(Comparator.comparing(BeanGenerator::fieldShouldBeInFinalStage)
                         .thenComparing(enrichedFields::indexOf));

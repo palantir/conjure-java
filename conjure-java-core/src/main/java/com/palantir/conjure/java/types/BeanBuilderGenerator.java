@@ -99,7 +99,12 @@ public final class BeanBuilderGenerator {
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Optional<ClassName> builderInterfaceClass) {
-        Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
+        ImmutableList<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
+        if (options.useStagedBuilders()) {
+            enrichedFields =
+                    BeanGenerator.sortedEnrichedFields(enrichedFields).collect(ImmutableList.toImmutableList());
+        }
+
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
 
         TypeSpec.Builder builder = TypeSpec.classBuilder(
@@ -207,8 +212,8 @@ public final class BeanBuilderGenerator {
         return "_" + JavaNameSanitizer.sanitize(field.conjureDef().getFieldName()) + "Initialized";
     }
 
-    private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
-        return fields.stream().map(e -> createField(e.getFieldName(), e)).collect(Collectors.toList());
+    private ImmutableList<EnrichedField> enrichFields(List<FieldDefinition> fields) {
+        return fields.stream().map(e -> createField(e.getFieldName(), e)).collect(ImmutableList.toImmutableList());
     }
 
     private static MethodSpec createConstructor() {
