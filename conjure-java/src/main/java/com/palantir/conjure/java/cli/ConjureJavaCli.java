@@ -189,6 +189,12 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generates compile-time safe builders to ensure all required attributes are set.")
         private boolean useStagedBuilders;
 
+        @CommandLine.Option(
+                names = "--excludeEmptyOptionals",
+                defaultValue = "false",
+                description = "Objects exclude empty optionals in serialization based on the conjure spec.")
+        private boolean excludeEmptyOptionals;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -254,6 +260,7 @@ public final class ConjureJavaCli implements Runnable {
                             .packagePrefix(Optional.ofNullable(packagePrefix))
                             .apiVersion(Optional.ofNullable(apiVersion))
                             .useStagedBuilders(useStagedBuilders)
+                            .excludeEmptyOptionals(excludeEmptyOptionals)
                             .build())
                     .build();
         }
