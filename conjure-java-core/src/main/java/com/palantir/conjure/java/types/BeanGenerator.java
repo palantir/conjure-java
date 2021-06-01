@@ -434,19 +434,21 @@ public final class BeanGenerator {
                         .build())
                 .returns(field.poetSpec().type);
         Type conjureDefType = field.conjureDef().getType();
-        if (conjureDefType.accept(TypeVisitor.IS_OPTIONAL)) {
-            // NON_ABSENT is most accurate for java Optional types (including OptionalDouble/OptionalInt, etc)
-            getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
-                    .addMember("value", "$T.NON_ABSENT", JsonInclude.Include.class)
-                    .build());
-        } else if (conjureDefType.accept(TypeVisitor.IS_REFERENCE)
-                && TypeFunctions.toConjureTypeWithoutAliases(conjureDefType, typesMap)
-                        .accept(TypeVisitor.IS_OPTIONAL)) {
-            // Aliases are special, as usual. Inclusion cannot take advantage of the optional delegate types,
-            // however the default (hidden no-arg constructor) can be leveraged using NON_EMPTY.
-            getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
-                    .addMember("value", "$T.NON_EMPTY", JsonInclude.Include.class)
-                    .build());
+        if (featureFlags.excludeEmptyOptionals()) {
+            if (conjureDefType.accept(TypeVisitor.IS_OPTIONAL)) {
+                // NON_ABSENT is most accurate for java Optional types (including OptionalDouble/OptionalInt, etc)
+                getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
+                        .addMember("value", "$T.NON_ABSENT", JsonInclude.Include.class)
+                        .build());
+            } else if (conjureDefType.accept(TypeVisitor.IS_REFERENCE)
+                    && TypeFunctions.toConjureTypeWithoutAliases(conjureDefType, typesMap)
+                            .accept(TypeVisitor.IS_OPTIONAL)) {
+                // Aliases are special, as usual. Inclusion cannot take advantage of the optional delegate types,
+                // however the default (hidden no-arg constructor) can be leveraged using NON_EMPTY.
+                getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
+                        .addMember("value", "$T.NON_EMPTY", JsonInclude.Include.class)
+                        .build());
+            }
         }
 
         if (conjureDefType.accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
