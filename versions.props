@@ -8,7 +8,7 @@ com.palantir.conjure.java.api:* = 2.18.0
 com.palantir.conjure.java.runtime:* = 7.3.0
 com.palantir.conjure.verification:* = 0.19.0
 com.palantir.conjure:* = 4.14.0
-com.palantir.dialogue:* = 2.0.1
+com.palantir.dialogue:* = 2.1.0
 com.palantir.ri:resource-identifier = 1.2.0
 com.palantir.safe-logging:* = 1.14.0
 com.palantir.syntactic-paths:syntactic-paths = 0.6.1
@@ -33,7 +33,7 @@ org.immutables:value = 2.8.8
 org.javassist:javassist = 3.22.0-GA
 org.junit.jupiter:* = 5.7.2
 org.junit.vintage:* = 5.7.2
-org.mockito:* = 3.10.0
+org.mockito:* = 3.11.0
 org.slf4j:* = 1.7.30
 
 # dependency-upgrader:OFF
