@@ -225,6 +225,12 @@ public interface EteService {
     void receiveSetOfOptionals(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull Set<Optional<String>> value);
 
+    @PUT
+    @Path("base/list/strings")
+    @ClientEndpoint(method = "PUT", path = "/base/list/strings")
+    void receiveListOfStrings(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull List<String> value);
+
     @Deprecated
     @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
     default Optional<Long> optionalExternalLongQuery(AuthHeader authHeader) {

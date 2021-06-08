@@ -177,4 +177,9 @@ public interface UndertowEteService {
      * @apiNote {@code PUT /base/set/optionals}
      */
     void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
+
+    /**
+     * @apiNote {@code PUT /base/list/strings}
+     */
+    void receiveListOfStrings(AuthHeader authHeader, List<String> value);
 }

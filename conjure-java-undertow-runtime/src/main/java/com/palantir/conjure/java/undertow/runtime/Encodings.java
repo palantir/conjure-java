@@ -93,7 +93,7 @@ public final class Encodings {
                             e,
                             SafeArg.of("contentType", getContentType()),
                             SafeArg.of("type", type));
-                } catch (JsonParseException e) {
+                } catch (JsonParseException | NullPointerException e) {
                     // JsonParseException is thrown when the input cannot be parsed as JSON, for example '{"value"}'.
                     throw new SafeIllegalArgumentException(
                             "Failed to parse request due to malformed content",

@@ -233,6 +233,12 @@ public interface EteServiceBlocking {
     void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
 
     /**
+     * @apiNote {@code PUT /base/list/strings}
+     */
+    @ClientEndpoint(method = "PUT", path = "/base/list/strings")
+    void receiveListOfStrings(AuthHeader authHeader, List<String> value);
+
+    /**
      * Creates a synchronous/blocking client for a EteService service.
      */
     static EteServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -425,6 +431,15 @@ public interface EteServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
             private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Serializer<List<String>> receiveListOfStringsSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
+
+            private final EndpointChannel receiveListOfStringsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
+
+            private final Deserializer<Void> receiveListOfStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
@@ -720,6 +735,15 @@ public interface EteServiceBlocking {
                 _runtime.clients()
                         .callBlocking(
                                 receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
+            }
+
+            @Override
+            public void receiveListOfStrings(AuthHeader authHeader, List<String> value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(receiveListOfStringsSerializer.serialize(value));
+                _runtime.clients()
+                        .callBlocking(receiveListOfStringsChannel, _request.build(), receiveListOfStringsDeserializer);
             }
 
             @Override
