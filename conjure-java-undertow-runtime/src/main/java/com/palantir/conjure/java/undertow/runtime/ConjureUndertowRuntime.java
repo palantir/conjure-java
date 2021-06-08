@@ -21,6 +21,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.AuthorizationExtractor;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
+import com.palantir.conjure.java.undertow.lib.Contexts;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.MarkerCallback;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
@@ -38,6 +39,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
     private final MarkerCallback markerCallback;
     private final AsyncRequestProcessing async;
     private final ExceptionHandler exceptionHandler;
+    private final Contexts contexts;
 
     private ConjureUndertowRuntime(Builder builder) {
         this.bodySerDe = new ConjureBodySerDe(
@@ -48,6 +50,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         this.exceptionHandler = builder.exceptionHandler;
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout, builder.exceptionHandler);
+        this.contexts = new ConjureContexts(builder.requestArgHandler);
     }
 
     public static Builder builder() {
@@ -84,10 +87,16 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         return exceptionHandler;
     }
 
+    @Override
+    public Contexts contexts() {
+        return contexts;
+    }
+
     public static final class Builder {
 
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private ExceptionHandler exceptionHandler = ConjureExceptions.INSTANCE;
+        private RequestArgHandler requestArgHandler = DefaultRequestArgHandler.INSTANCE;
         private final List<Encoding> encodings = new ArrayList<>();
         private final List<ParamMarker> paramMarkers = new ArrayList<>();
 
@@ -114,6 +123,12 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         @CanIgnoreReturnValue
         public Builder exceptionHandler(ExceptionHandler value) {
             exceptionHandler = Preconditions.checkNotNull(value, "exceptionHandler is required");
+            return this;
+        }
+
+        @CanIgnoreReturnValue
+        public Builder requestArgHandler(RequestArgHandler value) {
+            requestArgHandler = Preconditions.checkNotNull(value, "requestLogParameterHandler is required");
             return this;
         }
 

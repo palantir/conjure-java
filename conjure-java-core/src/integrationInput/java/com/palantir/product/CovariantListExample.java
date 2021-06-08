@@ -66,7 +66,7 @@ public final class CovariantListExample {
     }
 
     public static CovariantListExample of(List<Object> items, List<ExampleExternalReference> externalItems) {
-        return builder().externalItems(externalItems).items(items).build();
+        return builder().items(items).externalItems(externalItems).build();
     }
 
     private static void validateFields(List<Object> items, List<ExampleExternalReference> externalItems) {

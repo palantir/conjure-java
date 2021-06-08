@@ -116,18 +116,18 @@ public final class MultipleOrderedStages {
         return missingFields;
     }
 
-    public static ItemStageBuilder builder() {
+    public static TokenStageBuilder builder() {
         return new DefaultBuilder();
     }
 
-    public interface ItemStageBuilder {
-        TokenStageBuilder item(@Nonnull String item);
+    public interface TokenStageBuilder {
+        ItemStageBuilder token(@Nonnull OneField token);
 
         Builder from(MultipleOrderedStages other);
     }
 
-    public interface TokenStageBuilder {
-        Completed_StageBuilder token(@Nonnull OneField token);
+    public interface ItemStageBuilder {
+        Completed_StageBuilder item(@Nonnull String item);
     }
 
     public interface Completed_StageBuilder {
@@ -146,7 +146,7 @@ public final class MultipleOrderedStages {
         Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
     }
 
-    public interface Builder extends ItemStageBuilder, TokenStageBuilder, Completed_StageBuilder {
+    public interface Builder extends TokenStageBuilder, ItemStageBuilder, Completed_StageBuilder {
         @Override
         MultipleOrderedStages build();
 

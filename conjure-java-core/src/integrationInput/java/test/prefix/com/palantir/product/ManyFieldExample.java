@@ -1,6 +1,7 @@
 package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -90,6 +91,7 @@ public final class ManyFieldExample {
      * docs for optionalItem field
      */
     @JsonProperty("optionalItem")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<String> getOptionalItem() {
         return this.optionalItem;
     }

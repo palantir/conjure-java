@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix the .bat start script for the generator (used on Windows machines) to use the correct classpath.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1308

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: RequestContext supports adding safe-logging Args to the request
+  links:
+  - https://github.com/palantir/conjure-java/pull/1296

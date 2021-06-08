@@ -1,6 +1,7 @@
 package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -42,6 +43,7 @@ public final class ExternalLongExample {
     }
 
     @JsonProperty("optionalExternalLong")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<Long> getOptionalExternalLong() {
         return this.optionalExternalLong;
     }
@@ -81,8 +83,8 @@ public final class ExternalLongExample {
     public static ExternalLongExample of(long externalLong, long optionalExternalLong, List<Long> listExternalLong) {
         return builder()
                 .externalLong(externalLong)
-                .listExternalLong(listExternalLong)
                 .optionalExternalLong(Optional.of(optionalExternalLong))
+                .listExternalLong(listExternalLong)
                 .build();
     }
 

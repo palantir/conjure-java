@@ -518,6 +518,7 @@ public final class UndertowServiceEteTest extends TestBase {
         Options options = Options.builder()
                 .undertowServicePrefix(true)
                 .nonNullCollections(true)
+                .excludeEmptyOptionals(true)
                 .build();
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),

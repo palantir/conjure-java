@@ -152,8 +152,8 @@ public final class DialogueInterfaceGenerator {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addParameters(parameterTypes.methodParams(endpointDef))
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
+                .addParameters(parameterTypes.interfaceMethodParams(endpointDef))
+                .addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
         endpointDef.getMarkers().stream()
                 .filter(marker -> !marker.accept(IsUndertowAsyncMarkerVisitor.INSTANCE))
                 .map(marker -> {

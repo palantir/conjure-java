@@ -18,12 +18,15 @@ package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
+import com.palantir.conjure.java.util.Tags;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
@@ -121,6 +124,12 @@ final class UndertowServiceInterfaceGenerator {
         List<ArgumentDefinition> sortedArgList = ParameterOrder.sorted(endpointDef.getArgs());
         sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, endpointDef)));
 
+        if (Tags.hasServerRequestContext(endpointDef)) {
+            parameterSpecs.add(
+                    ParameterSpec.builder(ClassName.get(RequestContext.class), Tags.SERVER_REQUEST_CONTEXT_PARAMETER)
+                            .build());
+        }
+
         return ImmutableList.copyOf(parameterSpecs);
     }
 
@@ -129,6 +138,7 @@ final class UndertowServiceInterfaceGenerator {
         return ParameterSpec.builder(
                         typeMapper.getClassName(def.getType()),
                         JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint))
+                .addAnnotations(ConjureTags.safetyAnnotations(def))
                 .build();
     }
 }

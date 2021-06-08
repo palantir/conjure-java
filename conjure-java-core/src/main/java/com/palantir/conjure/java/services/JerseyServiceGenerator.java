@@ -148,7 +148,6 @@ public final class JerseyServiceGenerator implements Generator {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(
                         httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef))
                 .addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, true))
                 .returns(returnType);
 
@@ -184,6 +183,8 @@ public final class JerseyServiceGenerator implements Generator {
                 .getDeprecated()
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
+
+        methodBuilder.addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
         ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
@@ -229,7 +230,7 @@ public final class JerseyServiceGenerator implements Generator {
                         endpointDef.getEndpointName().get())
                 .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
                 .addAnnotation(Deprecated.class)
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef))
+                .addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef))
                 .addParameters(IntStream.range(0, sortedParams.size())
                         .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
                         .mapToObj(sortedParams::get)
@@ -285,7 +286,7 @@ public final class JerseyServiceGenerator implements Generator {
             getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
             param.addAnnotations(ImmutableSet.<AnnotationSpec>builder()
                     .addAll(createMarkers(typeMapper, def.getMarkers()))
-                    .addAll(ConjureTags.tagAnnotations(def))
+                    .addAll(ConjureTags.safetyAnnotations(def))
                     .build());
         }
         return param.build();

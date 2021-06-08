@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Bump jackson to 2.12.3.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1320

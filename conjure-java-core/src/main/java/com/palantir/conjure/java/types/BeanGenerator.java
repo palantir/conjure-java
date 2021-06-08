@@ -16,10 +16,12 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
@@ -29,6 +31,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -83,10 +86,10 @@ public final class BeanGenerator {
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Options options) {
-        Collection<EnrichedField> fields = createFields(typeMapper, typeDef.getFields());
-        Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(fields);
-        Collection<EnrichedField> nonPrimitiveEnrichedFields =
-                fields.stream().filter(field -> !field.isPrimitive()).collect(Collectors.toList());
+        ImmutableList<EnrichedField> fields = createFields(typeMapper, typeDef.getFields());
+        ImmutableList<FieldSpec> poetFields = EnrichedField.toPoetSpecs(fields);
+        ImmutableList<EnrichedField> nonPrimitiveEnrichedFields =
+                fields.stream().filter(field -> !field.isPrimitive()).collect(ImmutableList.toImmutableList());
 
         com.palantir.conjure.spec.TypeName prefixedName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
@@ -101,7 +104,7 @@ public final class BeanGenerator {
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(poetFields)
                 .addMethod(createConstructor(fields, poetFields))
-                .addMethods(createGetters(fields, options));
+                .addMethods(createGetters(fields, typesMap, options));
 
         if (!poetFields.isEmpty()) {
             typeBuilder
@@ -134,9 +137,9 @@ public final class BeanGenerator {
             // serialization.
             typeBuilder.addAnnotation(JsonSerialize.class).addField(createSingletonField(objectClass));
         } else {
-            List<EnrichedField> fieldsNeedingBuilderStage = fields.stream()
+            ImmutableList<EnrichedField> fieldsNeedingBuilderStage = fields.stream()
                     .filter(field -> !fieldShouldBeInFinalStage(field))
-                    .collect(Collectors.toList());
+                    .collect(ImmutableList.toImmutableList());
             typeBuilder.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
                     .addMember("builder", "$T.class", builderImplementation)
                     .build());
@@ -153,7 +156,7 @@ public final class BeanGenerator {
                         fieldsNeedingBuilderStage,
                         fields.stream()
                                 .filter(BeanGenerator::fieldShouldBeInFinalStage)
-                                .collect(Collectors.toList()));
+                                .collect(ImmutableList.toImmutableList()));
 
                 List<ClassName> interfacesAsClasses = interfaces.stream()
                         .map(stageInterface ->
@@ -218,13 +221,13 @@ public final class BeanGenerator {
     }
 
     /**
-     * Sorts input fields in the order they should be applied to the builder: Alphabetical order with required
+     * Sorts input fields in the order they should be applied to the builder: Original order with required
      * fields prior to optional/collection values.
      */
-    private static Stream<EnrichedField> sortedEnrichedFields(Collection<EnrichedField> enrichedFields) {
+    private static Stream<EnrichedField> sortedEnrichedFields(ImmutableList<EnrichedField> enrichedFields) {
         return enrichedFields.stream()
                 .sorted(Comparator.comparing(BeanGenerator::fieldShouldBeInFinalStage)
-                        .thenComparing(field -> field.fieldName().get()));
+                        .thenComparing(enrichedFields::indexOf));
     }
 
     private static ClassName stageBuilderInterfaceName(ClassName enclosingClass, String stageName) {
@@ -235,8 +238,8 @@ public final class BeanGenerator {
             ClassName objectClass,
             ClassName builderClass,
             TypeMapper typeMapper,
-            Collection<EnrichedField> fieldsNeedingBuilderStage,
-            Collection<EnrichedField> otherFields) {
+            ImmutableList<EnrichedField> fieldsNeedingBuilderStage,
+            ImmutableList<EnrichedField> otherFields) {
         List<TypeSpec.Builder> interfaces = new ArrayList<>();
 
         PeekingIterator<EnrichedField> fieldPeekingIterator = Iterators.peekingIterator(
@@ -363,7 +366,7 @@ public final class BeanGenerator {
                 .build();
     }
 
-    private static Collection<EnrichedField> createFields(TypeMapper typeMapper, List<FieldDefinition> fields) {
+    private static ImmutableList<EnrichedField> createFields(TypeMapper typeMapper, List<FieldDefinition> fields) {
         return fields.stream()
                 .map(e -> EnrichedField.of(
                         e.getFieldName(),
@@ -375,7 +378,7 @@ public final class BeanGenerator {
                                         Modifier.PRIVATE,
                                         Modifier.FINAL)
                                 .build()))
-                .collect(Collectors.toList());
+                .collect(ImmutableList.toImmutableList());
     }
 
     private static MethodSpec createConstructor(Collection<EnrichedField> fields, Collection<FieldSpec> poetFields) {
@@ -411,21 +414,44 @@ public final class BeanGenerator {
         return builder.build();
     }
 
-    private static Collection<MethodSpec> createGetters(Collection<EnrichedField> fields, Options featureFlags) {
+    private static Collection<MethodSpec> createGetters(
+            Collection<EnrichedField> fields,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options featureFlags) {
         return fields.stream()
-                .map(field -> BeanGenerator.createGetter(field, featureFlags))
+                .map(field -> BeanGenerator.createGetter(field, typesMap, featureFlags))
                 .collect(Collectors.toList());
     }
 
-    private static MethodSpec createGetter(EnrichedField field, Options featureFlags) {
+    private static MethodSpec createGetter(
+            EnrichedField field,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options featureFlags) {
         MethodSpec.Builder getterBuilder = MethodSpec.methodBuilder(field.getterName())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
                         .build())
                 .returns(field.poetSpec().type);
+        Type conjureDefType = field.conjureDef().getType();
+        if (featureFlags.excludeEmptyOptionals()) {
+            if (conjureDefType.accept(TypeVisitor.IS_OPTIONAL)) {
+                // NON_ABSENT is most accurate for java Optional types (including OptionalDouble/OptionalInt, etc)
+                getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
+                        .addMember("value", "$T.NON_ABSENT", JsonInclude.Include.class)
+                        .build());
+            } else if (conjureDefType.accept(TypeVisitor.IS_REFERENCE)
+                    && TypeFunctions.toConjureTypeWithoutAliases(conjureDefType, typesMap)
+                            .accept(TypeVisitor.IS_OPTIONAL)) {
+                // Aliases are special, as usual. Inclusion cannot take advantage of the optional delegate types,
+                // however the default (hidden no-arg constructor) can be leveraged using NON_EMPTY.
+                getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
+                        .addMember("value", "$T.NON_EMPTY", JsonInclude.Include.class)
+                        .build());
+            }
+        }
 
-        if (field.conjureDef().getType().accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
+        if (conjureDefType.accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
             getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
         } else {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);
@@ -461,7 +487,7 @@ public final class BeanGenerator {
         return builder.build();
     }
 
-    private static MethodSpec createStaticFactoryMethod(Collection<EnrichedField> fields, ClassName objectClass) {
+    private static MethodSpec createStaticFactoryMethod(ImmutableList<EnrichedField> fields, ClassName objectClass) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
@@ -566,8 +592,8 @@ public final class BeanGenerator {
             return ImmutableEnrichedField.of(fieldName, conjureDef, poetSpec);
         }
 
-        static Collection<FieldSpec> toPoetSpecs(Collection<EnrichedField> fields) {
-            return fields.stream().map(EnrichedField::poetSpec).collect(Collectors.toList());
+        static ImmutableList<FieldSpec> toPoetSpecs(Collection<EnrichedField> fields) {
+            return fields.stream().map(EnrichedField::poetSpec).collect(ImmutableList.toImmutableList());
         }
     }
 

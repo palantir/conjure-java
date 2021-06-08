@@ -111,6 +111,14 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Generated objects which exclude fields with empty optional values.
+     */
+    @Value.Default
+    default boolean excludeEmptyOptionals() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

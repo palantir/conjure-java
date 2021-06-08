@@ -73,6 +73,9 @@ public final class JavaNameSanitizer {
         if (maybeAuthParamName.isPresent() && maybeAuthParamName.get().equals(value)) {
             return sanitizeParameterName(escape(value), endpoint);
         }
+        if (Tags.hasServerRequestContext(endpoint) && Tags.SERVER_REQUEST_CONTEXT_PARAMETER.equals(value)) {
+            return sanitizeParameterName(escape(value), endpoint);
+        }
         return value;
     }
 

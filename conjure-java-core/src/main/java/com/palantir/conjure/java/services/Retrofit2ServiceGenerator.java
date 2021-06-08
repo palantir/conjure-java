@@ -152,8 +152,7 @@ public final class Retrofit2ServiceGenerator implements Generator {
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Headers"))
                         .addMember("value", "$S", "hr-path-template: " + endpointPathWithoutRegex)
                         .addMember("value", "$S", "Accept: " + getReturnMediaType(returnType))
-                        .build())
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
+                        .build());
 
         if (returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Streaming"))
@@ -164,6 +163,8 @@ public final class Retrofit2ServiceGenerator implements Generator {
                 .getDeprecated()
                 .ifPresent(
                         deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
+
+        methodBuilder.addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
         ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
@@ -255,7 +256,7 @@ public final class Retrofit2ServiceGenerator implements Generator {
                         .filter(i -> !sortedMaybeExtraArgs.get(i).isPresent())
                         .mapToObj(sortedParams::get)
                         .collect(Collectors.toList()))
-                .addAnnotations(ConjureAnnotations.incubating(endpointDef));
+                .addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
         endpointDef
                 .getReturns()

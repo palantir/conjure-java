@@ -2,6 +2,7 @@ package test.prefix.com.palantir.another;
 
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
+import com.palantir.logsafe.Safe;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
@@ -57,7 +58,7 @@ public interface TestService {
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased}
      */
-    AliasedString getAliasedString(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    AliasedString getAliasedString(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code POST /catalog/datasets/upload-raw}

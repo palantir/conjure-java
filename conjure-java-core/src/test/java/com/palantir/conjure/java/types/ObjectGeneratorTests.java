@@ -51,6 +51,7 @@ public final class ObjectGeneratorTests {
                                 .useImmutableBytes(true)
                                 .strictObjects(true)
                                 .nonNullCollections(true)
+                                .excludeEmptyOptionals(true)
                                 .build())))
                 .emit(def, tempDir);
 
@@ -62,7 +63,9 @@ public final class ObjectGeneratorTests {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
         List<Path> files = new GenerationCoordinator(
-                        MoreExecutors.directExecutor(), ImmutableSet.of(new ObjectGenerator(Options.empty())))
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(
+                                Options.builder().excludeEmptyOptionals(true).build())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -73,8 +76,10 @@ public final class ObjectGeneratorTests {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(
-                                Options.builder().packagePrefix("test.prefix").build())))
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .packagePrefix("test.prefix")
+                                .excludeEmptyOptionals(true)
+                                .build())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -86,8 +91,10 @@ public final class ObjectGeneratorTests {
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-staged-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(
-                                Options.builder().useStagedBuilders(true).build())))
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .useStagedBuilders(true)
+                                .excludeEmptyOptionals(true)
+                                .build())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -102,8 +109,10 @@ public final class ObjectGeneratorTests {
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
         new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(
-                                Options.builder().useImmutableBytes(true).build())))
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .useImmutableBytes(true)
+                                .excludeEmptyOptionals(true)
+                                .build())))
                 .emit(conjure, src);
 
         // Generated files contain imports
@@ -121,8 +130,10 @@ public final class ObjectGeneratorTests {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-errors.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ErrorGenerator(
-                                Options.builder().useImmutableBytes(true).build())))
+                        ImmutableSet.of(new ErrorGenerator(Options.builder()
+                                .useImmutableBytes(true)
+                                .excludeEmptyOptionals(true)
+                                .build())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);

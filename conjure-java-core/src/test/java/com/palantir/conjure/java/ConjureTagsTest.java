@@ -38,45 +38,45 @@ class ConjureTagsTest {
 
     @Test
     void testEmpty() {
-        assertThat(ConjureTags.tagAnnotations(tags())).isEmpty();
+        assertThat(ConjureTags.safetyAnnotations(tags())).isEmpty();
     }
 
     @Test
     void testUnknown() {
-        assertThat(ConjureTags.tagAnnotations(tags("unknown tag"))).isEmpty();
+        assertThat(ConjureTags.safetyAnnotations(tags("unknown tag"))).isEmpty();
     }
 
     @Test
     void testSafe() {
-        assertThat(ConjureTags.tagAnnotations(tags("safe")))
+        assertThat(ConjureTags.safetyAnnotations(tags("safe")))
                 .hasSize(1)
                 .allSatisfy(annotationSpec -> assertThat(annotationSpec.type).isEqualTo(ClassName.get(Safe.class)));
     }
 
     @Test
     void testUnsafe() {
-        assertThat(ConjureTags.tagAnnotations(tags("unsafe")))
+        assertThat(ConjureTags.safetyAnnotations(tags("unsafe")))
                 .hasSize(1)
                 .allSatisfy(annotationSpec -> assertThat(annotationSpec.type).isEqualTo(ClassName.get(Unsafe.class)));
     }
 
     @Test
     void testSafeAndUnsafe() {
-        assertThatThrownBy(() -> ConjureTags.tagAnnotations(tags("safe", "unsafe")))
+        assertThatThrownBy(() -> ConjureTags.safetyAnnotations(tags("safe", "unsafe")))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasMessageContaining("Tags cannot include both safe and unsafe");
     }
 
     @Test
     void testUnexpectedCase() {
-        assertThatThrownBy(() -> ConjureTags.tagAnnotations(tags("Safe")))
+        assertThatThrownBy(() -> ConjureTags.safetyAnnotations(tags("Safe")))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasMessageContaining("Unexpected capitalization");
     }
 
     @Test
     void testSafeMarkerAndTag() {
-        assertThatThrownBy(() -> ConjureTags.tagAnnotations(ArgumentDefinition.builder()
+        assertThatThrownBy(() -> ConjureTags.safetyAnnotations(ArgumentDefinition.builder()
                         .from(tags("safe"))
                         .markers(Type.external(ExternalReference.builder()
                                 .externalReference(TypeName.of(

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Revert default optional field handling to serialize a null value
+  links:
+  - https://github.com/palantir/conjure-java/pull/1375

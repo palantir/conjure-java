@@ -116,6 +116,12 @@ types:
         alias: uuid
       MapAliasExample:
         alias: map<string, any>
+      OptionalMapAliasExample:
+        alias: optional<map<string, any>>
+      OptionalListAliasExample:
+        alias: optional<list<string>>
+      OptionalSetAliasExample:
+        alias: optional<set<string>>
       ReferenceAliasExample:
         alias: AnyExample
       DateTimeAliasExample:
@@ -131,6 +137,17 @@ types:
           rid: optional<rid>
           bearertoken: optional<bearertoken>
           uuid: optional<uuid>
+          map: optional<map<string,string>>
+          list: optional<list<string>>
+          set: optional<set<string>>
+          aliasOne: optional<StringAliasOne>
+          aliasTwo: StringAliasTwo
+          aliasList: optional<ListAlias>
+          aliasMap: optional<MapAliasExample>
+          aliasOptional: OptionalAlias
+          aliasOptionalMap: OptionalMapAliasExample
+          aliasOptionalList: OptionalListAliasExample
+          aliasOptionalSet: OptionalSetAliasExample
       ExternalLongAliasExample:
         alias: ExternalLong
       ExternalStringAliasExample:

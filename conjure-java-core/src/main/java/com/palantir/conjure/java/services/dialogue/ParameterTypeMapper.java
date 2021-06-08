@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.services.Auth;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -33,12 +33,10 @@ import com.palantir.conjure.spec.PathParameterType;
 import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,30 +54,34 @@ public final class ParameterTypeMapper {
         return parameterTypes.getClassName(type);
     }
 
-    public List<ParameterSpec> methodParams(EndpointDefinition endpointDef) {
+    public List<ParameterSpec> interfaceMethodParams(EndpointDefinition endpointDef) {
+        return methodParams(endpointDef, true);
+    }
+
+    public List<ParameterSpec> implementationMethodParams(EndpointDefinition endpointDef) {
+        return methodParams(endpointDef, false);
+    }
+
+    private List<ParameterSpec> methodParams(EndpointDefinition endpointDef, boolean includeSafetyAnnotations) {
         ImmutableList.Builder<ParameterSpec> paramSpecBuilder = ImmutableList.builder();
         endpointDef.getAuth().ifPresent(auth -> paramSpecBuilder.add(Auth.authParam(auth)));
         endpointDef.getArgs().stream()
                 .sorted(Comparator.comparing(o -> o.getParamType().accept(PARAM_SORT_VISITOR)
                         + o.getType().accept(TYPE_SORT_VISITOR)))
-                .forEach(def -> paramSpecBuilder.add(param(def)));
+                .forEach(def -> paramSpecBuilder.add(param(def, includeSafetyAnnotations)));
 
         return paramSpecBuilder.build();
     }
 
-    private ParameterSpec param(ArgumentDefinition def) {
+    private ParameterSpec param(ArgumentDefinition def, boolean includeSafetyAnnotations) {
         ParameterSpec.Builder param = ParameterSpec.builder(
                 parameterTypes.getClassName(def.getType()), def.getArgName().get());
-
-        param.addAnnotations(markers(def.getMarkers()));
-        return param.build();
-    }
-
-    private Set<AnnotationSpec> markers(List<Type> markers) {
-        if (!markers.isEmpty()) {
-            log.debug("conjure-dialogue does not support markers. In particular, it ignores @Safe annotations");
+        if (includeSafetyAnnotations) {
+            // Safety annotations are helpful to inform developers of safety guarantees, and to
+            // reinforce static analysis tooling which validates arguments to annotated methods.
+            param.addAnnotations(ConjureTags.safetyAnnotations(def));
         }
-        return ImmutableSet.of();
+        return param.build();
     }
 
     /** Produces an ordering for ParamaterType of Header, Path, Query, Body. */

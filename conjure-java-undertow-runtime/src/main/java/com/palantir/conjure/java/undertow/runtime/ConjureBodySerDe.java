@@ -27,6 +27,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tracing.CloseableTracer;
+import com.palantir.tracing.TagTranslator;
 import com.palantir.tracing.Tracer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
@@ -36,11 +37,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xnio.IoUtils;
 
 /** Package private internal API. */
 final class ConjureBodySerDe implements BodySerDe {
 
+    private static final Logger log = LoggerFactory.getLogger(ConjureBodySerDe.class);
     private static final String BINARY_CONTENT_TYPE = "application/octet-stream";
     private static final Splitter ACCEPT_VALUE_SPLITTER =
             Splitter.on(',').trimResults().omitEmptyStrings();
@@ -73,20 +77,17 @@ final class ConjureBodySerDe implements BodySerDe {
     public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
         Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
-        Tracer.fastStartSpan("Undertow: serialize binary");
+        Tracer.fastStartSpan(TracedEncoding.SERIALIZE_OPERATION);
         try {
             value.write(exchange.getOutputStream());
         } finally {
-            Tracer.fastCompleteSpan();
+            Tracer.fastCompleteSpan(SerializeBinaryTagTranslator.INSTANCE, SerializeBinaryTagTranslator.INSTANCE);
         }
     }
 
     @Override
     public InputStream deserializeInputStream(HttpServerExchange exchange) {
-        String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
-        if (contentType == null) {
-            throw new SafeIllegalArgumentException("Request is missing Content-Type header");
-        }
+        String contentType = getContentType(exchange);
         if (!contentType.startsWith(BINARY_CONTENT_TYPE)) {
             throw FrameworkException.unsupportedMediaType(
                     "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
@@ -202,10 +203,7 @@ final class ConjureBodySerDe implements BodySerDe {
         /** Returns the {@link EncodingDeserializerContainer} to use to deserialize the request body. */
         @SuppressWarnings("ForLoopReplaceableByForEach") // performance sensitive code avoids iterator allocation
         EncodingDeserializerContainer<T> getRequestDeserializer(HttpServerExchange exchange) {
-            String contentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
-            if (contentType == null) {
-                throw new SafeIllegalArgumentException("Request is missing Content-Type header");
-            }
+            String contentType = getContentType(exchange);
             for (int i = 0; i < encodings.size(); i++) {
                 EncodingDeserializerContainer<T> container = encodings.get(i);
                 if (container.encoding.supportsContentType(contentType)) {
@@ -240,5 +238,34 @@ final class ConjureBodySerDe implements BodySerDe {
                 IoUtils.safeClose(exchange.getInputStream());
             }
         }
+    }
+
+    private enum SerializeBinaryTagTranslator implements TagTranslator<Object> {
+        INSTANCE;
+
+        @Override
+        public <T> void translate(TagAdapter<T> adapter, T target, Object _data) {
+            adapter.tag(target, "type", "BinaryResponseBody");
+            adapter.tag(target, "contentType", BINARY_CONTENT_TYPE);
+        }
+    }
+
+    /**
+     * Gets the request {@code Content-Type} header if exactly one value exists, otherwise logs
+     * a warning. This notifies us in the unexpected case when multiple
+     * content-type headers are incorrectly sent to the server, it's not clear which should
+     * be used.
+     */
+    private static String getContentType(HttpServerExchange exchange) {
+        HeaderValues contentTypeValues = exchange.getRequestHeaders().get(Headers.CONTENT_TYPE);
+        if (contentTypeValues == null || contentTypeValues.isEmpty()) {
+            throw new SafeIllegalArgumentException("Request is missing Content-Type header");
+        } else if (contentTypeValues.size() != 1) {
+            log.warn(
+                    "Request has too many Content-Type headers",
+                    SafeArg.of("contentTypes", ImmutableList.copyOf(contentTypeValues)));
+            return contentTypeValues.getFirst();
+        }
+        return contentTypeValues.get(0);
     }
 }

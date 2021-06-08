@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.google.errorprone.annotations.MustBeClosed;
+import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -24,35 +25,41 @@ public interface EteBinaryServiceBlocking {
     /**
      * @apiNote {@code POST /binary}
      */
+    @ClientEndpoint(method = "POST", path = "/binary")
     @MustBeClosed
     InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body);
 
     /**
      * @apiNote {@code POST /binary/throws}
      */
+    @ClientEndpoint(method = "POST", path = "/binary/throws")
     @MustBeClosed
     InputStream postBinaryThrows(AuthHeader authHeader, int bytesToRead, BinaryRequestBody body);
 
     /**
      * @apiNote {@code GET /binary/optional/present}
      */
+    @ClientEndpoint(method = "GET", path = "/binary/optional/present")
     Optional<InputStream> getOptionalBinaryPresent(AuthHeader authHeader);
 
     /**
      * @apiNote {@code GET /binary/optional/empty}
      */
+    @ClientEndpoint(method = "GET", path = "/binary/optional/empty")
     Optional<InputStream> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /**
      * Throws an exception after partially writing a binary response.
      * @apiNote {@code GET /binary/failure}
      */
+    @ClientEndpoint(method = "GET", path = "/binary/failure")
     @MustBeClosed
     InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
 
     /**
      * @apiNote {@code GET /binary/aliased}
      */
+    @ClientEndpoint(method = "GET", path = "/binary/aliased")
     Optional<InputStream> getAliased(AuthHeader authHeader);
 
     /**

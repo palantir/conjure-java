@@ -1,5 +1,6 @@
 package com.palantir.product;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
@@ -24,6 +25,7 @@ public final class OptionalAliasExample {
     }
 
     @JsonProperty("optionalAlias")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public OptionalAlias getOptionalAlias() {
         return this.optionalAlias;
     }
