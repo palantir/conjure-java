@@ -43,6 +43,8 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+    compile 'com.palantir.javaformat:palantir-java-format'
+    compile 'com.palantir.javaformat:palantir-java-format-spi'
     compile 'com.google.guava:guava'
     compile 'com.palantir.conjure:conjure-generator-common'
     compile 'com.palantir.conjure.java.api:errors'
@@ -56,8 +58,6 @@ dependencies {
     compile 'org.slf4j:slf4j-api'
     compile 'com.atlassian.commonmark:commonmark'
 
-    implementation 'com.palantir.javaformat:palantir-java-format'
-    implementation 'com.palantir.javaformat:palantir-java-format-spi'
     implementation 'org.glassfish.jersey.core:jersey-common'
     implementation 'com.palantir.dialogue:dialogue-target'
     implementation 'com.palantir.dialogue:dialogue-serde'
