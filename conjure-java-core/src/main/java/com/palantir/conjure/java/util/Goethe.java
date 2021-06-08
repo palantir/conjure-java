@@ -20,12 +20,12 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.Iterables;
 import com.google.common.io.CharSink;
-import com.google.common.io.CharSource;
-import com.palantir.javaformat.java.Formatter;
 import com.palantir.javaformat.java.FormatterDiagnostic;
 import com.palantir.javaformat.java.FormatterException;
-import com.palantir.javaformat.java.JavaFormatterOptions;
+import com.palantir.javaformat.java.FormatterService;
 import com.squareup.javapoet.JavaFile;
 import java.io.File;
 import java.io.IOException;
@@ -33,15 +33,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 /** Tools for a better JavaPoet. */
 public final class Goethe {
 
-    private static final Formatter JAVA_FORMATTER = Formatter.createFormatter(JavaFormatterOptions.builder()
-            .style(JavaFormatterOptions.Style.PALANTIR)
-            .build());
+    private static final Supplier<FormatterService> memoizedService = Suppliers.memoize(Goethe::serviceLoadInternal);
 
     private Goethe() {}
+
+    private static FormatterService serviceLoadInternal() {
+        return Iterables.getOnlyElement(ServiceLoader.load(FormatterService.class));
+    }
 
     /** Formats the given Java file and emits it to the appropriate directory under {@code baseDir}. */
     public static Path formatAndEmit(JavaFile file, Path baseDir) {
@@ -52,7 +56,7 @@ public final class Goethe {
 
             CharSink sink = com.google.common.io.Files.asCharSink(outputFile.toFile(), StandardCharsets.UTF_8);
             try {
-                JAVA_FORMATTER.formatSource(CharSource.wrap(code), sink);
+                sink.write(memoizedService.get().formatSourceReflowStringsAndFixImports(code.toString()));
             } catch (FormatterException e) {
                 throw new RuntimeException(generateMessage(file, code.toString(), e.diagnostics()), e);
             }

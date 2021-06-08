@@ -44,6 +44,7 @@ dependencies {
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
     compile 'com.palantir.javaformat:palantir-java-format'
+    compile 'com.palantir.javaformat:palantir-java-format-spi'
     compile 'com.google.guava:guava'
     compile 'com.palantir.conjure:conjure-generator-common'
     compile 'com.palantir.conjure.java.api:errors'
