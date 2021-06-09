@@ -237,6 +237,12 @@ public interface EteServiceAsync {
     ListenableFuture<Void> receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
 
     /**
+     * @apiNote {@code PUT /base/list/strings}
+     */
+    @ClientEndpoint(method = "PUT", path = "/base/list/strings")
+    ListenableFuture<Void> receiveListOfStrings(AuthHeader authHeader, List<String> value);
+
+    /**
      * Creates an asynchronous/non-blocking client for a EteService service.
      */
     static EteServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -429,6 +435,15 @@ public interface EteServiceAsync {
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveSetOfOptionals);
 
             private final Deserializer<Void> receiveSetOfOptionalsDeserializer =
+                    _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final Serializer<List<String>> receiveListOfStringsSerializer =
+                    _runtime.bodySerDe().serializer(new TypeMarker<List<String>>() {});
+
+            private final EndpointChannel receiveListOfStringsChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.receiveListOfStrings);
+
+            private final Deserializer<Void> receiveListOfStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
             @Override
@@ -724,6 +739,15 @@ public interface EteServiceAsync {
                 _request.body(receiveSetOfOptionalsSerializer.serialize(value));
                 return _runtime.clients()
                         .call(receiveSetOfOptionalsChannel, _request.build(), receiveSetOfOptionalsDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<Void> receiveListOfStrings(AuthHeader authHeader, List<String> value) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.body(receiveListOfStringsSerializer.serialize(value));
+                return _runtime.clients()
+                        .call(receiveListOfStringsChannel, _request.build(), receiveListOfStringsDeserializer);
             }
 
             @Override

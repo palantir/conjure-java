@@ -93,8 +93,9 @@ public final class Encodings {
                             e,
                             SafeArg.of("contentType", getContentType()),
                             SafeArg.of("type", type));
-                } catch (JsonParseException e) {
+                } catch (JsonParseException | NullPointerException e) {
                     // JsonParseException is thrown when the input cannot be parsed as JSON, for example '{"value"}'.
+                    // NPE is often thrown when an unexpected `null` is contained within the request, e.g. '[null]'.
                     throw new SafeIllegalArgumentException(
                             "Failed to parse request due to malformed content",
                             e,

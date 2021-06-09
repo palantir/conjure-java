@@ -509,6 +509,14 @@ public final class UndertowServiceEteTest extends TestBase {
                 .isEqualTo(SimpleEnum.VALUE);
     }
 
+    @Test
+    public void testListOfNull() {
+        assertThatThrownBy(() ->
+                        client.receiveListOfStrings(AuthHeader.valueOf("authHeader"), Collections.singletonList(null)))
+                .isInstanceOfSatisfying(
+                        RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
+    }
+
     @BeforeAll
     public static void beforeClass() throws IOException {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(

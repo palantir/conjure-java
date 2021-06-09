@@ -215,6 +215,12 @@ public interface EteServiceRetrofit {
     ListenableFuture<Void> receiveSetOfOptionals(
             @Header("Authorization") AuthHeader authHeader, @Body Set<Optional<String>> value);
 
+    @PUT("./base/list/strings")
+    @Headers({"hr-path-template: /base/list/strings", "Accept: application/json"})
+    @ClientEndpoint(method = "PUT", path = "/base/list/strings")
+    ListenableFuture<Void> receiveListOfStrings(
+            @Header("Authorization") AuthHeader authHeader, @Body List<String> value);
+
     @Deprecated
     @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
     default ListenableFuture<Optional<Long>> optionalExternalLongQuery(@Header("Authorization") AuthHeader authHeader) {

@@ -236,3 +236,8 @@ services:
         http: PUT /set/optionals
         args:
           value: set<optional<string>>
+
+      receiveListOfStrings:
+        http: PUT /list/strings
+        args:
+          value: list<string>

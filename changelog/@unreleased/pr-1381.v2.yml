@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: NPE in deserialization results in a 400 response status
+  links:
+  - https://github.com/palantir/conjure-java/pull/1381
