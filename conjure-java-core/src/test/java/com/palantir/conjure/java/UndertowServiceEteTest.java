@@ -358,6 +358,32 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void testGetMethodsAllowHeadRequests() throws IOException {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/string");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("HEAD");
+        con.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
+        con.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        assertThat(con.getResponseCode()).isEqualTo(200);
+        try (InputStream responseBody = con.getInputStream()) {
+            assertThat(responseBody).hasContent("");
+        }
+    }
+
+    @Test
+    public void testOptionsOnGetIncludesHead() throws IOException {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/string");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("OPTIONS");
+        con.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
+        con.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        assertThat(con.getResponseCode()).isEqualTo(204);
+        assertThat(con.getHeaderField(HttpHeaders.ALLOW)).isEqualTo("GET, HEAD");
+    }
+
+    @Test
     public void testUnknownContentType() {
         assertThatThrownBy(() -> {
                     try {

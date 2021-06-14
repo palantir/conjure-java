@@ -59,7 +59,26 @@ public final class ConjureHandler implements HttpHandler {
                 // fallback handler will be used instead of 405 status.
                 .setInvalidMethodHandler(null);
         endpoints.forEach(this::register);
-        registerOptionsEndpoints(routingHandler, endpoints);
+        registerSyntheticEndpoints(routingHandler, endpoints);
+    }
+
+    private static List<Endpoint> applyHeadEndpoints(RoutingHandler routingHandler, List<Endpoint> endpoints) {
+        List<Endpoint> result = new ArrayList<>(endpoints.size());
+        for (Endpoint endpoint : endpoints) {
+            result.add(endpoint);
+            if (Methods.GET.equals(endpoint.method())) {
+                Endpoint headEndpoint =
+                        Endpoint.builder().from(endpoint).method(Methods.HEAD).build();
+                result.add(headEndpoint);
+                routingHandler.add(headEndpoint.method(), headEndpoint.template(), headEndpoint.handler());
+            }
+        }
+        return result;
+    }
+
+    private static void registerSyntheticEndpoints(RoutingHandler routingHandler, List<Endpoint> endpoints) {
+        List<Endpoint> updatedEndpoints = applyHeadEndpoints(routingHandler, endpoints);
+        registerOptionsEndpoints(routingHandler, updatedEndpoints);
     }
 
     private static void registerOptionsEndpoints(RoutingHandler routingHandler, List<Endpoint> endpoints) {
