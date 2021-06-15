@@ -64,7 +64,7 @@ public final class OptionsRequestTest {
     public void test_getAndPost() {
         Response response = execute("/first");
         assertThat(response.code()).isEqualTo(204);
-        assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("GET, POST");
+        assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("GET, HEAD, POST");
     }
 
     @Test
