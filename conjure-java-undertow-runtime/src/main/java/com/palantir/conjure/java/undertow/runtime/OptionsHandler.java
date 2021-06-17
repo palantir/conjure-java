@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.logsafe.Preconditions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -31,7 +32,11 @@ final class OptionsHandler implements HttpHandler {
     private final String allowValue;
 
     OptionsHandler(Set<HttpString> methods) {
-        this.allowValue = Joiner.on(", ").join(methods);
+        this.allowValue = Joiner.on(", ")
+                .join(ImmutableSet.<HttpString>builder()
+                        .add(Methods.OPTIONS)
+                        .addAll(methods)
+                        .build());
     }
 
     @Override

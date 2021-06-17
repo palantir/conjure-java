@@ -64,7 +64,7 @@ public final class OptionsRequestTest {
     public void test_getAndPost() {
         Response response = execute("/first");
         assertThat(response.code()).isEqualTo(204);
-        assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("GET, HEAD, POST");
+        assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, GET, HEAD, POST");
     }
 
     @Test
@@ -78,7 +78,7 @@ public final class OptionsRequestTest {
     public void test_parameterized() {
         Response response = execute("/second/paramValue/and/secondParam");
         assertThat(response.code()).isEqualTo(204);
-        assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("PUT");
+        assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, PUT");
     }
 
     private static Response execute(String path) {

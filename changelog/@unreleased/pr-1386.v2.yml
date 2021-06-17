@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: |-
+    The conjure-undertow `OPTIONS` handler `Allow` header value includes the `OPTIONS` method
+    in addition to other available http methods.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1386

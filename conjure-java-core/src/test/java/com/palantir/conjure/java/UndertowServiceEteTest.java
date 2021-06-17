@@ -380,7 +380,7 @@ public final class UndertowServiceEteTest extends TestBase {
         con.setRequestProperty(
                 HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
         assertThat(con.getResponseCode()).isEqualTo(204);
-        assertThat(con.getHeaderField(HttpHeaders.ALLOW)).isEqualTo("GET, HEAD");
+        assertThat(con.getHeaderField(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, GET, HEAD");
     }
 
     @Test
