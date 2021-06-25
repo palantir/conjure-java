@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ErrorType.Code;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -103,8 +104,8 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void handles401RemoteException() throws IOException {
-        SerializableError remoteError =
-                SerializableError.forException(new ServiceException(ErrorType.UNAUTHORIZED, SafeArg.of("foo", "bar")));
+        SerializableError remoteError = SerializableError.forException(
+                new ServiceException(ErrorType.create(Code.UNAUTHORIZED, "Test:ErrorName"), SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.UNAUTHORIZED.httpErrorCode());
         Response response = execute();
 
@@ -112,7 +113,7 @@ public final class ConjureExceptionHandlerTest {
         // Does not propagate args
         SerializableError expectedPropagatedError = SerializableError.builder()
                 .errorCode(ErrorType.UNAUTHORIZED.code().toString())
-                .errorName(ErrorType.UNAUTHORIZED.name())
+                .errorName("Test:ErrorName")
                 .errorInstanceId(remoteError.errorInstanceId())
                 .build();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -124,8 +125,8 @@ public final class ConjureExceptionHandlerTest {
 
     @Test
     public void handles403RemoteException() throws IOException {
-        SerializableError remoteError = SerializableError.forException(
-                new ServiceException(ErrorType.PERMISSION_DENIED, SafeArg.of("foo", "bar")));
+        SerializableError remoteError = SerializableError.forException(new ServiceException(
+                ErrorType.create(Code.PERMISSION_DENIED, "Test:ErrorName"), SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.PERMISSION_DENIED.httpErrorCode());
         Response response = execute();
 
@@ -133,7 +134,7 @@ public final class ConjureExceptionHandlerTest {
         // Does not propagate args
         SerializableError expectedPropagatedError = SerializableError.builder()
                 .errorCode(ErrorType.PERMISSION_DENIED.code().toString())
-                .errorName(ErrorType.PERMISSION_DENIED.name())
+                .errorName("Test:ErrorName")
                 .errorInstanceId(remoteError.errorInstanceId())
                 .build();
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
