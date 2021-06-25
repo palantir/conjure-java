@@ -101,7 +101,7 @@ public enum ConjureExceptions implements ExceptionHandler {
                     "Encountered a remote exception",
                     SafeArg.of("errorInstanceId", remoteException.getError().errorInstanceId()),
                     SafeArg.of("errorName", remoteException.getError().errorName()),
-                    SafeArg.of("status", remoteException.getStatus()),
+                    SafeArg.of("statusCode", remoteException.getStatus()),
                     remoteException);
 
             writeResponse(
@@ -118,7 +118,7 @@ public enum ConjureExceptions implements ExceptionHandler {
                     "Encountered a remote exception. Mapping to an internal error before propagating",
                     SafeArg.of("errorInstanceId", remoteException.getError().errorInstanceId()),
                     SafeArg.of("errorName", remoteException.getError().errorName()),
-                    SafeArg.of("status", remoteException.getStatus()),
+                    SafeArg.of("statusCode", remoteException.getStatus()),
                     remoteException);
 
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, remoteException);
