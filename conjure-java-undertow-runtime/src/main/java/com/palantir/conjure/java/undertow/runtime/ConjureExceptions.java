@@ -84,10 +84,10 @@ public enum ConjureExceptions implements ExceptionHandler {
                 exception.getErrorType().httpErrorCode());
     }
 
-    private static void qosException(HttpServerExchange exchange, QosException exception) {
-        exception.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
-        log.debug("Possible quality-of-service intervention", exception);
-        writeResponse(exchange, Optional.empty(), exception.accept(QOS_EXCEPTION_STATUS_CODE));
+    private static void qosException(HttpServerExchange exchange, QosException qosException) {
+        qosException.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
+        log.debug("Possible quality-of-service intervention", qosException);
+        writeResponse(exchange, Optional.empty(), qosException.accept(QOS_EXCEPTION_STATUS_CODE));
     }
 
     // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
@@ -95,49 +95,37 @@ public enum ConjureExceptions implements ExceptionHandler {
     // considered internal to *this* service rather than the originating service. This means in particular
     // that Conjure errors are defined only local to a given service and these error types don't
     // propagate through other services.
-    private static void remoteException(HttpServerExchange exchange, RemoteException exception) {
-        ErrorType errorType = mapRemoteExceptionErrorType(exception);
-        writeResponse(
-                exchange,
-                Optional.of(SerializableError.builder()
-                        .errorName(errorType.name())
-                        .errorCode(errorType.code().toString())
-                        .errorInstanceId(exception.getError().errorInstanceId())
-                        .build()),
-                errorType.httpErrorCode());
-    }
-
-    private static ErrorType mapRemoteExceptionErrorType(RemoteException exception) {
-        if (exception.getStatus() == 401) {
+    private static void remoteException(HttpServerExchange exchange, RemoteException remoteException) {
+        if (remoteException.getStatus() == 401 || remoteException.getStatus() == 403) {
             log.info(
-                    "Encountered a remote unauthorized exception."
-                            + " Mapping to a default unauthorized exception before propagating",
-                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
-                    SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("statusCode", exception.getStatus()),
-                    exception);
+                    "Encountered a remote exception",
+                    SafeArg.of("errorInstanceId", remoteException.getError().errorInstanceId()),
+                    SafeArg.of("errorName", remoteException.getError().errorName()),
+                    SafeArg.of("statusCode", remoteException.getStatus()),
+                    remoteException);
 
-            return ErrorType.UNAUTHORIZED;
-        } else if (exception.getStatus() == 403) {
-            log.info(
-                    "Encountered a remote permission denied exception."
-                            + " Mapping to a default permission denied exception before propagating",
-                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
-                    SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("statusCode", exception.getStatus()),
-                    exception);
-
-            return ErrorType.PERMISSION_DENIED;
+            writeResponse(
+                    exchange,
+                    Optional.of(SerializableError.builder()
+                            .errorCode(remoteException.getError().errorCode())
+                            .errorName(remoteException.getError().errorName())
+                            .errorInstanceId(remoteException.getError().errorInstanceId())
+                            .build()),
+                    remoteException.getStatus());
         } else {
             // log at WARN instead of ERROR because this indicates an issue in a remote server
             log.warn(
                     "Encountered a remote exception. Mapping to an internal error before propagating",
-                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
-                    SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("statusCode", exception.getStatus()),
-                    exception);
+                    SafeArg.of("errorInstanceId", remoteException.getError().errorInstanceId()),
+                    SafeArg.of("errorName", remoteException.getError().errorName()),
+                    SafeArg.of("statusCode", remoteException.getStatus()),
+                    remoteException);
 
-            return ErrorType.INTERNAL;
+            ServiceException exception = new ServiceException(ErrorType.INTERNAL, remoteException);
+            writeResponse(
+                    exchange,
+                    Optional.of(SerializableError.forException(exception)),
+                    exception.getErrorType().httpErrorCode());
         }
     }
 
