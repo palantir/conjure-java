@@ -43,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
-@Execution(ExecutionMode.CONCURRENT)
+@Execution(ExecutionMode.SAME_THREAD)
 public final class AutoDeserializeTest {
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
 
