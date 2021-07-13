@@ -41,6 +41,7 @@ public final class JerseyServerUnderTestApplication extends Application<JerseySe
     }
 
     @Override
+    @SuppressWarnings("ProxyNonConstantType")
     public void run(JerseyServerUnderTestConfiguration _configuration, Environment environment) {
         environment
                 .jersey()
