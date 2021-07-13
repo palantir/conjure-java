@@ -16,15 +16,10 @@
 
 package com.palantir.conjure.java;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.palantir.common.streams.MoreStreams;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.goethe.Goethe;
-import com.squareup.javapoet.JavaFile;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -48,40 +43,9 @@ public class GenerationCoordinator {
     public List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
         return MoreStreams.inCompletionOrder(
                         generators.stream().flatMap(generator -> generator.generate(conjureDefinition)),
-                        f -> write(f, outputDir),
+                        f -> Goethe.formatAndEmit(f, outputDir.toPath()),
                         executor,
                         Runtime.getRuntime().availableProcessors())
                 .collect(Collectors.toList());
-    }
-
-    private static Path write(JavaFile javaFile, File outputDir) {
-        try {
-            Path result = getFilePath(javaFile, outputDir.toPath());
-            Files.writeString(result, Goethe.formatAsString(javaFile));
-            return result;
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to write file: " + javaFile.typeSpec.name);
-        }
-    }
-
-    /**
-     * Returns the full path for the given Java file and Java base dir. In a nutshell, turns packages into directories,
-     * e.g., {@code com.foo.bar.MyClass -> /<baseDir>/com/foo/bar/MyClass.java} and creates all directories.
-     * Implementation taken from JavaPoet's {@link JavaFile#writeTo(File)}.
-     */
-    private static Path getFilePath(JavaFile file, Path baseDir) throws IOException {
-        Preconditions.checkArgument(
-                Files.notExists(baseDir) || Files.isDirectory(baseDir),
-                "path %s exists but is not a directory.",
-                baseDir);
-        Path outputDirectory = baseDir;
-        if (!file.packageName.isEmpty()) {
-            for (String packageComponent : Splitter.on(".").split(file.packageName)) {
-                outputDirectory = outputDirectory.resolve(packageComponent);
-            }
-            Files.createDirectories(outputDirectory);
-        }
-
-        return outputDirectory.resolve(file.typeSpec.name + ".java");
     }
 }
