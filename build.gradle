@@ -63,15 +63,10 @@ subprojects {
     apply plugin: 'org.inferred.processors'
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
-    sourceCompatibility = 1.8
+    sourceCompatibility = 11
 
     tasks.withType(JavaCompile) {
         options.compilerArgs += ['-Werror']
-
-        // necessary until https://github.com/palantir/gradle-baseline/pull/582
-        if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
-            options.compilerArgs += ['--release', '8']
-        }
         options.errorprone.disable 'PreferSafeLoggingPreconditions', 'PreferSafeLoggableExceptions'
     }
 

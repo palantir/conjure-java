@@ -35,6 +35,7 @@ org.junit.jupiter:* = 5.7.2
 org.junit.vintage:* = 5.7.2
 org.mockito:* = 3.11.2
 org.slf4j:* = 1.7.31
+com.palantir.goethe:* = 0.2.0
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson

@@ -34,6 +34,7 @@ public final class UndertowServerUnderTestExtension implements BeforeAllCallback
     private Undertow server;
 
     @Override
+    @SuppressWarnings("ProxyNonConstantType")
     public void beforeAll(ExtensionContext _context) {
         UndertowAutoDeserializeService autoDeserialize =
                 Reflection.newProxy(UndertowAutoDeserializeService.class, new EchoResourceInvocationHandler());

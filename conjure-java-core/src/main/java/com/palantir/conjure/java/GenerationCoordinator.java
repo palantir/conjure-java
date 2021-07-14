@@ -17,8 +17,8 @@
 package com.palantir.conjure.java;
 
 import com.palantir.common.streams.MoreStreams;
-import com.palantir.conjure.java.util.Goethe;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.goethe.Goethe;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
