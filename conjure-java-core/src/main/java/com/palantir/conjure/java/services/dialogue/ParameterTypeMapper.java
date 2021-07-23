@@ -33,16 +33,16 @@ import com.palantir.conjure.spec.PathParameterType;
 import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import java.util.Comparator;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ParameterTypeMapper {
 
-    private static final Logger log = LoggerFactory.getLogger(ParameterTypeMapper.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(ParameterTypeMapper.class);
 
     private final TypeMapper parameterTypes;
 

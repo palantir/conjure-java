@@ -22,6 +22,8 @@ import com.palantir.conjure.java.undertow.lib.Contexts;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import java.security.cert.Certificate;
@@ -32,11 +34,9 @@ import java.util.Map;
 import java.util.Optional;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class ConjureContexts implements Contexts {
-    private static final Logger log = LoggerFactory.getLogger(ConjureContexts.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(ConjureContexts.class);
     private final RequestArgHandler requestArgHandler;
 
     ConjureContexts(RequestArgHandler requestArgHandler) {

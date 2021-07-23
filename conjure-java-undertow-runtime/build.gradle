@@ -36,4 +36,5 @@ dependencies {
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
+    implementation 'com.palantir.safe-logging:logger'
 }

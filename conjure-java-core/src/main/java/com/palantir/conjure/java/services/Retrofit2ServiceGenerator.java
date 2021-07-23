@@ -43,6 +43,8 @@ import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.util.syntacticpath.Path;
 import com.palantir.util.syntacticpath.Paths;
 import com.squareup.javapoet.AnnotationSpec;
@@ -66,8 +68,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 import javax.ws.rs.core.MediaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class Retrofit2ServiceGenerator implements Generator {
 
@@ -80,7 +80,7 @@ public final class Retrofit2ServiceGenerator implements Generator {
     private static final TypeName OPTIONAL_BINARY_RETURN_TYPE =
             ParameterizedTypeName.get(ClassName.get(Optional.class), BINARY_RETURN_TYPE);
 
-    private static final Logger log = LoggerFactory.getLogger(Retrofit2ServiceGenerator.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(Retrofit2ServiceGenerator.class);
 
     private final Options options;
 
