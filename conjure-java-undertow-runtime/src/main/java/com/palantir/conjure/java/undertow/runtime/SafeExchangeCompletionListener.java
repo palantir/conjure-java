@@ -17,11 +17,11 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.ExchangeCompletionListener;
 import io.undertow.server.HttpServerExchange;
 import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Safe implementation of {@link ExchangeCompletionListener} which always calls the {@link NextListener} and logs
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class SafeExchangeCompletionListener implements ExchangeCompletionListener {
 
-    private static final Logger log = LoggerFactory.getLogger(SafeExchangeCompletionListener.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(SafeExchangeCompletionListener.class);
     private final Consumer<HttpServerExchange> action;
 
     private SafeExchangeCompletionListener(Consumer<HttpServerExchange> action) {

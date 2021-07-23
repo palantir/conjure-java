@@ -25,6 +25,8 @@ import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
@@ -34,8 +36,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xnio.IoUtils;
 
 /**
@@ -45,7 +45,7 @@ import org.xnio.IoUtils;
 public enum ConjureExceptions implements ExceptionHandler {
     INSTANCE;
 
-    private static final Logger log = LoggerFactory.getLogger(ConjureExceptions.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(ConjureExceptions.class);
     // Exceptions should always be serialized using JSON
     private static final Serializer<SerializableError> serializer = new ConjureBodySerDe(
                     Collections.singletonList(Encodings.json()))

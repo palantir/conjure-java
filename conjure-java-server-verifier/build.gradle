@@ -44,6 +44,7 @@ dependencies {
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
+    testImplementation 'com.palantir.safe-logging:logger'
 }
 
 project('verification-client-api') {

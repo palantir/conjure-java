@@ -17,9 +17,10 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Default {@link RequestArgHandler} implementation which simply {@link Logger#debug(String, Object)} logs
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
 enum DefaultRequestArgHandler implements RequestArgHandler {
     INSTANCE;
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultRequestArgHandler.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(DefaultRequestArgHandler.class);
 
     @Override
     public void arg(HttpServerExchange _exchange, Arg<?> value) {
