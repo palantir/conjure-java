@@ -108,7 +108,7 @@ public final class ConjureHandler implements HttpHandler {
     public static final class Builder {
 
         private static final ImmutableSet<HttpString> ALLOWED_METHODS =
-                ImmutableSet.of(Methods.GET, Methods.PUT, Methods.POST, Methods.DELETE);
+                ImmutableSet.of(Methods.GET, Methods.PUT, Methods.POST, Methods.DELETE, Methods.HEAD);
 
         private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
