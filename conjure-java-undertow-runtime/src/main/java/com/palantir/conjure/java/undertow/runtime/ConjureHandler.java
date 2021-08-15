@@ -270,6 +270,14 @@ public final class ConjureHandler implements HttpHandler {
                         SafeArg.of("service", value.serviceName()),
                         SafeArg.of("name", value.name()));
             }
+            if (!value.template().startsWith("/")) {
+                throw new SafeIllegalStateException(
+                        "Endpoint template must start with \"/\"",
+                        SafeArg.of("method", value.method()),
+                        SafeArg.of("template", value.template()),
+                        SafeArg.of("service", value.serviceName()),
+                        SafeArg.of("name", value.name()));
+            }
             return value;
         }
 

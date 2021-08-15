@@ -69,7 +69,11 @@ public class ConjureHandlerBuilderTest {
                         .build())
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasLogMessage("Endpoint method is not recognized")
-                .containsArgs(SafeArg.of("method", Methods.OPTIONS));
+                .hasExactlyArgs(
+                        SafeArg.of("method", Methods.OPTIONS),
+                        SafeArg.of("template", "/template"),
+                        SafeArg.of("service", "service"),
+                        SafeArg.of("name", "name"));
     }
 
     @Test
@@ -85,7 +89,31 @@ public class ConjureHandlerBuilderTest {
                         .build())
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasLogMessage("Endpoint method is not recognized")
-                .containsArgs(SafeArg.of("method", Methods.TRACE));
+                .hasExactlyArgs(
+                        SafeArg.of("method", Methods.TRACE),
+                        SafeArg.of("template", "/template"),
+                        SafeArg.of("service", "service"),
+                        SafeArg.of("name", "name"));
+    }
+
+    @Test
+    public void testAddEndpoint_relativeTemplate() {
+        assertThatLoggableExceptionThrownBy(() -> ConjureHandler.builder()
+                        .services(EndpointService.of(Endpoint.builder()
+                                .name("name")
+                                .serviceName("service")
+                                .handler(ResponseCodeHandler.HANDLE_200)
+                                .method(Methods.GET)
+                                .template("template")
+                                .build()))
+                        .build())
+                .isInstanceOf(SafeIllegalStateException.class)
+                .hasLogMessage("Endpoint template must start with \"/\"")
+                .hasExactlyArgs(
+                        SafeArg.of("method", Methods.GET),
+                        SafeArg.of("template", "template"),
+                        SafeArg.of("service", "service"),
+                        SafeArg.of("name", "name"));
     }
 
     private Endpoint buildEndpoint(HttpString method, String template, String serviceName, String name) {
