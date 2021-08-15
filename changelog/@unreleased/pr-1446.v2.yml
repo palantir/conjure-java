@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Undertow endpoint path templates are now required to start with `/`.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1446
