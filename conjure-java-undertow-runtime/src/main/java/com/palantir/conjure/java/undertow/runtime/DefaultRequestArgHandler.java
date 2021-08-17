@@ -20,10 +20,9 @@ import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
-import org.slf4j.Logger;
 
 /**
- * Default {@link RequestArgHandler} implementation which simply {@link Logger#debug(String, Object)} logs
+ * Default {@link RequestArgHandler} implementation which simply {@link SafeLogger#debug(String, Arg)} logs
  * provided values immediately upon {@link #arg(HttpServerExchange, Arg)}. Server frameworks should provide
  * a better implementation which allows data to be associated with requests.
  */
