@@ -61,6 +61,7 @@ dependencies {
     implementation 'com.palantir.dialogue:dialogue-target'
     implementation 'com.palantir.dialogue:dialogue-serde'
     implementation 'com.palantir.common:streams'
+    implementation 'com.palantir.safe-logging:logger'
 
     testImplementation 'com.palantir.conjure:conjure-core'
     testImplementation project(':conjure-java-undertow-runtime')
@@ -77,20 +78,19 @@ dependencies {
     testImplementation 'jakarta.xml.bind:jakarta.xml.bind-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
-    integrationInputCompile project(':conjure-lib')
-    integrationInputCompile project(':conjure-undertow-lib')
-    integrationInputCompile 'com.google.guava:guava'
-    integrationInputCompile 'com.palantir.conjure.java.api:errors'
-    integrationInputCompile 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
-    integrationInputCompile 'jakarta.annotation:jakarta.annotation-api'
-    integrationInputCompile 'jakarta.validation:jakarta.validation-api'
-    integrationInputCompile 'jakarta.ws.rs:jakarta.ws.rs-api'
-    integrationInputCompile 'com.palantir.dialogue:dialogue-target'
+    integrationInputImplementation project(':conjure-lib')
+    integrationInputImplementation project(':conjure-undertow-lib')
+    integrationInputImplementation 'com.google.guava:guava'
+    integrationInputImplementation 'com.palantir.conjure.java.api:errors'
+    integrationInputImplementation 'com.palantir.conjure.java.runtime:conjure-java-retrofit2-client'
+    integrationInputImplementation 'jakarta.annotation:jakarta.annotation-api'
+    integrationInputImplementation 'jakarta.validation:jakarta.validation-api'
+    integrationInputImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
+    integrationInputImplementation 'com.palantir.dialogue:dialogue-target'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
-    implementation 'com.palantir.safe-logging:logger'
 }
 
 tasks.withType(JavaCompile) {
