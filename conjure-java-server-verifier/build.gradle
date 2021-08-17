@@ -29,17 +29,17 @@ dependencies {
     conjure 'com.palantir.conjure.verification:verification-client-api'
     verifier "com.palantir.conjure.verification:verification-client::${osClassifier}@tgz"
 
-    testCompile project('verification-client-api')
-    testCompile project(':conjure-java-core')
-    testCompile project(':conjure-java-undertow-runtime')
-    testCompile 'org.assertj:assertj-core'
-    testCompile 'org.mockito:mockito-core'
-    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
-    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
-    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
-    testCompile 'com.palantir.conjure.java.runtime:keystores'
-    testCompile 'com.palantir.websecurity:dropwizard-web-security'
-    testCompile 'io.dropwizard:dropwizard-testing'
+    testImplementation project('verification-client-api')
+    testImplementation project(':conjure-java-core')
+    testImplementation project(':conjure-java-undertow-runtime')
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'
+    testImplementation 'com.palantir.conjure.java.runtime:keystores'
+    testImplementation 'com.palantir.websecurity:dropwizard-web-security'
+    testImplementation 'io.dropwizard:dropwizard-testing'
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     compileOnly 'org.immutables:value::annotations'
@@ -49,9 +49,9 @@ dependencies {
 
 project('verification-client-api') {
     dependencies {
-        compile project(':conjure-java-core')
-        compile project(':conjure-lib')
-        compile project(':conjure-undertow-lib')
+        api project(':conjure-java-core')
+        api project(':conjure-lib')
+        api project(':conjure-undertow-lib')
     }
 }
 
