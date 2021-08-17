@@ -29,16 +29,16 @@ dependencies {
     testCases 'com.palantir.conjure.verification:verification-server-test-cases'
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
-    testCompile project(':conjure-java-core')
-    testCompile project('verification-server-api')
-    testCompile 'org.assertj:assertj-core'
-    testCompile 'org.mockito:mockito-core'
-    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
-    testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
-    testCompile 'com.palantir.conjure.java.runtime:keystores'
-    testCompile 'io.dropwizard:dropwizard-testing'
-    testCompile 'com.palantir.dialogue:dialogue-clients'
-    testCompile 'com.palantir.dialogue:dialogue-serde'
+    testImplementation project(':conjure-java-core')
+    testImplementation project('verification-server-api')
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    testImplementation 'com.palantir.conjure.java.runtime:keystores'
+    testImplementation 'io.dropwizard:dropwizard-testing'
+    testImplementation 'com.palantir.dialogue:dialogue-clients'
+    testImplementation 'com.palantir.dialogue:dialogue-serde'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 
@@ -49,10 +49,10 @@ dependencies {
 
 project('verification-server-api') {
     dependencies {
-        compile project(':conjure-java-core')
-        compile project(':conjure-lib')
-        compile 'com.palantir.dialogue:dialogue-clients'
-        compile 'com.palantir.dialogue:dialogue-serde'
+        api project(':conjure-java-core')
+        api project(':conjure-lib')
+        api 'com.palantir.dialogue:dialogue-clients'
+        api 'com.palantir.dialogue:dialogue-serde'
     }
 }
 
