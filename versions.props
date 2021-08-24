@@ -33,7 +33,7 @@ org.immutables:value = 2.8.8
 org.javassist:javassist = 3.22.0-GA
 org.junit.jupiter:* = 5.7.2
 org.junit.vintage:* = 5.7.2
-org.mockito:* = 3.12.2
+org.mockito:* = 3.12.3
 org.slf4j:* = 1.7.32
 com.palantir.goethe:* = 0.2.0
 
