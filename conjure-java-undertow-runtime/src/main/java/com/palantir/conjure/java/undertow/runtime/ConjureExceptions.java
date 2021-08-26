@@ -47,9 +47,8 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static final SafeLogger log = SafeLoggerFactory.get(ConjureExceptions.class);
     // Exceptions should always be serialized using JSON
-    private static final Serializer<SerializableError> serializer = new ConjureBodySerDe(
-                    Collections.singletonList(Encodings.json()))
-            .serializer(new TypeMarker<SerializableError>() {});
+    private static final Serializer<SerializableError> serializer =
+            new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
 
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
@@ -66,6 +65,10 @@ public enum ConjureExceptions implements ExceptionHandler {
             frameworkException(exchange, (FrameworkException) throwable);
         } else if (throwable instanceof Error) {
             error(exchange, (Error) throwable);
+        } else if (throwable instanceof IOException && !exchange.getConnection().isOpen()) {
+            log.info(
+                    "I/O exception from a closed connection. The request may have been aborted by the client",
+                    throwable);
         } else {
             ServiceException exception = new ServiceException(ErrorType.INTERNAL, throwable);
             log(exception, throwable);
@@ -159,12 +162,12 @@ public enum ConjureExceptions implements ExceptionHandler {
         // Do not attempt to write the failure if data has already been written
         if (!isResponseStarted(exchange)) {
             exchange.setStatusCode(statusCode);
-            try {
-                if (maybeBody.isPresent()) {
+            if (maybeBody.isPresent()) {
+                try {
                     serializer.serialize(maybeBody.get(), exchange);
+                } catch (IOException | RuntimeException e) {
+                    log.info("Failed to write error response", e);
                 }
-            } catch (IOException | RuntimeException e) {
-                log.info("Failed to write error response", e);
             }
         } else {
             // This prevents the server from sending the final null chunk, alerting
