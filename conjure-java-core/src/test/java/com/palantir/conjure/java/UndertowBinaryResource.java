@@ -24,13 +24,12 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.product.UndertowEteBinaryService;
-import com.palantir.random.SafeThreadLocalRandom;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.validation.constraints.NotNull;
 
 final class UndertowBinaryResource implements UndertowEteBinaryService {
@@ -67,12 +66,11 @@ final class UndertowBinaryResource implements UndertowEteBinaryService {
     public BinaryResponseBody getBinaryFailure(AuthHeader _authHeader, int numBytes) {
         return responseBody -> {
             byte[] buffer = new byte[Math.min(8 * 1024, numBytes)];
-            Random random = SafeThreadLocalRandom.get();
             int remainingBytes = numBytes;
             while (remainingBytes > 0) {
                 int chunkSize = Math.min(remainingBytes, buffer.length);
                 remainingBytes -= chunkSize;
-                random.nextBytes(buffer);
+                ThreadLocalRandom.current().nextBytes(buffer);
                 responseBody.write(buffer, 0, chunkSize);
             }
             throw new SafeRuntimeException("failure");
