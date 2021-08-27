@@ -94,6 +94,7 @@ com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider:2.12.3 (2 constraints: f
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.12.3 (2 constraints: 6e1d2e4b)
 com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.12.3 (3 constraints: 903d4249)
 com.fasterxml.jackson.module:jackson-module-parameter-names:2.12.3 (2 constraints: 661d2d2f)
+com.github.stefanbirkner:system-lambda:1.2.0 (1 constraints: 0505f635)
 com.helger:profiler:1.1.1 (1 constraints: e21053b8)
 com.jcraft:jzlib:1.1.3 (1 constraints: 0d192ea2)
 com.netflix.concurrency-limits:concurrency-limits-core:0.2.2 (1 constraints: 7d14fe7b)

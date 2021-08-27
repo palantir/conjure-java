@@ -36,6 +36,7 @@ org.junit.vintage:* = 5.7.2
 org.mockito:* = 3.12.4
 org.slf4j:* = 1.7.32
 com.palantir.goethe:* = 0.2.0
+com.github.stefanbirkner:system-lambda = 1.2.0
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson

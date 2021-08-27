@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: conjure-undertow logs I/O exceptions from closed connections at INFO
+  links:
+  - https://github.com/palantir/conjure-java/pull/1468

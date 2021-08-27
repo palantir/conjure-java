@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.validation.constraints.NotNull;
 
 final class UndertowBinaryResource implements UndertowEteBinaryService {
@@ -65,9 +65,14 @@ final class UndertowBinaryResource implements UndertowEteBinaryService {
     @Override
     public BinaryResponseBody getBinaryFailure(AuthHeader _authHeader, int numBytes) {
         return responseBody -> {
-            byte[] data = new byte[numBytes];
-            new Random().nextBytes(data);
-            responseBody.write(data);
+            byte[] buffer = new byte[Math.min(8 * 1024, numBytes)];
+            int remainingBytes = numBytes;
+            while (remainingBytes > 0) {
+                int chunkSize = Math.min(remainingBytes, buffer.length);
+                remainingBytes -= chunkSize;
+                ThreadLocalRandom.current().nextBytes(buffer);
+                responseBody.write(buffer, 0, chunkSize);
+            }
             throw new SafeRuntimeException("failure");
         };
     }
