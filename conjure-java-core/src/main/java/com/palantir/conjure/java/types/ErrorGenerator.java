@@ -22,6 +22,7 @@ import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -44,7 +45,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
@@ -118,12 +118,11 @@ public final class ErrorGenerator implements Generator {
 
         // Generate ServiceException factory methods
         List<MethodSpec> methodSpecs = errorTypeDefinitions.stream()
-                .map(entry -> {
+                .flatMap(entry -> {
                     MethodSpec withoutCause = generateExceptionFactory(typeMapper, entry, false);
                     MethodSpec withCause = generateExceptionFactory(typeMapper, entry, true);
                     return Stream.of(withoutCause, withCause);
                 })
-                .flatMap(Function.identity())
                 .collect(Collectors.toList());
 
         // Generate ServiceException factory check methods
@@ -172,12 +171,37 @@ public final class ErrorGenerator implements Generator {
                 })
                 .collect(Collectors.toList());
 
+        List<MethodSpec> isRemoteExceptionDefinitions = errorTypeDefinitions.stream()
+                .map(entry -> {
+                    String typeName = CaseFormat.UPPER_CAMEL.to(
+                            CaseFormat.UPPER_UNDERSCORE, entry.getErrorName().getName());
+                    String methodName = "is" + entry.getErrorName().getName();
+
+                    String remoteExceptionVar = "remoteException";
+
+                    MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
+                            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                            .addParameter(RemoteException.class, remoteExceptionVar)
+                            .returns(TypeName.BOOLEAN)
+                            .addStatement(
+                                    "return $L.name().equals($L.getError().errorName())", typeName, remoteExceptionVar);
+
+                    methodBuilder.addJavadoc(
+                            "Returns true if the {@link RemoteException} is named $L:$L",
+                            entry.getNamespace(),
+                            entry.getErrorName().getName());
+
+                    return methodBuilder.build();
+                })
+                .collect(Collectors.toList());
+
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(className)
                 .addMethod(privateConstructor())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fieldSpecs)
                 .addMethods(methodSpecs)
                 .addMethods(checkMethodSpecs)
+                .addMethods(isRemoteExceptionDefinitions)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(ErrorGenerator.class));
 
         return JavaFile.builder(conjurePackage, typeBuilder.build())

@@ -1,6 +1,7 @@
 package com.palantir.another;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import javax.annotation.Generated;
 
@@ -30,5 +31,12 @@ public final class ConjureErrors {
         if (shouldThrow) {
             throw differentPackage();
         }
+    }
+
+    /**
+     * Returns true if the {@link RemoteException} is named Conjure:DifferentPackage
+     */
+    public static boolean isDifferentPackage(RemoteException remoteException) {
+        return DIFFERENT_PACKAGE.name().equals(remoteException.getError().errorName());
     }
 }

@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import javax.annotation.Generated;
 
@@ -30,5 +31,12 @@ public final class ConjureJavaErrors {
         if (shouldThrow) {
             throw javaCompilationFailed();
         }
+    }
+
+    /**
+     * Returns true if the {@link RemoteException} is named ConjureJava:JavaCompilationFailed
+     */
+    public static boolean isJavaCompilationFailed(RemoteException remoteException) {
+        return JAVA_COMPILATION_FAILED.name().equals(remoteException.getError().errorName());
     }
 }
