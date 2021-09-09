@@ -27,8 +27,8 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import com.palantir.tracing.undertow.TracedOperationHandler;
 import com.palantir.tracing.undertow.TracedRequestHandler;
+import com.palantir.tracing.undertow.TracedStateHandler;
 import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -236,10 +236,7 @@ public final class ConjureHandler implements HttpHandler {
                             // Logging context and trace handler must execute prior to the exception
                             // to provide user and trace information on exceptions.
                             endpoint -> Optional.of(new LoggingContextHandler(endpoint.handler())),
-                            endpoint -> Optional.of(new TracedOperationHandler(
-                                    endpoint.handler(),
-                                    "conjure-undertow-dispatched: " + endpoint.serviceName() + '.' + endpoint.name(),
-                                    new EndpointTagTranslator(endpoint))),
+                            endpoint -> Optional.of(new TracedStateHandler(endpoint.handler())),
                             endpoint -> Optional.of(
                                     new ConjureExceptionHandler(endpoint.handler(), runtime.exceptionHandler())))
                     .build()
