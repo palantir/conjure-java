@@ -1,13 +1,13 @@
 package com.palantir.product;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.UrlBuilder;
 import java.lang.Override;
 import java.lang.String;
-import java.util.Map;
 import java.util.Set;
 import javax.annotation.Generated;
 
@@ -29,7 +29,7 @@ enum DialogueEteEndpoints implements Endpoint {
         private final ImmutableSet<String> tags = ImmutableSet.of("bar", "foo");
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -67,7 +67,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("integer").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -97,7 +97,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("double").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -127,7 +127,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("boolean").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -157,7 +157,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("safelong").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -187,7 +187,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("rid").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -217,7 +217,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("bearertoken").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -247,7 +247,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("optionalString").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -277,7 +277,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("optionalEmpty").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -307,7 +307,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("datetime").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -337,7 +337,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("binary").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -373,7 +373,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -406,7 +406,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -438,7 +438,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -468,7 +468,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("notNullBody").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -498,7 +498,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("aliasOne").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -528,7 +528,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("optionalAliasOne").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -558,7 +558,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("aliasTwo").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -591,7 +591,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -624,7 +624,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -657,7 +657,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -687,7 +687,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("no-return").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -720,7 +720,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -754,7 +754,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -788,7 +788,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -821,7 +821,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -851,7 +851,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("base").fixed("alias-long").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -885,7 +885,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -918,7 +918,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -951,7 +951,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -984,7 +984,7 @@ enum DialogueEteEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 

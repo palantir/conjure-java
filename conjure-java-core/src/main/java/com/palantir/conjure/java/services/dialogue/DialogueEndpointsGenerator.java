@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services.dialogue;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.Javadoc;
@@ -38,7 +39,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
@@ -91,7 +91,8 @@ final class DialogueEndpointsGenerator {
                 .addMethod(MethodSpec.methodBuilder("renderPath")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
-                        .addParameter(ParameterizedTypeName.get(Map.class, String.class, String.class), "params")
+                        .addParameter(
+                                ParameterizedTypeName.get(ListMultimap.class, String.class, String.class), "params")
                         .addParameter(UrlBuilder.class, "url")
                         .addCode("pathTemplate.fill(params, url);")
                         .build())

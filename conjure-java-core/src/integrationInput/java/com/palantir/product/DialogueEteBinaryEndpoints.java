@@ -1,12 +1,12 @@
 package com.palantir.product;
 
+import com.google.common.collect.ListMultimap;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.UrlBuilder;
 import java.lang.Override;
 import java.lang.String;
-import java.util.Map;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
@@ -16,7 +16,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("binary").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -46,7 +46,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("binary").fixed("throws").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -79,7 +79,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -112,7 +112,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -145,7 +145,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("binary").fixed("failure").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -175,7 +175,7 @@ enum DialogueEteBinaryEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("binary").fixed("aliased").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 

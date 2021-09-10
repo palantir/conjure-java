@@ -1,13 +1,13 @@
 package test.prefix.com.palantir.another;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.UrlBuilder;
 import java.lang.Override;
 import java.lang.String;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Generated;
@@ -24,7 +24,7 @@ enum DialogueTestEndpoints implements Endpoint {
         private final ImmutableSet<String> tags = ImmutableSet.of("incubating");
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -62,7 +62,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("catalog").fixed("datasets").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -95,7 +95,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -129,7 +129,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -163,7 +163,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -197,7 +197,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -231,7 +231,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -264,7 +264,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -297,7 +297,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -331,7 +331,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -368,7 +368,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -404,7 +404,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -438,7 +438,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -470,7 +470,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -502,7 +502,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -532,7 +532,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("catalog").fixed("boolean").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -562,7 +562,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("catalog").fixed("double").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -592,7 +592,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("catalog").fixed("integer").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -622,7 +622,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 PathTemplate.builder().fixed("catalog").fixed("optional").build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -654,7 +654,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
@@ -688,7 +688,7 @@ enum DialogueTestEndpoints implements Endpoint {
                 .build();
 
         @Override
-        public void renderPath(Map<String, String> params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             pathTemplate.fill(params, url);
         }
 
