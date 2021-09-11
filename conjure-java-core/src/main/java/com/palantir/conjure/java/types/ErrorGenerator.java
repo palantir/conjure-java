@@ -179,19 +179,17 @@ public final class ErrorGenerator implements Generator {
 
                     String remoteExceptionVar = "remoteException";
 
-                    MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
+                    return MethodSpec.methodBuilder(methodName)
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addParameter(RemoteException.class, remoteExceptionVar)
                             .returns(TypeName.BOOLEAN)
                             .addStatement(
-                                    "return $L.name().equals($L.getError().errorName())", typeName, remoteExceptionVar);
-
-                    methodBuilder.addJavadoc(
-                            "Returns true if the {@link RemoteException} is named $L:$L",
-                            entry.getNamespace(),
-                            entry.getErrorName().getName());
-
-                    return methodBuilder.build();
+                                    "return $L.name().equals($L.getError().errorName())", typeName, remoteExceptionVar)
+                            .addJavadoc(
+                                    "Returns true if the {@link RemoteException} is named $L:$L",
+                                    entry.getNamespace(),
+                                    entry.getErrorName().getName())
+                            .build();
                 })
                 .collect(Collectors.toList());
 
