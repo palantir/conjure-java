@@ -28,6 +28,8 @@ import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -45,7 +47,6 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -479,9 +480,10 @@ public final class BeanGenerator {
 
         builder.beginControlFlow("if (missingFields != null)")
                 .addStatement(
-                        "throw new $T(\"Some required fields have not been set\","
+                        "throw new $T($T.INVALID_ARGUMENT,"
                                 + " $T.of(\"missingFields\", missingFields))",
-                        SafeIllegalArgumentException.class,
+                        ServiceException.class,
+                        ErrorType.class,
                         SafeArg.class)
                 .endControlFlow();
         return builder.build();

@@ -12,9 +12,6 @@ import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
-import java.lang.Boolean;
-import java.lang.Override;
-import java.lang.String;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")

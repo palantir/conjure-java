@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -55,8 +56,7 @@ public final class AnyExample {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, any, "any");
         if (missingFields != null) {
-            throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
         }
     }
 

@@ -12,9 +12,6 @@ import com.palantir.dialogue.EndpointChannelFactory;
 import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.BearerToken;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.Void;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")

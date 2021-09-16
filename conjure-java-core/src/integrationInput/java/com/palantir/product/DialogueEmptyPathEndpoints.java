@@ -5,8 +5,6 @@ import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.UrlBuilder;
-import java.lang.Override;
-import java.lang.String;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
