@@ -337,7 +337,9 @@ public final class PrimitiveOptionalsExample {
         missingFields = addFieldIfMissing(missingFields, aliasOptionalList, "aliasOptionalList");
         missingFields = addFieldIfMissing(missingFields, aliasOptionalSet, "aliasOptionalSet");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ErrorType.Code;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
@@ -160,10 +161,11 @@ public final class BeanBuilderGenerator {
 
         builder.beginControlFlow("if (missingFields != null)")
                 .addStatement(
-                        "throw new $T($T.INVALID_ARGUMENT,"
+                        "throw new $T($T.create($T.INVALID_ARGUMENT, \"Error:MissingField\"),"
                                 + " $T.of(\"missingFields\", missingFields))",
                         ServiceException.class,
                         ErrorType.class,
+                        Code.class,
                         SafeArg.class)
                 .endControlFlow();
 

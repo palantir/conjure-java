@@ -79,7 +79,9 @@ public final class CovariantOptionalExample {
         missingFields = addFieldIfMissing(missingFields, item, "item");
         missingFields = addFieldIfMissing(missingFields, setItem, "setItem");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

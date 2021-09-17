@@ -6,6 +6,8 @@ import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.UrlBuilder;
+import java.lang.Override;
+import java.lang.String;
 import java.util.Set;
 import javax.annotation.Generated;
 

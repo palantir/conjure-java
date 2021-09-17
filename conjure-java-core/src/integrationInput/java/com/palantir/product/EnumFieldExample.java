@@ -55,7 +55,9 @@ public final class EnumFieldExample {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, enum_, "enum");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

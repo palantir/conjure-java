@@ -93,7 +93,9 @@ public final class ExternalLongExample {
         missingFields = addFieldIfMissing(missingFields, optionalExternalLong, "optionalExternalLong");
         missingFields = addFieldIfMissing(missingFields, listExternalLong, "listExternalLong");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -177,7 +179,9 @@ public final class ExternalLongExample {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(missingFields, _externalLongInitialized, "externalLong");
             if (missingFields != null) {
-                throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+                throw new ServiceException(
+                        ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                        SafeArg.of("missingFields", missingFields));
             }
         }
 

@@ -101,7 +101,9 @@ public final class MultipleOrderedStages {
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, mappedRids, "mappedRids");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

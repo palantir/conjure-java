@@ -14,6 +14,8 @@ import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
+import java.lang.Override;
+import java.lang.String;
 import java.util.Optional;
 import javax.annotation.Generated;
 

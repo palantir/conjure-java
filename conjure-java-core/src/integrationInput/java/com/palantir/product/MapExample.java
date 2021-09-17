@@ -101,7 +101,9 @@ public final class MapExample {
         missingFields = addFieldIfMissing(missingFields, optionalItems, "optionalItems");
         missingFields = addFieldIfMissing(missingFields, aliasOptionalItems, "aliasOptionalItems");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

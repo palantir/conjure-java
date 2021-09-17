@@ -188,7 +188,9 @@ public final class ManyFieldExample {
         missingFields = addFieldIfMissing(missingFields, map, "map");
         missingFields = addFieldIfMissing(missingFields, alias, "alias");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -387,7 +389,9 @@ public final class ManyFieldExample {
             missingFields = addFieldIfMissing(missingFields, _integerInitialized, "integer");
             missingFields = addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
             if (missingFields != null) {
-                throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+                throw new ServiceException(
+                        ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                        SafeArg.of("missingFields", missingFields));
             }
         }
 

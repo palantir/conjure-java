@@ -145,7 +145,9 @@ public final class AliasAsMapKeyExample {
         missingFields = addFieldIfMissing(missingFields, datetimes, "datetimes");
         missingFields = addFieldIfMissing(missingFields, uuids, "uuids");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

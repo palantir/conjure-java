@@ -29,6 +29,7 @@ import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ErrorType.Code;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
@@ -480,10 +481,11 @@ public final class BeanGenerator {
 
         builder.beginControlFlow("if (missingFields != null)")
                 .addStatement(
-                        "throw new $T($T.INVALID_ARGUMENT,"
+                        "throw new $T($T.create($T.INVALID_ARGUMENT, \"Error:MissingField\"),"
                                 + " $T.of(\"missingFields\", missingFields))",
                         ServiceException.class,
                         ErrorType.class,
+                        Code.class,
                         SafeArg.class)
                 .endControlFlow();
         return builder.build();

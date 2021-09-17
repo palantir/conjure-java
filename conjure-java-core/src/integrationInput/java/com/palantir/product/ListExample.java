@@ -132,7 +132,9 @@ public final class ListExample {
         missingFields = addFieldIfMissing(missingFields, aliasOptionalItems, "aliasOptionalItems");
         missingFields = addFieldIfMissing(missingFields, nestedItems, "nestedItems");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

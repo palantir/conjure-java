@@ -56,7 +56,9 @@ public final class AnyExample {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, any, "any");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

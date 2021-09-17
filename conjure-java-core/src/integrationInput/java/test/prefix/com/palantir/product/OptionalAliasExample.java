@@ -59,7 +59,9 @@ public final class OptionalAliasExample {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, optionalAlias, "optionalAlias");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 

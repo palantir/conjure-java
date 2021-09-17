@@ -119,7 +119,9 @@ public final class ReservedKeyExample {
         missingFields = addFieldIfMissing(missingFields, interface_, "interface");
         missingFields = addFieldIfMissing(missingFields, fieldNameWithDashes, "field-name-with-dashes");
         if (missingFields != null) {
-            throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+            throw new ServiceException(
+                    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                    SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -217,7 +219,9 @@ public final class ReservedKeyExample {
             missingFields = addFieldIfMissing(missingFields, _memoizedHashCode_Initialized, "memoizedHashCode");
             missingFields = addFieldIfMissing(missingFields, _resultInitialized, "result");
             if (missingFields != null) {
-                throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("missingFields", missingFields));
+                throw new ServiceException(
+                        ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Error:MissingField"),
+                        SafeArg.of("missingFields", missingFields));
             }
         }
 
