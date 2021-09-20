@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Conjure builders throw when they're reused after a `build()` invocation
+  links:
+  - https://github.com/palantir/conjure-java/pull/1492
