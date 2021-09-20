@@ -79,22 +79,28 @@ public final class SafeLongExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private SafeLong safeLongValue;
 
         private Builder() {}
 
         public Builder from(SafeLongExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             safeLongValue(other.getSafeLongValue());
             return this;
         }
 
         @JsonSetter("safeLongValue")
         public Builder safeLongValue(@Nonnull SafeLong safeLongValue) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.safeLongValue = Preconditions.checkNotNull(safeLongValue, "safeLongValue cannot be null");
             return this;
         }
 
         public SafeLongExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new SafeLongExample(safeLongValue);
         }
     }

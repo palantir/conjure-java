@@ -100,22 +100,28 @@ public final class OneField {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     static final class DefaultBuilder implements Builder {
+        boolean _buildInvoked;
+
         private BearerToken bearerTokenValue;
 
         private DefaultBuilder() {}
 
         public Builder from(OneField other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             bearerTokenValue(other.getBearerTokenValue());
             return this;
         }
 
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.bearerTokenValue = Preconditions.checkNotNull(bearerTokenValue, "bearerTokenValue cannot be null");
             return this;
         }
 
         public OneField build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new OneField(bearerTokenValue);
         }
     }

@@ -42,6 +42,7 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
@@ -70,6 +71,9 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 public final class BeanBuilderGenerator {
+
+    private static final String BUILT_FIELD = "_buildInvoked";
+
     private final TypeMapper typeMapper;
     private final ClassName builderClass;
     private final ClassName objectClass;
@@ -106,6 +110,7 @@ public final class BeanBuilderGenerator {
                         isInStagedBuilderMode(builderInterfaceClass) ? "DefaultBuilder" : "Builder")
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
+                .addField(FieldSpec.builder(boolean.class, BUILT_FIELD).build())
                 .addFields(poetFields)
                 .addFields(primitivesInitializedFields(enrichedFields))
                 .addMethod(createConstructor())
@@ -215,6 +220,13 @@ public final class BeanBuilderGenerator {
         return MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build();
     }
 
+    private CodeBlock verifyNotBuilt() {
+        return CodeBlock.builder()
+                .addStatement(
+                        "$T.checkState(!$N, $S)", Preconditions.class, BUILT_FIELD, "Build has already been called")
+                .build();
+    }
+
     private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields) {
         CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(
                 enrichedFields,
@@ -225,6 +237,7 @@ public final class BeanBuilderGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
                 .addParameter(objectClass, "other")
+                .addCode(verifyNotBuilt())
                 .addCode(assignmentBlock)
                 .addStatement("return this")
                 .build();
@@ -285,6 +298,7 @@ public final class BeanBuilderGenerator {
                 .addParameter(Parameters.nonnullParameter(
                         BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(field.type, type, typeMapper),
                         field.name))
+                .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
         if (enriched.isPrimitive()) {
@@ -303,6 +317,7 @@ public final class BeanBuilderGenerator {
         boolean shouldClearFirst = false;
         return BeanBuilderAuxiliarySettersUtils.createCollectionSetterBuilder(
                         prefix, enriched, typeMapper, builderClass)
+                .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
                 .addStatement("return this")
                 .build();
@@ -394,6 +409,7 @@ public final class BeanBuilderGenerator {
     private MethodSpec createOptionalSetter(EnrichedField enriched) {
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
         return BeanBuilderAuxiliarySettersUtils.createOptionalSetterBuilder(enriched, typeMapper, builderClass)
+                .addCode(verifyNotBuilt())
                 .addCode(optionalAssignmentStatement(enriched, type))
                 .addStatement("return this")
                 .build();
@@ -429,22 +445,26 @@ public final class BeanBuilderGenerator {
     private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {
         FieldSpec field = enriched.poetSpec();
         return BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(enriched, itemType, typeMapper, builderClass)
+                .addCode(verifyNotBuilt())
                 .addStatement("this.$1N.add($1N)", field.name)
                 .addStatement("return this")
                 .build();
     }
 
     private MethodSpec createMapSetter(EnrichedField enriched) {
-        MapType type = enriched.conjureDef().getType().accept(TypeVisitor.MAP);
         return BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(enriched, typeMapper, builderClass)
+                .addCode(verifyNotBuilt())
                 .addStatement("this.$1N.put(key, value)", enriched.poetSpec().name)
                 .addStatement("return this")
                 .build();
     }
 
     private MethodSpec createBuild(Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields) {
-        MethodSpec.Builder method =
-                MethodSpec.methodBuilder("build").addModifiers(Modifier.PUBLIC).returns(objectClass);
+        MethodSpec.Builder method = MethodSpec.methodBuilder("build")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(objectClass)
+                .addCode(verifyNotBuilt())
+                .addStatement("this.$N = true", BUILT_FIELD);
 
         if (enrichedFields.stream().filter(EnrichedField::isPrimitive).count() != 0) {
             method.addStatement("validatePrimitiveFieldsHaveBeenInitialized()");

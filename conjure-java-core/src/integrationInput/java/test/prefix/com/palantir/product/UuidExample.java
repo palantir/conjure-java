@@ -79,22 +79,28 @@ public final class UuidExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private UUID uuid;
 
         private Builder() {}
 
         public Builder from(UuidExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             uuid(other.getUuid());
             return this;
         }
 
         @JsonSetter("uuid")
         public Builder uuid(@Nonnull UUID uuid) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;
         }
 
         public UuidExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new UuidExample(uuid);
         }
     }

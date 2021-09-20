@@ -181,6 +181,8 @@ public final class MultipleOrderedStages {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     static final class DefaultBuilder implements Builder {
+        boolean _buildInvoked;
+
         private OneField token;
 
         private String item;
@@ -192,6 +194,7 @@ public final class MultipleOrderedStages {
         private DefaultBuilder() {}
 
         public Builder from(MultipleOrderedStages other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             token(other.getToken());
             item(other.getItem());
             items(other.getItems());
@@ -201,51 +204,61 @@ public final class MultipleOrderedStages {
 
         @JsonSetter("token")
         public Builder token(@Nonnull OneField token) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.token = Preconditions.checkNotNull(token, "token cannot be null");
             return this;
         }
 
         @JsonSetter("item")
         public Builder item(@Nonnull String item) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<SafeLong> items) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.items.clear();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<SafeLong> items) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(SafeLong items) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.items.add(items);
             return this;
         }
 
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.mappedRids.clear();
             this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
             return this;
         }
 
         public Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
             return this;
         }
 
         public Builder mappedRids(ResourceIdentifier key, String value) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.mappedRids.put(key, value);
             return this;
         }
 
         public MultipleOrderedStages build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new MultipleOrderedStages(token, item, items, mappedRids);
         }
     }

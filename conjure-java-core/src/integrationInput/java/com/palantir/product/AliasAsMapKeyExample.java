@@ -166,6 +166,8 @@ public final class AliasAsMapKeyExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private Map<StringAliasExample, ManyFieldExample> strings = new LinkedHashMap<>();
 
         private Map<RidAliasExample, ManyFieldExample> rids = new LinkedHashMap<>();
@@ -183,6 +185,7 @@ public final class AliasAsMapKeyExample {
         private Builder() {}
 
         public Builder from(AliasAsMapKeyExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             strings(other.getStrings());
             rids(other.getRids());
             bearertokens(other.getBearertokens());
@@ -195,124 +198,147 @@ public final class AliasAsMapKeyExample {
 
         @JsonSetter(value = "strings", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder strings(@Nonnull Map<StringAliasExample, ManyFieldExample> strings) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.strings.clear();
             this.strings.putAll(Preconditions.checkNotNull(strings, "strings cannot be null"));
             return this;
         }
 
         public Builder putAllStrings(@Nonnull Map<StringAliasExample, ManyFieldExample> strings) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.strings.putAll(Preconditions.checkNotNull(strings, "strings cannot be null"));
             return this;
         }
 
         public Builder strings(StringAliasExample key, ManyFieldExample value) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.strings.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "rids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder rids(@Nonnull Map<RidAliasExample, ManyFieldExample> rids) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.rids.clear();
             this.rids.putAll(Preconditions.checkNotNull(rids, "rids cannot be null"));
             return this;
         }
 
         public Builder putAllRids(@Nonnull Map<RidAliasExample, ManyFieldExample> rids) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.rids.putAll(Preconditions.checkNotNull(rids, "rids cannot be null"));
             return this;
         }
 
         public Builder rids(RidAliasExample key, ManyFieldExample value) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.rids.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "bearertokens", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder bearertokens(@Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.bearertokens.clear();
             this.bearertokens.putAll(Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
             return this;
         }
 
         public Builder putAllBearertokens(@Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.bearertokens.putAll(Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
             return this;
         }
 
         public Builder bearertokens(BearerTokenAliasExample key, ManyFieldExample value) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.bearertokens.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "integers", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder integers(@Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.integers.clear();
             this.integers.putAll(Preconditions.checkNotNull(integers, "integers cannot be null"));
             return this;
         }
 
         public Builder putAllIntegers(@Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.integers.putAll(Preconditions.checkNotNull(integers, "integers cannot be null"));
             return this;
         }
 
         public Builder integers(IntegerAliasExample key, ManyFieldExample value) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.integers.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "safelongs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.safelongs.clear();
             this.safelongs.putAll(Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
             return this;
         }
 
         public Builder putAllSafelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.safelongs.putAll(Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
             return this;
         }
 
         public Builder safelongs(SafeLongAliasExample key, ManyFieldExample value) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.safelongs.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "datetimes", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder datetimes(@Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.datetimes.clear();
             this.datetimes.putAll(Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
             return this;
         }
 
         public Builder putAllDatetimes(@Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.datetimes.putAll(Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
             return this;
         }
 
         public Builder datetimes(DateTimeAliasExample key, ManyFieldExample value) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.datetimes.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "uuids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder uuids(@Nonnull Map<UuidAliasExample, ManyFieldExample> uuids) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.uuids.clear();
             this.uuids.putAll(Preconditions.checkNotNull(uuids, "uuids cannot be null"));
             return this;
         }
 
         public Builder putAllUuids(@Nonnull Map<UuidAliasExample, ManyFieldExample> uuids) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.uuids.putAll(Preconditions.checkNotNull(uuids, "uuids cannot be null"));
             return this;
         }
 
         public Builder uuids(UuidAliasExample key, ManyFieldExample value) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.uuids.put(key, value);
             return this;
         }
 
         public AliasAsMapKeyExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new AliasAsMapKeyExample(strings, rids, bearertokens, integers, safelongs, datetimes, uuids);
         }
     }

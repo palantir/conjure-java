@@ -140,6 +140,8 @@ public final class ReservedKeyExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private String package_;
 
         private String interface_;
@@ -161,6 +163,7 @@ public final class ReservedKeyExample {
         private Builder() {}
 
         public Builder from(ReservedKeyExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             package_(other.getPackage());
             interface_(other.getInterface());
             fieldNameWithDashes(other.getFieldNameWithDashes());
@@ -172,18 +175,21 @@ public final class ReservedKeyExample {
 
         @JsonSetter("package")
         public Builder package_(@Nonnull String package_) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.package_ = Preconditions.checkNotNull(package_, "package cannot be null");
             return this;
         }
 
         @JsonSetter("interface")
         public Builder interface_(@Nonnull String interface_) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.interface_ = Preconditions.checkNotNull(interface_, "interface cannot be null");
             return this;
         }
 
         @JsonSetter("field-name-with-dashes")
         public Builder fieldNameWithDashes(@Nonnull String fieldNameWithDashes) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.fieldNameWithDashes =
                     Preconditions.checkNotNull(fieldNameWithDashes, "field-name-with-dashes cannot be null");
             return this;
@@ -191,6 +197,7 @@ public final class ReservedKeyExample {
 
         @JsonSetter("primitve-field-name-with-dashes")
         public Builder primitveFieldNameWithDashes(int primitveFieldNameWithDashes) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.primitveFieldNameWithDashes = primitveFieldNameWithDashes;
             this._primitveFieldNameWithDashesInitialized = true;
             return this;
@@ -198,6 +205,7 @@ public final class ReservedKeyExample {
 
         @JsonSetter("memoizedHashCode")
         public Builder memoizedHashCode_(int memoizedHashCode_) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.memoizedHashCode_ = memoizedHashCode_;
             this._memoizedHashCode_Initialized = true;
             return this;
@@ -205,6 +213,7 @@ public final class ReservedKeyExample {
 
         @JsonSetter("result")
         public Builder result(int result) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.result = result;
             this._resultInitialized = true;
             return this;
@@ -234,6 +243,8 @@ public final class ReservedKeyExample {
         }
 
         public ReservedKeyExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new ReservedKeyExample(
                     package_, interface_, fieldNameWithDashes, primitveFieldNameWithDashes, memoizedHashCode_, result);

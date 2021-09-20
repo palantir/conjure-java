@@ -78,22 +78,28 @@ public final class EnumFieldExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private EnumExample enum_;
 
         private Builder() {}
 
         public Builder from(EnumFieldExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             enum_(other.getEnum());
             return this;
         }
 
         @JsonSetter("enum")
         public Builder enum_(@Nonnull EnumExample enum_) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.enum_ = Preconditions.checkNotNull(enum_, "enum cannot be null");
             return this;
         }
 
         public EnumFieldExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new EnumFieldExample(enum_);
         }
     }

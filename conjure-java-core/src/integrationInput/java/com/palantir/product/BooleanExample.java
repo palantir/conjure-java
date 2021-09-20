@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -52,6 +53,8 @@ public final class BooleanExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private boolean coin;
 
         private boolean _coinInitialized = false;
@@ -59,12 +62,14 @@ public final class BooleanExample {
         private Builder() {}
 
         public Builder from(BooleanExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             coin(other.getCoin());
             return this;
         }
 
         @JsonSetter("coin")
         public Builder coin(boolean coin) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.coin = coin;
             this._coinInitialized = true;
             return this;
@@ -91,6 +96,8 @@ public final class BooleanExample {
         }
 
         public BooleanExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new BooleanExample(coin);
         }

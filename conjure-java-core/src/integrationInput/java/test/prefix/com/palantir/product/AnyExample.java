@@ -78,22 +78,28 @@ public final class AnyExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private Object any;
 
         private Builder() {}
 
         public Builder from(AnyExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             any(other.getAny());
             return this;
         }
 
         @JsonSetter("any")
         public Builder any(@Nonnull Object any) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.any = Preconditions.checkNotNull(any, "any cannot be null");
             return this;
         }
 
         public AnyExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new AnyExample(any);
         }
     }

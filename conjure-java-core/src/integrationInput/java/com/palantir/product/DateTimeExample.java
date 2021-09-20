@@ -84,22 +84,28 @@ public final class DateTimeExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private OffsetDateTime datetime;
 
         private Builder() {}
 
         public Builder from(DateTimeExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             datetime(other.getDatetime());
             return this;
         }
 
         @JsonSetter("datetime")
         public Builder datetime(@Nonnull OffsetDateTime datetime) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.datetime = Preconditions.checkNotNull(datetime, "datetime cannot be null");
             return this;
         }
 
         public DateTimeExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new DateTimeExample(datetime);
         }
     }

@@ -80,27 +80,34 @@ public final class OptionalExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private Optional<String> item = Optional.empty();
 
         private Builder() {}
 
         public Builder from(OptionalExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             item(other.getItem());
             return this;
         }
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
         public Builder item(@Nonnull Optional<String> item) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
         public Builder item(@Nonnull String item) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;
         }
 
         public OptionalExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new OptionalExample(item);
         }
     }

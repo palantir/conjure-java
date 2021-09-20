@@ -116,6 +116,8 @@ public final class ExternalLongExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private long externalLong;
 
         private Optional<Long> optionalExternalLong = Optional.empty();
@@ -127,6 +129,7 @@ public final class ExternalLongExample {
         private Builder() {}
 
         public Builder from(ExternalLongExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             externalLong(other.getExternalLong());
             optionalExternalLong(other.getOptionalExternalLong());
             listExternalLong(other.getListExternalLong());
@@ -135,6 +138,7 @@ public final class ExternalLongExample {
 
         @JsonSetter("externalLong")
         public Builder externalLong(long externalLong) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.externalLong = externalLong;
             this._externalLongInitialized = true;
             return this;
@@ -142,6 +146,7 @@ public final class ExternalLongExample {
 
         @JsonSetter(value = "optionalExternalLong", nulls = Nulls.SKIP)
         public Builder optionalExternalLong(@Nonnull Optional<? extends Long> optionalExternalLong) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.optionalExternalLong = Preconditions.checkNotNull(
                             optionalExternalLong, "optionalExternalLong cannot be null")
                     .map(Function.identity());
@@ -149,6 +154,7 @@ public final class ExternalLongExample {
         }
 
         public Builder optionalExternalLong(long optionalExternalLong) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.optionalExternalLong = Optional.of(
                     Preconditions.checkNotNull(optionalExternalLong, "optionalExternalLong cannot be null"));
             return this;
@@ -156,6 +162,7 @@ public final class ExternalLongExample {
 
         @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP)
         public Builder listExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.listExternalLong.clear();
             ConjureCollections.addAll(
                     this.listExternalLong,
@@ -164,6 +171,7 @@ public final class ExternalLongExample {
         }
 
         public Builder addAllListExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             ConjureCollections.addAll(
                     this.listExternalLong,
                     Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
@@ -171,6 +179,7 @@ public final class ExternalLongExample {
         }
 
         public Builder listExternalLong(long listExternalLong) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.listExternalLong.add(listExternalLong);
             return this;
         }
@@ -196,6 +205,8 @@ public final class ExternalLongExample {
         }
 
         public ExternalLongExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new ExternalLongExample(externalLong, optionalExternalLong, listExternalLong);
         }

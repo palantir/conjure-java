@@ -98,6 +98,8 @@ public final class CovariantListExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private List<Object> items = new ArrayList<>();
 
         private List<ExampleExternalReference> externalItems = new ArrayList<>();
@@ -105,6 +107,7 @@ public final class CovariantListExample {
         private Builder() {}
 
         public Builder from(CovariantListExample other) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             items(other.getItems());
             externalItems(other.getExternalItems());
             return this;
@@ -112,23 +115,27 @@ public final class CovariantListExample {
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<?> items) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.items.clear();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<?> items) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(Object items) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.items.add(items);
             return this;
         }
 
         @JsonSetter(value = "externalItems", nulls = Nulls.SKIP)
         public Builder externalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.externalItems.clear();
             ConjureCollections.addAll(
                     this.externalItems, Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
@@ -136,17 +143,21 @@ public final class CovariantListExample {
         }
 
         public Builder addAllExternalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             ConjureCollections.addAll(
                     this.externalItems, Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 
         public Builder externalItems(ExampleExternalReference externalItems) {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
             this.externalItems.add(externalItems);
             return this;
         }
 
         public CovariantListExample build() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            this._buildInvoked = true;
             return new CovariantListExample(items, externalItems);
         }
     }
