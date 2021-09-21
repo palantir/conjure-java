@@ -76,23 +76,33 @@ public final class AnyExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private Object any;
 
         private Builder() {}
 
         public Builder from(AnyExample other) {
+            checkNotBuilt();
             any(other.getAny());
             return this;
         }
 
         @JsonSetter("any")
         public Builder any(@Nonnull Object any) {
+            checkNotBuilt();
             this.any = Preconditions.checkNotNull(any, "any cannot be null");
             return this;
         }
 
         public AnyExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new AnyExample(any);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

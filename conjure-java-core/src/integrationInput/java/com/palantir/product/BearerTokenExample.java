@@ -77,23 +77,33 @@ public final class BearerTokenExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private BearerToken bearerTokenValue;
 
         private Builder() {}
 
         public Builder from(BearerTokenExample other) {
+            checkNotBuilt();
             bearerTokenValue(other.getBearerTokenValue());
             return this;
         }
 
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
+            checkNotBuilt();
             this.bearerTokenValue = Preconditions.checkNotNull(bearerTokenValue, "bearerTokenValue cannot be null");
             return this;
         }
 
         public BearerTokenExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new BearerTokenExample(bearerTokenValue);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

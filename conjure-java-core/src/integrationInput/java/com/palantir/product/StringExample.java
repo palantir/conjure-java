@@ -76,23 +76,33 @@ public final class StringExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private String string;
 
         private Builder() {}
 
         public Builder from(StringExample other) {
+            checkNotBuilt();
             string(other.getString());
             return this;
         }
 
         @JsonSetter("string")
         public Builder string(@Nonnull String string) {
+            checkNotBuilt();
             this.string = Preconditions.checkNotNull(string, "string cannot be null");
             return this;
         }
 
         public StringExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new StringExample(string);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

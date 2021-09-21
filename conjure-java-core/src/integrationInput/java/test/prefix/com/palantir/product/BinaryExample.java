@@ -80,17 +80,21 @@ public final class BinaryExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private ByteBuffer binary;
 
         private Builder() {}
 
         public Builder from(BinaryExample other) {
+            checkNotBuilt();
             binary(other.getBinary());
             return this;
         }
 
         @JsonSetter("binary")
         public Builder binary(@Nonnull ByteBuffer binary) {
+            checkNotBuilt();
             Preconditions.checkNotNull(binary, "binary cannot be null");
             this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
             ((Buffer) this.binary).rewind();
@@ -98,7 +102,13 @@ public final class BinaryExample {
         }
 
         public BinaryExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new BinaryExample(binary);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

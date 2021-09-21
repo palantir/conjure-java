@@ -102,6 +102,8 @@ public final class CovariantOptionalExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private Optional<Object> item = Optional.empty();
 
         private Optional<Set<StringAliasExample>> setItem = Optional.empty();
@@ -109,6 +111,7 @@ public final class CovariantOptionalExample {
         private Builder() {}
 
         public Builder from(CovariantOptionalExample other) {
+            checkNotBuilt();
             item(other.getItem());
             setItem(other.getSetItem());
             return this;
@@ -116,29 +119,39 @@ public final class CovariantOptionalExample {
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
         public Builder item(@Nonnull Optional<?> item) {
+            checkNotBuilt();
             this.item = Preconditions.checkNotNull(item, "item cannot be null").map(Function.identity());
             return this;
         }
 
         public Builder item(@Nonnull Object item) {
+            checkNotBuilt();
             this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "setItem", nulls = Nulls.SKIP)
         public Builder setItem(@Nonnull Optional<? extends Set<StringAliasExample>> setItem) {
+            checkNotBuilt();
             this.setItem = Preconditions.checkNotNull(setItem, "setItem cannot be null")
                     .map(Function.identity());
             return this;
         }
 
         public Builder setItem(@Nonnull Set<StringAliasExample> setItem) {
+            checkNotBuilt();
             this.setItem = Optional.of(Preconditions.checkNotNull(setItem, "setItem cannot be null"));
             return this;
         }
 
         public CovariantOptionalExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new CovariantOptionalExample(item, setItem);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

@@ -82,28 +82,39 @@ public final class OneFieldOnlyFinalStage {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private Optional<String> optionalItem = Optional.empty();
 
         private Builder() {}
 
         public Builder from(OneFieldOnlyFinalStage other) {
+            checkNotBuilt();
             optionalItem(other.getOptionalItem());
             return this;
         }
 
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
+            checkNotBuilt();
             this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
 
         public Builder optionalItem(@Nonnull String optionalItem) {
+            checkNotBuilt();
             this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
 
         public OneFieldOnlyFinalStage build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new OneFieldOnlyFinalStage(optionalItem);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

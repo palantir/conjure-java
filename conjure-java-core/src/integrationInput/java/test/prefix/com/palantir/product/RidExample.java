@@ -79,23 +79,33 @@ public final class RidExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private ResourceIdentifier ridValue;
 
         private Builder() {}
 
         public Builder from(RidExample other) {
+            checkNotBuilt();
             ridValue(other.getRidValue());
             return this;
         }
 
         @JsonSetter("ridValue")
         public Builder ridValue(@Nonnull ResourceIdentifier ridValue) {
+            checkNotBuilt();
             this.ridValue = Preconditions.checkNotNull(ridValue, "ridValue cannot be null");
             return this;
         }
 
         public RidExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new RidExample(ridValue);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

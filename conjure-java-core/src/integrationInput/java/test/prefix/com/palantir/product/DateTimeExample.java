@@ -86,23 +86,33 @@ public final class DateTimeExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private OffsetDateTime datetime;
 
         private Builder() {}
 
         public Builder from(DateTimeExample other) {
+            checkNotBuilt();
             datetime(other.getDatetime());
             return this;
         }
 
         @JsonSetter("datetime")
         public Builder datetime(@Nonnull OffsetDateTime datetime) {
+            checkNotBuilt();
             this.datetime = Preconditions.checkNotNull(datetime, "datetime cannot be null");
             return this;
         }
 
         public DateTimeExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new DateTimeExample(datetime);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

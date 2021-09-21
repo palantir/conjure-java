@@ -181,6 +181,8 @@ public final class MultipleOrderedStages {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     static final class DefaultBuilder implements Builder {
+        boolean _buildInvoked;
+
         private OneField token;
 
         private String item;
@@ -192,6 +194,7 @@ public final class MultipleOrderedStages {
         private DefaultBuilder() {}
 
         public Builder from(MultipleOrderedStages other) {
+            checkNotBuilt();
             token(other.getToken());
             item(other.getItem());
             items(other.getItems());
@@ -201,52 +204,66 @@ public final class MultipleOrderedStages {
 
         @JsonSetter("token")
         public Builder token(@Nonnull OneField token) {
+            checkNotBuilt();
             this.token = Preconditions.checkNotNull(token, "token cannot be null");
             return this;
         }
 
         @JsonSetter("item")
         public Builder item(@Nonnull String item) {
+            checkNotBuilt();
             this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<SafeLong> items) {
+            checkNotBuilt();
             this.items.clear();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<SafeLong> items) {
+            checkNotBuilt();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(SafeLong items) {
+            checkNotBuilt();
             this.items.add(items);
             return this;
         }
 
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
+            checkNotBuilt();
             this.mappedRids.clear();
             this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
             return this;
         }
 
         public Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
+            checkNotBuilt();
             this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
             return this;
         }
 
         public Builder mappedRids(ResourceIdentifier key, String value) {
+            checkNotBuilt();
             this.mappedRids.put(key, value);
             return this;
         }
 
         public MultipleOrderedStages build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new MultipleOrderedStages(token, item, items, mappedRids);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

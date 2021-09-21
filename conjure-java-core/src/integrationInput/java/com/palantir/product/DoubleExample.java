@@ -3,6 +3,7 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -52,6 +53,8 @@ public final class DoubleExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private double doubleValue;
 
         private boolean _doubleValueInitialized = false;
@@ -59,12 +62,14 @@ public final class DoubleExample {
         private Builder() {}
 
         public Builder from(DoubleExample other) {
+            checkNotBuilt();
             doubleValue(other.getDoubleValue());
             return this;
         }
 
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
+            checkNotBuilt();
             this.doubleValue = doubleValue;
             this._doubleValueInitialized = true;
             return this;
@@ -91,8 +96,14 @@ public final class DoubleExample {
         }
 
         public DoubleExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new DoubleExample(doubleValue);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

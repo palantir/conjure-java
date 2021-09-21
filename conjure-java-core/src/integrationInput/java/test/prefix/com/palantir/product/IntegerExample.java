@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ public final class IntegerExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private int integer;
 
         private boolean _integerInitialized = false;
@@ -61,12 +64,14 @@ public final class IntegerExample {
         private Builder() {}
 
         public Builder from(IntegerExample other) {
+            checkNotBuilt();
             integer(other.getInteger());
             return this;
         }
 
         @JsonSetter("integer")
         public Builder integer(int integer) {
+            checkNotBuilt();
             this.integer = integer;
             this._integerInitialized = true;
             return this;
@@ -93,8 +98,14 @@ public final class IntegerExample {
         }
 
         public IntegerExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new IntegerExample(integer);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

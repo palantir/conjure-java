@@ -125,6 +125,8 @@ public final class MultipleFieldsOnlyFinalStage {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private List<String> items = new ArrayList<>();
 
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
@@ -136,6 +138,7 @@ public final class MultipleFieldsOnlyFinalStage {
         private Builder() {}
 
         public Builder from(MultipleFieldsOnlyFinalStage other) {
+            checkNotBuilt();
             items(other.getItems());
             itemsMap(other.getItemsMap());
             optionalItem(other.getOptionalItem());
@@ -145,68 +148,85 @@ public final class MultipleFieldsOnlyFinalStage {
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
+            checkNotBuilt();
             this.items.clear();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<String> items) {
+            checkNotBuilt();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(String items) {
+            checkNotBuilt();
             this.items.add(items);
             return this;
         }
 
         @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
         public Builder itemsMap(@Nonnull Map<String, Integer> itemsMap) {
+            checkNotBuilt();
             this.itemsMap.clear();
             this.itemsMap.putAll(Preconditions.checkNotNull(itemsMap, "itemsMap cannot be null"));
             return this;
         }
 
         public Builder putAllItemsMap(@Nonnull Map<String, Integer> itemsMap) {
+            checkNotBuilt();
             this.itemsMap.putAll(Preconditions.checkNotNull(itemsMap, "itemsMap cannot be null"));
             return this;
         }
 
         public Builder itemsMap(String key, int value) {
+            checkNotBuilt();
             this.itemsMap.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
+            checkNotBuilt();
             this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
 
         public Builder optionalItem(@Nonnull String optionalItem) {
+            checkNotBuilt();
             this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "itemsSet", nulls = Nulls.SKIP)
         public Builder itemsSet(@Nonnull Iterable<String> itemsSet) {
+            checkNotBuilt();
             this.itemsSet.clear();
             ConjureCollections.addAll(this.itemsSet, Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
             return this;
         }
 
         public Builder addAllItemsSet(@Nonnull Iterable<String> itemsSet) {
+            checkNotBuilt();
             ConjureCollections.addAll(this.itemsSet, Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
             return this;
         }
 
         public Builder itemsSet(String itemsSet) {
+            checkNotBuilt();
             this.itemsSet.add(itemsSet);
             return this;
         }
 
         public MultipleFieldsOnlyFinalStage build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new MultipleFieldsOnlyFinalStage(items, itemsMap, optionalItem, itemsSet);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

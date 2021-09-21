@@ -208,6 +208,8 @@ public final class ManyFieldExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private String string;
 
         private int integer;
@@ -231,6 +233,7 @@ public final class ManyFieldExample {
         private Builder() {}
 
         public Builder from(ManyFieldExample other) {
+            checkNotBuilt();
             string(other.getString());
             integer(other.getInteger());
             doubleValue(other.getDoubleValue());
@@ -247,6 +250,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter("string")
         public Builder string(@Nonnull String string) {
+            checkNotBuilt();
             this.string = Preconditions.checkNotNull(string, "string cannot be null");
             return this;
         }
@@ -256,6 +260,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter("integer")
         public Builder integer(int integer) {
+            checkNotBuilt();
             this.integer = integer;
             this._integerInitialized = true;
             return this;
@@ -266,6 +271,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
+            checkNotBuilt();
             this.doubleValue = doubleValue;
             this._doubleValueInitialized = true;
             return this;
@@ -276,6 +282,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
+            checkNotBuilt();
             this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
@@ -284,6 +291,7 @@ public final class ManyFieldExample {
          * docs for optionalItem field
          */
         public Builder optionalItem(@Nonnull String optionalItem) {
+            checkNotBuilt();
             this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
@@ -293,6 +301,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
+            checkNotBuilt();
             this.items.clear();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
@@ -302,6 +311,7 @@ public final class ManyFieldExample {
          * docs for items field with exciting character$ used by javapoet.
          */
         public Builder addAllItems(@Nonnull Iterable<String> items) {
+            checkNotBuilt();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
@@ -310,6 +320,7 @@ public final class ManyFieldExample {
          * docs for items field with exciting character$ used by javapoet.
          */
         public Builder items(String items) {
+            checkNotBuilt();
             this.items.add(items);
             return this;
         }
@@ -319,6 +330,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder set(@Nonnull Iterable<String> set) {
+            checkNotBuilt();
             this.set.clear();
             ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
@@ -328,6 +340,7 @@ public final class ManyFieldExample {
          * docs for set field
          */
         public Builder addAllSet(@Nonnull Iterable<String> set) {
+            checkNotBuilt();
             ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
@@ -336,6 +349,7 @@ public final class ManyFieldExample {
          * docs for set field
          */
         public Builder set(String set) {
+            checkNotBuilt();
             this.set.add(set);
             return this;
         }
@@ -346,6 +360,7 @@ public final class ManyFieldExample {
         @Deprecated
         @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(@Nonnull Map<String, String> map) {
+            checkNotBuilt();
             this.map.clear();
             this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
@@ -356,6 +371,7 @@ public final class ManyFieldExample {
          */
         @Deprecated
         public Builder putAllMap(@Nonnull Map<String, String> map) {
+            checkNotBuilt();
             this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
         }
@@ -365,6 +381,7 @@ public final class ManyFieldExample {
          */
         @Deprecated
         public Builder map(String key, String value) {
+            checkNotBuilt();
             this.map.put(key, value);
             return this;
         }
@@ -376,6 +393,7 @@ public final class ManyFieldExample {
         @Deprecated
         @JsonSetter("alias")
         public Builder alias(@Nonnull StringAliasExample alias) {
+            checkNotBuilt();
             this.alias = Preconditions.checkNotNull(alias, "alias cannot be null");
             return this;
         }
@@ -402,8 +420,14 @@ public final class ManyFieldExample {
         }
 
         public ManyFieldExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new ManyFieldExample(string, integer, doubleValue, optionalItem, items, set, map, alias);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

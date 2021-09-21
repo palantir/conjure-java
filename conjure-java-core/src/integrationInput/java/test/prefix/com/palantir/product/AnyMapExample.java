@@ -89,34 +89,46 @@ public final class AnyMapExample {
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
+        boolean _buildInvoked;
+
         private Map<String, Object> items = new LinkedHashMap<>();
 
         private Builder() {}
 
         public Builder from(AnyMapExample other) {
+            checkNotBuilt();
             items(other.getItems());
             return this;
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Map<String, Object> items) {
+            checkNotBuilt();
             this.items.clear();
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder putAllItems(@Nonnull Map<String, Object> items) {
+            checkNotBuilt();
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(String key, Object value) {
+            checkNotBuilt();
             this.items.put(key, value);
             return this;
         }
 
         public AnyMapExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new AnyMapExample(items);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

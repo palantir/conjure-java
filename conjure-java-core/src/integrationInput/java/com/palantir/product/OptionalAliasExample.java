@@ -79,23 +79,33 @@ public final class OptionalAliasExample {
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
+        boolean _buildInvoked;
+
         private OptionalAlias optionalAlias;
 
         private Builder() {}
 
         public Builder from(OptionalAliasExample other) {
+            checkNotBuilt();
             optionalAlias(other.getOptionalAlias());
             return this;
         }
 
         @JsonSetter(value = "optionalAlias", nulls = Nulls.AS_EMPTY)
         public Builder optionalAlias(@Nonnull OptionalAlias optionalAlias) {
+            checkNotBuilt();
             this.optionalAlias = Preconditions.checkNotNull(optionalAlias, "optionalAlias cannot be null");
             return this;
         }
 
         public OptionalAliasExample build() {
+            checkNotBuilt();
+            this._buildInvoked = true;
             return new OptionalAliasExample(optionalAlias);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }
