@@ -88,22 +88,26 @@ public final class OptionalAliasExample {
         private Builder() {}
 
         public Builder from(OptionalAliasExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             optionalAlias(other.getOptionalAlias());
             return this;
         }
 
         @JsonSetter(value = "optionalAlias", nulls = Nulls.AS_EMPTY)
         public Builder optionalAlias(@Nonnull OptionalAlias optionalAlias) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalAlias = Preconditions.checkNotNull(optionalAlias, "optionalAlias cannot be null");
             return this;
         }
 
         public OptionalAliasExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new OptionalAliasExample(optionalAlias);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

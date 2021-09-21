@@ -86,22 +86,26 @@ public final class UuidExample {
         private Builder() {}
 
         public Builder from(UuidExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             uuid(other.getUuid());
             return this;
         }
 
         @JsonSetter("uuid")
         public Builder uuid(@Nonnull UUID uuid) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;
         }
 
         public UuidExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new UuidExample(uuid);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

@@ -64,14 +64,14 @@ public final class BooleanExample {
         private Builder() {}
 
         public Builder from(BooleanExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             coin(other.getCoin());
             return this;
         }
 
         @JsonSetter("coin")
         public Builder coin(boolean coin) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.coin = coin;
             this._coinInitialized = true;
             return this;
@@ -98,10 +98,14 @@ public final class BooleanExample {
         }
 
         public BooleanExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new BooleanExample(coin);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

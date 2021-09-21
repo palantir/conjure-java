@@ -83,22 +83,26 @@ public final class EnumFieldExample {
         private Builder() {}
 
         public Builder from(EnumFieldExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             enum_(other.getEnum());
             return this;
         }
 
         @JsonSetter("enum")
         public Builder enum_(@Nonnull EnumExample enum_) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.enum_ = Preconditions.checkNotNull(enum_, "enum cannot be null");
             return this;
         }
 
         public EnumFieldExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new EnumFieldExample(enum_);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

@@ -85,22 +85,26 @@ public final class StringExample {
         private Builder() {}
 
         public Builder from(StringExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             string(other.getString());
             return this;
         }
 
         @JsonSetter("string")
         public Builder string(@Nonnull String string) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.string = Preconditions.checkNotNull(string, "string cannot be null");
             return this;
         }
 
         public StringExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new StringExample(string);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

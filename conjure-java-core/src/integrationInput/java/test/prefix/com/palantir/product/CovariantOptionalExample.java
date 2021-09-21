@@ -111,7 +111,7 @@ public final class CovariantOptionalExample {
         private Builder() {}
 
         public Builder from(CovariantOptionalExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             item(other.getItem());
             setItem(other.getSetItem());
             return this;
@@ -119,35 +119,39 @@ public final class CovariantOptionalExample {
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
         public Builder item(@Nonnull Optional<?> item) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.item = Preconditions.checkNotNull(item, "item cannot be null").map(Function.identity());
             return this;
         }
 
         public Builder item(@Nonnull Object item) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "setItem", nulls = Nulls.SKIP)
         public Builder setItem(@Nonnull Optional<? extends Set<StringAliasExample>> setItem) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.setItem = Preconditions.checkNotNull(setItem, "setItem cannot be null")
                     .map(Function.identity());
             return this;
         }
 
         public Builder setItem(@Nonnull Set<StringAliasExample> setItem) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.setItem = Optional.of(Preconditions.checkNotNull(setItem, "setItem cannot be null"));
             return this;
         }
 
         public CovariantOptionalExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new CovariantOptionalExample(item, setItem);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

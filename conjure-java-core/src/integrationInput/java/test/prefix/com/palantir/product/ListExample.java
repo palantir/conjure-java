@@ -172,7 +172,7 @@ public final class ListExample {
         private Builder() {}
 
         public Builder from(ListExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             items(other.getItems());
             primitiveItems(other.getPrimitiveItems());
             doubleItems(other.getDoubleItems());
@@ -184,27 +184,27 @@ public final class ListExample {
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.clear();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<String> items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(String items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.add(items);
             return this;
         }
 
         @JsonSetter(value = "primitiveItems", nulls = Nulls.SKIP)
         public Builder primitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.primitiveItems.clear();
             ConjureCollections.addAll(
                     this.primitiveItems, Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
@@ -212,21 +212,21 @@ public final class ListExample {
         }
 
         public Builder addAllPrimitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(
                     this.primitiveItems, Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
 
         public Builder primitiveItems(int primitiveItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.primitiveItems.add(primitiveItems);
             return this;
         }
 
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.doubleItems.clear();
             ConjureCollections.addAll(
                     this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
@@ -234,21 +234,21 @@ public final class ListExample {
         }
 
         public Builder addAllDoubleItems(@Nonnull Iterable<Double> doubleItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(
                     this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 
         public Builder doubleItems(double doubleItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.doubleItems.add(doubleItems);
             return this;
         }
 
         @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder optionalItems(@Nonnull Iterable<Optional<String>> optionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItems.clear();
             ConjureCollections.addAll(
                     this.optionalItems, Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
@@ -256,21 +256,21 @@ public final class ListExample {
         }
 
         public Builder addAllOptionalItems(@Nonnull Iterable<Optional<String>> optionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(
                     this.optionalItems, Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
         public Builder optionalItems(Optional<String> optionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItems.add(optionalItems);
             return this;
         }
 
         @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalItems(@Nonnull Iterable<OptionalAlias> aliasOptionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptionalItems.clear();
             ConjureCollections.addAll(
                     this.aliasOptionalItems,
@@ -279,7 +279,7 @@ public final class ListExample {
         }
 
         public Builder addAllAliasOptionalItems(@Nonnull Iterable<OptionalAlias> aliasOptionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(
                     this.aliasOptionalItems,
                     Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
@@ -287,14 +287,14 @@ public final class ListExample {
         }
 
         public Builder aliasOptionalItems(OptionalAlias aliasOptionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptionalItems.add(aliasOptionalItems);
             return this;
         }
 
         @JsonSetter(value = "nestedItems", nulls = Nulls.SKIP)
         public Builder nestedItems(@Nonnull Iterable<? extends List<String>> nestedItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.nestedItems.clear();
             ConjureCollections.addAll(
                     this.nestedItems, Preconditions.checkNotNull(nestedItems, "nestedItems cannot be null"));
@@ -302,22 +302,26 @@ public final class ListExample {
         }
 
         public Builder addAllNestedItems(@Nonnull Iterable<? extends List<String>> nestedItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(
                     this.nestedItems, Preconditions.checkNotNull(nestedItems, "nestedItems cannot be null"));
             return this;
         }
 
         public Builder nestedItems(List<String> nestedItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.nestedItems.add(nestedItems);
             return this;
         }
 
         public ListExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new ListExample(items, primitiveItems, doubleItems, optionalItems, aliasOptionalItems, nestedItems);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

@@ -87,28 +87,32 @@ public final class OptionalExample {
         private Builder() {}
 
         public Builder from(OptionalExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             item(other.getItem());
             return this;
         }
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
         public Builder item(@Nonnull Optional<String> item) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
         public Builder item(@Nonnull String item) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;
         }
 
         public OptionalExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new OptionalExample(item);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

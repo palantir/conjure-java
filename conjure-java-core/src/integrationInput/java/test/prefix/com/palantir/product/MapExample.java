@@ -135,7 +135,7 @@ public final class MapExample {
         private Builder() {}
 
         public Builder from(MapExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             items(other.getItems());
             optionalItems(other.getOptionalItems());
             aliasOptionalItems(other.getAliasOptionalItems());
@@ -144,47 +144,47 @@ public final class MapExample {
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Map<String, String> items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.clear();
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder putAllItems(@Nonnull Map<String, String> items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(String key, String value) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder optionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItems.clear();
             this.optionalItems.putAll(Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
         public Builder putAllOptionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItems.putAll(Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
         public Builder optionalItems(String key, Optional<String> value) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItems.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptionalItems.clear();
             this.aliasOptionalItems.putAll(
                     Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
@@ -192,22 +192,26 @@ public final class MapExample {
         }
 
         public Builder putAllAliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptionalItems.putAll(
                     Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
             return this;
         }
 
         public Builder aliasOptionalItems(String key, OptionalAlias value) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptionalItems.put(key, value);
             return this;
         }
 
         public MapExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new MapExample(items, optionalItems, aliasOptionalItems);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

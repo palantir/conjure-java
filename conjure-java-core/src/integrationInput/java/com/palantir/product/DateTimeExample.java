@@ -91,22 +91,26 @@ public final class DateTimeExample {
         private Builder() {}
 
         public Builder from(DateTimeExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             datetime(other.getDatetime());
             return this;
         }
 
         @JsonSetter("datetime")
         public Builder datetime(@Nonnull OffsetDateTime datetime) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.datetime = Preconditions.checkNotNull(datetime, "datetime cannot be null");
             return this;
         }
 
         public DateTimeExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new DateTimeExample(datetime);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

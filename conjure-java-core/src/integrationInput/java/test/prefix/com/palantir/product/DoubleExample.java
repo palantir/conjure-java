@@ -64,14 +64,14 @@ public final class DoubleExample {
         private Builder() {}
 
         public Builder from(DoubleExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             doubleValue(other.getDoubleValue());
             return this;
         }
 
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.doubleValue = doubleValue;
             this._doubleValueInitialized = true;
             return this;
@@ -98,10 +98,14 @@ public final class DoubleExample {
         }
 
         public DoubleExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new DoubleExample(doubleValue);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

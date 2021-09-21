@@ -83,22 +83,26 @@ public final class AnyExample {
         private Builder() {}
 
         public Builder from(AnyExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             any(other.getAny());
             return this;
         }
 
         @JsonSetter("any")
         public Builder any(@Nonnull Object any) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.any = Preconditions.checkNotNull(any, "any cannot be null");
             return this;
         }
 
         public AnyExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new AnyExample(any);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

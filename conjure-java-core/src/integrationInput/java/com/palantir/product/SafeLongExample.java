@@ -84,22 +84,26 @@ public final class SafeLongExample {
         private Builder() {}
 
         public Builder from(SafeLongExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             safeLongValue(other.getSafeLongValue());
             return this;
         }
 
         @JsonSetter("safeLongValue")
         public Builder safeLongValue(@Nonnull SafeLong safeLongValue) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.safeLongValue = Preconditions.checkNotNull(safeLongValue, "safeLongValue cannot be null");
             return this;
         }
 
         public SafeLongExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new SafeLongExample(safeLongValue);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

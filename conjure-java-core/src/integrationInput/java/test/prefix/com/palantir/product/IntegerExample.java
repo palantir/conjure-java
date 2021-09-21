@@ -64,14 +64,14 @@ public final class IntegerExample {
         private Builder() {}
 
         public Builder from(IntegerExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             integer(other.getInteger());
             return this;
         }
 
         @JsonSetter("integer")
         public Builder integer(int integer) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.integer = integer;
             this._integerInitialized = true;
             return this;
@@ -98,10 +98,14 @@ public final class IntegerExample {
         }
 
         public IntegerExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new IntegerExample(integer);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

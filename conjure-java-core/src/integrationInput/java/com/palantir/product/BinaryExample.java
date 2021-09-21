@@ -84,22 +84,26 @@ public final class BinaryExample {
         private Builder() {}
 
         public Builder from(BinaryExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             binary(other.getBinary());
             return this;
         }
 
         @JsonSetter("binary")
         public Builder binary(@Nonnull Bytes binary) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.binary = Preconditions.checkNotNull(binary, "binary cannot be null");
             return this;
         }
 
         public BinaryExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new BinaryExample(binary);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

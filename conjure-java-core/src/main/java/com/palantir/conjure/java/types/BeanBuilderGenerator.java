@@ -73,6 +73,7 @@ import javax.lang.model.element.Modifier;
 public final class BeanBuilderGenerator {
 
     private static final String BUILT_FIELD = "_buildInvoked";
+    private static final String CHECK_NOT_BUILT_METHOD = "checkNotBuilt";
 
     private final TypeMapper typeMapper;
     private final ClassName builderClass;
@@ -117,7 +118,8 @@ public final class BeanBuilderGenerator {
                 .addMethod(createFromObject(enrichedFields))
                 .addMethods(createSetters(enrichedFields, typesMap))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
-                .addMethod(createBuild(enrichedFields, poetFields));
+                .addMethod(createBuild(enrichedFields, poetFields))
+                .addMethod(createCheckNotBuilt());
 
         if (isInStagedBuilderMode(builderInterfaceClass)) {
             builder.addSuperinterface(builderInterfaceClass.get());
@@ -218,13 +220,6 @@ public final class BeanBuilderGenerator {
 
     private static MethodSpec createConstructor() {
         return MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build();
-    }
-
-    private CodeBlock verifyNotBuilt() {
-        return CodeBlock.builder()
-                .addStatement(
-                        "$T.checkState(!$N, $S)", Preconditions.class, BUILT_FIELD, "Build has already been called")
-                .build();
     }
 
     private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields) {
@@ -472,6 +467,18 @@ public final class BeanBuilderGenerator {
 
         return method.addStatement("return new $L", Expressions.constructorCall(objectClass, fields))
                 .build();
+    }
+
+    private static MethodSpec createCheckNotBuilt() {
+        return MethodSpec.methodBuilder(CHECK_NOT_BUILT_METHOD)
+                .addModifiers(Modifier.PRIVATE)
+                .addStatement(
+                        "$T.checkState(!$N, $S)", Preconditions.class, BUILT_FIELD, "Build has already been called")
+                .build();
+    }
+
+    private static CodeBlock verifyNotBuilt() {
+        return CodeBlocks.statement("$N()", CHECK_NOT_BUILT_METHOD);
     }
 
     private static TypeName asRawType(TypeName type) {

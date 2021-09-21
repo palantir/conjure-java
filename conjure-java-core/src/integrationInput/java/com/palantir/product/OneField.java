@@ -107,22 +107,26 @@ public final class OneField {
         private DefaultBuilder() {}
 
         public Builder from(OneField other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             bearerTokenValue(other.getBearerTokenValue());
             return this;
         }
 
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.bearerTokenValue = Preconditions.checkNotNull(bearerTokenValue, "bearerTokenValue cannot be null");
             return this;
         }
 
         public OneField build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new OneField(bearerTokenValue);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

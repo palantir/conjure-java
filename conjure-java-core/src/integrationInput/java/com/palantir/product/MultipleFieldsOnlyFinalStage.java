@@ -138,7 +138,7 @@ public final class MultipleFieldsOnlyFinalStage {
         private Builder() {}
 
         public Builder from(MultipleFieldsOnlyFinalStage other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             items(other.getItems());
             itemsMap(other.getItemsMap());
             optionalItem(other.getOptionalItem());
@@ -148,81 +148,85 @@ public final class MultipleFieldsOnlyFinalStage {
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.clear();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<String> items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(String items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.add(items);
             return this;
         }
 
         @JsonSetter(value = "itemsMap", nulls = Nulls.SKIP)
         public Builder itemsMap(@Nonnull Map<String, Integer> itemsMap) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.itemsMap.clear();
             this.itemsMap.putAll(Preconditions.checkNotNull(itemsMap, "itemsMap cannot be null"));
             return this;
         }
 
         public Builder putAllItemsMap(@Nonnull Map<String, Integer> itemsMap) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.itemsMap.putAll(Preconditions.checkNotNull(itemsMap, "itemsMap cannot be null"));
             return this;
         }
 
         public Builder itemsMap(String key, int value) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.itemsMap.put(key, value);
             return this;
         }
 
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
 
         public Builder optionalItem(@Nonnull String optionalItem) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "itemsSet", nulls = Nulls.SKIP)
         public Builder itemsSet(@Nonnull Iterable<String> itemsSet) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.itemsSet.clear();
             ConjureCollections.addAll(this.itemsSet, Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
             return this;
         }
 
         public Builder addAllItemsSet(@Nonnull Iterable<String> itemsSet) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(this.itemsSet, Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
             return this;
         }
 
         public Builder itemsSet(String itemsSet) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.itemsSet.add(itemsSet);
             return this;
         }
 
         public MultipleFieldsOnlyFinalStage build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new MultipleFieldsOnlyFinalStage(items, itemsMap, optionalItem, itemsSet);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

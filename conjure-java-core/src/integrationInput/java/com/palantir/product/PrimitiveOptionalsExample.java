@@ -398,7 +398,7 @@ public final class PrimitiveOptionalsExample {
         private Builder() {}
 
         public Builder from(PrimitiveOptionalsExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             num(other.getNum());
             bool(other.getBool());
             integer(other.getInteger());
@@ -422,210 +422,210 @@ public final class PrimitiveOptionalsExample {
 
         @JsonSetter(value = "num", nulls = Nulls.SKIP)
         public Builder num(@Nonnull OptionalDouble num) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.num = Preconditions.checkNotNull(num, "num cannot be null");
             return this;
         }
 
         public Builder num(double num) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.num = OptionalDouble.of(num);
             return this;
         }
 
         @JsonSetter(value = "bool", nulls = Nulls.SKIP)
         public Builder bool(@Nonnull Optional<Boolean> bool) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.bool = Preconditions.checkNotNull(bool, "bool cannot be null");
             return this;
         }
 
         public Builder bool(boolean bool) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.bool = Optional.of(bool);
             return this;
         }
 
         @JsonSetter(value = "integer", nulls = Nulls.SKIP)
         public Builder integer(@Nonnull OptionalInt integer) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.integer = Preconditions.checkNotNull(integer, "integer cannot be null");
             return this;
         }
 
         public Builder integer(int integer) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.integer = OptionalInt.of(integer);
             return this;
         }
 
         @JsonSetter(value = "safelong", nulls = Nulls.SKIP)
         public Builder safelong(@Nonnull Optional<SafeLong> safelong) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.safelong = Preconditions.checkNotNull(safelong, "safelong cannot be null");
             return this;
         }
 
         public Builder safelong(@Nonnull SafeLong safelong) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.safelong = Optional.of(Preconditions.checkNotNull(safelong, "safelong cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "rid", nulls = Nulls.SKIP)
         public Builder rid(@Nonnull Optional<ResourceIdentifier> rid) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.rid = Preconditions.checkNotNull(rid, "rid cannot be null");
             return this;
         }
 
         public Builder rid(@Nonnull ResourceIdentifier rid) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.rid = Optional.of(Preconditions.checkNotNull(rid, "rid cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "bearertoken", nulls = Nulls.SKIP)
         public Builder bearertoken(@Nonnull Optional<BearerToken> bearertoken) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.bearertoken = Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null");
             return this;
         }
 
         public Builder bearertoken(@Nonnull BearerToken bearertoken) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.bearertoken = Optional.of(Preconditions.checkNotNull(bearertoken, "bearertoken cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "uuid", nulls = Nulls.SKIP)
         public Builder uuid(@Nonnull Optional<UUID> uuid) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;
         }
 
         public Builder uuid(@Nonnull UUID uuid) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.uuid = Optional.of(Preconditions.checkNotNull(uuid, "uuid cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "map", nulls = Nulls.SKIP)
         public Builder map(@Nonnull Optional<? extends Map<String, String>> map) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.map = Preconditions.checkNotNull(map, "map cannot be null").map(Function.identity());
             return this;
         }
 
         public Builder map(@Nonnull Map<String, String> map) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.map = Optional.of(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "list", nulls = Nulls.SKIP)
         public Builder list(@Nonnull Optional<? extends List<String>> list) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.list = Preconditions.checkNotNull(list, "list cannot be null").map(Function.identity());
             return this;
         }
 
         public Builder list(@Nonnull List<String> list) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.list = Optional.of(Preconditions.checkNotNull(list, "list cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "set", nulls = Nulls.SKIP)
         public Builder set(@Nonnull Optional<? extends Set<String>> set) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.set = Preconditions.checkNotNull(set, "set cannot be null").map(Function.identity());
             return this;
         }
 
         public Builder set(@Nonnull Set<String> set) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.set = Optional.of(Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "aliasOne", nulls = Nulls.SKIP)
         public Builder aliasOne(@Nonnull Optional<StringAliasOne> aliasOne) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOne = Preconditions.checkNotNull(aliasOne, "aliasOne cannot be null");
             return this;
         }
 
         public Builder aliasOne(@Nonnull StringAliasOne aliasOne) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOne = Optional.of(Preconditions.checkNotNull(aliasOne, "aliasOne cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "aliasTwo", nulls = Nulls.AS_EMPTY)
         public Builder aliasTwo(@Nonnull StringAliasTwo aliasTwo) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasTwo = Preconditions.checkNotNull(aliasTwo, "aliasTwo cannot be null");
             return this;
         }
 
         @JsonSetter(value = "aliasList", nulls = Nulls.SKIP)
         public Builder aliasList(@Nonnull Optional<ListAlias> aliasList) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasList = Preconditions.checkNotNull(aliasList, "aliasList cannot be null");
             return this;
         }
 
         public Builder aliasList(@Nonnull ListAlias aliasList) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasList = Optional.of(Preconditions.checkNotNull(aliasList, "aliasList cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "aliasMap", nulls = Nulls.SKIP)
         public Builder aliasMap(@Nonnull Optional<MapAliasExample> aliasMap) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasMap = Preconditions.checkNotNull(aliasMap, "aliasMap cannot be null");
             return this;
         }
 
         public Builder aliasMap(@Nonnull MapAliasExample aliasMap) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasMap = Optional.of(Preconditions.checkNotNull(aliasMap, "aliasMap cannot be null"));
             return this;
         }
 
         @JsonSetter(value = "aliasOptional", nulls = Nulls.AS_EMPTY)
         public Builder aliasOptional(@Nonnull OptionalAlias aliasOptional) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptional = Preconditions.checkNotNull(aliasOptional, "aliasOptional cannot be null");
             return this;
         }
 
         @JsonSetter(value = "aliasOptionalMap", nulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalMap(@Nonnull OptionalMapAliasExample aliasOptionalMap) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptionalMap = Preconditions.checkNotNull(aliasOptionalMap, "aliasOptionalMap cannot be null");
             return this;
         }
 
         @JsonSetter(value = "aliasOptionalList", nulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalList(@Nonnull OptionalListAliasExample aliasOptionalList) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptionalList = Preconditions.checkNotNull(aliasOptionalList, "aliasOptionalList cannot be null");
             return this;
         }
 
         @JsonSetter(value = "aliasOptionalSet", nulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalSet(@Nonnull OptionalSetAliasExample aliasOptionalSet) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.aliasOptionalSet = Preconditions.checkNotNull(aliasOptionalSet, "aliasOptionalSet cannot be null");
             return this;
         }
 
         public PrimitiveOptionalsExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new PrimitiveOptionalsExample(
                     num,
@@ -646,6 +646,10 @@ public final class PrimitiveOptionalsExample {
                     aliasOptionalMap,
                     aliasOptionalList,
                     aliasOptionalSet);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

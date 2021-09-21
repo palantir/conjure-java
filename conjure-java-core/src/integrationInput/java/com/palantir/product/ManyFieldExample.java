@@ -233,7 +233,7 @@ public final class ManyFieldExample {
         private Builder() {}
 
         public Builder from(ManyFieldExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             string(other.getString());
             integer(other.getInteger());
             doubleValue(other.getDoubleValue());
@@ -250,7 +250,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter("string")
         public Builder string(@Nonnull String string) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.string = Preconditions.checkNotNull(string, "string cannot be null");
             return this;
         }
@@ -260,7 +260,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter("integer")
         public Builder integer(int integer) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.integer = integer;
             this._integerInitialized = true;
             return this;
@@ -271,7 +271,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter("doubleValue")
         public Builder doubleValue(double doubleValue) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.doubleValue = doubleValue;
             this._doubleValueInitialized = true;
             return this;
@@ -282,7 +282,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
@@ -291,7 +291,7 @@ public final class ManyFieldExample {
          * docs for optionalItem field
          */
         public Builder optionalItem(@Nonnull String optionalItem) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
@@ -301,7 +301,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.clear();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
@@ -311,7 +311,7 @@ public final class ManyFieldExample {
          * docs for items field with exciting character$ used by javapoet.
          */
         public Builder addAllItems(@Nonnull Iterable<String> items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
@@ -320,7 +320,7 @@ public final class ManyFieldExample {
          * docs for items field with exciting character$ used by javapoet.
          */
         public Builder items(String items) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.items.add(items);
             return this;
         }
@@ -330,7 +330,7 @@ public final class ManyFieldExample {
          */
         @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder set(@Nonnull Iterable<String> set) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.set.clear();
             ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
@@ -340,7 +340,7 @@ public final class ManyFieldExample {
          * docs for set field
          */
         public Builder addAllSet(@Nonnull Iterable<String> set) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
@@ -349,7 +349,7 @@ public final class ManyFieldExample {
          * docs for set field
          */
         public Builder set(String set) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.set.add(set);
             return this;
         }
@@ -360,7 +360,7 @@ public final class ManyFieldExample {
         @Deprecated
         @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(@Nonnull Map<String, String> map) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.map.clear();
             this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
@@ -371,7 +371,7 @@ public final class ManyFieldExample {
          */
         @Deprecated
         public Builder putAllMap(@Nonnull Map<String, String> map) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
         }
@@ -381,7 +381,7 @@ public final class ManyFieldExample {
          */
         @Deprecated
         public Builder map(String key, String value) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.map.put(key, value);
             return this;
         }
@@ -393,7 +393,7 @@ public final class ManyFieldExample {
         @Deprecated
         @JsonSetter("alias")
         public Builder alias(@Nonnull StringAliasExample alias) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.alias = Preconditions.checkNotNull(alias, "alias cannot be null");
             return this;
         }
@@ -420,10 +420,14 @@ public final class ManyFieldExample {
         }
 
         public ManyFieldExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
             return new ManyFieldExample(string, integer, doubleValue, optionalItem, items, set, map, alias);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

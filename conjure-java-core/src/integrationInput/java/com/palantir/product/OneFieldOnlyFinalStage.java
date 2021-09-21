@@ -89,28 +89,32 @@ public final class OneFieldOnlyFinalStage {
         private Builder() {}
 
         public Builder from(OneFieldOnlyFinalStage other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             optionalItem(other.getOptionalItem());
             return this;
         }
 
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
             return this;
         }
 
         public Builder optionalItem(@Nonnull String optionalItem) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
 
         public OneFieldOnlyFinalStage build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new OneFieldOnlyFinalStage(optionalItem);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }

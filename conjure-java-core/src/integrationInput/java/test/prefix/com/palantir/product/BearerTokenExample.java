@@ -86,22 +86,26 @@ public final class BearerTokenExample {
         private Builder() {}
 
         public Builder from(BearerTokenExample other) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             bearerTokenValue(other.getBearerTokenValue());
             return this;
         }
 
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this.bearerTokenValue = Preconditions.checkNotNull(bearerTokenValue, "bearerTokenValue cannot be null");
             return this;
         }
 
         public BearerTokenExample build() {
-            Preconditions.checkState(!_buildInvoked, "Build has already been called");
+            checkNotBuilt();
             this._buildInvoked = true;
             return new BearerTokenExample(bearerTokenValue);
+        }
+
+        private void checkNotBuilt() {
+            Preconditions.checkState(!_buildInvoked, "Build has already been called");
         }
     }
 }
