@@ -25,8 +25,8 @@ import org.immutables.value.Value;
 @Value.Immutable
 public abstract class SafeLong implements Comparable<SafeLong> {
 
-    private static final long MIN_SAFE_VALUE = -(1L << 53) + 1;
-    private static final long MAX_SAFE_VALUE = (1L << 53) - 1;
+    public static final long MIN_SAFE_VALUE = -(1L << 53) + 1;
+    public static final long MAX_SAFE_VALUE = (1L << 53) - 1;
 
     @JsonValue
     @Value.Parameter
