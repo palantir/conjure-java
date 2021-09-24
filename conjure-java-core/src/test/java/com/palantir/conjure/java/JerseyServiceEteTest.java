@@ -124,7 +124,7 @@ public final class JerseyServiceEteTest extends TestBase {
     @Disabled("string returns in Jersey should use a mandated wrapper alias type")
     @Test
     public void client_can_retrieve_an_optional_string_from_a_server() throws Exception {
-        assertThat(client.optionalString(AuthHeader.valueOf("authHeader"))).isEqualTo(Optional.of("foo"));
+        assertThat(client.optionalString(AuthHeader.valueOf("authHeader"))).contains("foo");
     }
 
     @Disabled("Dropwizard returns 404 for empty optional")

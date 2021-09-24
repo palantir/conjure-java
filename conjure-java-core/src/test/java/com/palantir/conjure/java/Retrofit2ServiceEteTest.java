@@ -45,7 +45,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -107,7 +106,7 @@ public final class Retrofit2ServiceEteTest extends TestBase {
     @Test
     public void retrofit2_client_can_retrieve_an_optional_string_from_a_server() {
         assertThat(Futures.getUnchecked(client.optionalString(AuthHeader.valueOf("authHeader"))))
-                .isEqualTo(Optional.of("foo"));
+                .contains("foo");
     }
 
     @Disabled("https://github.com/palantir/conjure-java-runtime/issues/668")
