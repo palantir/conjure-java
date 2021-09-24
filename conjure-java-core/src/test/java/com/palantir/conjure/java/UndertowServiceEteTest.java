@@ -175,7 +175,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void client_can_retrieve_an_optional_string_from_a_server() {
-        assertThat(client.optionalString(AuthHeader.valueOf("authHeader"))).isEqualTo(Optional.of("foo"));
+        assertThat(client.optionalString(AuthHeader.valueOf("authHeader"))).contains("foo");
     }
 
     @Test
@@ -532,7 +532,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testOptionalEnumQueryParameterPresent() {
         assertThat(client.optionalEnumQuery(AuthHeader.valueOf("authHeader"), Optional.of(SimpleEnum.VALUE)))
-                .isEqualTo(Optional.of(SimpleEnum.VALUE));
+                .contains(SimpleEnum.VALUE);
     }
 
     @Test
