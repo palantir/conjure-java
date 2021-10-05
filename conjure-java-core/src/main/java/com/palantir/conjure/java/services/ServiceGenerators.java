@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.services;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Streams;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.spec.EndpointDefinition;
 import java.util.Optional;
@@ -45,7 +44,7 @@ public final class ServiceGenerators {
         }
 
         Optional<String> params = Optional.ofNullable(Strings.emptyToNull(endpointDef.getArgs().stream()
-                .flatMap(argument -> Streams.stream(Javadoc.getParameterJavadoc(argument, endpointDef)))
+                .flatMap(argument -> Javadoc.getParameterJavadoc(argument, endpointDef).stream())
                 .collect(Collectors.joining("\n"))));
 
         StringBuilder sb = new StringBuilder();

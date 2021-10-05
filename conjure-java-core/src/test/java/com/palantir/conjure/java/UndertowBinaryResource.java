@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java;
 
-import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
@@ -49,7 +48,7 @@ final class UndertowBinaryResource implements UndertowEteBinaryService {
             }
         }
         throw new ServiceException(
-                ErrorType.INVALID_ARGUMENT, SafeArg.of("large", Strings.repeat("Hello, World!", 1024 * 1024)));
+                ErrorType.INVALID_ARGUMENT, SafeArg.of("large", "Hello, World!".repeat(1024 * 1024)));
     }
 
     @Override
