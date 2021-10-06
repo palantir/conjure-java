@@ -52,6 +52,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class ErrorGenerator implements Generator {
 
+    private static final String REMOTE_EXCEPTION_VAR = "remoteException";
+
     private final Options options;
 
     public ErrorGenerator(Options options) {
@@ -177,16 +179,19 @@ public final class ErrorGenerator implements Generator {
                             CaseFormat.UPPER_UNDERSCORE, entry.getErrorName().getName());
                     String methodName = "is" + entry.getErrorName().getName();
 
-                    String remoteExceptionVar = "remoteException";
-
                     return MethodSpec.methodBuilder(methodName)
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                            .addParameter(RemoteException.class, remoteExceptionVar)
+                            .addParameter(RemoteException.class, REMOTE_EXCEPTION_VAR)
                             .returns(TypeName.BOOLEAN)
+                            .addStatement(Expressions.requireNonNull(
+                                    REMOTE_EXCEPTION_VAR, "remote exception must not be null"))
                             .addStatement(
-                                    "return $L.name().equals($L.getError().errorName())", typeName, remoteExceptionVar)
+                                    "return $N.name().equals($N.getError().errorName())",
+                                    typeName,
+                                    REMOTE_EXCEPTION_VAR)
                             .addJavadoc(
-                                    "Returns true if the {@link RemoteException} is named $L:$L",
+                                    "Returns true if the {@link $T} is named $L:$L",
+                                    RemoteException.class,
                                     entry.getNamespace(),
                                     entry.getErrorName().getName())
                             .build();

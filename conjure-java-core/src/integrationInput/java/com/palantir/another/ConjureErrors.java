@@ -3,6 +3,7 @@ package com.palantir.another;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
@@ -37,6 +38,7 @@ public final class ConjureErrors {
      * Returns true if the {@link RemoteException} is named Conjure:DifferentPackage
      */
     public static boolean isDifferentPackage(RemoteException remoteException) {
+        Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return DIFFERENT_PACKAGE.name().equals(remoteException.getError().errorName());
     }
 }
