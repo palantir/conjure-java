@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Generate convenience `is{Error}` static methods for Conjure errors.
+    It checks if a `RemoteException` has the same name as the Conjure defined error.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1507

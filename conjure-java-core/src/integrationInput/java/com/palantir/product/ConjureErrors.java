@@ -1,7 +1,9 @@
 package com.palantir.product;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import javax.annotation.Generated;
@@ -77,5 +79,23 @@ public final class ConjureErrors {
         if (shouldThrow) {
             throw invalidTypeDefinition(typeName, typeDef);
         }
+    }
+
+    /**
+     * Returns true if the {@link RemoteException} is named Conjure:InvalidServiceDefinition
+     */
+    public static boolean isInvalidServiceDefinition(RemoteException remoteException) {
+        Preconditions.checkNotNull(remoteException, "remote exception must not be null");
+        return INVALID_SERVICE_DEFINITION
+                .name()
+                .equals(remoteException.getError().errorName());
+    }
+
+    /**
+     * Returns true if the {@link RemoteException} is named Conjure:InvalidTypeDefinition
+     */
+    public static boolean isInvalidTypeDefinition(RemoteException remoteException) {
+        Preconditions.checkNotNull(remoteException, "remote exception must not be null");
+        return INVALID_TYPE_DEFINITION.name().equals(remoteException.getError().errorName());
     }
 }

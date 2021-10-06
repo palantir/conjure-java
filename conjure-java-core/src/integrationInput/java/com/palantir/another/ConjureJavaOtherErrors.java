@@ -1,4 +1,4 @@
-package com.palantir.product;
+package com.palantir.another;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -7,14 +7,14 @@ import com.palantir.logsafe.Preconditions;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
-public final class ConjureJavaErrors {
+public final class ConjureJavaOtherErrors {
     /**
      * Failed to compile Conjure definition to Java code.
      */
     public static final ErrorType JAVA_COMPILATION_FAILED =
-            ErrorType.create(ErrorType.Code.INTERNAL, "ConjureJava:JavaCompilationFailed");
+            ErrorType.create(ErrorType.Code.INTERNAL, "ConjureJavaOther:JavaCompilationFailed");
 
-    private ConjureJavaErrors() {}
+    private ConjureJavaOtherErrors() {}
 
     public static ServiceException javaCompilationFailed() {
         return new ServiceException(JAVA_COMPILATION_FAILED);
@@ -35,7 +35,7 @@ public final class ConjureJavaErrors {
     }
 
     /**
-     * Returns true if the {@link RemoteException} is named ConjureJava:JavaCompilationFailed
+     * Returns true if the {@link RemoteException} is named ConjureJavaOther:JavaCompilationFailed
      */
     public static boolean isJavaCompilationFailed(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");

@@ -1,0 +1,8 @@
+types:
+  definitions:
+    default-package: com.palantir.another
+    errors:
+      JavaCompilationFailed:
+        namespace: ConjureJavaOther
+        docs: Failed to compile Conjure definition to Java code.
+        code: INTERNAL

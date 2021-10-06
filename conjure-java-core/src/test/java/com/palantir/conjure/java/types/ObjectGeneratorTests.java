@@ -127,7 +127,9 @@ public final class ObjectGeneratorTests {
 
     @Test
     public void testConjureErrors() throws IOException {
-        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-errors.yml")));
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(
+                new File("src/test/resources/example-errors.yml"),
+                new File("src/test/resources/example-errors-other.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
                         ImmutableSet.of(new ErrorGenerator(Options.builder()
