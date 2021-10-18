@@ -50,7 +50,7 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
 * `incubating`: Describes an endpoint as incubating and likely to change. These endpoints are generated with an `@Incubating` annotation.
 * `server-request-context`: Opt into an additional [RequestContext](conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/RequestContext.java) parameter in conjure-undertow interfaces, which allows request metadata to be read, and additional arguments to be associated with the request log.
-* `server-async`: Opt into (#asynchronous-request-processing) in conjure-undertow. The generated interface returns a `ListenableFuture` of the defined return type, allowing processing to occur in the background without blocking the request thread.
+* `server-async`: Opt into [asynchronous request processing](#asynchronous-request-processing) in conjure-undertow. The generated interface returns a `ListenableFuture` of the defined return type, allowing processing to occur in the background without blocking the request thread.
 
 #### Endpoint Argument Tags
 
