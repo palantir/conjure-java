@@ -57,6 +57,12 @@ public interface Options {
         return false;
     }
 
+    /** Use the conjure immutable "Bytes" class over ByteBuffer. */
+    @Value.Default
+    default boolean useFieldMissingException() {
+        return false;
+    }
+
     /**
      * Instructs the {@link com.palantir.conjure.java.services.UndertowServiceGenerator} to generate service endpoints
      * returning {@link com.google.common.util.concurrent.ListenableFuture} to allow asynchronous request processing.
