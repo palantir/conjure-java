@@ -58,6 +58,15 @@ public interface Options {
     }
 
     /**
+     * Throw FieldMissingException instead of IllegalArgumentException if one or more fields are missing when
+     * constructing a type from a builder.
+     */
+    @Value.Default
+    default boolean useFieldMissingException() {
+        return false;
+    }
+
+    /**
      * Instructs the {@link com.palantir.conjure.java.services.UndertowServiceGenerator} to generate service endpoints
      * returning {@link com.google.common.util.concurrent.ListenableFuture} to allow asynchronous request processing.
      */
