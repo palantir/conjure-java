@@ -89,8 +89,27 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
         qosException.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
-        log.debug("Possible quality-of-service intervention", qosException);
+        if (qosExceptionHasAdditionalMetadata(qosException)) {
+            log.info("quality-of-service intervention", qosException);
+        } else {
+            log.debug("quality-of-service intervention", qosException);
+        }
         writeResponse(exchange, Optional.empty(), qosException.accept(QOS_EXCEPTION_STATUS_CODE));
+    }
+
+    /** Returns  true if {@link QosException} provides additional metadata and should be logged at {@code info}. */
+    private static boolean qosExceptionHasAdditionalMetadata(QosException qosException) {
+        try {
+            if (qosException.getCause() != null) {
+                return true;
+            }
+            Throwable[] suppressed = qosException.getSuppressed();
+            return suppressed != null && suppressed.length > 1;
+        } catch (Throwable t) {
+            // Fallback in case of unexpected bytecode manipulation (getCause or getSuppressed throws due to
+            // poor instrumentation/mocks)
+            return true;
+        }
     }
 
     // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.

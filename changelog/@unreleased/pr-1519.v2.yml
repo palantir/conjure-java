@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Log QosException at `info` (up from `debug`) when a cause or suppressed
+    throwable is present
+  links:
+  - https://github.com/palantir/conjure-java/pull/1519
