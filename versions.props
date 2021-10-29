@@ -35,7 +35,7 @@ org.junit.jupiter:* = 5.8.1
 org.junit.vintage:* = 5.8.1
 org.mockito:* = 4.0.0
 org.slf4j:* = 1.7.32
-com.palantir.goethe:* = 0.2.0
+com.palantir.goethe:* = 0.3.0
 com.github.stefanbirkner:system-lambda = 1.2.0
 
 # dependency-upgrader:OFF
