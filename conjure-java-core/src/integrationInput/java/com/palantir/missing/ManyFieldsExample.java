@@ -1,14 +1,15 @@
-package com.palantir.product;
+package com.palantir.missing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.api.errors.FieldMissingException;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -21,9 +22,9 @@ import java.util.Set;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
-@JsonDeserialize(builder = ManyFieldExample.Builder.class)
+@JsonDeserialize(builder = ManyFieldsExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class ManyFieldExample {
+public final class ManyFieldsExample {
     private final String string;
 
     private final int integer;
@@ -38,20 +39,17 @@ public final class ManyFieldExample {
 
     private final Map<String, String> map;
 
-    private final StringAliasExample alias;
-
     private int memoizedHashCode;
 
-    private ManyFieldExample(
+    private ManyFieldsExample(
             String string,
             int integer,
             double doubleValue,
             Optional<String> optionalItem,
             List<String> items,
             Set<String> set,
-            Map<String, String> map,
-            StringAliasExample alias) {
-        validateFields(string, optionalItem, items, set, map, alias);
+            Map<String, String> map) {
+        validateFields(string, optionalItem, items, set, map);
         this.string = string;
         this.integer = integer;
         this.doubleValue = doubleValue;
@@ -59,7 +57,6 @@ public final class ManyFieldExample {
         this.items = Collections.unmodifiableList(items);
         this.set = Collections.unmodifiableSet(set);
         this.map = Collections.unmodifiableMap(map);
-        this.alias = alias;
     }
 
     /**
@@ -120,30 +117,19 @@ public final class ManyFieldExample {
         return this.map;
     }
 
-    /**
-     * docs for alias field
-     * @deprecated This field is deprecated.
-     */
-    @JsonProperty("alias")
-    @Deprecated
-    public StringAliasExample getAlias() {
-        return this.alias;
-    }
-
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof ManyFieldExample && equalTo((ManyFieldExample) other));
+        return this == other || (other instanceof ManyFieldsExample && equalTo((ManyFieldsExample) other));
     }
 
-    private boolean equalTo(ManyFieldExample other) {
+    private boolean equalTo(ManyFieldsExample other) {
         return this.string.equals(other.string)
                 && this.integer == other.integer
                 && Double.doubleToLongBits(this.doubleValue) == Double.doubleToLongBits(other.doubleValue)
                 && this.optionalItem.equals(other.optionalItem)
                 && this.items.equals(other.items)
                 && this.set.equals(other.set)
-                && this.map.equals(other.map)
-                && this.alias.equals(other.alias);
+                && this.map.equals(other.map);
     }
 
     @Override
@@ -151,14 +137,7 @@ public final class ManyFieldExample {
         int result = memoizedHashCode;
         if (result == 0) {
             result = Objects.hash(
-                    this.string,
-                    this.integer,
-                    this.doubleValue,
-                    this.optionalItem,
-                    this.items,
-                    this.set,
-                    this.map,
-                    this.alias);
+                    this.string, this.integer, this.doubleValue, this.optionalItem, this.items, this.set, this.map);
             memoizedHashCode = result;
         }
         return result;
@@ -166,9 +145,8 @@ public final class ManyFieldExample {
 
     @Override
     public String toString() {
-        return "ManyFieldExample{string: " + string + ", integer: " + integer + ", doubleValue: " + doubleValue
-                + ", optionalItem: " + optionalItem + ", items: " + items + ", set: " + set + ", map: " + map
-                + ", alias: " + alias + '}';
+        return "ManyFieldsExample{string: " + string + ", integer: " + integer + ", doubleValue: " + doubleValue
+                + ", optionalItem: " + optionalItem + ", items: " + items + ", set: " + set + ", map: " + map + '}';
     }
 
     private static void validateFields(
@@ -176,17 +154,16 @@ public final class ManyFieldExample {
             Optional<String> optionalItem,
             List<String> items,
             Set<String> set,
-            Map<String, String> map,
-            StringAliasExample alias) {
+            Map<String, String> map) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, string, "string");
         missingFields = addFieldIfMissing(missingFields, optionalItem, "optionalItem");
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, set, "set");
         missingFields = addFieldIfMissing(missingFields, map, "map");
-        missingFields = addFieldIfMissing(missingFields, alias, "alias");
         if (missingFields != null) {
-            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -194,7 +171,7 @@ public final class ManyFieldExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(6);
+                missingFields = new ArrayList<>(5);
             }
             missingFields.add(fieldName);
         }
@@ -206,6 +183,7 @@ public final class ManyFieldExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
@@ -223,15 +201,13 @@ public final class ManyFieldExample {
 
         private Map<String, String> map = new LinkedHashMap<>();
 
-        private StringAliasExample alias;
-
         private boolean _integerInitialized = false;
 
         private boolean _doubleValueInitialized = false;
 
         private Builder() {}
 
-        public Builder from(ManyFieldExample other) {
+        public Builder from(ManyFieldsExample other) {
             checkNotBuilt();
             string(other.getString());
             integer(other.getInteger());
@@ -240,7 +216,6 @@ public final class ManyFieldExample {
             items(other.getItems());
             set(other.getSet());
             map(other.getMap());
-            alias(other.getAlias());
             return this;
         }
 
@@ -298,7 +273,7 @@ public final class ManyFieldExample {
         /**
          * docs for items field with exciting character$ used by javapoet.
          */
-        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
             this.items.clear();
@@ -327,7 +302,7 @@ public final class ManyFieldExample {
         /**
          * docs for set field
          */
-        @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "set", nulls = Nulls.SKIP)
         public Builder set(@Nonnull Iterable<String> set) {
             checkNotBuilt();
             this.set.clear();
@@ -357,7 +332,7 @@ public final class ManyFieldExample {
          * @deprecated deprecation documentation.
          */
         @Deprecated
-        @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "map", nulls = Nulls.SKIP)
         public Builder map(@Nonnull Map<String, String> map) {
             checkNotBuilt();
             this.map.clear();
@@ -385,24 +360,13 @@ public final class ManyFieldExample {
             return this;
         }
 
-        /**
-         * docs for alias field
-         * @deprecated This field is deprecated.
-         */
-        @Deprecated
-        @JsonSetter("alias")
-        public Builder alias(@Nonnull StringAliasExample alias) {
-            checkNotBuilt();
-            this.alias = Preconditions.checkNotNull(alias, "alias cannot be null");
-            return this;
-        }
-
         private void validatePrimitiveFieldsHaveBeenInitialized() {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(missingFields, _integerInitialized, "integer");
             missingFields = addFieldIfMissing(missingFields, _doubleValueInitialized, "doubleValue");
             if (missingFields != null) {
-                throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+                throw new SafeIllegalArgumentException(
+                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
             }
         }
 
@@ -417,11 +381,11 @@ public final class ManyFieldExample {
             return missingFields;
         }
 
-        public ManyFieldExample build() {
+        public ManyFieldsExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
-            return new ManyFieldExample(string, integer, doubleValue, optionalItem, items, set, map, alias);
+            return new ManyFieldsExample(string, integer, doubleValue, optionalItem, items, set, map);
         }
 
         private void checkNotBuilt() {

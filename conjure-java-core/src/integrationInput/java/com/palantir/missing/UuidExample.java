@@ -1,61 +1,63 @@
-package com.palantir.product;
+package com.palantir.missing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.api.errors.FieldMissingException;
-import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
-@JsonDeserialize(builder = SafeLongExample.Builder.class)
+@JsonDeserialize(builder = UuidExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class SafeLongExample {
-    private final SafeLong safeLongValue;
+public final class UuidExample {
+    private final UUID uuid;
 
-    private SafeLongExample(SafeLong safeLongValue) {
-        validateFields(safeLongValue);
-        this.safeLongValue = safeLongValue;
+    private UuidExample(UUID uuid) {
+        validateFields(uuid);
+        this.uuid = uuid;
     }
 
-    @JsonProperty("safeLongValue")
-    public SafeLong getSafeLongValue() {
-        return this.safeLongValue;
+    @JsonProperty("uuid")
+    public UUID getUuid() {
+        return this.uuid;
     }
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof SafeLongExample && equalTo((SafeLongExample) other));
+        return this == other || (other instanceof UuidExample && equalTo((UuidExample) other));
     }
 
-    private boolean equalTo(SafeLongExample other) {
-        return this.safeLongValue.equals(other.safeLongValue);
+    private boolean equalTo(UuidExample other) {
+        return this.uuid.equals(other.uuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.safeLongValue);
+        return Objects.hashCode(this.uuid);
     }
 
     @Override
     public String toString() {
-        return "SafeLongExample{safeLongValue: " + safeLongValue + '}';
+        return "UuidExample{uuid: " + uuid + '}';
     }
 
-    public static SafeLongExample of(SafeLong safeLongValue) {
-        return builder().safeLongValue(safeLongValue).build();
+    public static UuidExample of(UUID uuid) {
+        return builder().uuid(uuid).build();
     }
 
-    private static void validateFields(SafeLong safeLongValue) {
+    private static void validateFields(UUID uuid) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, safeLongValue, "safeLongValue");
+        missingFields = addFieldIfMissing(missingFields, uuid, "uuid");
         if (missingFields != null) {
-            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -75,30 +77,31 @@ public final class SafeLongExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
-        private SafeLong safeLongValue;
+        private UUID uuid;
 
         private Builder() {}
 
-        public Builder from(SafeLongExample other) {
+        public Builder from(UuidExample other) {
             checkNotBuilt();
-            safeLongValue(other.getSafeLongValue());
+            uuid(other.getUuid());
             return this;
         }
 
-        @JsonSetter("safeLongValue")
-        public Builder safeLongValue(@Nonnull SafeLong safeLongValue) {
+        @JsonSetter("uuid")
+        public Builder uuid(@Nonnull UUID uuid) {
             checkNotBuilt();
-            this.safeLongValue = Preconditions.checkNotNull(safeLongValue, "safeLongValue cannot be null");
+            this.uuid = Preconditions.checkNotNull(uuid, "uuid cannot be null");
             return this;
         }
 
-        public SafeLongExample build() {
+        public UuidExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new SafeLongExample(safeLongValue);
+            return new UuidExample(uuid);
         }
 
         private void checkNotBuilt() {

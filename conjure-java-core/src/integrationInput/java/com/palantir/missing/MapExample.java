@@ -1,12 +1,13 @@
-package com.palantir.product;
+package com.palantir.missing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.api.errors.FieldMissingException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -24,18 +25,12 @@ public final class MapExample {
 
     private final Map<String, Optional<String>> optionalItems;
 
-    private final Map<String, OptionalAlias> aliasOptionalItems;
-
     private int memoizedHashCode;
 
-    private MapExample(
-            Map<String, String> items,
-            Map<String, Optional<String>> optionalItems,
-            Map<String, OptionalAlias> aliasOptionalItems) {
-        validateFields(items, optionalItems, aliasOptionalItems);
+    private MapExample(Map<String, String> items, Map<String, Optional<String>> optionalItems) {
+        validateFields(items, optionalItems);
         this.items = Collections.unmodifiableMap(items);
         this.optionalItems = Collections.unmodifiableMap(optionalItems);
-        this.aliasOptionalItems = Collections.unmodifiableMap(aliasOptionalItems);
     }
 
     @JsonProperty("items")
@@ -48,27 +43,20 @@ public final class MapExample {
         return this.optionalItems;
     }
 
-    @JsonProperty("aliasOptionalItems")
-    public Map<String, OptionalAlias> getAliasOptionalItems() {
-        return this.aliasOptionalItems;
-    }
-
     @Override
     public boolean equals(Object other) {
         return this == other || (other instanceof MapExample && equalTo((MapExample) other));
     }
 
     private boolean equalTo(MapExample other) {
-        return this.items.equals(other.items)
-                && this.optionalItems.equals(other.optionalItems)
-                && this.aliasOptionalItems.equals(other.aliasOptionalItems);
+        return this.items.equals(other.items) && this.optionalItems.equals(other.optionalItems);
     }
 
     @Override
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.items, this.optionalItems, this.aliasOptionalItems);
+            result = Objects.hash(this.items, this.optionalItems);
             memoizedHashCode = result;
         }
         return result;
@@ -76,31 +64,20 @@ public final class MapExample {
 
     @Override
     public String toString() {
-        return "MapExample{items: " + items + ", optionalItems: " + optionalItems + ", aliasOptionalItems: "
-                + aliasOptionalItems + '}';
+        return "MapExample{items: " + items + ", optionalItems: " + optionalItems + '}';
     }
 
-    public static MapExample of(
-            Map<String, String> items,
-            Map<String, Optional<String>> optionalItems,
-            Map<String, OptionalAlias> aliasOptionalItems) {
-        return builder()
-                .items(items)
-                .optionalItems(optionalItems)
-                .aliasOptionalItems(aliasOptionalItems)
-                .build();
+    public static MapExample of(Map<String, String> items, Map<String, Optional<String>> optionalItems) {
+        return builder().items(items).optionalItems(optionalItems).build();
     }
 
-    private static void validateFields(
-            Map<String, String> items,
-            Map<String, Optional<String>> optionalItems,
-            Map<String, OptionalAlias> aliasOptionalItems) {
+    private static void validateFields(Map<String, String> items, Map<String, Optional<String>> optionalItems) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, optionalItems, "optionalItems");
-        missingFields = addFieldIfMissing(missingFields, aliasOptionalItems, "aliasOptionalItems");
         if (missingFields != null) {
-            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -108,7 +85,7 @@ public final class MapExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(3);
+                missingFields = new ArrayList<>(2);
             }
             missingFields.add(fieldName);
         }
@@ -120,6 +97,7 @@ public final class MapExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
@@ -127,19 +105,16 @@ public final class MapExample {
 
         private Map<String, Optional<String>> optionalItems = new LinkedHashMap<>();
 
-        private Map<String, OptionalAlias> aliasOptionalItems = new LinkedHashMap<>();
-
         private Builder() {}
 
         public Builder from(MapExample other) {
             checkNotBuilt();
             items(other.getItems());
             optionalItems(other.getOptionalItems());
-            aliasOptionalItems(other.getAliasOptionalItems());
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Map<String, String> items) {
             checkNotBuilt();
             this.items.clear();
@@ -179,32 +154,10 @@ public final class MapExample {
             return this;
         }
 
-        @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
-        public Builder aliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
-            checkNotBuilt();
-            this.aliasOptionalItems.clear();
-            this.aliasOptionalItems.putAll(
-                    Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
-            return this;
-        }
-
-        public Builder putAllAliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
-            checkNotBuilt();
-            this.aliasOptionalItems.putAll(
-                    Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
-            return this;
-        }
-
-        public Builder aliasOptionalItems(String key, OptionalAlias value) {
-            checkNotBuilt();
-            this.aliasOptionalItems.put(key, value);
-            return this;
-        }
-
         public MapExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new MapExample(items, optionalItems, aliasOptionalItems);
+            return new MapExample(items, optionalItems);
         }
 
         private void checkNotBuilt() {

@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.api.errors.FieldMissingException;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -92,8 +92,7 @@ public final class ExternalLongExample {
         missingFields = addFieldIfMissing(missingFields, optionalExternalLong, "optionalExternalLong");
         missingFields = addFieldIfMissing(missingFields, listExternalLong, "listExternalLong");
         if (missingFields != null) {
-            throw new SafeIllegalArgumentException(
-                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -186,8 +185,7 @@ public final class ExternalLongExample {
             List<String> missingFields = null;
             missingFields = addFieldIfMissing(missingFields, _externalLongInitialized, "externalLong");
             if (missingFields != null) {
-                throw new SafeIllegalArgumentException(
-                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
+                throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
             }
         }
 

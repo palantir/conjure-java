@@ -1,11 +1,12 @@
-package com.palantir.product;
+package com.palantir.missing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.api.errors.FieldMissingException;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -118,7 +119,8 @@ public final class ReservedKeyExample {
         missingFields = addFieldIfMissing(missingFields, interface_, "interface");
         missingFields = addFieldIfMissing(missingFields, fieldNameWithDashes, "field-name-with-dashes");
         if (missingFields != null) {
-            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -138,6 +140,7 @@ public final class ReservedKeyExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
@@ -225,7 +228,8 @@ public final class ReservedKeyExample {
             missingFields = addFieldIfMissing(missingFields, _memoizedHashCode_Initialized, "memoizedHashCode");
             missingFields = addFieldIfMissing(missingFields, _resultInitialized, "result");
             if (missingFields != null) {
-                throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+                throw new SafeIllegalArgumentException(
+                        "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
             }
         }
 

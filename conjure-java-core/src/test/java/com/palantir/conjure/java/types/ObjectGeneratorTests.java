@@ -19,7 +19,6 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
@@ -32,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -47,11 +47,12 @@ public final class ObjectGeneratorTests {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                        Set.of(new ObjectGenerator(Options.builder()
                                 .useImmutableBytes(true)
                                 .strictObjects(true)
                                 .nonNullCollections(true)
                                 .excludeEmptyOptionals(true)
+                                .useFieldMissingException(true)
                                 .build())))
                 .emit(def, tempDir);
 
@@ -64,8 +65,21 @@ public final class ObjectGeneratorTests {
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(
+                        Set.of(new ObjectGenerator(
                                 Options.builder().excludeEmptyOptionals(true).build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
+    public void testObjectGenerator_fieldMissingCompatibility() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-missing-field-types.yml")));
+        List<Path> files = new GenerationCoordinator(
+                MoreExecutors.directExecutor(),
+                Set.of(new ObjectGenerator(
+                        Options.builder().excludeEmptyOptionals(true).build())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -76,7 +90,7 @@ public final class ObjectGeneratorTests {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                        Set.of(new ObjectGenerator(Options.builder()
                                 .packagePrefix("test.prefix")
                                 .excludeEmptyOptionals(true)
                                 .build())))
@@ -91,7 +105,7 @@ public final class ObjectGeneratorTests {
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-staged-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                        Set.of(new ObjectGenerator(Options.builder()
                                 .useStagedBuilders(true)
                                 .excludeEmptyOptionals(true)
                                 .build())))
@@ -109,7 +123,7 @@ public final class ObjectGeneratorTests {
         File src = Files.createDirectory(tempDir.toPath().resolve("src")).toFile();
         new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                        Set.of(new ObjectGenerator(Options.builder()
                                 .useImmutableBytes(true)
                                 .excludeEmptyOptionals(true)
                                 .build())))
@@ -132,7 +146,7 @@ public final class ObjectGeneratorTests {
                 new File("src/test/resources/example-errors-other.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ErrorGenerator(Options.builder()
+                        Set.of(new ErrorGenerator(Options.builder()
                                 .useImmutableBytes(true)
                                 .excludeEmptyOptionals(true)
                                 .build())))

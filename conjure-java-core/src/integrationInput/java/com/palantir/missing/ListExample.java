@@ -1,13 +1,14 @@
-package com.palantir.product;
+package com.palantir.missing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.api.errors.FieldMissingException;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +28,6 @@ public final class ListExample {
 
     private final List<Optional<String>> optionalItems;
 
-    private final List<OptionalAlias> aliasOptionalItems;
-
     private final List<List<String>> nestedItems;
 
     private int memoizedHashCode;
@@ -38,14 +37,12 @@ public final class ListExample {
             List<Integer> primitiveItems,
             List<Double> doubleItems,
             List<Optional<String>> optionalItems,
-            List<OptionalAlias> aliasOptionalItems,
             List<List<String>> nestedItems) {
-        validateFields(items, primitiveItems, doubleItems, optionalItems, aliasOptionalItems, nestedItems);
+        validateFields(items, primitiveItems, doubleItems, optionalItems, nestedItems);
         this.items = Collections.unmodifiableList(items);
         this.primitiveItems = Collections.unmodifiableList(primitiveItems);
         this.doubleItems = Collections.unmodifiableList(doubleItems);
         this.optionalItems = Collections.unmodifiableList(optionalItems);
-        this.aliasOptionalItems = Collections.unmodifiableList(aliasOptionalItems);
         this.nestedItems = Collections.unmodifiableList(nestedItems);
     }
 
@@ -69,11 +66,6 @@ public final class ListExample {
         return this.optionalItems;
     }
 
-    @JsonProperty("aliasOptionalItems")
-    public List<OptionalAlias> getAliasOptionalItems() {
-        return this.aliasOptionalItems;
-    }
-
     @JsonProperty("nestedItems")
     public List<List<String>> getNestedItems() {
         return this.nestedItems;
@@ -89,7 +81,6 @@ public final class ListExample {
                 && this.primitiveItems.equals(other.primitiveItems)
                 && this.doubleItems.equals(other.doubleItems)
                 && this.optionalItems.equals(other.optionalItems)
-                && this.aliasOptionalItems.equals(other.aliasOptionalItems)
                 && this.nestedItems.equals(other.nestedItems);
     }
 
@@ -98,12 +89,7 @@ public final class ListExample {
         int result = memoizedHashCode;
         if (result == 0) {
             result = Objects.hash(
-                    this.items,
-                    this.primitiveItems,
-                    this.doubleItems,
-                    this.optionalItems,
-                    this.aliasOptionalItems,
-                    this.nestedItems);
+                    this.items, this.primitiveItems, this.doubleItems, this.optionalItems, this.nestedItems);
             memoizedHashCode = result;
         }
         return result;
@@ -112,8 +98,7 @@ public final class ListExample {
     @Override
     public String toString() {
         return "ListExample{items: " + items + ", primitiveItems: " + primitiveItems + ", doubleItems: " + doubleItems
-                + ", optionalItems: " + optionalItems + ", aliasOptionalItems: " + aliasOptionalItems
-                + ", nestedItems: " + nestedItems + '}';
+                + ", optionalItems: " + optionalItems + ", nestedItems: " + nestedItems + '}';
     }
 
     private static void validateFields(
@@ -121,17 +106,16 @@ public final class ListExample {
             List<Integer> primitiveItems,
             List<Double> doubleItems,
             List<Optional<String>> optionalItems,
-            List<OptionalAlias> aliasOptionalItems,
             List<List<String>> nestedItems) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, primitiveItems, "primitiveItems");
         missingFields = addFieldIfMissing(missingFields, doubleItems, "doubleItems");
         missingFields = addFieldIfMissing(missingFields, optionalItems, "optionalItems");
-        missingFields = addFieldIfMissing(missingFields, aliasOptionalItems, "aliasOptionalItems");
         missingFields = addFieldIfMissing(missingFields, nestedItems, "nestedItems");
         if (missingFields != null) {
-            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -139,7 +123,7 @@ public final class ListExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(6);
+                missingFields = new ArrayList<>(5);
             }
             missingFields.add(fieldName);
         }
@@ -151,6 +135,7 @@ public final class ListExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
@@ -162,8 +147,6 @@ public final class ListExample {
 
         private List<Optional<String>> optionalItems = new ArrayList<>();
 
-        private List<OptionalAlias> aliasOptionalItems = new ArrayList<>();
-
         private List<List<String>> nestedItems = new ArrayList<>();
 
         private Builder() {}
@@ -174,12 +157,11 @@ public final class ListExample {
             primitiveItems(other.getPrimitiveItems());
             doubleItems(other.getDoubleItems());
             optionalItems(other.getOptionalItems());
-            aliasOptionalItems(other.getAliasOptionalItems());
             nestedItems(other.getNestedItems());
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
             this.items.clear();
@@ -199,7 +181,7 @@ public final class ListExample {
             return this;
         }
 
-        @JsonSetter(value = "primitiveItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "primitiveItems", nulls = Nulls.SKIP)
         public Builder primitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
             this.primitiveItems.clear();
@@ -221,7 +203,7 @@ public final class ListExample {
             return this;
         }
 
-        @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
             this.doubleItems.clear();
@@ -265,31 +247,7 @@ public final class ListExample {
             return this;
         }
 
-        @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
-        public Builder aliasOptionalItems(@Nonnull Iterable<OptionalAlias> aliasOptionalItems) {
-            checkNotBuilt();
-            this.aliasOptionalItems.clear();
-            ConjureCollections.addAll(
-                    this.aliasOptionalItems,
-                    Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
-            return this;
-        }
-
-        public Builder addAllAliasOptionalItems(@Nonnull Iterable<OptionalAlias> aliasOptionalItems) {
-            checkNotBuilt();
-            ConjureCollections.addAll(
-                    this.aliasOptionalItems,
-                    Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
-            return this;
-        }
-
-        public Builder aliasOptionalItems(OptionalAlias aliasOptionalItems) {
-            checkNotBuilt();
-            this.aliasOptionalItems.add(aliasOptionalItems);
-            return this;
-        }
-
-        @JsonSetter(value = "nestedItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "nestedItems", nulls = Nulls.SKIP)
         public Builder nestedItems(@Nonnull Iterable<? extends List<String>> nestedItems) {
             checkNotBuilt();
             this.nestedItems.clear();
@@ -314,7 +272,7 @@ public final class ListExample {
         public ListExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new ListExample(items, primitiveItems, doubleItems, optionalItems, aliasOptionalItems, nestedItems);
+            return new ListExample(items, primitiveItems, doubleItems, optionalItems, nestedItems);
         }
 
         private void checkNotBuilt() {

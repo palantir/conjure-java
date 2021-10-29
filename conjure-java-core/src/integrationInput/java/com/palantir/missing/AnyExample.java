@@ -1,61 +1,62 @@
-package com.palantir.product;
+package com.palantir.missing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.api.errors.FieldMissingException;
-import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
-@JsonDeserialize(builder = SafeLongExample.Builder.class)
+@JsonDeserialize(builder = AnyExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class SafeLongExample {
-    private final SafeLong safeLongValue;
+public final class AnyExample {
+    private final Object any;
 
-    private SafeLongExample(SafeLong safeLongValue) {
-        validateFields(safeLongValue);
-        this.safeLongValue = safeLongValue;
+    private AnyExample(Object any) {
+        validateFields(any);
+        this.any = any;
     }
 
-    @JsonProperty("safeLongValue")
-    public SafeLong getSafeLongValue() {
-        return this.safeLongValue;
+    @JsonProperty("any")
+    public Object getAny() {
+        return this.any;
     }
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof SafeLongExample && equalTo((SafeLongExample) other));
+        return this == other || (other instanceof AnyExample && equalTo((AnyExample) other));
     }
 
-    private boolean equalTo(SafeLongExample other) {
-        return this.safeLongValue.equals(other.safeLongValue);
+    private boolean equalTo(AnyExample other) {
+        return this.any.equals(other.any);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.safeLongValue);
+        return Objects.hashCode(this.any);
     }
 
     @Override
     public String toString() {
-        return "SafeLongExample{safeLongValue: " + safeLongValue + '}';
+        return "AnyExample{any: " + any + '}';
     }
 
-    public static SafeLongExample of(SafeLong safeLongValue) {
-        return builder().safeLongValue(safeLongValue).build();
+    public static AnyExample of(Object any) {
+        return builder().any(any).build();
     }
 
-    private static void validateFields(SafeLong safeLongValue) {
+    private static void validateFields(Object any) {
         List<String> missingFields = null;
-        missingFields = addFieldIfMissing(missingFields, safeLongValue, "safeLongValue");
+        missingFields = addFieldIfMissing(missingFields, any, "any");
         if (missingFields != null) {
-            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -75,30 +76,31 @@ public final class SafeLongExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
-        private SafeLong safeLongValue;
+        private Object any;
 
         private Builder() {}
 
-        public Builder from(SafeLongExample other) {
+        public Builder from(AnyExample other) {
             checkNotBuilt();
-            safeLongValue(other.getSafeLongValue());
+            any(other.getAny());
             return this;
         }
 
-        @JsonSetter("safeLongValue")
-        public Builder safeLongValue(@Nonnull SafeLong safeLongValue) {
+        @JsonSetter("any")
+        public Builder any(@Nonnull Object any) {
             checkNotBuilt();
-            this.safeLongValue = Preconditions.checkNotNull(safeLongValue, "safeLongValue cannot be null");
+            this.any = Preconditions.checkNotNull(any, "any cannot be null");
             return this;
         }
 
-        public SafeLongExample build() {
+        public AnyExample build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new SafeLongExample(safeLongValue);
+            return new AnyExample(any);
         }
 
         private void checkNotBuilt() {

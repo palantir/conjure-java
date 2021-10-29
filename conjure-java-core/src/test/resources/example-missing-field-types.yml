@@ -1,0 +1,123 @@
+# don't forget to update conjure-python/src/test/resources/types/example-types.yml
+types:
+  imports:
+    ExampleExternalReference:
+      base-type: string
+      external:
+        java: test.api.ExampleExternalReference
+    ExternalLong:
+      base-type: safelong
+      external:
+        java: java.lang.Long
+    ExternalString:
+      base-type: string
+      external:
+        java: java.lang.String
+  definitions:
+    default-package: com.palantir.missing
+    objects:
+      StringExample:
+        fields:
+          string: string
+      IntegerExample:
+        fields:
+          integer: integer
+      SafeLongExample:
+        fields:
+          safeLongValue: safelong
+      RidExample:
+        fields:
+          ridValue: rid
+      BearerTokenExample:
+        fields:
+          bearerTokenValue: bearertoken
+      DateTimeExample:
+        fields:
+          datetime: datetime
+      DoubleExample:
+        fields:
+          doubleValue: double
+      BinaryExample:
+        fields:
+          binary: binary
+      OptionalExample:
+        fields:
+          item: optional<string>
+      ListExample:
+        fields:
+          items: list<string>
+          primitiveItems: list<integer>
+          doubleItems: list<double>
+          optionalItems: list<optional<string>>
+          nestedItems: list<list<string>>
+      CovariantListExample:
+        fields:
+          items: list<any>
+          externalItems: list<ExampleExternalReference>
+      SetExample:
+        fields:
+          items: set<string>
+          doubleItems: set<double>
+      MapExample:
+        fields:
+          items: map<string, string>
+          optionalItems: map<string, optional<string>>
+      EnumExample:
+        docs: |
+          This enumerates the numbers 1:2 also 100.
+        values:
+          - ONE
+          - value: TWO
+            deprecated: Prefer `ONE` where possible.
+          - value: ONE_HUNDRED
+            docs: Value of 100.
+            deprecated: One is easier to manage.
+      EnumFieldExample:
+        fields:
+          enum: EnumExample
+      BooleanExample:
+        fields:
+          coin: boolean
+      AnyExample:
+        fields:
+          any: any
+      UuidExample:
+        fields:
+          uuid: uuid
+      ManyFieldsExample:
+        fields:
+          string:
+            type: string
+            docs: docs for string field
+          integer:
+            type: integer
+            docs: docs for integer field
+          doubleValue:
+            type: double
+            docs: docs for doubleValue field
+          optionalItem:
+            type: optional<string>
+            docs: docs for optionalItem field
+          items:
+            type: list<string>
+            docs: docs for items field with exciting character$ used by javapoet.
+          set:
+            type: set<string>
+            docs: docs for set field
+          map:
+            type: map<string, string>
+            deprecated: deprecation documentation.
+      ReservedKeyExample:
+        fields:
+          package:
+            type: string
+          interface:
+            type: string
+          field-name-with-dashes:
+            type: string
+          primitve-field-name-with-dashes:
+            type: integer
+          memoizedHashCode:
+            type: integer
+          result:
+            type: integer

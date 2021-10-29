@@ -28,6 +28,7 @@ import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.api.errors.FieldMissingException;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
@@ -127,7 +128,7 @@ public final class BeanGenerator {
 
         if (!nonPrimitiveEnrichedFields.isEmpty()) {
             typeBuilder
-                    .addMethod(createValidateFields(nonPrimitiveEnrichedFields))
+                    .addMethod(createValidateFields(nonPrimitiveEnrichedFields, options))
                     .addMethod(createAddFieldIfMissing(nonPrimitiveEnrichedFields.size()));
         }
 
@@ -463,7 +464,7 @@ public final class BeanGenerator {
         return getterBuilder.build();
     }
 
-    private static MethodSpec createValidateFields(Collection<EnrichedField> fields) {
+    private static MethodSpec createValidateFields(Collection<EnrichedField> fields, Options options) {
         MethodSpec.Builder builder =
                 MethodSpec.methodBuilder("validateFields").addModifiers(Modifier.PRIVATE, Modifier.STATIC);
 
@@ -477,13 +478,22 @@ public final class BeanGenerator {
                     field.fieldName().get());
         }
 
-        builder.beginControlFlow("if (missingFields != null)")
-                .addStatement(
-                        "throw new $T(\"Some required fields have not been set\","
-                                + " $T.of(\"missingFields\", missingFields))",
-                        SafeIllegalArgumentException.class,
-                        SafeArg.class)
-                .endControlFlow();
+        if (options.useFieldMissingException()) {
+            builder.beginControlFlow("if (missingFields != null)")
+                    .addStatement(
+                            "throw new $T($T.of(\"missingFields\", missingFields))",
+                            FieldMissingException.class,
+                            SafeArg.class)
+                    .endControlFlow();
+        } else {
+            builder.beginControlFlow("if (missingFields != null)")
+                    .addStatement(
+                            "throw new $T(\"Some required fields have not been set\","
+                                    + " $T.of(\"missingFields\", missingFields))",
+                            SafeIllegalArgumentException.class,
+                            SafeArg.class)
+                    .endControlFlow();
+        }
         return builder.build();
     }
 

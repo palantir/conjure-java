@@ -1,13 +1,14 @@
-package com.palantir.product;
+package com.palantir.missing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.api.errors.FieldMissingException;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -74,7 +75,8 @@ public final class CovariantListExample {
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, externalItems, "externalItems");
         if (missingFields != null) {
-            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -94,6 +96,7 @@ public final class CovariantListExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
@@ -110,7 +113,7 @@ public final class CovariantListExample {
             return this;
         }
 
-        @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<?> items) {
             checkNotBuilt();
             this.items.clear();
@@ -130,7 +133,7 @@ public final class CovariantListExample {
             return this;
         }
 
-        @JsonSetter(value = "externalItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
+        @JsonSetter(value = "externalItems", nulls = Nulls.SKIP)
         public Builder externalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             checkNotBuilt();
             this.externalItems.clear();

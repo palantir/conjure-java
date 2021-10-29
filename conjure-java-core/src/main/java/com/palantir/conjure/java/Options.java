@@ -57,7 +57,7 @@ public interface Options {
         return false;
     }
 
-    /** Use the conjure immutable "Bytes" class over ByteBuffer. */
+    /** Throw FieldMissingException instead of IllegalArgumentException if required fields are missing in beans. */
     @Value.Default
     default boolean useFieldMissingException() {
         return false;

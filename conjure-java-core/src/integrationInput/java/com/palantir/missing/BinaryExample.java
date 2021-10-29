@@ -1,12 +1,14 @@
-package com.palantir.product;
+package com.palantir.missing;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.api.errors.FieldMissingException;
-import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,16 +18,16 @@ import javax.annotation.Nonnull;
 @JsonDeserialize(builder = BinaryExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class BinaryExample {
-    private final Bytes binary;
+    private final ByteBuffer binary;
 
-    private BinaryExample(Bytes binary) {
+    private BinaryExample(ByteBuffer binary) {
         validateFields(binary);
         this.binary = binary;
     }
 
     @JsonProperty("binary")
-    public Bytes getBinary() {
-        return this.binary;
+    public ByteBuffer getBinary() {
+        return this.binary.asReadOnlyBuffer();
     }
 
     @Override
@@ -47,15 +49,16 @@ public final class BinaryExample {
         return "BinaryExample{binary: " + binary + '}';
     }
 
-    public static BinaryExample of(Bytes binary) {
+    public static BinaryExample of(ByteBuffer binary) {
         return builder().binary(binary).build();
     }
 
-    private static void validateFields(Bytes binary) {
+    private static void validateFields(ByteBuffer binary) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, binary, "binary");
         if (missingFields != null) {
-            throw new FieldMissingException(SafeArg.of("missingFields", missingFields));
+            throw new SafeIllegalArgumentException(
+                    "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
         }
     }
 
@@ -75,10 +78,11 @@ public final class BinaryExample {
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class Builder {
         boolean _buildInvoked;
 
-        private Bytes binary;
+        private ByteBuffer binary;
 
         private Builder() {}
 
@@ -89,9 +93,11 @@ public final class BinaryExample {
         }
 
         @JsonSetter("binary")
-        public Builder binary(@Nonnull Bytes binary) {
+        public Builder binary(@Nonnull ByteBuffer binary) {
             checkNotBuilt();
-            this.binary = Preconditions.checkNotNull(binary, "binary cannot be null");
+            Preconditions.checkNotNull(binary, "binary cannot be null");
+            this.binary = ByteBuffer.allocate(binary.remaining()).put(binary.duplicate());
+            ((Buffer) this.binary).rewind();
             return this;
         }
 
