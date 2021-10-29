@@ -457,7 +457,6 @@ public final class BeanBuilderGenerator {
     }
 
     private MethodSpec createMapSetter(EnrichedField enriched) {
-        MapType type = enriched.conjureDef().getType().accept(TypeVisitor.MAP);
         return BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(enriched, typeMapper, builderClass)
                 .addCode(verifyNotBuilt())
                 .addStatement("this.$1N.put(key, value)", enriched.poetSpec().name)
