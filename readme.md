@@ -2,7 +2,7 @@
 <a href="https://autorelease.general.dmz.palantir.tech/palantir/conjure-java"><img src="https://img.shields.io/badge/Perform%20an-Autorelease-success.svg" alt="Autorelease"></a>
 </p>
 
-# Conjure-Java ![Bintray](https://img.shields.io/bintray/v/palantir/releases/conjure-java.svg) [![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg)](https://opensource.org/licenses/Apache-2.0)
+# Conjure-Java [![License](https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg)](https://opensource.org/licenses/Apache-2.0)
 
 _CLI to generate Java POJOs and interfaces from [Conjure API definitions](https://github.com/palantir/conjure)._
 
@@ -12,7 +12,7 @@ convenience, but users must assume responsibility for adapting their code when d
 
 ## Usage
 
-The recommended way to use conjure-java is via a build tool like [gradle-conjure](https://github.com/palantir/gradle-conjure). However, if you don't want to use gradle-conjure, there is also an executable which conforms to [RFC 002](https://palantir.github.io/conjure/#/docs/rfc/002-contract-for-conjure-generators),  published on [bintray](https://bintray.com/palantir/releases/conjure-java).
+The recommended way to use conjure-java is via a build tool like [gradle-conjure](https://github.com/palantir/gradle-conjure). However, if you don't want to use gradle-conjure, there is also an executable which conforms to [RFC 002](https://palantir.github.io/conjure/#/docs/rfc/002-contract-for-conjure-generators), published on [maven central](https://mvnrepository.com/artifact/com.palantir.conjure.java/conjure-java).
 
     Usage: conjure-java generate [...options] <input> <output>
 
@@ -176,7 +176,7 @@ public final class RecipeBookResource implements RecipeBookService {
 }
 ```
 
-Then in your server main method, [register your resource](https://www.dropwizard.io/1.3.5/docs/getting-started.html#registering-a-resource). For example, using Dropwizard:
+Then in your server main method, [register your resource](https://github.com/dropwizard/dropwizard/blob/caab32042c0f930d290b35248282c5623ea6cd82/docs/source/getting-started.rst#registering-a-resource). For example, using Dropwizard:
 
 ```diff
  public void run(YourConfiguration configuration, Environment environment) {
