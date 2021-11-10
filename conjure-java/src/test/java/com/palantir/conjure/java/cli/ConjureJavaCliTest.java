@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -172,7 +173,7 @@ public final class ConjureJavaCliTest {
         CommandLine.run(new ConjureJavaCli(), recordingStream, args);
         assertThat(new File(tempDir, "com/palantir/conjure/spec/ConjureDefinition.java").isFile())
                 .isTrue();
-        assertThat(baos.toString()).doesNotContain("[WARNING] Using deprecated ByteBuffer");
+        assertThat(baos.toString(StandardCharsets.UTF_8)).doesNotContain("[WARNING] Using deprecated ByteBuffer");
     }
 
     @Test

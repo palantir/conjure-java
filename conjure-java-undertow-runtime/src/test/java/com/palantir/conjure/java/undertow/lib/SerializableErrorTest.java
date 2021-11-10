@@ -26,6 +26,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 public final class SerializableErrorTest {
@@ -36,7 +37,7 @@ public final class SerializableErrorTest {
                 new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("foo", 42), UnsafeArg.of("bar", "boom")));
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(error, stream);
-        assertThat(stream.toString())
+        assertThat(stream.toString(StandardCharsets.UTF_8))
                 .isEqualTo("{\"errorCode\":\"INVALID_ARGUMENT\",\"errorName\":\"Default:InvalidArgument\","
                         + "\"errorInstanceId\":\""
                         + error.errorInstanceId()

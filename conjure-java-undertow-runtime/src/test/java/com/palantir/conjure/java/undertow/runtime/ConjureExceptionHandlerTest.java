@@ -35,6 +35,7 @@ import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -97,7 +98,7 @@ public final class ConjureExceptionHandlerTest {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
-        assertThat(response.body().string()).isEqualTo(stream.toString());
+        assertThat(response.body().string()).isEqualTo(stream.toString(StandardCharsets.UTF_8));
         // remote exceptions should result in 500 status
         assertThat(response.code()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
     }
@@ -119,7 +120,7 @@ public final class ConjureExceptionHandlerTest {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
-        assertThat(response.body().string()).isEqualTo(stream.toString());
+        assertThat(response.body().string()).isEqualTo(stream.toString(StandardCharsets.UTF_8));
         assertThat(response.code()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
     }
 
@@ -140,7 +141,7 @@ public final class ConjureExceptionHandlerTest {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
-        assertThat(response.body().string()).isEqualTo(stream.toString());
+        assertThat(response.body().string()).isEqualTo(stream.toString(StandardCharsets.UTF_8));
         assertThat(response.code()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
     }
 
