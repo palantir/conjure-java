@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Support tag-based per-endpoint asynchronous processing timeouts of
+    the form `server-async{timeout=5 minutes}`.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1549
