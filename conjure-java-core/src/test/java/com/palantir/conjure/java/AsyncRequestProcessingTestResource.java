@@ -53,6 +53,11 @@ final class AsyncRequestProcessingTestResource implements UndertowAsyncRequestPr
     }
 
     @Override
+    public ListenableFuture<String> delayFiveSecondTimeout(OptionalInt delayMillis) {
+        return delay(delayMillis);
+    }
+
+    @Override
     public ListenableFuture<Void> throwsInHandler() {
         throw new ServiceException(ErrorType.CONFLICT);
     }

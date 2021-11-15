@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -15,11 +16,13 @@ import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
@@ -38,6 +41,7 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return ImmutableList.of(
                 new DelayEndpoint(runtime, delegate),
+                new DelayFiveSecondTimeoutEndpoint(runtime, delegate),
                 new ThrowsInHandlerEndpoint(runtime, delegate),
                 new FailedFutureEndpoint(runtime, delegate),
                 new BinaryEndpoint(runtime, delegate),
@@ -88,6 +92,66 @@ public final class AsyncRequestProcessingTestServiceEndpoints implements Underto
         @Override
         public String name() {
             return "delay";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class DelayFiveSecondTimeoutEndpoint
+            implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("server-async{timeout=5 seconds}");
+
+        private final UndertowRuntime runtime;
+
+        private final UndertowAsyncRequestProcessingTestService delegate;
+
+        private final Serializer<String> serializer;
+
+        DelayFiveSecondTimeoutEndpoint(UndertowRuntime runtime, UndertowAsyncRequestProcessingTestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+        }
+
+        @Override
+        public Set<String> tags() {
+            return TAGS;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
+            OptionalInt delayMillis = runtime.plainSerDe().deserializeOptionalInteger(queryParams.get("delayMillis"));
+            ListenableFuture<String> result = delegate.delayFiveSecondTimeout(delayMillis);
+            runtime.async().register(result, this, Duration.ofMillis(/* 5 seconds */ 5000), exchange);
+        }
+
+        @Override
+        public void write(String result, HttpServerExchange exchange) throws IOException {
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/async/delay-5s-timeout";
+        }
+
+        @Override
+        public String serviceName() {
+            return "AsyncRequestProcessingTestService";
+        }
+
+        @Override
+        public String name() {
+            return "delayFiveSecondTimeout";
         }
 
         @Override

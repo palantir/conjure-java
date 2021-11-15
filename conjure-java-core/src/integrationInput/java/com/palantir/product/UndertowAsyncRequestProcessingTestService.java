@@ -14,6 +14,11 @@ public interface UndertowAsyncRequestProcessingTestService {
     ListenableFuture<String> delay(OptionalInt delayMillis);
 
     /**
+     * @apiNote {@code GET /async/delay-5s-timeout}
+     */
+    ListenableFuture<String> delayFiveSecondTimeout(OptionalInt delayMillis);
+
+    /**
      * @apiNote {@code GET /async/throws}
      */
     ListenableFuture<Void> throwsInHandler();

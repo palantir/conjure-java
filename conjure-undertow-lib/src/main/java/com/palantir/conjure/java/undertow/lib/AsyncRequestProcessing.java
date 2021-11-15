@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.lib;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
+import java.time.Duration;
 
 /**
  * Provides functionality to process requests asynchronously. This decouples the lifecycle of a request from the
@@ -28,5 +29,13 @@ public interface AsyncRequestProcessing {
 
     /** Registers a {@link ListenableFuture future} with the provided {@link HttpServerExchange request}. */
     <T> void register(ListenableFuture<T> future, ReturnValueWriter<T> returnValueWriter, HttpServerExchange exchange)
+            throws IOException;
+
+    /** Registers a {@link ListenableFuture future} with the provided {@link HttpServerExchange request}. */
+    <T> void register(
+            ListenableFuture<T> future,
+            ReturnValueWriter<T> returnValueWriter,
+            Duration timeout,
+            HttpServerExchange exchange)
             throws IOException;
 }

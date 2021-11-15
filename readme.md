@@ -273,6 +273,12 @@ conjure {
 }
 ```
 
+#### Timeouts
+
+By default, asynchronous request processing imposes a 3-minute timeout on the asynchronous component of the
+request, canceling the return future after this duration is exceeded. A custom duration may be used by
+extending the tag value using the form `server-async{timeout=5 minutes}`.
+
 #### Examples
 
 *Asynchronous request processing is helpful for endpoints which do not need a thread for the entirety of

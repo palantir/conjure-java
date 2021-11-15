@@ -23,6 +23,11 @@ public interface AsyncRequestProcessingTestService {
     String delay(@QueryParam("delayMillis") OptionalInt delayMillis);
 
     @GET
+    @Path("async/delay-5s-timeout")
+    @ClientEndpoint(method = "GET", path = "/async/delay-5s-timeout")
+    String delayFiveSecondTimeout(@QueryParam("delayMillis") OptionalInt delayMillis);
+
+    @GET
     @Path("async/throws")
     @ClientEndpoint(method = "GET", path = "/async/throws")
     void throwsInHandler();
@@ -47,6 +52,12 @@ public interface AsyncRequestProcessingTestService {
     @ClientEndpoint(method = "GET", path = "/async/delay")
     default String delay() {
         return delay(OptionalInt.empty());
+    }
+
+    @Deprecated
+    @ClientEndpoint(method = "GET", path = "/async/delay-5s-timeout")
+    default String delayFiveSecondTimeout() {
+        return delayFiveSecondTimeout(OptionalInt.empty());
     }
 
     @Deprecated

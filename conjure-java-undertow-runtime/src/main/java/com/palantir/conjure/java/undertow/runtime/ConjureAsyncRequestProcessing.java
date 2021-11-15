@@ -89,12 +89,26 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
         Preconditions.checkNotNull(future, "future");
         Preconditions.checkNotNull(returnValueWriter, "returnValueWriter");
         Preconditions.checkNotNull(exchange, "exchange");
+        register(future, returnValueWriter, timeout, exchange);
+    }
+
+    @Override
+    public <T> void register(
+            ListenableFuture<T> future,
+            ReturnValueWriter<T> returnValueWriter,
+            Duration requestAsyncTimeout,
+            HttpServerExchange exchange)
+            throws IOException {
+        Preconditions.checkNotNull(future, "future");
+        Preconditions.checkNotNull(returnValueWriter, "returnValueWriter");
+        Preconditions.checkNotNull(requestAsyncTimeout, "timeout");
+        Preconditions.checkNotNull(exchange, "exchange");
 
         if (future.isDone()) {
             // Optimization: write the completed result immediately without dispatching across threads.
             writeCompleteFuture(future, returnValueWriter, exchange);
         } else {
-            registerCallback(future, returnValueWriter, exchange);
+            registerCallback(future, returnValueWriter, requestAsyncTimeout, exchange);
         }
     }
 
@@ -112,7 +126,10 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
     }
 
     private <T> void registerCallback(
-            ListenableFuture<T> future, ReturnValueWriter<T> returnValueWriter, HttpServerExchange exchange) {
+            ListenableFuture<T> future,
+            ReturnValueWriter<T> returnValueWriter,
+            Duration requestAsyncTimeout,
+            HttpServerExchange exchange) {
         // Attach data to the exchange in order to reuse a stateless listener
         exchange.putAttachment(FUTURE, future);
         // If the exchange is complete we still follow this path to provide standard logging.
@@ -126,7 +143,10 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
         }
 
         XnioExecutor.Key timeoutKey = exchange.getIoThread()
-                .executeAfter(() -> future.cancel(INTERRUPT_ON_CANCEL), timeout.toMillis(), TimeUnit.MILLISECONDS);
+                .executeAfter(
+                        () -> future.cancel(INTERRUPT_ON_CANCEL),
+                        requestAsyncTimeout.toMillis(),
+                        TimeUnit.MILLISECONDS);
         future.addListener(timeoutKey::remove, DIRECT_EXECUTOR);
         // Dispatch the registration task, this accomplishes two things:
         // 1. Puts the exchange into a 'dispatched' state, otherwise the request will be terminated when
