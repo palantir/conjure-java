@@ -26,6 +26,7 @@ import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.UndertowTypeFunctions.AsyncRequestProcessingMetadata;
 import com.palantir.conjure.java.types.CodeBlocks;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -60,6 +61,7 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.humanreadabletypes.HumanReadableDuration;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.AnnotationSpec;
@@ -78,6 +80,7 @@ import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
@@ -446,11 +449,11 @@ final class UndertowServiceHandlerGenerator {
             methodArgs.add(CodeBlock.of("$N.contexts().createContext($N, this)", RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME));
         }
 
-        boolean async = UndertowTypeFunctions.isAsync(endpointDefinition, options);
-        if (async || endpointDefinition.getReturns().isPresent()) {
+        Optional<AsyncRequestProcessingMetadata> async = UndertowTypeFunctions.async(endpointDefinition, options);
+        if (async.isPresent() || endpointDefinition.getReturns().isPresent()) {
             code.addStatement(
                     "$1T $2N = $3N.$4L($5L)",
-                    async
+                    async.isPresent()
                             ? UndertowTypeFunctions.getAsyncReturnType(endpointDefinition, returnTypeMapper, options)
                             : returnTypeMapper.getClassName(
                                     endpointDefinition.getReturns().get()),
@@ -466,9 +469,22 @@ final class UndertowServiceHandlerGenerator {
                     endpointDefinition.getEndpointName(),
                     methodArgs.stream().collect(CodeBlock.joining(",")));
         }
-        if (UndertowTypeFunctions.isAsync(endpointDefinition, options)) {
-            code.add(CodeBlocks.statement(
-                    "$1N.async().register($2N, this, $3N)", RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME));
+        if (async.isPresent()) {
+            AsyncRequestProcessingMetadata metadata = async.get();
+            if (metadata.timeout().isPresent()) {
+                HumanReadableDuration timeout = metadata.timeout().get();
+                code.add(CodeBlocks.statement(
+                        "$N.async().register($N, this, $T.ofMillis(/* $L */ $L), $N)",
+                        RUNTIME_VAR_NAME,
+                        RESULT_VAR_NAME,
+                        Duration.class,
+                        timeout.toString(),
+                        timeout.toMilliseconds(),
+                        EXCHANGE_VAR_NAME));
+            } else {
+                code.add(CodeBlocks.statement(
+                        "$1N.async().register($2N, this, $3N)", RUNTIME_VAR_NAME, RESULT_VAR_NAME, EXCHANGE_VAR_NAME));
+            }
         } else {
             code.add(generateReturnValueCodeBlock(endpointDefinition, typeDefinitions));
         }

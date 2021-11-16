@@ -163,6 +163,14 @@ public final class AsyncRequestProcessingTest extends TestBase {
     }
 
     @Test
+    public void testFiveSecondTimeoutIsNotReached() throws IOException {
+        try (Response response = requestToDelayEndpointWithFiveSecondTimeout(OptionalInt.of(2000))) {
+            assertThat(response).matches(Response::isSuccessful);
+            assertThat(response.body().string()).isEqualTo("\"Completed after 2000ms\"");
+        }
+    }
+
+    @Test
     public void testExceptionThrownInHandlerMethod() throws IOException {
         try (Response response = client().newCall(new Request.Builder()
                         .get()
@@ -253,6 +261,21 @@ public final class AsyncRequestProcessingTest extends TestBase {
                 .url("http://localhost:"
                         + PORT
                         + "/async/delay"
+                        + (delay.isPresent() ? "?delayMillis=" + delay.getAsInt() : ""))
+                .build();
+        try {
+            return client().newCall(request).execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Response requestToDelayEndpointWithFiveSecondTimeout(OptionalInt delay) {
+        Request request = new Request.Builder()
+                .get()
+                .url("http://localhost:"
+                        + PORT
+                        + "/async/delay-5s-timeout"
                         + (delay.isPresent() ? "?delayMillis=" + delay.getAsInt() : ""))
                 .build();
         try {

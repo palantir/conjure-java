@@ -62,6 +62,7 @@ dependencies {
     implementation 'com.palantir.dialogue:dialogue-serde'
     implementation 'com.palantir.common:streams'
     implementation 'com.palantir.safe-logging:logger'
+    implementation 'com.palantir.human-readable-types:human-readable-types'
 
     testImplementation 'com.palantir.conjure:conjure-core'
     testImplementation project(':conjure-java-undertow-runtime')

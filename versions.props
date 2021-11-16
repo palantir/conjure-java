@@ -37,6 +37,7 @@ org.mockito:* = 4.0.0
 org.slf4j:* = 1.7.32
 com.palantir.goethe:* = 0.4.0
 com.github.stefanbirkner:system-lambda = 1.2.0
+com.palantir.human-readable-types:* = 1.5.0
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson
