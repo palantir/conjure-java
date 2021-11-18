@@ -20,10 +20,14 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.tracing.DeferredTracer;
 import io.undertow.server.ExchangeCompletionListener;
 import io.undertow.server.HttpHandler;
@@ -38,8 +42,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.xnio.XnioExecutor;
 
 /**
- *
- *
  * <h3>Thread Model</h3>
  *
  * <ul>
@@ -47,7 +49,7 @@ import org.xnio.XnioExecutor;
  *       it's executed, and what thread completes it.
  *   <li>All serialization and I/O occurs on the server task pool, matching synchronous conjure services.
  * </ul>
- *
+ * <p>
  * This requires us to move execution away from {@link ListenableFuture} callbacks as quickly as possible, because
  * they're controlled by a future created in the service implementation. This way service authors do not need to be
  * aware of the time it takes to serialize results and write them to clients, which can be time consuming depending on
@@ -142,12 +144,26 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
             exchange.addExchangeCompleteListener(COMPLETION_LISTENER);
         }
 
+        SettableFuture<T> timeoutOrResult = SettableFuture.create();
+        // Schedule a background task to mark the timeoutOrResult as timed out
         XnioExecutor.Key timeoutKey = exchange.getIoThread()
                 .executeAfter(
-                        () -> future.cancel(INTERRUPT_ON_CANCEL),
+                        () -> {
+                            timeoutOrResult.setException(new ServiceException(
+                                    ErrorType.TIMEOUT, SafeArg.of("timeoutAfter", requestAsyncTimeout)));
+                            future.cancel(INTERRUPT_ON_CANCEL);
+                        },
                         requestAsyncTimeout.toMillis(),
                         TimeUnit.MILLISECONDS);
-        future.addListener(timeoutKey::remove, DIRECT_EXECUTOR);
+        // When the original future completes mark the timeoutAsResult as done with the same result and cancel the
+        // scheduled timeout task
+        future.addListener(
+                () -> {
+                    timeoutOrResult.setFuture(future);
+                    timeoutKey.remove();
+                },
+                DIRECT_EXECUTOR);
+
         // Dispatch the registration task, this accomplishes two things:
         // 1. Puts the exchange into a 'dispatched' state, otherwise the request will be terminated when
         //    the endpoint HttpHandler returns. See Connectors.executeRootHandler for more information.
@@ -157,7 +173,7 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
         //    to execute.
         DeferredTracer tracer = new DeferredTracer("Undertow: Async Result");
         exchange.dispatch(() -> Futures.addCallback(
-                future,
+                timeoutOrResult,
                 new FutureCallback<T>() {
                     @Override
                     public void onSuccess(@Nullable T result) {

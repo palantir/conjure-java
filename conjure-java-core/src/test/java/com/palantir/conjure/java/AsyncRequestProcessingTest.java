@@ -158,7 +158,7 @@ public final class AsyncRequestProcessingTest extends TestBase {
         try (Response response = requestToDelayEndpoint(OptionalInt.of(2000))) {
             assertThat(response).matches(resp -> resp.code() == 500);
             SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
-            assertThat(error.errorCode()).isEqualTo("INTERNAL");
+            assertThat(error.errorCode()).isEqualTo("TIMEOUT");
         }
     }
 
