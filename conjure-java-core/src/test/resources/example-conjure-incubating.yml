@@ -1,0 +1,9 @@
+services:
+  IncubatingEndpoint:
+    name: Test Service
+    package: test.api.with.imports
+    base-path: /catalog
+    endpoints:
+      testIncubatingJavadoc:
+        http: GET /testIncubatingJavadoc
+        tags: ["To be removed after 1.2.x.", "incubating"]

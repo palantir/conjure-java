@@ -22,6 +22,9 @@ import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HttpMethod;
 import com.palantir.conjure.spec.HttpPath;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.commonmark.node.Paragraph;
 import org.commonmark.parser.Parser;
@@ -88,6 +91,21 @@ public final class Javadoc {
 
     public static String getDeprecatedJavadoc(Documentation deprecationDocs) {
         return "@deprecated " + render(deprecationDocs);
+    }
+
+    public static Optional<String> getIncubatingJavadoc(Set<String> endppointTags) {
+        Optional<String> incubatingMaxVersion = Optional.empty();
+        if (endppointTags.contains("incubating")) {
+            Pattern maxVersionPattern = Pattern.compile(".*To be removed (in|after) \\d+\\.\\d+\\.(\\d+|x).*");
+            incubatingMaxVersion = endppointTags.stream()
+                    .filter(t -> {
+                        Matcher matcher = maxVersionPattern.matcher(t);
+                        return matcher.matches();
+                    })
+                    .findFirst()
+                    .map(t -> "@Incubating " + t);
+        }
+        return incubatingMaxVersion;
     }
 
     private Javadoc() {}
