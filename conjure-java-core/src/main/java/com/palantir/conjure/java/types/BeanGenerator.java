@@ -297,6 +297,7 @@ public final class BeanGenerator {
             EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass) {
         List<MethodSpec> methodSpecs = new ArrayList<>();
         Type type = enriched.conjureDef().getType();
+        FieldDefinition definition = enriched.conjureDef();
 
         methodSpecs.add(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(enriched.fieldName()))
                 .addParameter(ParameterSpec.builder(
@@ -305,6 +306,10 @@ public final class BeanGenerator {
                                 JavaNameSanitizer.sanitize(enriched.fieldName()))
                         .addAnnotation(Nonnull.class)
                         .build())
+                .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
+                        .map(rendered -> CodeBlock.of("$L", rendered))
+                        .orElseGet(() -> CodeBlock.builder().build()))
+                .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(returnClass.box())
                 .build());
