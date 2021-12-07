@@ -35,6 +35,8 @@ public final class ServiceGenerators {
     private static Optional<String> getJavaDocInternal(EndpointDefinition endpointDef, boolean includeRequestLine) {
         Optional<String> depr = endpointDef.getDeprecated().map(Javadoc::getDeprecatedJavadoc);
 
+        Optional<String> incDoc = Javadoc.getIncubatingJavadoc(endpointDef.getTags());
+
         Optional<String> docs = endpointDef.getDocs().map(Javadoc::render);
 
         Optional<String> requestLine = Optional.empty();
@@ -52,6 +54,7 @@ public final class ServiceGenerators {
         requestLine.ifPresent(sb::append);
         params.ifPresent(sb::append);
         depr.ifPresent(sb::append);
+        incDoc.ifPresent(sb::append);
         return sb.length() > 0 ? Optional.of(sb.toString()) : Optional.empty();
     }
 
