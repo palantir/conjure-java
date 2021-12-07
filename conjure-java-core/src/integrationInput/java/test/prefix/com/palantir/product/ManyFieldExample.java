@@ -89,9 +89,11 @@ public final class ManyFieldExample {
 
     /**
      * docs for optionalItem field
+     * @deprecated an optional field is deprecated
      */
     @JsonProperty("optionalItem")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @Deprecated
     public Optional<String> getOptionalItem() {
         return this.optionalItem;
     }
@@ -281,7 +283,9 @@ public final class ManyFieldExample {
 
         /**
          * docs for optionalItem field
+         * @deprecated an optional field is deprecated
          */
+        @Deprecated
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
             checkNotBuilt();
@@ -291,7 +295,9 @@ public final class ManyFieldExample {
 
         /**
          * docs for optionalItem field
+         * @deprecated an optional field is deprecated
          */
+        @Deprecated
         public Builder optionalItem(@Nonnull String optionalItem) {
             checkNotBuilt();
             this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));

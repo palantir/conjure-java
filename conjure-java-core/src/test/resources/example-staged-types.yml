@@ -14,9 +14,24 @@ types:
           itemsMap: map<string, integer>
           optionalItem: optional<string>
           itemsSet: set<string>
+          itemsOld:
+            type: list<string>
+            deprecated: this list is deprecated
+          itemsMapOld:
+            type: map<string, integer>
+            deprecated: this map is deprecated
+          optionalItemOld:
+            type: optional<string>
+            deprecated: this optional is deprecated
+          itemsSetOld:
+            type: set<string>
+            deprecated: this set is deprecated
       MultipleOrderedStages:
         fields:
           token: OneField
           item: string
           items: set<safelong>
           mappedRids: map<rid, string>
+          optionalItem:
+            type: optional<OneField>
+            deprecated: this optional is deprecated

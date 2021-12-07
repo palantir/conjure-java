@@ -170,6 +170,7 @@ types:
             docs: docs for doubleValue field
           optionalItem:
             type: optional<string>
+            deprecated: an optional field is deprecated
             docs: docs for optionalItem field
           items:
             type: list<string>
