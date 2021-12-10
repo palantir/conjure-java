@@ -20,10 +20,14 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ErrorType.Code;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.lib.AsyncRequestProcessing;
 import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.tracing.DeferredTracer;
 import io.undertow.server.ExchangeCompletionListener;
 import io.undertow.server.HttpHandler;
@@ -31,6 +35,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.AttachmentKey;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -64,6 +69,9 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
     // running tasks, so the value passed to Future.cancel makes no difference.
     private static final boolean INTERRUPT_ON_CANCEL = false;
     private static final AttachmentKey<ListenableFuture<?>> FUTURE = AttachmentKey.create(ListenableFuture.class);
+    private static final AttachmentKey<Boolean> TIMED_OUT = AttachmentKey.create(Boolean.class);
+    private static final ErrorType ASYNC_REQUEST_PROCESSING_TIMEOUT =
+            ErrorType.create(Code.TIMEOUT, "Conjure:AsyncRequestProcessingTimeout");
     // If the request is ended before the future has completed, cancel the future to signal that work
     // should be stopped. This occurs when clients cancel requests or connections are closed.
     private static final ExchangeCompletionListener COMPLETION_LISTENER =
@@ -144,7 +152,12 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
 
         XnioExecutor.Key timeoutKey = exchange.getIoThread()
                 .executeAfter(
-                        () -> future.cancel(INTERRUPT_ON_CANCEL),
+                        () -> {
+                            // TIMED_OUT must be set prior to future.cancel, otherwise the FutureCallback
+                            // may be invoked before TIMED_OUT is set/visible.
+                            exchange.putAttachment(TIMED_OUT, Boolean.TRUE);
+                            future.cancel(INTERRUPT_ON_CANCEL);
+                        },
                         requestAsyncTimeout.toMillis(),
                         TimeUnit.MILLISECONDS);
         future.addListener(timeoutKey::remove, DIRECT_EXECUTOR);
@@ -168,10 +181,24 @@ final class ConjureAsyncRequestProcessing implements AsyncRequestProcessing {
                     @Override
                     public void onFailure(Throwable throwable) {
                         exchange.dispatch(wrapCallback(
-                                serverExchange -> exceptionHandler.handle(serverExchange, throwable), tracer));
+                                serverExchange -> exceptionHandler.handle(
+                                        serverExchange, getThrowable(serverExchange, throwable, requestAsyncTimeout)),
+                                tracer));
                     }
                 },
                 DIRECT_EXECUTOR));
+    }
+
+    /**
+     * Returns the provided {@link Throwable} unless the task has been canceled,
+     * in which case, additional information is provided.
+     */
+    private static Throwable getThrowable(HttpServerExchange exchange, Throwable failure, Duration timeout) {
+        if (failure instanceof CancellationException && Boolean.TRUE.equals(exchange.getAttachment(TIMED_OUT))) {
+            return new ServiceException(
+                    ASYNC_REQUEST_PROCESSING_TIMEOUT, failure, SafeArg.of("timeoutSeconds", timeout.getSeconds()));
+        }
+        return failure;
     }
 
     private HttpHandler wrapCallback(HttpHandler action, DeferredTracer tracer) {
