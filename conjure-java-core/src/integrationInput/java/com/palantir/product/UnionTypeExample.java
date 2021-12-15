@@ -109,6 +109,10 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new MapAliasWrapper(value));
     }
 
+    public static UnionTypeExample unknown(String type, Map<String, Object> value) {
+        return new UnionTypeExample(new UnknownWrapper(type, value));
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         return value.accept(visitor);
     }

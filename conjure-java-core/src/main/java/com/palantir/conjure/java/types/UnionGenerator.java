@@ -151,7 +151,7 @@ public final class UnionGenerator {
 
     private static List<MethodSpec> generateStaticFactories(
             TypeMapper typeMapper, ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
-        return memberTypeDefs.stream()
+        List<MethodSpec> staticFactories = memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
@@ -173,6 +173,25 @@ public final class UnionGenerator {
                     return builder.build();
                 })
                 .collect(Collectors.toList());
+        staticFactories.add(generateUnknownStaticFactory(unionClass));
+        return staticFactories;
+    }
+
+    private static MethodSpec generateUnknownStaticFactory(ClassName unionClass) {
+        String typeParam = "type";
+        String valueParam = "value";
+        return MethodSpec.methodBuilder("unknown")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(String.class, typeParam)
+                .addParameter(genericMapType(), valueParam)
+                .addStatement(
+                        "return new $T(new $T($L, $L))",
+                        unionClass,
+                        wrapperClass(unionClass, FieldName.of("unknown")),
+                        typeParam,
+                        valueParam)
+                .returns(unionClass)
+                .build();
     }
 
     private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass) {
@@ -635,7 +654,7 @@ public final class UnionGenerator {
     }
 
     private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass) {
-        ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
+        ParameterizedTypeName genericMapType = genericMapType();
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
         ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")
                 .addAnnotation(Nonnull.class)
@@ -709,6 +728,10 @@ public final class UnionGenerator {
                                 .map(fieldSpec -> FieldName.of(fieldSpec.name))
                                 .collect(Collectors.toList())));
         return typeBuilder.build();
+    }
+
+    private static ParameterizedTypeName genericMapType() {
+        return ParameterizedTypeName.get(Map.class, String.class, Object.class);
     }
 
     private static MethodSpec createWrapperAcceptMethod(

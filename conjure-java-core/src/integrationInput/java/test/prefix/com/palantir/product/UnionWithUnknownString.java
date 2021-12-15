@@ -38,6 +38,10 @@ public final class UnionWithUnknownString {
         return new UnionWithUnknownString(new Unknown_Wrapper(value));
     }
 
+    public static UnionWithUnknownString unknown(String type, Map<String, Object> value) {
+        return new UnionWithUnknownString(new UnknownWrapper(type, value));
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         return value.accept(visitor);
     }
