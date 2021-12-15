@@ -70,6 +70,10 @@ public final class SingleUnion {
 
         T visitUnknown(String unknownType);
 
+        default T visitUnknownWithValue(String type, Map<String, Object> _value) {
+            return visitUnknown(type);
+        }
+
         static <T> FooStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
         }
@@ -227,7 +231,7 @@ public final class SingleUnion {
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnknown(type);
+            return visitor.visitUnknownWithValue(type, value);
         }
 
         @Override

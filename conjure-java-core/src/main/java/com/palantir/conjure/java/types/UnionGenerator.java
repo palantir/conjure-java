@@ -71,9 +71,11 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class UnionGenerator {
 
+    private static final String TYPE_FIELD_NAME = "type";
     private static final String VALUE_FIELD_NAME = "value";
     private static final String UNKNOWN_WRAPPER_CLASS_NAME = "UnknownWrapper";
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
+    private static final String VISIT_UNKNOWN_WITH_VALUE_METHOD_NAME = "visitUnknownWithValue";
     private static final String COMPLETED = "completed_";
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
 
@@ -233,6 +235,13 @@ public final class UnionGenerator {
                 .addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                         .addParameter(UNKNOWN_MEMBER_TYPE, "unknownType")
+                        .returns(TYPE_VARIABLE)
+                        .build())
+                .addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_WITH_VALUE_METHOD_NAME)
+                        .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
+                        .addParameter(String.class, "type")
+                        .addParameter(genericMapType(), "_value")
+                        .addStatement("return $L($L)", VISIT_UNKNOWN_METHOD_NAME, "type")
                         .returns(TYPE_VARIABLE)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("builder")
@@ -717,8 +726,7 @@ public final class UnionGenerator {
                                 AnnotationSpec.builder(JsonAnySetter.class).build())
                         .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
                         .build())
-                .addMethod(
-                        createWrapperAcceptMethod(visitorClass, VISIT_UNKNOWN_METHOD_NAME, typeParameter.name, false))
+                .addMethod(createUnknownWrapperAcceptMethod(visitorClass))
                 .addMethod(MethodSpecs.createEquals(wrapperClass))
                 .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
@@ -752,6 +760,25 @@ public final class UnionGenerator {
                     .build());
         }
         return methodBuilder.build();
+    }
+
+    private static MethodSpec createUnknownWrapperAcceptMethod(ClassName visitorClass) {
+        ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
+        ParameterSpec visitor =
+                ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
+        return MethodSpec.methodBuilder("accept")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addTypeVariable(TYPE_VARIABLE)
+                .addParameter(visitor)
+                .addStatement(
+                        "return $N.$L($L, $L)",
+                        visitor,
+                        VISIT_UNKNOWN_WITH_VALUE_METHOD_NAME,
+                        TYPE_FIELD_NAME,
+                        VALUE_FIELD_NAME)
+                .returns(TYPE_VARIABLE)
+                .build();
     }
 
     private static ClassName wrapperClass(ClassName unionClass, FieldName memberTypeName) {
