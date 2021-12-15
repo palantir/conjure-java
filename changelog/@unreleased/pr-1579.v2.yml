@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Expose creating unknown unions and visiting their unknown values. This
+    will allow propagating unknown union types, for example.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1579
