@@ -16,6 +16,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Generated;
@@ -124,6 +125,9 @@ public final class Union {
 
         private Function<String, T> unknownVisitor;
 
+        private BiFunction<String, Map<String, Object>, T> unknownWithValueVisitor =
+                (type, _value) -> unknownVisitor.apply(type);
+
         @Override
         public BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor) {
             Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
@@ -153,6 +157,14 @@ public final class Union {
         }
 
         @Override
+        public Completed_StageVisitorBuilder<T> unknownWithValue(
+                @Nonnull BiFunction<String, Map<String, Object>, T> unknownWithValueVisitor) {
+            Preconditions.checkNotNull(unknownWithValueVisitor, "unknownWithValueVisitor cannot be null");
+            this.unknownWithValueVisitor = unknownWithValueVisitor;
+            return this;
+        }
+
+        @Override
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalArgumentException(
@@ -167,6 +179,7 @@ public final class Union {
             final Function<Long, T> bazVisitor = this.bazVisitor;
             final Function<String, T> fooVisitor = this.fooVisitor;
             final Function<String, T> unknownVisitor = this.unknownVisitor;
+            final BiFunction<String, Map<String, Object>, T> unknownWithValueVisitor = this.unknownWithValueVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitBar(int value) {
@@ -187,6 +200,11 @@ public final class Union {
                 public T visitUnknown(String value) {
                     return unknownVisitor.apply(value);
                 }
+
+                @Override
+                public T visitUnknownWithValue(String type, Map<String, Object> value) {
+                    return unknownWithValueVisitor.apply(type, value);
+                }
             };
         }
     }
@@ -205,6 +223,9 @@ public final class Union {
 
     public interface UnknownStageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+
+        Completed_StageVisitorBuilder<T> unknownWithValue(
+                @Nonnull BiFunction<String, Map<String, Object>, T> unknownWithValueVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
