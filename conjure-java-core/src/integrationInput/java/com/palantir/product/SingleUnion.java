@@ -16,6 +16,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -68,7 +69,7 @@ public final class SingleUnion {
     public interface Visitor<T> {
         T visitFoo(String value);
 
-        T visitUnknown(String unknownType);
+        T visitUnknown(String unknownType, Map<String, Object> unknownValue);
 
         static <T> FooStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -79,7 +80,7 @@ public final class SingleUnion {
             implements FooStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
         private Function<String, T> fooVisitor;
 
-        private Function<String, T> unknownVisitor;
+        private BiFunction<String, Map<String, Object>, T> unknownVisitor;
 
         @Override
         public UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor) {
@@ -89,7 +90,8 @@ public final class SingleUnion {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(
+                @Nonnull BiFunction<String, Map<String, Object>, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -97,7 +99,7 @@ public final class SingleUnion {
 
         @Override
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
-            this.unknownVisitor = unknownType -> {
+            this.unknownVisitor = (unknownType, _unknownValue) -> {
                 throw new SafeIllegalArgumentException(
                         "Unknown variant of the 'SingleUnion' union", SafeArg.of("unknownType", unknownType));
             };
@@ -107,7 +109,7 @@ public final class SingleUnion {
         @Override
         public Visitor<T> build() {
             final Function<String, T> fooVisitor = this.fooVisitor;
-            final Function<String, T> unknownVisitor = this.unknownVisitor;
+            final BiFunction<String, Map<String, Object>, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitFoo(String value) {
@@ -115,8 +117,8 @@ public final class SingleUnion {
                 }
 
                 @Override
-                public T visitUnknown(String value) {
-                    return unknownVisitor.apply(value);
+                public T visitUnknown(String unknownType, Map<String, Object> unknownValue) {
+                    return unknownVisitor.apply(unknownType, unknownValue);
                 }
             };
         }
@@ -127,7 +129,7 @@ public final class SingleUnion {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Map<String, Object>, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
@@ -227,7 +229,7 @@ public final class SingleUnion {
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnknown(type);
+            return visitor.visitUnknown(type, value);
         }
 
         @Override
