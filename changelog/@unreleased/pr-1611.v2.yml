@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Generate (behind a feature flag) union types with a new visitor interface which exposes the unknown value
+  links:
+  - https://github.com/palantir/conjure-java/pull/1611
