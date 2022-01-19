@@ -41,7 +41,7 @@ com.palantir.human-readable-types:* = 1.5.0
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson
-com.fasterxml.jackson.*:jackson-* = 2.12.3
+com.fasterxml.jackson.*:jackson-* = 2.13.1
 # Generator should be compatible with java 8
 com.palantir.javaformat:palantir-java-format = 1.1.0
 # dependency-upgrader:ON
