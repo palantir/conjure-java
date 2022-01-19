@@ -678,6 +678,7 @@ public final class UnionGenerator {
     }
 
     private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass) {
+        ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
         ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")
                 .addAnnotation(Nonnull.class)
@@ -692,7 +693,7 @@ public final class UnionGenerator {
         List<FieldSpec> fields = ImmutableList.of(
                 FieldSpec.builder(UNKNOWN_MEMBER_TYPE, "type", Modifier.PRIVATE, Modifier.FINAL)
                         .build(),
-                FieldSpec.builder(genericMapType(), VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                FieldSpec.builder(genericMapType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
@@ -707,7 +708,7 @@ public final class UnionGenerator {
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)
                         .addParameter(typeParameter)
-                        .addParameter(ParameterSpec.builder(genericMapType(), VALUE_FIELD_NAME)
+                        .addParameter(ParameterSpec.builder(genericMapType, VALUE_FIELD_NAME)
                                 .addAnnotation(Nonnull.class)
                                 .build())
                         .addStatement("$L", Expressions.requireNonNull(typeParameter.name, "type cannot be null"))
@@ -730,7 +731,7 @@ public final class UnionGenerator {
                         .addAnnotation(
                                 AnnotationSpec.builder(JsonAnyGetter.class).build())
                         .addStatement("return $L", VALUE_FIELD_NAME)
-                        .returns(genericMapType())
+                        .returns(genericMapType)
                         .build())
                 .addMethod(MethodSpec.methodBuilder("put")
                         .addModifiers(Modifier.PRIVATE)
@@ -751,10 +752,6 @@ public final class UnionGenerator {
                                 .map(fieldSpec -> FieldName.of(fieldSpec.name))
                                 .collect(Collectors.toList())));
         return typeBuilder.build();
-    }
-
-    private static ParameterizedTypeName genericMapType() {
-        return ParameterizedTypeName.get(Map.class, String.class, Object.class);
     }
 
     private static MethodSpec createWrapperAcceptMethod(
