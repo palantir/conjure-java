@@ -60,6 +60,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -72,6 +73,8 @@ import org.apache.commons.lang3.StringUtils;
 public final class UnionGenerator {
 
     private static final String VALUE_FIELD_NAME = "value";
+    public static final String UNKNOWN_TYPE_PARAM_NAME = "unknownType";
+    public static final String UNKNOWN_VALUE_PARAM_NAME = "unknownValue";
     private static final String UNKNOWN_WRAPPER_CLASS_NAME = "UnknownWrapper";
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
     private static final String COMPLETED = "completed_";
@@ -108,8 +111,8 @@ public final class UnionGenerator {
                 .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
                 .addMethod(generateAcceptVisitMethod(visitorClass))
                 .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
-                .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes))
-                .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes))
+                .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
+                .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
                 .addType(generateBase(baseClass, visitorClass, memberTypes))
                 .addTypes(generateWrapperClasses(
                         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
@@ -235,14 +238,14 @@ public final class UnionGenerator {
         if (options.unionsWithUnknownValues()) {
             visitorBuilder.addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addParameter(UNKNOWN_MEMBER_TYPE, "unknownType")
-                    .addParameter(genericMapType(), "unknownValue")
+                    .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
+                    .addParameter(genericMapType(), UNKNOWN_VALUE_PARAM_NAME)
                     .returns(TYPE_VARIABLE)
                     .build());
         } else {
             visitorBuilder.addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addParameter(UNKNOWN_MEMBER_TYPE, "unknownType")
+                    .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
                     .returns(TYPE_VARIABLE)
                     .build());
         }
@@ -290,15 +293,16 @@ public final class UnionGenerator {
             ClassName enclosingClass,
             ClassName visitor,
             ClassName visitorBuilder,
-            Map<FieldDefinition, TypeName> memberTypeMap) {
+            Map<FieldDefinition, TypeName> memberTypeMap,
+            Options options) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         return TypeSpec.classBuilder(visitorBuilder)
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addTypeVariable(visitResultType)
                 .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, memberTypeMap, visitResultType))
-                .addFields(allVisitorBuilderFields(memberTypeMap, visitResultType))
-                .addMethods(allVisitorBuilderSetters(enclosingClass, visitResultType, memberTypeMap))
-                .addMethod(builderBuildMethod(visitor, visitResultType, memberTypeMap))
+                .addFields(allVisitorBuilderFields(memberTypeMap, visitResultType, options))
+                .addMethods(allVisitorBuilderSetters(enclosingClass, visitResultType, memberTypeMap, options))
+                .addMethod(builderBuildMethod(visitor, visitResultType, memberTypeMap, options))
                 .build();
     }
 
@@ -313,7 +317,10 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<MethodSpec> allVisitorBuilderSetters(
-            ClassName enclosingClass, TypeName visitResultType, Map<FieldDefinition, TypeName> memberTypeMap) {
+            ClassName enclosingClass,
+            TypeName visitResultType,
+            Map<FieldDefinition, TypeName> memberTypeMap,
+            Options options) {
         ImmutableList.Builder<MethodSpec> setterMethods = ImmutableList.builder();
         Stream<NameTypePair> memberTypes = sortedStageNameTypePairs(memberTypeMap);
         PeekingIterator<NameTypePair> memberIter = Iterators.peekingIterator(memberTypes.iterator());
@@ -321,8 +328,8 @@ public final class UnionGenerator {
             NameTypePair pair = memberIter.next();
             String nextBuilderStage = memberIter.hasNext() ? memberIter.peek().memberName : COMPLETED;
             ClassName nextVisitorStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStage);
-            MethodSpec.Builder setterPrototype = visitorBuilderSetterPrototype(
-                    pair.memberName, pair.type, visitResultType, nextVisitorStageClassName);
+            MethodSpec.Builder setterPrototype =
+                    visitorBuilderSetterPrototype(pair, visitResultType, nextVisitorStageClassName, options);
             setterMethods.add(setterPrototype
                     .addModifiers(Modifier.PUBLIC)
                     .addAnnotation(Override.class)
@@ -335,16 +342,23 @@ public final class UnionGenerator {
                     .addStatement("return this")
                     .build());
             if (NameTypePair.UNKNOWN.equals(pair)) {
+                StringBuilder statement = new StringBuilder("this.$L = ");
+                if (options.unionsWithUnknownValues()) {
+                    statement.append("(unknownType, _unknownValue) ");
+                } else {
+                    statement.append("unknownType ");
+                }
+                statement.append("-> { throw new $T($S, $T.of($S, unknownType)); }");
                 setterMethods.add(visitorBuilderUnknownThrowPrototype(visitResultType, nextVisitorStageClassName)
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .addStatement(
-                                "this.$L = unknownType -> { throw new $T($S, $T.of($S, unknownType)); }",
+                                statement.toString(),
                                 visitorFieldName(pair.memberName),
                                 SafeIllegalArgumentException.class,
                                 "Unknown variant of the '" + enclosingClass.simpleName() + "' union",
                                 SafeArg.class,
-                                "unknownType")
+                                UNKNOWN_TYPE_PARAM_NAME)
                         .addStatement("return this")
                         .build());
             }
@@ -364,7 +378,10 @@ public final class UnionGenerator {
      * </pre>
      */
     private static MethodSpec builderBuildMethod(
-            ClassName visitorClass, TypeName visitResultType, Map<FieldDefinition, TypeName> memberTypeMap) {
+            ClassName visitorClass,
+            TypeName visitResultType,
+            Map<FieldDefinition, TypeName> memberTypeMap,
+            Options options) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("build")
                 .returns(ParameterizedTypeName.get(visitorClass, visitResultType))
                 .addModifiers(Modifier.PUBLIC)
@@ -374,14 +391,14 @@ public final class UnionGenerator {
         sortedStageNameTypePairs(memberTypeMap)
                 .forEach(nameType -> builder.addStatement(
                         "final $1T $2L = this.$2L",
-                        visitorObjectTypeName(nameType.type, visitResultType),
+                        visitorObjectTypeName(nameType, visitResultType, options),
                         visitorFieldName(nameType.memberName)));
 
         return builder.addStatement(
                         "return $L",
                         TypeSpec.anonymousClassBuilder("")
                                 .addSuperinterface(ParameterizedTypeName.get(visitorClass, visitResultType))
-                                .addMethods(allDelegatingVisitorMethods(memberTypeMap, visitResultType))
+                                .addMethods(allDelegatingVisitorMethods(memberTypeMap, visitResultType, options))
                                 .build())
                 .build();
     }
@@ -396,15 +413,28 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<MethodSpec> allDelegatingVisitorMethods(
-            Map<FieldDefinition, TypeName> memberTypeMap, TypeName visitorResultType) {
+            Map<FieldDefinition, TypeName> memberTypeMap, TypeName visitorResultType, Options options) {
         return sortedStageNameTypePairs(memberTypeMap)
-                .map(pair -> MethodSpec.methodBuilder(visitMethodName(pair.memberName))
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .addParameter(pair.type, variableName())
-                        .addStatement("return $L.apply($L)", visitorFieldName(pair.memberName), variableName())
-                        .returns(visitorResultType)
-                        .build())
+                .map(pair -> NameTypePair.UNKNOWN.equals(pair) && options.unionsWithUnknownValues()
+                        ? MethodSpec.methodBuilder(visitMethodName(pair.memberName))
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(Override.class)
+                                .addParameter(pair.type, UNKNOWN_TYPE_PARAM_NAME)
+                                .addParameter(genericMapType(), UNKNOWN_VALUE_PARAM_NAME)
+                                .addStatement(
+                                        "return $L.apply($L, $L)",
+                                        visitorFieldName(pair.memberName),
+                                        UNKNOWN_TYPE_PARAM_NAME,
+                                        UNKNOWN_VALUE_PARAM_NAME)
+                                .returns(visitorResultType)
+                                .build()
+                        : MethodSpec.methodBuilder(visitMethodName(pair.memberName))
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(Override.class)
+                                .addParameter(pair.type, variableName())
+                                .addStatement("return $L.apply($L)", visitorFieldName(pair.memberName), variableName())
+                                .returns(visitorResultType)
+                                .build())
                 .collect(Collectors.toList());
     }
 
@@ -428,10 +458,10 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<FieldSpec> allVisitorBuilderFields(
-            Map<FieldDefinition, TypeName> memberTypeMap, TypeVariableName visitResultType) {
+            Map<FieldDefinition, TypeName> memberTypeMap, TypeVariableName visitResultType, Options options) {
         return sortedStageNameTypePairs(memberTypeMap)
                 .map(field -> FieldSpec.builder(
-                                visitorObjectTypeName(field.type, visitResultType),
+                                visitorObjectTypeName(field, visitResultType, options),
                                 visitorFieldName(field.memberName),
                                 Modifier.PRIVATE)
                         .build())
@@ -445,15 +475,19 @@ public final class UnionGenerator {
 
     /**
      * Convenience method for generating a {@code Function<MemberType, T>} used for fields and setters of the
-     * visitor builder.
+     * visitor builder. Special-cases generation of a {@code BiFunction<String, Map<String, Object>, T>} in the case
+     * of the new unknownVisitor.
      */
-    private static TypeName visitorObjectTypeName(TypeName memberType, TypeName visitResultType) {
-        if (memberType.equals(TypeName.INT)) {
+    private static TypeName visitorObjectTypeName(NameTypePair member, TypeName visitResultType, Options options) {
+        if (member.type.equals(TypeName.INT)) {
             return ParameterizedTypeName.get(ClassName.get(IntFunction.class), visitResultType);
-        } else if (memberType.equals(TypeName.DOUBLE)) {
+        } else if (member.type.equals(TypeName.DOUBLE)) {
             return ParameterizedTypeName.get(ClassName.get(DoubleFunction.class), visitResultType);
+        } else if (NameTypePair.UNKNOWN.equals(member) && options.unionsWithUnknownValues()) {
+            return ParameterizedTypeName.get(
+                    ClassName.get(BiFunction.class), ClassName.get(String.class), genericMapType(), visitResultType);
         } else {
-            return ParameterizedTypeName.get(ClassName.get(Function.class), memberType.box(), visitResultType);
+            return ParameterizedTypeName.get(ClassName.get(Function.class), member.type.box(), visitResultType);
         }
     }
 
@@ -469,7 +503,10 @@ public final class UnionGenerator {
      * </pre>
      */
     private static List<TypeSpec> generateVisitorBuilderStageInterfaces(
-            ClassName enclosingClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes) {
+            ClassName enclosingClass,
+            ClassName visitorClass,
+            Map<FieldDefinition, TypeName> memberTypes,
+            Options options) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         List<TypeSpec> interfaces = new ArrayList<>();
         PeekingIterator<NameTypePair> memberIter =
@@ -481,8 +518,7 @@ public final class UnionGenerator {
             interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, member.memberName))
                     .addTypeVariable(visitResultType)
                     .addModifiers(Modifier.PUBLIC)
-                    .addMethod(visitorBuilderSetterPrototype(
-                                    member.memberName, member.type, visitResultType, nextStageClassName)
+                    .addMethod(visitorBuilderSetterPrototype(member, visitResultType, nextStageClassName, options)
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .build())
                     .addMethods(
@@ -523,10 +559,10 @@ public final class UnionGenerator {
      * </pre>
      */
     private static MethodSpec.Builder visitorBuilderSetterPrototype(
-            String memberName, TypeName memberType, TypeName visitResultType, ClassName nextBuilderStage) {
-        TypeName visitorObject = visitorObjectTypeName(memberType, visitResultType);
-        return MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
-                .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(memberName))
+            NameTypePair member, TypeName visitResultType, ClassName nextBuilderStage, Options options) {
+        TypeName visitorObject = visitorObjectTypeName(member, visitResultType, options);
+        return MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(member.memberName))
+                .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(member.memberName))
                         .addAnnotation(Nonnull.class)
                         .build())
                 .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
@@ -762,7 +798,7 @@ public final class UnionGenerator {
                 .addTypeVariable(TYPE_VARIABLE)
                 .addParameter(visitor)
                 .returns(TYPE_VARIABLE);
-        if (options.unionsWithUnknownValues()) {
+        if (visitMethodName.equals(VISIT_UNKNOWN_METHOD_NAME) && options.unionsWithUnknownValues()) {
             methodBuilder.addStatement("return $N.$L($L, $L)", visitor, visitMethodName, "type", VALUE_FIELD_NAME);
         } else {
             methodBuilder.addStatement("return $N.$L($L)", visitor, visitMethodName, valueName);
