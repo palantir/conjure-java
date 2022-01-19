@@ -56,6 +56,10 @@ public final class Union {
         return new Union(new BazWrapper(value));
     }
 
+    public static Union unknown(String type, Map<String, Object> value) {
+        return new Union(new UnknownWrapper(type, value));
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         return value.accept(visitor);
     }

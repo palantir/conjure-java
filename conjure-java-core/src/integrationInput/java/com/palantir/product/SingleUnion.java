@@ -38,6 +38,10 @@ public final class SingleUnion {
         return new SingleUnion(new FooWrapper(value));
     }
 
+    public static SingleUnion unknown(String type, Map<String, Object> value) {
+        return new SingleUnion(new UnknownWrapper(type, value));
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         return value.accept(visitor);
     }
