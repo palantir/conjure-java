@@ -42,6 +42,7 @@ import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
@@ -56,10 +57,13 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -120,7 +124,8 @@ public final class UnionGenerator {
                         unionClass.simpleName(),
                         fields.stream()
                                 .map(fieldSpec -> FieldName.of(fieldSpec.name))
-                                .collect(Collectors.toList())));
+                                .collect(Collectors.toList())))
+                .addMethod(generateAllKnownTypes(typeDef.getUnion()));
 
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -183,13 +188,18 @@ public final class UnionGenerator {
         return MethodSpec.methodBuilder("unknown")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(String.class, typeParam)
-                .addParameter(genericMapType(), valueParam)
+                .addParameter(Object.class, valueParam)
+                .addStatement(
+                        "$T.checkArgument(!allKnownTypes().contains($L), $S)",
+                        Preconditions.class,
+                        typeParam,
+                        "Unknown type cannot be created as the provided type is known")
                 .addStatement(
                         "return new $T(new $T($L, $L))",
                         unionClass,
                         wrapperClass(unionClass, FieldName.of("unknown")),
                         typeParam,
-                        valueParam)
+                        CodeBlock.of("$T.singletonMap($L, $L)", Collections.class, typeParam, valueParam))
                 .returns(unionClass)
                 .build();
     }
@@ -219,6 +229,20 @@ public final class UnionGenerator {
                 .returns(TypeName.BOOLEAN)
                 .addStatement("$L", codeBuilder.build())
                 .build();
+    }
+
+    private static MethodSpec generateAllKnownTypes(List<FieldDefinition> memberTypeDefs) {
+        String setName = "types";
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("allKnownTypes")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .returns(ParameterizedTypeName.get(ClassName.get(Set.class), ClassName.get(String.class)))
+                .addStatement("$T<$T> $L = new $T<>()", Set.class, String.class, setName, HashSet.class);
+        memberTypeDefs.forEach(memberTypeDef -> {
+            String memberName = sanitizeUnknown(memberTypeDef.getFieldName()).get();
+            builder.addStatement("$L.add($S)", setName, memberName);
+        });
+        builder.addStatement("return $L", setName);
+        return builder.build();
     }
 
     private static TypeSpec generateVisitor(

@@ -14,7 +14,9 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -109,8 +111,10 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new MapAliasWrapper(value));
     }
 
-    public static UnionTypeExample unknown(String type, Map<String, Object> value) {
-        return new UnionTypeExample(new UnknownWrapper(type, value));
+    public static UnionTypeExample unknown(String type, Object value) {
+        Preconditions.checkArgument(
+                !allKnownTypes().contains(type), "Unknown type cannot be created as the provided type is known");
+        return new UnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
     }
 
     public <T> T accept(Visitor<T> visitor) {
@@ -134,6 +138,27 @@ public final class UnionTypeExample {
     @Override
     public String toString() {
         return "UnionTypeExample{value: " + value + '}';
+    }
+
+    private static Set<String> allKnownTypes() {
+        Set<String> types = new HashSet<>();
+        types.add("stringExample");
+        types.add("thisFieldIsAnInteger");
+        types.add("alsoAnInteger");
+        types.add("if");
+        types.add("new");
+        types.add("interface");
+        types.add("completed");
+        types.add("unknown_");
+        types.add("optional");
+        types.add("list");
+        types.add("set");
+        types.add("map");
+        types.add("optionalAlias");
+        types.add("listAlias");
+        types.add("setAlias");
+        types.add("mapAlias");
+        return types;
     }
 
     public interface Visitor<T> {
