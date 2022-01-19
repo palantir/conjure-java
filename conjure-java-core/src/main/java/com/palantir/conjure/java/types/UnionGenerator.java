@@ -107,12 +107,13 @@ public final class UnionGenerator {
                 .addMethod(generateGetValue(baseClass))
                 .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
                 .addMethod(generateAcceptVisitMethod(visitorClass))
-                .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass))
+                .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
                 .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes))
                 .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes))
                 .addType(generateBase(baseClass, visitorClass, memberTypes))
-                .addTypes(generateWrapperClasses(typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion()))
-                .addType(generateUnknownWrapper(baseClass, visitorClass))
+                .addTypes(generateWrapperClasses(
+                        typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
+                .addType(generateUnknownWrapper(baseClass, visitorClass, options))
                 .addMethod(generateEquals(unionClass))
                 .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
@@ -225,16 +226,27 @@ public final class UnionGenerator {
             ClassName unionClass,
             ClassName visitorClass,
             Map<FieldDefinition, TypeName> memberTypes,
-            ClassName visitorBuilderClass) {
-        return TypeSpec.interfaceBuilder(visitorClass)
+            ClassName visitorBuilderClass,
+            Options options) {
+        TypeSpec.Builder visitorBuilder = TypeSpec.interfaceBuilder(visitorClass)
                 .addModifiers(Modifier.PUBLIC)
                 .addTypeVariable(TYPE_VARIABLE)
-                .addMethods(generateMemberVisitMethods(memberTypes))
-                .addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
-                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                        .addParameter(UNKNOWN_MEMBER_TYPE, "unknownType")
-                        .returns(TYPE_VARIABLE)
-                        .build())
+                .addMethods(generateMemberVisitMethods(memberTypes));
+        if (options.unionsWithUnknownValues()) {
+            visitorBuilder.addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                    .addParameter(UNKNOWN_MEMBER_TYPE, "unknownType")
+                    .addParameter(genericMapType(), "unknownValue")
+                    .returns(TYPE_VARIABLE)
+                    .build());
+        } else {
+            visitorBuilder.addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                    .addParameter(UNKNOWN_MEMBER_TYPE, "unknownType")
+                    .returns(TYPE_VARIABLE)
+                    .build());
+        }
+        visitorBuilder
                 .addMethod(MethodSpec.methodBuilder("builder")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .addTypeVariable(TYPE_VARIABLE)
@@ -249,6 +261,7 @@ public final class UnionGenerator {
                                 TYPE_VARIABLE))
                         .build())
                 .build();
+        return visitorBuilder.build();
     }
 
     private static List<MethodSpec> generateMemberVisitMethods(Map<FieldDefinition, TypeName> memberTypes) {
@@ -572,7 +585,8 @@ public final class UnionGenerator {
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             ClassName baseClass,
             ClassName visitorClass,
-            List<FieldDefinition> memberTypeDefs) {
+            List<FieldDefinition> memberTypeDefs,
+            Options options) {
         return memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
@@ -627,7 +641,11 @@ public final class UnionGenerator {
                                     .returns(memberType)
                                     .build())
                             .addMethod(createWrapperAcceptMethod(
-                                    visitorClass, visitMethodName(memberName.get()), VALUE_FIELD_NAME, isDeprecated))
+                                    visitorClass,
+                                    visitMethodName(memberName.get()),
+                                    VALUE_FIELD_NAME,
+                                    isDeprecated,
+                                    options))
                             .addMethod(MethodSpecs.createEquals(wrapperClass))
                             .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
                             .addMethod(MethodSpecs.createHashCode(fields))
@@ -653,7 +671,7 @@ public final class UnionGenerator {
         return builder.build();
     }
 
-    private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass) {
+    private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass, Options options) {
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
         ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")
                 .addAnnotation(Nonnull.class)
@@ -716,8 +734,8 @@ public final class UnionGenerator {
                                 AnnotationSpec.builder(JsonAnySetter.class).build())
                         .addStatement("$L.put(key, val)", VALUE_FIELD_NAME)
                         .build())
-                .addMethod(
-                        createWrapperAcceptMethod(visitorClass, VISIT_UNKNOWN_METHOD_NAME, typeParameter.name, false))
+                .addMethod(createWrapperAcceptMethod(
+                        visitorClass, VISIT_UNKNOWN_METHOD_NAME, typeParameter.name, false, options))
                 .addMethod(MethodSpecs.createEquals(wrapperClass))
                 .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
@@ -734,7 +752,7 @@ public final class UnionGenerator {
     }
 
     private static MethodSpec createWrapperAcceptMethod(
-            ClassName visitorClass, String visitMethodName, String valueName, boolean isDeprecated) {
+            ClassName visitorClass, String visitMethodName, String valueName, boolean isDeprecated, Options options) {
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
         ParameterSpec visitor =
                 ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
@@ -743,8 +761,12 @@ public final class UnionGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addTypeVariable(TYPE_VARIABLE)
                 .addParameter(visitor)
-                .addStatement("return $N.$L($L)", visitor, visitMethodName, valueName)
                 .returns(TYPE_VARIABLE);
+        if (options.unionsWithUnknownValues()) {
+            methodBuilder.addStatement("return $N.$L($L, $L)", visitor, visitMethodName, "type", VALUE_FIELD_NAME);
+        } else {
+            methodBuilder.addStatement("return $N.$L($L)", visitor, visitMethodName, valueName);
+        }
         if (isDeprecated) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
                     .addMember("value", "$S", "deprecation")
