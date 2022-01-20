@@ -198,7 +198,7 @@ public final class UnionTypeExample {
 
         T visitMapAlias(MapAliasExample value);
 
-        T visitUnknown(String unknownType, Map<String, Object> unknownValue);
+        T visitUnknown(String unknownType, Object unknownValue);
 
         static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -256,7 +256,7 @@ public final class UnionTypeExample {
 
         private IntFunction<T> unknown_Visitor;
 
-        private BiFunction<String, Map<String, Object>, T> unknownVisitor;
+        private BiFunction<String, Object, T> unknownVisitor;
 
         @Override
         public CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
@@ -373,8 +373,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(
-                @Nonnull BiFunction<String, Map<String, Object>, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -407,7 +406,7 @@ public final class UnionTypeExample {
             final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
             final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
             final IntFunction<T> unknown_Visitor = this.unknown_Visitor;
-            final BiFunction<String, Map<String, Object>, T> unknownVisitor = this.unknownVisitor;
+            final BiFunction<String, Object, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitAlsoAnInteger(int value) {
@@ -490,7 +489,7 @@ public final class UnionTypeExample {
                 }
 
                 @Override
-                public T visitUnknown(String unknownType, Map<String, Object> unknownValue) {
+                public T visitUnknown(String unknownType, Object unknownValue) {
                     return unknownVisitor.apply(unknownType, unknownValue);
                 }
             };
@@ -563,7 +562,7 @@ public final class UnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Map<String, Object>, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }

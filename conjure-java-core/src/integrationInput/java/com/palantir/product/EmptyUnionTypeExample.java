@@ -69,7 +69,7 @@ public final class EmptyUnionTypeExample {
     }
 
     public interface Visitor<T> {
-        T visitUnknown(String unknownType, Map<String, Object> unknownValue);
+        T visitUnknown(String unknownType, Object unknownValue);
 
         static <T> UnknownStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -78,11 +78,10 @@ public final class EmptyUnionTypeExample {
 
     private static final class VisitorBuilder<T>
             implements UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
-        private BiFunction<String, Map<String, Object>, T> unknownVisitor;
+        private BiFunction<String, Object, T> unknownVisitor;
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(
-                @Nonnull BiFunction<String, Map<String, Object>, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -99,10 +98,10 @@ public final class EmptyUnionTypeExample {
 
         @Override
         public Visitor<T> build() {
-            final BiFunction<String, Map<String, Object>, T> unknownVisitor = this.unknownVisitor;
+            final BiFunction<String, Object, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
-                public T visitUnknown(String unknownType, Map<String, Object> unknownValue) {
+                public T visitUnknown(String unknownType, Object unknownValue) {
                     return unknownVisitor.apply(unknownType, unknownValue);
                 }
             };
@@ -110,7 +109,7 @@ public final class EmptyUnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Map<String, Object>, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }

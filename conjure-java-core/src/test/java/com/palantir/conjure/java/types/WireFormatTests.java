@@ -647,7 +647,7 @@ public final class WireFormatTests {
         }
 
         @Override
-        public Integer visitUnknown(String _unknownType, Map<String, Object> _unknownValue) {
+        public Integer visitUnknown(String _unknownType, Object _unknownValue) {
             return 0;
         }
 
