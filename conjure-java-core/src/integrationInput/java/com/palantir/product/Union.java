@@ -410,7 +410,7 @@ public final class Union {
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnknown(type, value);
+            return visitor.visitUnknown(type, value.get(type));
         }
 
         @Override

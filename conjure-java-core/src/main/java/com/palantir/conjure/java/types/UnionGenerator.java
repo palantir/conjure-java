@@ -821,7 +821,12 @@ public final class UnionGenerator {
                 .addParameter(visitor)
                 .returns(TYPE_VARIABLE);
         if (visitMethodName.equals(VISIT_UNKNOWN_METHOD_NAME) && options.unionsWithUnknownValues()) {
-            methodBuilder.addStatement("return $N.$L($L, $L)", visitor, visitMethodName, "type", VALUE_FIELD_NAME);
+            methodBuilder.addStatement(
+                    "return $N.$L($L, $L)",
+                    visitor,
+                    visitMethodName,
+                    "type",
+                    CodeBlock.of("$L.get($L)", VALUE_FIELD_NAME, "type"));
         } else {
             methodBuilder.addStatement("return $N.$L($L)", visitor, visitMethodName, valueName);
         }
