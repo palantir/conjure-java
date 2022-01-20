@@ -13,9 +13,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -57,8 +60,10 @@ public final class Union {
         return new Union(new BazWrapper(value));
     }
 
-    public static Union unknown(String type, Map<String, Object> value) {
-        return new Union(new UnknownWrapper(type, value));
+    public static Union unknown(String type, Object value) {
+        Preconditions.checkArgument(
+                !allKnownTypes().contains(type), "Unknown type cannot be created as the provided type is known");
+        return new Union(new UnknownWrapper(type, Collections.singletonMap(type, value)));
     }
 
     public <T> T accept(Visitor<T> visitor) {
@@ -82,6 +87,14 @@ public final class Union {
     @Override
     public String toString() {
         return "Union{value: " + value + '}';
+    }
+
+    private static Set<String> allKnownTypes() {
+        Set<String> types = new HashSet<>();
+        types.add("foo");
+        types.add("bar");
+        types.add("baz");
+        return types;
     }
 
     public interface Visitor<T> {
