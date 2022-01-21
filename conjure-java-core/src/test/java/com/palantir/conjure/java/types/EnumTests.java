@@ -63,7 +63,7 @@ public class EnumTests {
         Set<EnumExample.Value> valuesFromEnum = Arrays.stream(EnumExample.Value.values())
                 .filter(v -> !v.equals(EnumExample.Value.UNKNOWN))
                 .collect(Collectors.toSet());
-        assertThat(valuesFromClass).isEqualTo(valuesFromEnum);
+        assertThat(valuesFromClass).containsExactlyInAnyOrderElementsOf(valuesFromEnum);
     }
 
     private enum Visitor implements EnumExample.Visitor<String> {
