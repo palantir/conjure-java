@@ -12,10 +12,8 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -35,9 +33,10 @@ public final class EmptyUnionTypeExample {
     }
 
     public static EmptyUnionTypeExample unknown(String type, Object value) {
-        Preconditions.checkArgument(
-                !allKnownTypes().contains(type), "Unknown type cannot be created as the provided type is known");
-        return new EmptyUnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        switch (Preconditions.checkNotNull(type, "Type is required")) {
+            default:
+                return new EmptyUnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        }
     }
 
     public <T> T accept(Visitor<T> visitor) {
@@ -61,11 +60,6 @@ public final class EmptyUnionTypeExample {
     @Override
     public String toString() {
         return "EmptyUnionTypeExample{value: " + value + '}';
-    }
-
-    private static Set<String> allKnownTypes() {
-        Set<String> types = new HashSet<>();
-        return types;
     }
 
     public interface Visitor<T> {

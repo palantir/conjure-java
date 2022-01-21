@@ -15,10 +15,8 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -42,9 +40,13 @@ public final class SingleUnion {
     }
 
     public static SingleUnion unknown(String type, Object value) {
-        Preconditions.checkArgument(
-                !allKnownTypes().contains(type), "Unknown type cannot be created as the provided type is known");
-        return new SingleUnion(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        switch (Preconditions.checkNotNull(type, "Type is required")) {
+            case "foo":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: foo");
+            default:
+                return new SingleUnion(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        }
     }
 
     public <T> T accept(Visitor<T> visitor) {
@@ -68,12 +70,6 @@ public final class SingleUnion {
     @Override
     public String toString() {
         return "SingleUnion{value: " + value + '}';
-    }
-
-    private static Set<String> allKnownTypes() {
-        Set<String> types = new HashSet<>();
-        types.add("foo");
-        return types;
     }
 
     public interface Visitor<T> {
