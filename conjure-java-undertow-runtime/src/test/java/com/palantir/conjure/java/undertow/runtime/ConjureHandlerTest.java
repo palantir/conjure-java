@@ -21,7 +21,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -108,7 +107,7 @@ public final class ConjureHandlerTest {
         when(wrapperObserver.control()).thenReturn(1);
         execute();
         // check that the first wrapper (the one that adds 1) is called before the one that adds 2.
-        assertThat(wrappersBeforeBlockingCallOrder).isEqualTo(ImmutableList.of(1, 2));
+        assertThat(wrappersBeforeBlockingCallOrder).containsExactly(1, 2);
         verify(wrapperObserver).control();
         verify(innerObserver).control();
     }

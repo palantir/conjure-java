@@ -31,7 +31,8 @@ public class LoggingContextHandlerTest {
         // Test to make sure these tests work. If slf4j-simple is on the classpath instead of a fully featured
         // logging framework, MDC operations will all no-op
         MDC.put("foo", "bar");
-        assertThat(MDC.getCopyOfContextMap()).isEqualTo(Collections.singletonMap("foo", "bar"));
+        assertThat(MDC.getCopyOfContextMap())
+                .containsExactlyInAnyOrderEntriesOf(Collections.singletonMap("foo", "bar"));
         MDC.clear();
     }
 
