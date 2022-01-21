@@ -187,7 +187,7 @@ public final class UnionGenerator {
                 .addParameter(Object.class, valueParam)
                 .returns(unionClass);
         // begin switch statement
-        builder.beginControlFlow("switch($L)", Expressions.requireNonNull("type", "Type is required"));
+        builder.beginControlFlow("switch($L)", Expressions.requireNonNull(typeParam, "Type is required"));
         // add all cases
         memberTypeDefs.forEach(memberTypeDef -> {
             String memberName = sanitizeUnknown(memberTypeDef.getFieldName()).get();
