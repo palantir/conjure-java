@@ -17,13 +17,18 @@
 package com.palantir.conjure.java.types;
 
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.product.EmptyUnionTypeExample;
+import com.palantir.product.Union;
 import java.io.IOException;
+import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
 
 class UnionTests {
@@ -40,5 +45,32 @@ class UnionTests {
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Unknown variant of the 'EmptyUnionTypeExample' union")
                 .hasExactlyArgs(SafeArg.of("unknownType", "foo"));
+    }
+
+    @Test
+    public void testUnknownTypeCreation() {
+        // cannot create unknown type from known type
+        assertThatThrownBy(() -> Union.unknown("bar", "value"));
+
+        // check that a truly unknown type works and round trips
+        String expectedType = "qux";
+        Union union = Union.unknown(expectedType, "quux");
+        union.accept(Union.Visitor.<Void>builder()
+                .bar(value -> failOnKnownType("bar", value))
+                .baz(value -> failOnKnownType("baz", value))
+                .foo(value -> failOnKnownType("foo", value))
+                .unknown(type -> {
+                    assertThat(type).isEqualTo(expectedType);
+                    return null;
+                })
+                .build());
+    }
+
+    private Void failOnKnownType(String type, Object value) {
+        Fail.fail(
+                "Visited known type when expected unknown type",
+                UnsafeArg.of("type", type),
+                UnsafeArg.of("value", value));
+        return null;
     }
 }
