@@ -56,6 +56,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -151,7 +152,7 @@ public final class UnionGenerator {
 
     private static List<MethodSpec> generateStaticFactories(
             TypeMapper typeMapper, ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
-        return memberTypeDefs.stream()
+        List<MethodSpec> staticFactories = memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
@@ -173,6 +174,39 @@ public final class UnionGenerator {
                     return builder.build();
                 })
                 .collect(Collectors.toList());
+        staticFactories.add(generateUnknownStaticFactory(unionClass, memberTypeDefs));
+        return staticFactories;
+    }
+
+    private static MethodSpec generateUnknownStaticFactory(ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
+        String typeParam = "type";
+        String valueParam = "value";
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("unknown")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(String.class, typeParam)
+                .addParameter(Object.class, valueParam)
+                .returns(unionClass);
+        // begin switch statement
+        builder.beginControlFlow("switch($L)", Expressions.requireNonNull(typeParam, "Type is required"));
+        // add all cases
+        memberTypeDefs.forEach(memberTypeDef -> {
+            String memberName = memberTypeDef.getFieldName().get();
+            builder.addCode("case $S:", memberName);
+            builder.addStatement(
+                    "throw new $T($S)",
+                    SafeIllegalArgumentException.class,
+                    "Unknown type cannot be created as the provided type is known: " + memberName);
+        });
+        // add default case, which actually builds the unknown
+        builder.addCode("default:");
+        builder.addStatement(
+                "return new $T(new $T($N, $L))",
+                unionClass,
+                wrapperClass(unionClass, FieldName.of("unknown")),
+                typeParam,
+                CodeBlock.of("$T.singletonMap($N, $N)", Collections.class, typeParam, valueParam));
+        builder.endControlFlow();
+        return builder.build();
     }
 
     private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass) {

@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +37,16 @@ public final class SingleUnion {
 
     public static SingleUnion foo(String value) {
         return new SingleUnion(new FooWrapper(value));
+    }
+
+    public static SingleUnion unknown(String type, Object value) {
+        switch (Preconditions.checkNotNull(type, "Type is required")) {
+            case "foo":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: foo");
+            default:
+                return new SingleUnion(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        }
     }
 
     public <T> T accept(Visitor<T> visitor) {

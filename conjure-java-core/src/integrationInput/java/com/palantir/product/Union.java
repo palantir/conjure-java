@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -54,6 +55,22 @@ public final class Union {
     @Deprecated
     public static Union baz(long value) {
         return new Union(new BazWrapper(value));
+    }
+
+    public static Union unknown(String type, Object value) {
+        switch (Preconditions.checkNotNull(type, "Type is required")) {
+            case "foo":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: foo");
+            case "bar":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: bar");
+            case "baz":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: baz");
+            default:
+                return new Union(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        }
     }
 
     public <T> T accept(Visitor<T> visitor) {

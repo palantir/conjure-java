@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,61 @@ public final class UnionTypeExample {
 
     public static UnionTypeExample mapAlias(MapAliasExample value) {
         return new UnionTypeExample(new MapAliasWrapper(value));
+    }
+
+    public static UnionTypeExample unknown(String type, Object value) {
+        switch (Preconditions.checkNotNull(type, "Type is required")) {
+            case "stringExample":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: stringExample");
+            case "thisFieldIsAnInteger":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: thisFieldIsAnInteger");
+            case "alsoAnInteger":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: alsoAnInteger");
+            case "if":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: if");
+            case "new":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: new");
+            case "interface":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: interface");
+            case "completed":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: completed");
+            case "unknown":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: unknown");
+            case "optional":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: optional");
+            case "list":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: list");
+            case "set":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: set");
+            case "map":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: map");
+            case "optionalAlias":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: optionalAlias");
+            case "listAlias":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: listAlias");
+            case "setAlias":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: setAlias");
+            case "mapAlias":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: mapAlias");
+            default:
+                return new UnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        }
     }
 
     public <T> T accept(Visitor<T> visitor) {
