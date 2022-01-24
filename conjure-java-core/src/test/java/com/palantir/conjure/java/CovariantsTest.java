@@ -54,6 +54,6 @@ public class CovariantsTest {
                 .addAllItems(otherValues)
                 .build();
         // without covariants item would be Optional<Optional<String>>
-        assertThat(covExample.getItems()).isEqualTo(ImmutableList.of(value, otherValue));
+        assertThat(covExample.getItems()).containsExactly(value, otherValue);
     }
 }

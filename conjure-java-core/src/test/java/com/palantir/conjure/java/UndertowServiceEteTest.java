@@ -544,7 +544,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testEnumQueryParameterList() {
         assertThat(client.enumListQuery(AuthHeader.valueOf("authHeader"), Collections.singletonList(SimpleEnum.VALUE)))
-                .isEqualTo(Collections.singletonList(SimpleEnum.VALUE));
+                .containsExactlyElementsOf(Collections.singletonList(SimpleEnum.VALUE));
     }
 
     @Test
