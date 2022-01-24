@@ -27,6 +27,8 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.product.EmptyUnionTypeExample;
 import com.palantir.product.Union;
+import com.palantir.product.UnionTypeExample;
+import com.palantir.product.UnionWithUnknownString;
 import java.io.IOException;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
@@ -48,17 +50,34 @@ class UnionTests {
     }
 
     @Test
-    public void testUnknownTypeCreation() {
-        // cannot create unknown type from known type
+    public void testCannotCreateUnknownTypeFromKnownType() {
         assertThatThrownBy(() -> Union.unknown("bar", "value"));
+        assertThatThrownBy(() -> UnionTypeExample.unknown("if", "value"));
+        assertThatThrownBy(() -> UnionWithUnknownString.unknown("unknown", "value"));
+    }
 
-        // check that a truly unknown type works and round trips
+    @Test
+    public void testCreateUnknownType() {
         String expectedType = "qux";
         Union union = Union.unknown(expectedType, "quux");
         union.accept(Union.Visitor.<Void>builder()
                 .bar(value -> failOnKnownType("bar", value))
                 .baz(value -> failOnKnownType("baz", value))
                 .foo(value -> failOnKnownType("foo", value))
+                .unknown(type -> {
+                    assertThat(type).isEqualTo(expectedType);
+                    return null;
+                })
+                .build());
+    }
+
+    @Test
+    public void testCreateUnknownTypeNamedUnknown() {
+        // unknown is the wire type and "unknown_" is actually unknown
+        String expectedType = "unknown_";
+        UnionWithUnknownString union = UnionWithUnknownString.unknown(expectedType, "foo");
+        union.accept(UnionWithUnknownString.Visitor.<Void>builder()
+                .unknown_(value -> failOnKnownType("unknown", value))
                 .unknown(type -> {
                     assertThat(type).isEqualTo(expectedType);
                     return null;

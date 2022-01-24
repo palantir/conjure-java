@@ -190,22 +190,21 @@ public final class UnionGenerator {
         builder.beginControlFlow("switch($L)", Expressions.requireNonNull(typeParam, "Type is required"));
         // add all cases
         memberTypeDefs.forEach(memberTypeDef -> {
-            String memberName = sanitizeUnknown(memberTypeDef.getFieldName()).get();
+            String memberName = memberTypeDef.getFieldName().get();
             builder.addCode("case $S:", memberName);
             builder.addStatement(
-                    "throw new $T(\"$L: $L\")",
+                    "throw new $T($S)",
                     SafeIllegalArgumentException.class,
-                    "Unknown type cannot be created as the provided type is known",
-                    memberName);
+                    "Unknown type cannot be created as the provided type is known: " + memberName);
         });
         // add default case, which actually builds the unknown
         builder.addCode("default:");
         builder.addStatement(
-                "return new $T(new $T($L, $L))",
+                "return new $T(new $T($N, $L))",
                 unionClass,
                 wrapperClass(unionClass, FieldName.of("unknown")),
                 typeParam,
-                CodeBlock.of("$T.singletonMap($L, $L)", Collections.class, typeParam, valueParam));
+                CodeBlock.of("$T.singletonMap($N, $N)", Collections.class, typeParam, valueParam));
         builder.endControlFlow();
         return builder.build();
     }

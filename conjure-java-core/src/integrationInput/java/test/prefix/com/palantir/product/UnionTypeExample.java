@@ -133,9 +133,9 @@ public final class UnionTypeExample {
             case "completed":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: completed");
-            case "unknown_":
+            case "unknown":
                 throw new SafeIllegalArgumentException(
-                        "Unknown type cannot be created as the provided type is known: unknown_");
+                        "Unknown type cannot be created as the provided type is known: unknown");
             case "optional":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: optional");

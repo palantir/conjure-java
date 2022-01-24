@@ -41,9 +41,9 @@ public final class UnionWithUnknownString {
 
     public static UnionWithUnknownString unknown(String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
-            case "unknown_":
+            case "unknown":
                 throw new SafeIllegalArgumentException(
-                        "Unknown type cannot be created as the provided type is known: unknown_");
+                        "Unknown type cannot be created as the provided type is known: unknown");
             default:
                 return new UnionWithUnknownString(new UnknownWrapper(type, Collections.singletonMap(type, value)));
         }
