@@ -27,7 +27,6 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.product.EmptyUnionTypeExample;
 import com.palantir.product.Union;
-import com.palantir.product.Union.Visitor;
 import com.palantir.product.UnionTypeExample;
 import com.palantir.product.UnionWithUnknownString;
 import java.io.IOException;
@@ -73,7 +72,7 @@ class UnionTests {
                 .build());
 
         // test anonymous visitor
-        union.accept(new Visitor<Void>() {
+        union.accept(new Union.Visitor<Void>() {
             @Override
             public Void visitFoo(String value) {
                 return failOnKnownType("foo", value);
@@ -99,14 +98,12 @@ class UnionTests {
     @Test
     public void testCreateUnknownTypeNamedUnknown() {
         // unknown is the wire type and "unknown_" is actually unknown
-        String expectedType = "unknown_";
-        UnionWithUnknownString union = UnionWithUnknownString.unknown(expectedType, "foo");
+        String expectedUnknownType = "unknown_";
+        String expectedUnknownValue = "foo";
+        UnionWithUnknownString union = UnionWithUnknownString.unknown(expectedUnknownType, expectedUnknownValue);
         union.accept(UnionWithUnknownString.Visitor.<Void>builder()
                 .unknown_(value -> failOnKnownType("unknown", value))
-                .unknown(type -> {
-                    assertThat(type).isEqualTo(expectedType);
-                    return null;
-                })
+                .unknown((type, value) -> verifyUnknownType(type, value, expectedUnknownType, expectedUnknownValue))
                 .build());
     }
 
