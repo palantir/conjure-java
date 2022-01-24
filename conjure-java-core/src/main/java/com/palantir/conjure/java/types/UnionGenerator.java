@@ -251,20 +251,14 @@ public final class UnionGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addTypeVariable(TYPE_VARIABLE)
                 .addMethods(generateMemberVisitMethods(memberTypes));
+        MethodSpec.Builder visitUnknownBuilder = MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
+                .returns(TYPE_VARIABLE);
         if (options.unionsWithUnknownValues()) {
-            visitorBuilder.addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
-                    .addParameter(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
-                    .returns(TYPE_VARIABLE)
-                    .build());
-        } else {
-            visitorBuilder.addMethod(MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
-                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                    .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
-                    .returns(TYPE_VARIABLE)
-                    .build());
+            visitUnknownBuilder.addParameter(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME);
         }
+        visitorBuilder.addMethod(visitUnknownBuilder.build());
         visitorBuilder
                 .addMethod(MethodSpec.methodBuilder("builder")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
