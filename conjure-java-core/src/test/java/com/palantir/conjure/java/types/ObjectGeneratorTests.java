@@ -80,7 +80,6 @@ public final class ObjectGeneratorTests {
                         ImmutableSet.of(new ObjectGenerator(Options.builder()
                                 .packagePrefix("test.prefix")
                                 .excludeEmptyOptionals(true)
-                                .unionsWithUnknownValues(true)
                                 .build())))
                 .emit(def, tempDir);
 

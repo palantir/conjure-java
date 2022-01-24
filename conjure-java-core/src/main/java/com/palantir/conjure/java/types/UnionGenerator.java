@@ -352,28 +352,59 @@ public final class UnionGenerator {
                     .addStatement("return this")
                     .build());
             if (NameTypePair.UNKNOWN.equals(pair)) {
-                StringBuilder statement = new StringBuilder("this.$L = ");
-                if (options.unionsWithUnknownValues()) {
-                    statement.append("(unknownType, _unknownValue) ");
-                } else {
-                    statement.append("unknownType ");
-                }
-                statement.append("-> { throw new $T($S, $T.of($S, unknownType)); }");
-                setterMethods.add(visitorBuilderUnknownThrowPrototype(visitResultType, nextVisitorStageClassName)
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .addStatement(
-                                statement.toString(),
-                                visitorFieldName(pair.memberName),
-                                SafeIllegalArgumentException.class,
-                                "Unknown variant of the '" + enclosingClass.simpleName() + "' union",
-                                SafeArg.class,
-                                UNKNOWN_TYPE_PARAM_NAME)
-                        .addStatement("return this")
-                        .build());
+                setterMethods.addAll(unknownSpecificVisitorSetters(
+                        enclosingClass, visitResultType, nextVisitorStageClassName, options));
             }
         }
         return setterMethods.build();
+    }
+
+    private static List<MethodSpec> unknownSpecificVisitorSetters(
+            ClassName enclosingClass, TypeName visitResultType, ClassName nextVisitorStageClassName, Options options) {
+        ImmutableList.Builder<MethodSpec> methods = ImmutableList.builder();
+        String lambdaParams = options.unionsWithUnknownValues()
+                ? String.format("(%s, _%s)", UNKNOWN_TYPE_PARAM_NAME, UNKNOWN_VALUE_PARAM_NAME)
+                : UNKNOWN_TYPE_PARAM_NAME;
+
+        // Allow providing the old unknown visitor
+        if (options.unionsWithUnknownValues()) {
+            String visitorName = visitorFieldName("unknown");
+            methods.add(MethodSpec.methodBuilder("unknown")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addParameter(ParameterSpec.builder(
+                                    ParameterizedTypeName.get(
+                                            ClassName.get(Function.class), UNKNOWN_MEMBER_TYPE, visitResultType),
+                                    visitorName)
+                            .addAnnotation(Nonnull.class)
+                            .build())
+                    .returns(ParameterizedTypeName.get(nextVisitorStageClassName, visitResultType))
+                    .addStatement(
+                            "$L",
+                            Expressions.requireNonNull(visitorName, String.format("%s cannot be null", visitorName)))
+                    .addStatement(
+                            "this.$1N = $2L -> $1N.apply($3N)", visitorName, lambdaParams, UNKNOWN_TYPE_PARAM_NAME)
+                    .addStatement("return this")
+                    .build());
+        }
+
+        // Throw on unknown
+        methods.add(visitorBuilderUnknownThrowPrototype(visitResultType, nextVisitorStageClassName)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addStatement(
+                        "this.$N = $L -> { throw new $T($S, $T.of($S, $N)); }",
+                        visitorFieldName("unknown"),
+                        lambdaParams,
+                        SafeIllegalArgumentException.class,
+                        "Unknown variant of the '" + enclosingClass.simpleName() + "' union",
+                        SafeArg.class,
+                        UNKNOWN_TYPE_PARAM_NAME,
+                        UNKNOWN_TYPE_PARAM_NAME)
+                .addStatement("return this")
+                .build());
+
+        return methods.build();
     }
 
     /**
@@ -533,10 +564,7 @@ public final class UnionGenerator {
                             .build())
                     .addMethods(
                             NameTypePair.UNKNOWN.equals(member)
-                                    ? ImmutableList.of(
-                                            visitorBuilderUnknownThrowPrototype(visitResultType, nextStageClassName)
-                                                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                                                    .build())
+                                    ? unknownSpecificVisitorPrototypes(visitResultType, nextStageClassName, options)
                                     : ImmutableList.of())
                     .build());
         }
@@ -549,6 +577,32 @@ public final class UnionGenerator {
                         .build())
                 .build());
         return interfaces;
+    }
+
+    private static ImmutableList<MethodSpec> unknownSpecificVisitorPrototypes(
+            TypeVariableName visitResultType, ClassName nextStageClassName, Options options) {
+        ImmutableList.Builder<MethodSpec> methods = ImmutableList.builder();
+
+        if (options.unionsWithUnknownValues()) {
+            // Allow providing the old unknown visitor
+            methods.add(MethodSpec.methodBuilder("unknown")
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                    .addParameter(ParameterSpec.builder(
+                                    ParameterizedTypeName.get(
+                                            ClassName.get(Function.class), UNKNOWN_MEMBER_TYPE, visitResultType),
+                                    visitorFieldName("unknown"))
+                            .addAnnotation(Nonnull.class)
+                            .build())
+                    .returns(ParameterizedTypeName.get(nextStageClassName, visitResultType))
+                    .build());
+        }
+
+        // Throw on unknown
+        methods.add(visitorBuilderUnknownThrowPrototype(visitResultType, nextStageClassName)
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .build());
+
+        return methods.build();
     }
 
     private static Stream<NameTypePair> sortedStageNameTypePairs(Map<FieldDefinition, TypeName> memberTypes) {

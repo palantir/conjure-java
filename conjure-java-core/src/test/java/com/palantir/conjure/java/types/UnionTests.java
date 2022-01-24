@@ -63,12 +63,23 @@ class UnionTests {
         List<String> expectedUnknownValue = List.of("quux", "quuz");
         Union union = Union.unknown(expectedUnknownType, expectedUnknownValue);
 
-        // test visitor builder
+        // test new visitor builder
         union.accept(Union.Visitor.<Void>builder()
                 .bar(value -> failOnKnownType("bar", value))
                 .baz(value -> failOnKnownType("baz", value))
                 .foo(value -> failOnKnownType("foo", value))
                 .unknown((type, value) -> verifyUnknownType(type, value, expectedUnknownType, expectedUnknownValue))
+                .build());
+
+        // test old visitor builder
+        union.accept(Union.Visitor.<Void>builder()
+                .bar(value -> failOnKnownType("bar", value))
+                .baz(value -> failOnKnownType("baz", value))
+                .foo(value -> failOnKnownType("foo", value))
+                .unknown(type -> {
+                    assertThat(type).isEqualTo(expectedUnknownType);
+                    return null;
+                })
                 .build());
 
         // test anonymous visitor

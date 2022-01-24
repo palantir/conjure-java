@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -82,6 +83,13 @@ public final class EmptyUnionTypeExample {
         }
 
         @Override
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = (unknownType, _unknownValue) -> unknownVisitor.apply(unknownType);
+            return this;
+        }
+
+        @Override
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = (unknownType, _unknownValue) -> {
                 throw new SafeIllegalArgumentException(
@@ -104,6 +112,8 @@ public final class EmptyUnionTypeExample {
 
     public interface UnknownStageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor);
+
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }

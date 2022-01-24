@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Generated;
@@ -113,7 +112,7 @@ public final class Union {
         @Deprecated
         T visitBaz(long value);
 
-        T visitUnknown(String unknownType, Object unknownValue);
+        T visitUnknown(String unknownType);
 
         static <T> BarStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -132,7 +131,7 @@ public final class Union {
 
         private Function<String, T> fooVisitor;
 
-        private BiFunction<String, Object, T> unknownVisitor;
+        private Function<String, T> unknownVisitor;
 
         @Override
         public BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor) {
@@ -156,7 +155,7 @@ public final class Union {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -164,7 +163,7 @@ public final class Union {
 
         @Override
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
-            this.unknownVisitor = (unknownType, _unknownValue) -> {
+            this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalArgumentException(
                         "Unknown variant of the 'Union' union", SafeArg.of("unknownType", unknownType));
             };
@@ -176,7 +175,7 @@ public final class Union {
             final IntFunction<T> barVisitor = this.barVisitor;
             final Function<Long, T> bazVisitor = this.bazVisitor;
             final Function<String, T> fooVisitor = this.fooVisitor;
-            final BiFunction<String, Object, T> unknownVisitor = this.unknownVisitor;
+            final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitBar(int value) {
@@ -194,8 +193,8 @@ public final class Union {
                 }
 
                 @Override
-                public T visitUnknown(String unknownType, Object unknownValue) {
-                    return unknownVisitor.apply(unknownType, unknownValue);
+                public T visitUnknown(String value) {
+                    return unknownVisitor.apply(value);
                 }
             };
         }
@@ -214,7 +213,7 @@ public final class Union {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
@@ -410,7 +409,7 @@ public final class Union {
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnknown(type, value.get(type));
+            return visitor.visitUnknown(type);
         }
 
         @Override
