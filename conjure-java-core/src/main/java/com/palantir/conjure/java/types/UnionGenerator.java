@@ -366,8 +366,8 @@ public final class UnionGenerator {
                 ? String.format("(%s, _%s)", UNKNOWN_TYPE_PARAM_NAME, UNKNOWN_VALUE_PARAM_NAME)
                 : UNKNOWN_TYPE_PARAM_NAME;
 
-        // Allow providing the old unknown visitor
         if (options.unionsWithUnknownValues()) {
+            // Allow providing the old unknown visitor
             String visitorName = visitorFieldName("unknown");
             methods.add(MethodSpec.methodBuilder("unknown")
                     .addModifiers(Modifier.PUBLIC)
@@ -463,7 +463,7 @@ public final class UnionGenerator {
                                 .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
                                 .addParameter(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
                                 .addStatement(
-                                        "return $L.apply($L, $L)",
+                                        "return $N.apply($N, $N)",
                                         visitorFieldName(pair.memberName),
                                         UNKNOWN_TYPE_PARAM_NAME,
                                         UNKNOWN_VALUE_PARAM_NAME)
@@ -473,7 +473,7 @@ public final class UnionGenerator {
                                 .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(Override.class)
                                 .addParameter(pair.type, variableName())
-                                .addStatement("return $L.apply($L)", visitorFieldName(pair.memberName), variableName())
+                                .addStatement("return $N.apply($N)", visitorFieldName(pair.memberName), variableName())
                                 .returns(visitorResultType)
                                 .build())
                 .collect(Collectors.toList());
@@ -861,13 +861,13 @@ public final class UnionGenerator {
                 .returns(TYPE_VARIABLE);
         if (visitMethodName.equals(VISIT_UNKNOWN_METHOD_NAME) && options.unionsWithUnknownValues()) {
             methodBuilder.addStatement(
-                    "return $N.$L($L, $L)",
+                    "return $N.$N($N, $L)",
                     visitor,
                     visitMethodName,
                     "type",
-                    CodeBlock.of("$L.get($L)", VALUE_FIELD_NAME, "type"));
+                    CodeBlock.of("$N.get($N)", VALUE_FIELD_NAME, "type"));
         } else {
-            methodBuilder.addStatement("return $N.$L($L)", visitor, visitMethodName, valueName);
+            methodBuilder.addStatement("return $N.$N($N)", visitor, visitMethodName, valueName);
         }
         if (isDeprecated) {
             methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
