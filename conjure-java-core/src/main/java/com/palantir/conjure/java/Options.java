@@ -119,6 +119,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Instructs the object generator to generate union visitors that expose the values of unknowns in addition to their
+     * types.
+     */
+    @Value.Default
+    default boolean unionsWithUnknownValues() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

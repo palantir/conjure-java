@@ -30,6 +30,7 @@ import com.palantir.product.Union;
 import com.palantir.product.UnionTypeExample;
 import com.palantir.product.UnionWithUnknownString;
 import java.io.IOException;
+import java.util.List;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
 
@@ -58,30 +59,62 @@ class UnionTests {
 
     @Test
     public void testCreateUnknownType() {
-        String expectedType = "qux";
-        Union union = Union.unknown(expectedType, "quux");
+        String expectedUnknownType = "qux";
+        List<String> expectedUnknownValue = List.of("quux", "quuz");
+        Union union = Union.unknown(expectedUnknownType, expectedUnknownValue);
+
+        // test new visitor builder
+        union.accept(Union.Visitor.<Void>builder()
+                .bar(value -> failOnKnownType("bar", value))
+                .baz(value -> failOnKnownType("baz", value))
+                .foo(value -> failOnKnownType("foo", value))
+                .unknown((type, value) -> verifyUnknownType(type, value, expectedUnknownType, expectedUnknownValue))
+                .build());
+
+        // test old visitor builder
         union.accept(Union.Visitor.<Void>builder()
                 .bar(value -> failOnKnownType("bar", value))
                 .baz(value -> failOnKnownType("baz", value))
                 .foo(value -> failOnKnownType("foo", value))
                 .unknown(type -> {
-                    assertThat(type).isEqualTo(expectedType);
+                    assertThat(type).isEqualTo(expectedUnknownType);
                     return null;
                 })
                 .build());
+
+        // test anonymous visitor
+        union.accept(new Union.Visitor<Void>() {
+            @Override
+            public Void visitFoo(String value) {
+                return failOnKnownType("foo", value);
+            }
+
+            @Override
+            public Void visitBar(int value) {
+                return failOnKnownType("bar", value);
+            }
+
+            @Override
+            public Void visitBaz(long value) {
+                return failOnKnownType("baz", value);
+            }
+
+            @Override
+            public Void visitUnknown(String unknownType, Object unknownValue) {
+                return verifyUnknownType(unknownType, unknownValue, expectedUnknownType, expectedUnknownValue);
+            }
+        });
     }
 
     @Test
     public void testCreateUnknownTypeNamedUnknown() {
         // unknown is the wire type and "unknown_" is actually unknown
-        String expectedType = "unknown_";
-        UnionWithUnknownString union = UnionWithUnknownString.unknown(expectedType, "foo");
+        String expectedUnknownType = "unknown_";
+        String expectedUnknownValue = "foo";
+        UnionWithUnknownString union = UnionWithUnknownString.unknown(expectedUnknownType, expectedUnknownValue);
         union.accept(UnionWithUnknownString.Visitor.<Void>builder()
                 .unknown_(value -> failOnKnownType("unknown", value))
-                .unknown(type -> {
-                    assertThat(type).isEqualTo(expectedType);
-                    return null;
-                })
+                .unknown((type, value) -> verifyUnknownType(type, value, expectedUnknownType, expectedUnknownValue))
                 .build());
     }
 
@@ -90,6 +123,12 @@ class UnionTests {
                 "Visited known type when expected unknown type",
                 UnsafeArg.of("type", type),
                 UnsafeArg.of("value", value));
+        return null;
+    }
+
+    private Void verifyUnknownType(String actualType, Object actualValue, String expectedType, Object expectedValue) {
+        assertThat(actualType).isEqualTo(expectedType);
+        assertThat(actualValue).isEqualTo(expectedValue);
         return null;
     }
 }
