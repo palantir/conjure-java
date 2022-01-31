@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +30,13 @@ public final class EmptyUnionTypeExample {
     @JsonValue
     private Base getValue() {
         return value;
+    }
+
+    public static EmptyUnionTypeExample unknown(String type, Object value) {
+        switch (Preconditions.checkNotNull(type, "Type is required")) {
+            default:
+                return new EmptyUnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        }
     }
 
     public <T> T accept(Visitor<T> visitor) {

@@ -14,12 +14,14 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Generated;
@@ -109,6 +111,61 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new MapAliasWrapper(value));
     }
 
+    public static UnionTypeExample unknown(String type, Object value) {
+        switch (Preconditions.checkNotNull(type, "Type is required")) {
+            case "stringExample":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: stringExample");
+            case "thisFieldIsAnInteger":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: thisFieldIsAnInteger");
+            case "alsoAnInteger":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: alsoAnInteger");
+            case "if":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: if");
+            case "new":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: new");
+            case "interface":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: interface");
+            case "completed":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: completed");
+            case "unknown":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: unknown");
+            case "optional":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: optional");
+            case "list":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: list");
+            case "set":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: set");
+            case "map":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: map");
+            case "optionalAlias":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: optionalAlias");
+            case "listAlias":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: listAlias");
+            case "setAlias":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: setAlias");
+            case "mapAlias":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: mapAlias");
+            default:
+                return new UnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
+        }
+    }
+
     public <T> T accept(Visitor<T> visitor) {
         return value.accept(visitor);
     }
@@ -168,7 +225,7 @@ public final class UnionTypeExample {
 
         T visitMapAlias(MapAliasExample value);
 
-        T visitUnknown(String unknownType);
+        T visitUnknown(String unknownType, Object unknownValue);
 
         static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -226,7 +283,7 @@ public final class UnionTypeExample {
 
         private IntFunction<T> unknown_Visitor;
 
-        private Function<String, T> unknownVisitor;
+        private BiFunction<String, Object, T> unknownVisitor;
 
         @Override
         public CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
@@ -343,15 +400,22 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
         }
 
         @Override
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = (unknownType, _unknownValue) -> unknownVisitor.apply(unknownType);
+            return this;
+        }
+
+        @Override
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
-            this.unknownVisitor = unknownType -> {
+            this.unknownVisitor = (unknownType, _unknownValue) -> {
                 throw new SafeIllegalArgumentException(
                         "Unknown variant of the 'UnionTypeExample' union", SafeArg.of("unknownType", unknownType));
             };
@@ -376,7 +440,7 @@ public final class UnionTypeExample {
             final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
             final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
             final IntFunction<T> unknown_Visitor = this.unknown_Visitor;
-            final Function<String, T> unknownVisitor = this.unknownVisitor;
+            final BiFunction<String, Object, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitAlsoAnInteger(int value) {
@@ -459,8 +523,8 @@ public final class UnionTypeExample {
                 }
 
                 @Override
-                public T visitUnknown(String value) {
-                    return unknownVisitor.apply(value);
+                public T visitUnknown(String unknownType, Object unknownValue) {
+                    return unknownVisitor.apply(unknownType, unknownValue);
                 }
             };
         }
@@ -532,6 +596,8 @@ public final class UnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor);
+
         Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
@@ -1328,7 +1394,7 @@ public final class UnionTypeExample {
 
         @Override
         public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnknown(type);
+            return visitor.visitUnknown(type, value.get(type));
         }
 
         @Override

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Provide a static factory for creating an unknown union type
+  links:
+  - https://github.com/palantir/conjure-java/pull/1605

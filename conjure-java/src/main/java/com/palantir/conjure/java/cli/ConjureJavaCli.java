@@ -195,6 +195,12 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Objects exclude empty optionals in serialization based on the conjure spec.")
         private boolean excludeEmptyOptionals;
 
+        @CommandLine.Option(
+                names = "--unionsWithUnknownValues",
+                defaultValue = "false",
+                description = "Union visitors expose the values of unknowns in addition to their types.")
+        private boolean unionsWithUnknownValues;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -261,6 +267,7 @@ public final class ConjureJavaCli implements Runnable {
                             .apiVersion(Optional.ofNullable(apiVersion))
                             .useStagedBuilders(useStagedBuilders)
                             .excludeEmptyOptionals(excludeEmptyOptionals)
+                            .unionsWithUnknownValues(unionsWithUnknownValues)
                             .build())
                     .build();
         }

@@ -52,6 +52,7 @@ public final class ObjectGeneratorTests {
                                 .strictObjects(true)
                                 .nonNullCollections(true)
                                 .excludeEmptyOptionals(true)
+                                .unionsWithUnknownValues(true)
                                 .build())))
                 .emit(def, tempDir);
 
