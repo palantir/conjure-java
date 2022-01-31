@@ -94,7 +94,7 @@ public final class ArgumentTypesResolver {
         } else if (isRawRequestBody(actualTypeMirror)) {
             return Optional.of(ArgumentTypes.rawRequestBody(TypeName.get(actualTypeMirror)));
         } else if (optionalType.isPresent()) {
-            // TODO(12345): We only want to go one level down: don't allow Optional<Optional<Type>>.
+            // TODO(ckozak): We only want to go one level down: don't allow Optional<Optional<Type>>.
             return Optional.of(ArgumentTypes.optional(typeName, optionalType.get()));
         } else if (mapType.isPresent()) {
             return mapType;

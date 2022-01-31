@@ -75,7 +75,7 @@ public final class EndpointDefinitions {
             return Optional.empty();
         }
 
-        // TODO(12345): More validations around repeats etc.
+        // TODO(ckozak): More validations around repeats etc.
 
         return Optional.of(ImmutableEndpointDefinition.builder()
                 .endpointName(endpointName)
@@ -95,7 +95,7 @@ public final class EndpointDefinitions {
             return Optional.empty();
         }
 
-        // TODO(12345): More validation around ArgumentType and ParameterType actually agreeing, e.g. if
+        // TODO(ckozak): More validation around ArgumentType and ParameterType actually agreeing, e.g. if
         //  ArgumentType#requestBody then ParameterType#rawBody.
 
         return Optional.of(ImmutableArgumentDefinition.builder()

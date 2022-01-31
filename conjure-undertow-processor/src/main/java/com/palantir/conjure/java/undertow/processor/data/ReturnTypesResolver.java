@@ -36,7 +36,7 @@ public final class ReturnTypesResolver {
         TypeMirror returnType = element.getReturnType();
 
         Optional<TypeMirror> maybeListenableFutureInnerType = getListenableFutureInnerType(returnType);
-        // TODO(12345): Validate deserializer types match
+        // TODO(ckozak): Validate deserializer types match
 
         TypeMirror producesSerializerFactory = handleAnnotation.getAnnotationValue("produces", TypeMirror.class);
         CodeBlock factoryInstantiator = Instantiables.instantiate(producesSerializerFactory);

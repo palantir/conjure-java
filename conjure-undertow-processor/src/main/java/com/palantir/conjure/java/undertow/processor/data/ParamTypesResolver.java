@@ -84,7 +84,7 @@ public final class ParamTypesResolver {
             return Optional.empty();
         }
 
-        // TODO(12345): More validation of values.
+        // TODO(ckozak): More validation of values.
 
         AnnotationReflector annotationReflector =
                 ImmutableAnnotationReflector.of(Iterables.getOnlyElement(paramAnnotationMirrors));
