@@ -39,7 +39,7 @@ com.palantir.goethe:* = 0.6.0
 com.github.stefanbirkner:system-lambda = 1.2.0
 com.palantir.human-readable-types:* = 1.5.0
 org.derive4j:* = 1.1.1
-com.google.auto:auto-common = 1.1.2
+com.google.auto:auto-common = 1.2.1
 com.google.testing.compile:compile-testing = 0.19
 
 # dependency-upgrader:OFF
