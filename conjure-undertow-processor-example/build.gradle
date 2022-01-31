@@ -1,0 +1,12 @@
+// Not published
+
+dependencies {
+    implementation project(':conjure-undertow-annotations')
+    annotationProcessor project(':conjure-undertow-processor')
+
+    testImplementation project(':conjure-java-undertow-runtime')
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'com.palantir.safe-logging:preconditions-assertj'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}

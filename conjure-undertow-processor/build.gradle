@@ -1,0 +1,22 @@
+apply plugin: 'com.palantir.external-publish-jar'
+
+dependencies {
+    implementation project(':conjure-undertow-annotations')
+    implementation 'com.palantir.goethe:goethe'
+    implementation 'com.squareup:javapoet'
+    implementation 'com.google.auto:auto-common'
+    implementation 'com.google.guava:guava'
+    implementation 'com.palantir.common:streams'
+    // For HttpPath parsing
+    implementation 'org.glassfish.jersey.core:jersey-common'
+
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.google.testing.compile:compile-testing'
+
+    annotationProcessor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
+    annotationProcessor 'org.derive4j:derive4j'
+    compileOnly 'org.derive4j:derive4j-annotation'
+}
