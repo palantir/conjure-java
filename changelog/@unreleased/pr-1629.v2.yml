@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Handle query params with primitive types
+  links:
+  - https://github.com/palantir/conjure-java/pull/1629

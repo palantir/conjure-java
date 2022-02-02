@@ -1,0 +1,95 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.lang.Boolean;
+import java.lang.Exception;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class PrimitiveQueryParamsEndpoints implements UndertowService {
+    private final PrimitiveQueryParams delegate;
+
+    private PrimitiveQueryParamsEndpoints(PrimitiveQueryParams delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(PrimitiveQueryParams delegate) {
+        return new PrimitiveQueryParamsEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new HandlePrimitveQueryParamsEndpoint(runtime, delegate));
+    }
+
+    private static final class HandlePrimitveQueryParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final PrimitiveQueryParams delegate;
+
+        private final Deserializer<Integer> countDeserializer;
+
+        private final Deserializer<Boolean> testDeserializer;
+
+        private final Deserializer<Boolean> testBoxedDeserializer;
+
+        HandlePrimitveQueryParamsEndpoint(UndertowRuntime runtime, PrimitiveQueryParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.countDeserializer =
+                    new QueryParamDeserializer<>("count", PrimitiveQueryParams.IntParamDecoder.INSTANCE);
+            this.testDeserializer =
+                    new QueryParamDeserializer<>("test", PrimitiveQueryParams.BooleanParamDecoder.INSTANCE);
+            this.testBoxedDeserializer =
+                    new QueryParamDeserializer<>("testboxed", PrimitiveQueryParams.BooleanParamDecoder.INSTANCE);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            this.delegate.handlePrimitveQueryParams(
+                    this.countDeserializer.deserialize(exchange),
+                    this.testDeserializer.deserialize(exchange),
+                    this.testBoxedDeserializer.deserialize(exchange));
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/ping";
+        }
+
+        @Override
+        public String serviceName() {
+            return "PrimitiveQueryParams";
+        }
+
+        @Override
+        public String name() {
+            return "handlePrimitveQueryParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

@@ -226,7 +226,7 @@ public final class ConjureUndertowEndpointsGenerator {
                 TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
                 additionalFields.add(ImmutableAdditionalField.builder()
                         .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType),
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
                                         deserializerFieldName,
                                         Modifier.PRIVATE,
                                         Modifier.FINAL)
