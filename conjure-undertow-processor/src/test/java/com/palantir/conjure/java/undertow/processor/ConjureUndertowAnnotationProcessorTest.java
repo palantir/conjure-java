@@ -25,6 +25,7 @@ import com.google.common.io.ByteStreams;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
+import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoders;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveQueryParams;
 import com.palantir.conjure.java.undertow.processor.sample.PrivateMethodAnnotatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ProtectedMethodAnnotatedResource;
@@ -56,6 +57,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testPrimitiveQueryParams() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, PrimitiveQueryParams.class);
+    }
+
+    @Test
+    public void testDefaultDecoders() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, DefaultDecoders.class);
     }
 
     @Test
