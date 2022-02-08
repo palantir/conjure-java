@@ -20,6 +20,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.palantir.ri.ResourceIdentifier;
+import java.time.OffsetDateTime;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.lang.model.element.Element;
@@ -43,7 +46,7 @@ final class DefaultDecoderNames {
                 Set.of(ContainerType.NONE, ContainerType.LIST).contains(inputType),
                 "Input container type must be 'LIST' or 'NONE'");
 
-        String type = clazz.getSimpleName();
+        String type = getTypeName(clazz);
         String decoderSuffix = inputType.equals(ContainerType.LIST) ? "CollectionParamDecoder" : "ParamDecoder";
         String optionalPrefix = outType.equals(ContainerType.OPTIONAL) ? "optional" : "";
         String typeSuffix =
@@ -55,18 +58,28 @@ final class DefaultDecoderNames {
         return InstanceVariables.joinCamelCase(segments);
     }
 
+    private static String getTypeName(Class<?> clazz) {
+        if (clazz.equals(ResourceIdentifier.class)) {
+            return "rid";
+        } else if (clazz.equals(OffsetDateTime.class)) {
+            return "dateTime";
+        } else if (clazz.equals(OptionalInt.class)) {
+            return "optionalInteger";
+        } else {
+            return clazz.getSimpleName();
+        }
+    }
+
     // TODO(fwindheuser): There is probably a better way to get the simple class name from a type mirror.
     private static Class<?> getClassForType(TypeMirror typeMirror) {
         // Only need to support primitives that are also supported by {@link PlainSerDe}.
         switch (typeMirror.getKind()) {
             case INT:
-                return int.class;
-            case LONG:
-                return long.class;
+                return Integer.class;
             case DOUBLE:
-                return double.class;
+                return Double.class;
             case BOOLEAN:
-                return boolean.class;
+                return Boolean.class;
             case DECLARED:
                 Element typeElement = ((DeclaredType) typeMirror).asElement();
                 String qualifiedName =

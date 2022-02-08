@@ -16,17 +16,22 @@
 
 package com.palantir.conjure.java.undertow.annotations;
 
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
+import com.palantir.ri.ResourceIdentifier;
+import com.palantir.tokens.auth.BearerToken;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 
 /** Default parameter decoders, mirroring and delegating to the deserializers provided by {@link PlainSerDe}. */
 public final class ParamDecoders {
-
-    // TODO(fwindheuser): Add methods for all deserializers in 'PlainSerDe'.
 
     public static ParamDecoder<String> stringParamDecoder(PlainSerDe serde) {
         return DelegatingParamDecoder.of(serde::deserializeString);
@@ -74,6 +79,177 @@ public final class ParamDecoders {
 
     public static CollectionParamDecoder<Set<Boolean>> booleanSetCollectionParamDecoder(PlainSerDe serde) {
         return DelegatingCollectionParamDecoder.of(serde::deserializeBooleanSet);
+    }
+
+    public static ParamDecoder<BearerToken> bearerTokenParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeBearerToken);
+    }
+
+    public static ParamDecoder<Optional<BearerToken>> optionalBearerTokenParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalBearerToken);
+    }
+
+    public static CollectionParamDecoder<BearerToken> bearerTokenCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeBearerToken);
+    }
+
+    public static CollectionParamDecoder<Optional<BearerToken>> optionalBearerTokenCollectionParamDecoder(
+            PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalBearerToken);
+    }
+
+    public static CollectionParamDecoder<List<BearerToken>> bearerTokenListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeBearerTokenList);
+    }
+
+    public static CollectionParamDecoder<Set<BearerToken>> bearerTokenSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeBearerTokenSet);
+    }
+
+    public static ParamDecoder<OffsetDateTime> dateTimeParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeDateTime);
+    }
+
+    public static ParamDecoder<Optional<OffsetDateTime>> optionalDateTimeParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalDateTime);
+    }
+
+    public static CollectionParamDecoder<OffsetDateTime> dateTimeCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeDateTime);
+    }
+
+    public static CollectionParamDecoder<Optional<OffsetDateTime>> optionalDateTimeCollectionParamDecoder(
+            PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalDateTime);
+    }
+
+    public static CollectionParamDecoder<List<OffsetDateTime>> dateTimeListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeDateTimeList);
+    }
+
+    public static CollectionParamDecoder<Set<OffsetDateTime>> dateTimeSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeDateTimeSet);
+    }
+
+    public static ParamDecoder<Double> doubleParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeDouble);
+    }
+
+    public static ParamDecoder<OptionalDouble> optionalDoubleParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalDouble);
+    }
+
+    public static CollectionParamDecoder<Double> doubleCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeDouble);
+    }
+
+    public static CollectionParamDecoder<OptionalDouble> optionalDoubleCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalDouble);
+    }
+
+    public static CollectionParamDecoder<List<Double>> doubleListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeDoubleList);
+    }
+
+    public static CollectionParamDecoder<Set<Double>> doubleSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeDoubleSet);
+    }
+
+    public static ParamDecoder<Integer> integerParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeInteger);
+    }
+
+    public static ParamDecoder<OptionalInt> optionalIntegerParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalInteger);
+    }
+
+    public static CollectionParamDecoder<Integer> integerCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeInteger);
+    }
+
+    public static CollectionParamDecoder<OptionalInt> optionalIntegerCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalInteger);
+    }
+
+    public static CollectionParamDecoder<List<Integer>> integerListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeIntegerList);
+    }
+
+    public static CollectionParamDecoder<Set<Integer>> integerSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeIntegerSet);
+    }
+
+    public static ParamDecoder<ResourceIdentifier> ridParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeRid);
+    }
+
+    public static ParamDecoder<Optional<ResourceIdentifier>> optionalRidParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalRid);
+    }
+
+    public static CollectionParamDecoder<ResourceIdentifier> ridCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeRid);
+    }
+
+    public static CollectionParamDecoder<Optional<ResourceIdentifier>> optionalRidCollectionParamDecoder(
+            PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalRid);
+    }
+
+    public static CollectionParamDecoder<List<ResourceIdentifier>> ridListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeRidList);
+    }
+
+    public static CollectionParamDecoder<Set<ResourceIdentifier>> ridSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeRidSet);
+    }
+
+    public static ParamDecoder<SafeLong> safeLongParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeSafeLong);
+    }
+
+    public static ParamDecoder<Optional<SafeLong>> optionalSafeLongParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalSafeLong);
+    }
+
+    public static CollectionParamDecoder<SafeLong> safeLongCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeSafeLong);
+    }
+
+    public static CollectionParamDecoder<Optional<SafeLong>> optionalSafeLongCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalSafeLong);
+    }
+
+    public static CollectionParamDecoder<List<SafeLong>> safeLongListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeSafeLongList);
+    }
+
+    public static CollectionParamDecoder<Set<SafeLong>> safeLongSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeSafeLongSet);
+    }
+
+    public static ParamDecoder<UUID> uuidParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeUuid);
+    }
+
+    public static ParamDecoder<Optional<UUID>> optionalUuidParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalUuid);
+    }
+
+    public static CollectionParamDecoder<UUID> uuidCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeUuid);
+    }
+
+    public static CollectionParamDecoder<Optional<UUID>> optionalUuidCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalUuid);
+    }
+
+    public static CollectionParamDecoder<List<UUID>> uuidListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeUuidList);
+    }
+
+    public static CollectionParamDecoder<Set<UUID>> uuidSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeUuidSet);
     }
 
     private static final class DelegatingParamDecoder<T> implements ParamDecoder<T> {
