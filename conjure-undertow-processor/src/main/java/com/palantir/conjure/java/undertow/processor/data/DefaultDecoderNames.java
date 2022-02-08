@@ -75,10 +75,7 @@ final class DefaultDecoderNames {
     static String getDefaultDecoderMethodName(Class<?> clazz, ContainerType inputType, ContainerType outType) {
         Preconditions.checkState(
                 SUPPORTED_CLASSES.contains(clazz),
-                String.format(
-                        "Default decoder not supported for this class (see \"%s\" for a list of supported types)."
-                                + " Please provide your own decoder implementation",
-                        ParamDecoders.class),
+                "Default decoder not supported for this class. Please provide your own decoder implementation",
                 SafeArg.of("class", clazz));
         Preconditions.checkState(
                 INPUT_TYPES.contains(inputType),
