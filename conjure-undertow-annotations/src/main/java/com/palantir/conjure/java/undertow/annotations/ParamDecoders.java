@@ -16,94 +16,99 @@
 
 package com.palantir.conjure.java.undertow.annotations;
 
-import com.google.common.collect.Iterables;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+/** Default parameter decoders, mirroring and delegating to the deserializers provided by {@link PlainSerDe}. */
 public final class ParamDecoders {
 
-    public static ParamDecoder<String> stringDecoder() {
-        return DelegateDecoder.of(Function.identity());
+    // TODO(fwindheuser): Add methods for all deserializers in 'PlainSerDe'.
+
+    public static ParamDecoder<String> stringParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeString);
     }
 
-    public static ParamDecoder<Boolean> booleanDecoder() {
-        return DelegateDecoder.of(Boolean::valueOf);
+    public static ParamDecoder<Optional<String>> optionalStringParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalString);
     }
 
-    public static ParamDecoder<Integer> integerDecoder() {
-        return DelegateDecoder.of(Integer::valueOf);
+    public static CollectionParamDecoder<String> stringCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeString);
     }
 
-    /** Expects only a single value to be present. Delegates to the provided {@link ParamDecoder}. */
-    public static final class OnlyElementCollectionParamDecoder<T> implements CollectionParamDecoder<T> {
-
-        private final ParamDecoder<T> paramDecoder;
-
-        public OnlyElementCollectionParamDecoder(ParamDecoder<T> paramDecoder) {
-            this.paramDecoder = paramDecoder;
-        }
-
-        @Override
-        public T decode(Collection<String> value) {
-            return paramDecoder.decode(Iterables.getOnlyElement(value));
-        }
+    public static CollectionParamDecoder<Optional<String>> optionalStringCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalString);
     }
 
-    /** Decodes all elements of the provided collection. Delegates to the provided {@link ParamDecoder}. */
-    public static final class AllElementsCollectionParamDecoder<T> implements CollectionParamDecoder<List<T>> {
-
-        private final ParamDecoder<T> paramDecoder;
-
-        public AllElementsCollectionParamDecoder(ParamDecoder<T> paramDecoder) {
-            this.paramDecoder = paramDecoder;
-        }
-
-        @Override
-        public List<T> decode(Collection<String> value) {
-            return value.stream().map(paramDecoder::decode).collect(Collectors.toList());
-        }
+    public static CollectionParamDecoder<List<String>> stringListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeStringList);
     }
 
-    /** Returns {@link Optional#empty} if no value is present. Delegates to the provided {@link ParamDecoder}. */
-    public static final class OptionalCollectionParamDecoder<T> implements CollectionParamDecoder<Optional<T>> {
-
-        private final ParamDecoder<T> paramDecoder;
-
-        public OptionalCollectionParamDecoder(ParamDecoder<T> paramDecoder) {
-            this.paramDecoder = paramDecoder;
-        }
-
-        @Override
-        public Optional<T> decode(Collection<String> value) {
-            if (value.isEmpty()) {
-                return Optional.empty();
-            }
-            return Optional.of(paramDecoder.decode(Iterables.getOnlyElement(value)));
-        }
+    public static CollectionParamDecoder<Set<String>> stringSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeStringSet);
     }
 
-    private static final class DelegateDecoder<T> implements ParamDecoder<T> {
+    public static ParamDecoder<Boolean> booleanParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeBoolean);
+    }
 
-        private final Function<String, T> decodeFunc;
+    public static ParamDecoder<Optional<Boolean>> optionalBooleanParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(serde::deserializeOptionalBoolean);
+    }
 
-        static <T> DelegateDecoder<T> of(Function<String, T> decodeFunc) {
-            return new DelegateDecoder<>(decodeFunc);
+    public static CollectionParamDecoder<Boolean> booleanCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeBoolean);
+    }
+
+    public static CollectionParamDecoder<Optional<Boolean>> optionalBooleanCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeOptionalBoolean);
+    }
+
+    public static CollectionParamDecoder<List<Boolean>> booleanListCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeBooleanList);
+    }
+
+    public static CollectionParamDecoder<Set<Boolean>> booleanSetCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(serde::deserializeBooleanSet);
+    }
+
+    private static final class DelegatingParamDecoder<T> implements ParamDecoder<T> {
+
+        private final Function<String, T> factory;
+
+        private DelegatingParamDecoder(Function<String, T> factory) {
+            this.factory = factory;
         }
 
-        private DelegateDecoder(Function<String, T> decodeFunc) {
-            this.decodeFunc = decodeFunc;
+        static <T> DelegatingParamDecoder<T> of(Function<String, T> factory) {
+            return new DelegatingParamDecoder<>(factory);
         }
 
         @Override
         public T decode(String value) {
-            if (value == null) {
-                throw new SafeIllegalArgumentException("Value is required");
-            }
-            return decodeFunc.apply(value);
+            return factory.apply(value);
+        }
+    }
+
+    private static final class DelegatingCollectionParamDecoder<T> implements CollectionParamDecoder<T> {
+
+        private final Function<Collection<String>, T> factory;
+
+        private DelegatingCollectionParamDecoder(Function<Collection<String>, T> factory) {
+            this.factory = factory;
+        }
+
+        static <T> DelegatingCollectionParamDecoder<T> of(Function<Collection<String>, T> factory) {
+            return new DelegatingCollectionParamDecoder<>(factory);
+        }
+
+        @Override
+        public T decode(Collection<String> value) {
+            return factory.apply(value);
         }
     }
 

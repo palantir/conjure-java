@@ -20,9 +20,11 @@ import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.undertow.annotations.DefaultCollectionParamDecoder;
+import com.palantir.conjure.java.undertow.annotations.DefaultParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
+import com.palantir.conjure.java.undertow.processor.data.DefaultDecoderNames.ContainerType;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tokens.auth.AuthHeader;
@@ -32,6 +34,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -101,58 +104,73 @@ public final class ParamTypesResolver {
             return Optional.of(ParameterTypes.header(
                     annotationReflector.getAnnotationValue(String.class),
                     deserializerName,
-                    Instantiables.instantiate(annotationReflector.getAnnotationValue("decoder", TypeMirror.class))));
+                    getCollectionParamDecoder(variableElement, annotationReflector)));
         } else if (annotationReflector.isAnnotation(Handle.PathParam.class)) {
             String javaParameterName = variableElement.getSimpleName().toString();
             String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
             return Optional.of(ParameterTypes.path(
-                    javaParameterName,
-                    deserializerName,
-                    Instantiables.instantiate(annotationReflector.getAnnotationValue("decoder", TypeMirror.class))));
+                    javaParameterName, deserializerName, getParamDecoder(variableElement, annotationReflector)));
         } else if (annotationReflector.isAnnotation(Handle.QueryParam.class)) {
             String deserializerName = InstanceVariables.joinCamelCase(
                     variableElement.getSimpleName().toString(), "Deserializer");
             return Optional.of(ParameterTypes.query(
                     annotationReflector.getAnnotationValue(String.class),
                     deserializerName,
-                    getQueryParamDecoder(variableElement, annotationReflector)));
+                    getCollectionParamDecoder(variableElement, annotationReflector)));
         }
 
         throw new SafeIllegalStateException("Not possible");
     }
 
-    private CodeBlock getQueryParamDecoder(VariableElement variableElement, AnnotationReflector annotationReflector) {
-        // If the default marker interface is not used, we want to use the user-provided decoder
+    // TODO(fwindheuser): Bit messy, clean up
+
+    private CodeBlock getParamDecoder(VariableElement variableElement, AnnotationReflector annotationReflector) {
+        // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
+        TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
+        if (!context.isSameTypes(typeMirror, DefaultParamDecoder.class)) {
+            return Instantiables.instantiate(typeMirror);
+        }
+
+        TypeMirror variableType = variableElement.asType();
+        String decoderMethodName =
+                DefaultDecoderNames.getDefaultDecoderMethodName(variableType, ContainerType.NONE, ContainerType.NONE);
+
+        // TODO(fwindheuser): We should reference the "runtime" var through a javapoet reference ('$N').
+        return CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName);
+    }
+
+    private CodeBlock getCollectionParamDecoder(
+            VariableElement variableElement, AnnotationReflector annotationReflector) {
+        // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultCollectionParamDecoder.class)) {
             return Instantiables.instantiate(typeMirror);
         }
 
         TypeMirror variableType = variableElement.asType();
-        Optional<TypeMirror> listType = context.getGenericInnerType(List.class, variableType);
-        Optional<TypeMirror> optionalType = context.getGenericInnerType(Optional.class, variableType);
+        Optional<TypeMirror> innerListType = context.getGenericInnerType(List.class, variableType);
+        Optional<TypeMirror> innerSetType = context.getGenericInnerType(Set.class, variableType);
+        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);
 
-        if (listType.isPresent()) {
-            return CodeBlock.of(
-                    "new $T<>($L)", ParamDecoders.AllElementsCollectionParamDecoder.class, getDecoder(listType.get()));
-        } else if (optionalType.isPresent()) {
-            return CodeBlock.of(
-                    "new $T<>($L)", ParamDecoders.OptionalCollectionParamDecoder.class, getDecoder(optionalType.get()));
-        } else {
-            return CodeBlock.of(
-                    "new $T<>($L)", ParamDecoders.OnlyElementCollectionParamDecoder.class, getDecoder(variableType));
-        }
+        TypeMirror decoderType =
+                innerListType.or(() -> innerSetType).or(() -> innerOptionalType).orElse(variableType);
+        ContainerType decoderOutputType = getOutputType(innerListType, innerSetType, innerOptionalType);
+
+        String decoderMethodName =
+                DefaultDecoderNames.getDefaultDecoderMethodName(decoderType, ContainerType.LIST, decoderOutputType);
+
+        return CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName);
     }
 
-    private CodeBlock getDecoder(TypeMirror variableType) {
-        // TODO(fwindheuser): Implement other types
-        if (context.isSameTypes(variableType, String.class)) {
-            return CodeBlock.of("$T.stringDecoder()", ParamDecoders.class);
-        } else if (context.isSameTypes(variableType, Boolean.class)) {
-            return CodeBlock.of("$T.booleanDecoder()", ParamDecoders.class);
-        } else if (context.isSameTypes(variableType, Integer.class)) {
-            return CodeBlock.of("$T.integerDecoder()", ParamDecoders.class);
+    private static ContainerType getOutputType(
+            Optional<TypeMirror> listType, Optional<TypeMirror> setType, Optional<TypeMirror> optionalType) {
+        if (listType.isPresent()) {
+            return ContainerType.LIST;
+        } else if (setType.isPresent()) {
+            return ContainerType.SET;
+        } else if (optionalType.isPresent()) {
+            return ContainerType.OPTIONAL;
         }
-        throw new SafeIllegalStateException("Could not create default decoder", SafeArg.of("type", variableType));
+        return ContainerType.NONE;
     }
 }

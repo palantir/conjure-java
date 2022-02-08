@@ -1,0 +1,277 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
+import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
+import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
+import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import java.io.IOException;
+import java.lang.Boolean;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class DefaultDecoderServiceEndpoints implements UndertowService {
+    private final DefaultDecoderService delegate;
+
+    private DefaultDecoderServiceEndpoints(DefaultDecoderService delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(DefaultDecoderService delegate) {
+        return new DefaultDecoderServiceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(
+                new QueryParamEndpoint(runtime, delegate),
+                new HeadersEndpoint(runtime, delegate),
+                new PathParamEndpoint(runtime, delegate));
+    }
+
+    private static final class QueryParamEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final DefaultDecoderService delegate;
+
+        private final Serializer<String> queryParamSerializer;
+
+        private final Deserializer<String> stringParamDeserializer;
+
+        private final Deserializer<Boolean> booleanParamDeserializer;
+
+        private final Deserializer<Set<String>> stringSetParamDeserializer;
+
+        private final Deserializer<List<String>> stringListParamDeserializer;
+
+        private final Deserializer<Optional<String>> optionalStringParamDeserializer;
+
+        private final Deserializer<String> decoderParamDeserializer;
+
+        QueryParamEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.queryParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime);
+            this.stringParamDeserializer = new QueryParamDeserializer<>(
+                    "stringParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.booleanParamDeserializer = new QueryParamDeserializer<>(
+                    "booleanParam", ParamDecoders.booleanCollectionParamDecoder(runtime.plainSerDe()));
+            this.stringSetParamDeserializer = new QueryParamDeserializer<>(
+                    "stringSetParam", ParamDecoders.stringSetCollectionParamDecoder(runtime.plainSerDe()));
+            this.stringListParamDeserializer = new QueryParamDeserializer<>(
+                    "stringListParam", ParamDecoders.stringListCollectionParamDecoder(runtime.plainSerDe()));
+            this.optionalStringParamDeserializer = new QueryParamDeserializer<>(
+                    "optionalStringParam", ParamDecoders.optionalStringCollectionParamDecoder(runtime.plainSerDe()));
+            this.decoderParamDeserializer = new QueryParamDeserializer<>(
+                    "decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            write(
+                    this.delegate.queryParam(
+                            this.stringParamDeserializer.deserialize(exchange),
+                            this.booleanParamDeserializer.deserialize(exchange),
+                            this.stringSetParamDeserializer.deserialize(exchange),
+                            this.stringListParamDeserializer.deserialize(exchange),
+                            this.optionalStringParamDeserializer.deserialize(exchange),
+                            this.decoderParamDeserializer.deserialize(exchange)),
+                    exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.queryParamSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/queryParam";
+        }
+
+        @Override
+        public String serviceName() {
+            return "DefaultDecoderService";
+        }
+
+        @Override
+        public String name() {
+            return "queryParam";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class HeadersEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final DefaultDecoderService delegate;
+
+        private final Serializer<String> headersSerializer;
+
+        private final Deserializer<String> stringParamDeserializer;
+
+        private final Deserializer<Boolean> booleanParamDeserializer;
+
+        private final Deserializer<Set<String>> stringSetParamDeserializer;
+
+        private final Deserializer<List<String>> stringListParamDeserializer;
+
+        private final Deserializer<Optional<String>> optionalStringParamDeserializer;
+
+        private final Deserializer<String> decoderParamDeserializer;
+
+        HeadersEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.headersSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime);
+            this.stringParamDeserializer = new HeaderParamDeserializer<>(
+                    "stringParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.booleanParamDeserializer = new HeaderParamDeserializer<>(
+                    "booleanParam", ParamDecoders.booleanCollectionParamDecoder(runtime.plainSerDe()));
+            this.stringSetParamDeserializer = new HeaderParamDeserializer<>(
+                    "stringSetParam", ParamDecoders.stringSetCollectionParamDecoder(runtime.plainSerDe()));
+            this.stringListParamDeserializer = new HeaderParamDeserializer<>(
+                    "stringListParam", ParamDecoders.stringListCollectionParamDecoder(runtime.plainSerDe()));
+            this.optionalStringParamDeserializer = new HeaderParamDeserializer<>(
+                    "optionalStringParam", ParamDecoders.optionalStringCollectionParamDecoder(runtime.plainSerDe()));
+            this.decoderParamDeserializer = new HeaderParamDeserializer<>(
+                    "decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            write(
+                    this.delegate.headers(
+                            this.stringParamDeserializer.deserialize(exchange),
+                            this.booleanParamDeserializer.deserialize(exchange),
+                            this.stringSetParamDeserializer.deserialize(exchange),
+                            this.stringListParamDeserializer.deserialize(exchange),
+                            this.optionalStringParamDeserializer.deserialize(exchange),
+                            this.decoderParamDeserializer.deserialize(exchange)),
+                    exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.headersSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/headers";
+        }
+
+        @Override
+        public String serviceName() {
+            return "DefaultDecoderService";
+        }
+
+        @Override
+        public String name() {
+            return "headers";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class PathParamEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final DefaultDecoderService delegate;
+
+        private final Serializer<String> pathParamSerializer;
+
+        private final Deserializer<String> stringParamDeserializer;
+
+        private final Deserializer<Boolean> booleanParamDeserializer;
+
+        private final Deserializer<String> decoderParamDeserializer;
+
+        PathParamEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.pathParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime);
+            this.stringParamDeserializer =
+                    new PathParamDeserializer<>("stringParam", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+            this.booleanParamDeserializer = new PathParamDeserializer<>(
+                    "booleanParam", ParamDecoders.booleanParamDecoder(runtime.plainSerDe()));
+            this.decoderParamDeserializer =
+                    new PathParamDeserializer<>("decoderParam", DefaultDecoderService.StringDecoder.INSTANCE);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            write(
+                    this.delegate.pathParam(
+                            this.stringParamDeserializer.deserialize(exchange),
+                            this.booleanParamDeserializer.deserialize(exchange),
+                            this.decoderParamDeserializer.deserialize(exchange)),
+                    exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.pathParamSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}";
+        }
+
+        @Override
+        public String serviceName() {
+            return "DefaultDecoderService";
+        }
+
+        @Override
+        public String name() {
+            return "pathParam";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}
