@@ -75,12 +75,20 @@ public @interface Handle {
     @interface Header {
         String value();
 
+        /**
+         * Decoder for deserializing the header value. If omitted, tries to use a default encoder in
+         * {@link ParamDecoders}.
+         */
         Class<? extends CollectionParamDecoder<?>> decoder() default DefaultCollectionParamDecoder.class;
     }
 
     @Retention(RetentionPolicy.SOURCE)
     @Target(ElementType.PARAMETER)
     @interface PathParam {
+        /**
+         * Decoder for deserializing the path parameter. If omitted, tries to use a default encoder in
+         * {@link ParamDecoders}.
+         */
         Class<? extends ParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
 
@@ -89,6 +97,10 @@ public @interface Handle {
     @interface QueryParam {
         String value();
 
+        /**
+         * Decoder for deserializing query parameter value. If omitted, tries to use a default encoder in
+         * {@link ParamDecoders}.
+         */
         Class<? extends CollectionParamDecoder<?>> decoder() default DefaultCollectionParamDecoder.class;
     }
 }

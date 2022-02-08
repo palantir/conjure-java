@@ -1,6 +1,7 @@
 package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
@@ -13,6 +14,7 @@ import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.ri.ResourceIdentifier;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
@@ -22,9 +24,12 @@ import java.lang.Boolean;
 import java.lang.Exception;
 import java.lang.Override;
 import java.lang.String;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
@@ -43,6 +48,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return ImmutableList.of(
                 new QueryParamEndpoint(runtime, delegate),
+                new MoreQueryParamsEndpoint(runtime, delegate),
                 new HeadersEndpoint(runtime, delegate),
                 new PathParamEndpoint(runtime, delegate));
     }
@@ -120,6 +126,83 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "queryParam";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class MoreQueryParamsEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final DefaultDecoderService delegate;
+
+        private final Serializer<String> moreQueryParamsSerializer;
+
+        private final Deserializer<OptionalInt> optionalIntParamDeserializer;
+
+        private final Deserializer<OffsetDateTime> dateTimeParamDeserializer;
+
+        private final Deserializer<Set<ResourceIdentifier>> ridSetParamDeserializer;
+
+        private final Deserializer<Optional<SafeLong>> optionalSafeLongParamDeserializer;
+
+        private final Deserializer<UUID> uuidParamDeserializer;
+
+        MoreQueryParamsEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.moreQueryParamsSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime);
+            this.optionalIntParamDeserializer = new QueryParamDeserializer<>(
+                    "optionalInt", ParamDecoders.optionalIntegerCollectionParamDecoder(runtime.plainSerDe()));
+            this.dateTimeParamDeserializer = new QueryParamDeserializer<>(
+                    "dateTime", ParamDecoders.dateTimeCollectionParamDecoder(runtime.plainSerDe()));
+            this.ridSetParamDeserializer = new QueryParamDeserializer<>(
+                    "ridSetParam", ParamDecoders.ridSetCollectionParamDecoder(runtime.plainSerDe()));
+            this.optionalSafeLongParamDeserializer = new QueryParamDeserializer<>(
+                    "optionalSafeLongParam",
+                    ParamDecoders.optionalSafeLongCollectionParamDecoder(runtime.plainSerDe()));
+            this.uuidParamDeserializer = new QueryParamDeserializer<>(
+                    "uuidParam", ParamDecoders.uuidCollectionParamDecoder(runtime.plainSerDe()));
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            write(
+                    this.delegate.moreQueryParams(
+                            this.optionalIntParamDeserializer.deserialize(exchange),
+                            this.dateTimeParamDeserializer.deserialize(exchange),
+                            this.ridSetParamDeserializer.deserialize(exchange),
+                            this.optionalSafeLongParamDeserializer.deserialize(exchange),
+                            this.uuidParamDeserializer.deserialize(exchange)),
+                    exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.moreQueryParamsSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/moreQueryParams";
+        }
+
+        @Override
+        public String serviceName() {
+            return "DefaultDecoderService";
+        }
+
+        @Override
+        public String name() {
+            return "moreQueryParams";
         }
 
         @Override

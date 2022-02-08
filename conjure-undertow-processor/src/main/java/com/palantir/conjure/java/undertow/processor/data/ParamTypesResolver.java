@@ -122,8 +122,6 @@ public final class ParamTypesResolver {
         throw new SafeIllegalStateException("Not possible");
     }
 
-    // TODO(fwindheuser): Bit messy, clean up
-
     private CodeBlock getParamDecoder(VariableElement variableElement, AnnotationReflector annotationReflector) {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
@@ -131,11 +129,11 @@ public final class ParamTypesResolver {
             return Instantiables.instantiate(typeMirror);
         }
 
+        // For param decoders, we don't support any container types (optional, list, set).
         TypeMirror variableType = variableElement.asType();
         String decoderMethodName =
                 DefaultDecoderNames.getDefaultDecoderMethodName(variableType, ContainerType.NONE, ContainerType.NONE);
 
-        // TODO(fwindheuser): We should reference the "runtime" var through a javapoet reference ('$N').
         return CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName);
     }
 

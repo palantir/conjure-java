@@ -17,14 +17,19 @@
 package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.google.common.collect.Iterables;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.annotations.CollectionParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoder;
+import com.palantir.ri.ResourceIdentifier;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.UUID;
 
 public interface DefaultDecoderService {
 
@@ -36,6 +41,14 @@ public interface DefaultDecoderService {
             @Handle.QueryParam(value = "stringListParam") List<String> stringListParam,
             @Handle.QueryParam(value = "optionalStringParam") Optional<String> optionalStringParam,
             @Handle.QueryParam(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam);
+
+    @Handle(method = HttpMethod.GET, path = "/moreQueryParams")
+    String moreQueryParams(
+            @Handle.QueryParam(value = "optionalInt") OptionalInt optionalIntParam,
+            @Handle.QueryParam(value = "dateTime") OffsetDateTime dateTimeParam,
+            @Handle.QueryParam(value = "ridSetParam") Set<ResourceIdentifier> ridSetParam,
+            @Handle.QueryParam(value = "optionalSafeLongParam") Optional<SafeLong> optionalSafeLongParam,
+            @Handle.QueryParam(value = "uuidParam") UUID uuidParam);
 
     @Handle(method = HttpMethod.GET, path = "/headers")
     String headers(

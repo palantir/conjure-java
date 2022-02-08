@@ -19,19 +19,14 @@ package com.palantir.conjure.java.undertow.processor.data;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
 import com.palantir.conjure.java.undertow.processor.data.DefaultDecoderNames.ContainerType;
-import com.palantir.ri.ResourceIdentifier;
-import com.palantir.tokens.auth.BearerToken;
 import java.lang.reflect.Method;
-import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -80,37 +75,31 @@ final class DefaultDecoderNamesTest {
     }
 
     private static List<Arguments> getParamDecoderArguments() {
-        List<Class<?>> supportedClasses = ImmutableList.of(
-                String.class,
-                Boolean.class,
-                BearerToken.class,
-                OffsetDateTime.class,
-                Double.class, // plus OptionalDouble
-                Integer.class, // plus OptionalInt
-                ResourceIdentifier.class,
-                SafeLong.class,
-                UUID.class);
+        List<Class<?>> supportedClasses = DefaultDecoderNames.SUPPORTED_CLASSES.stream()
+                // We handle these cases differently further down this method.
+                .filter(clazz -> !clazz.equals(OptionalDouble.class) && !clazz.equals(OptionalInt.class))
+                .collect(Collectors.toList());
 
         ImmutableList.Builder<Arguments> arguments = ImmutableList.builder();
 
         // For 'ParamDecoder', we only support mapping to Optional as output container.
         for (ContainerType outputContainer : ImmutableList.of(ContainerType.NONE, ContainerType.OPTIONAL)) {
-            arguments.addAll(getArgumentsForOuputContainer(ContainerType.NONE, outputContainer, supportedClasses));
+            arguments.addAll(getArgumentsForOutputContainer(ContainerType.NONE, outputContainer, supportedClasses));
         }
 
         // For 'CollectionParamDecoder', we support mapping to Optional, List, and Set as output container.
         for (ContainerType outputContainer : ContainerType.values()) {
-            arguments.addAll(getArgumentsForOuputContainer(ContainerType.LIST, outputContainer, supportedClasses));
+            arguments.addAll(getArgumentsForOutputContainer(ContainerType.LIST, outputContainer, supportedClasses));
         }
 
         return arguments.build();
     }
 
-    private static List<Arguments> getArgumentsForOuputContainer(
+    private static List<Arguments> getArgumentsForOutputContainer(
             ContainerType inputContainer, ContainerType outputContainer, List<Class<?>> supportedClasses) {
         return supportedClasses.stream()
                 .map(clazz -> {
-                    // For double and int, we use a separate type instead of wrapping it with Optional.
+                    // For double and int, we use a separate optional type instead of wrapping it with Optional.
                     if (outputContainer.equals(ContainerType.OPTIONAL) && clazz.equals(Double.class)) {
                         return Arguments.of(OptionalDouble.class, ContainerType.NONE, ContainerType.NONE);
                     } else if (outputContainer.equals(ContainerType.OPTIONAL) && clazz.equals(Integer.class)) {
