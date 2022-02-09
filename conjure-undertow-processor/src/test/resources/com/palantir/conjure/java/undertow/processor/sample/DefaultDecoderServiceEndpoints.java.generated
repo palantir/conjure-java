@@ -22,8 +22,10 @@ import io.undertow.util.Methods;
 import java.io.IOException;
 import java.lang.Boolean;
 import java.lang.Exception;
+import java.lang.Float;
 import java.lang.Override;
 import java.lang.String;
+import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -151,6 +153,10 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<UUID> uuidParamDeserializer;
 
+        private final Deserializer<Float> floatHeaderBoxedDeserializer;
+
+        private final Deserializer<Float> floatHeaderUnboxedDeserializer;
+
         MoreQueryParamsEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
@@ -166,6 +172,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     ParamDecoders.optionalSafeLongCollectionParamDecoder(runtime.plainSerDe()));
             this.uuidParamDeserializer = new QueryParamDeserializer<>(
                     "uuidParam", ParamDecoders.uuidCollectionParamDecoder(runtime.plainSerDe()));
+            this.floatHeaderBoxedDeserializer = new QueryParamDeserializer<>(
+                    "floatParamBoxed",
+                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::valueOf));
+            this.floatHeaderUnboxedDeserializer = new QueryParamDeserializer<>(
+                    "floatParamUnboxed",
+                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::parseFloat));
         }
 
         @Override
@@ -176,7 +188,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             this.dateTimeParamDeserializer.deserialize(exchange),
                             this.ridSetParamDeserializer.deserialize(exchange),
                             this.optionalSafeLongParamDeserializer.deserialize(exchange),
-                            this.uuidParamDeserializer.deserialize(exchange)),
+                            this.uuidParamDeserializer.deserialize(exchange),
+                            this.floatHeaderBoxedDeserializer.deserialize(exchange),
+                            this.floatHeaderUnboxedDeserializer.deserialize(exchange)),
                     exchange);
         }
 
@@ -230,6 +244,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<String> decoderParamDeserializer;
 
+        private final Deserializer<Float> floatHeaderBoxedDeserializer;
+
+        private final Deserializer<Float> floatHeaderUnboxedDeserializer;
+
+        private final Deserializer<BigInteger> bigIntegerDeserializer;
+
         HeadersEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
@@ -246,6 +266,14 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "optionalStringParam", ParamDecoders.optionalStringCollectionParamDecoder(runtime.plainSerDe()));
             this.decoderParamDeserializer = new HeaderParamDeserializer<>(
                     "decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
+            this.floatHeaderBoxedDeserializer = new HeaderParamDeserializer<>(
+                    "floatHeaderBoxed",
+                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::valueOf));
+            this.floatHeaderUnboxedDeserializer = new HeaderParamDeserializer<>(
+                    "floatHeaderUnboxed",
+                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::parseFloat));
+            this.bigIntegerDeserializer = new HeaderParamDeserializer<>(
+                    "bigInteger", ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), BigInteger::new));
         }
 
         @Override
@@ -257,7 +285,10 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             this.stringSetParamDeserializer.deserialize(exchange),
                             this.stringListParamDeserializer.deserialize(exchange),
                             this.optionalStringParamDeserializer.deserialize(exchange),
-                            this.decoderParamDeserializer.deserialize(exchange)),
+                            this.decoderParamDeserializer.deserialize(exchange),
+                            this.floatHeaderBoxedDeserializer.deserialize(exchange),
+                            this.floatHeaderUnboxedDeserializer.deserialize(exchange),
+                            this.bigIntegerDeserializer.deserialize(exchange)),
                     exchange);
         }
 
@@ -305,6 +336,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<String> decoderParamDeserializer;
 
+        private final Deserializer<Float> floatBoxedDeserializer;
+
+        private final Deserializer<Float> floatUnboxedDeserializer;
+
+        private final Deserializer<BigInteger> bigIntDeserializer;
+
         PathParamEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
@@ -315,6 +352,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "booleanParam", ParamDecoders.booleanParamDecoder(runtime.plainSerDe()));
             this.decoderParamDeserializer =
                     new PathParamDeserializer<>("decoderParam", DefaultDecoderService.StringDecoder.INSTANCE);
+            this.floatBoxedDeserializer = new PathParamDeserializer<>(
+                    "floatBoxed", ParamDecoders.complexParamDecoder(runtime.plainSerDe(), Float::valueOf));
+            this.floatUnboxedDeserializer = new PathParamDeserializer<>(
+                    "floatUnboxed", ParamDecoders.complexParamDecoder(runtime.plainSerDe(), Float::parseFloat));
+            this.bigIntDeserializer = new PathParamDeserializer<>(
+                    "bigInt", ParamDecoders.complexParamDecoder(runtime.plainSerDe(), BigInteger::new));
         }
 
         @Override
@@ -323,7 +366,10 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     this.delegate.pathParam(
                             this.stringParamDeserializer.deserialize(exchange),
                             this.booleanParamDeserializer.deserialize(exchange),
-                            this.decoderParamDeserializer.deserialize(exchange)),
+                            this.decoderParamDeserializer.deserialize(exchange),
+                            this.floatBoxedDeserializer.deserialize(exchange),
+                            this.floatUnboxedDeserializer.deserialize(exchange),
+                            this.bigIntDeserializer.deserialize(exchange)),
                     exchange);
         }
 
@@ -339,7 +385,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}";
+            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{bigInt}";
         }
 
         @Override
