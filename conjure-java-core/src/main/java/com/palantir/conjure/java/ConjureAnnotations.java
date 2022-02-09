@@ -30,6 +30,8 @@ public final class ConjureAnnotations {
 
     private static final ImmutableList<AnnotationSpec> DEPRECATED =
             ImmutableList.of(AnnotationSpec.builder(Deprecated.class).build());
+    private static final ImmutableList<AnnotationSpec> OVERRIDE_LIST =
+            ImmutableList.of(AnnotationSpec.builder(Override.class).build());
     private static final AnnotationSpec INCUBATING_SPEC =
             AnnotationSpec.builder(Incubating.class).build();
     private static final ImmutableList<AnnotationSpec> INCUBATING = ImmutableList.of(INCUBATING_SPEC);
@@ -48,6 +50,10 @@ public final class ConjureAnnotations {
 
     public static ImmutableList<AnnotationSpec> deprecation(Optional<Documentation> deprecation) {
         return deprecation.isPresent() ? DEPRECATED : ImmutableList.of();
+    }
+
+    public static ImmutableList<AnnotationSpec> override(boolean override) {
+        return override ? OVERRIDE_LIST : ImmutableList.of();
     }
 
     public static ImmutableList<AnnotationSpec> getClientEndpointAnnotations(EndpointDefinition definition) {

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add staged builder missing overrides in the default internal implementation
+  links:
+  - https://github.com/palantir/conjure-java/pull/1637

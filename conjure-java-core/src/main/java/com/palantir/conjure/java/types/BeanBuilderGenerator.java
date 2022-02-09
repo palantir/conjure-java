@@ -106,22 +106,22 @@ public final class BeanBuilderGenerator {
             Optional<ClassName> builderInterfaceClass) {
         Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
-
+        boolean override = builderInterfaceClass.isPresent();
         TypeSpec.Builder builder = TypeSpec.classBuilder(
-                        isInStagedBuilderMode(builderInterfaceClass) ? "DefaultBuilder" : "Builder")
+                        builderInterfaceClass.isPresent() ? "DefaultBuilder" : "Builder")
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .addField(FieldSpec.builder(boolean.class, BUILT_FIELD).build())
                 .addFields(poetFields)
                 .addFields(primitivesInitializedFields(enrichedFields))
                 .addMethod(createConstructor())
-                .addMethod(createFromObject(enrichedFields))
-                .addMethods(createSetters(enrichedFields, typesMap))
+                .addMethod(createFromObject(enrichedFields, override))
+                .addMethods(createSetters(enrichedFields, typesMap, override))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
-                .addMethod(createBuild(enrichedFields, poetFields))
+                .addMethod(createBuild(enrichedFields, poetFields, override))
                 .addMethod(createCheckNotBuilt());
 
-        if (isInStagedBuilderMode(builderInterfaceClass)) {
+        if (builderInterfaceClass.isPresent()) {
             builder.addSuperinterface(builderInterfaceClass.get());
         } else {
             builder.addModifiers(Modifier.PUBLIC);
@@ -134,10 +134,6 @@ public final class BeanBuilderGenerator {
         }
 
         return builder.build();
-    }
-
-    private boolean isInStagedBuilderMode(Optional<ClassName> builderInterfaceClass) {
-        return options.useStagedBuilders() && builderInterfaceClass.isPresent();
     }
 
     private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {
@@ -222,13 +218,14 @@ public final class BeanBuilderGenerator {
         return MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build();
     }
 
-    private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields) {
+    private MethodSpec createFromObject(Collection<EnrichedField> enrichedFields, boolean override) {
         CodeBlock assignmentBlock = CodeBlocks.of(Collections2.transform(
                 enrichedFields,
                 enrichedField -> CodeBlocks.statement(
                         "$1N(other.$2N())", enrichedField.poetSpec().name, enrichedField.getterName())));
 
         return MethodSpec.methodBuilder("from")
+                .addAnnotations(ConjureAnnotations.override(override))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(builderClass)
                 .addParameter(objectClass, "other")
@@ -257,17 +254,21 @@ public final class BeanBuilderGenerator {
     }
 
     private Iterable<MethodSpec> createSetters(
-            Collection<EnrichedField> fields, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+            Collection<EnrichedField> fields,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            boolean override) {
         Collection<MethodSpec> setters = Lists.newArrayListWithExpectedSize(fields.size());
         for (EnrichedField field : fields) {
-            setters.add(createSetter(field, typesMap));
-            setters.addAll(createAuxiliarySetters(field));
+            setters.add(createSetter(field, typesMap, override));
+            setters.addAll(createAuxiliarySetters(field, override));
         }
         return setters;
     }
 
     private MethodSpec createSetter(
-            EnrichedField enriched, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+            EnrichedField enriched,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            boolean override) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
@@ -302,16 +303,18 @@ public final class BeanBuilderGenerator {
 
         return setterBuilder
                 .addStatement("return this")
+                .addAnnotations(ConjureAnnotations.override(override))
                 .addAnnotation(annotationBuilder.build())
                 .build();
     }
 
-    private MethodSpec createCollectionSetter(String prefix, EnrichedField enriched) {
+    private MethodSpec createCollectionSetter(String prefix, EnrichedField enriched, boolean override) {
         FieldDefinition definition = enriched.conjureDef();
         Type type = definition.getType();
         boolean shouldClearFirst = false;
         return BeanBuilderAuxiliarySettersUtils.createCollectionSetterBuilder(
                         prefix, enriched, typeMapper, builderClass)
+                .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
                 .addStatement("return this")
@@ -375,35 +378,37 @@ public final class BeanBuilderGenerator {
         return type.accept(TypeVisitor.IS_BINARY) && !options.useImmutableBytes();
     }
 
-    private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched) {
+    private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched, boolean override) {
         Type type = enriched.conjureDef().getType();
 
         if (type.accept(TypeVisitor.IS_LIST)) {
             return ImmutableList.of(
-                    createCollectionSetter("addAll", enriched),
-                    createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType()));
+                    createCollectionSetter("addAll", enriched, override),
+                    createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override));
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
             return ImmutableList.of(
-                    createCollectionSetter("addAll", enriched),
-                    createItemSetter(enriched, type.accept(TypeVisitor.SET).getItemType()));
+                    createCollectionSetter("addAll", enriched, override),
+                    createItemSetter(enriched, type.accept(TypeVisitor.SET).getItemType(), override));
         }
 
         if (type.accept(TypeVisitor.IS_MAP)) {
-            return ImmutableList.of(createCollectionSetter("putAll", enriched), createMapSetter(enriched));
+            return ImmutableList.of(
+                    createCollectionSetter("putAll", enriched, override), createMapSetter(enriched, override));
         }
 
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
-            return ImmutableList.of(createOptionalSetter(enriched));
+            return ImmutableList.of(createOptionalSetter(enriched, override));
         }
 
         return ImmutableList.of();
     }
 
-    private MethodSpec createOptionalSetter(EnrichedField enriched) {
+    private MethodSpec createOptionalSetter(EnrichedField enriched, boolean override) {
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
         return BeanBuilderAuxiliarySettersUtils.createOptionalSetterBuilder(enriched, typeMapper, builderClass)
+                .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
                 .addCode(optionalAssignmentStatement(enriched, type))
                 .addStatement("return this")
@@ -437,25 +442,29 @@ public final class BeanBuilderGenerator {
                         optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
     }
 
-    private MethodSpec createItemSetter(EnrichedField enriched, Type itemType) {
+    private MethodSpec createItemSetter(EnrichedField enriched, Type itemType, boolean override) {
         FieldSpec field = enriched.poetSpec();
         return BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(enriched, itemType, typeMapper, builderClass)
+                .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
                 .addStatement("this.$1N.add($1N)", field.name)
                 .addStatement("return this")
                 .build();
     }
 
-    private MethodSpec createMapSetter(EnrichedField enriched) {
+    private MethodSpec createMapSetter(EnrichedField enriched, boolean override) {
         return BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(enriched, typeMapper, builderClass)
+                .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
                 .addStatement("this.$1N.put(key, value)", enriched.poetSpec().name)
                 .addStatement("return this")
                 .build();
     }
 
-    private MethodSpec createBuild(Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields) {
+    private MethodSpec createBuild(
+            Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields, boolean override) {
         MethodSpec.Builder method = MethodSpec.methodBuilder("build")
+                .addAnnotations(ConjureAnnotations.override(override))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(objectClass)
                 .addCode(verifyNotBuilt())

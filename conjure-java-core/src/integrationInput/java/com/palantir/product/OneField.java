@@ -106,12 +106,14 @@ public final class OneField {
 
         private DefaultBuilder() {}
 
+        @Override
         public Builder from(OneField other) {
             checkNotBuilt();
             bearerTokenValue(other.getBearerTokenValue());
             return this;
         }
 
+        @Override
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
             checkNotBuilt();
@@ -119,6 +121,7 @@ public final class OneField {
             return this;
         }
 
+        @Override
         public OneField build() {
             checkNotBuilt();
             this._buildInvoked = true;
