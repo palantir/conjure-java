@@ -246,6 +246,7 @@ public final class MultipleOrderedStages {
 
         private DefaultBuilder() {}
 
+        @Override
         public Builder from(MultipleOrderedStages other) {
             checkNotBuilt();
             token(other.getToken());
@@ -256,6 +257,7 @@ public final class MultipleOrderedStages {
             return this;
         }
 
+        @Override
         @JsonSetter("token")
         public Builder token(@Nonnull OneField token) {
             checkNotBuilt();
@@ -263,6 +265,7 @@ public final class MultipleOrderedStages {
             return this;
         }
 
+        @Override
         @JsonSetter("item")
         public Builder item(@Nonnull String item) {
             checkNotBuilt();
@@ -270,6 +273,7 @@ public final class MultipleOrderedStages {
             return this;
         }
 
+        @Override
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<SafeLong> items) {
             checkNotBuilt();
@@ -278,18 +282,21 @@ public final class MultipleOrderedStages {
             return this;
         }
 
+        @Override
         public Builder addAllItems(@Nonnull Iterable<SafeLong> items) {
             checkNotBuilt();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
+        @Override
         public Builder items(SafeLong items) {
             checkNotBuilt();
             this.items.add(items);
             return this;
         }
 
+        @Override
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
@@ -298,12 +305,14 @@ public final class MultipleOrderedStages {
             return this;
         }
 
+        @Override
         public Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
             return this;
         }
 
+        @Override
         public Builder mappedRids(ResourceIdentifier key, String value) {
             checkNotBuilt();
             this.mappedRids.put(key, value);
@@ -314,6 +323,7 @@ public final class MultipleOrderedStages {
          * @deprecated this optional is deprecated
          */
         @Deprecated
+        @Override
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
         public Builder optionalItem(@Nonnull Optional<OneField> optionalItem) {
             checkNotBuilt();
@@ -325,12 +335,14 @@ public final class MultipleOrderedStages {
          * @deprecated this optional is deprecated
          */
         @Deprecated
+        @Override
         public Builder optionalItem(@Nonnull OneField optionalItem) {
             checkNotBuilt();
             this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
 
+        @Override
         public MultipleOrderedStages build() {
             checkNotBuilt();
             this._buildInvoked = true;
