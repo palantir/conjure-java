@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add annotation for cookie params
+  links:
+  - https://github.com/palantir/conjure-java/pull/1640
