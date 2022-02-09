@@ -31,7 +31,6 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.stream.Stream;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -39,18 +38,18 @@ import javax.lang.model.type.TypeMirror;
 final class DefaultDecoderNames {
     /** Mirrored from {@link ParamDecoders}. */
     @VisibleForTesting
-    static final ImmutableList<Class<?>> SUPPORTED_CLASSES = ImmutableList.of(
-            String.class,
-            Boolean.class,
-            BearerToken.class,
-            OffsetDateTime.class,
-            Double.class,
-            OptionalDouble.class,
-            Integer.class,
-            OptionalInt.class,
-            ResourceIdentifier.class,
-            SafeLong.class,
-            UUID.class);
+    static final ImmutableList<String> SUPPORTED_CLASSES = ImmutableList.of(
+            String.class.getName(),
+            Boolean.class.getName(),
+            BearerToken.class.getName(),
+            OffsetDateTime.class.getName(),
+            Double.class.getName(),
+            OptionalDouble.class.getName(),
+            Integer.class.getName(),
+            OptionalInt.class.getName(),
+            ResourceIdentifier.class.getName(),
+            SafeLong.class.getName(),
+            UUID.class.getName());
 
     private static final ImmutableSet<ContainerType> INPUT_TYPES =
             ImmutableSet.of(ContainerType.NONE, ContainerType.LIST);
@@ -68,22 +67,22 @@ final class DefaultDecoderNames {
      * @param outType the container type used as output for the encoder, 'LIST', 'SET', 'OPTIONAL', or 'NONE'.
      */
     static String getDefaultDecoderMethodName(TypeMirror type, ContainerType inputType, ContainerType outType) {
-        return getDefaultDecoderMethodName(getClassForTypeMirror(type), inputType, outType);
+        return getDefaultDecoderMethodName(getClassNameForTypeMirror(type), inputType, outType);
     }
 
     @VisibleForTesting
-    static String getDefaultDecoderMethodName(Class<?> clazz, ContainerType inputType, ContainerType outType) {
+    static String getDefaultDecoderMethodName(String className, ContainerType inputType, ContainerType outType) {
         Preconditions.checkState(
-                SUPPORTED_CLASSES.contains(clazz),
+                SUPPORTED_CLASSES.contains(className),
                 "Default decoder not supported for this class. Please provide your own decoder implementation",
-                SafeArg.of("class", clazz));
+                SafeArg.of("class", className));
         Preconditions.checkState(
                 INPUT_TYPES.contains(inputType),
                 "Only list is allowed as container for encoders",
                 SafeArg.of("type", inputType));
 
         String optionalPrefix = outType.equals(ContainerType.OPTIONAL) ? "optional" : "";
-        String type = getTypeName(clazz);
+        String type = getTypeName(className);
         String decoderSuffix = inputType.equals(ContainerType.LIST) ? "CollectionParamDecoder" : "ParamDecoder";
         String typeSuffix =
                 outType.equals(ContainerType.LIST) || outType.equals(ContainerType.SET) ? outType.toString() : "";
@@ -94,38 +93,33 @@ final class DefaultDecoderNames {
         return InstanceVariables.joinCamelCase(segments);
     }
 
-    private static String getTypeName(Class<?> clazz) {
+    private static String getTypeName(String className) {
         // We have a few special cases, where we don't want to use the full class name.
-        if (clazz.equals(ResourceIdentifier.class)) {
+        if (className.equals(ResourceIdentifier.class.getName())) {
             return "rid";
-        } else if (clazz.equals(OffsetDateTime.class)) {
+        } else if (className.equals(OffsetDateTime.class.getName())) {
             return "dateTime";
-        } else if (clazz.equals(OptionalInt.class)) {
+        } else if (className.equals(OptionalInt.class.getName())) {
             return "optionalInteger";
         } else {
-            return clazz.getSimpleName();
+            int lastDelimiterIndex = className.lastIndexOf('.');
+            return lastDelimiterIndex < 0 ? className : className.substring(lastDelimiterIndex + 1);
         }
     }
 
-    private static Class<?> getClassForTypeMirror(TypeMirror typeMirror) {
+    private static String getClassNameForTypeMirror(TypeMirror typeMirror) {
         // Only need to support primitives that are also supported by {@link PlainSerDe}.
         switch (typeMirror.getKind()) {
             case INT:
-                return Integer.class;
+                return Integer.class.getName();
             case DOUBLE:
-                return Double.class;
+                return Double.class.getName();
             case BOOLEAN:
-                return Boolean.class;
+                return Boolean.class.getName();
             case DECLARED:
-                Element typeElement = ((DeclaredType) typeMirror).asElement();
-                String qualifiedName =
-                        ((TypeElement) typeElement).getQualifiedName().toString();
-                try {
-                    return Class.forName(qualifiedName);
-                } catch (ClassNotFoundException e) {
-                    throw new SafeIllegalStateException(
-                            "Could not determine declared class", e, SafeArg.of("type", typeMirror));
-                }
+                DeclaredType declaredType = (DeclaredType) typeMirror;
+                TypeElement typeElement = (TypeElement) declaredType.asElement();
+                return typeElement.getQualifiedName().toString();
             default:
                 throw new SafeIllegalStateException("Unsupported type", SafeArg.of("type", typeMirror));
         }
