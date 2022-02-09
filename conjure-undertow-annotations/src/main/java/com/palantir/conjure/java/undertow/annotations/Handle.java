@@ -103,4 +103,19 @@ public @interface Handle {
          */
         Class<? extends CollectionParamDecoder<?>> decoder() default DefaultCollectionParamDecoder.class;
     }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @Target(ElementType.PARAMETER)
+    @interface Cookie {
+        String value();
+
+        /**
+         * Decoder for deserializing the cookie value. If omitted, tries to use a default decoder in
+         * {@link ParamDecoders}.
+         *
+         * Note that if the annotated argument is using {@link com.palantir.tokens.auth.BearerToken} as type, it
+         * also delegates to the conjure {@link com.palantir.conjure.java.undertow.lib.AuthorizationExtractor}.
+         */
+        Class<? extends ParamDecoder<?>> decoder() default DefaultParamDecoder.class;
+    }
 }
