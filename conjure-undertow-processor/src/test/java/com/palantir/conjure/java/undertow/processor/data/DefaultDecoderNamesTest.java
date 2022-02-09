@@ -38,46 +38,48 @@ final class DefaultDecoderNamesTest {
     @Test
     void creates_default_string_decoder_method_names() {
         assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
-                        String.class, ContainerType.NONE, ContainerType.NONE))
+                        String.class.getName(), ContainerType.NONE, ContainerType.NONE))
                 .isEqualTo("stringParamDecoder");
 
         assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
-                        String.class, ContainerType.NONE, ContainerType.OPTIONAL))
+                        String.class.getName(), ContainerType.NONE, ContainerType.OPTIONAL))
                 .isEqualTo("optionalStringParamDecoder");
 
         assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
-                        String.class, ContainerType.LIST, ContainerType.NONE))
+                        String.class.getName(), ContainerType.LIST, ContainerType.NONE))
                 .isEqualTo("stringCollectionParamDecoder");
 
         assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
-                        String.class, ContainerType.LIST, ContainerType.OPTIONAL))
+                        String.class.getName(), ContainerType.LIST, ContainerType.OPTIONAL))
                 .isEqualTo("optionalStringCollectionParamDecoder");
 
         assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
-                        String.class, ContainerType.LIST, ContainerType.LIST))
+                        String.class.getName(), ContainerType.LIST, ContainerType.LIST))
                 .isEqualTo("stringListCollectionParamDecoder");
 
-        assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(String.class, ContainerType.LIST, ContainerType.SET))
+        assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
+                        String.class.getName(), ContainerType.LIST, ContainerType.SET))
                 .isEqualTo("stringSetCollectionParamDecoder");
     }
 
     @ParameterizedTest
     @MethodSource("getParamDecoderArguments")
     void all_param_decoder_types_have_respective_method(
-            Class<?> clazz, ContainerType inputType, ContainerType outputType) {
+            String className, ContainerType inputType, ContainerType outputType) {
         Set<String> declaredMethodNames = Arrays.stream(ParamDecoders.class.getDeclaredMethods())
                 .map(Method::getName)
                 .collect(Collectors.toSet());
 
-        String methodName = DefaultDecoderNames.getDefaultDecoderMethodName(clazz, inputType, outputType);
+        String methodName = DefaultDecoderNames.getDefaultDecoderMethodName(className, inputType, outputType);
 
         assertThat(declaredMethodNames).contains(methodName);
     }
 
     private static List<Arguments> getParamDecoderArguments() {
-        List<Class<?>> supportedClasses = DefaultDecoderNames.SUPPORTED_CLASSES.stream()
+        List<String> supportedClasses = DefaultDecoderNames.SUPPORTED_CLASSES.stream()
                 // We handle these cases differently further down this method.
-                .filter(clazz -> !clazz.equals(OptionalDouble.class) && !clazz.equals(OptionalInt.class))
+                .filter(name ->
+                        !name.equals(OptionalDouble.class.getName()) && !name.equals(OptionalInt.class.getName()))
                 .collect(Collectors.toList());
 
         ImmutableList.Builder<Arguments> arguments = ImmutableList.builder();
@@ -96,16 +98,17 @@ final class DefaultDecoderNamesTest {
     }
 
     private static List<Arguments> getArgumentsForOutputContainer(
-            ContainerType inputContainer, ContainerType outputContainer, List<Class<?>> supportedClasses) {
+            ContainerType inputContainer, ContainerType outputContainer, List<String> supportedClasses) {
         return supportedClasses.stream()
-                .map(clazz -> {
+                .map(clazzName -> {
                     // For double and int, we use a separate optional type instead of wrapping it with Optional.
-                    if (outputContainer.equals(ContainerType.OPTIONAL) && clazz.equals(Double.class)) {
-                        return Arguments.of(OptionalDouble.class, ContainerType.NONE, ContainerType.NONE);
-                    } else if (outputContainer.equals(ContainerType.OPTIONAL) && clazz.equals(Integer.class)) {
-                        return Arguments.of(OptionalInt.class, ContainerType.NONE, ContainerType.NONE);
+                    if (outputContainer.equals(ContainerType.OPTIONAL) && clazzName.equals(Double.class.getName())) {
+                        return Arguments.of(OptionalDouble.class.getName(), ContainerType.NONE, ContainerType.NONE);
+                    } else if (outputContainer.equals(ContainerType.OPTIONAL)
+                            && clazzName.equals(Integer.class.getName())) {
+                        return Arguments.of(OptionalInt.class.getName(), ContainerType.NONE, ContainerType.NONE);
                     } else {
-                        return Arguments.of(clazz, inputContainer, outputContainer);
+                        return Arguments.of(clazzName, inputContainer, outputContainer);
                     }
                 })
                 .collect(Collectors.toList());
