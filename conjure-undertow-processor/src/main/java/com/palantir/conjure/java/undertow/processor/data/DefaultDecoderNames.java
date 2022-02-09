@@ -125,7 +125,7 @@ final class DefaultDecoderNames {
                         && element.getParameters().size() == 1
                         && isStringMirror(element.getParameters().get(0).asType())
                         && Objects.equals(TypeName.get(declaredType), TypeName.get(element.getReturnType())))
-                .map(element -> CodeBlock.of("$T::valueOf", TypeName.get(declaredType)))
+                .map(_element -> CodeBlock.of("$T::valueOf", TypeName.get(declaredType)))
                 .findFirst();
     }
 
@@ -138,7 +138,7 @@ final class DefaultDecoderNames {
                 .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
                         && element.getParameters().size() == 1
                         && TypeName.get(element.getParameters().get(0).asType()).equals(ClassName.get(String.class)))
-                .map(element -> CodeBlock.of("$T::new", TypeName.get(declaredType)))
+                .map(_element -> CodeBlock.of("$T::new", TypeName.get(declaredType)))
                 .findFirst();
     }
 
