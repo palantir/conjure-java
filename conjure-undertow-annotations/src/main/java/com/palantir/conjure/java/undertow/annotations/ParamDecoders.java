@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.annotations;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.ri.ResourceIdentifier;
@@ -250,6 +251,36 @@ public final class ParamDecoders {
 
     public static CollectionParamDecoder<Set<UUID>> uuidSetCollectionParamDecoder(PlainSerDe serde) {
         return DelegatingCollectionParamDecoder.of(serde::deserializeUuidSet);
+    }
+
+    public static <T> ParamDecoder<T> complexParamDecoder(PlainSerDe serde, Function<String, T> factory) {
+        return DelegatingParamDecoder.of(value -> serde.deserializeComplex(value, factory));
+    }
+
+    public static <T> ParamDecoder<Optional<T>> optionalComplexParamDecoder(
+            PlainSerDe serde, Function<String, T> factory) {
+        return DelegatingParamDecoder.of(value -> serde.deserializeOptionalComplex(
+                value == null ? ImmutableList.of() : ImmutableList.of(value), factory));
+    }
+
+    public static <T> CollectionParamDecoder<T> complexCollectionParamDecoder(
+            PlainSerDe serde, Function<String, T> factory) {
+        return DelegatingCollectionParamDecoder.of(value -> serde.deserializeComplex(value, factory));
+    }
+
+    public static <T> CollectionParamDecoder<Optional<T>> optionalComplexCollectionParamDecoder(
+            PlainSerDe serde, Function<String, T> factory) {
+        return DelegatingCollectionParamDecoder.of(value -> serde.deserializeOptionalComplex(value, factory));
+    }
+
+    public <T> CollectionParamDecoder<List<T>> complexListCollectionParamDecoder(
+            PlainSerDe serde, Function<String, T> factory) {
+        return DelegatingCollectionParamDecoder.of(value -> serde.deserializeComplexList(value, factory));
+    }
+
+    public static <T> CollectionParamDecoder<Set<T>> complexSetCollectionParamDecoder(
+            PlainSerDe serde, Function<String, T> factory) {
+        return DelegatingCollectionParamDecoder.of(value -> serde.deserializeComplexSet(value, factory));
     }
 
     private static final class DelegatingParamDecoder<T> implements ParamDecoder<T> {

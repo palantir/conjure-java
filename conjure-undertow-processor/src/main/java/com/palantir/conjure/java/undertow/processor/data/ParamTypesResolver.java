@@ -22,7 +22,6 @@ import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.undertow.annotations.DefaultCollectionParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.DefaultParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
-import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.undertow.processor.data.DefaultDecoderNames.ContainerType;
 import com.palantir.logsafe.SafeArg;
@@ -131,10 +130,16 @@ public final class ParamTypesResolver {
 
         // For param decoders, we don't support any container types (optional, list, set).
         TypeMirror variableType = variableElement.asType();
-        String decoderMethodName =
-                DefaultDecoderNames.getDefaultDecoderMethodName(variableType, ContainerType.NONE, ContainerType.NONE);
-
-        return CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName);
+        return DefaultDecoderNames.getDefaultDecoderFactory(variableType, ContainerType.NONE, ContainerType.NONE)
+                .orElseGet(() -> {
+                    context.reportError(
+                            "No default decoder exists for parameter. "
+                                    + "Types with a valueOf(String) method are supported, as are conjure types",
+                            variableElement,
+                            SafeArg.of("variableType", variableType),
+                            SafeArg.of("supportedTypes", DefaultDecoderNames.SUPPORTED_CLASSES));
+                    return CodeBlock.of("// error");
+                });
     }
 
     private CodeBlock getCollectionParamDecoder(
@@ -154,10 +159,16 @@ public final class ParamTypesResolver {
                 innerListType.or(() -> innerSetType).or(() -> innerOptionalType).orElse(variableType);
         ContainerType decoderOutputType = getOutputType(innerListType, innerSetType, innerOptionalType);
 
-        String decoderMethodName =
-                DefaultDecoderNames.getDefaultDecoderMethodName(decoderType, ContainerType.LIST, decoderOutputType);
-
-        return CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName);
+        return DefaultDecoderNames.getDefaultDecoderFactory(decoderType, ContainerType.LIST, decoderOutputType)
+                .orElseGet(() -> {
+                    context.reportError(
+                            "No default decoder exists for parameter. "
+                                    + "Types with a valueOf(String) method are supported, as are conjure types",
+                            variableElement,
+                            SafeArg.of("variableType", variableType),
+                            SafeArg.of("supportedTypes", DefaultDecoderNames.SUPPORTED_CLASSES));
+                    return CodeBlock.of("// error");
+                });
     }
 
     private static ContainerType getOutputType(

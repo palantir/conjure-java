@@ -23,14 +23,21 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.BearerToken;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.TypeName;
 import java.time.OffsetDateTime;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.stream.Stream;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -55,7 +62,7 @@ final class DefaultDecoderNames {
             ImmutableSet.of(ContainerType.NONE, ContainerType.LIST);
 
     /**
-     * Generates the corresponding method name of the default decoder as declared in
+     * Generates the corresponding factory invocation for a default decoder as declared in
      * {@link com.palantir.conjure.java.undertow.annotations.ParamDecoders}.
      *
      * E.g. calling {@code getDefaultDecoderMethodName(String, LIST, OPTIONAL} will return
@@ -66,23 +73,90 @@ final class DefaultDecoderNames {
      * @param inputType the container type used as input for the encoder, 'LIST' or 'NONE'.
      * @param outType the container type used as output for the encoder, 'LIST', 'SET', 'OPTIONAL', or 'NONE'.
      */
-    static String getDefaultDecoderMethodName(TypeMirror type, ContainerType inputType, ContainerType outType) {
-        return getDefaultDecoderMethodName(getClassNameForTypeMirror(type), inputType, outType);
+    static Optional<CodeBlock> getDefaultDecoderFactory(
+            TypeMirror type, ContainerType inputType, ContainerType outType) {
+        return getClassNameForTypeMirror(type)
+                .filter(SUPPORTED_CLASSES::contains)
+                .map(className -> getDefaultDecoderMethodName(className, inputType, outType))
+                .map(decoderMethodName ->
+                        CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName))
+                .or(() -> getComplexDecoderFactory(type, inputType, outType));
+    }
+
+    private static Optional<CodeBlock> getComplexDecoderFactory(
+            TypeMirror typeMirror, ContainerType inputType, ContainerType outType) {
+        return getUnknownDecoderFactoryFunction(typeMirror)
+                .map(factoryFunction -> CodeBlock.of(
+                        "$T.$L(runtime.plainSerDe(), $L)",
+                        ParamDecoders.class,
+                        getDefaultDecoderMethodName(Optional.empty(), inputType, outType),
+                        factoryFunction));
+    }
+
+    static Optional<CodeBlock> getUnknownDecoderFactoryFunction(TypeMirror typeMirror) {
+        // No need to handle int/double/boolean because they're covered by default handlers
+        switch (typeMirror.getKind()) {
+            case FLOAT:
+                return Optional.of(CodeBlock.of("$T::parseFloat", Float.class));
+            case LONG:
+                return Optional.of(CodeBlock.of("$T::parseLong", Long.class));
+            case BYTE:
+                return Optional.of(CodeBlock.of("$T::parseByte", Byte.class));
+            case SHORT:
+                return Optional.of(CodeBlock.of("$T::parseShort", Short.class));
+            case DECLARED:
+                DeclaredType declaredType = (DeclaredType) typeMirror;
+                return getValueOfDecoderFactoryFunction(declaredType)
+                        .or(() -> getStringConstructorDecoderFactoryFunction(declaredType));
+            default:
+                return Optional.empty();
+        }
+    }
+
+    private static Optional<CodeBlock> getValueOfDecoderFactoryFunction(DeclaredType declaredType) {
+        TypeElement typeElement = (TypeElement) declaredType.asElement();
+        // T valueOf(String)
+        return typeElement.getEnclosedElements().stream()
+                .filter(element -> element.getKind() == ElementKind.METHOD)
+                .map(ExecutableElement.class::cast)
+                .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
+                        && element.getModifiers().contains(Modifier.STATIC)
+                        && element.getSimpleName().contentEquals("valueOf")
+                        && element.getParameters().size() == 1
+                        && isStringMirror(element.getParameters().get(0).asType())
+                        && Objects.equals(TypeName.get(declaredType), TypeName.get(element.getReturnType())))
+                .map(element -> CodeBlock.of("$T::valueOf", TypeName.get(declaredType)))
+                .findFirst();
+    }
+
+    private static Optional<CodeBlock> getStringConstructorDecoderFactoryFunction(DeclaredType declaredType) {
+        TypeElement typeElement = (TypeElement) declaredType.asElement();
+        // new T(String)
+        return typeElement.getEnclosedElements().stream()
+                .filter(element -> element.getKind() == ElementKind.CONSTRUCTOR)
+                .map(ExecutableElement.class::cast)
+                .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
+                        && element.getParameters().size() == 1
+                        && TypeName.get(element.getParameters().get(0).asType()).equals(ClassName.get(String.class)))
+                .map(element -> CodeBlock.of("$T::new", TypeName.get(declaredType)))
+                .findFirst();
     }
 
     @VisibleForTesting
     static String getDefaultDecoderMethodName(String className, ContainerType inputType, ContainerType outType) {
-        Preconditions.checkState(
-                SUPPORTED_CLASSES.contains(className),
-                "Default decoder not supported for this class. Please provide your own decoder implementation",
-                SafeArg.of("class", className));
+        return getDefaultDecoderMethodName(Optional.of(className), inputType, outType);
+    }
+
+    @VisibleForTesting
+    static String getDefaultDecoderMethodName(
+            Optional<String> className, ContainerType inputType, ContainerType outType) {
         Preconditions.checkState(
                 INPUT_TYPES.contains(inputType),
                 "Only list is allowed as container for encoders",
                 SafeArg.of("type", inputType));
 
         String optionalPrefix = outType.equals(ContainerType.OPTIONAL) ? "optional" : "";
-        String type = getTypeName(className);
+        String type = className.map(DefaultDecoderNames::getTypeName).orElse("Complex");
         String decoderSuffix = inputType.equals(ContainerType.LIST) ? "CollectionParamDecoder" : "ParamDecoder";
         String typeSuffix =
                 outType.equals(ContainerType.LIST) || outType.equals(ContainerType.SET) ? outType.toString() : "";
@@ -107,22 +181,26 @@ final class DefaultDecoderNames {
         }
     }
 
-    private static String getClassNameForTypeMirror(TypeMirror typeMirror) {
+    private static Optional<String> getClassNameForTypeMirror(TypeMirror typeMirror) {
         // Only need to support primitives that are also supported by {@link PlainSerDe}.
         switch (typeMirror.getKind()) {
             case INT:
-                return Integer.class.getName();
+                return Optional.of(Integer.class.getName());
             case DOUBLE:
-                return Double.class.getName();
+                return Optional.of(Double.class.getName());
             case BOOLEAN:
-                return Boolean.class.getName();
+                return Optional.of(Boolean.class.getName());
             case DECLARED:
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 TypeElement typeElement = (TypeElement) declaredType.asElement();
-                return typeElement.getQualifiedName().toString();
+                return Optional.of(typeElement.getQualifiedName().toString());
             default:
-                throw new SafeIllegalStateException("Unsupported type", SafeArg.of("type", typeMirror));
+                return Optional.empty();
         }
+    }
+
+    private static boolean isStringMirror(TypeMirror typeMirror) {
+        return ClassName.get(String.class).equals(TypeName.get(typeMirror));
     }
 
     enum ContainerType {
