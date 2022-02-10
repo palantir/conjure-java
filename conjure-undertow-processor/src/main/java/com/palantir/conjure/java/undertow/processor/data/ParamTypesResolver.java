@@ -167,7 +167,7 @@ public final class ParamTypesResolver {
         }
 
         Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);
-        TypeMirror decoderType = (innerOptionalType).orElse(variableType);
+        TypeMirror decoderType = innerOptionalType.orElse(variableType);
         ContainerType decoderOutputType = getOutputType(Optional.empty(), Optional.empty(), innerOptionalType);
 
         // For param decoders, we don't support any container types (optional, list, set).
