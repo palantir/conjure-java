@@ -272,7 +272,7 @@ class ExampleServiceTest {
         try {
             int port = TestHelper.getPort(server);
 
-            // Optional cookie is present
+            // Cookie value is present
             HttpURLConnection connection =
                     (HttpURLConnection) new URL("http://localhost:" + port + "/optionalCookie").openConnection();
             connection.setRequestProperty(HttpHeaders.COOKIE, "MY_COOKIE=cookie-value");
@@ -281,12 +281,12 @@ class ExampleServiceTest {
             assertThat(connection.getContentType()).startsWith("application/json");
             assertThat(connection.getInputStream()).hasBinaryContent(expected);
 
-            // Optional cookie is empty
+            // Cookie value is empty
             connection = (HttpURLConnection) new URL("http://localhost:" + port + "/optionalCookie").openConnection();
-            byte[] emptyExpected = "\"empty\"".getBytes(StandardCharsets.UTF_8);
+            byte[] emptyResponse = "\"empty\"".getBytes(StandardCharsets.UTF_8);
             assertThat(connection.getResponseCode()).isEqualTo(200);
             assertThat(connection.getContentType()).startsWith("application/json");
-            assertThat(connection.getInputStream()).hasBinaryContent(emptyExpected);
+            assertThat(connection.getInputStream()).hasBinaryContent(emptyResponse);
         } finally {
             server.stop();
         }

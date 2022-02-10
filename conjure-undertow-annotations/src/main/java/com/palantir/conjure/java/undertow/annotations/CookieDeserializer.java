@@ -38,7 +38,9 @@ public final class CookieDeserializer<T> implements Deserializer<T> {
     public T deserialize(HttpServerExchange exchange) throws IOException {
         Cookie cookie = exchange.getRequestCookie(cookieName);
         if (cookie == null) {
-            throw new SafeIllegalArgumentException("Cookie is required", SafeArg.of("cookieName", cookieName));
+            return decoder.noValuePresent()
+                    .orElseThrow(() -> new SafeIllegalArgumentException(
+                            "Cookie value is required", SafeArg.of("cookieName", cookieName)));
         }
         return decoder.decode(cookie.getValue());
     }

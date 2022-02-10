@@ -31,7 +31,7 @@ public interface ParameterType {
 
         R query(String paramName, String deserializerFieldName, CodeBlock deserializerFactory);
 
-        R cookie(String cookieName, String deserializerFieldName, CodeBlock deserializerFactory, boolean isOptional);
+        R cookie(String cookieName, String deserializerFieldName, CodeBlock deserializerFactory);
 
         R authCookie(String cookieName, String deserializerFieldName);
 

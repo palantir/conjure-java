@@ -21,6 +21,7 @@ import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoder;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 public interface CookieParams {
 
@@ -28,6 +29,7 @@ public interface CookieParams {
     String cookieParams(
             @Handle.Cookie(value = "stringCookie") String stringCookie,
             @Handle.Cookie(value = "optionalStringCookie") Optional<String> optionalStringCookie,
+            @Handle.Cookie(value = "optionalIntCookie") OptionalInt optionalIntCookie,
             @Handle.Cookie(value = "decoderCookie", decoder = StringParamDecoder.class) String decoderCookie,
             @Handle.Cookie(value = "AUTH_TOKEN") BearerToken token);
 

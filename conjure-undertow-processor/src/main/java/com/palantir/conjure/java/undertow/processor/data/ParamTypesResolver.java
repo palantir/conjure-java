@@ -153,13 +153,10 @@ public final class ParamTypesResolver {
             return ParameterTypes.authCookie(annotationReflector.getAnnotationValue(String.class), deserializerName);
         }
 
-        TypeMirror variableType = variableElement.asType();
-        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);
         return ParameterTypes.cookie(
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getParamDecoder(innerOptionalType.orElse(variableType), annotationReflector),
-                innerOptionalType.isPresent());
+                getParamDecoder(variableElement.asType(), annotationReflector));
     }
 
     private CodeBlock getParamDecoder(TypeMirror variableType, AnnotationReflector annotationReflector) {
@@ -169,9 +166,13 @@ public final class ParamTypesResolver {
             return Instantiables.instantiate(typeMirror);
         }
 
+        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);
+        TypeMirror decoderType = (innerOptionalType).orElse(variableType);
+        ContainerType decoderOutputType = getOutputType(Optional.empty(), Optional.empty(), innerOptionalType);
+
         // For param decoders, we don't support any container types (optional, list, set).
         String decoderMethodName =
-                DefaultDecoderNames.getDefaultDecoderMethodName(variableType, ContainerType.NONE, ContainerType.NONE);
+                DefaultDecoderNames.getDefaultDecoderMethodName(decoderType, ContainerType.NONE, decoderOutputType);
 
         return CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName);
     }

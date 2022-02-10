@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
-import com.palantir.conjure.java.undertow.annotations.OptionalCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -247,11 +246,7 @@ public final class ConjureUndertowEndpointsGenerator {
             }
 
             @Override
-            public Void cookie(
-                    String cookieName,
-                    String deserializerFieldName,
-                    CodeBlock deserializerFactory,
-                    boolean isOptional) {
+            public Void cookie(String cookieName, String deserializerFieldName, CodeBlock deserializerFactory) {
                 TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
                 additionalFields.add(ImmutableAdditionalField.builder()
                         .field(FieldSpec.builder(
@@ -264,7 +259,7 @@ public final class ConjureUndertowEndpointsGenerator {
                                 .addStatement(
                                         "this.$N = new $T<>($S, $L)",
                                         deserializerFieldName,
-                                        isOptional ? OptionalCookieDeserializer.class : CookieDeserializer.class,
+                                        CookieDeserializer.class,
                                         cookieName,
                                         deserializerFactory)
                                 .build())
@@ -407,10 +402,7 @@ public final class ConjureUndertowEndpointsGenerator {
 
                     @Override
                     public CodeBlock cookie(
-                            String _cookieName,
-                            String deserializerFieldName,
-                            CodeBlock _deserializerFactory,
-                            boolean _isOptional) {
+                            String _cookieName, String deserializerFieldName, CodeBlock _deserializerFactory) {
                         return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
                     }
 
