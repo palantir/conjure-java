@@ -23,6 +23,7 @@ import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoder;
 import com.palantir.ri.ResourceIdentifier;
+import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -48,7 +49,9 @@ public interface DefaultDecoderService {
             @Handle.QueryParam(value = "dateTime") OffsetDateTime dateTimeParam,
             @Handle.QueryParam(value = "ridSetParam") Set<ResourceIdentifier> ridSetParam,
             @Handle.QueryParam(value = "optionalSafeLongParam") Optional<SafeLong> optionalSafeLongParam,
-            @Handle.QueryParam(value = "uuidParam") UUID uuidParam);
+            @Handle.QueryParam(value = "uuidParam") UUID uuidParam,
+            @Handle.QueryParam("floatParamBoxed") Float floatHeaderBoxed,
+            @Handle.QueryParam("floatParamUnboxed") float floatHeaderUnboxed);
 
     @Handle(method = HttpMethod.GET, path = "/headers")
     String headers(
@@ -57,13 +60,21 @@ public interface DefaultDecoderService {
             @Handle.Header(value = "stringSetParam") Set<String> stringSetParam,
             @Handle.Header(value = "stringListParam") List<String> stringListParam,
             @Handle.Header(value = "optionalStringParam") Optional<String> optionalStringParam,
-            @Handle.Header(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam);
+            @Handle.Header(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
+            @Handle.Header("floatHeaderBoxed") Float floatHeaderBoxed,
+            @Handle.Header("floatHeaderUnboxed") float floatHeaderUnboxed,
+            @Handle.Header("bigInteger") BigInteger bigInteger);
 
-    @Handle(method = HttpMethod.GET, path = "/pathParam/{stringParam}/{booleanParam}/{decoderParam}")
+    @Handle(
+            method = HttpMethod.GET,
+            path = "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{bigInt}")
     String pathParam(
             @Handle.PathParam String stringParam,
             @Handle.PathParam Boolean booleanParam,
-            @Handle.PathParam(decoder = StringDecoder.class) String decoderParam);
+            @Handle.PathParam(decoder = StringDecoder.class) String decoderParam,
+            @Handle.PathParam Float floatBoxed,
+            @Handle.PathParam float floatUnboxed,
+            @Handle.PathParam BigInteger bigInt);
 
     enum StringCollectionDecoder implements CollectionParamDecoder<String> {
         INSTANCE;

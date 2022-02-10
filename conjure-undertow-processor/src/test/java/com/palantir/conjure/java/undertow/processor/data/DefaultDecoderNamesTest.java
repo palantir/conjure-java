@@ -24,10 +24,12 @@ import com.palantir.conjure.java.undertow.processor.data.DefaultDecoderNames.Con
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -65,7 +67,7 @@ final class DefaultDecoderNamesTest {
     @ParameterizedTest
     @MethodSource("getParamDecoderArguments")
     void all_param_decoder_types_have_respective_method(
-            String className, ContainerType inputType, ContainerType outputType) {
+            Optional<String> className, ContainerType inputType, ContainerType outputType) {
         Set<String> declaredMethodNames = Arrays.stream(ParamDecoders.class.getDeclaredMethods())
                 .map(Method::getName)
                 .collect(Collectors.toSet());
@@ -76,10 +78,14 @@ final class DefaultDecoderNamesTest {
     }
 
     private static List<Arguments> getParamDecoderArguments() {
-        List<String> supportedClasses = DefaultDecoderNames.SUPPORTED_CLASSES.stream()
+        List<Optional<String>> supportedClasses = Stream.concat(
+                        Stream.of(Optional.<String>empty()),
+                        DefaultDecoderNames.SUPPORTED_CLASSES.stream().map(Optional::of))
                 // We handle these cases differently further down this method.
-                .filter(name ->
-                        !name.equals(OptionalDouble.class.getName()) && !name.equals(OptionalInt.class.getName()))
+                .filter(maybeName -> maybeName
+                        .map(name -> !name.equals(OptionalDouble.class.getName())
+                                && !name.equals(OptionalInt.class.getName()))
+                        .orElse(true))
                 .collect(Collectors.toList());
 
         ImmutableList.Builder<Arguments> arguments = ImmutableList.builder();
@@ -98,15 +104,20 @@ final class DefaultDecoderNamesTest {
     }
 
     private static List<Arguments> getArgumentsForOutputContainer(
-            ContainerType inputContainer, ContainerType outputContainer, List<String> supportedClasses) {
+            ContainerType inputContainer, ContainerType outputContainer, List<Optional<String>> supportedClasses) {
         return supportedClasses.stream()
                 .map(clazzName -> {
                     // For double and int, we use a separate optional type instead of wrapping it with Optional.
-                    if (outputContainer.equals(ContainerType.OPTIONAL) && clazzName.equals(Double.class.getName())) {
-                        return Arguments.of(OptionalDouble.class.getName(), ContainerType.NONE, ContainerType.NONE);
+                    if (outputContainer.equals(ContainerType.OPTIONAL)
+                            && clazzName.isPresent()
+                            && clazzName.get().equals(Double.class.getName())) {
+                        return Arguments.of(
+                                Optional.of(OptionalDouble.class.getName()), ContainerType.NONE, ContainerType.NONE);
                     } else if (outputContainer.equals(ContainerType.OPTIONAL)
-                            && clazzName.equals(Integer.class.getName())) {
-                        return Arguments.of(OptionalInt.class.getName(), ContainerType.NONE, ContainerType.NONE);
+                            && clazzName.isPresent()
+                            && clazzName.get().equals(Integer.class.getName())) {
+                        return Arguments.of(
+                                Optional.of(OptionalInt.class.getName()), ContainerType.NONE, ContainerType.NONE);
                     } else {
                         return Arguments.of(clazzName, inputContainer, outputContainer);
                     }
