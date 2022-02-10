@@ -18,6 +18,8 @@ package com.palantir.conjure.java.types;
 
 import static com.palantir.logsafe.Preconditions.checkState;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.spec.FieldName;
@@ -84,42 +86,67 @@ public final class MethodSpecs {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.INT)
-                .addStatement("return $L", computeHashCode(fields))
+                .addCode(computeHashCode(fields))
                 .build();
     }
 
     public static void addCachedHashCode(TypeSpec.Builder typeBuilder, Collection<FieldSpec> fields) {
-        FieldSpec.Builder hashFieldSpec = FieldSpec.builder(TypeName.INT, "memoizedHashCode", Modifier.PRIVATE);
-        typeBuilder.addField(hashFieldSpec.build());
+        FieldSpec field = FieldSpec.builder(TypeName.INT, "memoizedHashCode", Modifier.PRIVATE)
+                .build();
+        typeBuilder.addField(field);
+        typeBuilder.addMethods(createCachedHashCodeMethods(fields, field));
+    }
 
-        typeBuilder.addMethod(MethodSpec.methodBuilder("hashCode")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
+    private static List<MethodSpec> createCachedHashCodeMethods(Collection<FieldSpec> fields, FieldSpec field) {
+        return ImmutableList.of(
+                MethodSpec.methodBuilder("hashCode")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(TypeName.INT)
+                        // Single volatile read
+                        .addStatement("int result = $N", field)
+                        .beginControlFlow("if (result == 0)")
+                        .addStatement("result = computeHashCode()")
+                        // Single volatile write
+                        .addStatement("$N = result", field)
+                        .endControlFlow()
+                        .addStatement("return result")
+                        .build(),
+                createComputeHashCode(fields));
+    }
+
+    @VisibleForTesting
+    static MethodSpec createComputeHashCode(Collection<FieldSpec> fields) {
+        return MethodSpec.methodBuilder("computeHashCode")
+                .addModifiers(Modifier.PRIVATE)
                 .returns(TypeName.INT)
-                // Single volatile read
-                .addStatement("int result = memoizedHashCode")
-                .beginControlFlow("if (result == 0)")
-                .addStatement("result = $L", computeHashCode(fields))
-                // Single volatile write
-                .addStatement("memoizedHashCode = result")
-                .endControlFlow()
-                .addStatement("return result")
-                .build());
+                .addCode(computeHashCode(fields))
+                .build();
     }
 
-    private static CodeBlock computeHashCode(Collection<FieldSpec> fields) {
+    @VisibleForTesting
+    static CodeBlock computeHashCode(Collection<FieldSpec> fields) {
         if (fields.size() == 1) {
-            FieldSpec fieldSpec = Iterables.getOnlyElement(fields);
-            if (fieldSpec.type.isPrimitive()) {
-                return CodeBlock.of("$1T.$2N($3L)", fieldSpec.type.box(), "hashCode", createHashInput(fieldSpec));
-            }
-            return CodeBlock.of("$1T.$2N($3L)", Objects.class, "hashCode", createHashInput(fieldSpec));
+            return CodeBlock.builder()
+                    .addStatement("return $L", computeHashCode(Iterables.getOnlyElement(fields)))
+                    .build();
         }
-        return CodeBlock.of("$1T.$2N($3L)", Objects.class, "hash", getHashInput(fields));
+
+        CodeBlock.Builder builder = CodeBlock.builder();
+        builder.addStatement(CodeBlock.of("int hash = 4441"));
+        for (FieldSpec field : fields) {
+            builder.addStatement("hash += (hash << 5) + $L", computeHashCode(field));
+        }
+        builder.addStatement("return hash");
+        return builder.build();
     }
 
-    private static CodeBlock getHashInput(Collection<FieldSpec> fields) {
-        return CodeBlocks.of(fields.stream().map(MethodSpecs::createHashInput).collect(joining(CodeBlock.of(", "))));
+    @VisibleForTesting
+    static CodeBlock computeHashCode(FieldSpec fieldSpec) {
+        if (fieldSpec.type.isPrimitive()) {
+            return CodeBlock.of("$1T.$2N($3L)", fieldSpec.type.box(), "hashCode", createHashInput(fieldSpec));
+        }
+        return CodeBlock.of("$1T.$2N($3L)", Objects.class, "hashCode", createHashInput(fieldSpec));
     }
 
     static MethodSpec createToString(String thisClassName, List<FieldName> fieldNames) {
