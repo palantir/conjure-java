@@ -126,14 +126,14 @@ public final class ParamTypesResolver {
         return ParameterTypes.header(
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getCollectionParamDecoder(variableElement, annotationReflector));
+                getCollectionParamDecoder(variableElement.asType(), annotationReflector));
     }
 
     private ParameterType pathParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
         String javaParameterName = variableElement.getSimpleName().toString();
         String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         return ParameterTypes.path(
-                javaParameterName, deserializerName, getParamDecoder(variableElement, annotationReflector));
+                javaParameterName, deserializerName, getParamDecoder(variableElement.asType(), annotationReflector));
     }
 
     private ParameterType queryParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
@@ -142,7 +142,7 @@ public final class ParamTypesResolver {
         return ParameterTypes.query(
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getCollectionParamDecoder(variableElement, annotationReflector));
+                getCollectionParamDecoder(variableElement.asType(), annotationReflector));
     }
 
     private ParameterType cookieParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
@@ -152,13 +152,17 @@ public final class ParamTypesResolver {
             // TODO(fwindheuser): Add some validation no more than one BearerToken cookie param is used.
             return ParameterTypes.authCookie(annotationReflector.getAnnotationValue(String.class), deserializerName);
         }
+
+        TypeMirror variableType = variableElement.asType();
+        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);
         return ParameterTypes.cookie(
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getParamDecoder(variableElement, annotationReflector));
+                getParamDecoder(innerOptionalType.orElse(variableType), annotationReflector),
+                innerOptionalType.isPresent());
     }
 
-    private CodeBlock getParamDecoder(VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private CodeBlock getParamDecoder(TypeMirror variableType, AnnotationReflector annotationReflector) {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultParamDecoder.class)) {
@@ -166,22 +170,19 @@ public final class ParamTypesResolver {
         }
 
         // For param decoders, we don't support any container types (optional, list, set).
-        TypeMirror variableType = variableElement.asType();
         String decoderMethodName =
                 DefaultDecoderNames.getDefaultDecoderMethodName(variableType, ContainerType.NONE, ContainerType.NONE);
 
         return CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName);
     }
 
-    private CodeBlock getCollectionParamDecoder(
-            VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private CodeBlock getCollectionParamDecoder(TypeMirror variableType, AnnotationReflector annotationReflector) {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultCollectionParamDecoder.class)) {
             return Instantiables.instantiate(typeMirror);
         }
 
-        TypeMirror variableType = variableElement.asType();
         Optional<TypeMirror> innerListType = context.getGenericInnerType(List.class, variableType);
         Optional<TypeMirror> innerSetType = context.getGenericInnerType(Set.class, variableType);
         Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);

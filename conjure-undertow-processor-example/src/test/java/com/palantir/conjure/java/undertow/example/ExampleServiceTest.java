@@ -267,6 +267,32 @@ class ExampleServiceTest {
     }
 
     @Test
+    void testOptionalCookieParam() throws Exception {
+        Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
+        try {
+            int port = TestHelper.getPort(server);
+
+            // Optional cookie is present
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/optionalCookie").openConnection();
+            connection.setRequestProperty(HttpHeaders.COOKIE, "MY_COOKIE=cookie-value");
+            byte[] expected = "\"cookie-value\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            assertThat(connection.getInputStream()).hasBinaryContent(expected);
+
+            // Optional cookie is empty
+            connection = (HttpURLConnection) new URL("http://localhost:" + port + "/optionalCookie").openConnection();
+            byte[] emptyExpected = "\"empty\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            assertThat(connection.getInputStream()).hasBinaryContent(emptyExpected);
+        } finally {
+            server.stop();
+        }
+    }
+
+    @Test
     void testAuthCookieParam() throws Exception {
         Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
         try {

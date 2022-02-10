@@ -18,33 +18,32 @@ package com.palantir.conjure.java.undertow.annotations;
 
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.logsafe.Preconditions;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import java.io.IOException;
+import java.util.Optional;
 
-public final class CookieDeserializer<T> implements Deserializer<T> {
+public final class OptionalCookieDeserializer<T> implements Deserializer<Optional<T>> {
 
     private final String cookieName;
     private final ParamDecoder<? extends T> decoder;
 
-    public CookieDeserializer(String cookieName, ParamDecoder<? extends T> decoder) {
+    public OptionalCookieDeserializer(String cookieName, ParamDecoder<? extends T> decoder) {
         this.cookieName = Preconditions.checkNotNull(cookieName, "Cookie name is required");
         this.decoder = Preconditions.checkNotNull(decoder, "Decoder is required");
     }
 
     @Override
-    public T deserialize(HttpServerExchange exchange) throws IOException {
+    public Optional<T> deserialize(HttpServerExchange exchange) throws IOException {
         Cookie cookie = exchange.getRequestCookie(cookieName);
         if (cookie == null) {
-            throw new SafeIllegalArgumentException("Cookie is required", SafeArg.of("cookieName", cookieName));
+            return Optional.empty();
         }
-        return decoder.decode(cookie.getValue());
+        return Optional.of(decoder.decode(cookie.getValue()));
     }
 
     @Override
     public String toString() {
-        return "CookieDeserializer{cookieName='" + cookieName + '\'' + ", decoder=" + decoder + '}';
+        return "OptionalCookieDeserializer{cookieName='" + cookieName + '\'' + ", decoder=" + decoder + '}';
     }
 }

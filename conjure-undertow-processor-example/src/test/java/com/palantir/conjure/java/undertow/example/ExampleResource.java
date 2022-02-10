@@ -116,6 +116,11 @@ final class ExampleResource implements ExampleService {
     }
 
     @Override
+    public String optionalCookie(Optional<String> cookieValue) {
+        return cookieValue.orElse("empty");
+    }
+
+    @Override
     public BearerToken authCookie(BearerToken token) {
         return Preconditions.checkNotNull(token, "Token parameter is required");
     }

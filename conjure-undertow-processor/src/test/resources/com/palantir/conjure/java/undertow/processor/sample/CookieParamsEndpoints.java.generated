@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.annotations.OptionalCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
@@ -22,6 +23,7 @@ import java.lang.Exception;
 import java.lang.Override;
 import java.lang.String;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
@@ -50,6 +52,8 @@ public final class CookieParamsEndpoints implements UndertowService {
 
         private final Deserializer<String> stringCookieDeserializer;
 
+        private final Deserializer<Optional<String>> optionalStringCookieDeserializer;
+
         private final Deserializer<String> decoderCookieDeserializer;
 
         private final Deserializer<BearerToken> tokenDeserializer;
@@ -60,6 +64,8 @@ public final class CookieParamsEndpoints implements UndertowService {
             this.cookieParamsSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime);
             this.stringCookieDeserializer =
                     new CookieDeserializer<>("stringCookie", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+            this.optionalStringCookieDeserializer = new OptionalCookieDeserializer<>(
+                    "optionalStringCookie", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
             this.decoderCookieDeserializer =
                     new CookieDeserializer<>("decoderCookie", CookieParams.StringParamDecoder.INSTANCE);
             this.tokenDeserializer = new BearerTokenCookieDeserializer(runtime, "AUTH_TOKEN");
@@ -70,6 +76,7 @@ public final class CookieParamsEndpoints implements UndertowService {
             write(
                     this.delegate.cookieParams(
                             this.stringCookieDeserializer.deserialize(exchange),
+                            this.optionalStringCookieDeserializer.deserialize(exchange),
                             this.decoderCookieDeserializer.deserialize(exchange),
                             this.tokenDeserializer.deserialize(exchange)),
                     exchange);

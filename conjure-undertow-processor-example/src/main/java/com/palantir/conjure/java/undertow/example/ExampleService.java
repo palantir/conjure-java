@@ -88,6 +88,9 @@ public interface ExampleService {
     @Handle(method = HttpMethod.GET, path = "/cookie")
     String cookie(@Cookie(value = "MY_COOKIE") String cookieValue);
 
+    @Handle(method = HttpMethod.GET, path = "/optionalCookie")
+    String optionalCookie(@Cookie(value = "MY_COOKIE") Optional<String> cookieValue);
+
     @Handle(method = HttpMethod.GET, path = "/authCookie")
     BearerToken authCookie(@Cookie(value = "AUTH_TOKEN") BearerToken token);
 
