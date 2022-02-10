@@ -39,7 +39,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<Optional<String>> optionalStringParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalString);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalString, Optional.empty());
     }
 
     public static CollectionParamDecoder<String> stringCollectionParamDecoder(PlainSerDe serde) {
@@ -63,7 +63,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<Optional<Boolean>> optionalBooleanParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalBoolean);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalBoolean, Optional.empty());
     }
 
     public static CollectionParamDecoder<Boolean> booleanCollectionParamDecoder(PlainSerDe serde) {
@@ -87,7 +87,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<Optional<BearerToken>> optionalBearerTokenParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalBearerToken);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalBearerToken, Optional.empty());
     }
 
     public static CollectionParamDecoder<BearerToken> bearerTokenCollectionParamDecoder(PlainSerDe serde) {
@@ -112,7 +112,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<Optional<OffsetDateTime>> optionalDateTimeParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalDateTime);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalDateTime, Optional.empty());
     }
 
     public static CollectionParamDecoder<OffsetDateTime> dateTimeCollectionParamDecoder(PlainSerDe serde) {
@@ -137,7 +137,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<OptionalDouble> optionalDoubleParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalDouble);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalDouble, OptionalDouble.empty());
     }
 
     public static CollectionParamDecoder<Double> doubleCollectionParamDecoder(PlainSerDe serde) {
@@ -161,7 +161,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<OptionalInt> optionalIntegerParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalInteger);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalInteger, OptionalInt.empty());
     }
 
     public static CollectionParamDecoder<Integer> integerCollectionParamDecoder(PlainSerDe serde) {
@@ -185,7 +185,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<Optional<ResourceIdentifier>> optionalRidParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalRid);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalRid, Optional.empty());
     }
 
     public static CollectionParamDecoder<ResourceIdentifier> ridCollectionParamDecoder(PlainSerDe serde) {
@@ -210,7 +210,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<Optional<SafeLong>> optionalSafeLongParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalSafeLong);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalSafeLong, Optional.empty());
     }
 
     public static CollectionParamDecoder<SafeLong> safeLongCollectionParamDecoder(PlainSerDe serde) {
@@ -234,7 +234,7 @@ public final class ParamDecoders {
     }
 
     public static ParamDecoder<Optional<UUID>> optionalUuidParamDecoder(PlainSerDe serde) {
-        return DelegatingParamDecoder.of(serde::deserializeOptionalUuid);
+        return DelegatingParamDecoder.of(serde::deserializeOptionalUuid, Optional.empty());
     }
 
     public static CollectionParamDecoder<UUID> uuidCollectionParamDecoder(PlainSerDe serde) {
@@ -286,18 +286,29 @@ public final class ParamDecoders {
     private static final class DelegatingParamDecoder<T> implements ParamDecoder<T> {
 
         private final Function<String, T> factory;
+        private final Optional<T> noValuePresent;
 
-        private DelegatingParamDecoder(Function<String, T> factory) {
+        private DelegatingParamDecoder(Function<String, T> factory, Optional<T> noValuePresent) {
             this.factory = factory;
+            this.noValuePresent = noValuePresent;
         }
 
         static <T> DelegatingParamDecoder<T> of(Function<String, T> factory) {
-            return new DelegatingParamDecoder<>(factory);
+            return new DelegatingParamDecoder<>(factory, Optional.empty());
+        }
+
+        static <T> DelegatingParamDecoder<T> of(Function<String, T> factory, T noValuePresent) {
+            return new DelegatingParamDecoder<>(factory, Optional.of(noValuePresent));
         }
 
         @Override
         public T decode(String value) {
             return factory.apply(value);
+        }
+
+        @Override
+        public Optional<T> noValuePresent() {
+            return noValuePresent;
         }
     }
 

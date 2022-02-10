@@ -22,6 +22,7 @@ import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -107,6 +108,21 @@ final class ExampleResource implements ExampleService {
     @Override
     public void context(RequestContext context) {
         Preconditions.checkNotNull(context, "RequestContext is required");
+    }
+
+    @Override
+    public String cookie(String cookieValue) {
+        return Preconditions.checkNotNull(cookieValue, "Cookie value parameter is required");
+    }
+
+    @Override
+    public String optionalCookie(Optional<String> cookieValue) {
+        return cookieValue.orElse("empty");
+    }
+
+    @Override
+    public BearerToken authCookie(BearerToken token) {
+        return Preconditions.checkNotNull(token, "Token parameter is required");
     }
 
     private enum Binary implements CustomBinaryResponseBody {

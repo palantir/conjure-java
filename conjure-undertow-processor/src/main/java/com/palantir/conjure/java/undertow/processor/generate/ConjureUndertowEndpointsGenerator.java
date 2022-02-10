@@ -17,6 +17,8 @@
 package com.palantir.conjure.java.undertow.processor.generate;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
+import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
@@ -244,6 +246,49 @@ public final class ConjureUndertowEndpointsGenerator {
             }
 
             @Override
+            public Void cookie(String cookieName, String deserializerFieldName, CodeBlock deserializerFactory) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T<>($S, $L)",
+                                        deserializerFieldName,
+                                        CookieDeserializer.class,
+                                        cookieName,
+                                        deserializerFactory)
+                                .build())
+                        .build());
+                return null;
+            }
+
+            @Override
+            public Void authCookie(String cookieName, String deserializerFieldName) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T(runtime, $S)",
+                                        deserializerFieldName,
+                                        BearerTokenCookieDeserializer.class,
+                                        cookieName)
+                                .build())
+                        .build());
+                return null;
+            }
+
+            @Override
             public Void authHeader() {
                 return null;
             }
@@ -352,6 +397,17 @@ public final class ConjureUndertowEndpointsGenerator {
                     @Override
                     public CodeBlock query(
                             String _paramName, String deserializerFieldName, CodeBlock _deserializerFactory) {
+                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                    }
+
+                    @Override
+                    public CodeBlock cookie(
+                            String _cookieName, String deserializerFieldName, CodeBlock _deserializerFactory) {
+                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                    }
+
+                    @Override
+                    public CodeBlock authCookie(String _cookieName, String deserializerFieldName) {
                         return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
                     }
 

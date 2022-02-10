@@ -16,6 +16,13 @@
 
 package com.palantir.conjure.java.undertow.annotations;
 
+import java.util.Optional;
+
 public interface ParamDecoder<T> {
     T decode(String value);
+
+    /** May return a value which should be used if the request doesn't include the requested parameter. */
+    default Optional<T> noValuePresent() {
+        return Optional.empty();
+    }
 }
