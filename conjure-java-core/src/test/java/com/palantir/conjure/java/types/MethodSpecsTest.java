@@ -52,45 +52,51 @@ class MethodSpecsTest {
                 FieldSpec.builder(TypeName.LONG, "primitiveLong").build(),
                 FieldSpec.builder(ClassName.get(Integer.class), "boxedInteger").build());
         assertThat(MethodSpecs.computeHashCode(fields))
+                .hasSize(fields.size())
+                .satisfies(codeBlock -> assertThat(codeBlock.isEmpty()).isFalse());
+    }
+
+    @Test
+    void generateHashCode_singleField() {
+        List<FieldSpec> fields = ImmutableList.of(
+                FieldSpec.builder(ClassName.get(String.class), "string").build());
+        assertThat(MethodSpecs.generateHashCode("result =", fields))
+                .asString()
+                .isEqualTo("result = java.util.Objects.hashCode(this.string);\n");
+    }
+
+    @Test
+    void generateHashCode_multipleFields() {
+        List<FieldSpec> fields = ImmutableList.of(
+                FieldSpec.builder(TypeName.INT, "primitiveInt").build(),
+                FieldSpec.builder(ClassName.get(String.class), "string").build(),
+                FieldSpec.builder(TypeName.LONG, "primitiveLong").build(),
+                FieldSpec.builder(ClassName.get(Integer.class), "boxedInteger").build());
+        assertThat(MethodSpecs.generateHashCode("result =", fields))
                 .asString()
                 .isEqualTo("int hash = 4441;\n"
                         + "hash += (hash << 5) + java.lang.Integer.hashCode(this.primitiveInt);\n"
                         + "hash += (hash << 5) + java.util.Objects.hashCode(this.string);\n"
                         + "hash += (hash << 5) + java.lang.Long.hashCode(this.primitiveLong);\n"
                         + "hash += (hash << 5) + java.util.Objects.hashCode(this.boxedInteger);\n"
-                        + "return hash;\n");
+                        + "result = hash;\n");
     }
 
     @Test
-    void createComputeHashCode_single() {
+    void createHashCode_singleField() {
         List<FieldSpec> fields = ImmutableList.of(
-                FieldSpec.builder(ClassName.get(String.class), "value").build());
-        assertThat(MethodSpecs.createComputeHashCode(fields))
+                FieldSpec.builder(ClassName.get(String.class), "string").build());
+        assertThat(MethodSpecs.createHashCode(fields))
                 .asString()
-                .isEqualTo("private int computeHashCode() {\n"
-                        + "  return java.util.Objects.hashCode(this.value);\n"
-                        + "}\n");
+                .isEqualTo(
+                        "@java.lang.Override\n" //
+                                + "public int hashCode() {\n" //
+                                + "  return java.util.Objects.hashCode(this.string);\n"
+                                + "}\n");
     }
 
     @Test
-    void createComputeHashCode_multiple() {
-        List<FieldSpec> fields = ImmutableList.of(
-                FieldSpec.builder(TypeName.INT, "primitiveInt").build(),
-                FieldSpec.builder(ClassName.get(String.class), "string").build(),
-                FieldSpec.builder(ClassName.get(Integer.class), "boxedInteger").build());
-        assertThat(MethodSpecs.createComputeHashCode(fields))
-                .asString()
-                .isEqualTo("private int computeHashCode() {\n"
-                        + "  int hash = 4441;\n"
-                        + "  hash += (hash << 5) + java.lang.Integer.hashCode(this.primitiveInt);\n"
-                        + "  hash += (hash << 5) + java.util.Objects.hashCode(this.string);\n"
-                        + "  hash += (hash << 5) + java.util.Objects.hashCode(this.boxedInteger);\n"
-                        + "  return hash;\n"
-                        + "}\n");
-    }
-
-    @Test
-    void createHashCode() {
+    void createHashCode_multipleFields() {
         List<FieldSpec> fields = ImmutableList.of(
                 FieldSpec.builder(TypeName.INT, "primitiveInt").build(),
                 FieldSpec.builder(ClassName.get(String.class), "string").build(),
@@ -109,7 +115,33 @@ class MethodSpecsTest {
     }
 
     @Test
-    void generateClass() {
+    void generateClass_singleField_primitive() {
+        List<FieldSpec> fields =
+                ImmutableList.of(FieldSpec.builder(TypeName.INT, "primitiveInt").build());
+        TypeSpec.Builder builder = TypeSpec.classBuilder("Test");
+        builder.addFields(fields);
+        MethodSpecs.addCachedHashCode(builder, fields);
+        assertThat(builder.build())
+                .asString()
+                .isEqualTo("class Test {\n"
+                        + "  int primitiveInt;\n"
+                        + "\n"
+                        + "  private int memoizedHashCode;\n"
+                        + "\n"
+                        + "  @java.lang.Override\n"
+                        + "  public int hashCode() {\n"
+                        + "    int result = memoizedHashCode;\n"
+                        + "    if (result == 0) {\n"
+                        + "      result = java.lang.Integer.hashCode(this.primitiveInt);\n"
+                        + "      memoizedHashCode = result;\n"
+                        + "    }\n"
+                        + "    return result;\n"
+                        + "  }\n"
+                        + "}\n");
+    }
+
+    @Test
+    void generateClass_multipleFields() {
         List<FieldSpec> fields = ImmutableList.of(
                 FieldSpec.builder(TypeName.INT, "primitiveInt").build(),
                 FieldSpec.builder(ClassName.get(String.class), "string").build(),
@@ -132,18 +164,14 @@ class MethodSpecsTest {
                         + "  public int hashCode() {\n"
                         + "    int result = memoizedHashCode;\n"
                         + "    if (result == 0) {\n"
-                        + "      result = computeHashCode();\n"
+                        + "      int hash = 4441;\n"
+                        + "      hash += (hash << 5) + java.lang.Integer.hashCode(this.primitiveInt);\n"
+                        + "      hash += (hash << 5) + java.util.Objects.hashCode(this.string);\n"
+                        + "      hash += (hash << 5) + java.util.Objects.hashCode(this.boxedInteger);\n"
+                        + "      result = hash;\n"
                         + "      memoizedHashCode = result;\n"
                         + "    }\n"
                         + "    return result;\n"
-                        + "  }\n"
-                        + "\n"
-                        + "  private int computeHashCode() {\n"
-                        + "    int hash = 4441;\n"
-                        + "    hash += (hash << 5) + java.lang.Integer.hashCode(this.primitiveInt);\n"
-                        + "    hash += (hash << 5) + java.util.Objects.hashCode(this.string);\n"
-                        + "    hash += (hash << 5) + java.util.Objects.hashCode(this.boxedInteger);\n"
-                        + "    return hash;\n"
                         + "  }\n"
                         + "}\n");
     }

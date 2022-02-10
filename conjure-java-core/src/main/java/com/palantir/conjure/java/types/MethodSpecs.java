@@ -86,58 +86,62 @@ public final class MethodSpecs {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.INT)
-                .addCode(computeHashCode(fields))
+                .addCode(generateHashCode("return", fields))
                 .build();
     }
 
     public static void addCachedHashCode(TypeSpec.Builder typeBuilder, Collection<FieldSpec> fields) {
-        FieldSpec field = FieldSpec.builder(TypeName.INT, "memoizedHashCode", Modifier.PRIVATE)
+        FieldSpec field = FieldSpec.builder(
+                        TypeName.INT, JavaNameSanitizer.sanitize("memoizedHashCode"), Modifier.PRIVATE)
                 .build();
         typeBuilder.addField(field);
-        typeBuilder.addMethods(createCachedHashCodeMethods(fields, field));
+        typeBuilder.addMethod(createCachedHashCode(fields, field));
     }
 
-    private static List<MethodSpec> createCachedHashCodeMethods(Collection<FieldSpec> fields, FieldSpec field) {
-        return ImmutableList.of(
-                MethodSpec.methodBuilder("hashCode")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(TypeName.INT)
-                        // Single volatile read
-                        .addStatement("int result = $N", field)
-                        .beginControlFlow("if (result == 0)")
-                        .addStatement("result = computeHashCode()")
-                        // Single volatile write
-                        .addStatement("$N = result", field)
-                        .endControlFlow()
-                        .addStatement("return result")
-                        .build(),
-                createComputeHashCode(fields));
-    }
-
-    @VisibleForTesting
-    static MethodSpec createComputeHashCode(Collection<FieldSpec> fields) {
-        return MethodSpec.methodBuilder("computeHashCode")
-                .addModifiers(Modifier.PRIVATE)
+    private static MethodSpec createCachedHashCode(Collection<FieldSpec> fields, FieldSpec field) {
+        return MethodSpec.methodBuilder("hashCode")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.INT)
-                .addCode(computeHashCode(fields))
+                // Single volatile read
+                .addStatement("int result = $N", field)
+                .beginControlFlow("if (result == 0)")
+                .addCode(generateHashCode("result =", fields))
+                // Single volatile write
+                .addStatement("$N = result", field)
+                .endControlFlow()
+                .addStatement("return result")
                 .build();
     }
 
     @VisibleForTesting
-    static CodeBlock computeHashCode(Collection<FieldSpec> fields) {
+    static CodeBlock generateHashCode(String prefix, Collection<FieldSpec> fields) {
+        String varName = "hash";
+        CodeBlock.Builder builder = CodeBlock.builder();
+        List<CodeBlock> codeBlocks = computeHashCode(fields);
+        if (codeBlocks.size() == 1) {
+            builder.addStatement("$L $L", prefix, Iterables.getOnlyElement(codeBlocks));
+        } else {
+            builder.addStatement("int $N = 4441", varName);
+            for (CodeBlock codeBlock : codeBlocks) {
+                builder.addStatement(codeBlock);
+            }
+            builder.addStatement("$L $N", prefix, varName);
+        }
+        return builder.build();
+    }
+
+    @VisibleForTesting
+    static List<CodeBlock> computeHashCode(Collection<FieldSpec> fields) {
         if (fields.size() == 1) {
-            return CodeBlock.builder()
-                    .addStatement("return $L", computeHashCode(Iterables.getOnlyElement(fields)))
-                    .build();
+            return ImmutableList.of(computeHashCode(Iterables.getOnlyElement(fields)));
         }
 
-        CodeBlock.Builder builder = CodeBlock.builder();
-        builder.addStatement(CodeBlock.of("int hash = 4441"));
+        String varName = "hash";
+        ImmutableList.Builder<CodeBlock> builder = ImmutableList.builder();
         for (FieldSpec field : fields) {
-            builder.addStatement("hash += (hash << 5) + $L", computeHashCode(field));
+            builder.add(CodeBlock.of("$N += ($N << 5) + $L", varName, varName, computeHashCode(field)));
         }
-        builder.addStatement("return hash");
         return builder.build();
     }
 
