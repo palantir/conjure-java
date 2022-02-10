@@ -28,6 +28,7 @@ import com.palantir.conjure.java.undertow.processor.data.DefaultDecoderNames.Con
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.CodeBlock;
 import io.undertow.server.HttpServerExchange;
 import java.io.InputStream;
@@ -42,8 +43,12 @@ import javax.lang.model.type.TypeMirror;
 
 public final class ParamTypesResolver {
 
-    private static final ImmutableSet<Class<?>> PARAM_ANNOTATION_CLASSES =
-            ImmutableSet.of(Handle.Body.class, Handle.PathParam.class, Handle.QueryParam.class, Handle.Header.class);
+    private static final ImmutableSet<Class<?>> PARAM_ANNOTATION_CLASSES = ImmutableSet.of(
+            Handle.Body.class,
+            Handle.PathParam.class,
+            Handle.QueryParam.class,
+            Handle.Header.class,
+            Handle.Cookie.class);
     private static final ImmutableSet<String> PARAM_ANNOTATIONS =
             PARAM_ANNOTATION_CLASSES.stream().map(Class::getCanonicalName).collect(ImmutableSet.toImmutableSet());
 
@@ -95,57 +100,90 @@ public final class ParamTypesResolver {
         AnnotationReflector annotationReflector =
                 ImmutableAnnotationReflector.of(Iterables.getOnlyElement(paramAnnotationMirrors));
         if (annotationReflector.isAnnotation(Handle.Body.class)) {
-            String deserializerName = InstanceVariables.joinCamelCase(endpointName.get(), "Deserializer");
-            TypeMirror deserializer = annotationReflector.getAnnotationValue(TypeMirror.class);
-            return Optional.of(ParameterTypes.body(Instantiables.instantiate(deserializer), deserializerName));
+            return Optional.of(bodyParameter(endpointName, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.Header.class)) {
-            String deserializerName = InstanceVariables.joinCamelCase(
-                    variableElement.getSimpleName().toString(), "Deserializer");
-            return Optional.of(ParameterTypes.header(
-                    annotationReflector.getAnnotationValue(String.class),
-                    deserializerName,
-                    getCollectionParamDecoder(variableElement, annotationReflector)));
+            return Optional.of(headerParameter(variableElement, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.PathParam.class)) {
-            String javaParameterName = variableElement.getSimpleName().toString();
-            String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
-            return Optional.of(ParameterTypes.path(
-                    javaParameterName, deserializerName, getParamDecoder(variableElement, annotationReflector)));
+            return Optional.of(pathParameter(variableElement, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.QueryParam.class)) {
-            String deserializerName = InstanceVariables.joinCamelCase(
-                    variableElement.getSimpleName().toString(), "Deserializer");
-            return Optional.of(ParameterTypes.query(
-                    annotationReflector.getAnnotationValue(String.class),
-                    deserializerName,
-                    getCollectionParamDecoder(variableElement, annotationReflector)));
+            return Optional.of(queryParameter(variableElement, annotationReflector));
+        } else if (annotationReflector.isAnnotation(Handle.Cookie.class)) {
+            return Optional.of(cookieParameter(variableElement, annotationReflector));
         }
 
         throw new SafeIllegalStateException("Not possible");
     }
 
-    private CodeBlock getParamDecoder(VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private ParameterType bodyParameter(EndpointName endpointName, AnnotationReflector annotationReflector) {
+        String deserializerName = InstanceVariables.joinCamelCase(endpointName.get(), "Deserializer");
+        TypeMirror deserializer = annotationReflector.getAnnotationValue(TypeMirror.class);
+        return ParameterTypes.body(Instantiables.instantiate(deserializer), deserializerName);
+    }
+
+    private ParameterType headerParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+        String deserializerName =
+                InstanceVariables.joinCamelCase(variableElement.getSimpleName().toString(), "Deserializer");
+        return ParameterTypes.header(
+                annotationReflector.getAnnotationValue(String.class),
+                deserializerName,
+                getCollectionParamDecoder(variableElement.asType(), annotationReflector));
+    }
+
+    private ParameterType pathParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+        String javaParameterName = variableElement.getSimpleName().toString();
+        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
+        return ParameterTypes.path(
+                javaParameterName, deserializerName, getParamDecoder(variableElement.asType(), annotationReflector));
+    }
+
+    private ParameterType queryParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+        String deserializerName =
+                InstanceVariables.joinCamelCase(variableElement.getSimpleName().toString(), "Deserializer");
+        return ParameterTypes.query(
+                annotationReflector.getAnnotationValue(String.class),
+                deserializerName,
+                getCollectionParamDecoder(variableElement.asType(), annotationReflector));
+    }
+
+    private ParameterType cookieParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+        String deserializerName =
+                InstanceVariables.joinCamelCase(variableElement.getSimpleName().toString(), "Deserializer");
+        if (context.isSameTypes(variableElement.asType(), BearerToken.class)) {
+            // TODO(fwindheuser): Add some validation no more than one BearerToken cookie param is used.
+            return ParameterTypes.authCookie(annotationReflector.getAnnotationValue(String.class), deserializerName);
+        }
+
+        return ParameterTypes.cookie(
+                annotationReflector.getAnnotationValue(String.class),
+                deserializerName,
+                getParamDecoder(variableElement.asType(), annotationReflector));
+    }
+
+    private CodeBlock getParamDecoder(TypeMirror variableType, AnnotationReflector annotationReflector) {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultParamDecoder.class)) {
             return Instantiables.instantiate(typeMirror);
         }
 
+        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);
+        TypeMirror decoderType = innerOptionalType.orElse(variableType);
+        ContainerType decoderOutputType = getOutputType(Optional.empty(), Optional.empty(), innerOptionalType);
+
         // For param decoders, we don't support any container types (optional, list, set).
-        TypeMirror variableType = variableElement.asType();
         String decoderMethodName =
-                DefaultDecoderNames.getDefaultDecoderMethodName(variableType, ContainerType.NONE, ContainerType.NONE);
+                DefaultDecoderNames.getDefaultDecoderMethodName(decoderType, ContainerType.NONE, decoderOutputType);
 
         return CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName);
     }
 
-    private CodeBlock getCollectionParamDecoder(
-            VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private CodeBlock getCollectionParamDecoder(TypeMirror variableType, AnnotationReflector annotationReflector) {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultCollectionParamDecoder.class)) {
             return Instantiables.instantiate(typeMirror);
         }
 
-        TypeMirror variableType = variableElement.asType();
         Optional<TypeMirror> innerListType = context.getGenericInnerType(List.class, variableType);
         Optional<TypeMirror> innerSetType = context.getGenericInnerType(Set.class, variableType);
         Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);

@@ -248,4 +248,65 @@ class ExampleServiceTest {
             server.stop();
         }
     }
+
+    @Test
+    void testCookieParam() throws Exception {
+        Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
+        try {
+            int port = TestHelper.getPort(server);
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/cookie").openConnection();
+            connection.setRequestProperty(HttpHeaders.COOKIE, "MY_COOKIE=cookie-value");
+            byte[] expected = "\"cookie-value\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            assertThat(connection.getInputStream()).hasBinaryContent(expected);
+        } finally {
+            server.stop();
+        }
+    }
+
+    @Test
+    void testOptionalCookieParam() throws Exception {
+        Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
+        try {
+            int port = TestHelper.getPort(server);
+
+            // Cookie value is present
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/optionalCookie").openConnection();
+            connection.setRequestProperty(HttpHeaders.COOKIE, "MY_COOKIE=cookie-value");
+            byte[] expected = "\"cookie-value\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            assertThat(connection.getInputStream()).hasBinaryContent(expected);
+
+            // Cookie value is empty
+            connection = (HttpURLConnection) new URL("http://localhost:" + port + "/optionalCookie").openConnection();
+            byte[] emptyResponse = "\"empty\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            assertThat(connection.getInputStream()).hasBinaryContent(emptyResponse);
+        } finally {
+            server.stop();
+        }
+    }
+
+    @Test
+    void testAuthCookieParam() throws Exception {
+        Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
+        try {
+            int port = TestHelper.getPort(server);
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/authCookie").openConnection();
+            connection.setRequestProperty(HttpHeaders.COOKIE, "AUTH_TOKEN=my-token");
+            byte[] expected = "\"my-token\"".getBytes(StandardCharsets.UTF_8);
+
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            assertThat(connection.getInputStream()).hasBinaryContent(expected);
+        } finally {
+            server.stop();
+        }
+    }
 }

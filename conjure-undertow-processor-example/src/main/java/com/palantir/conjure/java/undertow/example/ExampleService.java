@@ -20,12 +20,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.undertow.annotations.CollectionParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
+import com.palantir.conjure.java.undertow.annotations.Handle.Cookie;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoder;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
 import java.io.Closeable;
 import java.util.Collection;
@@ -82,6 +84,15 @@ public interface ExampleService {
 
     @Handle(method = HttpMethod.GET, path = "/context")
     void context(RequestContext context);
+
+    @Handle(method = HttpMethod.GET, path = "/cookie")
+    String cookie(@Cookie(value = "MY_COOKIE") String cookieValue);
+
+    @Handle(method = HttpMethod.GET, path = "/optionalCookie")
+    String optionalCookie(@Cookie(value = "MY_COOKIE") Optional<String> cookieValue);
+
+    @Handle(method = HttpMethod.GET, path = "/authCookie")
+    BearerToken authCookie(@Cookie(value = "AUTH_TOKEN") BearerToken token);
 
     interface CustomBinaryResponseBody extends Closeable, BinaryResponseBody {}
 

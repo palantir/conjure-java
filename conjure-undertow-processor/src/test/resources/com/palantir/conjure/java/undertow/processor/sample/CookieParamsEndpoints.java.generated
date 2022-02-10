@@ -1,0 +1,120 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
+import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.tokens.auth.BearerToken;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import java.io.IOException;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalInt;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class CookieParamsEndpoints implements UndertowService {
+    private final CookieParams delegate;
+
+    private CookieParamsEndpoints(CookieParams delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(CookieParams delegate) {
+        return new CookieParamsEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new CookieParamsEndpoint(runtime, delegate));
+    }
+
+    private static final class CookieParamsEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final CookieParams delegate;
+
+        private final Serializer<String> cookieParamsSerializer;
+
+        private final Deserializer<String> stringCookieDeserializer;
+
+        private final Deserializer<Optional<String>> optionalStringCookieDeserializer;
+
+        private final Deserializer<OptionalInt> optionalIntCookieDeserializer;
+
+        private final Deserializer<String> decoderCookieDeserializer;
+
+        private final Deserializer<BearerToken> tokenDeserializer;
+
+        CookieParamsEndpoint(UndertowRuntime runtime, CookieParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.cookieParamsSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime);
+            this.stringCookieDeserializer =
+                    new CookieDeserializer<>("stringCookie", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+            this.optionalStringCookieDeserializer = new CookieDeserializer<>(
+                    "optionalStringCookie", ParamDecoders.optionalStringParamDecoder(runtime.plainSerDe()));
+            this.optionalIntCookieDeserializer = new CookieDeserializer<>(
+                    "optionalIntCookie", ParamDecoders.optionalIntegerParamDecoder(runtime.plainSerDe()));
+            this.decoderCookieDeserializer =
+                    new CookieDeserializer<>("decoderCookie", CookieParams.StringParamDecoder.INSTANCE);
+            this.tokenDeserializer = new BearerTokenCookieDeserializer(runtime, "AUTH_TOKEN");
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            write(
+                    this.delegate.cookieParams(
+                            this.stringCookieDeserializer.deserialize(exchange),
+                            this.optionalStringCookieDeserializer.deserialize(exchange),
+                            this.optionalIntCookieDeserializer.deserialize(exchange),
+                            this.decoderCookieDeserializer.deserialize(exchange),
+                            this.tokenDeserializer.deserialize(exchange)),
+                    exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.cookieParamsSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/cookies";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CookieParams";
+        }
+
+        @Override
+        public String name() {
+            return "cookieParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}
