@@ -54,7 +54,10 @@ public final class CovariantListExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.items, this.externalItems);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.items);
+            hash += (hash << 5) + Objects.hashCode(this.externalItems);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

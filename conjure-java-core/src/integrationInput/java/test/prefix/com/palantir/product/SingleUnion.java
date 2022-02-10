@@ -248,7 +248,10 @@ public final class SingleUnion {
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.type, this.value);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.type);
+            hash += (hash << 5) + Objects.hashCode(this.value);
+            return hash;
         }
 
         @Override

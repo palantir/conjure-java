@@ -262,25 +262,26 @@ public final class PrimitiveOptionalsExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.num,
-                    this.bool,
-                    this.integer,
-                    this.safelong,
-                    this.rid,
-                    this.bearertoken,
-                    this.uuid,
-                    this.map,
-                    this.list,
-                    this.set,
-                    this.aliasOne,
-                    this.aliasTwo,
-                    this.aliasList,
-                    this.aliasMap,
-                    this.aliasOptional,
-                    this.aliasOptionalMap,
-                    this.aliasOptionalList,
-                    this.aliasOptionalSet);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.num);
+            hash += (hash << 5) + Objects.hashCode(this.bool);
+            hash += (hash << 5) + Objects.hashCode(this.integer);
+            hash += (hash << 5) + Objects.hashCode(this.safelong);
+            hash += (hash << 5) + Objects.hashCode(this.rid);
+            hash += (hash << 5) + Objects.hashCode(this.bearertoken);
+            hash += (hash << 5) + Objects.hashCode(this.uuid);
+            hash += (hash << 5) + Objects.hashCode(this.map);
+            hash += (hash << 5) + Objects.hashCode(this.list);
+            hash += (hash << 5) + Objects.hashCode(this.set);
+            hash += (hash << 5) + Objects.hashCode(this.aliasOne);
+            hash += (hash << 5) + Objects.hashCode(this.aliasTwo);
+            hash += (hash << 5) + Objects.hashCode(this.aliasList);
+            hash += (hash << 5) + Objects.hashCode(this.aliasMap);
+            hash += (hash << 5) + Objects.hashCode(this.aliasOptional);
+            hash += (hash << 5) + Objects.hashCode(this.aliasOptionalMap);
+            hash += (hash << 5) + Objects.hashCode(this.aliasOptionalList);
+            hash += (hash << 5) + Objects.hashCode(this.aliasOptionalSet);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

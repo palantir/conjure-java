@@ -108,14 +108,15 @@ public final class AliasAsMapKeyExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.strings,
-                    this.rids,
-                    this.bearertokens,
-                    this.integers,
-                    this.safelongs,
-                    this.datetimes,
-                    this.uuids);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.strings);
+            hash += (hash << 5) + Objects.hashCode(this.rids);
+            hash += (hash << 5) + Objects.hashCode(this.bearertokens);
+            hash += (hash << 5) + Objects.hashCode(this.integers);
+            hash += (hash << 5) + Objects.hashCode(this.safelongs);
+            hash += (hash << 5) + Objects.hashCode(this.datetimes);
+            hash += (hash << 5) + Objects.hashCode(this.uuids);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

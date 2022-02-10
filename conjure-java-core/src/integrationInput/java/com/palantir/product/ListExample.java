@@ -97,13 +97,14 @@ public final class ListExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.items,
-                    this.primitiveItems,
-                    this.doubleItems,
-                    this.optionalItems,
-                    this.aliasOptionalItems,
-                    this.nestedItems);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.items);
+            hash += (hash << 5) + Objects.hashCode(this.primitiveItems);
+            hash += (hash << 5) + Objects.hashCode(this.doubleItems);
+            hash += (hash << 5) + Objects.hashCode(this.optionalItems);
+            hash += (hash << 5) + Objects.hashCode(this.aliasOptionalItems);
+            hash += (hash << 5) + Objects.hashCode(this.nestedItems);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

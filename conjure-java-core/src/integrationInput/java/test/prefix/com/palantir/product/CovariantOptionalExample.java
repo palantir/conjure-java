@@ -59,7 +59,10 @@ public final class CovariantOptionalExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.item, this.setItem);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.item);
+            hash += (hash << 5) + Objects.hashCode(this.setItem);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

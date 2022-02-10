@@ -100,7 +100,13 @@ public final class MultipleOrderedStages {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.token, this.item, this.items, this.mappedRids, this.optionalItem);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.token);
+            hash += (hash << 5) + Objects.hashCode(this.item);
+            hash += (hash << 5) + Objects.hashCode(this.items);
+            hash += (hash << 5) + Objects.hashCode(this.mappedRids);
+            hash += (hash << 5) + Objects.hashCode(this.optionalItem);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

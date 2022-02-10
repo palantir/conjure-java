@@ -152,15 +152,16 @@ public final class ManyFieldExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.string,
-                    this.integer,
-                    this.doubleValue,
-                    this.optionalItem,
-                    this.items,
-                    this.set,
-                    this.map,
-                    this.alias);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.string);
+            hash += (hash << 5) + Integer.hashCode(this.integer);
+            hash += (hash << 5) + Double.hashCode(this.doubleValue);
+            hash += (hash << 5) + Objects.hashCode(this.optionalItem);
+            hash += (hash << 5) + Objects.hashCode(this.items);
+            hash += (hash << 5) + Objects.hashCode(this.set);
+            hash += (hash << 5) + Objects.hashCode(this.map);
+            hash += (hash << 5) + Objects.hashCode(this.alias);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

@@ -142,15 +142,16 @@ public final class MultipleFieldsOnlyFinalStage {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.items,
-                    this.itemsMap,
-                    this.optionalItem,
-                    this.itemsSet,
-                    this.itemsOld,
-                    this.itemsMapOld,
-                    this.optionalItemOld,
-                    this.itemsSetOld);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.items);
+            hash += (hash << 5) + Objects.hashCode(this.itemsMap);
+            hash += (hash << 5) + Objects.hashCode(this.optionalItem);
+            hash += (hash << 5) + Objects.hashCode(this.itemsSet);
+            hash += (hash << 5) + Objects.hashCode(this.itemsOld);
+            hash += (hash << 5) + Objects.hashCode(this.itemsMapOld);
+            hash += (hash << 5) + Objects.hashCode(this.optionalItemOld);
+            hash += (hash << 5) + Objects.hashCode(this.itemsSetOld);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

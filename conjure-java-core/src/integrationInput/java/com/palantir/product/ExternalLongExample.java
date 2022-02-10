@@ -67,7 +67,11 @@ public final class ExternalLongExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.externalLong, this.optionalExternalLong, this.listExternalLong);
+            int hash = 4441;
+            hash += (hash << 5) + Long.hashCode(this.externalLong);
+            hash += (hash << 5) + Objects.hashCode(this.optionalExternalLong);
+            hash += (hash << 5) + Objects.hashCode(this.listExternalLong);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

@@ -94,13 +94,14 @@ public final class ReservedKeyExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.package_,
-                    this.interface_,
-                    this.fieldNameWithDashes,
-                    this.primitveFieldNameWithDashes,
-                    this.memoizedHashCode_,
-                    this.result);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.package_);
+            hash += (hash << 5) + Objects.hashCode(this.interface_);
+            hash += (hash << 5) + Objects.hashCode(this.fieldNameWithDashes);
+            hash += (hash << 5) + Integer.hashCode(this.primitveFieldNameWithDashes);
+            hash += (hash << 5) + Integer.hashCode(this.memoizedHashCode_);
+            hash += (hash << 5) + Integer.hashCode(this.result);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

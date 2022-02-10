@@ -68,7 +68,11 @@ public final class MapExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.items, this.optionalItems, this.aliasOptionalItems);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.items);
+            hash += (hash << 5) + Objects.hashCode(this.optionalItems);
+            hash += (hash << 5) + Objects.hashCode(this.aliasOptionalItems);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

@@ -55,7 +55,10 @@ public final class SetExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.items, this.doubleItems);
+            int hash = 4441;
+            hash += (hash << 5) + Objects.hashCode(this.items);
+            hash += (hash << 5) + Objects.hashCode(this.doubleItems);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;
