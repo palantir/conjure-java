@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Generated;
@@ -153,15 +152,16 @@ public final class ManyFieldExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.string,
-                    this.integer,
-                    this.doubleValue,
-                    this.optionalItem,
-                    this.items,
-                    this.set,
-                    this.map,
-                    this.alias);
+            int hash = 1;
+            hash = 31 * hash + this.string.hashCode();
+            hash = 31 * hash + Integer.hashCode(this.integer);
+            hash = 31 * hash + Double.hashCode(this.doubleValue);
+            hash = 31 * hash + this.optionalItem.hashCode();
+            hash = 31 * hash + this.items.hashCode();
+            hash = 31 * hash + this.set.hashCode();
+            hash = 31 * hash + this.map.hashCode();
+            hash = 31 * hash + this.alias.hashCode();
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

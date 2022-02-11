@@ -14,7 +14,6 @@ import com.palantir.tokens.auth.BearerToken;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -262,25 +261,26 @@ public final class PrimitiveOptionalsExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.num,
-                    this.bool,
-                    this.integer,
-                    this.safelong,
-                    this.rid,
-                    this.bearertoken,
-                    this.uuid,
-                    this.map,
-                    this.list,
-                    this.set,
-                    this.aliasOne,
-                    this.aliasTwo,
-                    this.aliasList,
-                    this.aliasMap,
-                    this.aliasOptional,
-                    this.aliasOptionalMap,
-                    this.aliasOptionalList,
-                    this.aliasOptionalSet);
+            int hash = 1;
+            hash = 31 * hash + this.num.hashCode();
+            hash = 31 * hash + this.bool.hashCode();
+            hash = 31 * hash + this.integer.hashCode();
+            hash = 31 * hash + this.safelong.hashCode();
+            hash = 31 * hash + this.rid.hashCode();
+            hash = 31 * hash + this.bearertoken.hashCode();
+            hash = 31 * hash + this.uuid.hashCode();
+            hash = 31 * hash + this.map.hashCode();
+            hash = 31 * hash + this.list.hashCode();
+            hash = 31 * hash + this.set.hashCode();
+            hash = 31 * hash + this.aliasOne.hashCode();
+            hash = 31 * hash + this.aliasTwo.hashCode();
+            hash = 31 * hash + this.aliasList.hashCode();
+            hash = 31 * hash + this.aliasMap.hashCode();
+            hash = 31 * hash + this.aliasOptional.hashCode();
+            hash = 31 * hash + this.aliasOptionalMap.hashCode();
+            hash = 31 * hash + this.aliasOptionalList.hashCode();
+            hash = 31 * hash + this.aliasOptionalSet.hashCode();
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

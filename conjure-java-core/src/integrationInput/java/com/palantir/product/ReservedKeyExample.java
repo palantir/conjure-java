@@ -8,7 +8,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -93,13 +92,14 @@ public final class ReservedKeyExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.package_,
-                    this.interface_,
-                    this.fieldNameWithDashes,
-                    this.primitveFieldNameWithDashes,
-                    this.memoizedHashCode_,
-                    this.result);
+            int hash = 1;
+            hash = 31 * hash + this.package_.hashCode();
+            hash = 31 * hash + this.interface_.hashCode();
+            hash = 31 * hash + this.fieldNameWithDashes.hashCode();
+            hash = 31 * hash + Integer.hashCode(this.primitveFieldNameWithDashes);
+            hash = 31 * hash + Integer.hashCode(this.memoizedHashCode_);
+            hash = 31 * hash + Integer.hashCode(this.result);
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

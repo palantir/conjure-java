@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -69,7 +68,11 @@ public final class MapExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.items, this.optionalItems, this.aliasOptionalItems);
+            int hash = 1;
+            hash = 31 * hash + this.items.hashCode();
+            hash = 31 * hash + this.optionalItems.hashCode();
+            hash = 31 * hash + this.aliasOptionalItems.hashCode();
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

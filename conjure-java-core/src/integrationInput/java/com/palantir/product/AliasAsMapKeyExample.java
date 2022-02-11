@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -107,14 +106,15 @@ public final class AliasAsMapKeyExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(
-                    this.strings,
-                    this.rids,
-                    this.bearertokens,
-                    this.integers,
-                    this.safelongs,
-                    this.datetimes,
-                    this.uuids);
+            int hash = 1;
+            hash = 31 * hash + this.strings.hashCode();
+            hash = 31 * hash + this.rids.hashCode();
+            hash = 31 * hash + this.bearertokens.hashCode();
+            hash = 31 * hash + this.integers.hashCode();
+            hash = 31 * hash + this.safelongs.hashCode();
+            hash = 31 * hash + this.datetimes.hashCode();
+            hash = 31 * hash + this.uuids.hashCode();
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

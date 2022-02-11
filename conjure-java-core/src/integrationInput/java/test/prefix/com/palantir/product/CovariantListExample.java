@@ -12,7 +12,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 import test.api.ExampleExternalReference;
@@ -55,7 +54,10 @@ public final class CovariantListExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.items, this.externalItems);
+            int hash = 1;
+            hash = 31 * hash + this.items.hashCode();
+            hash = 31 * hash + this.externalItems.hashCode();
+            result = hash;
             memoizedHashCode = result;
         }
         return result;

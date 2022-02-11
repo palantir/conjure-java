@@ -11,7 +11,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -42,7 +41,7 @@ public final class OptionalAliasExample {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.optionalAlias);
+        return this.optionalAlias.hashCode();
     }
 
     @Override

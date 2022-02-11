@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -181,7 +180,7 @@ public final class UnionTypeExample {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.value);
+        return this.value.hashCode();
     }
 
     @Override
@@ -672,7 +671,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1034,7 +1033,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1079,7 +1078,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1124,7 +1123,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1169,7 +1168,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1215,7 +1214,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1260,7 +1259,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1305,7 +1304,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1351,7 +1350,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -1408,7 +1407,10 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Objects.hash(this.type, this.value);
+            int hash = 1;
+            hash = 31 * hash + this.type.hashCode();
+            hash = 31 * hash + this.value.hashCode();
+            return hash;
         }
 
         @Override

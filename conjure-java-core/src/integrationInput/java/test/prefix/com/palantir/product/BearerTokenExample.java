@@ -10,7 +10,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -40,7 +39,7 @@ public final class BearerTokenExample {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.bearerTokenValue);
+        return this.bearerTokenValue.hashCode();
     }
 
     @Override

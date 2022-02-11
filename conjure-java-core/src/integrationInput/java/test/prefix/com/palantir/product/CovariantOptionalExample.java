@@ -11,7 +11,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -59,7 +58,10 @@ public final class CovariantOptionalExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hash(this.item, this.setItem);
+            int hash = 1;
+            hash = 31 * hash + this.item.hashCode();
+            hash = 31 * hash + this.setItem.hashCode();
+            result = hash;
             memoizedHashCode = result;
         }
         return result;
