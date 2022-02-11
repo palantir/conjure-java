@@ -13,7 +13,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Generated;
@@ -68,10 +67,10 @@ public final class ExternalLongExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            int hash = 4441;
-            hash += (hash << 5) + Long.hashCode(this.externalLong);
-            hash += (hash << 5) + Objects.hashCode(this.optionalExternalLong);
-            hash += (hash << 5) + Objects.hashCode(this.listExternalLong);
+            int hash = 1;
+            hash = 31 * hash + Long.hashCode(this.externalLong);
+            hash = 31 * hash + this.optionalExternalLong.hashCode();
+            hash = 31 * hash + this.listExternalLong.hashCode();
             result = hash;
             memoizedHashCode = result;
         }

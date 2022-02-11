@@ -11,7 +11,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -43,7 +42,7 @@ public final class OneFieldOnlyFinalStage {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.optionalItem);
+        return this.optionalItem.hashCode();
     }
 
     @Override

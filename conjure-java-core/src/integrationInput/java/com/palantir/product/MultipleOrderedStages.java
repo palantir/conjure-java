@@ -18,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Generated;
@@ -100,12 +99,12 @@ public final class MultipleOrderedStages {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            int hash = 4441;
-            hash += (hash << 5) + Objects.hashCode(this.token);
-            hash += (hash << 5) + Objects.hashCode(this.item);
-            hash += (hash << 5) + Objects.hashCode(this.items);
-            hash += (hash << 5) + Objects.hashCode(this.mappedRids);
-            hash += (hash << 5) + Objects.hashCode(this.optionalItem);
+            int hash = 1;
+            hash = 31 * hash + this.token.hashCode();
+            hash = 31 * hash + this.item.hashCode();
+            hash = 31 * hash + this.items.hashCode();
+            hash = 31 * hash + this.mappedRids.hashCode();
+            hash = 31 * hash + this.optionalItem.hashCode();
             result = hash;
             memoizedHashCode = result;
         }

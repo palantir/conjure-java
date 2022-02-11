@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -46,7 +45,7 @@ public final class AnyMapExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hashCode(this.items);
+            result = this.items.hashCode();
             memoizedHashCode = result;
         }
         return result;

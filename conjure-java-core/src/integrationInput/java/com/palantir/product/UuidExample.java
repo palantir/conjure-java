@@ -8,7 +8,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -39,7 +38,7 @@ public final class UuidExample {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.uuid);
+        return this.uuid.hashCode();
     }
 
     @Override

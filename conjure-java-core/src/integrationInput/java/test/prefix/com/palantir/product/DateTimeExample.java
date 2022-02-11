@@ -10,7 +10,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -44,7 +43,7 @@ public final class DateTimeExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            result = Objects.hashCode(this.datetime.toInstant());
+            result = this.datetime.toInstant().hashCode();
             memoizedHashCode = result;
         }
         return result;

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -55,9 +54,9 @@ public final class SetExample {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            int hash = 4441;
-            hash += (hash << 5) + Objects.hashCode(this.items);
-            hash += (hash << 5) + Objects.hashCode(this.doubleItems);
+            int hash = 1;
+            hash = 31 * hash + this.items.hashCode();
+            hash = 31 * hash + this.doubleItems.hashCode();
             result = hash;
             memoizedHashCode = result;
         }

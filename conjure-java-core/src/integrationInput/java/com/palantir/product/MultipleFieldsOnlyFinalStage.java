@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Generated;
@@ -142,15 +141,15 @@ public final class MultipleFieldsOnlyFinalStage {
     public int hashCode() {
         int result = memoizedHashCode;
         if (result == 0) {
-            int hash = 4441;
-            hash += (hash << 5) + Objects.hashCode(this.items);
-            hash += (hash << 5) + Objects.hashCode(this.itemsMap);
-            hash += (hash << 5) + Objects.hashCode(this.optionalItem);
-            hash += (hash << 5) + Objects.hashCode(this.itemsSet);
-            hash += (hash << 5) + Objects.hashCode(this.itemsOld);
-            hash += (hash << 5) + Objects.hashCode(this.itemsMapOld);
-            hash += (hash << 5) + Objects.hashCode(this.optionalItemOld);
-            hash += (hash << 5) + Objects.hashCode(this.itemsSetOld);
+            int hash = 1;
+            hash = 31 * hash + this.items.hashCode();
+            hash = 31 * hash + this.itemsMap.hashCode();
+            hash = 31 * hash + this.optionalItem.hashCode();
+            hash = 31 * hash + this.itemsSet.hashCode();
+            hash = 31 * hash + this.itemsOld.hashCode();
+            hash = 31 * hash + this.itemsMapOld.hashCode();
+            hash = 31 * hash + this.optionalItemOld.hashCode();
+            hash = 31 * hash + this.itemsSetOld.hashCode();
             result = hash;
             memoizedHashCode = result;
         }

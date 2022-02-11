@@ -16,7 +16,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
@@ -64,7 +63,7 @@ public final class SingleUnion {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.value);
+        return this.value.hashCode();
     }
 
     @Override
@@ -191,7 +190,7 @@ public final class SingleUnion {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.value);
+            return this.value.hashCode();
         }
 
         @Override
@@ -248,9 +247,9 @@ public final class SingleUnion {
 
         @Override
         public int hashCode() {
-            int hash = 4441;
-            hash += (hash << 5) + Objects.hashCode(this.type);
-            hash += (hash << 5) + Objects.hashCode(this.value);
+            int hash = 1;
+            hash = 31 * hash + this.type.hashCode();
+            hash = 31 * hash + this.value.hashCode();
             return hash;
         }
 
