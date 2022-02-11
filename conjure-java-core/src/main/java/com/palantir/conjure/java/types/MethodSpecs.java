@@ -18,7 +18,6 @@ package com.palantir.conjure.java.types;
 
 import static com.palantir.logsafe.Preconditions.checkState;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -34,7 +33,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collector;
 import javax.lang.model.element.Modifier;
 
@@ -114,15 +112,14 @@ public final class MethodSpecs {
                 .build();
     }
 
-    @VisibleForTesting
-    static CodeBlock generateHashCode(String prefix, Collection<FieldSpec> fields) {
+    private static CodeBlock generateHashCode(String prefix, Collection<FieldSpec> fields) {
         String varName = "hash";
         CodeBlock.Builder builder = CodeBlock.builder();
         List<CodeBlock> codeBlocks = computeHashCode(fields);
         if (codeBlocks.size() == 1) {
             builder.addStatement("$L $L", prefix, Iterables.getOnlyElement(codeBlocks));
         } else {
-            builder.addStatement("int $N = 4441", varName);
+            builder.addStatement("int $N = 1", varName);
             for (CodeBlock codeBlock : codeBlocks) {
                 builder.addStatement(codeBlock);
             }
@@ -131,8 +128,7 @@ public final class MethodSpecs {
         return builder.build();
     }
 
-    @VisibleForTesting
-    static List<CodeBlock> computeHashCode(Collection<FieldSpec> fields) {
+    private static List<CodeBlock> computeHashCode(Collection<FieldSpec> fields) {
         if (fields.size() == 1) {
             return ImmutableList.of(computeHashCode(Iterables.getOnlyElement(fields)));
         }
@@ -140,17 +136,16 @@ public final class MethodSpecs {
         String varName = "hash";
         ImmutableList.Builder<CodeBlock> builder = ImmutableList.builder();
         for (FieldSpec field : fields) {
-            builder.add(CodeBlock.of("$N += ($N << 5) + $L", varName, varName, computeHashCode(field)));
+            builder.add(CodeBlock.of("$1N = 31 * $1N + $2L", varName, computeHashCode(field)));
         }
         return builder.build();
     }
 
-    @VisibleForTesting
-    static CodeBlock computeHashCode(FieldSpec fieldSpec) {
+    private static CodeBlock computeHashCode(FieldSpec fieldSpec) {
         if (fieldSpec.type.isPrimitive()) {
             return CodeBlock.of("$1T.$2N($3L)", fieldSpec.type.box(), "hashCode", createHashInput(fieldSpec));
         }
-        return CodeBlock.of("$1T.$2N($3L)", Objects.class, "hashCode", createHashInput(fieldSpec));
+        return CodeBlock.of("$L.hashCode()", createHashInput(fieldSpec));
     }
 
     static MethodSpec createToString(String thisClassName, List<FieldName> fieldNames) {
