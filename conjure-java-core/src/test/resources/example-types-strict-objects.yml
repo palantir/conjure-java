@@ -1,0 +1,10 @@
+types:
+  definitions:
+    default-package: com.palantir.strict
+    objects:
+      EmptyObjectNotStrict:
+        fields: {}
+      SingleFieldNotStrict:
+        fields:
+          foo: integer
+
