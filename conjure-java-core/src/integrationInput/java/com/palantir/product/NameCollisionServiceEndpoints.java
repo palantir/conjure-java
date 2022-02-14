@@ -55,8 +55,8 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
         IntEndpoint(UndertowRuntime runtime, UndertowNameCollisionService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
-            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {});
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {}, this);
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
         }
 
         @Override
@@ -121,7 +121,7 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
         NoContextEndpoint(UndertowRuntime runtime, UndertowNameCollisionService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {}, this);
         }
 
         @Override
@@ -169,7 +169,7 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
         ContextEndpoint(UndertowRuntime runtime, UndertowNameCollisionService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<String>() {}, this);
         }
 
         @Override

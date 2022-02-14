@@ -19,15 +19,34 @@ package com.palantir.conjure.java.undertow.lib;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 /** Request and response Deserialization and Serialization functionality used by generated code. */
 public interface BodySerDe {
 
     /** Creates a {@link Serializer} for the requested type. Serializer instances should be reused. */
-    <T> Serializer<T> serializer(TypeMarker<T> type);
+    default <T> Serializer<T> serializer(TypeMarker<T> type, Endpoint endpoint) {
+        return serializer(type, Optional.of(endpoint));
+    }
+
+    /** Kept for backwards compatibility. */
+    default <T> Serializer<T> serializer(TypeMarker<T> type) {
+        return serializer(type, Optional.empty());
+    }
+
+    <T> Serializer<T> serializer(TypeMarker<T> type, Optional<Endpoint> endpoint);
 
     /** Creates a {@link Deserializer} for the requested type. Deserializer instances should be reused. */
-    <T> Deserializer<T> deserializer(TypeMarker<T> type);
+    default <T> Deserializer<T> deserializer(TypeMarker<T> type, Endpoint endpoint) {
+        return deserializer(type, Optional.of(endpoint));
+    }
+
+    /** Kept for backwards compatibility. */
+    default <T> Deserializer<T> deserializer(TypeMarker<T> type) {
+        return deserializer(type, Optional.empty());
+    }
+
+    <T> Deserializer<T> deserializer(TypeMarker<T> type, Optional<Endpoint> endpoint);
 
     /**
      * Serializes a {@link BinaryResponseBody} to
