@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableMap;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.tracing.Tracer;
 import java.io.IOException;
@@ -42,18 +43,22 @@ final class TracedEncoding implements Encoding {
 
     @Override
     public <T> Serializer<T> serializer(TypeMarker<T> type) {
-        return new TracedSerializer<>(
-                encoding.serializer(type),
-                SERIALIZE_OPERATION,
-                ImmutableMap.of("type", toString(type), "contentType", getContentType()));
+        return new TracedSerializer<>(encoding.serializer(type), SERIALIZE_OPERATION, getTags(type));
+    }
+
+    @Override
+    public <T> Serializer<T> serializer(TypeMarker<T> type, Endpoint endpoint) {
+        return new TracedSerializer<>(encoding.serializer(type, endpoint), SERIALIZE_OPERATION, getTags(type));
     }
 
     @Override
     public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
-        return new TracedDeserializer<>(
-                encoding.deserializer(type),
-                DESERIALIZE_OPERATION,
-                ImmutableMap.of("type", toString(type), "contentType", getContentType()));
+        return new TracedDeserializer<>(encoding.deserializer(type), DESERIALIZE_OPERATION, getTags(type));
+    }
+
+    @Override
+    public <T> Deserializer<T> deserializer(TypeMarker<T> type, Endpoint endpoint) {
+        return new TracedDeserializer<>(encoding.deserializer(type, endpoint), DESERIALIZE_OPERATION, getTags(type));
     }
 
     /**
@@ -76,6 +81,10 @@ final class TracedEncoding implements Encoding {
     @Override
     public boolean supportsContentType(String contentType) {
         return encoding.supportsContentType(contentType);
+    }
+
+    private <T> ImmutableMap<String, String> getTags(TypeMarker<T> type) {
+        return ImmutableMap.of("type", toString(type), "contentType", getContentType());
     }
 
     private static final class TracedSerializer<T> implements Serializer<T> {

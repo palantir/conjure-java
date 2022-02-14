@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,11 +41,19 @@ public interface Encoding {
      */
     <T> Serializer<T> serializer(TypeMarker<T> type);
 
+    default <T> Serializer<T> serializer(TypeMarker<T> type, Endpoint _endpoint) {
+        return serializer(type);
+    }
+
     /**
      * Creates a new {@link Deserializer} for the requested type. It is recommended to reuse instances over requesting
      * new ones for each request.
      */
     <T> Deserializer<T> deserializer(TypeMarker<T> type);
+
+    default <T> Deserializer<T> deserializer(TypeMarker<T> type, Endpoint _endpoint) {
+        return deserializer(type);
+    }
 
     /**
      * Returns the value used in response
