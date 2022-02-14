@@ -142,6 +142,21 @@ public final class ObjectGeneratorTests {
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
     }
 
+    @Test
+    public void testStrictFalse() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types-strict-objects.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .useImmutableBytes(true)
+                                .strictObjects(false)
+                                .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
     private void assertThatFilesAreTheSame(List<Path> files, String referenceFilesFolder) throws IOException {
         for (Path file : files) {
             Path relativized = tempDir.toPath().relativize(file);

@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -136,6 +137,11 @@ public final class BeanGenerator {
             // serialize this class. Without this annotation no serializer will be set for this class, thus preventing
             // serialization.
             typeBuilder.addAnnotation(JsonSerialize.class).addField(createSingletonField(objectClass));
+            if (!options.strictObjects()) {
+                typeBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+                        .addMember("ignoreUnknown", "$L", true)
+                        .build());
+            }
         } else {
             ImmutableList<EnrichedField> fieldsNeedingBuilderStage = fields.stream()
                     .filter(field -> !fieldShouldBeInFinalStage(field))

@@ -1,4 +1,4 @@
-package test.prefix.com.palantir.product;
+package com.palantir.strict;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,18 +8,18 @@ import javax.annotation.Generated;
 @JsonSerialize
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
-public final class EmptyObjectExample {
-    private static final EmptyObjectExample INSTANCE = new EmptyObjectExample();
+public final class EmptyObjectNotStrict {
+    private static final EmptyObjectNotStrict INSTANCE = new EmptyObjectNotStrict();
 
-    private EmptyObjectExample() {}
+    private EmptyObjectNotStrict() {}
 
     @Override
     public String toString() {
-        return "EmptyObjectExample{}";
+        return "EmptyObjectNotStrict{}";
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static EmptyObjectExample of() {
+    public static EmptyObjectNotStrict of() {
         return INSTANCE;
     }
 }
