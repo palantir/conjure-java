@@ -1,10 +1,12 @@
 package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import javax.annotation.Generated;
 
 @JsonSerialize
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class EmptyObjectExample {
     private static final EmptyObjectExample INSTANCE = new EmptyObjectExample();
