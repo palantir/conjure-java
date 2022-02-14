@@ -140,7 +140,7 @@ public final class ConjureUndertowEndpointsGenerator {
                             .build())
                     .constructorInitializer(CodeBlock.builder()
                             .addStatement(
-                                    "this.$N = $L.serializer(new $T<$T>() {}, $N)",
+                                    "this.$N = $L.serializer(new $T<$T>() {}, $N, this)",
                                     returnType.serializerFieldName(),
                                     returnType.serializerFactory(),
                                     TypeMarker.class,
@@ -168,7 +168,7 @@ public final class ConjureUndertowEndpointsGenerator {
                                 .build())
                         .constructorInitializer(CodeBlock.builder()
                                 .addStatement(
-                                        "this.$N = $L.deserializer(new $T<$T>() {}, $N)",
+                                        "this.$N = $L.deserializer(new $T<$T>() {}, $N, this)",
                                         deserializerFieldName,
                                         deserializerFactory,
                                         TypeMarker.class,
