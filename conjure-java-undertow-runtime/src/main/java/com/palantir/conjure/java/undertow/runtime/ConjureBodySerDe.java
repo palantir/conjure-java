@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
-import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
@@ -40,7 +39,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.List;
-import java.util.Optional;
 import org.xnio.IoUtils;
 
 /** Package private internal API. */
@@ -66,12 +64,12 @@ final class ConjureBodySerDe implements BodySerDe {
     }
 
     @Override
-    public <T> Serializer<T> serializer(TypeMarker<T> token, Optional<Endpoint> _endpoint) {
+    public <T> Serializer<T> serializer(TypeMarker<T> token) {
         return new EncodingSerializerRegistry<>(encodings, token);
     }
 
     @Override
-    public <T> Deserializer<T> deserializer(TypeMarker<T> token, Optional<Endpoint> _endpoint) {
+    public <T> Deserializer<T> deserializer(TypeMarker<T> token) {
         return new EncodingDeserializerRegistry<>(encodings, token);
     }
 
