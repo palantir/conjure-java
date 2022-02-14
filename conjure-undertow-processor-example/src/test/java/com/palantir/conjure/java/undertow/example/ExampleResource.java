@@ -26,6 +26,7 @@ import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -123,6 +124,11 @@ final class ExampleResource implements ExampleService {
     @Override
     public BearerToken authCookie(BearerToken token) {
         return Preconditions.checkNotNull(token, "Token parameter is required");
+    }
+
+    @Override
+    public String optionalBigIntegerCookie(Optional<BigInteger> cookieValue) {
+        return cookieValue.map(BigInteger::toString).orElse("empty");
     }
 
     private enum Binary implements CustomBinaryResponseBody {

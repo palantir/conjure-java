@@ -30,6 +30,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
 import java.io.Closeable;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -93,6 +94,9 @@ public interface ExampleService {
 
     @Handle(method = HttpMethod.GET, path = "/authCookie")
     BearerToken authCookie(@Cookie(value = "AUTH_TOKEN") BearerToken token);
+
+    @Handle(method = HttpMethod.GET, path = "/optionalBigIntegerCookie")
+    String optionalBigIntegerCookie(@Cookie(value = "BIG_INTEGER") Optional<BigInteger> cookieValue);
 
     interface CustomBinaryResponseBody extends Closeable, BinaryResponseBody {}
 
