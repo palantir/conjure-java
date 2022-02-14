@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Fix annotation processor optional-complex cookie deserialization
+  links:
+  - https://github.com/palantir/conjure-java/pull/1648

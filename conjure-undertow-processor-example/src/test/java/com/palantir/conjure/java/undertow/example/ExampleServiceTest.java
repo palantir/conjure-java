@@ -23,6 +23,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.Undertow;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -279,14 +280,49 @@ class ExampleServiceTest {
             byte[] expected = "\"cookie-value\"".getBytes(StandardCharsets.UTF_8);
             assertThat(connection.getResponseCode()).isEqualTo(200);
             assertThat(connection.getContentType()).startsWith("application/json");
-            assertThat(connection.getInputStream()).hasBinaryContent(expected);
+            try (InputStream responseStream = connection.getInputStream()) {
+                assertThat(responseStream).hasBinaryContent(expected);
+            }
 
             // Cookie value is empty
             connection = (HttpURLConnection) new URL("http://localhost:" + port + "/optionalCookie").openConnection();
             byte[] emptyResponse = "\"empty\"".getBytes(StandardCharsets.UTF_8);
             assertThat(connection.getResponseCode()).isEqualTo(200);
             assertThat(connection.getContentType()).startsWith("application/json");
-            assertThat(connection.getInputStream()).hasBinaryContent(emptyResponse);
+            try (InputStream responseStream = connection.getInputStream()) {
+                assertThat(responseStream).hasBinaryContent(emptyResponse);
+            }
+        } finally {
+            server.stop();
+        }
+    }
+
+    @Test
+    void testOptionalComplexCookieParam() throws Exception {
+        Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
+        try {
+            int port = TestHelper.getPort(server);
+
+            // Cookie value is present
+            HttpURLConnection connection = (HttpURLConnection)
+                    new URL("http://localhost:" + port + "/optionalBigIntegerCookie").openConnection();
+            connection.setRequestProperty(HttpHeaders.COOKIE, "BIG_INTEGER=1");
+            byte[] expected = "\"1\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            try (InputStream responseStream = connection.getInputStream()) {
+                assertThat(responseStream).hasBinaryContent(expected);
+            }
+
+            // Cookie value is empty
+            connection = (HttpURLConnection)
+                    new URL("http://localhost:" + port + "/optionalBigIntegerCookie").openConnection();
+            byte[] emptyResponse = "\"empty\"".getBytes(StandardCharsets.UTF_8);
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            try (InputStream responseStream = connection.getInputStream()) {
+                assertThat(responseStream).hasBinaryContent(emptyResponse);
+            }
         } finally {
             server.stop();
         }

@@ -259,8 +259,8 @@ public final class ParamDecoders {
 
     public static <T> ParamDecoder<Optional<T>> optionalComplexParamDecoder(
             PlainSerDe serde, Function<String, T> factory) {
-        return DelegatingParamDecoder.of(value -> serde.deserializeOptionalComplex(
-                value == null ? ImmutableList.of() : ImmutableList.of(value), factory));
+        return DelegatingParamDecoder.of(
+                value -> serde.deserializeOptionalComplex(ImmutableList.of(value), factory), Optional.empty());
     }
 
     public static <T> CollectionParamDecoder<T> complexCollectionParamDecoder(
