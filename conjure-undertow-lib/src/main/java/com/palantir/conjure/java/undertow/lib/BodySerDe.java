@@ -26,8 +26,16 @@ public interface BodySerDe {
     /** Creates a {@link Serializer} for the requested type. Serializer instances should be reused. */
     <T> Serializer<T> serializer(TypeMarker<T> type);
 
+    default <T> Serializer<T> serializer(TypeMarker<T> type, Endpoint _endpoint) {
+        return serializer(type);
+    }
+
     /** Creates a {@link Deserializer} for the requested type. Deserializer instances should be reused. */
     <T> Deserializer<T> deserializer(TypeMarker<T> type);
+
+    default <T> Deserializer<T> deserializer(TypeMarker<T> type, Endpoint _endpoint) {
+        return deserializer(type);
+    }
 
     /**
      * Serializes a {@link BinaryResponseBody} to

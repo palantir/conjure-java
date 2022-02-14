@@ -257,7 +257,7 @@ final class UndertowServiceHandlerGenerator {
                             FieldSpec.builder(type, DESERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                                     .build());
                     ctorBuilder.addStatement(
-                            "this.$1N = $2N.bodySerDe().deserializer(new $3T() {})",
+                            "this.$1N = $2N.bodySerDe().deserializer(new $3T() {}, this)",
                             DESERIALIZER_VAR_NAME,
                             RUNTIME_VAR_NAME,
                             ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));
@@ -271,7 +271,7 @@ final class UndertowServiceHandlerGenerator {
                 endpointBuilder.addField(FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
                 ctorBuilder.addStatement(
-                        "this.$1N = $2N.bodySerDe().serializer(new $3T() {})",
+                        "this.$1N = $2N.bodySerDe().serializer(new $3T() {}, this)",
                         SERIALIZER_VAR_NAME,
                         RUNTIME_VAR_NAME,
                         ParameterizedTypeName.get(ClassName.get(TypeMarker.class), typeName));

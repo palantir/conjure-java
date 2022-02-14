@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.List;
+import java.util.Optional;
 import org.xnio.IoUtils;
 
 /** Package private internal API. */
@@ -65,12 +67,22 @@ final class ConjureBodySerDe implements BodySerDe {
 
     @Override
     public <T> Serializer<T> serializer(TypeMarker<T> token) {
-        return new EncodingSerializerRegistry<>(encodings, token);
+        return new EncodingSerializerRegistry<>(encodings, token, Optional.empty());
+    }
+
+    @Override
+    public <T> Serializer<T> serializer(TypeMarker<T> token, Endpoint endpoint) {
+        return new EncodingSerializerRegistry<>(encodings, token, Optional.of(endpoint));
     }
 
     @Override
     public <T> Deserializer<T> deserializer(TypeMarker<T> token) {
-        return new EncodingDeserializerRegistry<>(encodings, token);
+        return new EncodingDeserializerRegistry<>(encodings, token, Optional.empty());
+    }
+
+    @Override
+    public <T> Deserializer<T> deserializer(TypeMarker<T> token, Endpoint endpoint) {
+        return new EncodingDeserializerRegistry<>(encodings, token, Optional.of(endpoint));
     }
 
     @Override
@@ -100,9 +112,9 @@ final class ConjureBodySerDe implements BodySerDe {
         private final EncodingSerializerContainer<T> defaultEncoding;
         private final List<EncodingSerializerContainer<T>> encodings;
 
-        EncodingSerializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
+        EncodingSerializerRegistry(List<Encoding> encodings, TypeMarker<T> token, Optional<Endpoint> endpoint) {
             this.encodings = encodings.stream()
-                    .map(encoding -> new EncodingSerializerContainer<>(encoding, token))
+                    .map(encoding -> new EncodingSerializerContainer<>(encoding, token, endpoint))
                     .collect(ImmutableList.toImmutableList());
             this.defaultEncoding = this.encodings.get(0);
         }
@@ -143,9 +155,11 @@ final class ConjureBodySerDe implements BodySerDe {
         private final Encoding encoding;
         private final Encoding.Serializer<T> serializer;
 
-        EncodingSerializerContainer(Encoding encoding, TypeMarker<T> token) {
+        EncodingSerializerContainer(Encoding encoding, TypeMarker<T> token, Optional<Endpoint> endpoint) {
             this.encoding = encoding;
-            this.serializer = TracedEncoding.wrap(encoding).serializer(token);
+            this.serializer = endpoint.isPresent()
+                    ? TracedEncoding.wrap(encoding).serializer(token, endpoint.get())
+                    : TracedEncoding.wrap(encoding).serializer(token);
         }
     }
 
@@ -155,9 +169,9 @@ final class ConjureBodySerDe implements BodySerDe {
         private final boolean optionalType;
         private final TypeMarker<T> marker;
 
-        EncodingDeserializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
+        EncodingDeserializerRegistry(List<Encoding> encodings, TypeMarker<T> token, Optional<Endpoint> endpoint) {
             this.encodings = encodings.stream()
-                    .map(encoding -> new EncodingDeserializerContainer<>(encoding, token))
+                    .map(encoding -> new EncodingDeserializerContainer<>(encoding, token, endpoint))
                     .collect(ImmutableList.toImmutableList());
             this.optionalType = TypeMarkers.isOptional(token);
             this.marker = token;
@@ -220,9 +234,11 @@ final class ConjureBodySerDe implements BodySerDe {
         private final Encoding encoding;
         private final Encoding.Deserializer<T> deserializer;
 
-        EncodingDeserializerContainer(Encoding encoding, TypeMarker<T> token) {
+        EncodingDeserializerContainer(Encoding encoding, TypeMarker<T> token, Optional<Endpoint> endpoint) {
             this.encoding = encoding;
-            this.deserializer = TracedEncoding.wrap(encoding).deserializer(token);
+            this.deserializer = endpoint.isPresent()
+                    ? TracedEncoding.wrap(encoding).deserializer(token, endpoint.get())
+                    : TracedEncoding.wrap(encoding).deserializer(token);
         }
     }
 
