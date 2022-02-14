@@ -67,12 +67,12 @@ final class ConjureBodySerDe implements BodySerDe {
 
     @Override
     public <T> Serializer<T> serializer(TypeMarker<T> token) {
-        return new EncodingSerializerRegistry<>(encodings, token, Optional.empty());
+        return new EncodingSerializerRegistry<>(encodings, token);
     }
 
     @Override
     public <T> Serializer<T> serializer(TypeMarker<T> token, Endpoint endpoint) {
-        return new EncodingSerializerRegistry<>(encodings, token, Optional.of(endpoint));
+        return new EncodingSerializerRegistry<>(encodings, token, endpoint);
     }
 
     @Override
@@ -82,7 +82,7 @@ final class ConjureBodySerDe implements BodySerDe {
 
     @Override
     public <T> Deserializer<T> deserializer(TypeMarker<T> token, Endpoint endpoint) {
-        return new EncodingDeserializerRegistry<>(encodings, token, Optional.of(endpoint));
+        return new EncodingDeserializerRegistry<>(encodings, token, endpoint);
     }
 
     @Override
@@ -112,7 +112,15 @@ final class ConjureBodySerDe implements BodySerDe {
         private final EncodingSerializerContainer<T> defaultEncoding;
         private final List<EncodingSerializerContainer<T>> encodings;
 
-        EncodingSerializerRegistry(List<Encoding> encodings, TypeMarker<T> token, Optional<Endpoint> endpoint) {
+        EncodingSerializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
+            this(encodings, token, Optional.empty());
+        }
+
+        EncodingSerializerRegistry(List<Encoding> encodings, TypeMarker<T> token, Endpoint endpoint) {
+            this(encodings, token, Optional.of(endpoint));
+        }
+
+        private EncodingSerializerRegistry(List<Encoding> encodings, TypeMarker<T> token, Optional<Endpoint> endpoint) {
             this.encodings = encodings.stream()
                     .map(encoding -> new EncodingSerializerContainer<>(encoding, token, endpoint))
                     .collect(ImmutableList.toImmutableList());
@@ -169,7 +177,16 @@ final class ConjureBodySerDe implements BodySerDe {
         private final boolean optionalType;
         private final TypeMarker<T> marker;
 
-        EncodingDeserializerRegistry(List<Encoding> encodings, TypeMarker<T> token, Optional<Endpoint> endpoint) {
+        EncodingDeserializerRegistry(List<Encoding> encodings, TypeMarker<T> token) {
+            this(encodings, token, Optional.empty());
+        }
+
+        EncodingDeserializerRegistry(List<Encoding> encodings, TypeMarker<T> token, Endpoint endpoint) {
+            this(encodings, token, Optional.of(endpoint));
+        }
+
+        private EncodingDeserializerRegistry(
+                List<Encoding> encodings, TypeMarker<T> token, Optional<Endpoint> endpoint) {
             this.encodings = encodings.stream()
                     .map(encoding -> new EncodingDeserializerContainer<>(encoding, token, endpoint))
                     .collect(ImmutableList.toImmutableList());
