@@ -134,41 +134,41 @@ public final class EndpointDefinitions {
         return argumentDefinitions.stream()
                 .filter(definition -> definition.paramType().match(new Cases<>() {
                     @Override
-                    public Boolean body(CodeBlock deserializerFactory, String deserializerFieldName) {
+                    public Boolean body(CodeBlock _deserializerFactory, String _deserializerFieldName) {
                         return false;
                     }
 
                     @Override
                     public Boolean header(
-                            String headerName, String deserializerFieldName, CodeBlock deserializerFactory) {
+                            String _headerName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
                         return false;
                     }
 
                     @Override
-                    public Boolean path(String paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
+                    public Boolean path(String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
                         return false;
                     }
 
                     @Override
                     public Boolean pathMulti(
-                            String paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
+                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
                         return true;
                     }
 
                     @Override
                     public Boolean query(
-                            String paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
+                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
                         return false;
                     }
 
                     @Override
                     public Boolean cookie(
-                            String cookieName, String deserializerFieldName, CodeBlock deserializerFactory) {
+                            String _cookieName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
                         return false;
                     }
 
                     @Override
-                    public Boolean authCookie(String cookieName, String deserializerFieldName) {
+                    public Boolean authCookie(String _cookieName, String _deserializerFieldName) {
                         return false;
                     }
 

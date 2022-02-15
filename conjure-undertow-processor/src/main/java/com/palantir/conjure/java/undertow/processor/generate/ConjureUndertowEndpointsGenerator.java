@@ -419,7 +419,7 @@ public final class ConjureUndertowEndpointsGenerator {
 
                     @Override
                     public CodeBlock pathMulti(
-                            String paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
+                            String _paramName, String deserializerFieldName, CodeBlock _deserializerFactory) {
                         return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
                     }
 
