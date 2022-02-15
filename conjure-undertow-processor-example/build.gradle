@@ -5,6 +5,7 @@ dependencies {
     annotationProcessor project(':conjure-undertow-processor')
 
     testImplementation project(':conjure-java-undertow-runtime')
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
