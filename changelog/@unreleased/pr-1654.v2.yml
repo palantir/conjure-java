@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: The undertow annotation processor supports globbed path ends
+  links:
+  - https://github.com/palantir/conjure-java/pull/1654
