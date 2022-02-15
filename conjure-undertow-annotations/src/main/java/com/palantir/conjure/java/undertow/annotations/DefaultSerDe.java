@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.annotations;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.BodySerDe;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
@@ -40,22 +41,22 @@ public enum DefaultSerDe implements SerializerFactory<Object>, DeserializerFacto
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Deserializer<T> deserializer(TypeMarker<T> marker, UndertowRuntime runtime) {
+    public <T> Deserializer<T> deserializer(TypeMarker<T> marker, UndertowRuntime runtime, Endpoint endpoint) {
         if (INPUT_STREAM.getType().equals(marker.getType())) {
             return (Deserializer<T>) new BinaryDeserializer(runtime.bodySerDe());
         }
-        return runtime.bodySerDe().deserializer(marker);
+        return runtime.bodySerDe().deserializer(marker, endpoint);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Serializer<T> serializer(TypeMarker<T> marker, UndertowRuntime runtime) {
+    public <T> Serializer<T> serializer(TypeMarker<T> marker, UndertowRuntime runtime, Endpoint endpoint) {
         Type type = marker.getType();
         Serializer<T> maybeSpecialSerializer = (Serializer<T>) maybeSpecialSerializer(type, runtime);
         if (maybeSpecialSerializer != null) {
             return maybeSpecialSerializer;
         }
-        Serializer<T> delegateSerializer = runtime.bodySerDe().serializer(marker);
+        Serializer<T> delegateSerializer = runtime.bodySerDe().serializer(marker, endpoint);
         return isOptional(marker)
                 ? (Serializer<T>) new OptionalDelegatingSerializer<>((Serializer<Optional<Object>>) delegateSerializer)
                 : delegateSerializer;

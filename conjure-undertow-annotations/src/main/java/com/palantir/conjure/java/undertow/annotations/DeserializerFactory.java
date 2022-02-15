@@ -17,9 +17,10 @@
 package com.palantir.conjure.java.undertow.annotations;
 
 import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 
 public interface DeserializerFactory<U> {
-    <T extends U> Deserializer<T> deserializer(TypeMarker<T> type, UndertowRuntime runtime);
+    <T extends U> Deserializer<T> deserializer(TypeMarker<T> type, UndertowRuntime runtime, Endpoint endpoint);
 }

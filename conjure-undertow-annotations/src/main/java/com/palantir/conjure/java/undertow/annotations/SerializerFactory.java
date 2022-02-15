@@ -16,10 +16,11 @@
 
 package com.palantir.conjure.java.undertow.annotations;
 
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 
 public interface SerializerFactory<U> {
-    <T extends U> Serializer<T> serializer(TypeMarker<T> type, UndertowRuntime runtime);
+    <T extends U> Serializer<T> serializer(TypeMarker<T> type, UndertowRuntime runtime, Endpoint endpoint);
 }
