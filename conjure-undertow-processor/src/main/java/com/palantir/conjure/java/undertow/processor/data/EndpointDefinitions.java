@@ -145,7 +145,8 @@ public final class EndpointDefinitions {
                     }
 
                     @Override
-                    public Boolean path(String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
+                    public Boolean path(
+                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
                         return false;
                     }
 
