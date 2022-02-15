@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Provide Endpoints to conjure-undertow-annotations serde factories
+  links:
+  - https://github.com/palantir/conjure-java/pull/1653
