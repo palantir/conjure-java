@@ -391,6 +391,11 @@ public final class ExampleResource implements ExampleService {
 }
 ```
 
+### Conjure-Undertow Annotation Processor
+
+The conjure-undertow annotation processor generates Undertow handler for services that can not easily be represented
+using Conjure. You can find more details in the [respective readme](conjure-undertow-annotations/readme.md).
+
 ## conjure-lib `Bytes` class
 
 By default, conjure-java will use `java.nio.ByteByffer` to represent fields of Conjure type `binary`.  However, the ByteBuffer class has many subtleties, including interior mutability.
