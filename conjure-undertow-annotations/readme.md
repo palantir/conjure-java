@@ -125,9 +125,9 @@ public interface MyService {
 }
 ```
 
-For the above endpoint, calling `GET /path/foo/bar/baz` will be decoded to `["foo", "bar", "baz"]`. Note that unless
-configured differently, path segments will still be decoded. E.g. calling `GET /path/foo%2fbar` will be decoded to
-`["foo/bar"]`.
+For the above endpoint, calling `GET /path/foo/bar/baz` will decode the path parameter to `["foo", "bar", "baz"]`. Note
+that unless configured differently, path segments will still be url decoded. E.g. calling `GET /path/foo%2fbar` will be
+decoded to `["foo/bar"]`.
 
 ### Using Custom Serializer or Deserializers
 
@@ -144,7 +144,8 @@ public interface MyService {
 
     @Handle(method = HttpMethod.GET, path = "/path")
     void customParam(
-            @Handle.QueryParam(value = "query", decoder = MyCollectionParamDecoder.class) Optional<MyType> queryParam);
+            @Handle.QueryParam(value = "query", decoder = MyCollectionParamDecoder.class)
+                    Optional<MyType> queryParam);
 
     enum MyCollectionParamDecoder implements CollectionParamDecoder<Optional<MyType>> {
         INSTANCE;
