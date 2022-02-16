@@ -21,6 +21,8 @@ import com.google.common.base.Predicates;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.processor.ErrorContext;
+import com.palantir.conjure.java.undertow.processor.data.ParameterType.Cases;
+import com.squareup.javapoet.CodeBlock;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,8 +37,10 @@ public final class EndpointDefinitions {
     private final HttpPathParser httpPathParser;
     private final ArgumentTypesResolver argumentTypesResolver;
     private final ReturnTypesResolver returnTypesResolver;
+    private final ErrorContext errorContext;
 
     public EndpointDefinitions(ErrorContext errorContext, Elements elements, Types types) {
+        this.errorContext = errorContext;
         ResolverContext context = new ResolverContext(errorContext, elements, types);
         this.paramTypesResolver = new ParamTypesResolver(context);
         this.httpPathParser = new HttpPathParser(context);
@@ -75,15 +79,36 @@ public final class EndpointDefinitions {
             return Optional.empty();
         }
 
-        // TODO(ckozak): More validations around repeats etc.
+        List<ArgumentDefinition> argumentDefinitions =
+                args.stream().map(Optional::get).collect(Collectors.toList());
+
+        List<ArgumentDefinition> multiPathParams = getPathMultiParams(argumentDefinitions);
+        if (multiPathParams.size() > 1) {
+            errorContext.reportError("Only one PathMultiParam is supported", element);
+            return Optional.empty();
+        }
+
+        HttpPath path = maybeHttpPath.get();
+
+        if (multiPathParams.size() == 1) {
+            String argName = multiPathParams.get(0).argName().get();
+            String expectedEnd = "/{" + argName + '}';
+            String pathString = path.path();
+            if (!pathString.endsWith(expectedEnd)) {
+                errorContext.reportError("PathMultiParam is only supported at the end of the path template", element);
+                return Optional.empty();
+            }
+            path = ImmutableHttpPath.of(
+                    pathString.substring(0, pathString.length() - expectedEnd.length()) + "/*", path.segments());
+        }
 
         return Optional.of(ImmutableEndpointDefinition.builder()
                 .endpointName(endpointName)
                 .serviceName(serviceName)
                 .httpMethod(method)
-                .httpPath(maybeHttpPath.get())
+                .httpPath(path)
                 .returns(maybeReturnType.get())
-                .addAllArguments(args.stream().map(Optional::get).collect(Collectors.toList()))
+                .addAllArguments(argumentDefinitions)
                 .build());
     }
 
@@ -103,5 +128,66 @@ public final class EndpointDefinitions {
                 .argType(argumentType.get())
                 .paramType(parameterType.get())
                 .build());
+    }
+
+    private static List<ArgumentDefinition> getPathMultiParams(List<ArgumentDefinition> argumentDefinitions) {
+        return argumentDefinitions.stream()
+                .filter(definition -> definition.paramType().match(new Cases<>() {
+                    @Override
+                    public Boolean body(CodeBlock _deserializerFactory, String _deserializerFieldName) {
+                        return false;
+                    }
+
+                    @Override
+                    public Boolean header(
+                            String _headerName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
+                        return false;
+                    }
+
+                    @Override
+                    public Boolean path(
+                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
+                        return false;
+                    }
+
+                    @Override
+                    public Boolean pathMulti(
+                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
+                        return true;
+                    }
+
+                    @Override
+                    public Boolean query(
+                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
+                        return false;
+                    }
+
+                    @Override
+                    public Boolean cookie(
+                            String _cookieName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
+                        return false;
+                    }
+
+                    @Override
+                    public Boolean authCookie(String _cookieName, String _deserializerFieldName) {
+                        return false;
+                    }
+
+                    @Override
+                    public Boolean authHeader() {
+                        return false;
+                    }
+
+                    @Override
+                    public Boolean exchange() {
+                        return false;
+                    }
+
+                    @Override
+                    public Boolean context() {
+                        return false;
+                    }
+                }))
+                .collect(Collectors.toList());
     }
 }

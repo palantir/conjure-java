@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
+import com.palantir.conjure.java.undertow.annotations.PathMultiParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
@@ -224,6 +225,28 @@ public final class ConjureUndertowEndpointsGenerator {
             }
 
             @Override
+            public Void pathMulti(String _paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T<>($S, $L)",
+                                        deserializerFieldName,
+                                        PathMultiParamDeserializer.class,
+                                        "*",
+                                        deserializerFactory)
+                                .build())
+                        .build());
+                return null;
+            }
+
+            @Override
             public Void query(String paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
                 TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
                 additionalFields.add(ImmutableAdditionalField.builder()
@@ -390,6 +413,12 @@ public final class ConjureUndertowEndpointsGenerator {
 
                     @Override
                     public CodeBlock path(
+                            String _paramName, String deserializerFieldName, CodeBlock _deserializerFactory) {
+                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                    }
+
+                    @Override
+                    public CodeBlock pathMulti(
                             String _paramName, String deserializerFieldName, CodeBlock _deserializerFactory) {
                         return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
                     }

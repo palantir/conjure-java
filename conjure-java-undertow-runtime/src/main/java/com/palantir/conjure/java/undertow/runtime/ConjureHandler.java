@@ -35,7 +35,6 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.RoutingHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.server.handlers.ResponseCodeHandler;
-import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.util.ArrayList;
@@ -214,7 +213,7 @@ public final class ConjureHandler implements HttpHandler {
                             // parameters. Servers which do not configure DECODE_URL will still work properly except
                             // for encoded slash values. When DECODE_URL has not been disabled, the following handler
                             // will no-op
-                            endpoint -> Optional.of(new URLDecodingHandler(endpoint.handler(), "UTF-8")),
+                            GlobRetainingDecodingHandler.WRAPPER,
                             // no-cache and web-security handlers add listeners for the response to be committed,
                             // they can be executed on the IO thread.
                             endpoint -> Methods.GET.equals(endpoint.method())

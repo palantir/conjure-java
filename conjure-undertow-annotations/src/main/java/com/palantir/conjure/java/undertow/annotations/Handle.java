@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.annotations;
 
+import com.google.common.annotations.Beta;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -90,6 +91,18 @@ public @interface Handle {
          * {@link ParamDecoders}.
          */
         Class<? extends ParamDecoder<?>> decoder() default DefaultParamDecoder.class;
+    }
+
+    /** Only supported at the end of a path for the time being. */
+    @Beta
+    @Retention(RetentionPolicy.SOURCE)
+    @Target(ElementType.PARAMETER)
+    @interface PathMultiParam {
+        /**
+         * Decoder for deserializing a path parameter that may span several path segments.
+         * If omitted, tries to use a default decoder in {@link ParamDecoders}.
+         */
+        Class<? extends CollectionParamDecoder<?>> decoder() default DefaultCollectionParamDecoder.class;
     }
 
     @Retention(RetentionPolicy.SOURCE)

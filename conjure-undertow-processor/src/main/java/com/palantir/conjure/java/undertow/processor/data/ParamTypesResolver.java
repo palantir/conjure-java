@@ -45,6 +45,7 @@ public final class ParamTypesResolver {
     private static final ImmutableSet<Class<?>> PARAM_ANNOTATION_CLASSES = ImmutableSet.of(
             Handle.Body.class,
             Handle.PathParam.class,
+            Handle.PathMultiParam.class,
             Handle.QueryParam.class,
             Handle.Header.class,
             Handle.Cookie.class);
@@ -104,6 +105,8 @@ public final class ParamTypesResolver {
             return Optional.of(headerParameter(variableElement, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.PathParam.class)) {
             return Optional.of(pathParameter(variableElement, annotationReflector));
+        } else if (annotationReflector.isAnnotation(Handle.PathMultiParam.class)) {
+            return Optional.of(pathMultiParameter(variableElement, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.QueryParam.class)) {
             return Optional.of(queryParameter(variableElement, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.Cookie.class)) {
@@ -133,6 +136,13 @@ public final class ParamTypesResolver {
         String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         return ParameterTypes.path(
                 javaParameterName, deserializerName, getParamDecoder(variableElement, annotationReflector));
+    }
+
+    private ParameterType pathMultiParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+        String javaParameterName = variableElement.getSimpleName().toString();
+        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
+        return ParameterTypes.pathMulti(
+                javaParameterName, deserializerName, getCollectionParamDecoder(variableElement, annotationReflector));
     }
 
     private ParameterType queryParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {

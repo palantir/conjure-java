@@ -29,6 +29,8 @@ public interface ParameterType {
 
         R path(String paramName, String deserializerFieldName, CodeBlock deserializerFactory);
 
+        R pathMulti(String paramName, String deserializerFieldName, CodeBlock deserializerFactory);
+
         R query(String paramName, String deserializerFieldName, CodeBlock deserializerFactory);
 
         R cookie(String cookieName, String deserializerFieldName, CodeBlock deserializerFactory);
