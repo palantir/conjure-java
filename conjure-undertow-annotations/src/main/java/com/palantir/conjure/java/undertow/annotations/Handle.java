@@ -93,7 +93,12 @@ public @interface Handle {
         Class<? extends ParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
 
-    /** Only supported at the end of a path for the time being. */
+    /**
+     * Only supported at the end of a path for the time being.
+     * Unlike {@link PathParam}, values are represented to the decoder as a collection of strings, each
+     * URL segment delimited by an unencoded slash is represented as an element. For example, {@code /foo/bar}
+     * is surfaced as {@code ['foo', 'bar']} while {@code /foo%2Fbar} is surfaced as {@code ['foo/bar']}.
+     */
     @Beta
     @Retention(RetentionPolicy.SOURCE)
     @Target(ElementType.PARAMETER)

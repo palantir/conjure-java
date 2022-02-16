@@ -38,6 +38,12 @@ final class GlobRetainingDecodingHandler implements HttpHandler {
         this.next = next;
     }
 
+    /**
+     * Restores the url-encoded glob value after the {@link URLDecodingHandler} has processed the request.
+     * This is required to disambiguate slashes delimiting URL segments, and encoded slashes ({@code %2F})
+     * which represent slashes within a single URL segment. For example, {@code /foo/bar} represents
+     * {@code ['foo', 'bar']} while {@code /foo%2Fbar} represents {@code ['foo/bar']}.
+     */
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
         Map<String, String> pathParams =
