@@ -16,16 +16,15 @@
 
 package com.palantir.conjure.java.undertow.processor.data;
 
-import java.util.List;
 import org.immutables.value.Value;
 
 @Value.Immutable
-@StagedBuilder
 public interface HttpPath {
 
     @Value.Parameter
     String path();
 
-    @Value.Parameter
-    List<HttpPathSegment> segments();
+    static HttpPath of(String value) {
+        return ImmutableHttpPath.of(value);
+    }
 }
