@@ -159,7 +159,8 @@ public final class ConjureUndertowEndpointsGenerator {
         endpoint.arguments().forEach(def -> def.paramType().match(new Cases<Void>() {
             @Override
             public Void body(CodeBlock deserializerFactory, String deserializerFieldName) {
-                TypeName requestBodyType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                TypeName requestBodyType =
+                        def.argType().match(ArgTypeTypeName.INSTANCE).box();
                 additionalFields.add(ImmutableAdditionalField.builder()
                         .field(FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Deserializer.class), requestBodyType),

@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: '[processor] fix primitive body deserializer handling'
+  links:
+  - https://github.com/palantir/conjure-java/pull/1660
