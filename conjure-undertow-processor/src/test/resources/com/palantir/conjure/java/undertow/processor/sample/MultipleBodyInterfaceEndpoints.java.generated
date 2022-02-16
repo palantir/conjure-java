@@ -1,6 +1,7 @@
 package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
@@ -12,46 +13,53 @@ import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.lang.Exception;
-import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import java.util.List;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
-public final class PrimitiveBodyParamEndpoints implements UndertowService {
-    private final PrimitiveBodyParam delegate;
+public final class MultipleBodyInterfaceEndpoints implements UndertowService {
+    private final MultipleBodyInterface delegate;
 
-    private PrimitiveBodyParamEndpoints(PrimitiveBodyParam delegate) {
+    private MultipleBodyInterfaceEndpoints(MultipleBodyInterface delegate) {
         this.delegate = delegate;
     }
 
-    public static UndertowService of(PrimitiveBodyParam delegate) {
-        return new PrimitiveBodyParamEndpoints(delegate);
+    public static UndertowService of(MultipleBodyInterface delegate) {
+        return new MultipleBodyInterfaceEndpoints(delegate);
     }
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return ImmutableList.of(new HandlePrimitiveBodyEndpoint(runtime, delegate));
+        return ImmutableList.of(new PostEndpoint(runtime, delegate));
     }
 
-    private static final class HandlePrimitiveBodyEndpoint implements HttpHandler, Endpoint {
+    private static final class PostEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
-        private final PrimitiveBodyParam delegate;
+        private final MultipleBodyInterface delegate;
 
-        private final Deserializer<Integer> countDeserializer;
+        private final Deserializer<String> oneDeserializer;
 
-        HandlePrimitiveBodyEndpoint(UndertowRuntime runtime, PrimitiveBodyParam delegate) {
+        private final Deserializer<String> twoDeserializer;
+
+        private final Deserializer<String> threeDeserializer;
+
+        PostEndpoint(UndertowRuntime runtime, MultipleBodyInterface delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.countDeserializer = PrimitiveBodyParam.IntParamDeserializerFactory.INSTANCE.deserializer(
-                    new TypeMarker<Integer>() {}, runtime, this);
+            this.oneDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+            this.twoDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+            this.threeDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            this.delegate.handlePrimitiveBody(countDeserializer.deserialize(exchange));
+            this.delegate.post(
+                    oneDeserializer.deserialize(exchange),
+                    twoDeserializer.deserialize(exchange),
+                    threeDeserializer.deserialize(exchange));
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
@@ -62,17 +70,17 @@ public final class PrimitiveBodyParamEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/post";
+            return "/body";
         }
 
         @Override
         public String serviceName() {
-            return "PrimitiveBodyParam";
+            return "MultipleBodyInterface";
         }
 
         @Override
         public String name() {
-            return "handlePrimitiveBody";
+            return "post";
         }
 
         @Override

@@ -58,7 +58,7 @@ public final class ParamTypesResolver {
     }
 
     @SuppressWarnings("CyclomaticComplexity")
-    public Optional<ParameterType> getParameterType(EndpointName endpointName, VariableElement variableElement) {
+    public Optional<ParameterType> getParameterType(VariableElement variableElement) {
         List<AnnotationMirror> paramAnnotationMirrors = new ArrayList<>();
         for (AnnotationMirror annotationMirror : variableElement.getAnnotationMirrors()) {
             TypeElement annotationTypeElement =
@@ -99,7 +99,7 @@ public final class ParamTypesResolver {
         AnnotationReflector annotationReflector =
                 ImmutableAnnotationReflector.of(Iterables.getOnlyElement(paramAnnotationMirrors));
         if (annotationReflector.isAnnotation(Handle.Body.class)) {
-            return Optional.of(bodyParameter(endpointName, annotationReflector));
+            return Optional.of(bodyParameter(variableElement, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.Header.class)) {
             return Optional.of(headerParameter(variableElement, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.PathParam.class)) {
@@ -115,8 +115,9 @@ public final class ParamTypesResolver {
         throw new SafeIllegalStateException("Not possible");
     }
 
-    private ParameterType bodyParameter(EndpointName endpointName, AnnotationReflector annotationReflector) {
-        String deserializerName = InstanceVariables.joinCamelCase(endpointName.get(), "Deserializer");
+    private ParameterType bodyParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+        String javaParameterName = variableElement.getSimpleName().toString();
+        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         TypeMirror deserializer = annotationReflector.getAnnotationValue(TypeMirror.class);
         return ParameterTypes.body(Instantiables.instantiate(deserializer), deserializerName);
     }

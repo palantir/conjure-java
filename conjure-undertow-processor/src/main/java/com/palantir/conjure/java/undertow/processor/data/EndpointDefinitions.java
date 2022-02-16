@@ -65,7 +65,7 @@ public final class EndpointDefinitions {
         Optional<ReturnType> maybeReturnType =
                 returnTypesResolver.getReturnType(endpointName, element, requestAnnotationReflector);
         List<Optional<ArgumentDefinition>> args = element.getParameters().stream()
-                .map(arg -> getArgumentDefinition(endpointName, arg))
+                .map(this::getArgumentDefinition)
                 .collect(Collectors.toList());
 
         if (!args.stream()
@@ -106,9 +106,9 @@ public final class EndpointDefinitions {
                 .build());
     }
 
-    private Optional<ArgumentDefinition> getArgumentDefinition(EndpointName endpointName, VariableElement param) {
+    private Optional<ArgumentDefinition> getArgumentDefinition(VariableElement param) {
         Optional<ArgumentType> argumentType = argumentTypesResolver.getArgumentType(param);
-        Optional<ParameterType> parameterType = paramTypesResolver.getParameterType(endpointName, param);
+        Optional<ParameterType> parameterType = paramTypesResolver.getParameterType(param);
 
         if (argumentType.isEmpty() || parameterType.isEmpty()) {
             return Optional.empty();
