@@ -1,0 +1,83 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.lang.Exception;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class PrimitiveBodyParamEndpoints implements UndertowService {
+    private final PrimitiveBodyParam delegate;
+
+    private PrimitiveBodyParamEndpoints(PrimitiveBodyParam delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(PrimitiveBodyParam delegate) {
+        return new PrimitiveBodyParamEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new HandlePrimitiveBodyEndpoint(runtime, delegate));
+    }
+
+    private static final class HandlePrimitiveBodyEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final PrimitiveBodyParam delegate;
+
+        private final Deserializer<Integer> handlePrimitiveBodyDeserializer;
+
+        HandlePrimitiveBodyEndpoint(UndertowRuntime runtime, PrimitiveBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.handlePrimitiveBodyDeserializer = PrimitiveBodyParam.IntParamDeserializerFactory.INSTANCE.deserializer(
+                    new TypeMarker<Integer>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            this.delegate.handlePrimitiveBody(handlePrimitiveBodyDeserializer.deserialize(exchange));
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/post";
+        }
+
+        @Override
+        public String serviceName() {
+            return "PrimitiveBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "handlePrimitiveBody";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}
