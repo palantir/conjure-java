@@ -35,7 +35,7 @@ public interface MyService {
     MyResponse myEndpoint(
             AuthHeader authHeader,
             @Handle.PathParam String pathParam,
-            @Handle.QueryParam(value = "queryParam") Optional<String> queryParam,
+            @Handle.QueryParam("queryParam") Optional<String> queryParam,
             @Handle.Body MyBody body);
 }
 ```
@@ -58,8 +58,8 @@ public interface MyService {
     void myEndpoint(
             @Handle.PathParam String myParam,
             @Handle.PathParam String otherParam,
-            @Handle.QueryParam(value = "queryParam") String queryParam,
-            @Handle.QueryParam(value = "maybeQueryParam") Optional<Boolean> maybeQueryParam);
+            @Handle.QueryParam("queryParam") String queryParam,
+            @Handle.QueryParam("maybeQueryParam") Optional<Boolean> maybeQueryParam);
 }
 ```
 
@@ -72,8 +72,8 @@ public interface MyService {
 
     @Handle(method = HttpMethod.Get, path = "/path")
     void myEndpoint(
-            @Handle.Header(value = "Foo") String fooHeader,
-            @Handle.Cookie(value = "MY_COOKIE") Optional<String> cookieValue);
+            @Handle.Header("Foo") String fooHeader,
+            @Handle.Cookie("MY_COOKIE") Optional<String> cookieValue);
 }
 ```
 
@@ -95,7 +95,7 @@ Similarly, you can access a bearer token from a cookie when using the `@Handle.C
 public interface MyService {
 
     @Handle(method = HttpMethod.Get, path = "/path")
-    void myEndpoint(@Handle.Cookie(value = "AUTH_TOKEN") BearerToken token);
+    void myEndpoint(@Handle.Cookie("AUTH_TOKEN") BearerToken token);
 }
 ```
 
