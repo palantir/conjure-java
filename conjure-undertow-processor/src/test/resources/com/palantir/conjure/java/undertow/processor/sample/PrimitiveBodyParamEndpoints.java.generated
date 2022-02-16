@@ -40,18 +40,18 @@ public final class PrimitiveBodyParamEndpoints implements UndertowService {
 
         private final PrimitiveBodyParam delegate;
 
-        private final Deserializer<Integer> handlePrimitiveBodyDeserializer;
+        private final Deserializer<Integer> countDeserializer;
 
         HandlePrimitiveBodyEndpoint(UndertowRuntime runtime, PrimitiveBodyParam delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.handlePrimitiveBodyDeserializer = PrimitiveBodyParam.IntParamDeserializerFactory.INSTANCE.deserializer(
+            this.countDeserializer = PrimitiveBodyParam.IntParamDeserializerFactory.INSTANCE.deserializer(
                     new TypeMarker<Integer>() {}, runtime, this);
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            this.delegate.handlePrimitiveBody(handlePrimitiveBodyDeserializer.deserialize(exchange));
+            this.delegate.handlePrimitiveBody(countDeserializer.deserialize(exchange));
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
