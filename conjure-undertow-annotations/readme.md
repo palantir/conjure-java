@@ -121,7 +121,7 @@ as a catch-all at the end of the path when using the `@Handle.PathMultiParam` an
 public interface MyService {
 
     @Handle(method = HttpMethod.Get, path = "/path/{params}")
-    void myEndpoint(@Handle.PathMultiParam List<String> path);
+    void myEndpoint(@Handle.PathMultiParam List<String> params);
 }
 ```
 
