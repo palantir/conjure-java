@@ -19,7 +19,6 @@ package com.palantir.conjure.java.undertow.processor.data;
 import com.google.auto.common.MoreElements;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.palantir.conjure.java.undertow.annotations.DefaultCollectionParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.DefaultParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
@@ -197,7 +196,7 @@ public final class ParamTypesResolver {
             VariableElement variableElement, AnnotationReflector annotationReflector) {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
-        if (!context.isSameTypes(typeMirror, DefaultCollectionParamDecoder.class)) {
+        if (!context.isSameTypes(typeMirror, DefaultParamDecoder.class)) {
             return Instantiables.instantiate(typeMirror);
         }
 

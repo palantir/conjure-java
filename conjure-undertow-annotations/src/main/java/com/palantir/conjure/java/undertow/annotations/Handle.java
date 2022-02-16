@@ -80,7 +80,7 @@ public @interface Handle {
          * Decoder for deserializing the header value. If omitted, tries to use a default decoder in
          * {@link ParamDecoders}.
          */
-        Class<? extends CollectionParamDecoder<?>> decoder() default DefaultCollectionParamDecoder.class;
+        Class<? extends CollectionParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -102,7 +102,7 @@ public @interface Handle {
          * Decoder for deserializing a path parameter that may span several path segments.
          * If omitted, tries to use a default decoder in {@link ParamDecoders}.
          */
-        Class<? extends CollectionParamDecoder<?>> decoder() default DefaultCollectionParamDecoder.class;
+        Class<? extends CollectionParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
 
     @Retention(RetentionPolicy.SOURCE)
@@ -114,7 +114,7 @@ public @interface Handle {
          * Decoder for deserializing query parameter value. If omitted, tries to use a default decoder in
          * {@link ParamDecoders}.
          */
-        Class<? extends CollectionParamDecoder<?>> decoder() default DefaultCollectionParamDecoder.class;
+        Class<? extends CollectionParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
 
     @Retention(RetentionPolicy.SOURCE)
