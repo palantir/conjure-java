@@ -1,0 +1,91 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class MultipleBodyInterfaceEndpoints implements UndertowService {
+    private final MultipleBodyInterface delegate;
+
+    private MultipleBodyInterfaceEndpoints(MultipleBodyInterface delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(MultipleBodyInterface delegate) {
+        return new MultipleBodyInterfaceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new PostEndpoint(runtime, delegate));
+    }
+
+    private static final class PostEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final MultipleBodyInterface delegate;
+
+        private final Deserializer<String> oneDeserializer;
+
+        private final Deserializer<String> twoDeserializer;
+
+        private final Deserializer<String> threeDeserializer;
+
+        PostEndpoint(UndertowRuntime runtime, MultipleBodyInterface delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.oneDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+            this.twoDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+            this.threeDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            this.delegate.post(
+                    oneDeserializer.deserialize(exchange),
+                    twoDeserializer.deserialize(exchange),
+                    threeDeserializer.deserialize(exchange));
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/body";
+        }
+
+        @Override
+        public String serviceName() {
+            return "MultipleBodyInterface";
+        }
+
+        @Override
+        public String name() {
+            return "post";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}
