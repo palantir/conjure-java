@@ -34,7 +34,6 @@ import javax.lang.model.util.Types;
 public final class EndpointDefinitions {
 
     private final ParamTypesResolver paramTypesResolver;
-    private final HttpPathParser httpPathParser;
     private final ArgumentTypesResolver argumentTypesResolver;
     private final ReturnTypesResolver returnTypesResolver;
     private final ErrorContext errorContext;
@@ -43,7 +42,6 @@ public final class EndpointDefinitions {
         this.errorContext = errorContext;
         ResolverContext context = new ResolverContext(errorContext, elements, types);
         this.paramTypesResolver = new ParamTypesResolver(context);
-        this.httpPathParser = new HttpPathParser(context);
         this.argumentTypesResolver = new ArgumentTypesResolver(context);
         this.returnTypesResolver = new ReturnTypesResolver(context);
     }
@@ -63,7 +61,7 @@ public final class EndpointDefinitions {
                 .getAnnotationValue("method", VariableElement.class)
                 .getSimpleName()
                 .toString());
-        Optional<HttpPath> maybeHttpPath = httpPathParser.getHttpPath(element, requestAnnotationReflector);
+        HttpPath path = HttpPath.of(requestAnnotationReflector.getAnnotationValue("path", String.class));
         Optional<ReturnType> maybeReturnType =
                 returnTypesResolver.getReturnType(endpointName, element, requestAnnotationReflector);
         List<Optional<ArgumentDefinition>> args = element.getParameters().stream()
@@ -74,7 +72,6 @@ public final class EndpointDefinitions {
                         .filter(Predicates.not(Optional::isPresent))
                         .collect(Collectors.toList())
                         .isEmpty()
-                || maybeHttpPath.isEmpty()
                 || maybeReturnType.isEmpty()) {
             return Optional.empty();
         }
@@ -88,8 +85,6 @@ public final class EndpointDefinitions {
             return Optional.empty();
         }
 
-        HttpPath path = maybeHttpPath.get();
-
         if (multiPathParams.size() == 1) {
             String argName = multiPathParams.get(0).argName().get();
             String expectedEnd = "/{" + argName + '}';
@@ -98,8 +93,7 @@ public final class EndpointDefinitions {
                 errorContext.reportError("PathMultiParam is only supported at the end of the path template", element);
                 return Optional.empty();
             }
-            path = ImmutableHttpPath.of(
-                    pathString.substring(0, pathString.length() - expectedEnd.length()) + "/*", path.segments());
+            path = HttpPath.of(pathString.substring(0, pathString.length() - expectedEnd.length()) + "/*");
         }
 
         return Optional.of(ImmutableEndpointDefinition.builder()
