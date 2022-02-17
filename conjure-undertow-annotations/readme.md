@@ -54,7 +54,7 @@ Path and query parameters can be defined using the `@Handle.PathParam` and `@Han
 ```java
 public interface MyService {
 
-    @Handle(method = HttpMethod.Get, path = "/api/{myParam}/{otherParam}")
+    @Handle(method = HttpMethod.GET, path = "/api/{myParam}/{otherParam}")
     void myEndpoint(
             @Handle.PathParam String myParam,
             @Handle.PathParam String otherParam,
@@ -70,7 +70,7 @@ To access header fields or cookie values, you can use the `@Handle.Header` or `@
 ```java
 public interface MyService {
 
-    @Handle(method = HttpMethod.Get, path = "/path")
+    @Handle(method = HttpMethod.GET, path = "/path")
     void myEndpoint(
             @Handle.Header("Foo") String fooHeader,
             @Handle.Cookie("MY_COOKIE") Optional<String> cookieValue);
@@ -83,7 +83,7 @@ using an [`AuthHeader`](https://github.com/palantir/auth-tokens/blob/develop/aut
 ```java
 public interface MyService {
 
-    @Handle(method = HttpMethod.Get, path = "/path")
+    @Handle(method = HttpMethod.GET, path = "/path")
     void myEndpoint(AuthHeader authHeader);
 }
 ```
@@ -94,7 +94,7 @@ Similarly, you can access a bearer token from a cookie when using the `@Handle.C
 ```java
 public interface MyService {
 
-    @Handle(method = HttpMethod.Get, path = "/path")
+    @Handle(method = HttpMethod.GET, path = "/path")
     void myEndpoint(@Handle.Cookie("AUTH_TOKEN") BearerToken token);
 }
 ```
@@ -107,7 +107,7 @@ or the underlying Undertow [`HttpServerExchange`](https://github.com/undertow-io
 ```java
 public interface MyService {
 
-    @Handle(method = HttpMethod.Get, path = "/path")
+    @Handle(method = HttpMethod.GET, path = "/path")
     void myEndpoint(HttpServerExchange exchange, RequestContext context);
 }
 ```
@@ -120,7 +120,7 @@ as a catch-all at the end of the path when using the `@Handle.PathMultiParam` an
 ```java
 public interface MyService {
 
-    @Handle(method = HttpMethod.Get, path = "/path/{params}")
+    @Handle(method = HttpMethod.GET, path = "/path/{params}")
     void myEndpoint(@Handle.PathMultiParam List<String> params);
 }
 ```
@@ -155,7 +155,7 @@ public interface MyService {
             if (value.isEmpty()) {
                 return Optional.empty();
             }
-            return MyType.from(Iterables.getOnlyElement(value));
+            return Optional.of(MyType.from(Iterables.getOnlyElement(value)));
         }
     }
 }
