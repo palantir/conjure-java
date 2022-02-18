@@ -2,6 +2,7 @@ apply plugin: 'com.palantir.external-publish-jar'
 
 dependencies {
     implementation project(':conjure-undertow-annotations')
+    implementation project(':conjure-java-undertow-runtime')
     implementation 'com.palantir.goethe:goethe'
     implementation 'com.squareup:javapoet'
     implementation 'com.google.auto:auto-common'

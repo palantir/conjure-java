@@ -16,16 +16,21 @@
 
 package com.palantir.conjure.java.undertow.processor.data;
 
+import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.MoreElements;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.processor.ErrorContext;
+import com.palantir.conjure.java.undertow.processor.data.AnnotationValueVisitors.StringArrayAnnotationValueVisitor;
 import com.palantir.conjure.java.undertow.processor.data.ParameterType.Cases;
 import com.squareup.javapoet.CodeBlock;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
@@ -103,6 +108,7 @@ public final class EndpointDefinitions {
                 .httpPath(path)
                 .returns(maybeReturnType.get())
                 .addAllArguments(argumentDefinitions)
+                .addAllContentTypeFilters(acceptedContentTypes(element))
                 .build());
     }
 
@@ -122,6 +128,23 @@ public final class EndpointDefinitions {
                 .argType(argumentType.get())
                 .paramType(parameterType.get())
                 .build());
+    }
+
+    private static Set<String> acceptedContentTypes(ExecutableElement element) {
+        Optional<AnnotationMirror> annotationMirror =
+                MoreElements.getAnnotationMirror(element, Handle.Accepts.class).toJavaUtil();
+
+        if (annotationMirror.isEmpty()) {
+            return ImmutableSet.of();
+        }
+
+        List<String> vals = AnnotationMirrors.getAnnotationValue(annotationMirror.get(), "value")
+                .accept(new StringArrayAnnotationValueVisitor(), null);
+        if (vals == null) {
+            throw new IllegalStateException("Could not parse annotation values");
+        }
+
+        return ImmutableSet.copyOf(vals);
     }
 
     private static List<ArgumentDefinition> getPathMultiParams(List<ArgumentDefinition> argumentDefinitions) {

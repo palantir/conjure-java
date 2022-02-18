@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2021 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2022 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.processor.data;
+package com.palantir.conjure.java.undertow.processor.sample;
 
+import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
-import java.util.List;
-import java.util.Set;
-import org.immutables.value.Value;
+import javax.ws.rs.core.MediaType;
 
-@Value.Immutable
-@StagedBuilder
-public interface EndpointDefinition {
+public interface ContentTypeFilter {
 
-    EndpointName endpointName();
+    @Handle(method = HttpMethod.POST, path = "/contentTyp")
+    @Handle.Accepts(MediaType.TEXT_PLAIN)
+    void contentType(@Handle.Body String body);
 
-    ServiceName serviceName();
-
-    HttpMethod httpMethod();
-
-    HttpPath httpPath();
-
-    List<ArgumentDefinition> arguments();
-
-    Set<String> contentTypeFilters();
-
-    ReturnType returns();
+    @Handle(method = HttpMethod.POST, path = "/contentTyps")
+    @Handle.Accepts({MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.TEXT_XML})
+    void contentTypes(@Handle.Body String body);
 }
