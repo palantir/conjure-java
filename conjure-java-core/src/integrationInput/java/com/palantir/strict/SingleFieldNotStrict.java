@@ -36,7 +36,7 @@ public final class SingleFieldNotStrict {
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(this.foo);
+        return this.foo;
     }
 
     @Override
