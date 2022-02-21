@@ -153,7 +153,7 @@ public final class ManyFieldExample {
         if (result == 0) {
             int hash = 1;
             hash = 31 * hash + this.string.hashCode();
-            hash = 31 * hash + Integer.hashCode(this.integer);
+            hash = 31 * hash + this.integer;
             hash = 31 * hash + Double.hashCode(this.doubleValue);
             hash = 31 * hash + this.optionalItem.hashCode();
             hash = 31 * hash + this.items.hashCode();

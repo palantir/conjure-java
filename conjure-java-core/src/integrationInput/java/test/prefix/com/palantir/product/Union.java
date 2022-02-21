@@ -319,7 +319,7 @@ public final class Union {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(this.value);
+            return this.value;
         }
 
         @Override

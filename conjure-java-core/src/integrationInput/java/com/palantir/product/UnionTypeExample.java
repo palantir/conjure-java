@@ -717,7 +717,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(this.value);
+            return this.value;
         }
 
         @Override
@@ -762,7 +762,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(this.value);
+            return this.value;
         }
 
         @Override
@@ -807,7 +807,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(this.value);
+            return this.value;
         }
 
         @Override
@@ -852,7 +852,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(this.value);
+            return this.value;
         }
 
         @Override
@@ -897,7 +897,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(this.value);
+            return this.value;
         }
 
         @Override
@@ -942,7 +942,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(this.value);
+            return this.value;
         }
 
         @Override
@@ -987,7 +987,7 @@ public final class UnionTypeExample {
 
         @Override
         public int hashCode() {
-            return Integer.hashCode(this.value);
+            return this.value;
         }
 
         @Override

@@ -143,7 +143,11 @@ public final class MethodSpecs {
 
     private static CodeBlock computeHashCode(FieldSpec fieldSpec) {
         if (fieldSpec.type.isPrimitive()) {
-            return CodeBlock.of("$1T.$2N($3L)", fieldSpec.type.box(), "hashCode", createHashInput(fieldSpec));
+            if (TypeName.INT.equals(fieldSpec.type)) {
+                return createHashInput(fieldSpec);
+            } else {
+                return CodeBlock.of("$1T.$2N($3L)", fieldSpec.type.box(), "hashCode", createHashInput(fieldSpec));
+            }
         }
         return CodeBlock.of("$L.hashCode()", createHashInput(fieldSpec));
     }

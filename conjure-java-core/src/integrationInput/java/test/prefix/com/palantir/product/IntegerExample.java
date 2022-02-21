@@ -36,7 +36,7 @@ public final class IntegerExample {
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(this.integer);
+        return this.integer;
     }
 
     @Override
