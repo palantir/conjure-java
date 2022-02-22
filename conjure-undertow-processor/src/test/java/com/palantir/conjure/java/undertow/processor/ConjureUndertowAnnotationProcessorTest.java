@@ -51,7 +51,7 @@ import org.junit.jupiter.api.Test;
 
 public class ConjureUndertowAnnotationProcessorTest {
 
-    private static final boolean DEV_MODE = true || Boolean.valueOf(System.getProperty("recreate", "false"));
+    private static final boolean DEV_MODE = Boolean.valueOf(System.getProperty("recreate", "false"));
     private static final Path TEST_CLASSES_BASE_DIR = Paths.get("src", "test", "java");
     private static final Path RESOURCES_BASE_DIR = Paths.get("src", "test", "resources");
 
