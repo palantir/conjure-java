@@ -9,6 +9,8 @@ import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class StringAliasTwo {
+    private static final StringAliasTwo EMPTY = new StringAliasTwo();
+
     private final Optional<StringAliasOne> value;
 
     private StringAliasTwo(@Nonnull Optional<StringAliasOne> value) {
@@ -42,5 +44,9 @@ public final class StringAliasTwo {
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static StringAliasTwo of(@Nonnull Optional<StringAliasOne> value) {
         return new StringAliasTwo(value);
+    }
+
+    public static StringAliasTwo empty() {
+        return EMPTY;
     }
 }

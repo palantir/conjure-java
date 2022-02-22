@@ -1,0 +1,19 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      CollectionsTestAliasList:
+        alias: list<integer>
+      CollectionsTestAliasSet:
+        alias: set<integer>
+      CollectionsTestAliasMap:
+        alias: map<string, integer>
+      CollectionsTestObject:
+        fields:
+          items: list<string>
+          itemsMap: map<string, integer>
+          optionalItem: optional<string>
+          itemsSet: set<string>
+          alist: CollectionsTestAliasList
+          aset: CollectionsTestAliasSet
+          amap: CollectionsTestAliasMap

@@ -383,19 +383,19 @@ public final class PrimitiveOptionalsExample {
 
         private Optional<StringAliasOne> aliasOne = Optional.empty();
 
-        private StringAliasTwo aliasTwo;
+        private StringAliasTwo aliasTwo = StringAliasTwo.empty();
 
         private Optional<ListAlias> aliasList = Optional.empty();
 
         private Optional<MapAliasExample> aliasMap = Optional.empty();
 
-        private OptionalAlias aliasOptional;
+        private OptionalAlias aliasOptional = OptionalAlias.empty();
 
-        private OptionalMapAliasExample aliasOptionalMap;
+        private OptionalMapAliasExample aliasOptionalMap = OptionalMapAliasExample.empty();
 
-        private OptionalListAliasExample aliasOptionalList;
+        private OptionalListAliasExample aliasOptionalList = OptionalListAliasExample.empty();
 
-        private OptionalSetAliasExample aliasOptionalSet;
+        private OptionalSetAliasExample aliasOptionalSet = OptionalSetAliasExample.empty();
 
         private Builder() {}
 

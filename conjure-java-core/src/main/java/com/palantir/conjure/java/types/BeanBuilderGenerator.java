@@ -29,6 +29,9 @@ import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
+import com.palantir.conjure.java.visitor.MoreVisitors;
+import com.palantir.conjure.spec.AliasDefinition;
+import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -40,6 +43,8 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeDefinition.Visitor;
+import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
@@ -104,7 +109,7 @@ public final class BeanBuilderGenerator {
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Optional<ClassName> builderInterfaceClass) {
-        Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
+        Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields(), typesMap);
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
         boolean override = builderInterfaceClass.isPresent();
         TypeSpec.Builder builder = TypeSpec.classBuilder(
@@ -210,8 +215,11 @@ public final class BeanBuilderGenerator {
         return "_" + JavaNameSanitizer.sanitize(field.conjureDef().getFieldName()) + "Initialized";
     }
 
-    private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
-        return fields.stream().map(e -> createField(e.getFieldName(), e)).collect(Collectors.toList());
+    private Collection<EnrichedField> enrichFields(
+            List<FieldDefinition> fields, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+        return fields.stream()
+                .map(e -> createField(e.getFieldName(), e, typesMap))
+                .collect(Collectors.toList());
     }
 
     private static MethodSpec createConstructor() {
@@ -235,7 +243,10 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
-    private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
+    private EnrichedField createField(
+            FieldName fieldName,
+            FieldDefinition field,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
         FieldSpec.Builder spec = FieldSpec.builder(
                 typeMapper.getClassName(field.getType()), JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
 
@@ -247,6 +258,41 @@ public final class BeanBuilderGenerator {
             spec.initializer("new $T<>()", LinkedHashMap.class);
         } else if (field.getType().accept(TypeVisitor.IS_OPTIONAL)) {
             spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(field.getType())));
+        } else if (field.getType().accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
+            com.palantir.conjure.spec.TypeName name = field.getType().accept(TypeVisitor.REFERENCE);
+            typeMapper
+                    .getType(name)
+                    .ifPresent(definition -> definition.accept(new Visitor<Void>() {
+                        @Override
+                        public Void visitAlias(AliasDefinition value) {
+                            Type aliasType = value.getAlias();
+                            if (aliasType.accept(MoreVisitors.IS_COLLECTION)
+                                    || aliasType.accept(TypeVisitor.IS_OPTIONAL)) {
+                                spec.initializer("$T.empty()", typeMapper.getClassName(field.getType()));
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        public Void visitEnum(EnumDefinition value) {
+                            return null;
+                        }
+
+                        @Override
+                        public Void visitObject(ObjectDefinition value) {
+                            return null;
+                        }
+
+                        @Override
+                        public Void visitUnion(UnionDefinition value) {
+                            return null;
+                        }
+
+                        @Override
+                        public Void visitUnknown(String unknownType) {
+                            return null;
+                        }
+                    }));
         }
         // else no initializer
 

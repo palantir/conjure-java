@@ -34,6 +34,7 @@ import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
+import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ListType;
@@ -456,6 +457,17 @@ public final class BeanGenerator {
                             .accept(TypeVisitor.IS_OPTIONAL)) {
                 // Aliases are special, as usual. Inclusion cannot take advantage of the optional delegate types,
                 // however the default (hidden no-arg constructor) can be leveraged using NON_EMPTY.
+                getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
+                        .addMember("value", "$T.NON_EMPTY", JsonInclude.Include.class)
+                        .build());
+            }
+        }
+
+        if (featureFlags.excludeEmptyCollections()) {
+            Type dealiased = conjureDefType.accept(TypeVisitor.IS_REFERENCE)
+                    ? TypeFunctions.toConjureTypeWithoutAliases(conjureDefType, typesMap)
+                    : conjureDefType;
+            if (dealiased.accept(MoreVisitors.IS_COLLECTION)) {
                 getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
                         .addMember("value", "$T.NON_EMPTY", JsonInclude.Include.class)
                         .build());

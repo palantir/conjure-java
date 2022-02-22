@@ -24,10 +24,17 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidNullException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.product.BearerTokenExample;
 import com.palantir.product.BooleanExample;
+import com.palantir.product.CollectionsTestAliasList;
+import com.palantir.product.CollectionsTestAliasMap;
+import com.palantir.product.CollectionsTestAliasSet;
+import com.palantir.product.CollectionsTestObject;
 import com.palantir.product.EnumExample;
 import com.palantir.product.ListExample;
 import com.palantir.product.MapExample;
@@ -165,6 +172,35 @@ public final class BeanSerdeIntegrationTests {
         Map<EnumExample, String> value =
                 mapper.readValue("{\"TWO\": \"foo\"}", new TypeReference<Map<EnumExample, String>>() {});
         assertThat(Iterables.getOnlyElement(value.keySet()).get()).isEqualTo(EnumExample.Value.TWO);
+    }
+
+    @Test
+    public void testExcludeEmptyCollections_empty() throws IOException {
+        CollectionsTestObject initial = CollectionsTestObject.builder()
+                .alist(CollectionsTestAliasList.of(ImmutableList.of()))
+                .aset(CollectionsTestAliasSet.of(ImmutableSet.of()))
+                .amap(CollectionsTestAliasMap.of(ImmutableMap.of()))
+                .build();
+        String stringValue = mapper.writeValueAsString(initial);
+        assertThat(stringValue)
+                .as("Type does not set the 'excludeEmptyOptionals' flag, only the optional should be serialized")
+                .isEqualTo("{\"optionalItem\":null}");
+        assertThat(mapper.readValue(stringValue, CollectionsTestObject.class)).isEqualTo(initial);
+    }
+
+    @Test
+    public void testExcludeEmptyCollections_nonempty() throws IOException {
+        CollectionsTestObject initial = CollectionsTestObject.builder()
+                .alist(CollectionsTestAliasList.of(ImmutableList.of(0)))
+                .aset(CollectionsTestAliasSet.of(ImmutableSet.of(0)))
+                .amap(CollectionsTestAliasMap.of(ImmutableMap.of("", 0)))
+                .items("")
+                .itemsMap("", 0)
+                .optionalItem("")
+                .itemsSet("")
+                .build();
+        String stringValue = mapper.writeValueAsString(initial);
+        assertThat(mapper.readValue(stringValue, CollectionsTestObject.class)).isEqualTo(initial);
     }
 
     private static <T> void testSerde(String json, Class<T> clazz) throws Exception {

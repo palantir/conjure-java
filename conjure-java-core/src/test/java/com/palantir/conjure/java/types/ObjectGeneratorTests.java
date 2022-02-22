@@ -102,6 +102,19 @@ public final class ObjectGeneratorTests {
     }
 
     @Test
+    public void testObjectGenerator_excludeEmptyCollections() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/exclude-empty-collections.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(
+                                Options.builder().excludeEmptyCollections(true).build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
     public void testConjureImports() throws IOException {
         ConjureDefinition conjure = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/example-conjure-imports.yml"),

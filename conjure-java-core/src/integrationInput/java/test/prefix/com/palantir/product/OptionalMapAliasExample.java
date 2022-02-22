@@ -10,6 +10,8 @@ import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class OptionalMapAliasExample {
+    private static final OptionalMapAliasExample EMPTY = new OptionalMapAliasExample();
+
     private final Optional<Map<String, Object>> value;
 
     private OptionalMapAliasExample(@Nonnull Optional<Map<String, Object>> value) {
@@ -45,5 +47,9 @@ public final class OptionalMapAliasExample {
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static OptionalMapAliasExample of(@Nonnull Optional<Map<String, Object>> value) {
         return new OptionalMapAliasExample(value);
+    }
+
+    public static OptionalMapAliasExample empty() {
+        return EMPTY;
     }
 }
