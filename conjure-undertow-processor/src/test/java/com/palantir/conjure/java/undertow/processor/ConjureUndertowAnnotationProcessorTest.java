@@ -29,6 +29,7 @@ import com.palantir.conjure.java.undertow.processor.sample.ContextParamNameClash
 import com.palantir.conjure.java.undertow.processor.sample.CookieParams;
 import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoderService;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
+import com.palantir.conjure.java.undertow.processor.sample.ParameterNotAnnotated;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveQueryParams;
 import com.palantir.conjure.java.undertow.processor.sample.PrivateMethodAnnotatedResource;
@@ -125,6 +126,12 @@ public class ConjureUndertowAnnotationProcessorTest {
     public void testContextNameClash() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ContextParamNameClash.class))
                 .hadErrorContaining("Invalid case format: {segment=requestContext_}");
+    }
+
+    @Test
+    public void testBodyIsNotAnnotated() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterNotAnnotated.class))
+                .hadErrorContaining("At least one annotation should be present");
     }
 
     private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {
