@@ -91,7 +91,7 @@ public final class ParamTypesResolver {
                 .collect(Collectors.toList());
 
         if (otherAnnotationReflectors.isEmpty()) {
-            if (safeLoggable.equals(SafeLoggingAnnotation.SAFE)) {
+            if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
                 context.reportError(
                         "Parameter type cannot be annotated with safe logging annotations",
                         variableElement,
@@ -213,7 +213,7 @@ public final class ParamTypesResolver {
         String javaParameterName = variableElement.getSimpleName().toString();
         String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         if (context.isSameTypes(variableElement.asType(), BearerToken.class)) {
-            if (safeLoggable.equals(SafeLoggingAnnotation.SAFE)) {
+            if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
                 context.reportError(
                         "BearerToken parameter cannot be annotated with Safe Logging annotations",
                         variableElement,

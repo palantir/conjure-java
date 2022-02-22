@@ -80,14 +80,14 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            RequestContext requestContext_ = this.runtime.contexts().createContext(exchange, this);
             String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
             String safeParam = this.safeParamDeserializer.deserialize(exchange);
-            context.requestArg(SafeArg.of("safeParam", safeParam));
+            requestContext_.requestArg(SafeArg.of("safeParam", safeParam));
             String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
-            context.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            requestContext_.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
             String safeMultiParam = this.safeMultiParamDeserializer.deserialize(exchange);
-            context.requestArg(SafeArg.of("safeMultiParam", safeMultiParam));
+            requestContext_.requestArg(SafeArg.of("safeMultiParam", safeMultiParam));
             this.delegate.pathParams(noAnnotationParam, safeParam, unsafeParam, safeMultiParam);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -142,12 +142,12 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            RequestContext requestContext_ = this.runtime.contexts().createContext(exchange, this);
             String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
             String safeParam = this.safeParamDeserializer.deserialize(exchange);
-            context.requestArg(SafeArg.of("safeParam", safeParam));
+            requestContext_.requestArg(SafeArg.of("safeParam", safeParam));
             String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
-            context.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            requestContext_.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
             this.delegate.queryParams(noAnnotationParam, safeParam, unsafeParam);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -202,12 +202,12 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            RequestContext requestContext_ = this.runtime.contexts().createContext(exchange, this);
             String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
             String safeParam = this.safeParamDeserializer.deserialize(exchange);
-            context.requestArg(SafeArg.of("safeParam", safeParam));
+            requestContext_.requestArg(SafeArg.of("safeParam", safeParam));
             String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
-            context.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            requestContext_.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
             this.delegate.headerParams(noAnnotationParam, safeParam, unsafeParam);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -262,12 +262,12 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            RequestContext requestContext_ = this.runtime.contexts().createContext(exchange, this);
             String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
             String safeParam = this.safeParamDeserializer.deserialize(exchange);
-            context.requestArg(SafeArg.of("safeParam", safeParam));
+            requestContext_.requestArg(SafeArg.of("safeParam", safeParam));
             String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
-            context.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            requestContext_.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
             this.delegate.cookieParams(noAnnotationParam, safeParam, unsafeParam);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -306,6 +306,8 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
 
         private final Deserializer<String> safeParamDeserializer;
 
+        private final Deserializer<String> contextDeserializer;
+
         private final Serializer<String> safeLoggingReusesContextSerializer;
 
         SafeLoggingReusesContextEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
@@ -313,16 +315,20 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
             this.delegate = delegate;
             this.safeParamDeserializer = new QueryParamDeserializer<>(
                     "safeParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.contextDeserializer = new QueryParamDeserializer<>(
+                    "context", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
             this.safeLoggingReusesContextSerializer =
                     DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            RequestContext requestContext_ = this.runtime.contexts().createContext(exchange, this);
             String safeParam = this.safeParamDeserializer.deserialize(exchange);
-            context.requestArg(SafeArg.of("safeParam", safeParam));
-            write(this.delegate.safeLoggingReusesContext(safeParam, context), exchange);
+            requestContext_.requestArg(SafeArg.of("safeParam", safeParam));
+            String context = this.contextDeserializer.deserialize(exchange);
+            requestContext_.requestArg(SafeArg.of("context", context));
+            write(this.delegate.safeLoggingReusesContext(safeParam, context, requestContext_), exchange);
         }
 
         @Override

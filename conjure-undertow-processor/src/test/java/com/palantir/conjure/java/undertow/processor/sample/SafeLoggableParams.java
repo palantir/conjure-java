@@ -50,5 +50,8 @@ public interface SafeLoggableParams {
             @Unsafe @Handle.Cookie("unsafeParam") String unsafeParam);
 
     @Handle(method = HttpMethod.GET, path = "/safeLoggingReusesContext")
-    String safeLoggingReusesContext(@Safe @Handle.QueryParam("safeParam") String safeParam, RequestContext context);
+    String safeLoggingReusesContext(
+            @Safe @Handle.QueryParam("safeParam") String safeParam,
+            @Safe @Handle.QueryParam("context") String context,
+            RequestContext requestContext);
 }
