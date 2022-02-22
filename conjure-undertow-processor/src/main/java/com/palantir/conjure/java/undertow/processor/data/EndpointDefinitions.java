@@ -107,10 +107,10 @@ public final class EndpointDefinitions {
     }
 
     private Optional<ArgumentDefinition> getArgumentDefinition(VariableElement param) {
-        Optional<ArgumentType> argumentType = argumentTypesResolver.getArgumentType(param);
+        ArgumentType argumentType = argumentTypesResolver.getArgumentType(param);
         Optional<ParameterType> parameterType = paramTypesResolver.getParameterType(param);
 
-        if (argumentType.isEmpty() || parameterType.isEmpty()) {
+        if (parameterType.isEmpty()) {
             return Optional.empty();
         }
 
@@ -119,7 +119,7 @@ public final class EndpointDefinitions {
 
         return Optional.of(ImmutableArgumentDefinition.builder()
                 .argName(ImmutableArgumentName.of(param.getSimpleName().toString()))
-                .argType(argumentType.get())
+                .argType(argumentType)
                 .paramType(parameterType.get())
                 .build());
     }

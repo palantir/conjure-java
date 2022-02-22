@@ -28,6 +28,7 @@ import com.google.testing.compile.JavaFileObjects;
 import com.palantir.conjure.java.undertow.processor.sample.CookieParams;
 import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoderService;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
+import com.palantir.conjure.java.undertow.processor.sample.ParameterNotAnnotated;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveQueryParams;
 import com.palantir.conjure.java.undertow.processor.sample.PrivateMethodAnnotatedResource;
@@ -98,6 +99,12 @@ public class ConjureUndertowAnnotationProcessorTest {
     public void testStaticAnnotatedMethod() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, StaticMethodAnnotatedResource.class))
                 .hadErrorContaining("The '@Handle' annotation does not support static methods");
+    }
+
+    @Test
+    public void testBodyIsNotAnnotated() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterNotAnnotated.class))
+                .hadErrorContaining("At least one annotation should be present");
     }
 
     private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {
