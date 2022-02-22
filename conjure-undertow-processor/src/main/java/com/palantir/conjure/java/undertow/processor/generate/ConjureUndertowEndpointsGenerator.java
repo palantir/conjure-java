@@ -70,9 +70,8 @@ public final class ConjureUndertowEndpointsGenerator {
     private static final String DELEGATE_NAME = "delegate";
     private static final String RUNTIME_NAME = "runtime";
     private static final String RETURN_VALUE = "returnValue";
-    // Trailing '_' to avoid clashes with other generated local variables
-    private static final String EXCHANGE_NAME = "exchange_";
-    private static final String REQUEST_CONTEXT = "requestContext_";
+    private static final String EXCHANGE_NAME = "exchange";
+    private static final String REQUEST_CONTEXT = "requestContext";
 
     private final ServiceDefinition serviceDefinition;
 

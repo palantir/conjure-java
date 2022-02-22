@@ -22,7 +22,6 @@ import com.palantir.conjure.java.undertow.lib.RequestContext;
 
 public interface NameClashContextParam {
 
-    @SuppressWarnings("checkstyle:ParameterName")
     @Handle(method = HttpMethod.GET, path = "/context")
-    String context(@Handle.QueryParam("requestContext") String requestContext_, RequestContext context);
+    String context(@Handle.QueryParam("requestContext") String requestContext, RequestContext context);
 }

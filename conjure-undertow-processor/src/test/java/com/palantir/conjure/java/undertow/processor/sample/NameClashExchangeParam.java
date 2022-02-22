@@ -23,5 +23,5 @@ public interface NameClashExchangeParam {
 
     @SuppressWarnings("checkstyle:ParameterName")
     @Handle(method = HttpMethod.GET, path = "/exchange")
-    String exchange(@Handle.QueryParam("exchange") String exchange_);
+    String exchange(@Handle.QueryParam("exchange") String exchange);
 }

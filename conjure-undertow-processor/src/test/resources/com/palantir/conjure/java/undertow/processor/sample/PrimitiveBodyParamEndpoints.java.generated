@@ -50,9 +50,9 @@ public final class PrimitiveBodyParamEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange_) throws Exception {
-            this.delegate.handlePrimitiveBody(countDeserializer.deserialize(exchange_));
-            exchange_.setStatusCode(StatusCodes.NO_CONTENT);
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            this.delegate.handlePrimitiveBody(countDeserializer.deserialize(exchange));
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
         @Override

@@ -59,12 +59,12 @@ public final class PrimitiveQueryParamsEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange_) throws Exception {
-            int count = this.countDeserializer.deserialize(exchange_);
-            boolean test = this.testDeserializer.deserialize(exchange_);
-            Boolean testBoxed = this.testBoxedDeserializer.deserialize(exchange_);
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            int count = this.countDeserializer.deserialize(exchange);
+            boolean test = this.testDeserializer.deserialize(exchange);
+            Boolean testBoxed = this.testBoxedDeserializer.deserialize(exchange);
             this.delegate.handlePrimitiveQueryParams(count, test, testBoxed);
-            exchange_.setStatusCode(StatusCodes.NO_CONTENT);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
         @Override

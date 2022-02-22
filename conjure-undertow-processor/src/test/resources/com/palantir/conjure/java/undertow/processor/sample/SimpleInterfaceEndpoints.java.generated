@@ -43,9 +43,9 @@ public final class SimpleInterfaceEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange_) throws Exception {
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
             this.delegate.ping();
-            exchange_.setStatusCode(StatusCodes.NO_CONTENT);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
         @Override

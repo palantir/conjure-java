@@ -93,13 +93,13 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange_) throws Exception {
-            String stringParam = this.stringParamDeserializer.deserialize(exchange_);
-            Boolean booleanParam = this.booleanParamDeserializer.deserialize(exchange_);
-            Set<String> stringSetParam = this.stringSetParamDeserializer.deserialize(exchange_);
-            List<String> stringListParam = this.stringListParamDeserializer.deserialize(exchange_);
-            Optional<String> optionalStringParam = this.optionalStringParamDeserializer.deserialize(exchange_);
-            String decoderParam = this.decoderParamDeserializer.deserialize(exchange_);
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String stringParam = this.stringParamDeserializer.deserialize(exchange);
+            Boolean booleanParam = this.booleanParamDeserializer.deserialize(exchange);
+            Set<String> stringSetParam = this.stringSetParamDeserializer.deserialize(exchange);
+            List<String> stringListParam = this.stringListParamDeserializer.deserialize(exchange);
+            Optional<String> optionalStringParam = this.optionalStringParamDeserializer.deserialize(exchange);
+            String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
             write(
                     this.delegate.queryParam(
                             stringParam,
@@ -108,12 +108,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             stringListParam,
                             optionalStringParam,
                             decoderParam),
-                    exchange_);
+                    exchange);
         }
 
         @Override
-        public void write(String returnValue, HttpServerExchange exchange_) throws IOException {
-            this.queryParamSerializer.serialize(returnValue, exchange_);
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.queryParamSerializer.serialize(returnValue, exchange);
         }
 
         @Override
@@ -188,14 +188,14 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange_) throws Exception {
-            OptionalInt optionalIntParam = this.optionalIntParamDeserializer.deserialize(exchange_);
-            OffsetDateTime dateTimeParam = this.dateTimeParamDeserializer.deserialize(exchange_);
-            Set<ResourceIdentifier> ridSetParam = this.ridSetParamDeserializer.deserialize(exchange_);
-            Optional<SafeLong> optionalSafeLongParam = this.optionalSafeLongParamDeserializer.deserialize(exchange_);
-            UUID uuidParam = this.uuidParamDeserializer.deserialize(exchange_);
-            Float floatHeaderBoxed = this.floatHeaderBoxedDeserializer.deserialize(exchange_);
-            float floatHeaderUnboxed = this.floatHeaderUnboxedDeserializer.deserialize(exchange_);
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            OptionalInt optionalIntParam = this.optionalIntParamDeserializer.deserialize(exchange);
+            OffsetDateTime dateTimeParam = this.dateTimeParamDeserializer.deserialize(exchange);
+            Set<ResourceIdentifier> ridSetParam = this.ridSetParamDeserializer.deserialize(exchange);
+            Optional<SafeLong> optionalSafeLongParam = this.optionalSafeLongParamDeserializer.deserialize(exchange);
+            UUID uuidParam = this.uuidParamDeserializer.deserialize(exchange);
+            Float floatHeaderBoxed = this.floatHeaderBoxedDeserializer.deserialize(exchange);
+            float floatHeaderUnboxed = this.floatHeaderUnboxedDeserializer.deserialize(exchange);
             write(
                     this.delegate.moreQueryParams(
                             optionalIntParam,
@@ -205,12 +205,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             uuidParam,
                             floatHeaderBoxed,
                             floatHeaderUnboxed),
-                    exchange_);
+                    exchange);
         }
 
         @Override
-        public void write(String returnValue, HttpServerExchange exchange_) throws IOException {
-            this.moreQueryParamsSerializer.serialize(returnValue, exchange_);
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.moreQueryParamsSerializer.serialize(returnValue, exchange);
         }
 
         @Override
@@ -291,16 +291,16 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange_) throws Exception {
-            String stringParam = this.stringParamDeserializer.deserialize(exchange_);
-            Boolean booleanParam = this.booleanParamDeserializer.deserialize(exchange_);
-            Set<String> stringSetParam = this.stringSetParamDeserializer.deserialize(exchange_);
-            List<String> stringListParam = this.stringListParamDeserializer.deserialize(exchange_);
-            Optional<String> optionalStringParam = this.optionalStringParamDeserializer.deserialize(exchange_);
-            String decoderParam = this.decoderParamDeserializer.deserialize(exchange_);
-            Float floatHeaderBoxed = this.floatHeaderBoxedDeserializer.deserialize(exchange_);
-            float floatHeaderUnboxed = this.floatHeaderUnboxedDeserializer.deserialize(exchange_);
-            BigInteger bigInteger = this.bigIntegerDeserializer.deserialize(exchange_);
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String stringParam = this.stringParamDeserializer.deserialize(exchange);
+            Boolean booleanParam = this.booleanParamDeserializer.deserialize(exchange);
+            Set<String> stringSetParam = this.stringSetParamDeserializer.deserialize(exchange);
+            List<String> stringListParam = this.stringListParamDeserializer.deserialize(exchange);
+            Optional<String> optionalStringParam = this.optionalStringParamDeserializer.deserialize(exchange);
+            String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
+            Float floatHeaderBoxed = this.floatHeaderBoxedDeserializer.deserialize(exchange);
+            float floatHeaderUnboxed = this.floatHeaderUnboxedDeserializer.deserialize(exchange);
+            BigInteger bigInteger = this.bigIntegerDeserializer.deserialize(exchange);
             write(
                     this.delegate.headers(
                             stringParam,
@@ -312,12 +312,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             floatHeaderBoxed,
                             floatHeaderUnboxed,
                             bigInteger),
-                    exchange_);
+                    exchange);
         }
 
         @Override
-        public void write(String returnValue, HttpServerExchange exchange_) throws IOException {
-            this.headersSerializer.serialize(returnValue, exchange_);
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.headersSerializer.serialize(returnValue, exchange);
         }
 
         @Override
@@ -384,21 +384,21 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange_) throws Exception {
-            String stringParam = this.stringParamDeserializer.deserialize(exchange_);
-            Boolean booleanParam = this.booleanParamDeserializer.deserialize(exchange_);
-            String decoderParam = this.decoderParamDeserializer.deserialize(exchange_);
-            Float floatBoxed = this.floatBoxedDeserializer.deserialize(exchange_);
-            float floatUnboxed = this.floatUnboxedDeserializer.deserialize(exchange_);
-            BigInteger bigInt = this.bigIntDeserializer.deserialize(exchange_);
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String stringParam = this.stringParamDeserializer.deserialize(exchange);
+            Boolean booleanParam = this.booleanParamDeserializer.deserialize(exchange);
+            String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
+            Float floatBoxed = this.floatBoxedDeserializer.deserialize(exchange);
+            float floatUnboxed = this.floatUnboxedDeserializer.deserialize(exchange);
+            BigInteger bigInt = this.bigIntDeserializer.deserialize(exchange);
             write(
                     this.delegate.pathParam(stringParam, booleanParam, decoderParam, floatBoxed, floatUnboxed, bigInt),
-                    exchange_);
+                    exchange);
         }
 
         @Override
-        public void write(String returnValue, HttpServerExchange exchange_) throws IOException {
-            this.pathParamSerializer.serialize(returnValue, exchange_);
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.pathParamSerializer.serialize(returnValue, exchange);
         }
 
         @Override

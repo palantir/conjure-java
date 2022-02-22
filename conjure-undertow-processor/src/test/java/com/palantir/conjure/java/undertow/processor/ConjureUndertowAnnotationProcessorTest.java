@@ -126,13 +126,14 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testContextNameClash() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, NameClashContextParam.class))
-                .hadErrorContaining("Invalid case format: {segment=requestContext_}");
+                .hadErrorContaining("incompatible types: java.lang.String cannot be converted to "
+                        + "com.palantir.conjure.java.undertow.lib.RequestContext");
     }
 
     @Test
     public void testExchangeNameClash() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, NameClashExchangeParam.class))
-                .hadErrorContaining("variable exchange_ is already defined in method handleRequest");
+                .hadErrorContaining("variable exchange is already defined in method handleRequest");
     }
 
     @Test

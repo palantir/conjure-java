@@ -76,21 +76,21 @@ public final class CookieParamsEndpoints implements UndertowService {
         }
 
         @Override
-        public void handleRequest(HttpServerExchange exchange_) throws Exception {
-            String stringCookie = this.stringCookieDeserializer.deserialize(exchange_);
-            Optional<String> optionalStringCookie = this.optionalStringCookieDeserializer.deserialize(exchange_);
-            OptionalInt optionalIntCookie = this.optionalIntCookieDeserializer.deserialize(exchange_);
-            String decoderCookie = this.decoderCookieDeserializer.deserialize(exchange_);
-            BearerToken token = this.tokenDeserializer.deserialize(exchange_);
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String stringCookie = this.stringCookieDeserializer.deserialize(exchange);
+            Optional<String> optionalStringCookie = this.optionalStringCookieDeserializer.deserialize(exchange);
+            OptionalInt optionalIntCookie = this.optionalIntCookieDeserializer.deserialize(exchange);
+            String decoderCookie = this.decoderCookieDeserializer.deserialize(exchange);
+            BearerToken token = this.tokenDeserializer.deserialize(exchange);
             write(
                     this.delegate.cookieParams(
                             stringCookie, optionalStringCookie, optionalIntCookie, decoderCookie, token),
-                    exchange_);
+                    exchange);
         }
 
         @Override
-        public void write(String returnValue, HttpServerExchange exchange_) throws IOException {
-            this.cookieParamsSerializer.serialize(returnValue, exchange_);
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.cookieParamsSerializer.serialize(returnValue, exchange);
         }
 
         @Override
