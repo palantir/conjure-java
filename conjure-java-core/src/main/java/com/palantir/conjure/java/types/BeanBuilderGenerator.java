@@ -30,8 +30,6 @@ import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
-import com.palantir.conjure.spec.AliasDefinition;
-import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -43,8 +41,6 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
-import com.palantir.conjure.spec.TypeDefinition.Visitor;
-import com.palantir.conjure.spec.UnionDefinition;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
@@ -256,37 +252,14 @@ public final class BeanBuilderGenerator {
             com.palantir.conjure.spec.TypeName name = field.getType().accept(TypeVisitor.REFERENCE);
             typeMapper
                     .getType(name)
-                    .ifPresent(definition -> definition.accept(new Visitor<Void>() {
-                        @Override
-                        public Void visitAlias(AliasDefinition value) {
-                            Type aliasType = value.getAlias();
-                            if (aliasType.accept(MoreVisitors.IS_COLLECTION)
-                                    || aliasType.accept(TypeVisitor.IS_OPTIONAL)) {
-                                spec.initializer("$T.empty()", typeMapper.getClassName(field.getType()));
-                            }
-                            return null;
+                    .filter(definition -> definition.accept(TypeDefinitionVisitor.IS_ALIAS))
+                    .map(definition -> definition.accept(TypeDefinitionVisitor.ALIAS))
+                    .ifPresent(aliasDefinition -> {
+                        Type aliasType = aliasDefinition.getAlias();
+                        if (aliasType.accept(MoreVisitors.IS_COLLECTION) || aliasType.accept(TypeVisitor.IS_OPTIONAL)) {
+                            spec.initializer("$T.empty()", typeMapper.getClassName(field.getType()));
                         }
-
-                        @Override
-                        public Void visitEnum(EnumDefinition value) {
-                            return null;
-                        }
-
-                        @Override
-                        public Void visitObject(ObjectDefinition value) {
-                            return null;
-                        }
-
-                        @Override
-                        public Void visitUnion(UnionDefinition value) {
-                            return null;
-                        }
-
-                        @Override
-                        public Void visitUnknown(String unknownType) {
-                            return null;
-                        }
-                    }));
+                    });
         }
         // else no initializer
 
