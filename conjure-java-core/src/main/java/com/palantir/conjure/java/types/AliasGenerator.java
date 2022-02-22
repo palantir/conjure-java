@@ -121,14 +121,7 @@ public final class AliasGenerator {
         // Generate a default constructor so that Jackson can construct a default instance when coercing from null
         typeDef.getAlias().accept(new DefaultConstructorVisitor(aliasTypeName)).ifPresent(ctor -> {
             spec.addMethod(ctor);
-            spec.addField(FieldSpec.builder(thisClass, "EMPTY", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                    .initializer(CodeBlock.of("new $T()", thisClass))
-                    .build());
-            spec.addMethod(MethodSpec.methodBuilder("empty")
-                    .returns(thisClass)
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addStatement("return $N", "EMPTY")
-                    .build());
+            addEmptyMethod(spec, thisClass);
         });
 
         if (isAliasOfDouble(typeDef)) {
@@ -205,6 +198,17 @@ public final class AliasGenerator {
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static void addEmptyMethod(TypeSpec.Builder spec, TypeName thisClass) {
+        spec.addField(FieldSpec.builder(thisClass, "EMPTY", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer(CodeBlock.of("new $T()", thisClass))
+                .build());
+        spec.addMethod(MethodSpec.methodBuilder("empty")
+                .returns(thisClass)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addStatement("return $N", "EMPTY")
+                .build());
     }
 
     private static boolean isAliasOfDouble(AliasDefinition typeDef) {
