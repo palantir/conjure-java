@@ -18,12 +18,12 @@ package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
-import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.Unsafe;
 import com.palantir.tokens.auth.AuthHeader;
 
 public interface SafeLoggableAuthHeaderParam {
 
     // Safe logging auth headers should fail
     @Handle(method = HttpMethod.GET, path = "/authCookie")
-    void authCookie(@Safe AuthHeader token);
+    void authCookie(@Unsafe AuthHeader token);
 }

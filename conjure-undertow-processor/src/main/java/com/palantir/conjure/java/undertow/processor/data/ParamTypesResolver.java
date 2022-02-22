@@ -215,7 +215,7 @@ public final class ParamTypesResolver {
         if (context.isSameTypes(variableElement.asType(), BearerToken.class)) {
             if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
                 context.reportError(
-                        "BearerToken parameter cannot be annotated with Safe Logging annotations",
+                        "BearerToken parameter cannot be annotated with safe logging annotations",
                         variableElement,
                         SafeArg.of("type", variableElement.asType()));
                 return Optional.empty();
