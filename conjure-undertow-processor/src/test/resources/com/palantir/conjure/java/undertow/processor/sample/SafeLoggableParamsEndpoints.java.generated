@@ -1,0 +1,358 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
+import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
+import com.palantir.conjure.java.undertow.annotations.PathMultiParamDeserializer;
+import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
+import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.io.IOException;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class SafeLoggableParamsEndpoints implements UndertowService {
+    private final SafeLoggableParams delegate;
+
+    private SafeLoggableParamsEndpoints(SafeLoggableParams delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(SafeLoggableParams delegate) {
+        return new SafeLoggableParamsEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(
+                new PathParamsEndpoint(runtime, delegate),
+                new QueryParamsEndpoint(runtime, delegate),
+                new HeaderParamsEndpoint(runtime, delegate),
+                new CookieParamsEndpoint(runtime, delegate),
+                new SafeLoggingReusesContextEndpoint(runtime, delegate));
+    }
+
+    private static final class PathParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final SafeLoggableParams delegate;
+
+        private final Deserializer<String> noAnnotationParamDeserializer;
+
+        private final Deserializer<String> safeParamDeserializer;
+
+        private final Deserializer<String> unsafeParamDeserializer;
+
+        private final Deserializer<String> safeMultiParamDeserializer;
+
+        PathParamsEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.noAnnotationParamDeserializer = new PathParamDeserializer<>(
+                    "noAnnotationParam", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+            this.safeParamDeserializer =
+                    new PathParamDeserializer<>("safeParam", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+            this.unsafeParamDeserializer =
+                    new PathParamDeserializer<>("unsafeParam", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+            this.safeMultiParamDeserializer = new PathMultiParamDeserializer<>(
+                    "*", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
+            String safeParam = this.safeParamDeserializer.deserialize(exchange);
+            context.requestArg(SafeArg.of("safeParam", safeParam));
+            String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
+            context.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            String safeMultiParam = this.safeMultiParamDeserializer.deserialize(exchange);
+            context.requestArg(SafeArg.of("safeMultiParam", safeMultiParam));
+            this.delegate.pathParams(noAnnotationParam, safeParam, unsafeParam, safeMultiParam);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/pathParams/{noAnnotation}/{safeParam}/{unsafeParam}/*";
+        }
+
+        @Override
+        public String serviceName() {
+            return "SafeLoggableParams";
+        }
+
+        @Override
+        public String name() {
+            return "pathParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class QueryParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final SafeLoggableParams delegate;
+
+        private final Deserializer<String> noAnnotationParamDeserializer;
+
+        private final Deserializer<String> safeParamDeserializer;
+
+        private final Deserializer<String> unsafeParamDeserializer;
+
+        QueryParamsEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.noAnnotationParamDeserializer = new QueryParamDeserializer<>(
+                    "noAnnotation", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.safeParamDeserializer = new QueryParamDeserializer<>(
+                    "safeParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.unsafeParamDeserializer = new QueryParamDeserializer<>(
+                    "unsafeParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
+            String safeParam = this.safeParamDeserializer.deserialize(exchange);
+            context.requestArg(SafeArg.of("safeParam", safeParam));
+            String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
+            context.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            this.delegate.queryParams(noAnnotationParam, safeParam, unsafeParam);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/queryParams";
+        }
+
+        @Override
+        public String serviceName() {
+            return "SafeLoggableParams";
+        }
+
+        @Override
+        public String name() {
+            return "queryParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class HeaderParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final SafeLoggableParams delegate;
+
+        private final Deserializer<String> noAnnotationParamDeserializer;
+
+        private final Deserializer<String> safeParamDeserializer;
+
+        private final Deserializer<String> unsafeParamDeserializer;
+
+        HeaderParamsEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.noAnnotationParamDeserializer = new HeaderParamDeserializer<>(
+                    "noAnnotation", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.safeParamDeserializer = new HeaderParamDeserializer<>(
+                    "safeParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.unsafeParamDeserializer = new HeaderParamDeserializer<>(
+                    "unsafeParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
+            String safeParam = this.safeParamDeserializer.deserialize(exchange);
+            context.requestArg(SafeArg.of("safeParam", safeParam));
+            String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
+            context.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            this.delegate.headerParams(noAnnotationParam, safeParam, unsafeParam);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/headerParams";
+        }
+
+        @Override
+        public String serviceName() {
+            return "SafeLoggableParams";
+        }
+
+        @Override
+        public String name() {
+            return "headerParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class CookieParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final SafeLoggableParams delegate;
+
+        private final Deserializer<String> noAnnotationParamDeserializer;
+
+        private final Deserializer<String> safeParamDeserializer;
+
+        private final Deserializer<String> unsafeParamDeserializer;
+
+        CookieParamsEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.noAnnotationParamDeserializer =
+                    new CookieDeserializer<>("noAnnotation", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+            this.safeParamDeserializer =
+                    new CookieDeserializer<>("safeParam", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+            this.unsafeParamDeserializer =
+                    new CookieDeserializer<>("unsafeParam", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
+            String safeParam = this.safeParamDeserializer.deserialize(exchange);
+            context.requestArg(SafeArg.of("safeParam", safeParam));
+            String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
+            context.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            this.delegate.cookieParams(noAnnotationParam, safeParam, unsafeParam);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/cookieParams";
+        }
+
+        @Override
+        public String serviceName() {
+            return "SafeLoggableParams";
+        }
+
+        @Override
+        public String name() {
+            return "cookieParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class SafeLoggingReusesContextEndpoint
+            implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final SafeLoggableParams delegate;
+
+        private final Deserializer<String> safeParamDeserializer;
+
+        private final Serializer<String> safeLoggingReusesContextSerializer;
+
+        SafeLoggingReusesContextEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.safeParamDeserializer = new QueryParamDeserializer<>(
+                    "safeParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.safeLoggingReusesContextSerializer =
+                    DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            RequestContext context = this.runtime.contexts().createContext(exchange, this);
+            String safeParam = this.safeParamDeserializer.deserialize(exchange);
+            context.requestArg(SafeArg.of("safeParam", safeParam));
+            write(this.delegate.safeLoggingReusesContext(safeParam, context), exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.safeLoggingReusesContextSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/safeLoggingReusesContext";
+        }
+
+        @Override
+        public String serviceName() {
+            return "SafeLoggableParams";
+        }
+
+        @Override
+        public String name() {
+            return "safeLoggingReusesContext";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

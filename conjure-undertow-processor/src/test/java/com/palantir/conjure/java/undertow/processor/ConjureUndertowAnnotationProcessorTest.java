@@ -32,6 +32,9 @@ import com.palantir.conjure.java.undertow.processor.sample.PrimitiveBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveQueryParams;
 import com.palantir.conjure.java.undertow.processor.sample.PrivateMethodAnnotatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ProtectedMethodAnnotatedResource;
+import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableAuthCookieParam;
+import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableAuthHeaderParam;
+import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableParams;
 import com.palantir.conjure.java.undertow.processor.sample.SimpleInterface;
 import com.palantir.conjure.java.undertow.processor.sample.StaticMethodAnnotatedResource;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
@@ -83,6 +86,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     }
 
     @Test
+    public void testSafeLoggableParams() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, SafeLoggableParams.class);
+    }
+
+    @Test
     public void testConcreteClassWithPrivateAnnotatedMethod() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, PrivateMethodAnnotatedResource.class))
                 .hadErrorContaining("must be accessible to classes in the same package");
@@ -98,6 +106,18 @@ public class ConjureUndertowAnnotationProcessorTest {
     public void testStaticAnnotatedMethod() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, StaticMethodAnnotatedResource.class))
                 .hadErrorContaining("The '@Handle' annotation does not support static methods");
+    }
+
+    @Test
+    public void testSafeLoggingAuthCookie() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthCookieParam.class))
+                .hadErrorContaining("BearerToken parameter cannot be annotated with Safe Logging annotations");
+    }
+
+    @Test
+    public void testSafeLoggingAuthHeader() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthHeaderParam.class))
+                .hadErrorContaining("Parameter type cannot be annotated with safe logging annotations");
     }
 
     private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {

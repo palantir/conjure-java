@@ -33,10 +33,10 @@ public final class PrimitiveQueryParamsEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return ImmutableList.of(new HandlePrimitveQueryParamsEndpoint(runtime, delegate));
+        return ImmutableList.of(new HandlePrimitiveQueryParamsEndpoint(runtime, delegate));
     }
 
-    private static final class HandlePrimitveQueryParamsEndpoint implements HttpHandler, Endpoint {
+    private static final class HandlePrimitiveQueryParamsEndpoint implements HttpHandler, Endpoint {
         private final UndertowRuntime runtime;
 
         private final PrimitiveQueryParams delegate;
@@ -47,7 +47,7 @@ public final class PrimitiveQueryParamsEndpoints implements UndertowService {
 
         private final Deserializer<Boolean> testBoxedDeserializer;
 
-        HandlePrimitveQueryParamsEndpoint(UndertowRuntime runtime, PrimitiveQueryParams delegate) {
+        HandlePrimitiveQueryParamsEndpoint(UndertowRuntime runtime, PrimitiveQueryParams delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.countDeserializer =
@@ -60,10 +60,10 @@ public final class PrimitiveQueryParamsEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            this.delegate.handlePrimitveQueryParams(
-                    this.countDeserializer.deserialize(exchange),
-                    this.testDeserializer.deserialize(exchange),
-                    this.testBoxedDeserializer.deserialize(exchange));
+            int count = this.countDeserializer.deserialize(exchange);
+            boolean test = this.testDeserializer.deserialize(exchange);
+            Boolean testBoxed = this.testBoxedDeserializer.deserialize(exchange);
+            this.delegate.handlePrimitiveQueryParams(count, test, testBoxed);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
@@ -84,7 +84,7 @@ public final class PrimitiveQueryParamsEndpoints implements UndertowService {
 
         @Override
         public String name() {
-            return "handlePrimitveQueryParams";
+            return "handlePrimitiveQueryParams";
         }
 
         @Override

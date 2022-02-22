@@ -25,17 +25,25 @@ import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.conjure.java.undertow.processor.data.ArgumentDefinition;
 import com.palantir.conjure.java.undertow.processor.data.EndpointDefinition;
 import com.palantir.conjure.java.undertow.processor.data.EndpointName;
 import com.palantir.conjure.java.undertow.processor.data.ParameterType;
 import com.palantir.conjure.java.undertow.processor.data.ParameterType.Cases;
+import com.palantir.conjure.java.undertow.processor.data.ParameterType.SafeLoggingAnnotation;
+import com.palantir.conjure.java.undertow.processor.data.ParameterTypeVisitors.UsesRequestContextVisitor;
 import com.palantir.conjure.java.undertow.processor.data.ReturnType;
 import com.palantir.conjure.java.undertow.processor.data.ServiceDefinition;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.palantir.tokens.auth.AuthHeader;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -52,6 +60,7 @@ import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
 import org.immutables.value.Value;
@@ -62,6 +71,7 @@ public final class ConjureUndertowEndpointsGenerator {
     private static final String RUNTIME_NAME = "runtime";
     private static final String EXCHANGE_NAME = "exchange";
     private static final String RETURN_VALUE = "returnValue";
+    private static final String REQUEST_CONTEXT = "context";
 
     private final ServiceDefinition serviceDefinition;
 
@@ -127,6 +137,223 @@ public final class ConjureUndertowEndpointsGenerator {
         ReturnType returnType = endpoint.returns();
         TypeName responseTypeName =
                 returnType.asyncInnerType().orElseGet(returnType::returnType).box();
+
+        if (usesRequestContext(endpoint)) {
+            handlerBuilder.addStatement(
+                    "$T $N = this.$N.contexts().createContext($N, this)",
+                    RequestContext.class,
+                    REQUEST_CONTEXT,
+                    RUNTIME_NAME,
+                    EXCHANGE_NAME);
+        }
+
+        endpoint.arguments().forEach(def -> def.paramType().match(new Cases<Void>() {
+            @Override
+            public Void body(CodeBlock deserializerFactory, String deserializerFieldName) {
+                TypeName requestBodyType =
+                        def.argType().match(ArgTypeTypeName.INSTANCE).box();
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), requestBodyType),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = $L.deserializer(new $T<$T>() {}, $N, this)",
+                                        deserializerFieldName,
+                                        deserializerFactory,
+                                        TypeMarker.class,
+                                        requestBodyType,
+                                        RUNTIME_NAME)
+                                .build())
+                        .build());
+                return null;
+            }
+
+            @Override
+            public Void header(
+                    String variableName,
+                    String headerName,
+                    String deserializerFieldName,
+                    CodeBlock deserializerFactory,
+                    SafeLoggingAnnotation safeLoggable) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T<>($S, $L)",
+                                        deserializerFieldName,
+                                        HeaderParamDeserializer.class,
+                                        headerName,
+                                        deserializerFactory)
+                                .build())
+                        .build());
+                handlerBuilder.addStatement("$T $N = $L", paramType, variableName, invokeDeserializer(def));
+                getSafeLogging(headerName, variableName, safeLoggable).ifPresent(handlerBuilder::addStatement);
+                return null;
+            }
+
+            @Override
+            public Void path(
+                    String paramName,
+                    String deserializerFieldName,
+                    CodeBlock deserializerFactory,
+                    SafeLoggingAnnotation safeLoggable) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T<>($S, $L)",
+                                        deserializerFieldName,
+                                        PathParamDeserializer.class,
+                                        paramName,
+                                        deserializerFactory)
+                                .build())
+                        .build());
+                handlerBuilder.addStatement("$T $N = $L", paramType, paramName, invokeDeserializer(def));
+                getSafeLogging(paramName, paramName, safeLoggable).ifPresent(handlerBuilder::addStatement);
+                return null;
+            }
+
+            @Override
+            public Void pathMulti(
+                    String paramName,
+                    String deserializerFieldName,
+                    CodeBlock deserializerFactory,
+                    SafeLoggingAnnotation safeLoggable) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T<>($S, $L)",
+                                        deserializerFieldName,
+                                        PathMultiParamDeserializer.class,
+                                        "*",
+                                        deserializerFactory)
+                                .build())
+                        .build());
+                handlerBuilder.addStatement("$T $N = $L", paramType, paramName, invokeDeserializer(def));
+                getSafeLogging(paramName, paramName, safeLoggable).ifPresent(handlerBuilder::addStatement);
+                return null;
+            }
+
+            @Override
+            public Void query(
+                    String variableName,
+                    String paramName,
+                    String deserializerFieldName,
+                    CodeBlock deserializerFactory,
+                    SafeLoggingAnnotation safeLoggable) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T<>($S, $L)",
+                                        deserializerFieldName,
+                                        QueryParamDeserializer.class,
+                                        paramName,
+                                        deserializerFactory)
+                                .build())
+                        .build());
+                handlerBuilder.addStatement("$T $N = $L", paramType, variableName, invokeDeserializer(def));
+                getSafeLogging(paramName, variableName, safeLoggable).ifPresent(handlerBuilder::addStatement);
+                return null;
+            }
+
+            @Override
+            public Void cookie(
+                    String variableName,
+                    String cookieName,
+                    String deserializerFieldName,
+                    CodeBlock deserializerFactory,
+                    SafeLoggingAnnotation safeLoggable) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T<>($S, $L)",
+                                        deserializerFieldName,
+                                        CookieDeserializer.class,
+                                        cookieName,
+                                        deserializerFactory)
+                                .build())
+                        .build());
+                handlerBuilder.addStatement("$T $N = $L", paramType, variableName, invokeDeserializer(def));
+                getSafeLogging(cookieName, variableName, safeLoggable).ifPresent(handlerBuilder::addStatement);
+                return null;
+            }
+
+            @Override
+            public Void authCookie(String variableName, String cookieName, String deserializerFieldName) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T(runtime, $S)",
+                                        deserializerFieldName,
+                                        BearerTokenCookieDeserializer.class,
+                                        cookieName)
+                                .build())
+                        .build());
+                handlerBuilder.addStatement("$T $N = $L", paramType, variableName, invokeDeserializer(def));
+                return null;
+            }
+
+            @Override
+            public Void authHeader(String variableName) {
+                handlerBuilder.addStatement("$T $N = $L", AuthHeader.class, variableName, invokeDeserializer(def));
+                return null;
+            }
+
+            @Override
+            public Void exchange() {
+                return null;
+            }
+
+            @Override
+            public Void context() {
+                return null;
+            }
+        }));
+
         if (returnType.asyncInnerType().isEmpty() && returnType.isVoid()) {
             handlerBuilder
                     .addStatement(invokeDelegate(endpoint))
@@ -156,177 +383,6 @@ public final class ConjureUndertowEndpointsGenerator {
                 handlerBuilder.addStatement("write($L, $N)", invokeDelegate(endpoint), EXCHANGE_NAME);
             }
         }
-        endpoint.arguments().forEach(def -> def.paramType().match(new Cases<Void>() {
-            @Override
-            public Void body(CodeBlock deserializerFactory, String deserializerFieldName) {
-                TypeName requestBodyType =
-                        def.argType().match(ArgTypeTypeName.INSTANCE).box();
-                additionalFields.add(ImmutableAdditionalField.builder()
-                        .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), requestBodyType),
-                                        deserializerFieldName,
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL)
-                                .build())
-                        .constructorInitializer(CodeBlock.builder()
-                                .addStatement(
-                                        "this.$N = $L.deserializer(new $T<$T>() {}, $N, this)",
-                                        deserializerFieldName,
-                                        deserializerFactory,
-                                        TypeMarker.class,
-                                        requestBodyType,
-                                        RUNTIME_NAME)
-                                .build())
-                        .build());
-                return null;
-            }
-
-            @Override
-            public Void header(String headerName, String deserializerFieldName, CodeBlock deserializerFactory) {
-                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
-                additionalFields.add(ImmutableAdditionalField.builder()
-                        .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
-                                        deserializerFieldName,
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL)
-                                .build())
-                        .constructorInitializer(CodeBlock.builder()
-                                .addStatement(
-                                        "this.$N = new $T<>($S, $L)",
-                                        deserializerFieldName,
-                                        HeaderParamDeserializer.class,
-                                        headerName,
-                                        deserializerFactory)
-                                .build())
-                        .build());
-                return null;
-            }
-
-            @Override
-            public Void path(String paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
-                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
-                additionalFields.add(ImmutableAdditionalField.builder()
-                        .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
-                                        deserializerFieldName,
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL)
-                                .build())
-                        .constructorInitializer(CodeBlock.builder()
-                                .addStatement(
-                                        "this.$N = new $T<>($S, $L)",
-                                        deserializerFieldName,
-                                        PathParamDeserializer.class,
-                                        paramName,
-                                        deserializerFactory)
-                                .build())
-                        .build());
-                return null;
-            }
-
-            @Override
-            public Void pathMulti(String _paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
-                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
-                additionalFields.add(ImmutableAdditionalField.builder()
-                        .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
-                                        deserializerFieldName,
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL)
-                                .build())
-                        .constructorInitializer(CodeBlock.builder()
-                                .addStatement(
-                                        "this.$N = new $T<>($S, $L)",
-                                        deserializerFieldName,
-                                        PathMultiParamDeserializer.class,
-                                        "*",
-                                        deserializerFactory)
-                                .build())
-                        .build());
-                return null;
-            }
-
-            @Override
-            public Void query(String paramName, String deserializerFieldName, CodeBlock deserializerFactory) {
-                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
-                additionalFields.add(ImmutableAdditionalField.builder()
-                        .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
-                                        deserializerFieldName,
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL)
-                                .build())
-                        .constructorInitializer(CodeBlock.builder()
-                                .addStatement(
-                                        "this.$N = new $T<>($S, $L)",
-                                        deserializerFieldName,
-                                        QueryParamDeserializer.class,
-                                        paramName,
-                                        deserializerFactory)
-                                .build())
-                        .build());
-                return null;
-            }
-
-            @Override
-            public Void cookie(String cookieName, String deserializerFieldName, CodeBlock deserializerFactory) {
-                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
-                additionalFields.add(ImmutableAdditionalField.builder()
-                        .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
-                                        deserializerFieldName,
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL)
-                                .build())
-                        .constructorInitializer(CodeBlock.builder()
-                                .addStatement(
-                                        "this.$N = new $T<>($S, $L)",
-                                        deserializerFieldName,
-                                        CookieDeserializer.class,
-                                        cookieName,
-                                        deserializerFactory)
-                                .build())
-                        .build());
-                return null;
-            }
-
-            @Override
-            public Void authCookie(String cookieName, String deserializerFieldName) {
-                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
-                additionalFields.add(ImmutableAdditionalField.builder()
-                        .field(FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
-                                        deserializerFieldName,
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL)
-                                .build())
-                        .constructorInitializer(CodeBlock.builder()
-                                .addStatement(
-                                        "this.$N = new $T(runtime, $S)",
-                                        deserializerFieldName,
-                                        BearerTokenCookieDeserializer.class,
-                                        cookieName)
-                                .build())
-                        .build());
-                return null;
-            }
-
-            @Override
-            public Void authHeader() {
-                return null;
-            }
-
-            @Override
-            public Void exchange() {
-                return null;
-            }
-
-            @Override
-            public Void context() {
-                return null;
-            }
-        }));
 
         TypeSpec.Builder endpointBuilder = TypeSpec.classBuilder(endpointClassName(endpoint.endpointName()))
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
@@ -398,52 +454,148 @@ public final class ConjureUndertowEndpointsGenerator {
                 .build();
     }
 
+    private static CodeBlock invokeDeserializer(ArgumentDefinition arg) {
+        return arg.paramType().match(new ParameterType.Cases<>() {
+            @Override
+            public CodeBlock body(CodeBlock _deserializerFactory, String deserializerFieldName) {
+                return CodeBlock.of("$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock header(
+                    String _variableName,
+                    String _headerName,
+                    String deserializerFieldName,
+                    CodeBlock _deserializerFactory,
+                    SafeLoggingAnnotation _safeLoggable) {
+                return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock path(
+                    String _paramName,
+                    String deserializerFieldName,
+                    CodeBlock _deserializerFactory,
+                    SafeLoggingAnnotation _safeLoggable) {
+                return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock pathMulti(
+                    String _paramName,
+                    String deserializerFieldName,
+                    CodeBlock _deserializerFactory,
+                    SafeLoggingAnnotation _safeLoggable) {
+                return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock query(
+                    String _variableName,
+                    String _paramName,
+                    String deserializerFieldName,
+                    CodeBlock _deserializerFactory,
+                    SafeLoggingAnnotation _safeLoggable) {
+                return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock cookie(
+                    String _variableName,
+                    String _cookieName,
+                    String deserializerFieldName,
+                    CodeBlock _deserializerFactory,
+                    SafeLoggingAnnotation _safeLoggable) {
+                return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock authCookie(String _variableName, String _cookieName, String deserializerFieldName) {
+                return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock authHeader(String _variableName) {
+                return CodeBlock.of("this.$N.auth().header($N)", RUNTIME_NAME, EXCHANGE_NAME);
+            }
+
+            @Override
+            public CodeBlock exchange() {
+                throw new SafeIllegalStateException("Exchange param does not support deserializer");
+            }
+
+            @Override
+            public CodeBlock context() {
+                throw new SafeIllegalStateException("Context param does not support deserializer");
+            }
+        });
+    }
+
     private static CodeBlock invokeDelegate(EndpointDefinition endpoint) {
         CodeBlock args = endpoint.arguments().stream()
-                .map(arg -> arg.paramType().match(new ParameterType.Cases<CodeBlock>() {
+                .map(arg -> arg.paramType().match(new Cases<CodeBlock>() {
                     @Override
-                    public CodeBlock body(CodeBlock _deserializerFactory, String deserializerFieldName) {
-                        return CodeBlock.of("$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                    public CodeBlock body(CodeBlock _deserializerFactory, String _deserializerFieldName) {
+                        return invokeDeserializer(arg);
                     }
 
                     @Override
                     public CodeBlock header(
-                            String _headerName, String deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                            String variableName,
+                            String _headerName,
+                            String _deserializerFieldName,
+                            CodeBlock _deserializerFactory,
+                            SafeLoggingAnnotation _safeLoggable) {
+                        return CodeBlock.of(variableName);
                     }
 
                     @Override
                     public CodeBlock path(
-                            String _paramName, String deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                            String paramName,
+                            String _deserializerFieldName,
+                            CodeBlock _deserializerFactory,
+                            SafeLoggingAnnotation _safeLoggable) {
+                        return CodeBlock.of(paramName);
                     }
 
                     @Override
                     public CodeBlock pathMulti(
-                            String _paramName, String deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                            String paramName,
+                            String _deserializerFieldName,
+                            CodeBlock _deserializerFactory,
+                            SafeLoggingAnnotation _safeLoggable) {
+                        return CodeBlock.of(paramName);
                     }
 
                     @Override
                     public CodeBlock query(
-                            String _paramName, String deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                            String variableName,
+                            String _paramName,
+                            String _deserializerFieldName,
+                            CodeBlock _deserializerFactory,
+                            SafeLoggingAnnotation _safeLoggable) {
+                        return CodeBlock.of(variableName);
                     }
 
                     @Override
                     public CodeBlock cookie(
-                            String _cookieName, String deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                            String variableName,
+                            String _cookieName,
+                            String _deserializerFieldName,
+                            CodeBlock _deserializerFactory,
+                            SafeLoggingAnnotation _safeLoggable) {
+                        return CodeBlock.of(variableName);
                     }
 
                     @Override
-                    public CodeBlock authCookie(String _cookieName, String deserializerFieldName) {
-                        return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+                    public CodeBlock authCookie(
+                            String variableName, String _cookieName, String _deserializerFieldName) {
+                        return CodeBlock.of(variableName);
                     }
 
                     @Override
-                    public CodeBlock authHeader() {
-                        return CodeBlock.of("this.$N.auth().header($N)", RUNTIME_NAME, EXCHANGE_NAME);
+                    public CodeBlock authHeader(String variableName) {
+                        return CodeBlock.of(variableName);
                     }
 
                     @Override
@@ -453,12 +605,33 @@ public final class ConjureUndertowEndpointsGenerator {
 
                     @Override
                     public CodeBlock context() {
-                        return CodeBlock.of("this.$N.contexts().createContext($N, this)", RUNTIME_NAME, EXCHANGE_NAME);
+                        return CodeBlock.of(REQUEST_CONTEXT);
                     }
                 }))
-                .collect(CodeBlock.joining(","));
+                .collect(CodeBlock.joining(", "));
+
         return CodeBlock.of(
                 "this.$N.$N($L)", DELEGATE_NAME, endpoint.endpointName().get(), args);
+    }
+
+    private static boolean usesRequestContext(EndpointDefinition endpoint) {
+        return endpoint.arguments().stream().anyMatch(arg -> arg.paramType().match(UsesRequestContextVisitor.INSTANCE));
+    }
+
+    private static Optional<CodeBlock> getSafeLogging(
+            String name, String variableName, SafeLoggingAnnotation safeLoggable) {
+        switch (safeLoggable) {
+            case UNKNOWN:
+                return Optional.empty();
+            case SAFE:
+                return Optional.of(CodeBlock.of(
+                        "$N.requestArg($T.of($S, $N))", REQUEST_CONTEXT, SafeArg.class, name, variableName));
+            case UNSAFE:
+                return Optional.of(CodeBlock.of(
+                        "$N.requestArg($T.of($S, $N))", REQUEST_CONTEXT, UnsafeArg.class, name, variableName));
+            default:
+                throw new SafeIllegalStateException("Illegal value", SafeArg.of("value", safeLoggable));
+        }
     }
 
     @Value.Immutable
