@@ -109,7 +109,7 @@ public final class BeanBuilderGenerator {
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Optional<ClassName> builderInterfaceClass) {
-        Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields(), typesMap);
+        Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
         boolean override = builderInterfaceClass.isPresent();
         TypeSpec.Builder builder = TypeSpec.classBuilder(
@@ -215,11 +215,8 @@ public final class BeanBuilderGenerator {
         return "_" + JavaNameSanitizer.sanitize(field.conjureDef().getFieldName()) + "Initialized";
     }
 
-    private Collection<EnrichedField> enrichFields(
-            List<FieldDefinition> fields, Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
-        return fields.stream()
-                .map(e -> createField(e.getFieldName(), e, typesMap))
-                .collect(Collectors.toList());
+    private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
+        return fields.stream().map(e -> createField(e.getFieldName(), e)).collect(Collectors.toList());
     }
 
     private static MethodSpec createConstructor() {
@@ -243,10 +240,7 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
-    private EnrichedField createField(
-            FieldName fieldName,
-            FieldDefinition field,
-            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+    private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
         FieldSpec.Builder spec = FieldSpec.builder(
                 typeMapper.getClassName(field.getType()), JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
 
