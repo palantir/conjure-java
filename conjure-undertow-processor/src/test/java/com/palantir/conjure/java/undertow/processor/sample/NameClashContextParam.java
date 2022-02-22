@@ -20,7 +20,7 @@ import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 
-public interface ContextParamNameClash {
+public interface NameClashContextParam {
 
     @SuppressWarnings("checkstyle:ParameterName")
     @Handle(method = HttpMethod.GET, path = "/context")

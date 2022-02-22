@@ -25,10 +25,11 @@ import com.google.common.io.ByteStreams;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
-import com.palantir.conjure.java.undertow.processor.sample.ContextParamNameClash;
 import com.palantir.conjure.java.undertow.processor.sample.CookieParams;
 import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoderService;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
+import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
+import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterNotAnnotated;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveQueryParams;
@@ -95,7 +96,7 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testSafeLoggingAuthCookie() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthCookieParam.class))
-                .hadErrorContaining("BearerToken parameter cannot be annotated with Safe Logging annotations");
+                .hadErrorContaining("BearerToken parameter cannot be annotated with safe logging annotations");
     }
 
     @Test
@@ -124,8 +125,14 @@ public class ConjureUndertowAnnotationProcessorTest {
 
     @Test
     public void testContextNameClash() {
-        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ContextParamNameClash.class))
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, NameClashContextParam.class))
                 .hadErrorContaining("Invalid case format: {segment=requestContext_}");
+    }
+
+    @Test
+    public void testExchangeNameClash() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, NameClashExchangeParam.class))
+                .hadErrorContaining("variable exchange_ is already defined in method handleRequest");
     }
 
     @Test
