@@ -23,7 +23,10 @@ import com.palantir.conjure.java.undertow.annotations.DefaultParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.undertow.processor.data.DefaultDecoderNames.ContainerType;
+import com.palantir.conjure.java.undertow.processor.data.ParameterType.SafeLoggingAnnotation;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -34,6 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -48,8 +53,10 @@ public final class ParamTypesResolver {
             Handle.QueryParam.class,
             Handle.Header.class,
             Handle.Cookie.class);
-    private static final ImmutableSet<String> PARAM_ANNOTATIONS =
-            PARAM_ANNOTATION_CLASSES.stream().map(Class::getCanonicalName).collect(ImmutableSet.toImmutableSet());
+    private static final ImmutableSet<String> SUPPORTED_ANNOTATIONS = Stream.concat(
+                    Stream.of(Safe.class, Unsafe.class), PARAM_ANNOTATION_CLASSES.stream())
+            .map(Class::getCanonicalName)
+            .collect(ImmutableSet.toImmutableSet());
 
     private final ResolverContext context;
 
@@ -63,15 +70,38 @@ public final class ParamTypesResolver {
         for (AnnotationMirror annotationMirror : variableElement.getAnnotationMirrors()) {
             TypeElement annotationTypeElement =
                     MoreElements.asType(annotationMirror.getAnnotationType().asElement());
-            if (PARAM_ANNOTATIONS.contains(
+            if (SUPPORTED_ANNOTATIONS.contains(
                     annotationTypeElement.getQualifiedName().toString())) {
                 paramAnnotationMirrors.add(annotationMirror);
             }
         }
 
-        if (paramAnnotationMirrors.isEmpty()) {
+        List<AnnotationReflector> annotationReflectors = paramAnnotationMirrors.stream()
+                .map(ImmutableAnnotationReflector::of)
+                .collect(Collectors.toList());
+
+        boolean isSafe = annotationReflectors.stream().anyMatch(annotation -> annotation.isAnnotation(Safe.class));
+        boolean isUnsafe = annotationReflectors.stream().anyMatch(annotation -> annotation.isAnnotation(Unsafe.class));
+        SafeLoggingAnnotation safeLoggable = isUnsafe
+                ? SafeLoggingAnnotation.UNSAFE
+                : isSafe ? SafeLoggingAnnotation.SAFE : SafeLoggingAnnotation.UNKNOWN;
+
+        List<AnnotationReflector> otherAnnotationReflectors = annotationReflectors.stream()
+                .filter(annotation -> !annotation.isAnnotation(Safe.class) && !annotation.isAnnotation(Unsafe.class))
+                .collect(Collectors.toList());
+
+        if (otherAnnotationReflectors.isEmpty()) {
+            if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
+                context.reportError(
+                        "Parameter type cannot be annotated with safe logging annotations",
+                        variableElement,
+                        SafeArg.of("type", variableElement.asType()));
+                return Optional.empty();
+            }
+
             if (context.isSameTypes(variableElement.asType(), AuthHeader.class)) {
-                return Optional.of(ParameterTypes.authHeader());
+                return Optional.of(ParameterTypes.authHeader(
+                        variableElement.getSimpleName().toString()));
             } else if (context.isSameTypes(variableElement.asType(), HttpServerExchange.class)) {
                 return Optional.of(ParameterTypes.exchange());
             } else if (context.isSameTypes(variableElement.asType(), RequestContext.class)) {
@@ -86,30 +116,29 @@ public final class ParamTypesResolver {
             }
         }
 
-        if (paramAnnotationMirrors.size() > 1) {
+        if (otherAnnotationReflectors.size() > 1) {
             context.reportError(
                     "Only single annotation can be used",
                     variableElement,
-                    SafeArg.of("annotations", paramAnnotationMirrors));
+                    SafeArg.of("annotations", otherAnnotationReflectors));
             return Optional.empty();
         }
 
         // TODO(ckozak): More validation of values.
 
-        AnnotationReflector annotationReflector =
-                ImmutableAnnotationReflector.of(Iterables.getOnlyElement(paramAnnotationMirrors));
+        AnnotationReflector annotationReflector = Iterables.getOnlyElement(otherAnnotationReflectors);
         if (annotationReflector.isAnnotation(Handle.Body.class)) {
             return Optional.of(bodyParameter(variableElement, annotationReflector));
         } else if (annotationReflector.isAnnotation(Handle.Header.class)) {
-            return Optional.of(headerParameter(variableElement, annotationReflector));
+            return Optional.of(headerParameter(variableElement, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.PathParam.class)) {
-            return Optional.of(pathParameter(variableElement, annotationReflector));
+            return Optional.of(pathParameter(variableElement, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.PathMultiParam.class)) {
-            return Optional.of(pathMultiParameter(variableElement, annotationReflector));
+            return Optional.of(pathMultiParameter(variableElement, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.QueryParam.class)) {
-            return Optional.of(queryParameter(variableElement, annotationReflector));
+            return Optional.of(queryParameter(variableElement, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.Cookie.class)) {
-            return Optional.of(cookieParameter(variableElement, annotationReflector));
+            return cookieParameter(variableElement, annotationReflector, safeLoggable);
         }
 
         throw new SafeIllegalStateException("Not possible");
@@ -122,50 +151,86 @@ public final class ParamTypesResolver {
         return ParameterTypes.body(Instantiables.instantiate(deserializer), deserializerName);
     }
 
-    private ParameterType headerParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
-        String deserializerName =
-                InstanceVariables.joinCamelCase(variableElement.getSimpleName().toString(), "Deserializer");
+    private ParameterType headerParameter(
+            VariableElement variableElement,
+            AnnotationReflector annotationReflector,
+            SafeLoggingAnnotation safeLoggable) {
+        String javaParameterName = variableElement.getSimpleName().toString();
+        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         return ParameterTypes.header(
+                javaParameterName,
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getCollectionParamDecoder(variableElement, annotationReflector));
+                getCollectionParamDecoder(variableElement, annotationReflector),
+                safeLoggable);
     }
 
-    private ParameterType pathParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private ParameterType pathParameter(
+            VariableElement variableElement,
+            AnnotationReflector annotationReflector,
+            SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
         String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         return ParameterTypes.path(
-                javaParameterName, deserializerName, getParamDecoder(variableElement, annotationReflector));
+                javaParameterName,
+                deserializerName,
+                getParamDecoder(variableElement, annotationReflector),
+                safeLoggable);
     }
 
-    private ParameterType pathMultiParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private ParameterType pathMultiParameter(
+            VariableElement variableElement,
+            AnnotationReflector annotationReflector,
+            SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
         String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         return ParameterTypes.pathMulti(
-                javaParameterName, deserializerName, getCollectionParamDecoder(variableElement, annotationReflector));
+                javaParameterName,
+                deserializerName,
+                getCollectionParamDecoder(variableElement, annotationReflector),
+                safeLoggable);
     }
 
-    private ParameterType queryParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private ParameterType queryParameter(
+            VariableElement variableElement,
+            AnnotationReflector annotationReflector,
+            SafeLoggingAnnotation safeLoggable) {
+        String javaParameterName = variableElement.getSimpleName().toString();
         String deserializerName =
                 InstanceVariables.joinCamelCase(variableElement.getSimpleName().toString(), "Deserializer");
         return ParameterTypes.query(
+                javaParameterName,
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getCollectionParamDecoder(variableElement, annotationReflector));
+                getCollectionParamDecoder(variableElement, annotationReflector),
+                safeLoggable);
     }
 
-    private ParameterType cookieParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
-        String deserializerName =
-                InstanceVariables.joinCamelCase(variableElement.getSimpleName().toString(), "Deserializer");
+    private Optional<ParameterType> cookieParameter(
+            VariableElement variableElement,
+            AnnotationReflector annotationReflector,
+            SafeLoggingAnnotation safeLoggable) {
+        String javaParameterName = variableElement.getSimpleName().toString();
+        String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         if (context.isSameTypes(variableElement.asType(), BearerToken.class)) {
+            if (!safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN)) {
+                context.reportError(
+                        "BearerToken parameter cannot be annotated with safe logging annotations",
+                        variableElement,
+                        SafeArg.of("type", variableElement.asType()));
+                return Optional.empty();
+            }
             // TODO(fwindheuser): Add some validation no more than one BearerToken cookie param is used.
-            return ParameterTypes.authCookie(annotationReflector.getAnnotationValue(String.class), deserializerName);
+            return Optional.of(ParameterTypes.authCookie(
+                    javaParameterName, annotationReflector.getAnnotationValue(String.class), deserializerName));
         }
 
-        return ParameterTypes.cookie(
+        return Optional.of(ParameterTypes.cookie(
+                javaParameterName,
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getParamDecoder(variableElement, annotationReflector));
+                getParamDecoder(variableElement, annotationReflector),
+                safeLoggable));
     }
 
     private CodeBlock getParamDecoder(VariableElement variableElement, AnnotationReflector annotationReflector) {

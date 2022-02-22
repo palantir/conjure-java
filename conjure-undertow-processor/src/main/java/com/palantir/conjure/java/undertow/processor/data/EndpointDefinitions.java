@@ -21,8 +21,7 @@ import com.google.common.base.Predicates;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.processor.ErrorContext;
-import com.palantir.conjure.java.undertow.processor.data.ParameterType.Cases;
-import com.squareup.javapoet.CodeBlock;
+import com.palantir.conjure.java.undertow.processor.data.ParameterTypeVisitors.IsPathMultiParamsVisitor;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -126,62 +125,7 @@ public final class EndpointDefinitions {
 
     private static List<ArgumentDefinition> getPathMultiParams(List<ArgumentDefinition> argumentDefinitions) {
         return argumentDefinitions.stream()
-                .filter(definition -> definition.paramType().match(new Cases<>() {
-                    @Override
-                    public Boolean body(CodeBlock _deserializerFactory, String _deserializerFieldName) {
-                        return false;
-                    }
-
-                    @Override
-                    public Boolean header(
-                            String _headerName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return false;
-                    }
-
-                    @Override
-                    public Boolean path(
-                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return false;
-                    }
-
-                    @Override
-                    public Boolean pathMulti(
-                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return true;
-                    }
-
-                    @Override
-                    public Boolean query(
-                            String _paramName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return false;
-                    }
-
-                    @Override
-                    public Boolean cookie(
-                            String _cookieName, String _deserializerFieldName, CodeBlock _deserializerFactory) {
-                        return false;
-                    }
-
-                    @Override
-                    public Boolean authCookie(String _cookieName, String _deserializerFieldName) {
-                        return false;
-                    }
-
-                    @Override
-                    public Boolean authHeader() {
-                        return false;
-                    }
-
-                    @Override
-                    public Boolean exchange() {
-                        return false;
-                    }
-
-                    @Override
-                    public Boolean context() {
-                        return false;
-                    }
-                }))
+                .filter(definition -> definition.paramType().match(IsPathMultiParamsVisitor.INSTANCE))
                 .collect(Collectors.toList());
     }
 }
