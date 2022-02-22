@@ -25,6 +25,7 @@ import com.google.common.io.ByteStreams;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
+import com.palantir.conjure.java.undertow.processor.sample.ContextParamNameClash;
 import com.palantir.conjure.java.undertow.processor.sample.CookieParams;
 import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoderService;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
@@ -91,6 +92,18 @@ public class ConjureUndertowAnnotationProcessorTest {
     }
 
     @Test
+    public void testSafeLoggingAuthCookie() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthCookieParam.class))
+                .hadErrorContaining("BearerToken parameter cannot be annotated with Safe Logging annotations");
+    }
+
+    @Test
+    public void testSafeLoggingAuthHeader() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthHeaderParam.class))
+                .hadErrorContaining("Parameter type cannot be annotated with safe logging annotations");
+    }
+
+    @Test
     public void testConcreteClassWithPrivateAnnotatedMethod() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, PrivateMethodAnnotatedResource.class))
                 .hadErrorContaining("must be accessible to classes in the same package");
@@ -109,15 +122,9 @@ public class ConjureUndertowAnnotationProcessorTest {
     }
 
     @Test
-    public void testSafeLoggingAuthCookie() {
-        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthCookieParam.class))
-                .hadErrorContaining("BearerToken parameter cannot be annotated with Safe Logging annotations");
-    }
-
-    @Test
-    public void testSafeLoggingAuthHeader() {
-        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthHeaderParam.class))
-                .hadErrorContaining("Parameter type cannot be annotated with safe logging annotations");
+    public void testContextNameClash() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ContextParamNameClash.class))
+                .hadErrorContaining("Invalid case format: {segment=requestContext_}");
     }
 
     private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {
