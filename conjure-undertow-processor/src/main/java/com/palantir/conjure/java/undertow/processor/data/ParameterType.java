@@ -25,19 +25,42 @@ public interface ParameterType {
 
         R body(CodeBlock deserializerFactory, String deserializerFieldName);
 
-        R header(String headerName, String deserializerFieldName, CodeBlock deserializerFactory);
+        R header(
+                String variableName,
+                String headerName,
+                String deserializerFieldName,
+                CodeBlock deserializerFactory,
+                SafeLoggingAnnotation safeLoggable);
 
-        R path(String paramName, String deserializerFieldName, CodeBlock deserializerFactory);
+        R path(
+                String paramName,
+                String deserializerFieldName,
+                CodeBlock deserializerFactory,
+                SafeLoggingAnnotation safeLoggable);
 
-        R pathMulti(String paramName, String deserializerFieldName, CodeBlock deserializerFactory);
+        R pathMulti(
+                String paramName,
+                String deserializerFieldName,
+                CodeBlock deserializerFactory,
+                SafeLoggingAnnotation safeLoggable);
 
-        R query(String paramName, String deserializerFieldName, CodeBlock deserializerFactory);
+        R query(
+                String variableName,
+                String paramName,
+                String deserializerFieldName,
+                CodeBlock deserializerFactory,
+                SafeLoggingAnnotation safeLoggable);
 
-        R cookie(String cookieName, String deserializerFieldName, CodeBlock deserializerFactory);
+        R cookie(
+                String variableName,
+                String cookieName,
+                String deserializerFieldName,
+                CodeBlock deserializerFactory,
+                SafeLoggingAnnotation safeLoggable);
 
-        R authCookie(String cookieName, String deserializerFieldName);
+        R authCookie(String variableName, String cookieName, String deserializerFieldName);
 
-        R authHeader();
+        R authHeader(String variableName);
 
         R exchange();
 
@@ -45,4 +68,10 @@ public interface ParameterType {
     }
 
     <R> R match(Cases<R> cases);
+
+    enum SafeLoggingAnnotation {
+        SAFE,
+        UNSAFE,
+        UNKNOWN;
+    }
 }

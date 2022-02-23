@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: '[processor] Add support for safe logging annotations'
+  links:
+  - https://github.com/palantir/conjure-java/pull/1667

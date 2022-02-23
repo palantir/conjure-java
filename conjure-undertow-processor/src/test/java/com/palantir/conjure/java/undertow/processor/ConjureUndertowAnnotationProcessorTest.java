@@ -28,10 +28,16 @@ import com.google.testing.compile.JavaFileObjects;
 import com.palantir.conjure.java.undertow.processor.sample.CookieParams;
 import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoderService;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
+import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
+import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
+import com.palantir.conjure.java.undertow.processor.sample.ParameterNotAnnotated;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveQueryParams;
 import com.palantir.conjure.java.undertow.processor.sample.PrivateMethodAnnotatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ProtectedMethodAnnotatedResource;
+import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableAuthCookieParam;
+import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableAuthHeaderParam;
+import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableParams;
 import com.palantir.conjure.java.undertow.processor.sample.SimpleInterface;
 import com.palantir.conjure.java.undertow.processor.sample.StaticMethodAnnotatedResource;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
@@ -83,6 +89,23 @@ public class ConjureUndertowAnnotationProcessorTest {
     }
 
     @Test
+    public void testSafeLoggableParams() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, SafeLoggableParams.class);
+    }
+
+    @Test
+    public void testSafeLoggingAuthCookie() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthCookieParam.class))
+                .hadErrorContaining("BearerToken parameter cannot be annotated with safe logging annotations");
+    }
+
+    @Test
+    public void testSafeLoggingAuthHeader() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthHeaderParam.class))
+                .hadErrorContaining("Parameter type cannot be annotated with safe logging annotations");
+    }
+
+    @Test
     public void testConcreteClassWithPrivateAnnotatedMethod() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, PrivateMethodAnnotatedResource.class))
                 .hadErrorContaining("must be accessible to classes in the same package");
@@ -98,6 +121,25 @@ public class ConjureUndertowAnnotationProcessorTest {
     public void testStaticAnnotatedMethod() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, StaticMethodAnnotatedResource.class))
                 .hadErrorContaining("The '@Handle' annotation does not support static methods");
+    }
+
+    @Test
+    public void testContextNameClash() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, NameClashContextParam.class))
+                .hadErrorContaining("incompatible types: java.lang.String cannot be converted to "
+                        + "com.palantir.conjure.java.undertow.lib.RequestContext");
+    }
+
+    @Test
+    public void testExchangeNameClash() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, NameClashExchangeParam.class))
+                .hadErrorContaining("variable exchange is already defined in method handleRequest");
+    }
+
+    @Test
+    public void testBodyIsNotAnnotated() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterNotAnnotated.class))
+                .hadErrorContaining("At least one annotation should be present");
     }
 
     private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {

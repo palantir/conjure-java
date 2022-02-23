@@ -48,8 +48,6 @@ public final class CookieParamsEndpoints implements UndertowService {
 
         private final CookieParams delegate;
 
-        private final Serializer<String> cookieParamsSerializer;
-
         private final Deserializer<String> stringCookieDeserializer;
 
         private final Deserializer<Optional<String>> optionalStringCookieDeserializer;
@@ -60,10 +58,11 @@ public final class CookieParamsEndpoints implements UndertowService {
 
         private final Deserializer<BearerToken> tokenDeserializer;
 
+        private final Serializer<String> cookieParamsSerializer;
+
         CookieParamsEndpoint(UndertowRuntime runtime, CookieParams delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.cookieParamsSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
             this.stringCookieDeserializer =
                     new CookieDeserializer<>("stringCookie", ParamDecoders.stringParamDecoder(runtime.plainSerDe()));
             this.optionalStringCookieDeserializer = new CookieDeserializer<>(
@@ -73,17 +72,19 @@ public final class CookieParamsEndpoints implements UndertowService {
             this.decoderCookieDeserializer =
                     new CookieDeserializer<>("decoderCookie", CookieParams.StringParamDecoder.INSTANCE);
             this.tokenDeserializer = new BearerTokenCookieDeserializer(runtime, "AUTH_TOKEN");
+            this.cookieParamsSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String stringCookie = this.stringCookieDeserializer.deserialize(exchange);
+            Optional<String> optionalStringCookie = this.optionalStringCookieDeserializer.deserialize(exchange);
+            OptionalInt optionalIntCookie = this.optionalIntCookieDeserializer.deserialize(exchange);
+            String decoderCookie = this.decoderCookieDeserializer.deserialize(exchange);
+            BearerToken token = this.tokenDeserializer.deserialize(exchange);
             write(
                     this.delegate.cookieParams(
-                            this.stringCookieDeserializer.deserialize(exchange),
-                            this.optionalStringCookieDeserializer.deserialize(exchange),
-                            this.optionalIntCookieDeserializer.deserialize(exchange),
-                            this.decoderCookieDeserializer.deserialize(exchange),
-                            this.tokenDeserializer.deserialize(exchange)),
+                            stringCookie, optionalStringCookie, optionalIntCookie, decoderCookie, token),
                     exchange);
         }
 

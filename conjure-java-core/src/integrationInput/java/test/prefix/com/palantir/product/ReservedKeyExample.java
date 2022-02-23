@@ -97,9 +97,9 @@ public final class ReservedKeyExample {
             hash = 31 * hash + this.package_.hashCode();
             hash = 31 * hash + this.interface_.hashCode();
             hash = 31 * hash + this.fieldNameWithDashes.hashCode();
-            hash = 31 * hash + Integer.hashCode(this.primitveFieldNameWithDashes);
-            hash = 31 * hash + Integer.hashCode(this.memoizedHashCode_);
-            hash = 31 * hash + Integer.hashCode(this.result);
+            hash = 31 * hash + this.primitveFieldNameWithDashes;
+            hash = 31 * hash + this.memoizedHashCode_;
+            hash = 31 * hash + this.result;
             result = hash;
             memoizedHashCode = result;
         }

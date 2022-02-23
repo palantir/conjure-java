@@ -18,6 +18,8 @@ package com.palantir.conjure.java.undertow.processor.data;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Joiner;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -30,8 +32,9 @@ final class InstanceVariables {
                 .join(IntStream.range(0, segments.length)
                         .mapToObj(i -> {
                             String segment = segments[i];
-                            CaseFormat caseFormat =
-                                    CaseFormats.estimate(segment).get();
+                            CaseFormat caseFormat = CaseFormats.estimate(segment)
+                                    .orElseThrow(() -> new SafeIllegalArgumentException(
+                                            "Invalid case format", SafeArg.of("segment", segment)));
                             if (i == 0) {
                                 return caseFormat.to(CaseFormat.LOWER_CAMEL, segment);
                             }

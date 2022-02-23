@@ -25,7 +25,7 @@ import java.util.Collection;
 public interface PrimitiveQueryParams {
 
     @Handle(method = HttpMethod.GET, path = "/ping")
-    void handlePrimitveQueryParams(
+    void handlePrimitiveQueryParams(
             @Handle.QueryParam(value = "count", decoder = IntParamDecoder.class) int count,
             @Handle.QueryParam(value = "test", decoder = BooleanParamDecoder.class) boolean test,
             @Handle.QueryParam(value = "testboxed", decoder = BooleanParamDecoder.class) Boolean testBoxed);

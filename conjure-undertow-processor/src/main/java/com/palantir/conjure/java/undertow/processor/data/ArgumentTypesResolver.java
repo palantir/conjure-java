@@ -74,32 +74,31 @@ public final class ArgumentTypesResolver {
                 ArgumentTypes.primitive(integerType, planSerDeMethodName(integerType), Optional.empty());
     }
 
-    public Optional<ArgumentType> getArgumentType(VariableElement param) {
+    public ArgumentType getArgumentType(VariableElement param) {
         return getArgumentTypeImpl(param, param.asType());
     }
 
     @SuppressWarnings("CyclomaticComplexity")
-    private Optional<ArgumentType> getArgumentTypeImpl(Element paramContext, TypeMirror actualTypeMirror) {
+    private ArgumentType getArgumentTypeImpl(Element paramContext, TypeMirror actualTypeMirror) {
         TypeName typeName = TypeName.get(actualTypeMirror);
         Optional<OptionalType> optionalType = getOptionalType(paramContext, actualTypeMirror);
         Optional<TypeMirror> listType = getListType(actualTypeMirror);
         Optional<ArgumentType> mapType = getMapType(actualTypeMirror, typeName);
         if (isPrimitive(typeName)) {
-            return Optional.of(ArgumentTypes.primitive(typeName, planSerDeMethodName(typeName), Optional.empty()));
+            return ArgumentTypes.primitive(typeName, planSerDeMethodName(typeName), Optional.empty());
         } else if (listType.map(innerType -> isPrimitive(TypeName.get(innerType)))
                 .orElse(false)) {
             TypeName innerTypeName = TypeName.get(listType.get());
-            return Optional.of(
-                    ArgumentTypes.primitive(typeName, planSerDeMethodName(innerTypeName), Optional.of(innerTypeName)));
+            return ArgumentTypes.primitive(typeName, planSerDeMethodName(innerTypeName), Optional.of(innerTypeName));
         } else if (isRawRequestBody(actualTypeMirror)) {
-            return Optional.of(ArgumentTypes.rawRequestBody(TypeName.get(actualTypeMirror)));
+            return ArgumentTypes.rawRequestBody(TypeName.get(actualTypeMirror));
         } else if (optionalType.isPresent()) {
             // TODO(ckozak): We only want to go one level down: don't allow Optional<Optional<Type>>.
-            return Optional.of(ArgumentTypes.optional(typeName, optionalType.get()));
+            return ArgumentTypes.optional(typeName, optionalType.get());
         } else if (mapType.isPresent()) {
-            return mapType;
+            return mapType.get();
         } else {
-            return Optional.of(ArgumentTypes.customType(typeName));
+            return ArgumentTypes.customType(typeName);
         }
     }
 
@@ -140,12 +139,10 @@ public final class ArgumentTypesResolver {
                     .build());
         }
 
-        return context.getGenericInnerType(Optional.class, typeName)
-                .flatMap(innerType -> getArgumentTypeImpl(paramContext, innerType)
-                        .map(argumentType -> ImmutableOptionalType.builder()
-                                .isPresentMethodName("isPresent")
-                                .valueGetMethodName("get")
-                                .underlyingType(argumentType)
-                                .build()));
+        return context.getGenericInnerType(Optional.class, typeName).map(innerType -> ImmutableOptionalType.builder()
+                .isPresentMethodName("isPresent")
+                .valueGetMethodName("get")
+                .underlyingType(getArgumentTypeImpl(paramContext, innerType))
+                .build());
     }
 }
