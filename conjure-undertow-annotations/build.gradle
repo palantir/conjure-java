@@ -2,4 +2,7 @@ apply plugin: 'com.palantir.external-publish-jar'
 
 dependencies {
     api project(':conjure-undertow-lib')
+
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
