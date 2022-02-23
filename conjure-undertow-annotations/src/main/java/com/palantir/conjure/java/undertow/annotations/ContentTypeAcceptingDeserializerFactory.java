@@ -25,18 +25,19 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 import java.io.IOException;
+import java.util.List;
 
 public interface ContentTypeAcceptingDeserializerFactory<U> extends DeserializerFactory<U> {
 
-    /** The content type that is accepted by this deserializer. */
-    String supportedContentType();
+    /** The content types that is accepted by this deserializer. */
+    List<String> supportedContentTypes();
 
-    /** Deserialize the request body. */
-    U deserialize(HttpServerExchange exchange) throws IOException;
+    /** Deserialize the request body with the given supported content type. */
+    U deserialize(HttpServerExchange exchange, String contentType) throws IOException;
 
     /** Per default, a content type is accepted if its value starts with the supported content type. */
-    default boolean accepts(String contentType) {
-        return contentType.startsWith(supportedContentType());
+    default boolean accepts(String contentType, String supportedContentType) {
+        return contentType.startsWith(supportedContentType);
     }
 
     @Override
@@ -45,10 +46,14 @@ public interface ContentTypeAcceptingDeserializerFactory<U> extends Deserializer
             TypeMarker<T> _type, UndertowRuntime _runtime, Endpoint _endpoint) {
         return (Deserializer<T>) (Deserializer<U>) exchange -> {
             String maybeContentType = exchange.getRequestHeaders().getFirst(Headers.CONTENT_TYPE);
-            if (maybeContentType == null || !accepts(maybeContentType)) {
-                throw new SafeIoException("Unsupported content-type", SafeArg.of("contentType", maybeContentType));
+            if (maybeContentType != null) {
+                for (String supportedContentType : supportedContentTypes()) {
+                    if (accepts(maybeContentType, supportedContentType)) {
+                        return ContentTypeAcceptingDeserializerFactory.this.deserialize(exchange, supportedContentType);
+                    }
+                }
             }
-            return ContentTypeAcceptingDeserializerFactory.this.deserialize(exchange);
+            throw new SafeIoException("Unsupported content-type", SafeArg.of("contentType", maybeContentType));
         };
     }
 }
