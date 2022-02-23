@@ -15,7 +15,7 @@ com.fasterxml.jackson.module:jackson-module-afterburner:2.12.5 (23 constraints: 
 com.github.ben-manes.caffeine:caffeine:3.0.5 (26 constraints: 48eb217b)
 com.google.auto:auto-common:1.2.1 (24 constraints: 85c5a01a)
 com.google.code.findbugs:jsr305:3.0.2 (44 constraints: 69019b34)
-com.google.errorprone:error_prone_annotations:2.11.0 (42 constraints: efdbf003)
+com.google.errorprone:error_prone_annotations:2.11.0 (42 constraints: c5db3daa)
 com.google.guava:failureaccess:1.0.1 (29 constraints: 41167ee0)
 com.google.guava:guava:31.0.1-jre (44 constraints: 003d2a50)
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (29 constraints: 75a20b1a)
