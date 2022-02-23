@@ -36,7 +36,6 @@ import com.palantir.conjure.java.undertow.processor.data.ParameterType;
 import com.palantir.conjure.java.undertow.processor.data.ParameterType.Cases;
 import com.palantir.conjure.java.undertow.processor.data.ReturnType;
 import com.palantir.conjure.java.undertow.processor.data.ServiceDefinition;
-import com.palantir.conjure.java.undertow.runtime.ContentTypeFilterHandler;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -53,10 +52,6 @@ import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
 import org.immutables.value.Value;
@@ -398,22 +393,9 @@ public final class ConjureUndertowEndpointsGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(HttpHandler.class)
-                        .addStatement(getOptionalDelegateHandler(endpoint))
+                        .addStatement("return this")
                         .build())
                 .build();
-    }
-
-    private static CodeBlock getOptionalDelegateHandler(EndpointDefinition endpoint) {
-        if (endpoint.contentTypeFilters().isEmpty()) {
-            return CodeBlock.of("return this");
-        }
-        String varArgs = IntStream.range(0, endpoint.contentTypeFilters().size())
-                .mapToObj(_idx -> "$S")
-                .collect(Collectors.joining(", "));
-        Object[] args = Stream.concat(
-                        Stream.of(ContentTypeFilterHandler.class, Set.class), endpoint.contentTypeFilters().stream())
-                .toArray(Object[]::new);
-        return CodeBlock.of("return $T.of($T.of(" + varArgs + "), this)", args);
     }
 
     private static CodeBlock invokeDelegate(EndpointDefinition endpoint) {

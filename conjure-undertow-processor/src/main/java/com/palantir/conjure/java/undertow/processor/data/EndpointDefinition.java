@@ -18,7 +18,6 @@ package com.palantir.conjure.java.undertow.processor.data;
 
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import java.util.List;
-import java.util.Set;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -34,8 +33,6 @@ public interface EndpointDefinition {
     HttpPath httpPath();
 
     List<ArgumentDefinition> arguments();
-
-    Set<String> contentTypeFilters();
 
     ReturnType returns();
 }

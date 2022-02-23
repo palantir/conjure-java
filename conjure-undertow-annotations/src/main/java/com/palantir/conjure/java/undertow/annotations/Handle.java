@@ -136,13 +136,4 @@ public @interface Handle {
          */
         Class<? extends ParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
-
-    @Retention(RetentionPolicy.SOURCE)
-    @Target(ElementType.METHOD)
-    @interface Accepts {
-        /**
-         * Explicitly overwrite the supported content type to accept.
-         */
-        String[] value();
-    }
 }
