@@ -37,6 +37,7 @@ import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -118,7 +119,10 @@ public final class AliasGenerator {
                 .build());
 
         // Generate a default constructor so that Jackson can construct a default instance when coercing from null
-        typeDef.getAlias().accept(new DefaultConstructorVisitor(aliasTypeName)).ifPresent(spec::addMethod);
+        typeDef.getAlias().accept(new DefaultConstructorVisitor(aliasTypeName)).ifPresent(ctor -> {
+            spec.addMethod(ctor);
+            addEmptyMethod(spec, thisClass);
+        });
 
         if (isAliasOfDouble(typeDef)) {
             CodeBlock longCastCodeBlock = CodeBlock.builder()
@@ -194,6 +198,17 @@ public final class AliasGenerator {
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static void addEmptyMethod(TypeSpec.Builder spec, TypeName thisClass) {
+        spec.addField(FieldSpec.builder(thisClass, "EMPTY", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer(CodeBlock.of("new $T()", thisClass))
+                .build());
+        spec.addMethod(MethodSpec.methodBuilder("empty")
+                .returns(thisClass)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addStatement("return $N", "EMPTY")
+                .build());
     }
 
     private static boolean isAliasOfDouble(AliasDefinition typeDef) {

@@ -10,6 +10,8 @@ import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class OptionalSetAliasExample {
+    private static final OptionalSetAliasExample EMPTY = new OptionalSetAliasExample();
+
     private final Optional<Set<String>> value;
 
     private OptionalSetAliasExample(@Nonnull Optional<Set<String>> value) {
@@ -45,5 +47,9 @@ public final class OptionalSetAliasExample {
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static OptionalSetAliasExample of(@Nonnull Optional<Set<String>> value) {
         return new OptionalSetAliasExample(value);
+    }
+
+    public static OptionalSetAliasExample empty() {
+        return EMPTY;
     }
 }

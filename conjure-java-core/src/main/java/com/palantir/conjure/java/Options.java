@@ -120,6 +120,14 @@ public interface Options {
     }
 
     /**
+     * Generated objects exclude fields with empty collection (list, set, and map) values.
+     */
+    @Value.Default
+    default boolean excludeEmptyCollections() {
+        return false;
+    }
+
+    /**
      * Instructs the object generator to generate union visitors that expose the values of unknowns in addition to their
      * types.
      */

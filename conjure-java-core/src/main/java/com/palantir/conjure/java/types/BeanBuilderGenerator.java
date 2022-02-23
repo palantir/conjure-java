@@ -29,6 +29,7 @@ import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
+import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -247,6 +248,18 @@ public final class BeanBuilderGenerator {
             spec.initializer("new $T<>()", LinkedHashMap.class);
         } else if (field.getType().accept(TypeVisitor.IS_OPTIONAL)) {
             spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(field.getType())));
+        } else if (field.getType().accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
+            com.palantir.conjure.spec.TypeName name = field.getType().accept(TypeVisitor.REFERENCE);
+            typeMapper
+                    .getType(name)
+                    .filter(definition -> definition.accept(TypeDefinitionVisitor.IS_ALIAS))
+                    .map(definition -> definition.accept(TypeDefinitionVisitor.ALIAS))
+                    .ifPresent(aliasDefinition -> {
+                        Type aliasType = aliasDefinition.getAlias();
+                        if (aliasType.accept(MoreVisitors.IS_COLLECTION) || aliasType.accept(TypeVisitor.IS_OPTIONAL)) {
+                            spec.initializer("$T.empty()", typeMapper.getClassName(field.getType()));
+                        }
+                    });
         }
         // else no initializer
 

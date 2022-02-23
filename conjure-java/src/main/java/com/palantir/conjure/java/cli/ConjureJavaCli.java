@@ -196,6 +196,14 @@ public final class ConjureJavaCli implements Runnable {
         private boolean excludeEmptyOptionals;
 
         @CommandLine.Option(
+                names = "--experimentalExcludeEmptyCollections",
+                defaultValue = "false",
+                description = "Objects exclude empty collections in serialization based on the conjure spec. Note "
+                        + "that this should not be enabled on servers due to shortcomings in the "
+                        + "typescript implementation, and should only be used for clients with local codegen.")
+        private boolean excludeEmptyCollections;
+
+        @CommandLine.Option(
                 names = "--unionsWithUnknownValues",
                 defaultValue = "false",
                 description = "Union visitors expose the values of unknowns in addition to their types.")
@@ -267,6 +275,7 @@ public final class ConjureJavaCli implements Runnable {
                             .apiVersion(Optional.ofNullable(apiVersion))
                             .useStagedBuilders(useStagedBuilders)
                             .excludeEmptyOptionals(excludeEmptyOptionals)
+                            .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .build())
                     .build();

@@ -4,26 +4,26 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ListAlias {
-    private static final ListAlias EMPTY = new ListAlias();
+public final class CollectionsTestAliasSet {
+    private static final CollectionsTestAliasSet EMPTY = new CollectionsTestAliasSet();
 
-    private final List<String> value;
+    private final Set<Integer> value;
 
-    private ListAlias(@Nonnull List<String> value) {
+    private CollectionsTestAliasSet(@Nonnull Set<Integer> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private ListAlias() {
-        this(Collections.emptyList());
+    private CollectionsTestAliasSet() {
+        this(Collections.emptySet());
     }
 
     @JsonValue
-    public List<String> get() {
+    public Set<Integer> get() {
         return value;
     }
 
@@ -34,7 +34,9 @@ public final class ListAlias {
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof ListAlias && this.value.equals(((ListAlias) other).value));
+        return this == other
+                || (other instanceof CollectionsTestAliasSet
+                        && this.value.equals(((CollectionsTestAliasSet) other).value));
     }
 
     @Override
@@ -43,11 +45,11 @@ public final class ListAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static ListAlias of(@Nonnull List<String> value) {
-        return new ListAlias(value);
+    public static CollectionsTestAliasSet of(@Nonnull Set<Integer> value) {
+        return new CollectionsTestAliasSet(value);
     }
 
-    public static ListAlias empty() {
+    public static CollectionsTestAliasSet empty() {
         return EMPTY;
     }
 }

@@ -10,6 +10,8 @@ import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class SetAlias {
+    private static final SetAlias EMPTY = new SetAlias();
+
     private final Set<String> value;
 
     private SetAlias(@Nonnull Set<String> value) {
@@ -43,5 +45,9 @@ public final class SetAlias {
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static SetAlias of(@Nonnull Set<String> value) {
         return new SetAlias(value);
+    }
+
+    public static SetAlias empty() {
+        return EMPTY;
     }
 }

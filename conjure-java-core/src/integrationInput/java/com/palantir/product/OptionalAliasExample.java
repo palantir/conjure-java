@@ -80,7 +80,7 @@ public final class OptionalAliasExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private OptionalAlias optionalAlias;
+        private OptionalAlias optionalAlias = OptionalAlias.empty();
 
         private Builder() {}
 

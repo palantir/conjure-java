@@ -9,6 +9,8 @@ import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class AliasOptionalDoubleAliasedBinaryResult {
+    private static final AliasOptionalDoubleAliasedBinaryResult EMPTY = new AliasOptionalDoubleAliasedBinaryResult();
+
     private final Optional<DoubleAliasedBinaryResult> value;
 
     private AliasOptionalDoubleAliasedBinaryResult(@Nonnull Optional<DoubleAliasedBinaryResult> value) {
@@ -44,5 +46,9 @@ public final class AliasOptionalDoubleAliasedBinaryResult {
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static AliasOptionalDoubleAliasedBinaryResult of(@Nonnull Optional<DoubleAliasedBinaryResult> value) {
         return new AliasOptionalDoubleAliasedBinaryResult(value);
+    }
+
+    public static AliasOptionalDoubleAliasedBinaryResult empty() {
+        return EMPTY;
     }
 }

@@ -9,21 +9,21 @@ import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ListAlias {
-    private static final ListAlias EMPTY = new ListAlias();
+public final class CollectionsTestAliasList {
+    private static final CollectionsTestAliasList EMPTY = new CollectionsTestAliasList();
 
-    private final List<String> value;
+    private final List<Integer> value;
 
-    private ListAlias(@Nonnull List<String> value) {
+    private CollectionsTestAliasList(@Nonnull List<Integer> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private ListAlias() {
+    private CollectionsTestAliasList() {
         this(Collections.emptyList());
     }
 
     @JsonValue
-    public List<String> get() {
+    public List<Integer> get() {
         return value;
     }
 
@@ -34,7 +34,9 @@ public final class ListAlias {
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof ListAlias && this.value.equals(((ListAlias) other).value));
+        return this == other
+                || (other instanceof CollectionsTestAliasList
+                        && this.value.equals(((CollectionsTestAliasList) other).value));
     }
 
     @Override
@@ -43,11 +45,11 @@ public final class ListAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static ListAlias of(@Nonnull List<String> value) {
-        return new ListAlias(value);
+    public static CollectionsTestAliasList of(@Nonnull List<Integer> value) {
+        return new CollectionsTestAliasList(value);
     }
 
-    public static ListAlias empty() {
+    public static CollectionsTestAliasList empty() {
         return EMPTY;
     }
 }

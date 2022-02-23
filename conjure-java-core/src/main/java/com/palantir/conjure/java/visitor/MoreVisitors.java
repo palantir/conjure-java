@@ -31,6 +31,7 @@ public final class MoreVisitors {
     public static final IsExternalType IS_EXTERNAL = new IsExternalType();
     public static final ExternalType EXTERNAL = new ExternalType();
     public static final IsInternalReference IS_INTERNAL_REFERENCE = new IsInternalReference();
+    public static final IsCollection IS_COLLECTION = new IsCollection();
 
     private static final class IsExternalType extends IsTypeVisitor {
         @Override
@@ -93,6 +94,23 @@ public final class MoreVisitors {
         @Override
         public Boolean visitUnknown(String _unknownType) {
             return false;
+        }
+    }
+
+    private static final class IsCollection extends IsTypeVisitor {
+        @Override
+        public Boolean visitList(ListType _value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitSet(SetType _value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitMap(MapType _value) {
+            return true;
         }
     }
 }
