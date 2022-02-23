@@ -22,9 +22,9 @@ buildscript {
 
     dependencies {
         classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.11.0'
-        classpath 'com.palantir.gradle.conjure:gradle-conjure:5.20.0'
+        classpath 'com.palantir.gradle.conjure:gradle-conjure:4.27.2'
         classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.17.0'
-        classpath 'com.palantir.baseline:gradle-baseline-java:4.70.0'
+        classpath 'com.palantir.baseline:gradle-baseline-java:4.71.0'
         classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.8.0'
         classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.13.0'
         classpath 'gradle.plugin.org.inferred:gradle-processors:3.6.0'
@@ -57,6 +57,10 @@ allprojects {
             if (details.requested.group == 'org.glassfish.hk2.external' && details.requested.name == 'javax.inject') {
                 details.useTarget group: 'javax.inject', name: 'javax.inject', version: '1'
                 details.because "The glassfish shaded copy is only necessary for OSGI environments, which we do not endorse."
+            }
+            if (details.requested.group == 'com.google.errorprone' && details.requested.name == 'error_prone_annotations') {
+                details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
+                details.because "The error_prone_annotations dependency must be low to avoid forcing consumers to use newer releases"
             }
         }
     }
