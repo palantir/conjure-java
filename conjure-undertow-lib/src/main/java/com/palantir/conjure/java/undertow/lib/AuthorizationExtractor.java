@@ -18,14 +18,33 @@ package com.palantir.conjure.java.undertow.lib;
 
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens.auth.UnverifiedJsonWebToken;
 import io.undertow.server.HttpServerExchange;
+import java.util.Optional;
 
 /** Provides auth functionality for generated code. */
 public interface AuthorizationExtractor {
 
-    /** Parses an {@link AuthHeader} from the provided {@link HttpServerExchange}. */
+    /**
+     * Parses an {@link AuthHeader} from the provided {@link HttpServerExchange}.
+     * Implementations are responsible for calling {@link #setRequestToken(HttpServerExchange, Optional)} before
+     * returning the result.
+     */
     AuthHeader header(HttpServerExchange exchange);
 
-    /** Parses a {@link BearerToken} from the provided {@link HttpServerExchange}. */
+    /**
+     * Parses a {@link BearerToken} from the provided {@link HttpServerExchange}.
+     * Implementations are responsible for calling {@link #setRequestToken(HttpServerExchange, Optional)} before
+     * returning the result.
+     */
     BearerToken cookie(HttpServerExchange exchange, String cookieName);
+
+    /**
+     * Set the {@link HttpServerExchange request} {@link UnverifiedJsonWebToken} for observability information.
+     * Implementations may choose to set logging context data and track the token value for request logging.
+     * This data is never used for auth and is not guaranteed to be verified.
+     */
+    default void setRequestToken(HttpServerExchange exchange, Optional<UnverifiedJsonWebToken> token) {
+        // no-op default implementation for cross-version compatibility.
+    }
 }

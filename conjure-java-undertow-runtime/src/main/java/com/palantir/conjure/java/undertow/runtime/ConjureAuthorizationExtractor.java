@@ -83,13 +83,8 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
         }
     }
 
-    /**
-     * Attempts to extract a {@link UnverifiedJsonWebToken JSON Web Token} from the {@link BearerToken} value, and
-     * populates the SLF4J {@link MDC} with user id, session id, and token id extracted from the JWT. This is
-     * best-effort and does not throw an exception in case any of these steps fail.
-     */
-    private static BearerToken setState(HttpServerExchange exchange, BearerToken token) {
-        Optional<UnverifiedJsonWebToken> parsedJwt = UnverifiedJsonWebToken.tryParse(token.getToken());
+    @Override
+    public void setRequestToken(HttpServerExchange exchange, Optional<UnverifiedJsonWebToken> parsedJwt) {
         exchange.putAttachment(Attachments.UNVERIFIED_JWT, parsedJwt);
         if (parsedJwt.isPresent()) {
             UnverifiedJsonWebToken jwt = parsedJwt.get();
@@ -97,10 +92,20 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
             jwt.getUnverifiedSessionId().ifPresent(sessionIdSetter);
             jwt.getUnverifiedTokenId().ifPresent(tokenIdSetter);
         }
+    }
+
+    /**
+     * Attempts to extract a {@link UnverifiedJsonWebToken JSON Web Token} from the {@link BearerToken} value, and
+     * populates the SLF4J {@link MDC} with user id, session id, and token id extracted from the JWT. This is
+     * best-effort and does not throw an exception in case any of these steps fail.
+     */
+    private BearerToken setState(HttpServerExchange exchange, BearerToken token) {
+        Optional<UnverifiedJsonWebToken> parsedJwt = UnverifiedJsonWebToken.tryParse(token.getToken());
+        setRequestToken(exchange, parsedJwt);
         return token;
     }
 
-    private static AuthHeader setState(HttpServerExchange exchange, AuthHeader authHeader) {
+    private AuthHeader setState(HttpServerExchange exchange, AuthHeader authHeader) {
         setState(exchange, authHeader.getBearerToken());
         return authHeader;
     }
