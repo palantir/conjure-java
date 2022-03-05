@@ -1,4 +1,4 @@
-ch.qos.logback:* = 1.2.10
+ch.qos.logback:* = 1.2.11
 com.atlassian.commonmark:* = 0.12.1
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 31.1-jre
