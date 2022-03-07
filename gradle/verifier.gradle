@@ -30,13 +30,6 @@ conjure {
     }
 }
 
-configurations.conjureJava.exclude group: 'com.palantir.conjure.java'
-dependencies {
-    conjureJava files(project(':conjure-java').tasks.distTar.archiveFile) {
-        builtBy project(':conjure-java').tasks.distTar
-    }
-}
-
 subprojects {
     dependencies {
         api project(':conjure-lib')

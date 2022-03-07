@@ -82,3 +82,17 @@ subprojects {
         systemProperty 'recreate', System.getProperty('recreate', 'false')
     }
 }
+
+configurations {
+    conjureJava
+}
+
+configurations.conjureJava.exclude group: 'com.palantir.conjure.java'
+
+afterEvaluate {
+    dependencies {
+        conjureJava files(project(':conjure-java').tasks.distTar.archiveFile) {
+            builtBy project(':conjure-java').tasks.distTar
+        }
+    }
+}
