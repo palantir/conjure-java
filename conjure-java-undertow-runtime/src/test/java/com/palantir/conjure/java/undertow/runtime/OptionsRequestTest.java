@@ -50,6 +50,9 @@ public final class OptionsRequestTest {
                         .services(EndpointService.of(endpoint(Methods.GET, "/first")))
                         .services(EndpointService.of(endpoint(Methods.POST, "/first")))
                         .services(EndpointService.of(endpoint(Methods.PUT, "/second/{p1}/and/{p2}")))
+                        .services(EndpointService.of(endpoint(Methods.GET, "/third", 200)))
+                        .services(EndpointService.of(endpoint(Methods.OPTIONS, "/third", 418 /* I'm a teapot */)))
+                        .services(EndpointService.of(endpoint(Methods.OPTIONS, "/fourth", 418 /* I'm a teapot */)))
                         .build())
                 .build();
         server.start();
@@ -81,9 +84,33 @@ public final class OptionsRequestTest {
         assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, PUT");
     }
 
+    @Test
+    public void test_customOptionsEndpoint() {
+        try (Response response = execute("GET", "/third")) {
+            assertThat(response.code()).isEqualTo(200);
+            assertThat(response.header(HttpHeaders.ALLOW)).isNull();
+        }
+        try (Response response = execute("OPTIONS", "/third")) {
+            assertThat(response.code()).isEqualTo(418);
+            assertThat(response.header(HttpHeaders.ALLOW)).isNull();
+        }
+    }
+
+    @Test
+    public void test_customOptionsEndpointWithNoOtherMethods() {
+        try (Response response = execute("/fourth")) {
+            assertThat(response.code()).isEqualTo(418);
+            assertThat(response.header(HttpHeaders.ALLOW)).isNull();
+        }
+    }
+
     private static Response execute(String path) {
+        return execute("OPTIONS", path);
+    }
+
+    private static Response execute(String method, String path) {
         Request request = new Request.Builder()
-                .method("OPTIONS", null)
+                .method(method, null)
                 .url("http://localhost:12346" + path)
                 .build();
         try {
@@ -94,8 +121,12 @@ public final class OptionsRequestTest {
     }
 
     private static Endpoint endpoint(HttpString method, String template) {
+        return endpoint(method, template, 500);
+    }
+
+    private static Endpoint endpoint(HttpString method, String template, int code) {
         return Endpoint.builder()
-                .handler(ResponseCodeHandler.HANDLE_500)
+                .handler(new ResponseCodeHandler(code))
                 .method(method)
                 .template(template)
                 .serviceName(UUID.randomUUID().toString())

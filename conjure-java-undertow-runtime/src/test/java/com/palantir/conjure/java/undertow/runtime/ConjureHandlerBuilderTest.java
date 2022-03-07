@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableList;
@@ -58,7 +59,7 @@ public class ConjureHandlerBuilderTest {
 
     @Test
     public void testAddEndpoint_options() {
-        assertThatLoggableExceptionThrownBy(() -> ConjureHandler.builder()
+        assertThatCode(() -> ConjureHandler.builder()
                         .services(EndpointService.of(Endpoint.builder()
                                 .name("name")
                                 .serviceName("service")
@@ -67,9 +68,8 @@ public class ConjureHandlerBuilderTest {
                                 .template("/template")
                                 .build()))
                         .build())
-                .isInstanceOf(SafeIllegalStateException.class)
-                .hasLogMessage("Endpoint method is not recognized")
-                .containsArgs(SafeArg.of("method", Methods.OPTIONS));
+                .as("OPTIONS may be handled by custom endpoints")
+                .doesNotThrowAnyException();
     }
 
     @Test
