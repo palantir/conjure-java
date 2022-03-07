@@ -85,10 +85,14 @@ public final class ConjureHandler implements HttpHandler {
                 .collect(ImmutableSetMultimap.toImmutableSetMultimap(
                         endpoint -> normalizeTemplate(endpoint.template()), Endpoint::method))
                 .asMap()
-                .forEach((normalizedPath, methods) -> routingHandler.add(
-                        Methods.OPTIONS,
-                        normalizedPath,
-                        new WebSecurityHandler(new OptionsHandler(ImmutableSet.copyOf(methods)))));
+                .forEach((normalizedPath, methods) -> {
+                    if (!methods.contains(Methods.OPTIONS)) {
+                        routingHandler.add(
+                                Methods.OPTIONS,
+                                normalizedPath,
+                                new WebSecurityHandler(new OptionsHandler(ImmutableSet.copyOf(methods))));
+                    }
+                });
     }
 
     @Override
@@ -107,7 +111,7 @@ public final class ConjureHandler implements HttpHandler {
     public static final class Builder {
 
         private static final ImmutableSet<HttpString> ALLOWED_METHODS =
-                ImmutableSet.of(Methods.GET, Methods.PUT, Methods.POST, Methods.DELETE);
+                ImmutableSet.of(Methods.GET, Methods.PUT, Methods.POST, Methods.DELETE, Methods.OPTIONS, Methods.PATCH);
 
         private final List<EndpointHandlerWrapper> wrappersJustBeforeBlocking = new ArrayList<>();
 
