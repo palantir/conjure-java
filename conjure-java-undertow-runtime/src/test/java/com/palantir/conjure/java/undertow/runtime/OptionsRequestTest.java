@@ -18,13 +18,16 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
+import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.UUID;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,11 +44,12 @@ public final class OptionsRequestTest {
             .build();
 
     private Undertow server;
+    private int port;
 
     @BeforeEach
     public void before() {
         server = Undertow.builder()
-                .addHttpListener(12346, "localhost")
+                .addHttpListener(0, "localhost")
                 .setHandler(ConjureHandler.builder()
                         .services(EndpointService.of(endpoint(Methods.GET, "/first")))
                         .services(EndpointService.of(endpoint(Methods.POST, "/first")))
@@ -56,6 +60,9 @@ public final class OptionsRequestTest {
                         .build())
                 .build();
         server.start();
+        port = ((InetSocketAddress)
+                        Iterables.getOnlyElement(server.getListenerInfo()).getAddress())
+                .getPort();
     }
 
     @AfterEach
@@ -65,23 +72,26 @@ public final class OptionsRequestTest {
 
     @Test
     public void test_getAndPost() {
-        Response response = execute("/first");
-        assertThat(response.code()).isEqualTo(204);
-        assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, GET, HEAD, POST");
+        try (Response response = execute("/first")) {
+            assertThat(response.code()).isEqualTo(204);
+            assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, GET, HEAD, POST");
+        }
     }
 
     @Test
     public void test_webSecurityHeaders() {
-        Response response = execute("/first");
-        assertThat(response.code()).isEqualTo(204);
-        assertThat(response.header(HttpHeaders.CONTENT_SECURITY_POLICY)).isNotNull();
+        try (Response response = execute("/first")) {
+            assertThat(response.code()).isEqualTo(204);
+            assertThat(response.header(HttpHeaders.CONTENT_SECURITY_POLICY)).isNotNull();
+        }
     }
 
     @Test
     public void test_parameterized() {
-        Response response = execute("/second/paramValue/and/secondParam");
-        assertThat(response.code()).isEqualTo(204);
-        assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, PUT");
+        try (Response response = execute("/second/paramValue/and/secondParam")) {
+            assertThat(response.code()).isEqualTo(204);
+            assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, PUT");
+        }
     }
 
     @Test
@@ -98,20 +108,22 @@ public final class OptionsRequestTest {
 
     @Test
     public void test_customOptionsEndpointWithNoOtherMethods() {
-        try (Response response = execute("/fourth")) {
+        try (Response response = execute("OPTIONS", "/fourth")) {
             assertThat(response.code()).isEqualTo(418);
             assertThat(response.header(HttpHeaders.ALLOW)).isNull();
         }
     }
 
-    private static Response execute(String path) {
+    @MustBeClosed
+    private Response execute(String path) {
         return execute("OPTIONS", path);
     }
 
-    private static Response execute(String method, String path) {
+    @MustBeClosed
+    private Response execute(String method, String path) {
         Request request = new Request.Builder()
                 .method(method, null)
-                .url("http://localhost:12346" + path)
+                .url("http://localhost:" + port + path)
                 .build();
         try {
             return client.newCall(request).execute();
