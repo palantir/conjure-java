@@ -75,6 +75,15 @@ public final class OptionsRequestTest {
         try (Response response = execute("/first")) {
             assertThat(response.code()).isEqualTo(204);
             assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, GET, HEAD, POST");
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
+                    .isEqualTo("Authorization");
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                    .isEqualTo("OPTIONS, GET, HEAD, POST");
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_MAX_AGE)).isEqualTo("600");
         }
     }
 
@@ -83,6 +92,8 @@ public final class OptionsRequestTest {
         try (Response response = execute("/first")) {
             assertThat(response.code()).isEqualTo(204);
             assertThat(response.header(HttpHeaders.CONTENT_SECURITY_POLICY)).isNotNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("origin.com");
+            assertThat(response.header(HttpHeaders.VARY)).isEqualTo("Origin");
         }
     }
 
@@ -91,6 +102,15 @@ public final class OptionsRequestTest {
         try (Response response = execute("/second/paramValue/and/secondParam")) {
             assertThat(response.code()).isEqualTo(204);
             assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, PUT");
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
+                    .isEqualTo("Authorization");
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                    .isEqualTo("OPTIONS, PUT");
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_MAX_AGE)).isEqualTo("600");
         }
     }
 
@@ -99,10 +119,28 @@ public final class OptionsRequestTest {
         try (Response response = execute("GET", "/third")) {
             assertThat(response.code()).isEqualTo(200);
             assertThat(response.header(HttpHeaders.ALLOW)).isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_MAX_AGE)).isNull();
         }
         try (Response response = execute("OPTIONS", "/third")) {
             assertThat(response.code()).isEqualTo(418);
             assertThat(response.header(HttpHeaders.ALLOW)).isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_MAX_AGE)).isNull();
         }
     }
 
@@ -111,6 +149,15 @@ public final class OptionsRequestTest {
         try (Response response = execute("OPTIONS", "/fourth")) {
             assertThat(response.code()).isEqualTo(418);
             assertThat(response.header(HttpHeaders.ALLOW)).isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS))
+                    .isNull();
+            assertThat(response.header(HttpHeaders.ACCESS_CONTROL_MAX_AGE)).isNull();
         }
     }
 
@@ -124,6 +171,7 @@ public final class OptionsRequestTest {
         Request request = new Request.Builder()
                 .method(method, null)
                 .url("http://localhost:" + port + path)
+                .header(HttpHeaders.ORIGIN, "origin.com")
                 .build();
         try {
             return client.newCall(request).execute();

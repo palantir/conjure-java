@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.net.HttpHeaders;
 import com.palantir.logsafe.Preconditions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -29,10 +30,19 @@ import java.util.Set;
 
 final class OptionsHandler implements HttpHandler {
 
-    private final String allowValue;
+    private static final HttpString HEADER_ACCESS_CONTROL_ALLOW_HEADERS =
+            HttpString.tryFromString(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS);
+    private static final HttpString HEADER_ACCESS_CONTROL_ALLOW_METHODS =
+            HttpString.tryFromString(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS);
+    private static final HttpString HEADER_ACCESS_CONTROL_MAX_AGE =
+            HttpString.tryFromString(HttpHeaders.ACCESS_CONTROL_MAX_AGE);
+
+    private static final int ACCESS_CONTROL_MAX_AGE = 600;
+
+    private final String methods;
 
     OptionsHandler(Set<HttpString> methods) {
-        this.allowValue = Joiner.on(", ")
+        this.methods = Joiner.on(", ")
                 .join(ImmutableSet.<HttpString>builder()
                         .add(Methods.OPTIONS)
                         .addAll(methods)
@@ -42,7 +52,10 @@ final class OptionsHandler implements HttpHandler {
     @Override
     public void handleRequest(HttpServerExchange exchange) {
         Preconditions.checkState(Methods.OPTIONS.equals(exchange.getRequestMethod()), "Expected an OPTIONS request");
-        exchange.getResponseHeaders().put(Headers.ALLOW, allowValue);
+        exchange.getResponseHeaders().put(Headers.ALLOW, methods);
+        exchange.getResponseHeaders().put(HEADER_ACCESS_CONTROL_ALLOW_HEADERS, Headers.AUTHORIZATION_STRING);
+        exchange.getResponseHeaders().put(HEADER_ACCESS_CONTROL_ALLOW_METHODS, methods);
+        exchange.getResponseHeaders().put(HEADER_ACCESS_CONTROL_MAX_AGE, ACCESS_CONTROL_MAX_AGE);
         exchange.setStatusCode(StatusCodes.NO_CONTENT);
     }
 }

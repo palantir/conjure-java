@@ -55,6 +55,7 @@ public class WebSecurityHandlerTest {
         try (Response response = client.newCall(new Request.Builder()
                         .get()
                         .url("http://localhost:12345")
+                        .header(HttpHeaders.ORIGIN, "origin.com")
                         .build())
                 .execute()) {
             validateCommonResponseHeaders(response);
@@ -76,6 +77,7 @@ public class WebSecurityHandlerTest {
         try (Response response = client.newCall(new Request.Builder()
                         .get()
                         .url("http://localhost:12345")
+                        .header(HttpHeaders.ORIGIN, "origin.com")
                         .header(HttpHeaders.USER_AGENT, userAgent)
                         .build())
                 .execute()) {
@@ -94,5 +96,7 @@ public class WebSecurityHandlerTest {
         assertThat(response.header(HttpHeaders.X_CONTENT_TYPE_OPTIONS)).isEqualTo("nosniff");
         assertThat(response.header(HttpHeaders.X_FRAME_OPTIONS)).isEqualTo("sameorigin");
         assertThat(response.header(HttpHeaders.X_XSS_PROTECTION)).isEqualTo("1; mode=block");
+        assertThat(response.header(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("origin.com");
+        assertThat(response.header(HttpHeaders.VARY)).isEqualTo("Origin");
     }
 }
