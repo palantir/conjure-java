@@ -18,10 +18,6 @@ apply plugin: 'com.palantir.external-publish-jar'
 
 sourceSets {
     integrationInput
-    test {
-        compileClasspath += integrationInput.output
-        runtimeClasspath += integrationInput.output
-    }
 }
 
 spotless {
@@ -32,7 +28,7 @@ spotless {
 
 idea {
     module {
-        testSourceDirs += sourceSets.integrationInput.java.srcDirs
+        sourceDirs += sourceSets.integrationInput.java.srcDirs
     }
 }
 
@@ -64,6 +60,7 @@ dependencies {
     implementation 'com.palantir.safe-logging:logger'
     implementation 'com.palantir.human-readable-types:human-readable-types'
 
+    testImplementation sourceSets.integrationInput.output
     testImplementation 'com.palantir.conjure:conjure-core'
     testImplementation project(':conjure-java-undertow-runtime')
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
