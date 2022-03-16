@@ -1,0 +1,144 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
+import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import java.io.IOException;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class OverloadedResourceEndpoints implements UndertowService {
+    private final OverloadedResource delegate;
+
+    private OverloadedResourceEndpoints(OverloadedResource delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(OverloadedResource delegate) {
+        return new OverloadedResourceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new EndpointEndpoint_0(runtime, delegate), new EndpointEndpoint_1(runtime, delegate));
+    }
+
+    private static final class EndpointEndpoint_0 implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final OverloadedResource delegate;
+
+        private final Serializer<String> endpointSerializer;
+
+        EndpointEndpoint_0(UndertowRuntime runtime, OverloadedResource delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.endpointSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            write(this.delegate.endpoint(), exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.endpointSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/ping";
+        }
+
+        @Override
+        public String serviceName() {
+            return "OverloadedResource";
+        }
+
+        @Override
+        public String name() {
+            return "endpoint";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class EndpointEndpoint_1 implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final OverloadedResource delegate;
+
+        private final Deserializer<String> valueDeserializer;
+
+        private final Serializer<String> endpointSerializer;
+
+        EndpointEndpoint_1(UndertowRuntime runtime, OverloadedResource delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valueDeserializer =
+                    new QueryParamDeserializer<>("q", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.endpointSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String value = this.valueDeserializer.deserialize(exchange);
+            write(this.delegate.endpoint(value), exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.endpointSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.DELETE;
+        }
+
+        @Override
+        public String template() {
+            return "/foo";
+        }
+
+        @Override
+        public String serviceName() {
+            return "OverloadedResource";
+        }
+
+        @Override
+        public String name() {
+            return "endpoint";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}
