@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: conjure-undertow processor supports safe-logging Body params
+  links:
+  - https://github.com/palantir/conjure-java/pull/1709

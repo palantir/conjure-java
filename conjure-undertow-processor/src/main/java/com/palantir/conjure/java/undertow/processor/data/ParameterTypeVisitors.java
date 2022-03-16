@@ -26,8 +26,12 @@ public final class ParameterTypeVisitors {
         INSTANCE;
 
         @Override
-        public Boolean body(CodeBlock _deserializerFactory, String _deserializerFieldName) {
-            return false;
+        public Boolean body(
+                String _variableName,
+                CodeBlock _deserializerFactory,
+                String _deserializerFieldName,
+                SafeLoggingAnnotation safeLoggable) {
+            return !safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN);
         }
 
         @Override
@@ -103,7 +107,11 @@ public final class ParameterTypeVisitors {
         INSTANCE;
 
         @Override
-        public Boolean body(CodeBlock _deserializerFactory, String _deserializerFieldName) {
+        public Boolean body(
+                String _variableName,
+                CodeBlock _deserializerFactory,
+                String _deserializerFieldName,
+                SafeLoggingAnnotation _safeLoggable) {
             return false;
         }
 

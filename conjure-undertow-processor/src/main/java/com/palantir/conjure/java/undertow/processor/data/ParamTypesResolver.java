@@ -128,7 +128,7 @@ public final class ParamTypesResolver {
 
         AnnotationReflector annotationReflector = Iterables.getOnlyElement(otherAnnotationReflectors);
         if (annotationReflector.isAnnotation(Handle.Body.class)) {
-            return Optional.of(bodyParameter(variableElement, annotationReflector));
+            return Optional.of(bodyParameter(variableElement, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.Header.class)) {
             return Optional.of(headerParameter(variableElement, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.PathParam.class)) {
@@ -144,11 +144,15 @@ public final class ParamTypesResolver {
         throw new SafeIllegalStateException("Not possible");
     }
 
-    private ParameterType bodyParameter(VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private ParameterType bodyParameter(
+            VariableElement variableElement,
+            AnnotationReflector annotationReflector,
+            SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
         String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         TypeMirror deserializer = annotationReflector.getAnnotationValue(TypeMirror.class);
-        return ParameterTypes.body(Instantiables.instantiate(deserializer), deserializerName);
+        return ParameterTypes.body(
+                javaParameterName, Instantiables.instantiate(deserializer), deserializerName, safeLoggable);
     }
 
     private ParameterType headerParameter(

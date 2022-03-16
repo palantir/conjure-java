@@ -49,7 +49,8 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
                 new QueryParamsEndpoint(runtime, delegate),
                 new HeaderParamsEndpoint(runtime, delegate),
                 new CookieParamsEndpoint(runtime, delegate),
-                new SafeLoggingReusesContextEndpoint(runtime, delegate));
+                new SafeLoggingReusesContextEndpoint(runtime, delegate),
+                new BodyParamEndpoint(runtime, delegate));
     }
 
     private static final class PathParamsEndpoint implements HttpHandler, Endpoint {
@@ -354,6 +355,61 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
         @Override
         public String name() {
             return "safeLoggingReusesContext";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class BodyParamEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final SafeLoggableParams delegate;
+
+        private final Deserializer<String> bodyDeserializer;
+
+        private final Serializer<String> bodyParamSerializer;
+
+        BodyParamEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.bodyDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+            this.bodyParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            RequestContext requestContext = this.runtime.contexts().createContext(exchange, this);
+            String body = bodyDeserializer.deserialize(exchange);
+            requestContext.requestArg(SafeArg.of("body", body));
+            write(this.delegate.bodyParam(body), exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.bodyParamSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/safeLoggingBody";
+        }
+
+        @Override
+        public String serviceName() {
+            return "SafeLoggableParams";
+        }
+
+        @Override
+        public String name() {
+            return "bodyParam";
         }
 
         @Override
