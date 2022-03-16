@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: conjure-undertow processor allows overloaded `@Handle` methods
+  links:
+  - https://github.com/palantir/conjure-java/pull/1708
