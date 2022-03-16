@@ -18,7 +18,10 @@ package com.palantir.conjure.java.undertow.example;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.runtime.ConjureUndertowRuntime;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.Undertow;
@@ -27,6 +30,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -344,5 +348,24 @@ class ExampleServiceTest {
         } finally {
             server.stop();
         }
+    }
+
+    @Test
+    void testDeprecatedEndpoint() {
+        List<Endpoint> endpoints = DeprecatedEndpointResourceEndpoints.of(new DeprecatedEndpointResource())
+                .endpoints(ConjureUndertowRuntime.builder().build());
+        assertThat(endpoints).hasSize(1);
+        Endpoint endpoint = Iterables.getOnlyElement(endpoints);
+        assertThat(endpoint.deprecated()).isPresent();
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    void testDeprecatedResource() {
+        List<Endpoint> endpoints = DeprecatedResourceEndpoints.of(new DeprecatedResource())
+                .endpoints(ConjureUndertowRuntime.builder().build());
+        assertThat(endpoints).hasSize(1);
+        Endpoint endpoint = Iterables.getOnlyElement(endpoints);
+        assertThat(endpoint.deprecated()).isPresent();
     }
 }

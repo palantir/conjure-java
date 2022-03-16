@@ -27,6 +27,8 @@ import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 import com.palantir.conjure.java.undertow.processor.sample.CookieParams;
 import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoderService;
+import com.palantir.conjure.java.undertow.processor.sample.DeprecatedEndpointResource;
+import com.palantir.conjure.java.undertow.processor.sample.DeprecatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
@@ -91,6 +93,17 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testSafeLoggableParams() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, SafeLoggableParams.class);
+    }
+
+    @Test
+    public void testDeprecatedEndpoint() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, DeprecatedEndpointResource.class);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testDeprecatedResource() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, DeprecatedResource.class);
     }
 
     @Test
@@ -160,7 +173,7 @@ public class ConjureUndertowAnnotationProcessorTest {
         try {
             return Compiler.javac()
                     // This is required because this tool does not know about our gradle setting.
-                    .withOptions("-source", "11")
+                    .withOptions("-source", "11", "-Werror", "-Xlint:deprecation")
                     .withProcessors(new ConjureUndertowAnnotationProcessor())
                     .compile(JavaFileObjects.forResource(clazzPath.toUri().toURL()));
         } catch (MalformedURLException e) {

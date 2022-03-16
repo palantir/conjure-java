@@ -37,4 +37,9 @@ public interface ServiceDefinition {
     }
 
     List<EndpointDefinition> endpoints();
+
+    @Value.Default
+    default boolean deprecated() {
+        return false;
+    }
 }

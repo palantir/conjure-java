@@ -86,7 +86,7 @@ public final class ConjureUndertowEndpointsGenerator {
         ImmutableList<TypeSpec> endpoints = serviceDefinition.endpoints().stream()
                 .map(endpoint -> endpoint(serviceDefinition, endpoint))
                 .collect(ImmutableList.toImmutableList());
-        return TypeSpec.classBuilder(serviceDefinition.undertowService())
+        TypeSpec.Builder builder = TypeSpec.classBuilder(serviceDefinition.undertowService())
                 .addAnnotation(AnnotationSpec.builder(ClassName.get(Generated.class))
                         .addMember("value", "$S", getClass().getCanonicalName())
                         .build())
@@ -117,8 +117,11 @@ public final class ConjureUndertowEndpointsGenerator {
                                                 "new $N($N, $N)", endpoint.name, RUNTIME_NAME, DELEGATE_NAME))
                                         .collect(CodeBlock.joining(", ")))
                         .build())
-                .addTypes(endpoints)
-                .build();
+                .addTypes(endpoints);
+        if (serviceDefinition.deprecated()) {
+            builder.addAnnotation(Deprecated.class);
+        }
+        return builder.build();
     }
 
     private static String endpointClassName(EndpointName endpointName) {
@@ -145,6 +148,12 @@ public final class ConjureUndertowEndpointsGenerator {
                     REQUEST_CONTEXT,
                     RUNTIME_NAME,
                     EXCHANGE_NAME);
+        }
+
+        if (endpoint.deprecated()
+                // Class-level annotation is already handled if the service is deprecated
+                && !service.deprecated()) {
+            handlerBuilder.addAnnotation(Deprecated.class);
         }
 
         endpoint.arguments().forEach(def -> def.paramType().match(new Cases<Void>() {
@@ -414,6 +423,17 @@ public final class ConjureUndertowEndpointsGenerator {
                     .addException(IOException.class)
                     .addStatement(
                             "this.$N.serialize($N, $N)", returnType.serializerFieldName(), RETURN_VALUE, EXCHANGE_NAME)
+                    .build());
+        }
+
+        if (endpoint.deprecated() || service.deprecated()) {
+            endpointBuilder.addMethod(MethodSpec.methodBuilder("deprecated")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .returns(ParameterizedTypeName.get(Optional.class, String.class))
+                    // Ideally we could scrape javadoc from the annotated method, but that's
+                    // more trouble than it's worth for now.
+                    .addStatement("return $T.of($S)", Optional.class, "deprecated")
                     .build());
         }
 
