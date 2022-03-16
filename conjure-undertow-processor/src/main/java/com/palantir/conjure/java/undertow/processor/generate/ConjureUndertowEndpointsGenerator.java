@@ -60,6 +60,7 @@ import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
@@ -124,9 +125,22 @@ public final class ConjureUndertowEndpointsGenerator {
         return builder.build();
     }
 
-    private static String endpointClassName(EndpointName endpointName) {
+    private static String endpointClassName(EndpointDefinition endpoint, ServiceDefinition service) {
+        EndpointName endpointName = endpoint.endpointName();
         String name = endpointName.get();
-        return Character.toUpperCase(name.charAt(0)) + name.substring(1) + "Endpoint";
+        String endpointClassName = Character.toUpperCase(name.charAt(0)) + name.substring(1) + "Endpoint";
+        ImmutableList<EndpointDefinition> overloads = service.endpoints().stream()
+                .filter(item -> Objects.equals(endpointName, item.endpointName()))
+                .collect(ImmutableList.toImmutableList());
+        if (overloads.size() > 1) {
+            int overloadIndex = overloads.indexOf(endpoint);
+            if (overloadIndex < 0) {
+                throw new SafeIllegalStateException("Unknown endpoint", SafeArg.of("endpoint", endpoint));
+            }
+            endpointClassName = endpointClassName + "_" + overloadIndex;
+        }
+
+        return endpointClassName;
     }
 
     @SuppressWarnings("checkstyle:MethodLength") // TODO(ckozak): refactor
@@ -399,7 +413,7 @@ public final class ConjureUndertowEndpointsGenerator {
             }
         }
 
-        TypeSpec.Builder endpointBuilder = TypeSpec.classBuilder(endpointClassName(endpoint.endpointName()))
+        TypeSpec.Builder endpointBuilder = TypeSpec.classBuilder(endpointClassName(endpoint, service))
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addSuperinterface(HttpHandler.class)
                 .addSuperinterface(Endpoint.class)

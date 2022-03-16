@@ -32,6 +32,7 @@ import com.palantir.conjure.java.undertow.processor.sample.DeprecatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
+import com.palantir.conjure.java.undertow.processor.sample.OverloadedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterNotAnnotated;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveQueryParams;
@@ -104,6 +105,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     @SuppressWarnings("deprecation")
     public void testDeprecatedResource() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, DeprecatedResource.class);
+    }
+
+    @Test
+    public void testOverloadedEndpoint() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, OverloadedResource.class);
     }
 
     @Test
