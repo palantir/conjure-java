@@ -158,7 +158,11 @@ public final class ConjureUndertowEndpointsGenerator {
 
         endpoint.arguments().forEach(def -> def.paramType().match(new Cases<Void>() {
             @Override
-            public Void body(CodeBlock deserializerFactory, String deserializerFieldName) {
+            public Void body(
+                    String variableName,
+                    CodeBlock deserializerFactory,
+                    String deserializerFieldName,
+                    SafeLoggingAnnotation safeLoggable) {
                 TypeName requestBodyType =
                         def.argType().match(ArgTypeTypeName.INSTANCE).box();
                 additionalFields.add(ImmutableAdditionalField.builder()
@@ -178,6 +182,8 @@ public final class ConjureUndertowEndpointsGenerator {
                                         RUNTIME_NAME)
                                 .build())
                         .build());
+                handlerBuilder.addStatement("$T $N = $L", requestBodyType, variableName, invokeDeserializer(def));
+                getSafeLogging(variableName, variableName, safeLoggable).ifPresent(handlerBuilder::addStatement);
                 return null;
             }
 
@@ -477,7 +483,11 @@ public final class ConjureUndertowEndpointsGenerator {
     private static CodeBlock invokeDeserializer(ArgumentDefinition arg) {
         return arg.paramType().match(new ParameterType.Cases<>() {
             @Override
-            public CodeBlock body(CodeBlock _deserializerFactory, String deserializerFieldName) {
+            public CodeBlock body(
+                    String _variableName,
+                    CodeBlock _deserializerFactory,
+                    String deserializerFieldName,
+                    SafeLoggingAnnotation _safeLoggable) {
                 return CodeBlock.of("$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
             }
 
@@ -555,8 +565,12 @@ public final class ConjureUndertowEndpointsGenerator {
         CodeBlock args = endpoint.arguments().stream()
                 .map(arg -> arg.paramType().match(new Cases<CodeBlock>() {
                     @Override
-                    public CodeBlock body(CodeBlock _deserializerFactory, String _deserializerFieldName) {
-                        return invokeDeserializer(arg);
+                    public CodeBlock body(
+                            String variableName,
+                            CodeBlock _deserializerFactory,
+                            String _deserializerFieldName,
+                            SafeLoggingAnnotation _safeLoggable) {
+                        return CodeBlock.of(variableName);
                     }
 
                     @Override

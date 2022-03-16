@@ -23,7 +23,11 @@ import org.derive4j.Data;
 public interface ParameterType {
     interface Cases<R> {
 
-        R body(CodeBlock deserializerFactory, String deserializerFieldName);
+        R body(
+                String variableName,
+                CodeBlock deserializerFactory,
+                String deserializerFieldName,
+                SafeLoggingAnnotation safeLoggable);
 
         R header(
                 String variableName,

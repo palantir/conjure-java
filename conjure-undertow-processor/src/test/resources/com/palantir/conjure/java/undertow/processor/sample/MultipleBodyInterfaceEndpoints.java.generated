@@ -56,10 +56,10 @@ public final class MultipleBodyInterfaceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
-            this.delegate.post(
-                    oneDeserializer.deserialize(exchange),
-                    twoDeserializer.deserialize(exchange),
-                    threeDeserializer.deserialize(exchange));
+            String one = oneDeserializer.deserialize(exchange);
+            String two = twoDeserializer.deserialize(exchange);
+            String three = threeDeserializer.deserialize(exchange);
+            this.delegate.post(one, two, three);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
