@@ -114,7 +114,7 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
     }
 
     private JavaFile generateUndertowServiceEndpoints(
-            Element annotatedInterface, Collection<? extends Element> annotatedMethods) {
+            Element annotatedType, Collection<? extends Element> annotatedMethods) {
         validationStep(ctx -> {
             for (Element element : annotatedMethods) {
                 if (!element.getKind().equals(ElementKind.METHOD)) {
@@ -148,18 +148,18 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
         });
 
         ClassName serviceInterface = ClassName.get(
-                MoreElements.getPackage(annotatedInterface).getQualifiedName().toString(),
-                annotatedInterface.getSimpleName().toString());
+                MoreElements.getPackage(annotatedType).getQualifiedName().toString(),
+                annotatedType.getSimpleName().toString());
 
         ServiceDefinition serviceDefinition = ImmutableServiceDefinition.builder()
                 .serviceInterface(serviceInterface)
                 .addAllEndpoints(endpoints)
+                .deprecated(MoreElements.isAnnotationPresent(annotatedType, Deprecated.class))
                 .build();
 
         TypeSpec generatedClass = new ConjureUndertowEndpointsGenerator(serviceDefinition).generate();
-        TypeSpec withOriginatingElement = generatedClass.toBuilder()
-                .addOriginatingElement(annotatedInterface)
-                .build();
+        TypeSpec withOriginatingElement =
+                generatedClass.toBuilder().addOriginatingElement(annotatedType).build();
 
         return JavaFile.builder(serviceInterface.packageName(), withOriginatingElement)
                 .build();

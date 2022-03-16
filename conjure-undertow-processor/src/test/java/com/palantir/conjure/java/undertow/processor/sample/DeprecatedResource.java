@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.processor.data;
+package com.palantir.conjure.java.undertow.processor.sample;
 
+import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
-import java.util.List;
-import org.immutables.value.Value;
 
-@Value.Immutable
-@StagedBuilder
-public interface EndpointDefinition {
+/**
+ * Deprecated resource.
+ *
+ * @deprecated deprecated
+ */
+@Deprecated
+public final class DeprecatedResource {
 
-    EndpointName endpointName();
-
-    ServiceName serviceName();
-
-    HttpMethod httpMethod();
-
-    HttpPath httpPath();
-
-    List<ArgumentDefinition> arguments();
-
-    ReturnType returns();
-
-    @Value.Default
-    default boolean deprecated() {
-        return false;
+    @Handle(method = HttpMethod.GET, path = "/deprecated/ping")
+    public String ping() {
+        return "pong";
     }
 }

@@ -102,6 +102,8 @@ public final class EndpointDefinitions {
                 .httpPath(path)
                 .returns(maybeReturnType.get())
                 .addAllArguments(argumentDefinitions)
+                .deprecated(MoreElements.isAnnotationPresent(element, Deprecated.class)
+                        || MoreElements.isAnnotationPresent(element.getEnclosingElement(), Deprecated.class))
                 .build());
     }
 

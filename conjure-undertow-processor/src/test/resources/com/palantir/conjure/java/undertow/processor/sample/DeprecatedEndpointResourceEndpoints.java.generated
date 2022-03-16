@@ -1,0 +1,95 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import java.io.IOException;
+import java.lang.Deprecated;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import java.util.Optional;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class DeprecatedEndpointResourceEndpoints implements UndertowService {
+    private final DeprecatedEndpointResource delegate;
+
+    private DeprecatedEndpointResourceEndpoints(DeprecatedEndpointResource delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(DeprecatedEndpointResource delegate) {
+        return new DeprecatedEndpointResourceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new PingEndpoint(runtime, delegate));
+    }
+
+    private static final class PingEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final DeprecatedEndpointResource delegate;
+
+        private final Serializer<String> pingSerializer;
+
+        PingEndpoint(UndertowRuntime runtime, DeprecatedEndpointResource delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.pingSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+        }
+
+        @Override
+        @Deprecated
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            write(this.delegate.ping(), exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.pingSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public Optional<String> deprecated() {
+            return Optional.of("deprecated");
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/ping/deprecated";
+        }
+
+        @Override
+        public String serviceName() {
+            return "DeprecatedEndpointResource";
+        }
+
+        @Override
+        public String name() {
+            return "ping";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}
