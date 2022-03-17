@@ -168,6 +168,21 @@ class ExampleServiceTest {
     }
 
     @Test
+    void testOptionalInputStreamWildcardBinary() throws IOException {
+        Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
+        try {
+            int port = TestHelper.getPort(server);
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/optionalWildStream").openConnection();
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/octet-stream");
+            assertThat(connection.getInputStream()).hasBinaryContent("binary".getBytes(StandardCharsets.UTF_8));
+        } finally {
+            server.stop();
+        }
+    }
+
+    @Test
     void testPostRequest() throws IOException {
         Undertow server = TestHelper.started(ExampleServiceEndpoints.of(new ExampleResource()));
         try {

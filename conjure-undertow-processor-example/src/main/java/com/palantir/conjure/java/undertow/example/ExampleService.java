@@ -29,6 +29,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -62,6 +63,9 @@ public interface ExampleService {
 
     @Handle(method = HttpMethod.GET, path = "/optionalNamedBinary")
     Optional<CustomBinaryResponseBody> optionalNamedBinary();
+
+    @Handle(method = HttpMethod.GET, path = "/optionalWildStream")
+    Optional<? extends ByteArrayInputStream> optionalWildStream();
 
     @Handle(method = HttpMethod.POST, path = "/post")
     String post(@Handle.Body String body);

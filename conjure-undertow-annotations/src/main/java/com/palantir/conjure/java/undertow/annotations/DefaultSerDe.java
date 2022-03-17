@@ -31,7 +31,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 /** Default serializer and deserializer factory which produces behavior equivalent to conjure. */
 public enum DefaultSerDe implements SerializerFactory<Object>, DeserializerFactory<Object> {
@@ -66,10 +68,13 @@ public enum DefaultSerDe implements SerializerFactory<Object>, DeserializerFacto
         if (Void.class.equals(type)) {
             return VoidSerializer.INSTANCE;
         }
-        if (type instanceof Class) {
-            Class<?> clazz = (Class<?>) type;
+        Class<?> clazz = asClass(type);
+        if (clazz != null) {
             if (BinaryResponseBody.class.isAssignableFrom(clazz)) {
-                return new BinarySerializer(runtime.bodySerDe());
+                return new BinaryResponseBodySerializer(runtime.bodySerDe());
+            }
+            if (InputStream.class.isAssignableFrom(clazz)) {
+                return new InputStreamBodySerializer(runtime.bodySerDe());
             }
         }
         Type optionalValueType = unwrapOptional(type);
@@ -77,6 +82,26 @@ public enum DefaultSerDe implements SerializerFactory<Object>, DeserializerFacto
             Serializer<?> maybeDelegate = maybeSpecialSerializer(optionalValueType, runtime);
             if (maybeDelegate != null) {
                 return new OptionalValueDelegatingSerializer<>(maybeDelegate);
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private static Class<?> asClass(Type type) {
+        if (type instanceof Class) {
+            return (Class<?>) type;
+        }
+        if (type instanceof ParameterizedType) {
+            ParameterizedType param = (ParameterizedType) type;
+            return asClass(param.getRawType());
+        }
+        if (type instanceof WildcardType) {
+            WildcardType wild = (WildcardType) type;
+            // Only check upper bounded e.g. '? extends Type' as opposed to lower bounded '? super Type'
+            Type[] upperBounds = wild.getUpperBounds();
+            if (upperBounds != null && upperBounds.length == 1) {
+                return asClass(upperBounds[0]);
             }
         }
         return null;
@@ -124,16 +149,35 @@ public enum DefaultSerDe implements SerializerFactory<Object>, DeserializerFacto
         }
     }
 
-    private static final class BinarySerializer implements Serializer<BinaryResponseBody> {
+    private static final class BinaryResponseBodySerializer implements Serializer<BinaryResponseBody> {
         private final BodySerDe bodySerDe;
 
-        BinarySerializer(BodySerDe bodySerDe) {
+        BinaryResponseBodySerializer(BodySerDe bodySerDe) {
             this.bodySerDe = bodySerDe;
         }
 
         @Override
         public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
             bodySerDe.serialize(value, exchange);
+        }
+    }
+
+    private static final class InputStreamBodySerializer implements Serializer<InputStream> {
+        private final BodySerDe bodySerDe;
+
+        InputStreamBodySerializer(BodySerDe bodySerDe) {
+            this.bodySerDe = bodySerDe;
+        }
+
+        @Override
+        public void serialize(InputStream value, HttpServerExchange exchange) throws IOException {
+            bodySerDe.serialize(
+                    responseBody -> {
+                        try (value) {
+                            value.transferTo(responseBody);
+                        }
+                    },
+                    exchange);
         }
     }
 

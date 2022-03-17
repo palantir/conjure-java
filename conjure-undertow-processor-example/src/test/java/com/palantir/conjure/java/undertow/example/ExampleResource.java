@@ -24,6 +24,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import io.undertow.server.HttpServerExchange;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
@@ -72,6 +73,11 @@ final class ExampleResource implements ExampleService {
     @Override
     public Optional<CustomBinaryResponseBody> optionalNamedBinary() {
         return Optional.of(namedBinary());
+    }
+
+    @Override
+    public Optional<? extends ByteArrayInputStream> optionalWildStream() {
+        return Optional.of(new ByteArrayInputStream("binary".getBytes(StandardCharsets.UTF_8)));
     }
 
     @Override
