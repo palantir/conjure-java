@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Fix processor codegen for `Optional<Integer>` and `Optional<Double>`
+  links:
+  - https://github.com/palantir/conjure-java/pull/1711
