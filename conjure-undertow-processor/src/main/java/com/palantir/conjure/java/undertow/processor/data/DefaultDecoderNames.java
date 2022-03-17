@@ -77,6 +77,14 @@ final class DefaultDecoderNames {
             TypeMirror type, ContainerType inputType, ContainerType outType) {
         return getClassNameForTypeMirror(type)
                 .filter(SUPPORTED_CLASSES::contains)
+                .filter(className -> {
+                    // Conjure uses OptionalInt and OptionalDouble, we cannot use these methods
+                    // to construct Optional<Integer> and Optional<Double>.
+                    boolean isOptionalBoxedConjureType = outType == ContainerType.OPTIONAL
+                            && (Integer.class.getName().equals(className)
+                                    || Double.class.getName().equals(className));
+                    return !isOptionalBoxedConjureType;
+                })
                 .map(className -> getDefaultDecoderMethodName(className, inputType, outType))
                 .map(decoderMethodName ->
                         CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName))
