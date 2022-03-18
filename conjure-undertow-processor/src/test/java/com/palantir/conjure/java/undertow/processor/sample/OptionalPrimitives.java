@@ -22,6 +22,7 @@ import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 public interface OptionalPrimitives {
 
@@ -30,4 +31,7 @@ public interface OptionalPrimitives {
 
     @Handle(method = HttpMethod.GET, path = "/double")
     void doubles(@QueryParam("one") OptionalDouble one, @QueryParam("two") Optional<Double> two);
+
+    @Handle(method = HttpMethod.GET, path = "/long")
+    void longs(@QueryParam("one") OptionalLong one, @QueryParam("two") Optional<Long> two);
 }

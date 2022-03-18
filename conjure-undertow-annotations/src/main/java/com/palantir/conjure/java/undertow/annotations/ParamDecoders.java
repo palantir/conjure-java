@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.annotations;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.ri.ResourceIdentifier;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -229,6 +231,36 @@ public final class ParamDecoders {
         return DelegatingCollectionParamDecoder.of(serde::deserializeSafeLongSet);
     }
 
+    public static ParamDecoder<Long> longParamDecoder(PlainSerDe serde) {
+        return complexParamDecoder(serde, Long::parseLong);
+    }
+
+    public static ParamDecoder<OptionalLong> optionalLongParamDecoder(PlainSerDe serde) {
+        return DelegatingParamDecoder.of(
+                in -> OptionalLong.of(serde.deserializeComplex(in, Long::parseLong)), OptionalLong.empty());
+    }
+
+    public static CollectionParamDecoder<Long> longCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(in -> serde.deserializeComplex(in, Long::parseLong));
+    }
+
+    public static CollectionParamDecoder<OptionalLong> optionalLongCollectionParamDecoder(PlainSerDe serde) {
+        return DelegatingCollectionParamDecoder.of(in -> {
+            if (in == null || Iterables.isEmpty(in)) {
+                return OptionalLong.empty();
+            }
+            return OptionalLong.of(serde.deserializeComplex(in, Long::parseLong));
+        });
+    }
+
+    public static CollectionParamDecoder<List<Long>> longListCollectionParamDecoder(PlainSerDe serde) {
+        return complexListCollectionParamDecoder(serde, Long::parseLong);
+    }
+
+    public static CollectionParamDecoder<Set<Long>> longSetCollectionParamDecoder(PlainSerDe serde) {
+        return complexSetCollectionParamDecoder(serde, Long::parseLong);
+    }
+
     public static ParamDecoder<UUID> uuidParamDecoder(PlainSerDe serde) {
         return DelegatingParamDecoder.of(serde::deserializeUuid);
     }
@@ -273,7 +305,7 @@ public final class ParamDecoders {
         return DelegatingCollectionParamDecoder.of(value -> serde.deserializeOptionalComplex(value, factory));
     }
 
-    public <T> CollectionParamDecoder<List<T>> complexListCollectionParamDecoder(
+    public static <T> CollectionParamDecoder<List<T>> complexListCollectionParamDecoder(
             PlainSerDe serde, Function<String, T> factory) {
         return DelegatingCollectionParamDecoder.of(value -> serde.deserializeComplexList(value, factory));
     }
