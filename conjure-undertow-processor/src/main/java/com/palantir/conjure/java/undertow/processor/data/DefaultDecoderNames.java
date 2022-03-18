@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.lang.model.element.ElementKind;
@@ -56,7 +57,9 @@ final class DefaultDecoderNames {
             OptionalInt.class.getName(),
             ResourceIdentifier.class.getName(),
             SafeLong.class.getName(),
-            UUID.class.getName());
+            UUID.class.getName(),
+            Long.class.getName(),
+            OptionalLong.class.getName());
 
     private static final ImmutableSet<ContainerType> INPUT_TYPES =
             ImmutableSet.of(ContainerType.NONE, ContainerType.LIST);
@@ -82,7 +85,8 @@ final class DefaultDecoderNames {
                     // to construct Optional<Integer> and Optional<Double>.
                     boolean isOptionalBoxedConjureType = outType == ContainerType.OPTIONAL
                             && (Integer.class.getName().equals(className)
-                                    || Double.class.getName().equals(className));
+                                    || Double.class.getName().equals(className)
+                                    || Long.class.getName().equals(className));
                     return !isOptionalBoxedConjureType;
                 })
                 .map(className -> getDefaultDecoderMethodName(className, inputType, outType))

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Handle query/header/path `Optional<Long>` and `OptionalLong`
+  links:
+  - https://github.com/palantir/conjure-java/pull/1712

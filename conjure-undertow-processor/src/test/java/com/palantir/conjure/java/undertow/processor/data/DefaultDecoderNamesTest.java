@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,7 +85,8 @@ final class DefaultDecoderNamesTest {
                 // We handle these cases differently further down this method.
                 .filter(maybeName -> maybeName
                         .map(name -> !name.equals(OptionalDouble.class.getName())
-                                && !name.equals(OptionalInt.class.getName()))
+                                && !name.equals(OptionalInt.class.getName())
+                                && !name.equals(OptionalLong.class.getName()))
                         .orElse(true))
                 .collect(Collectors.toList());
 
@@ -108,19 +110,24 @@ final class DefaultDecoderNamesTest {
         return supportedClasses.stream()
                 .map(clazzName -> {
                     // For double and int, we use a separate optional type instead of wrapping it with Optional.
-                    if (outputContainer.equals(ContainerType.OPTIONAL)
-                            && clazzName.isPresent()
-                            && clazzName.get().equals(Double.class.getName())) {
-                        return Arguments.of(
-                                Optional.of(OptionalDouble.class.getName()), ContainerType.NONE, ContainerType.NONE);
-                    } else if (outputContainer.equals(ContainerType.OPTIONAL)
-                            && clazzName.isPresent()
-                            && clazzName.get().equals(Integer.class.getName())) {
-                        return Arguments.of(
-                                Optional.of(OptionalInt.class.getName()), ContainerType.NONE, ContainerType.NONE);
-                    } else {
-                        return Arguments.of(clazzName, inputContainer, outputContainer);
+                    if (outputContainer.equals(ContainerType.OPTIONAL) && clazzName.isPresent()) {
+                        String name = clazzName.get();
+                        if (name.equals(Double.class.getName())) {
+                            return Arguments.of(
+                                    Optional.of(OptionalDouble.class.getName()),
+                                    ContainerType.NONE,
+                                    ContainerType.NONE);
+                        }
+                        if (name.equals(Integer.class.getName())) {
+                            return Arguments.of(
+                                    Optional.of(OptionalInt.class.getName()), ContainerType.NONE, ContainerType.NONE);
+                        }
+                        if (name.equals(Long.class.getName())) {
+                            return Arguments.of(
+                                    Optional.of(OptionalLong.class.getName()), ContainerType.NONE, ContainerType.NONE);
+                        }
                     }
+                    return Arguments.of(clazzName, inputContainer, outputContainer);
                 })
                 .collect(Collectors.toList());
     }

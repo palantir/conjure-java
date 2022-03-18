@@ -15,12 +15,14 @@ import io.undertow.util.StatusCodes;
 import java.lang.Double;
 import java.lang.Exception;
 import java.lang.Integer;
+import java.lang.Long;
 import java.lang.Override;
 import java.lang.String;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
@@ -37,7 +39,10 @@ public final class OptionalPrimitivesEndpoints implements UndertowService {
 
     @Override
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
-        return ImmutableList.of(new IntegersEndpoint(runtime, delegate), new DoublesEndpoint(runtime, delegate));
+        return ImmutableList.of(
+                new IntegersEndpoint(runtime, delegate),
+                new DoublesEndpoint(runtime, delegate),
+                new LongsEndpoint(runtime, delegate));
     }
 
     private static final class IntegersEndpoint implements HttpHandler, Endpoint {
@@ -136,6 +141,58 @@ public final class OptionalPrimitivesEndpoints implements UndertowService {
         @Override
         public String name() {
             return "doubles";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class LongsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final OptionalPrimitives delegate;
+
+        private final Deserializer<OptionalLong> oneDeserializer;
+
+        private final Deserializer<Optional<Long>> twoDeserializer;
+
+        LongsEndpoint(UndertowRuntime runtime, OptionalPrimitives delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.oneDeserializer = new QueryParamDeserializer<>(
+                    "one", ParamDecoders.optionalLongCollectionParamDecoder(runtime.plainSerDe()));
+            this.twoDeserializer = new QueryParamDeserializer<>(
+                    "two", ParamDecoders.optionalComplexCollectionParamDecoder(runtime.plainSerDe(), Long::valueOf));
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            OptionalLong one = this.oneDeserializer.deserialize(exchange);
+            Optional<Long> two = this.twoDeserializer.deserialize(exchange);
+            this.delegate.longs(one, two);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/long";
+        }
+
+        @Override
+        public String serviceName() {
+            return "OptionalPrimitives";
+        }
+
+        @Override
+        public String name() {
+            return "longs";
         }
 
         @Override
