@@ -118,14 +118,15 @@ final class DefaultDecoderNames {
                 return Optional.of(CodeBlock.of("$T::parseShort", Short.class));
             case DECLARED:
                 DeclaredType declaredType = (DeclaredType) typeMirror;
-                return getValueOfDecoderFactoryFunction(declaredType)
-                        .or(() -> getStringConstructorDecoderFactoryFunction(declaredType));
+                return getValueOfDecoderFactoryFunction(declaredType, "valueOf")
+                        .or(() -> getStringConstructorDecoderFactoryFunction(declaredType))
+                        .or(() -> getValueOfDecoderFactoryFunction(declaredType, "of"));
             default:
                 return Optional.empty();
         }
     }
 
-    private static Optional<CodeBlock> getValueOfDecoderFactoryFunction(DeclaredType declaredType) {
+    private static Optional<CodeBlock> getValueOfDecoderFactoryFunction(DeclaredType declaredType, String methodName) {
         TypeElement typeElement = (TypeElement) declaredType.asElement();
         // T valueOf(String)
         return typeElement.getEnclosedElements().stream()
@@ -133,11 +134,11 @@ final class DefaultDecoderNames {
                 .map(ExecutableElement.class::cast)
                 .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
                         && element.getModifiers().contains(Modifier.STATIC)
-                        && element.getSimpleName().contentEquals("valueOf")
+                        && element.getSimpleName().contentEquals(methodName)
                         && element.getParameters().size() == 1
                         && isStringMirror(element.getParameters().get(0).asType())
                         && Objects.equals(TypeName.get(declaredType), TypeName.get(element.getReturnType())))
-                .map(_element -> CodeBlock.of("$T::valueOf", TypeName.get(declaredType)))
+                .map(_element -> CodeBlock.of("$T::" + methodName, TypeName.get(declaredType)))
                 .findFirst();
     }
 

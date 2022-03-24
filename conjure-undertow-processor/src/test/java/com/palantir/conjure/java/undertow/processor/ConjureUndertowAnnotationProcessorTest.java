@@ -32,6 +32,7 @@ import com.palantir.conjure.java.undertow.processor.sample.DeprecatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
+import com.palantir.conjure.java.undertow.processor.sample.OfFactory;
 import com.palantir.conjure.java.undertow.processor.sample.OptionalPrimitives;
 import com.palantir.conjure.java.undertow.processor.sample.OverloadedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterNotAnnotated;
@@ -75,6 +76,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testMultipleBodies() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, MultipleBodyInterface.class);
+    }
+
+    @Test
+    public void testOfFactoryMethod() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, OfFactory.class);
     }
 
     @Test

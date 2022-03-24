@@ -1,0 +1,84 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
+import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class OfFactoryEndpoints implements UndertowService {
+    private final OfFactory delegate;
+
+    private OfFactoryEndpoints(OfFactory delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(OfFactory delegate) {
+        return new OfFactoryEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new PingEndpoint(runtime, delegate));
+    }
+
+    private static final class PingEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final OfFactory delegate;
+
+        private final Deserializer<OfFactory.PathVariable> pathVarDeserializer;
+
+        PingEndpoint(UndertowRuntime runtime, OfFactory delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.pathVarDeserializer = new PathParamDeserializer<>(
+                    "pathVar", ParamDecoders.complexParamDecoder(runtime.plainSerDe(), OfFactory.PathVariable::of));
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            OfFactory.PathVariable pathVar = this.pathVarDeserializer.deserialize(exchange);
+            this.delegate.ping(pathVar);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/{pathVar}";
+        }
+
+        @Override
+        public String serviceName() {
+            return "OfFactory";
+        }
+
+        @Override
+        public String name() {
+            return "ping";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}
