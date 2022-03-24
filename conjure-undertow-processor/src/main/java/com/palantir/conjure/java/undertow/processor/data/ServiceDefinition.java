@@ -42,4 +42,6 @@ public interface ServiceDefinition {
     default boolean deprecated() {
         return false;
     }
+
+    Visibility visibility();
 }
