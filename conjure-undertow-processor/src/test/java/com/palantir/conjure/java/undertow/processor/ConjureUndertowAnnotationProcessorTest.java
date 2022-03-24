@@ -119,6 +119,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     }
 
     @Test
+    public void testPackagePrivateInterface() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, PackagePrivateInterface.class);
+    }
+
+    @Test
     public void testSafeLoggingAuthCookie() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, SafeLoggableAuthCookieParam.class))
                 .hadErrorContaining("BearerToken parameter cannot be annotated with safe logging annotations");

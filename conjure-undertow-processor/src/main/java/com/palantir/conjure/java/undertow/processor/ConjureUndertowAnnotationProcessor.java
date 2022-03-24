@@ -27,6 +27,7 @@ import com.palantir.conjure.java.undertow.processor.data.EndpointDefinition;
 import com.palantir.conjure.java.undertow.processor.data.EndpointDefinitions;
 import com.palantir.conjure.java.undertow.processor.data.ImmutableServiceDefinition;
 import com.palantir.conjure.java.undertow.processor.data.ServiceDefinition;
+import com.palantir.conjure.java.undertow.processor.data.Visibility;
 import com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator;
 import com.palantir.goethe.Goethe;
 import com.palantir.goethe.GoetheException;
@@ -153,6 +154,7 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
 
         ServiceDefinition serviceDefinition = ImmutableServiceDefinition.builder()
                 .serviceInterface(serviceInterface)
+                .visibility(Visibility.of(annotatedType))
                 .addAllEndpoints(endpoints)
                 .deprecated(MoreElements.isAnnotationPresent(annotatedType, Deprecated.class))
                 .build();
