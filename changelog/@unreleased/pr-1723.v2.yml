@@ -1,5 +1,5 @@
 type: improvement
 improvement:
-  description: annotation-processor uses `of(String)` factory methods by default
+  description: annotation-processor uses `of(String)` factory methods by default.
   links:
   - https://github.com/palantir/conjure-java/pull/1723
