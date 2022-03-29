@@ -61,4 +61,10 @@ public interface RequestContext {
      * @see javax.net.ssl.SSLSession#getPeerCertificates()
      */
     ImmutableList<Certificate> peerCertificates();
+
+    /**
+     * Returns the source address of the request, as an IP address (e.g. "172.18.0.1") if the source address can be
+     * resolved, or a hostname (e.g. "localhost") if it can not.
+     */
+    String sourceAddress();
 }
