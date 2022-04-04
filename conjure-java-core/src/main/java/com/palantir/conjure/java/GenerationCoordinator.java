@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java;
 
-import com.palantir.common.streams.MoreStreams;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.goethe.Goethe;
 import java.io.File;
@@ -28,12 +27,19 @@ import java.util.stream.Collectors;
 
 public class GenerationCoordinator {
 
-    private final Executor executor;
     private final Set<Generator> generators;
 
-    public GenerationCoordinator(Executor executor, Set<Generator> generators) {
-        this.executor = executor;
+    public GenerationCoordinator(Set<Generator> generators) {
         this.generators = generators;
+    }
+
+    /**
+     * Temporary backcompat shim because this module is published, despite being considered internal api.
+     * @deprecated use {@link GenerationCoordinator#GenerationCoordinator(Set)}.
+     */
+    @Deprecated
+    public GenerationCoordinator(Executor _executor, Set<Generator> generators) {
+        this(generators);
     }
 
     /**
@@ -41,11 +47,9 @@ public class GenerationCoordinator {
      * the instance's service and type generators.
      */
     public List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
-        return MoreStreams.inCompletionOrder(
-                        generators.stream().flatMap(generator -> generator.generate(conjureDefinition)),
-                        f -> Goethe.formatAndEmit(f, outputDir.toPath()),
-                        executor,
-                        Runtime.getRuntime().availableProcessors())
+        return generators.stream()
+                .flatMap(generator -> generator.generate(conjureDefinition))
+                .map(f -> Goethe.formatAndEmit(f, outputDir.toPath()))
                 .collect(Collectors.toList());
     }
 }

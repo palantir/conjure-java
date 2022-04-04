@@ -22,7 +22,6 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
@@ -39,8 +38,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import javax.annotation.Nullable;
 import picocli.CommandLine;
 
@@ -221,8 +218,6 @@ public final class ConjureJavaCli implements Runnable {
                 System.err.println("[WARNING] Using deprecated ByteBuffer codegen, please enable the "
                         + "--useImmutableBytes feature flag to opt into the preferred implementation");
             }
-            ExecutorService executor = Executors.newCachedThreadPool(
-                    new ThreadFactoryBuilder().setDaemon(true).build());
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
 
@@ -242,12 +237,9 @@ public final class ConjureJavaCli implements Runnable {
                 if (config.generateDialogue()) {
                     generatorBuilder.add(new DialogueServiceGenerator(config.options()));
                 }
-                new GenerationCoordinator(executor, generatorBuilder.build())
-                        .emit(conjureDefinition, config.outputDirectory());
+                new GenerationCoordinator(generatorBuilder.build()).emit(conjureDefinition, config.outputDirectory());
             } catch (IOException e) {
                 throw new SafeRuntimeException("Error parsing definition", e);
-            } finally {
-                executor.shutdown();
             }
         }
 
