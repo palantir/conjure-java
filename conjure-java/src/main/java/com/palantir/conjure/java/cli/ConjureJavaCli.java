@@ -221,7 +221,8 @@ public final class ConjureJavaCli implements Runnable {
                 System.err.println("[WARNING] Using deprecated ByteBuffer codegen, please enable the "
                         + "--useImmutableBytes feature flag to opt into the preferred implementation");
             }
-            ExecutorService executor = Executors.newCachedThreadPool(
+            ExecutorService executor = Executors.newFixedThreadPool(
+                    Runtime.getRuntime().availableProcessors(),
                     new ThreadFactoryBuilder().setDaemon(true).build());
             try {
                 ConjureDefinition conjureDefinition = OBJECT_MAPPER.readValue(config.input(), ConjureDefinition.class);
