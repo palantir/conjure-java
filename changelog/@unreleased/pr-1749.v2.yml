@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Limit conjure codegen concurrency to the expected parallelism
+  links:
+  - https://github.com/palantir/conjure-java/pull/1749
