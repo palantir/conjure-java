@@ -40,21 +40,26 @@ public final class ObjectGenerator implements Generator {
         List<TypeDefinition> types = definition.getTypes();
         Map<TypeName, TypeDefinition> typesMap = TypeFunctions.toTypesMap(types);
         TypeMapper typeMapper = new TypeMapper(typesMap, options);
-        return types.stream().map(typeDef -> generateInner(typeMapper, typesMap, typeDef));
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(typesMap);
+        return types.stream().map(typeDef -> generateInner(typeMapper, safetyEvaluator, typesMap, typeDef));
     }
 
     private JavaFile generateInner(
-            TypeMapper typeMapper, Map<TypeName, TypeDefinition> typesMap, TypeDefinition typeDef) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            Map<TypeName, TypeDefinition> typesMap,
+            TypeDefinition typeDef) {
         if (typeDef.accept(TypeDefinitionVisitor.IS_OBJECT)) {
             return BeanGenerator.generateBeanType(
-                    typeMapper, typeDef.accept(TypeDefinitionVisitor.OBJECT), typesMap, options);
+                    typeMapper, safetyEvaluator, typeDef.accept(TypeDefinitionVisitor.OBJECT), typesMap, options);
         } else if (typeDef.accept(TypeDefinitionVisitor.IS_UNION)) {
             return UnionGenerator.generateUnionType(
-                    typeMapper, typesMap, typeDef.accept(TypeDefinitionVisitor.UNION), options);
+                    typeMapper, safetyEvaluator, typesMap, typeDef.accept(TypeDefinitionVisitor.UNION), options);
         } else if (typeDef.accept(TypeDefinitionVisitor.IS_ENUM)) {
             return EnumGenerator.generateEnumType(typeDef.accept(TypeDefinitionVisitor.ENUM), options);
         } else if (typeDef.accept(TypeDefinitionVisitor.IS_ALIAS)) {
-            return AliasGenerator.generateAliasType(typeMapper, typeDef.accept(TypeDefinitionVisitor.ALIAS), options);
+            return AliasGenerator.generateAliasType(
+                    typeMapper, safetyEvaluator, typeDef.accept(TypeDefinitionVisitor.ALIAS), options);
         } else {
             throw new IllegalArgumentException("Unknown object definition type " + typeDef.getClass());
         }

@@ -85,6 +85,7 @@ public final class BeanGenerator {
     @SuppressWarnings("CyclomaticComplexity")
     public static JavaFile generateBeanType(
             TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Options options) {
@@ -102,8 +103,15 @@ public final class BeanGenerator {
                         ? ClassName.get(objectClass.packageName(), objectClass.simpleName(), "DefaultBuilder")
                         : builderClass;
 
+        // Use the fully-resolved/computed safety value for the top-level class, however
+        // fields (setters/getters) are annotated with declared values because complex objects
+        // provide safety information themselves.
+        ImmutableList<AnnotationSpec> safety =
+                ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.object(typeDef)));
+
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addAnnotations(safety)
                 .addFields(poetFields)
                 .addMethod(createConstructor(fields, poetFields))
                 .addMethods(createGetters(fields, typesMap, options));
@@ -154,7 +162,14 @@ public final class BeanGenerator {
                 typeBuilder
                         .addMethod(createBuilder(builderClass))
                         .addType(BeanBuilderGenerator.generate(
-                                typeMapper, objectClass, builderClass, typeDef, typesMap, options, Optional.empty()));
+                                typeMapper,
+                                safetyEvaluator,
+                                objectClass,
+                                builderClass,
+                                typeDef,
+                                typesMap,
+                                options,
+                                Optional.empty()));
             } else {
                 List<TypeSpec> interfaces = generateStageInterfaces(
                         objectClass,
@@ -200,6 +215,7 @@ public final class BeanGenerator {
                                 .build())
                         .addType(BeanBuilderGenerator.generate(
                                 typeMapper,
+                                safetyEvaluator,
                                 objectClass,
                                 builderClass,
                                 typeDef,
@@ -444,6 +460,7 @@ public final class BeanGenerator {
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
                         .build())
+                .addAnnotations(ConjureAnnotations.safety(field.conjureDef().getSafety()))
                 .returns(field.poetSpec().type);
         Type conjureDefType = field.conjureDef().getType();
         if (featureFlags.excludeEmptyOptionals()) {
@@ -520,11 +537,10 @@ public final class BeanGenerator {
                     .addCode("return $L;", SINGLETON_INSTANCE_NAME);
         } else {
             builder.addCode("return builder()");
-            fields.stream()
-                    .map(EnrichedField::poetSpec)
-                    .forEach(spec ->
-                            builder.addParameter(ParameterSpec.builder(getTypeNameWithoutOptional(spec), spec.name)
-                                    .build()));
+            fields.forEach(field -> builder.addParameter(ParameterSpec.builder(
+                            getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
+                    .addAnnotations(ConjureAnnotations.safety(field.conjureDef().getSafety()))
+                    .build()));
             // Follow order on adding methods on builder to comply with staged builders option if set
             sortedEnrichedFields(fields).map(EnrichedField::poetSpec).forEach(spec -> {
                 if (isOptional(spec)) {

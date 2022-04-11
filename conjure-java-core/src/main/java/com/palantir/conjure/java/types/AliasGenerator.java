@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -26,6 +27,7 @@ import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
@@ -35,11 +37,13 @@ import com.palantir.conjure.spec.Type.Visitor;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -53,14 +57,22 @@ public final class AliasGenerator {
 
     private AliasGenerator() {}
 
-    public static JavaFile generateAliasType(TypeMapper typeMapper, AliasDefinition typeDef, Options options) {
+    @SuppressWarnings("checkstyle:MethodLength")
+    public static JavaFile generateAliasType(
+            TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, AliasDefinition typeDef, Options options) {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
-        TypeName aliasTypeName = typeMapper.getClassName(typeDef.getAlias());
+        TypeName aliasTypeName =
+                ConjureAnnotations.withSafety(typeMapper.getClassName(typeDef.getAlias()), typeDef.getSafety());
 
         ClassName thisClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
+        Optional<LogSafety> safety = typeDef.getSafety();
+        ImmutableList<AnnotationSpec> safetyAnnotations = ConjureAnnotations.safety(safety);
+        Optional<LogSafety> computedSafety = safetyEvaluator.evaluate(typeDef.getAlias(), typeDef.getSafety());
+        ImmutableList<AnnotationSpec> computedSafetyAnnotations = ConjureAnnotations.safety(computedSafety);
 
         TypeSpec.Builder spec = TypeSpec.classBuilder(prefixedTypeName.getName())
+                .addAnnotations(computedSafetyAnnotations)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(aliasTypeName, "value", Modifier.PRIVATE, Modifier.FINAL)
@@ -68,6 +80,7 @@ public final class AliasGenerator {
                 .addMethod(MethodSpec.methodBuilder("get")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(JsonValue.class)
+                        .addAnnotations(safetyAnnotations)
                         .returns(aliasTypeName)
                         .addStatement("return value")
                         .build())
@@ -96,7 +109,9 @@ public final class AliasGenerator {
         if (maybeValueOfFactoryMethod.isPresent()) {
             spec.addMethod(MethodSpec.methodBuilder("valueOf")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addParameter(String.class, "value")
+                    .addParameter(ParameterSpec.builder(String.class, "value")
+                            .addAnnotations(safetyAnnotations)
+                            .build())
                     .returns(thisClass)
                     .addCode(maybeValueOfFactoryMethod.get())
                     .addAnnotations(
@@ -113,7 +128,7 @@ public final class AliasGenerator {
         spec.addMethod(MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"))
+                .addParameter(Parameters.nonnullParameter(aliasTypeName, "value", safety))
                 .returns(thisClass)
                 .addStatement("return new $T(value)", thisClass)
                 .build());
@@ -137,7 +152,9 @@ public final class AliasGenerator {
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                    .addParameter(TypeName.LONG, "value")
+                    .addParameter(ParameterSpec.builder(TypeName.LONG, "value")
+                            .addAnnotations(safetyAnnotations)
+                            .build())
                     .returns(thisClass)
                     .addCode(longCastCodeBlock)
                     .build());
@@ -145,7 +162,9 @@ public final class AliasGenerator {
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                    .addParameter(TypeName.INT, "value")
+                    .addParameter(ParameterSpec.builder(TypeName.INT, "value")
+                            .addAnnotations(safetyAnnotations)
+                            .build())
                     .returns(thisClass)
                     .addCode(intCastCodeBlock)
                     .build());
@@ -153,7 +172,9 @@ public final class AliasGenerator {
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                     .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                    .addParameter(BigDecimal.class, "value")
+                    .addParameter(ParameterSpec.builder(BigDecimal.class, "value")
+                            .addAnnotations(safetyAnnotations)
+                            .build())
                     .returns(thisClass)
                     .addCode(CodeBlock.builder()
                             .addStatement("return new $T(value.doubleValue())", thisClass)
@@ -186,7 +207,9 @@ public final class AliasGenerator {
             spec.addMethod(MethodSpec.methodBuilder("of")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                    .addParameter(ClassName.get(String.class), "value")
+                    .addParameter(ParameterSpec.builder(ClassName.get(String.class), "value")
+                            .addAnnotations(safetyAnnotations)
+                            .build())
                     .returns(thisClass)
                     .addCode(doubleFromStringCodeBlock)
                     .build());

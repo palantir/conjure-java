@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Safe
 @JsonDeserialize(builder = OptionalExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class OptionalExample {
@@ -26,6 +28,7 @@ public final class OptionalExample {
     }
 
     @JsonProperty("item")
+    @Safe
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<String> getItem() {
         return this.item;
@@ -50,7 +53,7 @@ public final class OptionalExample {
         return "OptionalExample{item: " + item + '}';
     }
 
-    public static OptionalExample of(String item) {
+    public static OptionalExample of(@Safe String item) {
         return builder().item(Optional.of(item)).build();
     }
 
@@ -83,7 +86,7 @@ public final class OptionalExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private Optional<String> item = Optional.empty();
+        private Optional<@Safe String> item = Optional.empty();
 
         private Builder() {}
 
@@ -94,13 +97,13 @@ public final class OptionalExample {
         }
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
-        public Builder item(@Nonnull Optional<String> item) {
+        public Builder item(@Safe @Nonnull Optional<@Safe String> item) {
             checkNotBuilt();
             this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
-        public Builder item(@Nonnull String item) {
+        public Builder item(@Safe @Nonnull String item) {
             checkNotBuilt();
             this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;

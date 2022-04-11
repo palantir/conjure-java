@@ -18,12 +18,19 @@ package com.palantir.conjure.java;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.Incubating;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.LogSafety;
+import com.palantir.logsafe.DoNotLog;
+import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.Unsafe;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import java.util.Optional;
 
 public final class ConjureAnnotations {
@@ -77,6 +84,44 @@ public final class ConjureAnnotations {
             return INCUBATING;
         }
         return ImmutableList.of();
+    }
+
+    public static ImmutableList<AnnotationSpec> safety(Optional<LogSafety> value) {
+        return value.map(safety -> {
+                    switch (safety.get()) {
+                        case SAFE:
+                            return Safe.class;
+                        case UNSAFE:
+                            return Unsafe.class;
+                        case DO_NOT_LOG:
+                            return DoNotLog.class;
+                        case UNKNOWN:
+                            // fall through
+                        default:
+                            throw new IllegalStateException("Unknown safety: " + safety);
+                    }
+                })
+                .map(clazz -> ImmutableList.of(AnnotationSpec.builder(clazz).build()))
+                .orElseGet(ImmutableList::of);
+    }
+
+    public static TypeName withSafety(TypeName typeName, Optional<LogSafety> maybeSafety) {
+        if (maybeSafety.isPresent()) {
+            if (typeName instanceof ParameterizedTypeName) {
+                ParameterizedTypeName param = (ParameterizedTypeName) typeName;
+                // Handle List/Set/Optional wrappers, however Map has not been implemented yet.
+                if (param.typeArguments.size() == 1) {
+                    TypeName typeArgument = Iterables.getOnlyElement(param.typeArguments);
+                    if (typeArgument instanceof ClassName) {
+                        ImmutableList<AnnotationSpec> annotations = safety(maybeSafety);
+                        return ParameterizedTypeName.get(param.rawType, typeArgument.annotated(annotations));
+                    } else if (typeArgument instanceof ParameterizedTypeName) {
+                        return ParameterizedTypeName.get(param.rawType, withSafety(typeArgument, maybeSafety));
+                    }
+                }
+            }
+        }
+        return typeName;
     }
 
     public static AnnotationSpec delegatingJsonCreator() {

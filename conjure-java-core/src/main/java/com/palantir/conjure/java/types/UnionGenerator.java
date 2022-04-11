@@ -39,9 +39,11 @@ import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
@@ -61,6 +63,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
@@ -87,6 +90,7 @@ public final class UnionGenerator {
 
     public static JavaFile generateUnionType(
             TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             UnionDefinition typeDef,
             Options options) {
@@ -98,13 +102,16 @@ public final class UnionGenerator {
         ClassName visitorBuilderClass = unionClass.nestedClass("VisitorBuilder");
         Map<FieldDefinition, TypeName> memberTypes = typeDef.getUnion().stream()
                 .collect(StableCollectors.toLinkedMap(
-                        Function.identity(), entry -> typeMapper.getClassName(entry.getType())));
+                        Function.identity(),
+                        entry -> ConjureAnnotations.withSafety(
+                                typeMapper.getClassName(entry.getType()), entry.getSafety())));
         List<FieldSpec> fields =
                 ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
                         typeDef.getTypeName().getName())
+                .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
@@ -166,7 +173,9 @@ public final class UnionGenerator {
                     // safe
                     MethodSpec.Builder builder = MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                            .addParameter(memberType, variableName)
+                            .addParameter(ParameterSpec.builder(memberType, variableName)
+                                    .addAnnotations(ConjureAnnotations.safety(memberTypeDef.getSafety()))
+                                    .build())
                             .addStatement(
                                     "return new $T(new $T($L))",
                                     unionClass,
@@ -188,8 +197,12 @@ public final class UnionGenerator {
         String valueParam = "value";
         MethodSpec.Builder builder = MethodSpec.methodBuilder("unknown")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(String.class, typeParam)
-                .addParameter(Object.class, valueParam)
+                .addParameter(ParameterSpec.builder(String.class, typeParam)
+                        .addAnnotation(Safe.class)
+                        .build())
+                .addParameter(ParameterSpec.builder(Object.class, valueParam)
+                        .addAnnotations(ConjureAnnotations.safety(SafetyEvaluator.UNKNOWN_UNION_VARINT_SAFETY))
+                        .build())
                 .returns(unionClass);
         // begin switch statement
         builder.beginControlFlow("switch($L)", Expressions.requireNonNull(typeParam, "Type is required"));
@@ -253,10 +266,14 @@ public final class UnionGenerator {
                 .addMethods(generateMemberVisitMethods(memberTypes));
         MethodSpec.Builder visitUnknownBuilder = MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
+                .addParameter(ParameterSpec.builder(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
+                        .addAnnotation(Safe.class)
+                        .build())
                 .returns(TYPE_VARIABLE);
         if (options.unionsWithUnknownValues()) {
-            visitUnknownBuilder.addParameter(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME);
+            visitUnknownBuilder.addParameter(ParameterSpec.builder(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
+                    .addAnnotations(ConjureAnnotations.safety(SafetyEvaluator.UNKNOWN_UNION_VARINT_SAFETY))
+                    .build());
         }
         visitorBuilder.addMethod(visitUnknownBuilder.build());
         visitorBuilder
@@ -291,7 +308,10 @@ public final class UnionGenerator {
                             .addAnnotations(ConjureAnnotations.deprecation(
                                     entry.getKey().getDeprecated()))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                            .addParameter(entry.getValue(), variableName)
+                            .addParameter(ParameterSpec.builder(entry.getValue(), variableName)
+                                    .addAnnotations(ConjureAnnotations.safety(
+                                            entry.getKey().getSafety()))
+                                    .build())
                             .returns(TYPE_VARIABLE)
                             .build();
                 })
@@ -332,10 +352,10 @@ public final class UnionGenerator {
             Map<FieldDefinition, TypeName> memberTypeMap,
             Options options) {
         ImmutableList.Builder<MethodSpec> setterMethods = ImmutableList.builder();
-        Stream<NameTypePair> memberTypes = sortedStageNameTypePairs(memberTypeMap);
-        PeekingIterator<NameTypePair> memberIter = Iterators.peekingIterator(memberTypes.iterator());
+        Stream<NameTypeMetadata> memberTypes = sortedStageNameTypePairs(memberTypeMap);
+        PeekingIterator<NameTypeMetadata> memberIter = Iterators.peekingIterator(memberTypes.iterator());
         while (memberIter.hasNext()) {
-            NameTypePair pair = memberIter.next();
+            NameTypeMetadata pair = memberIter.next();
             String nextBuilderStage = memberIter.hasNext() ? memberIter.peek().memberName : COMPLETED;
             ClassName nextVisitorStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStage);
             MethodSpec.Builder setterPrototype =
@@ -351,7 +371,7 @@ public final class UnionGenerator {
                     .addStatement("this.$1L = $1L", visitorFieldName(pair.memberName))
                     .addStatement("return this")
                     .build());
-            if (NameTypePair.UNKNOWN.equals(pair)) {
+            if (NameTypeMetadata.UNKNOWN.equals(pair)) {
                 setterMethods.addAll(unknownSpecificVisitorSetters(
                         enclosingClass, visitResultType, nextVisitorStageClassName, options));
             }
@@ -374,7 +394,10 @@ public final class UnionGenerator {
                     .addAnnotation(Override.class)
                     .addParameter(ParameterSpec.builder(
                                     ParameterizedTypeName.get(
-                                            ClassName.get(Function.class), UNKNOWN_MEMBER_TYPE, visitResultType),
+                                            ClassName.get(Function.class),
+                                            UNKNOWN_MEMBER_TYPE.annotated(AnnotationSpec.builder(Safe.class)
+                                                    .build()),
+                                            visitResultType),
                                     visitorName)
                             .addAnnotation(Nonnull.class)
                             .build())
@@ -456,7 +479,7 @@ public final class UnionGenerator {
     private static List<MethodSpec> allDelegatingVisitorMethods(
             Map<FieldDefinition, TypeName> memberTypeMap, TypeName visitorResultType, Options options) {
         return sortedStageNameTypePairs(memberTypeMap)
-                .map(pair -> NameTypePair.UNKNOWN.equals(pair) && options.unionsWithUnknownValues()
+                .map(pair -> NameTypeMetadata.UNKNOWN.equals(pair) && options.unionsWithUnknownValues()
                         ? MethodSpec.methodBuilder(visitMethodName(pair.memberName))
                                 .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(Override.class)
@@ -519,16 +542,24 @@ public final class UnionGenerator {
      * visitor builder. Special-cases generation of a {@code BiFunction<String, Map<String, Object>, T>} in the case
      * of the new unknownVisitor.
      */
-    private static TypeName visitorObjectTypeName(NameTypePair member, TypeName visitResultType, Options options) {
+    private static TypeName visitorObjectTypeName(NameTypeMetadata member, TypeName visitResultType, Options options) {
         if (member.type.equals(TypeName.INT)) {
             return ParameterizedTypeName.get(ClassName.get(IntFunction.class), visitResultType);
         } else if (member.type.equals(TypeName.DOUBLE)) {
             return ParameterizedTypeName.get(ClassName.get(DoubleFunction.class), visitResultType);
-        } else if (NameTypePair.UNKNOWN.equals(member) && options.unionsWithUnknownValues()) {
+        } else if (NameTypeMetadata.UNKNOWN.equals(member) && options.unionsWithUnknownValues()) {
             return ParameterizedTypeName.get(
-                    ClassName.get(BiFunction.class), UNKNOWN_MEMBER_TYPE, UNKNOWN_VALUE_TYPE, visitResultType);
+                    ClassName.get(BiFunction.class),
+                    UNKNOWN_MEMBER_TYPE.annotated(
+                            AnnotationSpec.builder(Safe.class).build()),
+                    UNKNOWN_VALUE_TYPE.annotated(
+                            ConjureAnnotations.safety(SafetyEvaluator.UNKNOWN_UNION_VARINT_SAFETY)),
+                    visitResultType);
         } else {
-            return ParameterizedTypeName.get(ClassName.get(Function.class), member.type.box(), visitResultType);
+            return ParameterizedTypeName.get(
+                    ClassName.get(Function.class),
+                    member.type.box().annotated(ConjureAnnotations.safety(member.safety)),
+                    visitResultType);
         }
     }
 
@@ -550,10 +581,10 @@ public final class UnionGenerator {
             Options options) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         List<TypeSpec> interfaces = new ArrayList<>();
-        PeekingIterator<NameTypePair> memberIter =
+        PeekingIterator<NameTypeMetadata> memberIter =
                 Iterators.peekingIterator(sortedStageNameTypePairs(memberTypes).iterator());
         while (memberIter.hasNext()) {
-            NameTypePair member = memberIter.next();
+            NameTypeMetadata member = memberIter.next();
             String nextBuilderStageName = memberIter.hasNext() ? memberIter.peek().memberName : COMPLETED;
             ClassName nextStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStageName);
             interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, member.memberName))
@@ -563,7 +594,7 @@ public final class UnionGenerator {
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .build())
                     .addMethods(
-                            NameTypePair.UNKNOWN.equals(member)
+                            NameTypeMetadata.UNKNOWN.equals(member)
                                     ? unknownSpecificVisitorPrototypes(visitResultType, nextStageClassName, options)
                                     : ImmutableList.of())
                     .build());
@@ -589,7 +620,10 @@ public final class UnionGenerator {
                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                     .addParameter(ParameterSpec.builder(
                                     ParameterizedTypeName.get(
-                                            ClassName.get(Function.class), UNKNOWN_MEMBER_TYPE, visitResultType),
+                                            ClassName.get(Function.class),
+                                            UNKNOWN_MEMBER_TYPE.annotated(AnnotationSpec.builder(Safe.class)
+                                                    .build()),
+                                            visitResultType),
                                     visitorFieldName("unknown"))
                             .addAnnotation(Nonnull.class)
                             .build())
@@ -605,13 +639,15 @@ public final class UnionGenerator {
         return methods.build();
     }
 
-    private static Stream<NameTypePair> sortedStageNameTypePairs(Map<FieldDefinition, TypeName> memberTypes) {
+    private static Stream<NameTypeMetadata> sortedStageNameTypePairs(Map<FieldDefinition, TypeName> memberTypes) {
         return Stream.concat(
                 memberTypes.entrySet().stream()
-                        .map(entry -> new NameTypePair(
-                                sanitizeUnknown(entry.getKey().getFieldName().get()), entry.getValue()))
+                        .map(entry -> new NameTypeMetadata(
+                                sanitizeUnknown(entry.getKey().getFieldName().get()),
+                                entry.getValue(),
+                                entry.getKey().getSafety()))
                         .sorted(Comparator.comparing(p -> p.memberName)),
-                Stream.of(NameTypePair.UNKNOWN));
+                Stream.of(NameTypeMetadata.UNKNOWN));
     }
 
     /**
@@ -623,7 +659,7 @@ public final class UnionGenerator {
      * </pre>
      */
     private static MethodSpec.Builder visitorBuilderSetterPrototype(
-            NameTypePair member, TypeName visitResultType, ClassName nextBuilderStage, Options options) {
+            NameTypeMetadata member, TypeName visitResultType, ClassName nextBuilderStage, Options options) {
         TypeName visitorObject = visitorObjectTypeName(member, visitResultType, options);
         return MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(member.memberName))
                 .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(member.memberName))
@@ -910,15 +946,18 @@ public final class UnionGenerator {
 
     private UnionGenerator() {}
 
-    private static final class NameTypePair {
+    private static final class NameTypeMetadata {
         private final String memberName;
         private final TypeName type;
+        private final Optional<LogSafety> safety;
 
-        static final NameTypePair UNKNOWN = new NameTypePair("unknown", UNKNOWN_MEMBER_TYPE);
+        static final NameTypeMetadata UNKNOWN =
+                new NameTypeMetadata("unknown", UNKNOWN_MEMBER_TYPE, SafetyEvaluator.UNKNOWN_UNION_VARINT_SAFETY);
 
-        private NameTypePair(String memberName, TypeName type) {
+        private NameTypeMetadata(String memberName, TypeName type, Optional<LogSafety> safety) {
             this.memberName = memberName;
             this.type = type;
+            this.safety = safety;
         }
     }
 }

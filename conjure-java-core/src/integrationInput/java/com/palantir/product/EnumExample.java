@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +25,7 @@ import javax.annotation.Nonnull;
  * There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
+@Safe
 @Immutable
 public final class EnumExample {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
@@ -75,7 +77,7 @@ public final class EnumExample {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     @SuppressWarnings("deprecation")
-    public static EnumExample valueOf(@Nonnull String value) {
+    public static EnumExample valueOf(@Nonnull @Safe String value) {
         Preconditions.checkNotNull(value, "value cannot be null");
         String upperCasedValue = value.toUpperCase(Locale.ROOT);
         switch (upperCasedValue) {

@@ -42,7 +42,9 @@ types:
           binary: binary
       OptionalExample:
         fields:
-          item: optional<string>
+          item:
+            type: optional<string>
+            safety: safe
       CovariantOptionalExample:
         fields:
           item: optional<any>
@@ -98,6 +100,7 @@ types:
           uuid: uuid
       StringAliasExample:
         alias: string
+        safety: safe
       NestedStringAliasExample:
         alias: StringAliasExample
       DoubleAliasExample:
@@ -249,7 +252,9 @@ types:
             deprecated: Prefer `foo`.
       SingleUnion:
         union:
-          foo: string
+          foo:
+            type: string
+            safety: safe
       SimpleEnum:
         values:
           - VALUE
@@ -269,6 +274,7 @@ types:
         alias: ExternalLongAliasOne
       OptionalAlias:
         alias: optional<string>
+        safety: safe
       ListAlias:
         alias: list<string>
       SetAlias:
