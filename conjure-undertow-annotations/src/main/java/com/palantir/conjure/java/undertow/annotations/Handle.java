@@ -48,7 +48,7 @@ public @interface Handle {
     /**
      * Response body {@link SerializerFactory}.
      *
-     * @return class that implements a zero-arg constructor to be used to deserialize the response
+     * @return class that implements a zero-arg constructor to be used to serialize the response
      */
     Class<? extends SerializerFactory> produces() default DefaultSerDe.class;
 
@@ -65,7 +65,7 @@ public @interface Handle {
         /**
          * Custom body {@link DeserializerFactory}.
          *
-         * @return class that implements a zero-arg constructor to be used to serialize the body. Defaults to
+         * @return class that implements a zero-arg constructor to be used to deserialize the body. Defaults to
          * {@link DefaultSerDe}
          */
         Class<? extends DeserializerFactory> value() default DefaultSerDe.class;
