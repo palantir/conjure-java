@@ -107,7 +107,7 @@ public final class SingleUnion {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, @Unsafe T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = (unknownType, _unknownValue) -> unknownVisitor.apply(unknownType);
             return this;
@@ -147,7 +147,7 @@ public final class SingleUnion {
     public interface UnknownStageVisitorBuilder<T> {
         Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor);
 
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, @Unsafe T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
