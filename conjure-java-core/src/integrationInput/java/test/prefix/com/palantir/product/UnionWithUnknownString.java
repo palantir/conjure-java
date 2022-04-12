@@ -11,7 +11,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Unsafe
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionWithUnknownString {
     private final Base value;
@@ -38,7 +41,7 @@ public final class UnionWithUnknownString {
         return new UnionWithUnknownString(new Unknown_Wrapper(value));
     }
 
-    public static UnionWithUnknownString unknown(String type, Object value) {
+    public static UnionWithUnknownString unknown(@Safe String type, @Unsafe Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "unknown":
                 throw new SafeIllegalArgumentException(
@@ -74,7 +77,7 @@ public final class UnionWithUnknownString {
     public interface Visitor<T> {
         T visitUnknown_(String value);
 
-        T visitUnknown(String unknownType);
+        T visitUnknown(@Safe String unknownType);
 
         static <T> Unknown_StageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -85,7 +88,7 @@ public final class UnionWithUnknownString {
             implements Unknown_StageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
         private Function<String, T> unknown_Visitor;
 
-        private Function<String, T> unknownVisitor;
+        private Function<@Unsafe String, T> unknownVisitor;
 
         @Override
         public UnknownStageVisitorBuilder<T> unknown_(@Nonnull Function<String, T> unknown_Visitor) {
@@ -95,7 +98,7 @@ public final class UnionWithUnknownString {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Unsafe String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -114,7 +117,7 @@ public final class UnionWithUnknownString {
         @Override
         public Visitor<T> build() {
             final Function<String, T> unknown_Visitor = this.unknown_Visitor;
-            final Function<String, T> unknownVisitor = this.unknownVisitor;
+            final Function<@Unsafe String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitUnknown_(String value) {
@@ -134,7 +137,7 @@ public final class UnionWithUnknownString {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Unsafe String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }

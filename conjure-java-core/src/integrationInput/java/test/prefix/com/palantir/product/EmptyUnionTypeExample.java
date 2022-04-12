@@ -8,7 +8,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,6 +19,7 @@ import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Unsafe
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class EmptyUnionTypeExample {
     private final Base value;
@@ -31,7 +34,7 @@ public final class EmptyUnionTypeExample {
         return value;
     }
 
-    public static EmptyUnionTypeExample unknown(String type, Object value) {
+    public static EmptyUnionTypeExample unknown(@Safe String type, @Unsafe Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             default:
                 return new EmptyUnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
@@ -62,7 +65,7 @@ public final class EmptyUnionTypeExample {
     }
 
     public interface Visitor<T> {
-        T visitUnknown(String unknownType);
+        T visitUnknown(@Safe String unknownType);
 
         static <T> UnknownStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -71,10 +74,10 @@ public final class EmptyUnionTypeExample {
 
     private static final class VisitorBuilder<T>
             implements UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
-        private Function<String, T> unknownVisitor;
+        private Function<@Unsafe String, T> unknownVisitor;
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Unsafe String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -91,7 +94,7 @@ public final class EmptyUnionTypeExample {
 
         @Override
         public Visitor<T> build() {
-            final Function<String, T> unknownVisitor = this.unknownVisitor;
+            final Function<@Unsafe String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitUnknown(String value) {
@@ -102,7 +105,7 @@ public final class EmptyUnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Unsafe String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Safe
 @JsonDeserialize(builder = EnumFieldExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class EnumFieldExample {

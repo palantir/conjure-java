@@ -11,7 +11,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import java.util.function.IntFunction;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Unsafe
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class Union {
     private final Base value;
@@ -57,7 +60,7 @@ public final class Union {
         return new Union(new BazWrapper(value));
     }
 
-    public static Union unknown(String type, Object value) {
+    public static Union unknown(@Safe String type, @Unsafe Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "foo":
                 throw new SafeIllegalArgumentException(
@@ -112,7 +115,7 @@ public final class Union {
         @Deprecated
         T visitBaz(long value);
 
-        T visitUnknown(String unknownType, Object unknownValue);
+        T visitUnknown(@Safe String unknownType, @Unsafe Object unknownValue);
 
         static <T> BarStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -131,7 +134,7 @@ public final class Union {
 
         private Function<String, T> fooVisitor;
 
-        private BiFunction<String, Object, T> unknownVisitor;
+        private BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor;
 
         @Override
         public BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor) {
@@ -155,14 +158,15 @@ public final class Union {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(
+                @Nonnull BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = (unknownType, _unknownValue) -> unknownVisitor.apply(unknownType);
             return this;
@@ -182,7 +186,7 @@ public final class Union {
             final IntFunction<T> barVisitor = this.barVisitor;
             final Function<Long, T> bazVisitor = this.bazVisitor;
             final Function<String, T> fooVisitor = this.fooVisitor;
-            final BiFunction<String, Object, T> unknownVisitor = this.unknownVisitor;
+            final BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitBar(int value) {
@@ -220,9 +224,9 @@ public final class Union {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<String, Object, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor);
 
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }

@@ -77,13 +77,19 @@ public final class BeanBuilderGenerator {
     private static final String CHECK_NOT_BUILT_METHOD = "checkNotBuilt";
 
     private final TypeMapper typeMapper;
+    private final SafetyEvaluator safetyEvaluator;
     private final ClassName builderClass;
     private final ClassName objectClass;
     private final Options options;
 
     private BeanBuilderGenerator(
-            TypeMapper typeMapper, ClassName builderClass, ClassName objectClass, Options options) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            ClassName builderClass,
+            ClassName objectClass,
+            Options options) {
         this.typeMapper = typeMapper;
+        this.safetyEvaluator = safetyEvaluator;
         this.builderClass = builderClass;
         this.objectClass = objectClass;
         this.options = options;
@@ -91,13 +97,14 @@ public final class BeanBuilderGenerator {
 
     public static TypeSpec generate(
             TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
             ClassName objectClass,
             ClassName builderClass,
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             Options options,
             Optional<ClassName> builderInterfaceClass) {
-        return new BeanBuilderGenerator(typeMapper, builderClass, objectClass, options)
+        return new BeanBuilderGenerator(typeMapper, safetyEvaluator, builderClass, objectClass, options)
                 .generate(typeDef, typesMap, builderInterfaceClass);
     }
 
@@ -237,9 +244,8 @@ public final class BeanBuilderGenerator {
     }
 
     private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
-        FieldSpec.Builder spec = FieldSpec.builder(
-                typeMapper.getClassName(field.getType()), JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
-
+        TypeName typeName = ConjureAnnotations.withSafety(typeMapper.getClassName(field.getType()), field.getSafety());
+        FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (field.getType().accept(TypeVisitor.IS_LIST)) {
             spec.initializer("new $T<>()", ArrayList.class);
         } else if (field.getType().accept(TypeVisitor.IS_SET)) {
@@ -306,7 +312,8 @@ public final class BeanBuilderGenerator {
         MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
                 .addParameter(Parameters.nonnullParameter(
                         BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(field.type, type, typeMapper),
-                        field.name))
+                        field.name,
+                        enriched.conjureDef().getSafety()))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 

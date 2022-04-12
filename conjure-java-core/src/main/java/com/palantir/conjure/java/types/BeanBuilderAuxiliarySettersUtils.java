@@ -55,7 +55,9 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(returnClass)
                 .addParameter(Parameters.nonnullParameter(
-                        widenParameterIfPossible(field.type, type, typeMapper), field.name));
+                        widenParameterIfPossible(field.type, type, typeMapper),
+                        field.name,
+                        enriched.conjureDef().getSafety()));
     }
 
     public static MethodSpec.Builder createOptionalSetterBuilder(
@@ -63,7 +65,10 @@ public final class BeanBuilderAuxiliarySettersUtils {
         FieldSpec field = enriched.poetSpec();
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
         return publicSetter(enriched, returnClass)
-                .addParameter(Parameters.nonnullParameter(typeMapper.getClassName(type.getItemType()), field.name));
+                .addParameter(Parameters.nonnullParameter(
+                        typeMapper.getClassName(type.getItemType()),
+                        field.name,
+                        enriched.conjureDef().getSafety()));
     }
 
     public static MethodSpec.Builder createItemSetterBuilder(

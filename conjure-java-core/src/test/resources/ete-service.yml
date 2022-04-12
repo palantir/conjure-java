@@ -13,6 +13,7 @@ types:
     objects:
       StringAliasExample:
         alias: string
+        safety: safe
       NestedStringAliasExample:
         alias: StringAliasExample
       SimpleEnum:

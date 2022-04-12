@@ -3,9 +3,11 @@ package test.prefix.com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class StringAliasExample {
     private final String value;
@@ -15,6 +17,7 @@ public final class StringAliasExample {
     }
 
     @JsonValue
+    @Safe
     public String get() {
         return value;
     }
@@ -35,12 +38,12 @@ public final class StringAliasExample {
         return value.hashCode();
     }
 
-    public static StringAliasExample valueOf(String value) {
+    public static StringAliasExample valueOf(@Safe String value) {
         return of(value);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static StringAliasExample of(@Nonnull String value) {
+    public static StringAliasExample of(@Safe @Nonnull String value) {
         return new StringAliasExample(value);
     }
 }

@@ -31,6 +31,7 @@ import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
 import com.palantir.conjure.spec.ErrorNamespace;
 import com.palantir.conjure.spec.FieldDefinition;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
@@ -39,12 +40,14 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
@@ -145,11 +148,22 @@ public final class ErrorGenerator implements Generator {
                             entry.getErrorName().getName(),
                             shouldThrowVar);
                     methodBuilder.addJavadoc("@param $L $L\n", shouldThrowVar, "Cause the method to throw when true");
-                    Streams.concat(entry.getSafeArgs().stream(), entry.getUnsafeArgs().stream())
+                    Streams.concat(
+                                    entry.getSafeArgs().stream().map(field -> FieldDefinition.builder()
+                                            .from(field)
+                                            .safety(LogSafety.SAFE)
+                                            .build()),
+                                    entry.getUnsafeArgs().stream().map(field -> FieldDefinition.builder()
+                                            .from(field)
+                                            .safety(LogSafety.UNSAFE)
+                                            .build()))
                             .forEach(arg -> {
-                                methodBuilder.addParameter(
-                                        typeMapper.getClassName(arg.getType()),
-                                        arg.getFieldName().get());
+                                methodBuilder.addParameter(ParameterSpec.builder(
+                                                ConjureAnnotations.withSafety(
+                                                        typeMapper.getClassName(arg.getType()), arg.getSafety()),
+                                                arg.getFieldName().get())
+                                        .addAnnotations(ConjureAnnotations.safety(arg.getSafety()))
+                                        .build());
                                 methodBuilder.addJavadoc(
                                         "@param $L $L",
                                         arg.getFieldName().get(),
@@ -241,9 +255,12 @@ public final class ErrorGenerator implements Generator {
 
     private static void processArg(
             TypeMapper typeMapper, MethodSpec.Builder methodBuilder, FieldDefinition argDefinition, boolean isSafe) {
+        Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
         String argName = argDefinition.getFieldName().get();
-        TypeName argType = typeMapper.getClassName(argDefinition.getType());
-        methodBuilder.addParameter(argType, argName);
+        TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
+        methodBuilder.addParameter(ParameterSpec.builder(argType, argName)
+                .addAnnotations(ConjureAnnotations.safety(safety))
+                .build());
         Class<?> clazz = isSafe ? SafeArg.class : UnsafeArg.class;
         methodBuilder.addCode(",\n    $T.of($S, $L)", clazz, argName, argName);
         argDefinition

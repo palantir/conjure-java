@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Implement support for conjure log-safety
+  links:
+  - https://github.com/palantir/conjure-java/pull/1753

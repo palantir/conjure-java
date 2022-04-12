@@ -27,6 +27,7 @@ import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
+import com.palantir.logsafe.Safe;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -74,6 +75,7 @@ public final class EnumGenerator {
             EnumDefinition typeDef, ClassName thisClass, ClassName enumClass, ClassName visitorClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
+                .addAnnotation(Safe.class)
                 .addAnnotation(Immutable.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addType(createEnum(enumClass, typeDef.getValues(), true))
@@ -238,6 +240,7 @@ public final class EnumGenerator {
     private static MethodSpec createValueOf(ClassName thisClass, List<EnumValueDefinition> values) {
         ParameterSpec param = ParameterSpec.builder(ClassName.get(String.class), "value")
                 .addAnnotation(Nonnull.class)
+                .addAnnotation(Safe.class)
                 .build();
 
         CodeBlock.Builder parser = CodeBlock.builder().beginControlFlow("switch (upperCasedValue)");

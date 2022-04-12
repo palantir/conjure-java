@@ -3,9 +3,11 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class NestedStringAliasExample {
     private final StringAliasExample value;
