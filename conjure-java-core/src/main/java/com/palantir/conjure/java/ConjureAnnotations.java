@@ -87,7 +87,8 @@ public final class ConjureAnnotations {
     }
 
     public static ImmutableList<AnnotationSpec> safety(Optional<LogSafety> value) {
-        return value.map(safety -> {
+        return value
+                .map(safety -> {
                     switch (safety.get()) {
                         case SAFE:
                             return Safe.class;
