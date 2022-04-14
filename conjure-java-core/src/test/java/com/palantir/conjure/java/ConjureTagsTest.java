@@ -19,10 +19,13 @@ package com.palantir.conjure.java;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.google.common.collect.ImmutableMap;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ArgumentName;
 import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.ExternalReference;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
@@ -30,7 +33,6 @@ import com.palantir.conjure.spec.TypeName;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import com.squareup.javapoet.ClassName;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
@@ -38,45 +40,41 @@ class ConjureTagsTest {
 
     @Test
     void testEmpty() {
-        assertThat(ConjureTags.safetyAnnotations(tags())).isEmpty();
+        assertThat(ConjureTags.safety(tags())).isEmpty();
     }
 
     @Test
     void testUnknown() {
-        assertThat(ConjureTags.safetyAnnotations(tags("unknown tag"))).isEmpty();
+        assertThat(ConjureTags.safety(tags("unknown tag"))).isEmpty();
     }
 
     @Test
     void testSafe() {
-        assertThat(ConjureTags.safetyAnnotations(tags("safe")))
-                .hasSize(1)
-                .allSatisfy(annotationSpec -> assertThat(annotationSpec.type).isEqualTo(ClassName.get(Safe.class)));
+        assertThat(ConjureTags.safety(tags("safe"))).hasValue(LogSafety.SAFE);
     }
 
     @Test
     void testUnsafe() {
-        assertThat(ConjureTags.safetyAnnotations(tags("unsafe")))
-                .hasSize(1)
-                .allSatisfy(annotationSpec -> assertThat(annotationSpec.type).isEqualTo(ClassName.get(Unsafe.class)));
+        assertThat(ConjureTags.safety(tags("unsafe"))).hasValue(LogSafety.UNSAFE);
     }
 
     @Test
     void testSafeAndUnsafe() {
-        assertThatThrownBy(() -> ConjureTags.safetyAnnotations(tags("safe", "unsafe")))
+        assertThatThrownBy(() -> ConjureTags.safety(tags("safe", "unsafe")))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasMessageContaining("Tags cannot include both safe and unsafe");
     }
 
     @Test
     void testUnexpectedCase() {
-        assertThatThrownBy(() -> ConjureTags.safetyAnnotations(tags("Safe")))
+        assertThatThrownBy(() -> ConjureTags.safety(tags("Safe")))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasMessageContaining("Unexpected capitalization");
     }
 
     @Test
     void testSafeMarkerAndTag() {
-        assertThatThrownBy(() -> ConjureTags.safetyAnnotations(ArgumentDefinition.builder()
+        assertThatThrownBy(() -> ConjureTags.safety(ArgumentDefinition.builder()
                         .from(tags("safe"))
                         .markers(Type.external(ExternalReference.builder()
                                 .externalReference(TypeName.of(
@@ -85,8 +83,86 @@ class ConjureTagsTest {
                                 .fallback(Type.primitive(PrimitiveType.ANY))
                                 .build()))
                         .build()))
-                .isInstanceOf(SafeIllegalStateException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Unexpected com.palantir.logsafe.Safe marker in addition to a 'safe' tag");
+    }
+
+    @Test
+    void testUnsafeMarkerAndSafeTag() {
+        assertThatThrownBy(() -> ConjureTags.safety(ArgumentDefinition.builder()
+                        .from(tags("safe"))
+                        .markers(Type.external(ExternalReference.builder()
+                                .externalReference(TypeName.of(
+                                        Unsafe.class.getSimpleName(),
+                                        Unsafe.class.getPackage().getName()))
+                                .fallback(Type.primitive(PrimitiveType.ANY))
+                                .build()))
+                        .build()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unexpected com.palantir.logsafe.Unsafe marker in addition to a 'safe' tag");
+    }
+
+    @Test
+    void testSafeMarkerAndUnsafeTag() {
+        assertThatThrownBy(() -> ConjureTags.safety(ArgumentDefinition.builder()
+                        .from(tags("unsafe"))
+                        .markers(Type.external(ExternalReference.builder()
+                                .externalReference(TypeName.of(
+                                        Safe.class.getSimpleName(),
+                                        Safe.class.getPackage().getName()))
+                                .fallback(Type.primitive(PrimitiveType.ANY))
+                                .build()))
+                        .build()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unexpected com.palantir.logsafe.Safe marker in addition to a 'unsafe' tag");
+    }
+
+    @Test
+    void testUnsafeMarkerAndTag() {
+        assertThatThrownBy(() -> ConjureTags.safety(ArgumentDefinition.builder()
+                        .from(tags("unsafe"))
+                        .markers(Type.external(ExternalReference.builder()
+                                .externalReference(TypeName.of(
+                                        Unsafe.class.getSimpleName(),
+                                        Unsafe.class.getPackage().getName()))
+                                .fallback(Type.primitive(PrimitiveType.ANY))
+                                .build()))
+                        .build()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unexpected com.palantir.logsafe.Unsafe marker in addition to a 'unsafe' tag");
+    }
+
+    @Test
+    void testMarkerAndTypeSafetyDisagreement() {
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(ImmutableMap.of());
+        ArgumentDefinition argument = ArgumentDefinition.builder()
+                .argName(ArgumentName.of("name"))
+                .markers(Type.external(ExternalReference.builder()
+                        .externalReference(TypeName.of(
+                                Unsafe.class.getSimpleName(),
+                                Unsafe.class.getPackage().getName()))
+                        .fallback(Type.primitive(PrimitiveType.ANY))
+                        .build()))
+                .type(Type.primitive(PrimitiveType.BEARERTOKEN))
+                .paramType(ParameterType.body(BodyParameterType.of()))
+                .build();
+        assertThatThrownBy(() -> ConjureTags.validateArgument(argument, safetyEvaluator))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Declared argument safety is incompatible with the provided type");
+    }
+
+    @Test
+    void testTagAndTypeSafetyDisagreement() {
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(ImmutableMap.of());
+        ArgumentDefinition argument = ArgumentDefinition.builder()
+                .argName(ArgumentName.of("name"))
+                .tags("safe")
+                .type(Type.primitive(PrimitiveType.BEARERTOKEN))
+                .paramType(ParameterType.body(BodyParameterType.of()))
+                .build();
+        assertThatThrownBy(() -> ConjureTags.validateArgument(argument, safetyEvaluator))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Declared argument safety is incompatible with the provided type");
     }
 
     private static ArgumentDefinition tags(String... tags) {

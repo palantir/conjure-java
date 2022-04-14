@@ -60,33 +60,33 @@ public interface TestServiceBlocking {
      * @apiNote {@code POST /catalog/datasets}
      */
     @ClientEndpoint(method = "POST", path = "/catalog/datasets")
-    Dataset createDataset(AuthHeader authHeader, String testHeaderArg, CreateDatasetRequest request);
+    Dataset createDataset(AuthHeader authHeader, @Safe String testHeaderArg, CreateDatasetRequest request);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}}
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
-    Optional<Dataset> getDataset(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    Optional<Dataset> getDataset(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw}
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
     @MustBeClosed
-    InputStream getRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    InputStream getRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased}
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
     @MustBeClosed
-    InputStream getAliasedRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    InputStream getAliasedRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe}
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
-    Optional<InputStream> maybeGetRawData(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    Optional<InputStream> maybeGetRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased}
@@ -98,7 +98,7 @@ public interface TestServiceBlocking {
      * @apiNote {@code POST /catalog/datasets/upload-raw}
      */
     @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
-    void uploadRawData(AuthHeader authHeader, BinaryRequestBody input);
+    void uploadRawData(AuthHeader authHeader, @Safe BinaryRequestBody input);
 
     /**
      * @apiNote {@code POST /catalog/datasets/upload-raw-aliased}
@@ -111,7 +111,7 @@ public interface TestServiceBlocking {
      * @param datasetRid A valid dataset resource identifier.
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
-    Set<String> getBranches(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    Set<String> getBranches(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
@@ -121,19 +121,19 @@ public interface TestServiceBlocking {
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecated")
     @Deprecated
-    Set<String> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    Set<String> getBranchesDeprecated(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve}
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
-    Optional<String> resolveBranch(AuthHeader authHeader, ResourceIdentifier datasetRid, String branch);
+    Optional<String> resolveBranch(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, String branch);
 
     /**
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/testParam}
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
-    Optional<String> testParam(AuthHeader authHeader, ResourceIdentifier datasetRid);
+    Optional<String> testParam(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /**
      * @apiNote {@code POST /catalog/test-query-params}
@@ -141,7 +141,7 @@ public interface TestServiceBlocking {
     @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     int testQueryParams(
             AuthHeader authHeader,
-            ResourceIdentifier something,
+            @Safe ResourceIdentifier something,
             ResourceIdentifier implicit,
             Optional<ResourceIdentifier> optionalMiddle,
             Set<String> setEnd,
@@ -195,7 +195,7 @@ public interface TestServiceBlocking {
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/strings}
      */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
-    void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid, Set<AliasedString> strings);
+    void getForStrings(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, Set<AliasedString> strings);
 
     /**
      * Creates a synchronous/blocking client for a TestService service.

@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EnumDefinition;
@@ -23,6 +24,7 @@ import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.LogSafety;
+import com.palantir.conjure.spec.LogSafety.Visitor;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
@@ -32,14 +34,12 @@ import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.spec.UnionDefinition;
-import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.logsafe.Preconditions;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public final class SafetyEvaluator {
     /**
@@ -53,8 +53,7 @@ public final class SafetyEvaluator {
     private final Map<TypeName, TypeDefinition> definitionMap;
 
     public SafetyEvaluator(ConjureDefinition definition) {
-        this(definition.getTypes().stream()
-                .collect(Collectors.toMap(entry -> entry.accept(TypeDefinitionVisitor.TYPE_NAME), entry -> entry)));
+        this(TypeFunctions.toTypesMap(definition));
     }
 
     public SafetyEvaluator(Map<TypeName, TypeDefinition> definitionMap) {
@@ -281,5 +280,39 @@ public final class SafetyEvaluator {
             return LogSafety.UNSAFE;
         }
         return one;
+    }
+
+    public static boolean allows(Optional<LogSafety> required, Optional<LogSafety> given) {
+        if (required.isEmpty() || given.isEmpty()) {
+            // If there is no requirement, all inputs are allowed.
+            // If there is a requirement but the input is unknown,
+            // this serves as the initial determination.
+            return true;
+        }
+        return allows(required.get(), given.get());
+    }
+
+    public static boolean allows(LogSafety required, LogSafety given) {
+        return required.accept(new Visitor<>() {
+            @Override
+            public Boolean visitSafe() {
+                return LogSafety.SAFE.equals(given);
+            }
+
+            @Override
+            public Boolean visitUnsafe() {
+                return !LogSafety.DO_NOT_LOG.equals(given);
+            }
+
+            @Override
+            public Boolean visitDoNotLog() {
+                return true;
+            }
+
+            @Override
+            public Boolean visitUnknown(String unknownValue) {
+                throw new IllegalStateException("Unknown LogSafety value: " + unknownValue);
+            }
+        });
     }
 }

@@ -17,13 +17,14 @@
 package com.palantir.conjure.java.services;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.ConjureMarkers;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
@@ -35,15 +36,14 @@ import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.ParameterId;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.ServiceDefinition;
-import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
-import com.palantir.logsafe.Preconditions;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -91,6 +91,7 @@ public final class JerseyServiceGenerator implements Generator {
 
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper returnTypeMapper = new TypeMapper(
                 types,
                 new SpecializeBinaryClassNameVisitor(
@@ -100,11 +101,14 @@ public final class JerseyServiceGenerator implements Generator {
                 types, new SpecializeBinaryClassNameVisitor(defaultVisitor, types, BINARY_ARGUMENT_TYPE));
 
         return conjureDefinition.getServices().stream()
-                .map(serviceDef -> generateService(serviceDef, returnTypeMapper, argumentTypeMapper));
+                .map(serviceDef -> generateService(serviceDef, safetyEvaluator, returnTypeMapper, argumentTypeMapper));
     }
 
     private JavaFile generateService(
-            ServiceDefinition serviceDefinition, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+            ServiceDefinition serviceDefinition,
+            SafetyEvaluator safetyEvaluator,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper) {
         com.palantir.conjure.spec.TypeName prefixedName =
                 Packages.getPrefixedName(serviceDefinition.getServiceName(), options.packagePrefix());
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(prefixedName.getName())
@@ -123,12 +127,12 @@ public final class JerseyServiceGenerator implements Generator {
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateServiceMethod(endpoint, returnTypeMapper, argumentTypeMapper))
+                .map(endpoint -> generateServiceMethod(endpoint, safetyEvaluator, returnTypeMapper, argumentTypeMapper))
                 .collect(Collectors.toList()));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint ->
-                        generateCompatibilityBackfillServiceMethods(endpoint, returnTypeMapper, argumentTypeMapper))
+                .map(endpoint -> generateCompatibilityBackfillServiceMethods(
+                        endpoint, safetyEvaluator, returnTypeMapper, argumentTypeMapper))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList()));
 
@@ -139,7 +143,10 @@ public final class JerseyServiceGenerator implements Generator {
     }
 
     private MethodSpec generateServiceMethod(
-            EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+            EndpointDefinition endpointDef,
+            SafetyEvaluator safetyEvaluator,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper) {
         TypeName returnType =
                 endpointDef.getReturns().map(returnTypeMapper::getClassName).orElse(ClassName.VOID);
 
@@ -148,7 +155,7 @@ public final class JerseyServiceGenerator implements Generator {
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addAnnotation(
                         httpMethodToClassName(endpointDef.getHttpMethod().get().name()))
-                .addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, true))
+                .addParameters(createServiceMethodParameters(endpointDef, safetyEvaluator, argumentTypeMapper, true))
                 .returns(returnType);
 
         // @Path("") is invalid in Feign JaxRs and equivalent to absent on an endpoint method
@@ -193,7 +200,10 @@ public final class JerseyServiceGenerator implements Generator {
 
     /** Provides a linear expansion of optional query arguments to improve Java back-compat. */
     private List<MethodSpec> generateCompatibilityBackfillServiceMethods(
-            EndpointDefinition endpointDef, TypeMapper returnTypeMapper, TypeMapper argumentTypeMapper) {
+            EndpointDefinition endpointDef,
+            SafetyEvaluator safetyEvaluator,
+            TypeMapper returnTypeMapper,
+            TypeMapper argumentTypeMapper) {
         List<ArgumentDefinition> queryArgs = new ArrayList<>();
 
         for (ArgumentDefinition arg : endpointDef.getArgs()) {
@@ -206,7 +216,11 @@ public final class JerseyServiceGenerator implements Generator {
         List<MethodSpec> alternateMethods = new ArrayList<>();
         for (int i = 0; i < queryArgs.size(); i++) {
             alternateMethods.add(createCompatibilityBackfillMethod(
-                    endpointDef, returnTypeMapper, argumentTypeMapper, queryArgs.subList(i, queryArgs.size())));
+                    endpointDef,
+                    safetyEvaluator,
+                    returnTypeMapper,
+                    argumentTypeMapper,
+                    queryArgs.subList(i, queryArgs.size())));
         }
 
         return alternateMethods;
@@ -214,11 +228,13 @@ public final class JerseyServiceGenerator implements Generator {
 
     private MethodSpec createCompatibilityBackfillMethod(
             EndpointDefinition endpointDef,
+            SafetyEvaluator safetyEvaluator,
             TypeMapper returnTypeMapper,
             TypeMapper argumentTypeMapper,
             List<ArgumentDefinition> extraArgs) {
         // ensure the correct ordering of parameters by creating the complete sorted parameter list
-        List<ParameterSpec> sortedParams = createServiceMethodParameters(endpointDef, argumentTypeMapper, false);
+        List<ParameterSpec> sortedParams =
+                createServiceMethodParameters(endpointDef, safetyEvaluator, argumentTypeMapper, false);
         List<Optional<ArgumentDefinition>> sortedMaybeExtraArgs = sortedParams.stream()
                 .map(param -> extraArgs.stream()
                         .filter(arg -> arg.getArgName().get().equals(param.name))
@@ -267,27 +283,30 @@ public final class JerseyServiceGenerator implements Generator {
     }
 
     private List<ParameterSpec> createServiceMethodParameters(
-            EndpointDefinition endpointDef, TypeMapper typeMapper, boolean withAnnotations) {
+            EndpointDefinition endpointDef,
+            SafetyEvaluator safetyEvaluator,
+            TypeMapper typeMapper,
+            boolean withAnnotations) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
         Optional<AuthType> auth = endpointDef.getAuth();
         createAuthParameter(auth, withAnnotations).ifPresent(parameterSpecs::add);
 
         ParameterOrder.sorted(endpointDef.getArgs())
-                .forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, withAnnotations)));
+                .forEach(def -> parameterSpecs.add(
+                        createServiceMethodParameterArg(typeMapper, safetyEvaluator, def, withAnnotations)));
         return ImmutableList.copyOf(parameterSpecs);
     }
 
     private ParameterSpec createServiceMethodParameterArg(
-            TypeMapper typeMapper, ArgumentDefinition def, boolean withAnnotations) {
+            TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, ArgumentDefinition def, boolean withAnnotations) {
+        Optional<LogSafety> declaredSafety = ConjureTags.validateArgument(def, safetyEvaluator);
         ParameterSpec.Builder param = ParameterSpec.builder(
-                typeMapper.getClassName(def.getType()), def.getArgName().get());
+                        typeMapper.getClassName(def.getType()), def.getArgName().get())
+                .addAnnotations(ConjureAnnotations.safety(declaredSafety));
         if (withAnnotations) {
             getParamTypeAnnotation(def).ifPresent(param::addAnnotation);
-            param.addAnnotations(ImmutableSet.<AnnotationSpec>builder()
-                    .addAll(createMarkers(typeMapper, def.getMarkers()))
-                    .addAll(ConjureTags.safetyAnnotations(def))
-                    .build());
+            param.addAnnotations(ConjureMarkers.annotations(typeMapper, def.getMarkers()));
         }
         return param.build();
     }
@@ -352,18 +371,6 @@ public final class JerseyServiceGenerator implements Generator {
         }
 
         return Optional.of(annotationSpecBuilder.build());
-    }
-
-    private static List<AnnotationSpec> createMarkers(TypeMapper typeMapper, List<Type> markers) {
-        Preconditions.checkArgument(
-                markers.stream().allMatch(type -> type.accept(TypeVisitor.IS_REFERENCE)),
-                "Markers must refer to reference types.");
-        return markers.stream()
-                .map(typeMapper::getClassName)
-                .map(ClassName.class::cast)
-                .map(AnnotationSpec::builder)
-                .map(AnnotationSpec.Builder::build)
-                .collect(Collectors.toList());
     }
 
     private static ClassName httpMethodToClassName(String method) {

@@ -1,6 +1,7 @@
 package com.palantir.product;
 
 import com.palantir.conjure.java.undertow.lib.RequestContext;
+import com.palantir.logsafe.Safe;
 import com.palantir.tokens.auth.AuthHeader;
 import javax.annotation.Generated;
 
@@ -11,13 +12,13 @@ public interface UndertowNameCollisionService {
      */
     String int_(
             AuthHeader authHeader,
-            String serializer,
-            String runtime,
-            String authHeader_,
-            String long_,
-            String delegate,
-            String result,
-            String deserializer);
+            @Safe String serializer,
+            @Safe String runtime,
+            @Safe String authHeader_,
+            @Safe String long_,
+            @Safe String delegate,
+            @Safe String result,
+            @Safe String deserializer);
 
     /**
      * @apiNote {@code POST /no/context}

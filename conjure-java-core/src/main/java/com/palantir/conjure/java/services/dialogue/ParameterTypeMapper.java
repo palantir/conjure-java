@@ -17,8 +17,10 @@
 package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.services.Auth;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -26,6 +28,7 @@ import com.palantir.conjure.spec.BodyParameterType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HeaderParameterType;
 import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterType;
@@ -33,21 +36,20 @@ import com.palantir.conjure.spec.PathParameterType;
 import com.palantir.conjure.spec.QueryParameterType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
-import com.palantir.logsafe.logger.SafeLogger;
-import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public final class ParameterTypeMapper {
 
-    private static final SafeLogger log = SafeLoggerFactory.get(ParameterTypeMapper.class);
-
     private final TypeMapper parameterTypes;
+    private final SafetyEvaluator safetyEvaluator;
 
-    public ParameterTypeMapper(TypeMapper parameterTypes) {
+    public ParameterTypeMapper(TypeMapper parameterTypes, SafetyEvaluator safetyEvaluator) {
         this.parameterTypes = parameterTypes;
+        this.safetyEvaluator = safetyEvaluator;
     }
 
     public TypeName baseType(Type type) {
@@ -74,12 +76,13 @@ public final class ParameterTypeMapper {
     }
 
     private ParameterSpec param(ArgumentDefinition def, boolean includeSafetyAnnotations) {
+        Optional<LogSafety> safety = ConjureTags.validateArgument(def, safetyEvaluator);
         ParameterSpec.Builder param = ParameterSpec.builder(
                 parameterTypes.getClassName(def.getType()), def.getArgName().get());
         if (includeSafetyAnnotations) {
             // Safety annotations are helpful to inform developers of safety guarantees, and to
             // reinforce static analysis tooling which validates arguments to annotated methods.
-            param.addAnnotations(ConjureTags.safetyAnnotations(def));
+            param.addAnnotations(ConjureAnnotations.safety(safety));
         }
         return param.build();
     }

@@ -20,6 +20,7 @@ import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.ClassNameVisitor;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
@@ -45,6 +46,7 @@ public final class UndertowServiceGenerator implements Generator {
     public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
         Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         TypeMapper typeMapper = new TypeMapper(
                 types, new SpecializeBinaryClassNameVisitor(defaultVisitor, types, ClassName.get(InputStream.class)));
         TypeMapper returnTypeMapper = new TypeMapper(
@@ -56,7 +58,8 @@ public final class UndertowServiceGenerator implements Generator {
 
         return conjureDefinition.getServices().stream()
                 .flatMap(serviceDef -> Stream.of(
-                        interfaceGenerator.generateServiceInterface(serviceDef, typeMapper, returnTypeMapper),
+                        interfaceGenerator.generateServiceInterface(
+                                serviceDef, safetyEvaluator, typeMapper, returnTypeMapper),
                         handlerGenerator.generateServiceHandler(serviceDef, types, typeMapper, returnTypeMapper)));
     }
 }

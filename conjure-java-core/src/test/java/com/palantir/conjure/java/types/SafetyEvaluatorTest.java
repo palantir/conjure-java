@@ -87,6 +87,35 @@ class SafetyEvaluatorTest {
     }
 
     @Test
+    public void testAllows() {
+        assertThat(SafetyEvaluator.allows(Optional.empty(), Optional.empty())).isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.SAFE), Optional.empty()))
+                .isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.UNSAFE), Optional.empty()))
+                .isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.DO_NOT_LOG), Optional.empty()))
+                .isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.SAFE), Optional.of(LogSafety.SAFE)))
+                .isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.SAFE), Optional.of(LogSafety.UNSAFE)))
+                .isFalse();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.SAFE), Optional.of(LogSafety.DO_NOT_LOG)))
+                .isFalse();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.UNSAFE), Optional.of(LogSafety.SAFE)))
+                .isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.UNSAFE), Optional.of(LogSafety.UNSAFE)))
+                .isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.UNSAFE), Optional.of(LogSafety.DO_NOT_LOG)))
+                .isFalse();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.DO_NOT_LOG), Optional.of(LogSafety.SAFE)))
+                .isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.DO_NOT_LOG), Optional.of(LogSafety.UNSAFE)))
+                .isTrue();
+        assertThat(SafetyEvaluator.allows(Optional.of(LogSafety.DO_NOT_LOG), Optional.of(LogSafety.DO_NOT_LOG)))
+                .isTrue();
+    }
+
+    @Test
     void testMapSafeKey() {
         TypeDefinition object = TypeDefinition.object(ObjectDefinition.builder()
                 .typeName(FOO)
