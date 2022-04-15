@@ -24,6 +24,7 @@ import com.palantir.tokens.auth.BearerToken;
 public interface SafeLoggableAuthCookieParam {
 
     // Safe logging auth cookies should fail
+    @SuppressWarnings("IllegalSafeLoggingArgument")
     @Handle(method = HttpMethod.GET, path = "/authCookie")
     void authCookie(@Safe @Handle.Cookie("AUTH_TOKEN") BearerToken token); // This should throw
 }
