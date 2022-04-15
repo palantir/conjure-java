@@ -24,6 +24,7 @@ import com.palantir.tokens.auth.AuthHeader;
 public interface SafeLoggableAuthHeaderParam {
 
     // Safe logging auth headers should fail
+    @SuppressWarnings("IllegalSafeLoggingArgument")
     @Handle(method = HttpMethod.GET, path = "/authCookie")
     void authCookie(@Unsafe AuthHeader token);
 }
