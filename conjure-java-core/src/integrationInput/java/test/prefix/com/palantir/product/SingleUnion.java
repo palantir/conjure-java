@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +21,6 @@ import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
-@Unsafe
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class SingleUnion {
     private final Base value;
@@ -41,7 +39,7 @@ public final class SingleUnion {
         return new SingleUnion(new FooWrapper(value));
     }
 
-    public static SingleUnion unknown(@Safe String type, @Unsafe Object value) {
+    public static SingleUnion unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "foo":
                 throw new SafeIllegalArgumentException(
@@ -88,7 +86,7 @@ public final class SingleUnion {
             implements FooStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
         private Function<@Safe String, T> fooVisitor;
 
-        private Function<@Unsafe String, T> unknownVisitor;
+        private Function<String, T> unknownVisitor;
 
         @Override
         public UnknownStageVisitorBuilder<T> foo(@Nonnull Function<@Safe String, T> fooVisitor) {
@@ -98,7 +96,7 @@ public final class SingleUnion {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Unsafe String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -116,7 +114,7 @@ public final class SingleUnion {
         @Override
         public Visitor<T> build() {
             final Function<@Safe String, T> fooVisitor = this.fooVisitor;
-            final Function<@Unsafe String, T> unknownVisitor = this.unknownVisitor;
+            final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitFoo(String value) {
@@ -136,7 +134,7 @@ public final class SingleUnion {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Unsafe String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> throwOnUnknown();
     }

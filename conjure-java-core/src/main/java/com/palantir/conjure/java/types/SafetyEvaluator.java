@@ -47,8 +47,12 @@ public final class SafetyEvaluator {
      * for past and future values which are known at compile-time in that version.
      */
     public static final Optional<LogSafety> ENUM_SAFETY = Optional.of(LogSafety.SAFE);
-    /** Unknown variant is considered unsafe because we don't know what kind of data it may contain. */
-    public static final Optional<LogSafety> UNKNOWN_UNION_VARINT_SAFETY = Optional.of(LogSafety.UNSAFE);
+    /**
+     * Unknown variant should be considered unsafe because we don't know what kind of data it may contain,
+     * however this makes rollout much more challenging, so we will ratchet unknown safety once we have
+     * better tooling to extract safe components.
+     */
+    public static final Optional<LogSafety> UNKNOWN_UNION_VARINT_SAFETY = Optional.empty();
 
     private final Map<TypeName, TypeDefinition> definitionMap;
 

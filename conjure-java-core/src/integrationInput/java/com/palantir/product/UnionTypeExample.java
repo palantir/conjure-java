@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +30,6 @@ import javax.annotation.Nonnull;
 /**
  * A type which can either be a StringExample, a set of strings, or an integer.
  */
-@Unsafe
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionTypeExample {
     private final Base value;
@@ -113,7 +111,7 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new MapAliasWrapper(value));
     }
 
-    public static UnionTypeExample unknown(@Safe String type, @Unsafe Object value) {
+    public static UnionTypeExample unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "stringExample":
                 throw new SafeIllegalArgumentException(
@@ -227,7 +225,7 @@ public final class UnionTypeExample {
 
         T visitMapAlias(MapAliasExample value);
 
-        T visitUnknown(@Safe String unknownType, @Unsafe Object unknownValue);
+        T visitUnknown(@Safe String unknownType, Object unknownValue);
 
         static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
@@ -285,7 +283,7 @@ public final class UnionTypeExample {
 
         private IntFunction<T> unknown_Visitor;
 
-        private BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor;
+        private BiFunction<@Safe String, Object, T> unknownVisitor;
 
         @Override
         public CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
@@ -402,8 +400,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public Completed_StageVisitorBuilder<T> unknown(
-                @Nonnull BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownVisitor;
             return this;
@@ -443,7 +440,7 @@ public final class UnionTypeExample {
             final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
             final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
             final IntFunction<T> unknown_Visitor = this.unknown_Visitor;
-            final BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor = this.unknownVisitor;
+            final BiFunction<@Safe String, Object, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitAlsoAnInteger(int value) {
@@ -599,7 +596,7 @@ public final class UnionTypeExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, @Unsafe Object, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor);
 
         Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
 

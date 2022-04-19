@@ -257,8 +257,47 @@ class SafetyEvaluatorTest {
         ConjureDefinitionValidator.validateAll(conjureDef);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
-                .as("No guarantees can be made about future union values")
+                .as("No guarantees can be made about future union values, "
+                        + "however we don't mark them unsafe to ease rollout")
+                .isEmpty();
+    }
+
+    @Test
+    void testUnsafeElementUnion() {
+        ConjureDefinition conjureDef = ConjureDefinition.builder()
+                .version(1)
+                .types(TypeDefinition.union(UnionDefinition.builder()
+                        .typeName(FOO)
+                        .union(FieldDefinition.builder()
+                                .fieldName(FieldName.of("field"))
+                                .type(Type.primitive(PrimitiveType.STRING))
+                                .safety(LogSafety.UNSAFE)
+                                .build())
+                        .build()))
+                .build();
+        ConjureDefinitionValidator.validateAll(conjureDef);
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.UNSAFE);
+    }
+
+    @Test
+    void testDoNotLogElementUnion() {
+        ConjureDefinition conjureDef = ConjureDefinition.builder()
+                .version(1)
+                .types(TypeDefinition.union(UnionDefinition.builder()
+                        .typeName(FOO)
+                        .union(FieldDefinition.builder()
+                                .fieldName(FieldName.of("field"))
+                                .type(Type.primitive(PrimitiveType.STRING))
+                                .safety(LogSafety.DO_NOT_LOG)
+                                .build())
+                        .build()))
+                .build();
+        ConjureDefinitionValidator.validateAll(conjureDef);
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
+                .hasValue(LogSafety.DO_NOT_LOG);
     }
 
     @Test
