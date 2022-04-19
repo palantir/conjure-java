@@ -19,13 +19,13 @@ package com.palantir.conjure.java.services.dialogue;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.DefaultClassNameVisitor;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.SpecializeBinaryClassNameVisitor;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
-import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -33,8 +33,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import java.io.InputStream;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // TODO(rfink): Add unit tests for misc edge cases, e.g.: docs/no-docs, auth/no-auth, binary return type.
@@ -49,6 +47,7 @@ public final class DialogueServiceGenerator implements Generator {
     @Override
     public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
         Map<TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         DialogueEndpointsGenerator endpoints = new DialogueEndpointsGenerator(options);
         TypeMapper parameterTypes = new TypeMapper(
                 types,
@@ -60,26 +59,25 @@ public final class DialogueServiceGenerator implements Generator {
                 types,
                 new SpecializeBinaryClassNameVisitor(
                         new DefaultClassNameVisitor(types.keySet(), options), types, ClassName.get(InputStream.class)));
-        Map<TypeName, TypeDefinition> typeDefinitionsByName = conjureDefinition.getTypes().stream()
-                .collect(Collectors.toMap(type -> type.accept(TypeDefinitionVisitor.TYPE_NAME), Function.identity()));
+        ParameterTypeMapper parameterMapper = new ParameterTypeMapper(parameterTypes, safetyEvaluator);
 
-        DialogueInterfaceGenerator interfaceGenerator = new DialogueInterfaceGenerator(
-                options, new ParameterTypeMapper(parameterTypes), new ReturnTypeMapper(returnTypes));
+        DialogueInterfaceGenerator interfaceGenerator =
+                new DialogueInterfaceGenerator(options, parameterMapper, new ReturnTypeMapper(returnTypes));
 
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
-                typeDefinitionsByName.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
+                types.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
 
         StaticFactoryMethodGenerator asyncGenerator = new DefaultStaticFactoryMethodGenerator(
                 options,
                 typeNameResolver,
-                new ParameterTypeMapper(parameterTypes),
+                parameterMapper,
                 new ReturnTypeMapper(returnTypes),
                 StaticFactoryMethodType.ASYNC);
 
         StaticFactoryMethodGenerator blockingGenerator = new DefaultStaticFactoryMethodGenerator(
                 options,
                 typeNameResolver,
-                new ParameterTypeMapper(parameterTypes),
+                parameterMapper,
                 new ReturnTypeMapper(returnTypes),
                 StaticFactoryMethodType.BLOCKING);
 

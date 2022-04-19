@@ -65,12 +65,14 @@ public final class ErrorGenerator implements Generator {
 
     @Override
     public Stream<JavaFile> generate(ConjureDefinition definition) {
-        List<TypeDefinition> types = definition.getTypes();
-        TypeMapper typeMapper = new TypeMapper(TypeFunctions.toTypesMap(types), options);
+        Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(definition);
+        TypeMapper typeMapper = new TypeMapper(types, options);
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(types);
         return splitErrorDefsByNamespace(definition.getErrors()).entrySet().stream()
                 .flatMap(entry -> entry.getValue().entrySet().stream()
                         .map(innerEntry -> generateErrorTypesForNamespace(
                                 typeMapper,
+                                safetyEvaluator,
                                 Packages.getPrefixedPackage(entry.getKey(), options.packagePrefix()),
                                 innerEntry.getKey(),
                                 innerEntry.getValue())));
@@ -94,6 +96,7 @@ public final class ErrorGenerator implements Generator {
 
     private static JavaFile generateErrorTypesForNamespace(
             TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
             String conjurePackage,
             ErrorNamespace namespace,
             List<ErrorDefinition> errorTypeDefinitions) {
@@ -158,9 +161,20 @@ public final class ErrorGenerator implements Generator {
                                             .safety(LogSafety.UNSAFE)
                                             .build()))
                             .forEach(arg -> {
+                                TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
+                                Optional<LogSafety> required = arg.getSafety();
+                                Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(arg.getType());
+                                if (!SafetyEvaluator.allows(required, typeSafety)) {
+                                    throw new IllegalStateException(String.format(
+                                            "Cannot use %s type %s as a %s parameter in error %s -> %s",
+                                            typeSafety.map(Object::toString).orElse("unknown"),
+                                            argumentTypeName,
+                                            required.map(Object::toString).orElse("unknown"),
+                                            entry.getErrorName().getName(),
+                                            arg.getFieldName()));
+                                }
                                 methodBuilder.addParameter(ParameterSpec.builder(
-                                                ConjureAnnotations.withSafety(
-                                                        typeMapper.getClassName(arg.getType()), arg.getSafety()),
+                                                argumentTypeName,
                                                 arg.getFieldName().get())
                                         .addAnnotations(ConjureAnnotations.safety(arg.getSafety()))
                                         .build());

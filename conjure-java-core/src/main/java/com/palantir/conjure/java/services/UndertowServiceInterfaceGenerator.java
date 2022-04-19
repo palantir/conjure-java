@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -32,6 +33,7 @@ import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.HeaderAuthType;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -42,6 +44,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
@@ -54,7 +57,10 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     public JavaFile generateServiceInterface(
-            ServiceDefinition serviceDefinition, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+            ServiceDefinition serviceDefinition,
+            SafetyEvaluator safetyEvaluator,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper) {
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder((options.undertowServicePrefix() ? "Undertow" : "")
                         + serviceDefinition.getServiceName().getName())
                 .addModifiers(Modifier.PUBLIC)
@@ -64,7 +70,8 @@ final class UndertowServiceInterfaceGenerator {
         serviceDefinition.getDocs().ifPresent(docs -> serviceBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         serviceBuilder.addMethods(serviceDefinition.getEndpoints().stream()
-                .map(endpoint -> generateServiceInterfaceMethod(endpoint, typeMapper, returnTypeMapper))
+                .map(endpoint ->
+                        generateServiceInterfaceMethod(endpoint, safetyEvaluator, typeMapper, returnTypeMapper))
                 .collect(Collectors.toList()));
 
         return JavaFile.builder(
@@ -77,12 +84,15 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     private MethodSpec generateServiceInterfaceMethod(
-            EndpointDefinition endpointDef, TypeMapper typeMapper, TypeMapper returnTypeMapper) {
+            EndpointDefinition endpointDef,
+            SafetyEvaluator safetyEvaluator,
+            TypeMapper typeMapper,
+            TypeMapper returnTypeMapper) {
         String methodName =
                 JavaNameSanitizer.sanitize(endpointDef.getEndpointName().get());
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .addParameters(createServiceMethodParameters(endpointDef, typeMapper))
+                .addParameters(createServiceMethodParameters(endpointDef, safetyEvaluator, typeMapper))
                 .addAnnotations(ConjureAnnotations.incubating(endpointDef));
 
         endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
@@ -98,7 +108,8 @@ final class UndertowServiceInterfaceGenerator {
         return methodBuilder.build();
     }
 
-    private List<ParameterSpec> createServiceMethodParameters(EndpointDefinition endpointDef, TypeMapper typeMapper) {
+    private List<ParameterSpec> createServiceMethodParameters(
+            EndpointDefinition endpointDef, SafetyEvaluator safetyEvaluator, TypeMapper typeMapper) {
         List<ParameterSpec> parameterSpecs = new ArrayList<>();
 
         endpointDef
@@ -122,7 +133,8 @@ final class UndertowServiceInterfaceGenerator {
                     }
                 })));
         List<ArgumentDefinition> sortedArgList = ParameterOrder.sorted(endpointDef.getArgs());
-        sortedArgList.forEach(def -> parameterSpecs.add(createServiceMethodParameterArg(typeMapper, def, endpointDef)));
+        sortedArgList.forEach(def ->
+                parameterSpecs.add(createServiceMethodParameterArg(typeMapper, safetyEvaluator, def, endpointDef)));
 
         if (Tags.hasServerRequestContext(endpointDef)) {
             parameterSpecs.add(
@@ -134,11 +146,15 @@ final class UndertowServiceInterfaceGenerator {
     }
 
     private ParameterSpec createServiceMethodParameterArg(
-            TypeMapper typeMapper, ArgumentDefinition def, EndpointDefinition endpoint) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            ArgumentDefinition def,
+            EndpointDefinition endpoint) {
+        Optional<LogSafety> safety = ConjureTags.validateArgument(def, safetyEvaluator);
         return ParameterSpec.builder(
                         typeMapper.getClassName(def.getType()),
                         JavaNameSanitizer.sanitizeParameterName(def.getArgName().get(), endpoint))
-                .addAnnotations(ConjureTags.safetyAnnotations(def))
+                .addAnnotations(ConjureAnnotations.safety(safety))
                 .build();
     }
 }

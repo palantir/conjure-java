@@ -55,7 +55,7 @@ public interface TestService {
     @ClientEndpoint(method = "POST", path = "/catalog/datasets")
     Dataset createDataset(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @HeaderParam("Test-Header") @Safe String testHeaderArg,
+            @Safe @HeaderParam("Test-Header") String testHeaderArg,
             @NotNull CreateDatasetRequest request);
 
     @GET
@@ -63,7 +63,7 @@ public interface TestService {
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
     Optional<Dataset> getDataset(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw")
@@ -71,7 +71,7 @@ public interface TestService {
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
     StreamingOutput getRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-aliased")
@@ -79,7 +79,7 @@ public interface TestService {
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
     StreamingOutput getAliasedRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/raw-maybe")
@@ -87,20 +87,20 @@ public interface TestService {
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
     Optional<StreamingOutput> maybeGetRawData(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe @Nonnull ResourceIdentifier datasetRid);
+            @Safe @PathParam("datasetRid") @Nonnull ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/string-aliased")
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/string-aliased")
     AliasedString getAliasedString(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
     @POST
     @Path("catalog/datasets/upload-raw")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
-    void uploadRawData(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @NotNull @Safe InputStream input);
+    void uploadRawData(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @Safe @NotNull InputStream input);
 
     @POST
     @Path("catalog/datasets/upload-raw-aliased")
@@ -116,7 +116,7 @@ public interface TestService {
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
     Set<String> getBranches(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
     /**
      * Gets all branches of this dataset.
@@ -129,14 +129,14 @@ public interface TestService {
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecated")
     Set<String> getBranchesDeprecated(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
     @GET
     @Path("catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
     Optional<String> resolveBranch(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid,
             @PathParam("branch") String branch);
 
     @GET
@@ -144,14 +144,14 @@ public interface TestService {
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
     Optional<String> testParam(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid);
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
     @POST
     @Path("catalog/test-query-params")
     @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     int testQueryParams(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @QueryParam("different") @Safe ResourceIdentifier something,
+            @Safe @QueryParam("different") ResourceIdentifier something,
             @QueryParam("implicit") ResourceIdentifier implicit,
             @QueryParam("optionalMiddle") Optional<ResourceIdentifier> optionalMiddle,
             @QueryParam("setEnd") Set<String> setEnd,
@@ -204,13 +204,13 @@ public interface TestService {
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
     void getForStrings(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
-            @PathParam("datasetRid") @Safe ResourceIdentifier datasetRid,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid,
             @QueryParam("strings") Set<AliasedString> strings);
 
     @Deprecated
     @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default int testQueryParams(
-            AuthHeader authHeader, ResourceIdentifier something, ResourceIdentifier implicit, String query) {
+            AuthHeader authHeader, @Safe ResourceIdentifier something, ResourceIdentifier implicit, String query) {
         return testQueryParams(
                 authHeader, something, implicit, Optional.empty(), Collections.emptySet(), Optional.empty(), query);
     }
@@ -219,7 +219,7 @@ public interface TestService {
     @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default int testQueryParams(
             AuthHeader authHeader,
-            ResourceIdentifier something,
+            @Safe ResourceIdentifier something,
             ResourceIdentifier implicit,
             Optional<ResourceIdentifier> optionalMiddle,
             String query) {
@@ -231,7 +231,7 @@ public interface TestService {
     @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     default int testQueryParams(
             AuthHeader authHeader,
-            ResourceIdentifier something,
+            @Safe ResourceIdentifier something,
             ResourceIdentifier implicit,
             Optional<ResourceIdentifier> optionalMiddle,
             Set<String> setEnd,
@@ -285,7 +285,7 @@ public interface TestService {
 
     @Deprecated
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
-    default void getForStrings(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+    default void getForStrings(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid) {
         getForStrings(authHeader, datasetRid, Collections.emptySet());
     }
 }

@@ -16,25 +16,22 @@
 
 package com.palantir.conjure.java;
 
-import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.spec.ArgumentDefinition;
-import com.palantir.conjure.spec.TypeName;
-import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.conjure.spec.LogSafety;
+import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import com.squareup.javapoet.AnnotationSpec;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 public final class ConjureTags {
 
     private static final String SAFE = "safe";
     private static final String UNSAFE = "unsafe";
-
-    private static final TypeName SAFE_TYPE_NAME =
-            TypeName.of(Safe.class.getSimpleName(), Safe.class.getPackage().getName());
 
     public static boolean isSafe(Collection<String> tags) {
         return tags.contains(SAFE);
@@ -44,29 +41,47 @@ public final class ConjureTags {
         return tags.contains(UNSAFE);
     }
 
-    public static ImmutableList<AnnotationSpec> safetyAnnotations(ArgumentDefinition argument) {
+    /**
+     * Validates that safety declared using tags or markers agrees with the safety of the argument
+     * type, and returns the declared safety.
+     */
+    public static Optional<LogSafety> validateArgument(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
+        Optional<LogSafety> tagSafety = safety(argument);
+        if (tagSafety.isPresent()) {
+            Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(argument.getType());
+            if (!SafetyEvaluator.allows(tagSafety, typeSafety)) {
+                throw new SafeIllegalStateException(
+                        "Declared argument safety is incompatible with the provided type",
+                        SafeArg.of("name", argument.getArgName()),
+                        SafeArg.of("declaredSafety", tagSafety.get()),
+                        SafeArg.of("argumentTypeSafety", typeSafety));
+            }
+        }
+        return tagSafety;
+    }
+
+    public static Optional<LogSafety> safety(ArgumentDefinition argument) {
         validateTags(argument);
         Set<String> tags = argument.getTags();
-        ImmutableList.Builder<AnnotationSpec> builder = ImmutableList.builderWithExpectedSize(1);
         if (isSafe(tags)) {
-            builder.add(AnnotationSpec.builder(Safe.class).build());
+            return Optional.of(LogSafety.SAFE);
         }
         if (isUnsafe(tags)) {
-            builder.add(AnnotationSpec.builder(Unsafe.class).build());
+            return Optional.of(LogSafety.UNSAFE);
         }
-        return builder.build();
+        return ConjureMarkers.markerSafety(argument);
     }
 
     public static void validateTags(ArgumentDefinition argument) {
         Set<String> tags = argument.getTags();
         validateTags(tags);
-
-        boolean hasSafeMarker = argument.getMarkers().stream()
-                .map(type -> type.accept(TypeVisitor.IS_REFERENCE) ? type.accept(TypeVisitor.REFERENCE) : null)
-                .anyMatch(SAFE_TYPE_NAME::equals);
-        if (hasSafeMarker && isSafe(tags)) {
-            throw new SafeIllegalStateException(
-                    "Unexpected com.palantir.logsafe.Safe marker in addition to a 'safe' tag");
+        Optional<LogSafety> markerSafety = ConjureMarkers.markerSafety(argument);
+        if (markerSafety.isPresent() && (isSafe(tags) || isUnsafe(tags))) {
+            throw new IllegalStateException(String.format(
+                    "Unexpected %s marker in addition to a '%s' tag on argument %s",
+                    markerSafety.get().accept(MarkerNameLogSafetyVisitor.INSTANCE),
+                    isSafe(tags) ? "safe" : "unsafe",
+                    argument.getArgName()));
         }
     }
 
@@ -89,4 +104,28 @@ public final class ConjureTags {
     }
 
     private ConjureTags() {}
+
+    private enum MarkerNameLogSafetyVisitor implements LogSafety.Visitor<String> {
+        INSTANCE;
+
+        @Override
+        public String visitSafe() {
+            return Safe.class.getName();
+        }
+
+        @Override
+        public String visitUnsafe() {
+            return Unsafe.class.getName();
+        }
+
+        @Override
+        public String visitDoNotLog() {
+            return DoNotLog.class.getName();
+        }
+
+        @Override
+        public String visitUnknown(String unknownValue) {
+            throw new IllegalStateException("Unknown value: " + unknownValue);
+        }
+    }
 }

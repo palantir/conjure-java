@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -24,7 +25,18 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.conjure.spec.ErrorCode;
+import com.palantir.conjure.spec.ErrorDefinition;
+import com.palantir.conjure.spec.ErrorNamespace;
+import com.palantir.conjure.spec.FieldDefinition;
+import com.palantir.conjure.spec.FieldName;
+import com.palantir.conjure.spec.LogSafety;
+import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.Type;
+import com.palantir.conjure.spec.TypeDefinition;
+import com.palantir.conjure.spec.TypeName;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -153,6 +165,37 @@ public final class ObjectGeneratorTests {
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
+    public void testErrorSafetyDisagreement() {
+        ErrorGenerator errorGenerator = new ErrorGenerator(Options.builder()
+                .useImmutableBytes(true)
+                .excludeEmptyOptionals(true)
+                .build());
+        TypeName unsafeAliasName = TypeName.of("UnsafeAlias", "com.palantir.product");
+        TypeDefinition unsafeAlias = TypeDefinition.alias(AliasDefinition.builder()
+                .typeName(unsafeAliasName)
+                .safety(LogSafety.UNSAFE)
+                .alias(Type.primitive(PrimitiveType.STRING))
+                .build());
+        ConjureDefinition conjureDefinition = ConjureDefinition.builder()
+                .version(1)
+                .errors(ErrorDefinition.builder()
+                        .errorName(TypeName.of("Name", "com.palantir.product"))
+                        .code(ErrorCode.CUSTOM_SERVER)
+                        .namespace(ErrorNamespace.of("Service"))
+                        .safeArgs(FieldDefinition.builder()
+                                .fieldName(FieldName.of("field"))
+                                .type(Type.reference(unsafeAliasName))
+                                .build())
+                        .build())
+                .types(unsafeAlias)
+                .build();
+        assertThatThrownBy(errorGenerator.generate(conjureDefinition)::count)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot use UNSAFE type com.palantir.product.UnsafeAlias "
+                        + "as a SAFE parameter in error Name -> field");
     }
 
     @Test
