@@ -4,10 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -62,24 +64,24 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             String deserializer_ = deserializer.deserialize(exchange);
-            runtime.markers().param("com.palantir.logsafe.Safe", "deserializer", deserializer_, exchange);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             String runtime_ = runtime.plainSerDe().deserializeString(pathParams.get("runtime"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "runtime", runtime_, exchange);
+            requestContext.requestArg(SafeArg.of("runtime", runtime_));
             HeaderMap headerParams = exchange.getRequestHeaders();
             String serializer_ = runtime.plainSerDe().deserializeString(headerParams.get("Serializer"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "serializer", serializer_, exchange);
+            requestContext.requestArg(SafeArg.of("serializer", serializer_));
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             String authHeader_ = runtime.plainSerDe().deserializeString(queryParams.get("authHeader"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "authHeader", authHeader_, exchange);
+            requestContext.requestArg(SafeArg.of("authHeader", authHeader_));
             String long_ = runtime.plainSerDe().deserializeString(queryParams.get("long"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "long", long_, exchange);
+            requestContext.requestArg(SafeArg.of("long", long_));
             String delegate_ = runtime.plainSerDe().deserializeString(queryParams.get("delegate"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "delegate", delegate_, exchange);
+            requestContext.requestArg(SafeArg.of("delegate", delegate_));
             String result_ = runtime.plainSerDe().deserializeString(queryParams.get("result"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "result", result_, exchange);
+            requestContext.requestArg(SafeArg.of("result", result_));
             String result = delegate.int_(
                     authHeader, serializer_, runtime_, authHeader_, long_, delegate_, result_, deserializer_);
             serializer.serialize(result, exchange);
@@ -126,8 +128,8 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            String requestContext = deserializer.deserialize(exchange);
-            delegate.noContext(requestContext);
+            String requestContext_ = deserializer.deserialize(exchange);
+            delegate.noContext(requestContext_);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 
@@ -179,8 +181,9 @@ public final class NameCollisionServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             String requestContext_ = deserializer.deserialize(exchange);
-            delegate.context(requestContext_, runtime.contexts().createContext(exchange, this));
+            delegate.context(requestContext_, requestContext);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 

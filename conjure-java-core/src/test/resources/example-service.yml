@@ -70,8 +70,7 @@ services:
             param-id: Test-Header
             param-type: header
             type: string
-            markers:
-              - Safe
+            safety: safe
         returns: Dataset
         docs: foo $bar
 
@@ -80,8 +79,7 @@ services:
         args:
           datasetRid:
             type: rid
-            markers:
-             - Safe
+            safety: safe
         returns: optional<Dataset>
 
       getRawData:

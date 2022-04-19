@@ -88,6 +88,33 @@ class ConjureTagsTest {
     }
 
     @Test
+    void testSafetyAndMarker() {
+        assertThatThrownBy(() -> ConjureTags.safety(ArgumentDefinition.builder()
+                        .from(tags())
+                        .safety(LogSafety.SAFE)
+                        .markers(Type.external(ExternalReference.builder()
+                                .externalReference(TypeName.of(
+                                        Safe.class.getSimpleName(),
+                                        Safe.class.getPackage().getName()))
+                                .fallback(Type.primitive(PrimitiveType.ANY))
+                                .build()))
+                        .build()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("safety: safe' value in addition to a "
+                        + "'com.palantir.logsafe.Safe' marker on argument 'name'");
+    }
+
+    @Test
+    void testSafetyAndTag() {
+        assertThatThrownBy(() -> ConjureTags.safety(ArgumentDefinition.builder()
+                        .from(tags("safe"))
+                        .safety(LogSafety.SAFE)
+                        .build()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("safety: safe' value in addition to a 'safe' tag on argument 'name'");
+    }
+
+    @Test
     void testUnsafeMarkerAndSafeTag() {
         assertThatThrownBy(() -> ConjureTags.safety(ArgumentDefinition.builder()
                         .from(tags("safe"))

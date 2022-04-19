@@ -60,6 +60,7 @@ public final class UndertowServiceGenerator implements Generator {
                 .flatMap(serviceDef -> Stream.of(
                         interfaceGenerator.generateServiceInterface(
                                 serviceDef, safetyEvaluator, typeMapper, returnTypeMapper),
-                        handlerGenerator.generateServiceHandler(serviceDef, types, typeMapper, returnTypeMapper)));
+                        handlerGenerator.generateServiceHandler(
+                                serviceDef, types, typeMapper, returnTypeMapper, safetyEvaluator)));
     }
 }

@@ -16,8 +16,10 @@
 
 package com.palantir.conjure.java;
 
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.spec.ArgumentDefinition;
+import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.LogSafety;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Safe;
@@ -32,6 +34,22 @@ public final class ConjureTags {
 
     private static final String SAFE = "safe";
     private static final String UNSAFE = "unsafe";
+
+    public static final String SERVER_REQUEST_CONTEXT_TAG = "server-request-context";
+    public static final String SERVER_REQUEST_CONTEXT_NAME = "requestContext";
+    public static final String SERVER_SAFE_LOGGING_DISABLED = "server-squelch";
+
+    /** Values that are consumed by the conjure generator, and needn't be listed for use at runtime. */
+    public static final ImmutableSet<String> HANDLED_ARGUMENT_TAGS =
+            ImmutableSet.of(SERVER_SAFE_LOGGING_DISABLED, SAFE, UNSAFE);
+
+    public static boolean hasServerRequestContext(EndpointDefinition endpointDefinition) {
+        return endpointDefinition.getTags().contains(SERVER_REQUEST_CONTEXT_TAG);
+    }
+
+    public static boolean isServerSafeLoggingAllowed(ArgumentDefinition arg) {
+        return !arg.getTags().contains(SERVER_SAFE_LOGGING_DISABLED);
+    }
 
     public static boolean isSafe(Collection<String> tags) {
         return tags.contains(SAFE);
@@ -62,6 +80,9 @@ public final class ConjureTags {
 
     public static Optional<LogSafety> safety(ArgumentDefinition argument) {
         validateTags(argument);
+        if (argument.getSafety().isPresent()) {
+            return argument.getSafety();
+        }
         Set<String> tags = argument.getTags();
         if (isSafe(tags)) {
             return Optional.of(LogSafety.SAFE);
@@ -78,10 +99,26 @@ public final class ConjureTags {
         Optional<LogSafety> markerSafety = ConjureMarkers.markerSafety(argument);
         if (markerSafety.isPresent() && (isSafe(tags) || isUnsafe(tags))) {
             throw new IllegalStateException(String.format(
-                    "Unexpected %s marker in addition to a '%s' tag on argument %s",
+                    "Unexpected %s marker in addition to a '%s' tag on argument '%s'",
                     markerSafety.get().accept(MarkerNameLogSafetyVisitor.INSTANCE),
                     isSafe(tags) ? "safe" : "unsafe",
                     argument.getArgName()));
+        }
+        if (argument.getSafety().isPresent()) {
+            if (markerSafety.isPresent()) {
+                throw new IllegalStateException(String.format(
+                        "Unexpected 'safety: %s' value in addition to a '%s' marker on argument '%s'",
+                        argument.getSafety().get().accept(DefFormatSafetyVisitor.INSTANCE),
+                        markerSafety.get().accept(MarkerNameLogSafetyVisitor.INSTANCE),
+                        argument.getArgName()));
+            }
+            if (isSafe(tags) || isUnsafe(tags)) {
+                throw new IllegalStateException(String.format(
+                        "Unexpected 'safety: %s' value in addition to a '%s' tag on argument '%s'",
+                        argument.getSafety().get().accept(DefFormatSafetyVisitor.INSTANCE),
+                        isSafe(tags) ? "safe" : "unsafe",
+                        argument.getArgName()));
+            }
         }
     }
 
@@ -121,6 +158,31 @@ public final class ConjureTags {
         @Override
         public String visitDoNotLog() {
             return DoNotLog.class.getName();
+        }
+
+        @Override
+        public String visitUnknown(String unknownValue) {
+            throw new IllegalStateException("Unknown value: " + unknownValue);
+        }
+    }
+
+    /** Visitor returns a value formatted like the yaml input rather than the IR. */
+    private enum DefFormatSafetyVisitor implements LogSafety.Visitor<String> {
+        INSTANCE;
+
+        @Override
+        public String visitSafe() {
+            return "safe";
+        }
+
+        @Override
+        public String visitUnsafe() {
+            return "unsafe";
+        }
+
+        @Override
+        public String visitDoNotLog() {
+            return "do-not-log";
         }
 
         @Override

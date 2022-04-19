@@ -39,7 +39,7 @@ import java.util.Optional;
 /** The marker concept is deprecated in favor of tags, however the functionality has not been dropped yet. */
 public final class ConjureMarkers {
 
-    private static final ImmutableSet<ClassName> SAFETY_CLASS_NAMES =
+    public static final ImmutableSet<com.squareup.javapoet.TypeName> SAFETY_CLASS_NAMES =
             ImmutableSet.of(ClassName.get(Safe.class), ClassName.get(Unsafe.class));
 
     private static final TypeName SAFE_TYPE_NAME =
