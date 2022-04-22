@@ -5,10 +5,12 @@ import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.undertow.server.HttpHandler;
@@ -146,7 +148,6 @@ public final class TestServiceEndpoints implements UndertowService {
             CreateDatasetRequest request = deserializer.deserialize(exchange);
             HeaderMap headerParams = exchange.getRequestHeaders();
             String testHeaderArg = runtime.plainSerDe().deserializeString(headerParams.get("Test-Header"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "testHeaderArg", testHeaderArg, exchange);
             Dataset result = delegate.createDataset(authHeader, testHeaderArg, request);
             serializer.serialize(result, exchange);
         }
@@ -196,7 +197,6 @@ public final class TestServiceEndpoints implements UndertowService {
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
             Optional<Dataset> result = delegate.getDataset(authHeader, datasetRid);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
@@ -244,10 +244,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
+            requestContext.requestArg(SafeArg.of("datasetRid", datasetRid));
             BinaryResponseBody result = delegate.getRawData(authHeader, datasetRid);
             runtime.bodySerDe().serialize(result, exchange);
         }
@@ -291,10 +292,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
+            requestContext.requestArg(SafeArg.of("datasetRid", datasetRid));
             BinaryResponseBody result = delegate.getAliasedRawData(authHeader, datasetRid);
             runtime.bodySerDe().serialize(result, exchange);
         }
@@ -338,10 +340,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
+            requestContext.requestArg(SafeArg.of("datasetRid", datasetRid));
             runtime.markers().param("javax.annotation.Nonnull", "datasetRid", datasetRid, exchange);
             Optional<BinaryResponseBody> result = delegate.maybeGetRawData(authHeader, datasetRid);
             if (result.isPresent()) {
@@ -396,7 +399,6 @@ public final class TestServiceEndpoints implements UndertowService {
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("safe", "datasetRid", datasetRid, exchange);
             AliasedString result = delegate.getAliasedString(authHeader, datasetRid);
             serializer.serialize(result, exchange);
         }
@@ -441,7 +443,6 @@ public final class TestServiceEndpoints implements UndertowService {
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
             InputStream input = runtime.bodySerDe().deserializeInputStream(exchange);
-            runtime.markers().param("com.palantir.logsafe.Safe", "input", input, exchange);
             delegate.uploadRawData(authHeader, input);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -532,10 +533,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
+            requestContext.requestArg(SafeArg.of("datasetRid", datasetRid));
             Set<String> result = delegate.getBranches(authHeader, datasetRid);
             serializer.serialize(result, exchange);
         }
@@ -583,10 +585,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @SuppressWarnings("deprecation")
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
+            requestContext.requestArg(SafeArg.of("datasetRid", datasetRid));
             Set<String> result = delegate.getBranchesDeprecated(authHeader, datasetRid);
             serializer.serialize(result, exchange);
         }
@@ -638,10 +641,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
+            requestContext.requestArg(SafeArg.of("datasetRid", datasetRid));
             String branch = runtime.plainSerDe().deserializeString(pathParams.get("branch"));
             Optional<String> result = delegate.resolveBranch(authHeader, datasetRid, branch);
             if (result.isPresent()) {
@@ -693,10 +697,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
+            requestContext.requestArg(SafeArg.of("datasetRid", datasetRid));
             Optional<String> result = delegate.testParam(authHeader, datasetRid);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
@@ -750,10 +755,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             String query = deserializer.deserialize(exchange);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             ResourceIdentifier something = runtime.plainSerDe().deserializeRid(queryParams.get("different"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "something", something, exchange);
+            requestContext.requestArg(SafeArg.of("something", something));
             Optional<ResourceIdentifier> optionalMiddle =
                     runtime.plainSerDe().deserializeOptionalRid(queryParams.get("optionalMiddle"));
             ResourceIdentifier implicit = runtime.plainSerDe().deserializeRid(queryParams.get("implicit"));
@@ -1098,10 +1104,11 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
-            runtime.markers().param("com.palantir.logsafe.Safe", "datasetRid", datasetRid, exchange);
+            requestContext.requestArg(SafeArg.of("datasetRid", datasetRid));
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             Set<AliasedString> strings =
                     runtime.plainSerDe().deserializeComplexSet(queryParams.get("strings"), AliasedString::valueOf);

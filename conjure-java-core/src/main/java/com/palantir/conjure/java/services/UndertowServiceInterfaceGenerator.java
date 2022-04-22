@@ -27,7 +27,6 @@ import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
-import com.palantir.conjure.java.util.Tags;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
@@ -136,9 +135,9 @@ final class UndertowServiceInterfaceGenerator {
         sortedArgList.forEach(def ->
                 parameterSpecs.add(createServiceMethodParameterArg(typeMapper, safetyEvaluator, def, endpointDef)));
 
-        if (Tags.hasServerRequestContext(endpointDef)) {
+        if (ConjureTags.hasServerRequestContext(endpointDef)) {
             parameterSpecs.add(
-                    ParameterSpec.builder(ClassName.get(RequestContext.class), Tags.SERVER_REQUEST_CONTEXT_PARAMETER)
+                    ParameterSpec.builder(ClassName.get(RequestContext.class), ConjureTags.SERVER_REQUEST_CONTEXT_NAME)
                             .build());
         }
 

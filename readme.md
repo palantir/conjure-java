@@ -54,6 +54,9 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
 
 #### Endpoint Argument Tags
 
+* `server-squelch`: Opts out of attaching safe non-body parameters to the request. By default, all known log-safe non-body inputs are included.
+
+_The following argument tags are deprecated, replaced by `safety` declarations._
 * `safe`: Annotates parameters as `@Safe` to log using safe-logging annotations. Implementations may add this data to the request log.
 * `unsafe`: Annotates parameters as `@Unsafe` to log using safe-logging annotations. Implementations may add this data to the request log.
 

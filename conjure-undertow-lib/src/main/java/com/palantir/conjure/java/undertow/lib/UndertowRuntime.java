@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java.undertow.lib;
 
-import com.google.common.annotations.Beta;
-
 /**
  * {@link UndertowRuntime} is the anchor for all non-generated logic used by generated handlers.
  *
@@ -45,6 +43,5 @@ public interface UndertowRuntime {
     ExceptionHandler exceptionHandler();
 
     /** Provides the {@link Contexts} which safely expose request details to resources. */
-    @Beta
     Contexts contexts();
 }

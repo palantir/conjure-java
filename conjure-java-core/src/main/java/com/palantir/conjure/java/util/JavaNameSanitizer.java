@@ -18,6 +18,7 @@ package com.palantir.conjure.java.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.CaseConverter;
+import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
@@ -73,7 +74,7 @@ public final class JavaNameSanitizer {
         if (maybeAuthParamName.isPresent() && maybeAuthParamName.get().equals(value)) {
             return sanitizeParameterName(escape(value), endpoint);
         }
-        if (Tags.hasServerRequestContext(endpoint) && Tags.SERVER_REQUEST_CONTEXT_PARAMETER.equals(value)) {
+        if (ConjureTags.hasServerRequestContext(endpoint) && ConjureTags.SERVER_REQUEST_CONTEXT_NAME.equals(value)) {
             return sanitizeParameterName(escape(value), endpoint);
         }
         return value;

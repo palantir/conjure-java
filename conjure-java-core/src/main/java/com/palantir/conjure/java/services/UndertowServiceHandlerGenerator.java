@@ -24,13 +24,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.MoreCollectors;
 import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
+import com.palantir.conjure.java.ConjureMarkers;
 import com.palantir.conjure.java.ConjureTags;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.UndertowTypeFunctions.AsyncRequestProcessingMetadata;
 import com.palantir.conjure.java.types.CodeBlocks;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
@@ -39,7 +42,6 @@ import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
-import com.palantir.conjure.java.util.Tags;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
@@ -51,6 +53,7 @@ import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
 import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.ParameterType;
 import com.palantir.conjure.spec.PrimitiveType;
@@ -62,6 +65,8 @@ import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.humanreadabletypes.HumanReadableDuration;
+import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.AnnotationSpec;
@@ -104,7 +109,12 @@ final class UndertowServiceHandlerGenerator {
     private static final String RESULT_VAR_NAME = "result";
 
     private static final ImmutableSet<String> RESERVED_PARAM_NAMES = ImmutableSet.of(
-            EXCHANGE_VAR_NAME, DELEGATE_VAR_NAME, RUNTIME_VAR_NAME, DESERIALIZER_VAR_NAME, SERIALIZER_VAR_NAME);
+            EXCHANGE_VAR_NAME,
+            DELEGATE_VAR_NAME,
+            RUNTIME_VAR_NAME,
+            DESERIALIZER_VAR_NAME,
+            SERIALIZER_VAR_NAME,
+            ConjureTags.SERVER_REQUEST_CONTEXT_NAME);
 
     private final Options options;
 
@@ -116,7 +126,8 @@ final class UndertowServiceHandlerGenerator {
             ServiceDefinition serviceDefinition,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            TypeMapper returnTypeMapper,
+            SafetyEvaluator safetyEvaluator) {
         String serviceName = serviceDefinition.getServiceName().getName();
         // class name
         ClassName serviceClass = ClassName.get(
@@ -179,7 +190,13 @@ final class UndertowServiceHandlerGenerator {
                 .addTypes(Lists.transform(
                         serviceDefinition.getEndpoints(),
                         e -> generateEndpointHandler(
-                                e, serviceDefinition, serviceClass, typeDefinitions, typeMapper, returnTypeMapper)))
+                                e,
+                                serviceDefinition,
+                                serviceClass,
+                                typeDefinitions,
+                                typeMapper,
+                                returnTypeMapper,
+                                safetyEvaluator)))
                 .build();
 
         return JavaFile.builder(
@@ -208,13 +225,15 @@ final class UndertowServiceHandlerGenerator {
             ClassName serviceClass,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            TypeMapper returnTypeMapper,
+            SafetyEvaluator safetyEvaluator) {
         MethodSpec.Builder handleMethodBuilder = MethodSpec.methodBuilder("handleRequest")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(HttpServerExchange.class, EXCHANGE_VAR_NAME)
                 .addException(IOException.class)
-                .addCode(endpointInvocation(endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper));
+                .addCode(endpointInvocation(
+                        endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper, safetyEvaluator));
 
         endpointDefinition
                 .getDeprecated()
@@ -397,15 +416,43 @@ final class UndertowServiceHandlerGenerator {
     private static final String QUERY_PARAMS_VAR_NAME = "queryParams";
     private static final String HEADER_PARAMS_VAR_NAME = "headerParams";
 
+    private boolean requiresRequestContext(EndpointDefinition endpointDefinition, SafetyEvaluator safetyEvaluator) {
+        return ConjureTags.hasServerRequestContext(endpointDefinition)
+                || endpointDefinition.getArgs().stream()
+                        .anyMatch(argument -> isSafeLoggableArgument(argument, safetyEvaluator));
+    }
+
+    private static boolean isSafeLoggableArgument(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
+        // Body parameters can very noisy, we do not attach these by default.
+        return !argument.getParamType().accept(ParameterTypeVisitor.IS_BODY)
+                // Allow opt-out for noisy parameters
+                && ConjureTags.isServerSafeLoggingAllowed(argument)
+                && safetyEvaluator
+                        .evaluate(argument.getType(), ConjureMarkers.markerSafety(argument))
+                        .filter(LogSafety.SAFE::equals)
+                        .isPresent();
+    }
+
     private CodeBlock endpointInvocation(
             EndpointDefinition endpointDefinition,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
             TypeMapper typeMapper,
-            TypeMapper returnTypeMapper) {
+            TypeMapper returnTypeMapper,
+            SafetyEvaluator safetyEvaluator) {
         CodeBlock.Builder code = CodeBlock.builder();
 
         // auth code
         Optional<String> authVarName = addAuthCode(code, endpointDefinition);
+
+        // request context if necessary
+        if (requiresRequestContext(endpointDefinition, safetyEvaluator)) {
+            code.addStatement(
+                    "$T $N = $N.contexts().createContext($N, this)",
+                    RequestContext.class,
+                    ConjureTags.SERVER_REQUEST_CONTEXT_NAME,
+                    RUNTIME_VAR_NAME,
+                    EXCHANGE_VAR_NAME);
+        }
 
         // body parameter
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
@@ -426,17 +473,18 @@ final class UndertowServiceHandlerGenerator {
                         DESERIALIZER_VAR_NAME,
                         EXCHANGE_VAR_NAME);
             }
-            code.add(generateParamMetadata(bodyParam, bodyParam.getArgName().get(), paramName, typeMapper));
+            code.add(generateParamMetadata(
+                    bodyParam, bodyParam.getArgName().get(), paramName, typeMapper, safetyEvaluator));
         });
 
         // path parameters
-        addPathParamsCode(code, endpointDefinition, typeDefinitions, typeMapper);
+        addPathParamsCode(code, endpointDefinition, typeDefinitions, typeMapper, safetyEvaluator);
 
         // header parameters
-        addHeaderParamsCode(code, endpointDefinition, typeDefinitions, typeMapper);
+        addHeaderParamsCode(code, endpointDefinition, typeDefinitions, typeMapper, safetyEvaluator);
 
         // query parameters
-        addQueryParamsCode(code, endpointDefinition, typeDefinitions, typeMapper);
+        addQueryParamsCode(code, endpointDefinition, typeDefinitions, typeMapper, safetyEvaluator);
 
         List<CodeBlock> methodArgs = new ArrayList<>();
         authVarName.ifPresent(name -> methodArgs.add(CodeBlock.of("$N", name)));
@@ -445,8 +493,8 @@ final class UndertowServiceHandlerGenerator {
                 .map(arg -> sanitizeVarName(arg, endpointDefinition))
                 .map(arg -> CodeBlock.of("$N", arg))
                 .forEach(methodArgs::add);
-        if (Tags.hasServerRequestContext(endpointDefinition)) {
-            methodArgs.add(CodeBlock.of("$N.contexts().createContext($N, this)", RUNTIME_VAR_NAME, EXCHANGE_VAR_NAME));
+        if (ConjureTags.hasServerRequestContext(endpointDefinition)) {
+            methodArgs.add(CodeBlock.of("$N", ConjureTags.SERVER_REQUEST_CONTEXT_NAME));
         }
 
         Optional<AsyncRequestProcessingMetadata> async = UndertowTypeFunctions.async(endpointDefinition, options);
@@ -550,17 +598,34 @@ final class UndertowServiceHandlerGenerator {
     }
 
     private static CodeBlock generateParamMetadata(
-            ArgumentDefinition argument, String paramName, String variableName, TypeMapper typeMapper) {
+            ArgumentDefinition argument,
+            String paramName,
+            String variableName,
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator) {
         ConjureTags.validateTags(argument);
+        // filter out both forms of safety markers in favor of the declared safety
         Set<String> mergedTags = Streams.concat(
-                        argument.getMarkers().stream().map(marker -> typeMapper
-                                .getClassName(marker)
-                                .box()
-                                .withoutAnnotations()
-                                .toString()),
-                        argument.getTags().stream())
+                        argument.getMarkers().stream()
+                                .map(typeMapper::getClassName)
+                                .filter(typeName -> !ConjureMarkers.SAFETY_CLASS_NAMES.contains(typeName))
+                                .map(name -> name.box().withoutAnnotations().toString()),
+                        argument.getTags().stream().filter(item -> !ConjureTags.HANDLED_ARGUMENT_TAGS.contains(item)))
+                .filter(item -> !Safe.class.getName().equals(item) && !"safe".equals(item))
                 .collect(ImmutableSet.toImmutableSet());
-        return generateParamTags(mergedTags, paramName, variableName);
+        CodeBlock paramTags = generateParamTags(mergedTags, paramName, variableName);
+        if (isSafeLoggableArgument(argument, safetyEvaluator)) {
+            return CodeBlock.builder()
+                    .addStatement(
+                            "$N.requestArg($T.of($S, $N))",
+                            ConjureTags.SERVER_REQUEST_CONTEXT_NAME,
+                            SafeArg.class,
+                            paramName,
+                            variableName)
+                    .add(paramTags)
+                    .build();
+        }
+        return paramTags;
     }
 
     private static CodeBlock generateParamTags(
@@ -628,7 +693,8 @@ final class UndertowServiceHandlerGenerator {
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator) {
         if (hasPathArgument(endpointDefinition.getArgs())) {
             code.addStatement(
                     "$1T<$2T, $2T> $3N = $4N.getAttachment($5T.ATTACHMENT_KEY).getParameters()",
@@ -637,7 +703,7 @@ final class UndertowServiceHandlerGenerator {
                     PATH_PARAMS_VAR_NAME,
                     EXCHANGE_VAR_NAME,
                     io.undertow.util.PathTemplateMatch.class);
-            code.add(generatePathParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper));
+            code.add(generatePathParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper, safetyEvaluator));
         }
     }
 
@@ -645,14 +711,16 @@ final class UndertowServiceHandlerGenerator {
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator) {
         if (hasHeaderArgument(endpointDefinition.getArgs())) {
             code.addStatement(
                     "$1T $2N = $3N.getRequestHeaders()",
                     io.undertow.util.HeaderMap.class,
                     HEADER_PARAMS_VAR_NAME,
                     EXCHANGE_VAR_NAME);
-            code.add(generateHeaderParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper));
+            code.add(
+                    generateHeaderParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper, safetyEvaluator));
         }
     }
 
@@ -660,7 +728,8 @@ final class UndertowServiceHandlerGenerator {
             CodeBlock.Builder code,
             EndpointDefinition endpointDefinition,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator) {
         if (hasQueryArgument(endpointDefinition.getArgs())) {
             code.addStatement(
                     "$1T $2N = $3N.getQueryParameters()",
@@ -670,7 +739,7 @@ final class UndertowServiceHandlerGenerator {
                             ParameterizedTypeName.get(Deque.class, String.class)),
                     QUERY_PARAMS_VAR_NAME,
                     EXCHANGE_VAR_NAME);
-            code.add(generateQueryParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper));
+            code.add(generateQueryParameterCodeBlock(endpointDefinition, typeDefinitions, typeMapper, safetyEvaluator));
         }
     }
 
@@ -689,20 +758,23 @@ final class UndertowServiceHandlerGenerator {
     private CodeBlock generatePathParameterCodeBlock(
             EndpointDefinition endpoint,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_PATH,
                 PATH_PARAMS_VAR_NAME,
                 arg -> arg.getArgName().get(),
                 typeDefinitions,
-                typeMapper);
+                typeMapper,
+                safetyEvaluator);
     }
 
     private CodeBlock generateQueryParameterCodeBlock(
             EndpointDefinition endpoint,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_QUERY,
@@ -712,13 +784,15 @@ final class UndertowServiceHandlerGenerator {
                         .getParamId()
                         .get(),
                 typeDefinitions,
-                typeMapper);
+                typeMapper,
+                safetyEvaluator);
     }
 
     private CodeBlock generateHeaderParameterCodeBlock(
             EndpointDefinition endpoint,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator) {
         return generateParameterCodeBlock(
                 endpoint,
                 ParameterTypeVisitor.IS_HEADER,
@@ -728,7 +802,8 @@ final class UndertowServiceHandlerGenerator {
                         .getParamId()
                         .get(),
                 typeDefinitions,
-                typeMapper);
+                typeMapper,
+                safetyEvaluator);
     }
 
     private CodeBlock generateParameterCodeBlock(
@@ -737,7 +812,8 @@ final class UndertowServiceHandlerGenerator {
             String paramsVarName,
             Function<ArgumentDefinition, String> toParamId,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typeDefinitions,
-            TypeMapper typeMapper) {
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator) {
         return CodeBlocks.of(endpoint.getArgs().stream()
                 .filter(param -> param.getParamType().accept(paramTypeVisitor))
                 .map(arg -> {
@@ -765,7 +841,7 @@ final class UndertowServiceHandlerGenerator {
                     }
                     return CodeBlocks.of(
                             retrieveParam,
-                            generateParamMetadata(arg, arg.getArgName().get(), paramName, typeMapper));
+                            generateParamMetadata(arg, arg.getArgName().get(), paramName, typeMapper, safetyEvaluator));
                 })
                 .collect(ImmutableList.toImmutableList()));
     }
@@ -1084,7 +1160,8 @@ final class UndertowServiceHandlerGenerator {
         String value = JavaNameSanitizer.sanitizeParameterName(input, endpoint);
         if (RESERVED_PARAM_NAMES.contains(value)
                 || (endpoint.getReturns().isPresent() && RESULT_VAR_NAME.equals(value))
-                || (Tags.hasServerRequestContext(endpoint) && Tags.SERVER_REQUEST_CONTEXT_PARAMETER.equals(value))) {
+                || (ConjureTags.hasServerRequestContext(endpoint)
+                        && ConjureTags.SERVER_REQUEST_CONTEXT_NAME.equals(value))) {
             return sanitizeVarName(value + "_", endpoint);
         }
         return value;

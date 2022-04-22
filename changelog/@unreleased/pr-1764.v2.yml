@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Support Conjure argument safety declarations
+  links:
+  - https://github.com/palantir/conjure-java/pull/1764

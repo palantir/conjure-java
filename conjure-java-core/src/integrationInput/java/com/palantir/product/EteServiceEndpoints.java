@@ -6,10 +6,12 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.RequestContext;
 import com.palantir.conjure.java.undertow.lib.Serializer;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.lib.UndertowService;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
@@ -812,9 +814,11 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             String queryParamNameRaw = runtime.plainSerDe().deserializeString(queryParams.get("queryParamName"));
             StringAliasExample queryParamName = StringAliasExample.of(queryParamNameRaw);
+            requestContext.requestArg(SafeArg.of("queryParamName", queryParamName));
             StringAliasExample result = delegate.aliasOne(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
@@ -861,11 +865,13 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             Optional<String> queryParamNameRaw =
                     runtime.plainSerDe().deserializeOptionalString(queryParams.get("queryParamName"));
             Optional<StringAliasExample> queryParamName = Optional.ofNullable(
                     queryParamNameRaw.isPresent() ? StringAliasExample.of(queryParamNameRaw.get()) : null);
+            requestContext.requestArg(SafeArg.of("queryParamName", queryParamName));
             StringAliasExample result = delegate.optionalAliasOne(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
@@ -912,10 +918,12 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             String queryParamNameRaw = runtime.plainSerDe().deserializeString(queryParams.get("queryParamName"));
             NestedStringAliasExample queryParamName =
                     NestedStringAliasExample.of(StringAliasExample.of(queryParamNameRaw));
+            requestContext.requestArg(SafeArg.of("queryParamName", queryParamName));
             NestedStringAliasExample result = delegate.aliasTwo(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
@@ -1163,9 +1171,11 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             SimpleEnum queryParamName =
                     runtime.plainSerDe().deserializeComplex(queryParams.get("queryParamName"), SimpleEnum::valueOf);
+            requestContext.requestArg(SafeArg.of("queryParamName", queryParamName));
             SimpleEnum result = delegate.enumQuery(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
@@ -1212,9 +1222,11 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             List<SimpleEnum> queryParamName =
                     runtime.plainSerDe().deserializeComplexList(queryParams.get("queryParamName"), SimpleEnum::valueOf);
+            requestContext.requestArg(SafeArg.of("queryParamName", queryParamName));
             List<SimpleEnum> result = delegate.enumListQuery(authHeader, queryParamName);
             serializer.serialize(result, exchange);
         }
@@ -1261,9 +1273,11 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             Optional<SimpleEnum> queryParamName = runtime.plainSerDe()
                     .deserializeOptionalComplex(queryParams.get("queryParamName"), SimpleEnum::valueOf);
+            requestContext.requestArg(SafeArg.of("queryParamName", queryParamName));
             Optional<SimpleEnum> result = delegate.optionalEnumQuery(authHeader, queryParamName);
             if (result.isPresent()) {
                 serializer.serialize(result, exchange);
@@ -1314,9 +1328,11 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             HeaderMap headerParams = exchange.getRequestHeaders();
             SimpleEnum headerParameter =
                     runtime.plainSerDe().deserializeComplex(headerParams.get("Custom-Header"), SimpleEnum::valueOf);
+            requestContext.requestArg(SafeArg.of("headerParameter", headerParameter));
             SimpleEnum result = delegate.enumHeader(authHeader, headerParameter);
             serializer.serialize(result, exchange);
         }
@@ -1414,12 +1430,14 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
+            RequestContext requestContext = runtime.contexts().createContext(exchange, this);
             Map<String, String> pathParams =
                     exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
             ResourceIdentifier datasetRid = runtime.plainSerDe().deserializeRid(pathParams.get("datasetRid"));
             Map<String, Deque<String>> queryParams = exchange.getQueryParameters();
             Set<StringAliasExample> strings =
                     runtime.plainSerDe().deserializeComplexSet(queryParams.get("strings"), StringAliasExample::valueOf);
+            requestContext.requestArg(SafeArg.of("strings", strings));
             Set<Long> longs = runtime.plainSerDe().deserializeComplexSet(queryParams.get("longs"), Long::valueOf);
             Set<Integer> ints = runtime.plainSerDe().deserializeIntegerSet(queryParams.get("ints"));
             delegate.complexQueryParameters(authHeader, datasetRid, strings, longs, ints);
