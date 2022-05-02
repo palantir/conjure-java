@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 
 @Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class StringAliasExample {
+public final class StringAliasExample implements Comparable<StringAliasExample> {
     private final String value;
 
     private StringAliasExample(@Nonnull String value) {
@@ -36,6 +36,11 @@ public final class StringAliasExample {
     @Override
     public int hashCode() {
         return value.hashCode();
+    }
+
+    @Override
+    public int compareTo(StringAliasExample other) {
+        return value.compareTo(other.get());
     }
 
     public static StringAliasExample valueOf(@Safe String value) {

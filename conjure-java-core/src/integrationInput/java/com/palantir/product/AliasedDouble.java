@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class AliasedDouble {
+public final class AliasedDouble implements Comparable<AliasedDouble> {
     private final double value;
 
     private AliasedDouble(double value) {
@@ -35,6 +35,11 @@ public final class AliasedDouble {
     @Override
     public int hashCode() {
         return Double.hashCode(value);
+    }
+
+    @Override
+    public int compareTo(AliasedDouble other) {
+        return Double.compare(value, other.get());
     }
 
     public static AliasedDouble valueOf(String value) {

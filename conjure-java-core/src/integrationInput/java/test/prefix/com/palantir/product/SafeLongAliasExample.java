@@ -8,7 +8,7 @@ import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class SafeLongAliasExample {
+public final class SafeLongAliasExample implements Comparable<SafeLongAliasExample> {
     private final SafeLong value;
 
     private SafeLongAliasExample(@Nonnull SafeLong value) {
@@ -34,6 +34,11 @@ public final class SafeLongAliasExample {
     @Override
     public int hashCode() {
         return value.hashCode();
+    }
+
+    @Override
+    public int compareTo(SafeLongAliasExample other) {
+        return value.compareTo(other.get());
     }
 
     public static SafeLongAliasExample valueOf(String value) {

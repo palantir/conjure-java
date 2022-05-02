@@ -37,6 +37,7 @@ import com.palantir.conjure.spec.Type.Visitor;
 import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -51,6 +52,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import javax.lang.model.element.Modifier;
 
 public final class AliasGenerator {
@@ -103,6 +105,10 @@ public final class AliasGenerator {
                         .returns(TypeName.INT)
                         .addCode(primitiveSafeHashCode(aliasTypeName))
                         .build());
+
+        typeDef.getAlias().accept(new ComparableVisitor(thisClass)).ifPresent(compareTo -> spec.addSuperinterface(
+                        ParameterizedTypeName.get(ClassName.get(Comparable.class), thisClass))
+                .addMethod(compareTo));
 
         Optional<CodeBlock> maybeValueOfFactoryMethod =
                 valueOfFactoryMethod(typeDef.getAlias(), aliasTypeName, typeMapper, options);
@@ -448,5 +454,146 @@ public final class AliasGenerator {
             return CodeBlocks.statement("return $T.hashCode(value)", aliasTypeName.box());
         }
         return CodeBlocks.statement("return value.hashCode()");
+    }
+
+    private static final class ComparableVisitor implements Type.Visitor<Optional<MethodSpec>> {
+        private final TypeName aliasName;
+
+        ComparableVisitor(TypeName aliasName) {
+            this.aliasName = aliasName;
+        }
+
+        @Override
+        public Optional<MethodSpec> visitPrimitive(PrimitiveType value) {
+            return value.accept(new PrimitiveComparableVisitor(aliasName));
+        }
+
+        @Override
+        public Optional<MethodSpec> visitOptional(OptionalType _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitList(ListType _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitSet(SetType _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitMap(MapType _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitReference(com.palantir.conjure.spec.TypeName _value) {
+            // We could detect if this is an alias to another alias which is itself comparable, however
+            // that's out of scope for the initial implementation.
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitExternal(ExternalReference _value) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitUnknown(@Safe String unknownType) {
+            throw new IllegalStateException("Unknown type: " + unknownType);
+        }
+    }
+
+    private static final class PrimitiveComparableVisitor implements PrimitiveType.Visitor<Optional<MethodSpec>> {
+        private final TypeName aliasName;
+
+        PrimitiveComparableVisitor(TypeName aliasName) {
+            this.aliasName = aliasName;
+        }
+
+        @Override
+        public Optional<MethodSpec> visitString() {
+            return Optional.of(createCompareTo(aliasName));
+        }
+
+        @Override
+        public Optional<MethodSpec> visitDatetime() {
+            return Optional.of(createCompareTo(aliasName));
+        }
+
+        @Override
+        public Optional<MethodSpec> visitInteger() {
+            return Optional.of(createCompareTo(aliasName, (thisValue, otherValue) -> CodeBlock.builder()
+                    .add("$T.compare($L, $L)", Integer.class, thisValue, otherValue)
+                    .build()));
+        }
+
+        @Override
+        public Optional<MethodSpec> visitDouble() {
+            return Optional.of(createCompareTo(aliasName, (thisValue, otherValue) -> CodeBlock.builder()
+                    .add("$T.compare($L, $L)", Double.class, thisValue, otherValue)
+                    .build()));
+        }
+
+        @Override
+        public Optional<MethodSpec> visitSafelong() {
+            return Optional.of(createCompareTo(aliasName));
+        }
+
+        @Override
+        public Optional<MethodSpec> visitBinary() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitAny() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitBoolean() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitUuid() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitRid() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitBearertoken() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<MethodSpec> visitUnknown(String unknownValue) {
+            throw new IllegalStateException("Unknown type: " + unknownValue);
+        }
+    }
+
+    private static MethodSpec createCompareTo(TypeName aliasType) {
+        return createCompareTo(aliasType, (thisValue, otherValue) -> CodeBlock.builder()
+                .add("$L.compareTo($L)", thisValue, otherValue)
+                .build());
+    }
+
+    private static MethodSpec createCompareTo(
+            TypeName aliasType, BiFunction<CodeBlock, CodeBlock, CodeBlock> comparisonFunc) {
+        return MethodSpec.methodBuilder("compareTo")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(TypeName.INT)
+                .addParameter(ParameterSpec.builder(aliasType, "other").build())
+                .addStatement(
+                        "return $L",
+                        comparisonFunc.apply(CodeBlock.of("$N", "value"), CodeBlock.of("$N.get()", "other")))
+                .build();
     }
 }

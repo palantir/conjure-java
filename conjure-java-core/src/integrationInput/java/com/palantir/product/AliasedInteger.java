@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class AliasedInteger {
+public final class AliasedInteger implements Comparable<AliasedInteger> {
     private final int value;
 
     private AliasedInteger(int value) {
@@ -30,6 +30,11 @@ public final class AliasedInteger {
     @Override
     public int hashCode() {
         return Integer.hashCode(value);
+    }
+
+    @Override
+    public int compareTo(AliasedInteger other) {
+        return Integer.compare(value, other.get());
     }
 
     public static AliasedInteger valueOf(String value) {
