@@ -8,7 +8,7 @@ import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class AliasedSafeLong {
+public final class AliasedSafeLong implements Comparable<AliasedSafeLong> {
     private final SafeLong value;
 
     private AliasedSafeLong(@Nonnull SafeLong value) {
@@ -34,6 +34,11 @@ public final class AliasedSafeLong {
     @Override
     public int hashCode() {
         return value.hashCode();
+    }
+
+    @Override
+    public int compareTo(AliasedSafeLong other) {
+        return value.compareTo(other.get());
     }
 
     public static AliasedSafeLong valueOf(String value) {

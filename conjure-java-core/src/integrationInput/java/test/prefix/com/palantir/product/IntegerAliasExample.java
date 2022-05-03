@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import javax.annotation.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class IntegerAliasExample {
+public final class IntegerAliasExample implements Comparable<IntegerAliasExample> {
     private final int value;
 
     private IntegerAliasExample(int value) {
@@ -31,6 +31,11 @@ public final class IntegerAliasExample {
     @Override
     public int hashCode() {
         return Integer.hashCode(value);
+    }
+
+    @Override
+    public int compareTo(IntegerAliasExample other) {
+        return Integer.compare(value, other.get());
     }
 
     public static IntegerAliasExample valueOf(String value) {

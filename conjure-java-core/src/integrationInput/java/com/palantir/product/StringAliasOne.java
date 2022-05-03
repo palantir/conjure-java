@@ -7,7 +7,7 @@ import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class StringAliasOne {
+public final class StringAliasOne implements Comparable<StringAliasOne> {
     private final String value;
 
     private StringAliasOne(@Nonnull String value) {
@@ -32,6 +32,11 @@ public final class StringAliasOne {
     @Override
     public int hashCode() {
         return value.hashCode();
+    }
+
+    @Override
+    public int compareTo(StringAliasOne other) {
+        return value.compareTo(other.get());
     }
 
     public static StringAliasOne valueOf(String value) {
