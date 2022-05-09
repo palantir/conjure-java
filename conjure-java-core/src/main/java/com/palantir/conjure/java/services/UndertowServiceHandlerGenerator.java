@@ -416,7 +416,8 @@ final class UndertowServiceHandlerGenerator {
     private static final String QUERY_PARAMS_VAR_NAME = "queryParams";
     private static final String HEADER_PARAMS_VAR_NAME = "headerParams";
 
-    private boolean requiresRequestContext(EndpointDefinition endpointDefinition, SafetyEvaluator safetyEvaluator) {
+    private static boolean requiresRequestContext(
+            EndpointDefinition endpointDefinition, SafetyEvaluator safetyEvaluator) {
         return ConjureTags.hasServerRequestContext(endpointDefinition)
                 || endpointDefinition.getArgs().stream()
                         .anyMatch(argument -> isSafeLoggableArgument(argument, safetyEvaluator));
@@ -428,7 +429,7 @@ final class UndertowServiceHandlerGenerator {
                 // Allow opt-out for noisy parameters
                 && ConjureTags.isServerSafeLoggingAllowed(argument)
                 && safetyEvaluator
-                        .evaluate(argument.getType(), ConjureMarkers.markerSafety(argument))
+                        .evaluate(argument.getType(), ConjureTags.safety(argument))
                         .filter(LogSafety.SAFE::equals)
                         .isPresent();
     }
@@ -456,7 +457,7 @@ final class UndertowServiceHandlerGenerator {
 
         // body parameter
         getBodyParamTypeArgument(endpointDefinition.getArgs()).ifPresent(bodyParam -> {
-            String paramName = sanitizeVarName(bodyParam.getArgName().get(), endpointDefinition);
+            String paramName = sanitizeVarName(bodyParam.getArgName().get(), endpointDefinition, safetyEvaluator);
             Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(bodyParam.getType(), typeDefinitions);
             if (TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
                 code.addStatement(
@@ -490,7 +491,7 @@ final class UndertowServiceHandlerGenerator {
         authVarName.ifPresent(name -> methodArgs.add(CodeBlock.of("$N", name)));
         ParameterOrder.sorted(endpointDefinition.getArgs()).stream()
                 .map(arg -> arg.getArgName().get())
-                .map(arg -> sanitizeVarName(arg, endpointDefinition))
+                .map(arg -> sanitizeVarName(arg, endpointDefinition, safetyEvaluator))
                 .map(arg -> CodeBlock.of("$N", arg))
                 .forEach(methodArgs::add);
         if (ConjureTags.hasServerRequestContext(endpointDefinition)) {
@@ -818,7 +819,7 @@ final class UndertowServiceHandlerGenerator {
                 .filter(param -> param.getParamType().accept(paramTypeVisitor))
                 .map(arg -> {
                     Type normalizedType = TypeFunctions.toConjureTypeWithoutAliases(arg.getType(), typeDefinitions);
-                    String paramName = sanitizeVarName(arg.getArgName().get(), endpoint);
+                    String paramName = sanitizeVarName(arg.getArgName().get(), endpoint, safetyEvaluator);
                     final CodeBlock retrieveParam;
                     if (normalizedType.equals(arg.getType())
                             // Collections of alias types are handled the same way as external imports
@@ -1156,13 +1157,13 @@ final class UndertowServiceHandlerGenerator {
                 .collect(MoreCollectors.toOptional());
     }
 
-    private static String sanitizeVarName(String input, EndpointDefinition endpoint) {
+    private static String sanitizeVarName(String input, EndpointDefinition endpoint, SafetyEvaluator evaluator) {
         String value = JavaNameSanitizer.sanitizeParameterName(input, endpoint);
         if (RESERVED_PARAM_NAMES.contains(value)
                 || (endpoint.getReturns().isPresent() && RESULT_VAR_NAME.equals(value))
-                || (ConjureTags.hasServerRequestContext(endpoint)
-                        && ConjureTags.SERVER_REQUEST_CONTEXT_NAME.equals(value))) {
-            return sanitizeVarName(value + "_", endpoint);
+                || (ConjureTags.SERVER_REQUEST_CONTEXT_NAME.equals(value)
+                        && requiresRequestContext(endpoint, evaluator))) {
+            return sanitizeVarName(value + "_", endpoint, evaluator);
         }
         return value;
     }
