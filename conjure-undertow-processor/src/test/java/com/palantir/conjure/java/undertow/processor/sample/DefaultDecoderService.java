@@ -51,7 +51,9 @@ public interface DefaultDecoderService {
             @Handle.QueryParam(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
             @Handle.QueryParam("constructor") Constructor constructor,
             @Handle.QueryParam("ofFactory") OfFactory ofFactory,
-            @Handle.QueryParam("valueOfFactory") ValueOfFactory valueOfFactory);
+            @Handle.QueryParam("valueOfFactory") ValueOfFactory valueOfFactory,
+            @Handle.QueryParam("fromStringFactory") FromStringFactory fromStringFactory,
+            @Handle.QueryParam("createFactory") CreateFactory createFactory);
 
     @Handle(method = HttpMethod.GET, path = "/headers")
     String headers(
@@ -65,7 +67,9 @@ public interface DefaultDecoderService {
             @Handle.Header(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
             @Handle.Header("constructor") Constructor constructor,
             @Handle.Header("ofFactory") OfFactory ofFactory,
-            @Handle.Header("valueOfFactory") ValueOfFactory valueOfFactory);
+            @Handle.Header("valueOfFactory") ValueOfFactory valueOfFactory,
+            @Handle.Header("fromStringFactory") FromStringFactory fromStringFactory,
+            @Handle.Header("createFactory") CreateFactory createFactory);
 
     @Handle(
             method = HttpMethod.GET,
@@ -79,7 +83,9 @@ public interface DefaultDecoderService {
             @Handle.PathParam float floatUnboxed,
             @Handle.PathParam Constructor constructor,
             @Handle.PathParam OfFactory ofFactory,
-            @Handle.PathParam ValueOfFactory valueOfFactory);
+            @Handle.PathParam ValueOfFactory valueOfFactory,
+            @Handle.PathParam FromStringFactory fromStringFactory,
+            @Handle.PathParam CreateFactory createFactory);
 
     enum StringCollectionDecoder implements CollectionParamDecoder<String> {
         INSTANCE;
@@ -119,6 +125,24 @@ public interface DefaultDecoderService {
 
         public static ValueOfFactory valueOf(String _value) {
             return new ValueOfFactory();
+        }
+    }
+
+    final class FromStringFactory {
+
+        private FromStringFactory() {}
+
+        public static FromStringFactory fromString(String _value) {
+            return new FromStringFactory();
+        }
+    }
+
+    final class CreateFactory {
+
+        private CreateFactory() {}
+
+        public static CreateFactory create(String _value) {
+            return new CreateFactory();
         }
     }
 }

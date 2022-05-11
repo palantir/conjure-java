@@ -90,6 +90,10 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<DefaultDecoderService.ValueOfFactory> valueOfFactoryDeserializer;
 
+        private final Deserializer<DefaultDecoderService.FromStringFactory> fromStringFactoryDeserializer;
+
+        private final Deserializer<DefaultDecoderService.CreateFactory> createFactoryDeserializer;
+
         private final Serializer<String> queryParamSerializer;
 
         QueryParamEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
@@ -135,6 +139,14 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "valueOfFactory",
                     ParamDecoders.complexCollectionParamDecoder(
                             runtime.plainSerDe(), DefaultDecoderService.ValueOfFactory::valueOf));
+            this.fromStringFactoryDeserializer = new QueryParamDeserializer<>(
+                    "fromStringFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.FromStringFactory::fromString));
+            this.createFactoryDeserializer = new QueryParamDeserializer<>(
+                    "createFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.CreateFactory::create));
             this.queryParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
@@ -156,6 +168,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
             DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
             DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.FromStringFactory fromStringFactory =
+                    this.fromStringFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.CreateFactory createFactory = this.createFactoryDeserializer.deserialize(exchange);
             write(
                     this.delegate.queryParam(
                             stringParam,
@@ -173,7 +188,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             decoderParam,
                             constructor,
                             ofFactory,
-                            valueOfFactory),
+                            valueOfFactory,
+                            fromStringFactory,
+                            createFactory),
                     exchange);
         }
 
@@ -235,6 +252,10 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<DefaultDecoderService.ValueOfFactory> valueOfFactoryDeserializer;
 
+        private final Deserializer<DefaultDecoderService.FromStringFactory> fromStringFactoryDeserializer;
+
+        private final Deserializer<DefaultDecoderService.CreateFactory> createFactoryDeserializer;
+
         private final Serializer<String> headersSerializer;
 
         HeadersEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
@@ -269,6 +290,14 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "valueOfFactory",
                     ParamDecoders.complexCollectionParamDecoder(
                             runtime.plainSerDe(), DefaultDecoderService.ValueOfFactory::valueOf));
+            this.fromStringFactoryDeserializer = new HeaderParamDeserializer<>(
+                    "fromStringFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.FromStringFactory::fromString));
+            this.createFactoryDeserializer = new HeaderParamDeserializer<>(
+                    "createFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.CreateFactory::create));
             this.headersSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
@@ -285,6 +314,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
             DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
             DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.FromStringFactory fromStringFactory =
+                    this.fromStringFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.CreateFactory createFactory = this.createFactoryDeserializer.deserialize(exchange);
             write(
                     this.delegate.headers(
                             stringParam,
@@ -297,7 +329,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             decoderParam,
                             constructor,
                             ofFactory,
-                            valueOfFactory),
+                            valueOfFactory,
+                            fromStringFactory,
+                            createFactory),
                     exchange);
         }
 
@@ -353,6 +387,10 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<DefaultDecoderService.ValueOfFactory> valueOfFactoryDeserializer;
 
+        private final Deserializer<DefaultDecoderService.FromStringFactory> fromStringFactoryDeserializer;
+
+        private final Deserializer<DefaultDecoderService.CreateFactory> createFactoryDeserializer;
+
         private final Serializer<String> pathParamSerializer;
 
         PathParamEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
@@ -378,6 +416,14 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "valueOfFactory",
                     ParamDecoders.complexParamDecoder(
                             runtime.plainSerDe(), DefaultDecoderService.ValueOfFactory::valueOf));
+            this.fromStringFactoryDeserializer = new PathParamDeserializer<>(
+                    "fromStringFactory",
+                    ParamDecoders.complexParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.FromStringFactory::fromString));
+            this.createFactoryDeserializer = new PathParamDeserializer<>(
+                    "createFactory",
+                    ParamDecoders.complexParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.CreateFactory::create));
             this.pathParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
@@ -391,6 +437,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
             DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
             DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.FromStringFactory fromStringFactory =
+                    this.fromStringFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.CreateFactory createFactory = this.createFactoryDeserializer.deserialize(exchange);
             write(
                     this.delegate.pathParam(
                             stringParam,
@@ -400,7 +449,9 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             floatUnboxed,
                             constructor,
                             ofFactory,
-                            valueOfFactory),
+                            valueOfFactory,
+                            fromStringFactory,
+                            createFactory),
                     exchange);
         }
 

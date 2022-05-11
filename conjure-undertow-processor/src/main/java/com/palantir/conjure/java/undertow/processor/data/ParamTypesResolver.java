@@ -384,7 +384,9 @@ public final class ParamTypesResolver {
                 DeclaredType declaredType = (DeclaredType) typeMirror;
                 return getFactoryDecoderFactoryFunction(declaredType, "valueOf")
                         .or(() -> getConstructorDecoderFactoryFunction(declaredType))
-                        .or(() -> getFactoryDecoderFactoryFunction(declaredType, "of"));
+                        .or(() -> getFactoryDecoderFactoryFunction(declaredType, "of"))
+                        .or(() -> getFactoryDecoderFactoryFunction(declaredType, "fromString"))
+                        .or(() -> getFactoryDecoderFactoryFunction(declaredType, "create"));
             default:
                 return Optional.empty();
         }
