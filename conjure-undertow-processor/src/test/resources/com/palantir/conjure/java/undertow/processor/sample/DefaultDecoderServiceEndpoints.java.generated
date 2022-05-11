@@ -25,7 +25,6 @@ import java.lang.Exception;
 import java.lang.Float;
 import java.lang.Override;
 import java.lang.String;
-import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +49,6 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return ImmutableList.of(
                 new QueryParamEndpoint(runtime, delegate),
-                new MoreQueryParamsEndpoint(runtime, delegate),
                 new HeadersEndpoint(runtime, delegate),
                 new PathParamEndpoint(runtime, delegate));
     }
@@ -70,7 +68,27 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<Optional<String>> optionalStringParamDeserializer;
 
+        private final Deserializer<Float> floatBoxedDeserializer;
+
+        private final Deserializer<Float> floatUnboxedDeserializer;
+
+        private final Deserializer<OptionalInt> optionalIntParamDeserializer;
+
+        private final Deserializer<OffsetDateTime> dateTimeParamDeserializer;
+
+        private final Deserializer<Set<ResourceIdentifier>> ridSetParamDeserializer;
+
+        private final Deserializer<Optional<SafeLong>> optionalSafeLongParamDeserializer;
+
+        private final Deserializer<UUID> uuidParamDeserializer;
+
         private final Deserializer<String> decoderParamDeserializer;
+
+        private final Deserializer<DefaultDecoderService.Constructor> constructorDeserializer;
+
+        private final Deserializer<DefaultDecoderService.OfFactory> ofFactoryDeserializer;
+
+        private final Deserializer<DefaultDecoderService.ValueOfFactory> valueOfFactoryDeserializer;
 
         private final Serializer<String> queryParamSerializer;
 
@@ -87,8 +105,36 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "stringListParam", ParamDecoders.stringListCollectionParamDecoder(runtime.plainSerDe()));
             this.optionalStringParamDeserializer = new QueryParamDeserializer<>(
                     "optionalStringParam", ParamDecoders.optionalStringCollectionParamDecoder(runtime.plainSerDe()));
+            this.floatBoxedDeserializer = new QueryParamDeserializer<>(
+                    "floatBoxed", ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::valueOf));
+            this.floatUnboxedDeserializer = new QueryParamDeserializer<>(
+                    "floatUnboxed",
+                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::parseFloat));
+            this.optionalIntParamDeserializer = new QueryParamDeserializer<>(
+                    "optionalInt", ParamDecoders.optionalIntegerCollectionParamDecoder(runtime.plainSerDe()));
+            this.dateTimeParamDeserializer = new QueryParamDeserializer<>(
+                    "dateTime", ParamDecoders.dateTimeCollectionParamDecoder(runtime.plainSerDe()));
+            this.ridSetParamDeserializer = new QueryParamDeserializer<>(
+                    "ridSetParam", ParamDecoders.ridSetCollectionParamDecoder(runtime.plainSerDe()));
+            this.optionalSafeLongParamDeserializer = new QueryParamDeserializer<>(
+                    "optionalSafeLongParam",
+                    ParamDecoders.optionalSafeLongCollectionParamDecoder(runtime.plainSerDe()));
+            this.uuidParamDeserializer = new QueryParamDeserializer<>(
+                    "uuidParam", ParamDecoders.uuidCollectionParamDecoder(runtime.plainSerDe()));
             this.decoderParamDeserializer = new QueryParamDeserializer<>(
                     "decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
+            this.constructorDeserializer = new QueryParamDeserializer<>(
+                    "constructor",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.Constructor::new));
+            this.ofFactoryDeserializer = new QueryParamDeserializer<>(
+                    "ofFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.OfFactory::of));
+            this.valueOfFactoryDeserializer = new QueryParamDeserializer<>(
+                    "valueOfFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.ValueOfFactory::valueOf));
             this.queryParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
@@ -99,7 +145,17 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             Set<String> stringSetParam = this.stringSetParamDeserializer.deserialize(exchange);
             List<String> stringListParam = this.stringListParamDeserializer.deserialize(exchange);
             Optional<String> optionalStringParam = this.optionalStringParamDeserializer.deserialize(exchange);
+            Float floatBoxed = this.floatBoxedDeserializer.deserialize(exchange);
+            float floatUnboxed = this.floatUnboxedDeserializer.deserialize(exchange);
+            OptionalInt optionalIntParam = this.optionalIntParamDeserializer.deserialize(exchange);
+            OffsetDateTime dateTimeParam = this.dateTimeParamDeserializer.deserialize(exchange);
+            Set<ResourceIdentifier> ridSetParam = this.ridSetParamDeserializer.deserialize(exchange);
+            Optional<SafeLong> optionalSafeLongParam = this.optionalSafeLongParamDeserializer.deserialize(exchange);
+            UUID uuidParam = this.uuidParamDeserializer.deserialize(exchange);
             String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
+            DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
+            DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
             write(
                     this.delegate.queryParam(
                             stringParam,
@@ -107,7 +163,17 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             stringSetParam,
                             stringListParam,
                             optionalStringParam,
-                            decoderParam),
+                            floatBoxed,
+                            floatUnboxed,
+                            optionalIntParam,
+                            dateTimeParam,
+                            ridSetParam,
+                            optionalSafeLongParam,
+                            uuidParam,
+                            decoderParam,
+                            constructor,
+                            ofFactory,
+                            valueOfFactory),
                     exchange);
         }
 
@@ -142,103 +208,6 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
         }
     }
 
-    private static final class MoreQueryParamsEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
-        private final UndertowRuntime runtime;
-
-        private final DefaultDecoderService delegate;
-
-        private final Deserializer<OptionalInt> optionalIntParamDeserializer;
-
-        private final Deserializer<OffsetDateTime> dateTimeParamDeserializer;
-
-        private final Deserializer<Set<ResourceIdentifier>> ridSetParamDeserializer;
-
-        private final Deserializer<Optional<SafeLong>> optionalSafeLongParamDeserializer;
-
-        private final Deserializer<UUID> uuidParamDeserializer;
-
-        private final Deserializer<Float> floatHeaderBoxedDeserializer;
-
-        private final Deserializer<Float> floatHeaderUnboxedDeserializer;
-
-        private final Serializer<String> moreQueryParamsSerializer;
-
-        MoreQueryParamsEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
-            this.runtime = runtime;
-            this.delegate = delegate;
-            this.optionalIntParamDeserializer = new QueryParamDeserializer<>(
-                    "optionalInt", ParamDecoders.optionalIntegerCollectionParamDecoder(runtime.plainSerDe()));
-            this.dateTimeParamDeserializer = new QueryParamDeserializer<>(
-                    "dateTime", ParamDecoders.dateTimeCollectionParamDecoder(runtime.plainSerDe()));
-            this.ridSetParamDeserializer = new QueryParamDeserializer<>(
-                    "ridSetParam", ParamDecoders.ridSetCollectionParamDecoder(runtime.plainSerDe()));
-            this.optionalSafeLongParamDeserializer = new QueryParamDeserializer<>(
-                    "optionalSafeLongParam",
-                    ParamDecoders.optionalSafeLongCollectionParamDecoder(runtime.plainSerDe()));
-            this.uuidParamDeserializer = new QueryParamDeserializer<>(
-                    "uuidParam", ParamDecoders.uuidCollectionParamDecoder(runtime.plainSerDe()));
-            this.floatHeaderBoxedDeserializer = new QueryParamDeserializer<>(
-                    "floatParamBoxed",
-                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::valueOf));
-            this.floatHeaderUnboxedDeserializer = new QueryParamDeserializer<>(
-                    "floatParamUnboxed",
-                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::parseFloat));
-            this.moreQueryParamsSerializer =
-                    DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
-        }
-
-        @Override
-        public void handleRequest(HttpServerExchange exchange) throws Exception {
-            OptionalInt optionalIntParam = this.optionalIntParamDeserializer.deserialize(exchange);
-            OffsetDateTime dateTimeParam = this.dateTimeParamDeserializer.deserialize(exchange);
-            Set<ResourceIdentifier> ridSetParam = this.ridSetParamDeserializer.deserialize(exchange);
-            Optional<SafeLong> optionalSafeLongParam = this.optionalSafeLongParamDeserializer.deserialize(exchange);
-            UUID uuidParam = this.uuidParamDeserializer.deserialize(exchange);
-            Float floatHeaderBoxed = this.floatHeaderBoxedDeserializer.deserialize(exchange);
-            float floatHeaderUnboxed = this.floatHeaderUnboxedDeserializer.deserialize(exchange);
-            write(
-                    this.delegate.moreQueryParams(
-                            optionalIntParam,
-                            dateTimeParam,
-                            ridSetParam,
-                            optionalSafeLongParam,
-                            uuidParam,
-                            floatHeaderBoxed,
-                            floatHeaderUnboxed),
-                    exchange);
-        }
-
-        @Override
-        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
-            this.moreQueryParamsSerializer.serialize(returnValue, exchange);
-        }
-
-        @Override
-        public HttpString method() {
-            return Methods.GET;
-        }
-
-        @Override
-        public String template() {
-            return "/moreQueryParams";
-        }
-
-        @Override
-        public String serviceName() {
-            return "DefaultDecoderService";
-        }
-
-        @Override
-        public String name() {
-            return "moreQueryParams";
-        }
-
-        @Override
-        public HttpHandler handler() {
-            return this;
-        }
-    }
-
     private static final class HeadersEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
         private final UndertowRuntime runtime;
 
@@ -254,13 +223,17 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<Optional<String>> optionalStringParamDeserializer;
 
+        private final Deserializer<Float> floatBoxedDeserializer;
+
+        private final Deserializer<Float> floatUnboxedDeserializer;
+
         private final Deserializer<String> decoderParamDeserializer;
 
-        private final Deserializer<Float> floatHeaderBoxedDeserializer;
+        private final Deserializer<DefaultDecoderService.Constructor> constructorDeserializer;
 
-        private final Deserializer<Float> floatHeaderUnboxedDeserializer;
+        private final Deserializer<DefaultDecoderService.OfFactory> ofFactoryDeserializer;
 
-        private final Deserializer<BigInteger> bigIntegerDeserializer;
+        private final Deserializer<DefaultDecoderService.ValueOfFactory> valueOfFactoryDeserializer;
 
         private final Serializer<String> headersSerializer;
 
@@ -277,16 +250,25 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "stringListParam", ParamDecoders.stringListCollectionParamDecoder(runtime.plainSerDe()));
             this.optionalStringParamDeserializer = new HeaderParamDeserializer<>(
                     "optionalStringParam", ParamDecoders.optionalStringCollectionParamDecoder(runtime.plainSerDe()));
+            this.floatBoxedDeserializer = new HeaderParamDeserializer<>(
+                    "floatBoxed", ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::valueOf));
+            this.floatUnboxedDeserializer = new HeaderParamDeserializer<>(
+                    "floatUnboxed",
+                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::parseFloat));
             this.decoderParamDeserializer = new HeaderParamDeserializer<>(
                     "decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
-            this.floatHeaderBoxedDeserializer = new HeaderParamDeserializer<>(
-                    "floatHeaderBoxed",
-                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::valueOf));
-            this.floatHeaderUnboxedDeserializer = new HeaderParamDeserializer<>(
-                    "floatHeaderUnboxed",
-                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::parseFloat));
-            this.bigIntegerDeserializer = new HeaderParamDeserializer<>(
-                    "bigInteger", ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), BigInteger::new));
+            this.constructorDeserializer = new HeaderParamDeserializer<>(
+                    "constructor",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.Constructor::new));
+            this.ofFactoryDeserializer = new HeaderParamDeserializer<>(
+                    "ofFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.OfFactory::of));
+            this.valueOfFactoryDeserializer = new HeaderParamDeserializer<>(
+                    "valueOfFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.ValueOfFactory::valueOf));
             this.headersSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
@@ -297,10 +279,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             Set<String> stringSetParam = this.stringSetParamDeserializer.deserialize(exchange);
             List<String> stringListParam = this.stringListParamDeserializer.deserialize(exchange);
             Optional<String> optionalStringParam = this.optionalStringParamDeserializer.deserialize(exchange);
+            Float floatBoxed = this.floatBoxedDeserializer.deserialize(exchange);
+            float floatUnboxed = this.floatUnboxedDeserializer.deserialize(exchange);
             String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
-            Float floatHeaderBoxed = this.floatHeaderBoxedDeserializer.deserialize(exchange);
-            float floatHeaderUnboxed = this.floatHeaderUnboxedDeserializer.deserialize(exchange);
-            BigInteger bigInteger = this.bigIntegerDeserializer.deserialize(exchange);
+            DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
+            DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
             write(
                     this.delegate.headers(
                             stringParam,
@@ -308,10 +292,12 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                             stringSetParam,
                             stringListParam,
                             optionalStringParam,
+                            floatBoxed,
+                            floatUnboxed,
                             decoderParam,
-                            floatHeaderBoxed,
-                            floatHeaderUnboxed,
-                            bigInteger),
+                            constructor,
+                            ofFactory,
+                            valueOfFactory),
                     exchange);
         }
 
@@ -361,7 +347,11 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         private final Deserializer<Float> floatUnboxedDeserializer;
 
-        private final Deserializer<BigInteger> bigIntDeserializer;
+        private final Deserializer<DefaultDecoderService.Constructor> constructorDeserializer;
+
+        private final Deserializer<DefaultDecoderService.OfFactory> ofFactoryDeserializer;
+
+        private final Deserializer<DefaultDecoderService.ValueOfFactory> valueOfFactoryDeserializer;
 
         private final Serializer<String> pathParamSerializer;
 
@@ -378,8 +368,16 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
                     "floatBoxed", ParamDecoders.complexParamDecoder(runtime.plainSerDe(), Float::valueOf));
             this.floatUnboxedDeserializer = new PathParamDeserializer<>(
                     "floatUnboxed", ParamDecoders.complexParamDecoder(runtime.plainSerDe(), Float::parseFloat));
-            this.bigIntDeserializer = new PathParamDeserializer<>(
-                    "bigInt", ParamDecoders.complexParamDecoder(runtime.plainSerDe(), BigInteger::new));
+            this.constructorDeserializer = new PathParamDeserializer<>(
+                    "constructor",
+                    ParamDecoders.complexParamDecoder(runtime.plainSerDe(), DefaultDecoderService.Constructor::new));
+            this.ofFactoryDeserializer = new PathParamDeserializer<>(
+                    "ofFactory",
+                    ParamDecoders.complexParamDecoder(runtime.plainSerDe(), DefaultDecoderService.OfFactory::of));
+            this.valueOfFactoryDeserializer = new PathParamDeserializer<>(
+                    "valueOfFactory",
+                    ParamDecoders.complexParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.ValueOfFactory::valueOf));
             this.pathParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
         }
 
@@ -390,9 +388,19 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
             String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
             Float floatBoxed = this.floatBoxedDeserializer.deserialize(exchange);
             float floatUnboxed = this.floatUnboxedDeserializer.deserialize(exchange);
-            BigInteger bigInt = this.bigIntDeserializer.deserialize(exchange);
+            DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
+            DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
             write(
-                    this.delegate.pathParam(stringParam, booleanParam, decoderParam, floatBoxed, floatUnboxed, bigInt),
+                    this.delegate.pathParam(
+                            stringParam,
+                            booleanParam,
+                            decoderParam,
+                            floatBoxed,
+                            floatUnboxed,
+                            constructor,
+                            ofFactory,
+                            valueOfFactory),
                     exchange);
         }
 
@@ -408,7 +416,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{bigInt}";
+            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{bigInt}/{constructor}/{ofFactory}/{valueOfFactory}";
         }
 
         @Override

@@ -17,27 +17,20 @@
 package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.palantir.conjure.java.undertow.annotations.Handle;
+import com.palantir.conjure.java.undertow.annotations.Handle.QueryParam;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 
-public interface OfFactory {
+public interface ParameterValueOfFactoryThrows {
 
-    @Handle(method = HttpMethod.GET, path = "/{pathVar}")
-    void ping(@Handle.PathParam PathVariable pathVar);
+    @Handle(method = HttpMethod.GET, path = "/")
+    void parameterThrowingConstructor(@QueryParam("value") Value value);
 
-    final class PathVariable {
-        private final String value;
+    final class Value {
 
-        private PathVariable(String value) {
-            this.value = value;
-        }
+        private Value() {}
 
-        public static PathVariable of(String value) {
-            return new PathVariable(value);
-        }
-
-        @Override
-        public String toString() {
-            return "PathVariable{value='" + value + '\'' + '}';
+        static Value of(String _value) throws Exception {
+            return new Value();
         }
     }
 }
