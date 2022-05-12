@@ -32,10 +32,12 @@ import com.palantir.conjure.java.undertow.processor.sample.DeprecatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
-import com.palantir.conjure.java.undertow.processor.sample.OfFactory;
 import com.palantir.conjure.java.undertow.processor.sample.OptionalPrimitives;
 import com.palantir.conjure.java.undertow.processor.sample.OverloadedResource;
+import com.palantir.conjure.java.undertow.processor.sample.ParameterConstructorThrows;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterNotAnnotated;
+import com.palantir.conjure.java.undertow.processor.sample.ParameterOfFactoryThrows;
+import com.palantir.conjure.java.undertow.processor.sample.ParameterValueOfFactoryThrows;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.PrimitiveQueryParams;
 import com.palantir.conjure.java.undertow.processor.sample.PrivateMethodAnnotatedResource;
@@ -76,11 +78,6 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testMultipleBodies() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, MultipleBodyInterface.class);
-    }
-
-    @Test
-    public void testOfFactoryMethod() {
-        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, OfFactory.class);
     }
 
     @Test
@@ -176,6 +173,24 @@ public class ConjureUndertowAnnotationProcessorTest {
     public void testBodyIsNotAnnotated() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterNotAnnotated.class))
                 .hadErrorContaining("At least one annotation should be present");
+    }
+
+    @Test
+    public void testParameterConstructorThrows() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterConstructorThrows.class))
+                .hadErrorContaining("No default decoder exists for parameter");
+    }
+
+    @Test
+    public void testParameterOfFactoryThrows() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterOfFactoryThrows.class))
+                .hadErrorContaining("No default decoder exists for parameter");
+    }
+
+    @Test
+    public void testParameterValueOfFactoryThrows() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterValueOfFactoryThrows.class))
+                .hadErrorContaining("No default decoder exists for parameter");
     }
 
     private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {

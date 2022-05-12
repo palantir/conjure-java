@@ -23,7 +23,6 @@ import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoder;
 import com.palantir.ri.ResourceIdentifier;
-import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -32,49 +31,55 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 
+@SuppressWarnings("TooManyArguments")
 public interface DefaultDecoderService {
 
     @Handle(method = HttpMethod.GET, path = "/queryParam")
     String queryParam(
-            @Handle.QueryParam(value = "stringParam") String stringParam,
-            @Handle.QueryParam(value = "booleanParam") Boolean booleanParam,
-            @Handle.QueryParam(value = "stringSetParam") Set<String> stringSetParam,
-            @Handle.QueryParam(value = "stringListParam") List<String> stringListParam,
-            @Handle.QueryParam(value = "optionalStringParam") Optional<String> optionalStringParam,
-            @Handle.QueryParam(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam);
-
-    @Handle(method = HttpMethod.GET, path = "/moreQueryParams")
-    String moreQueryParams(
-            @Handle.QueryParam(value = "optionalInt") OptionalInt optionalIntParam,
-            @Handle.QueryParam(value = "dateTime") OffsetDateTime dateTimeParam,
-            @Handle.QueryParam(value = "ridSetParam") Set<ResourceIdentifier> ridSetParam,
-            @Handle.QueryParam(value = "optionalSafeLongParam") Optional<SafeLong> optionalSafeLongParam,
-            @Handle.QueryParam(value = "uuidParam") UUID uuidParam,
-            @Handle.QueryParam("floatParamBoxed") Float floatHeaderBoxed,
-            @Handle.QueryParam("floatParamUnboxed") float floatHeaderUnboxed);
+            @Handle.QueryParam("stringParam") String stringParam,
+            @Handle.QueryParam("booleanParam") Boolean booleanParam,
+            @Handle.QueryParam("stringSetParam") Set<String> stringSetParam,
+            @Handle.QueryParam("stringListParam") List<String> stringListParam,
+            @Handle.QueryParam("optionalStringParam") Optional<String> optionalStringParam,
+            @Handle.QueryParam("floatBoxed") Float floatBoxed,
+            @Handle.QueryParam("floatUnboxed") float floatUnboxed,
+            @Handle.QueryParam("optionalInt") OptionalInt optionalIntParam,
+            @Handle.QueryParam("dateTime") OffsetDateTime dateTimeParam,
+            @Handle.QueryParam("ridSetParam") Set<ResourceIdentifier> ridSetParam,
+            @Handle.QueryParam("optionalSafeLongParam") Optional<SafeLong> optionalSafeLongParam,
+            @Handle.QueryParam("uuidParam") UUID uuidParam,
+            @Handle.QueryParam(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
+            @Handle.QueryParam("constructor") Constructor constructor,
+            @Handle.QueryParam("ofFactory") OfFactory ofFactory,
+            @Handle.QueryParam("valueOfFactory") ValueOfFactory valueOfFactory);
 
     @Handle(method = HttpMethod.GET, path = "/headers")
     String headers(
-            @Handle.Header(value = "stringParam") String stringParam,
-            @Handle.Header(value = "booleanParam") Boolean booleanParam,
-            @Handle.Header(value = "stringSetParam") Set<String> stringSetParam,
-            @Handle.Header(value = "stringListParam") List<String> stringListParam,
-            @Handle.Header(value = "optionalStringParam") Optional<String> optionalStringParam,
+            @Handle.Header("stringParam") String stringParam,
+            @Handle.Header("booleanParam") Boolean booleanParam,
+            @Handle.Header("stringSetParam") Set<String> stringSetParam,
+            @Handle.Header("stringListParam") List<String> stringListParam,
+            @Handle.Header("optionalStringParam") Optional<String> optionalStringParam,
+            @Handle.Header("floatBoxed") Float floatBoxed,
+            @Handle.Header("floatUnboxed") float floatUnboxed,
             @Handle.Header(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
-            @Handle.Header("floatHeaderBoxed") Float floatHeaderBoxed,
-            @Handle.Header("floatHeaderUnboxed") float floatHeaderUnboxed,
-            @Handle.Header("bigInteger") BigInteger bigInteger);
+            @Handle.Header("constructor") Constructor constructor,
+            @Handle.Header("ofFactory") OfFactory ofFactory,
+            @Handle.Header("valueOfFactory") ValueOfFactory valueOfFactory);
 
     @Handle(
             method = HttpMethod.GET,
-            path = "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{bigInt}")
+            path = "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{bigInt}"
+                    + "/{constructor}/{ofFactory}/{valueOfFactory}")
     String pathParam(
             @Handle.PathParam String stringParam,
             @Handle.PathParam Boolean booleanParam,
             @Handle.PathParam(decoder = StringDecoder.class) String decoderParam,
             @Handle.PathParam Float floatBoxed,
             @Handle.PathParam float floatUnboxed,
-            @Handle.PathParam BigInteger bigInt);
+            @Handle.PathParam Constructor constructor,
+            @Handle.PathParam OfFactory ofFactory,
+            @Handle.PathParam ValueOfFactory valueOfFactory);
 
     enum StringCollectionDecoder implements CollectionParamDecoder<String> {
         INSTANCE;
@@ -91,6 +96,29 @@ public interface DefaultDecoderService {
         @Override
         public String decode(String value) {
             return value;
+        }
+    }
+
+    final class Constructor {
+
+        public Constructor(String _value) {}
+    }
+
+    final class OfFactory {
+
+        private OfFactory() {}
+
+        public static OfFactory of(String _value) {
+            return new OfFactory();
+        }
+    }
+
+    final class ValueOfFactory {
+
+        private ValueOfFactory() {}
+
+        public static ValueOfFactory valueOf(String _value) {
+            return new ValueOfFactory();
         }
     }
 }

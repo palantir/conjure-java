@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Ignore parameter factory methods that throw checked exceptions.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1790
