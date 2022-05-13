@@ -17,31 +17,48 @@
 package com.palantir.conjure.java.undertow.processor.data;
 
 import com.google.auto.common.MoreElements;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.annotations.DefaultParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
+import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
-import com.palantir.conjure.java.undertow.processor.data.DefaultDecoderNames.ContainerType;
 import com.palantir.conjure.java.undertow.processor.data.ParameterType.SafeLoggingAnnotation;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.TypeName;
 import io.undertow.server.HttpServerExchange;
 import java.io.InputStream;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 public final class ParamTypesResolver {
@@ -58,12 +75,30 @@ public final class ParamTypesResolver {
             .map(Class::getCanonicalName)
             .collect(ImmutableSet.toImmutableSet());
 
+    /** Mirrored from {@link ParamDecoders}. */
+    @VisibleForTesting
+    static final ImmutableList<String> SUPPORTED_CLASSES = ImmutableList.of(
+            String.class.getName(),
+            Boolean.class.getName(),
+            BearerToken.class.getName(),
+            OffsetDateTime.class.getName(),
+            Double.class.getName(),
+            OptionalDouble.class.getName(),
+            Integer.class.getName(),
+            OptionalInt.class.getName(),
+            ResourceIdentifier.class.getName(),
+            SafeLong.class.getName(),
+            UUID.class.getName(),
+            Long.class.getName(),
+            OptionalLong.class.getName());
+
+    private static final ImmutableSet<ContainerType> INPUT_TYPES =
+            ImmutableSet.of(ContainerType.NONE, ContainerType.LIST);
+
     private final ResolverContext context;
-    private final DefaultDecoderNames defaultDecoderNames;
 
     public ParamTypesResolver(ResolverContext context) {
         this.context = context;
-        this.defaultDecoderNames = new DefaultDecoderNames(context);
     }
 
     @SuppressWarnings("CyclomaticComplexity")
@@ -252,15 +287,14 @@ public final class ParamTypesResolver {
         TypeMirror decoderType = innerOptionalType.orElse(variableType);
         ContainerType decoderOutputType = getOutputType(Optional.empty(), Optional.empty(), innerOptionalType);
 
-        return defaultDecoderNames
-                .getDefaultDecoderFactory(decoderType, ContainerType.NONE, decoderOutputType)
+        return getDefaultDecoderFactory(decoderType, ContainerType.NONE, decoderOutputType)
                 .orElseGet(() -> {
                     context.reportError(
                             "No default decoder exists for parameter. "
                                     + "Types with a valueOf(String) method are supported, as are conjure types",
                             variableElement,
                             SafeArg.of("variableType", variableType),
-                            SafeArg.of("supportedTypes", DefaultDecoderNames.SUPPORTED_CLASSES));
+                            SafeArg.of("supportedTypes", SUPPORTED_CLASSES));
                     return CodeBlock.of("// error");
                 });
     }
@@ -282,17 +316,174 @@ public final class ParamTypesResolver {
                 innerListType.or(() -> innerSetType).or(() -> innerOptionalType).orElse(variableType);
         ContainerType decoderOutputType = getOutputType(innerListType, innerSetType, innerOptionalType);
 
-        return defaultDecoderNames
-                .getDefaultDecoderFactory(decoderType, ContainerType.LIST, decoderOutputType)
+        return getDefaultDecoderFactory(decoderType, ContainerType.LIST, decoderOutputType)
                 .orElseGet(() -> {
                     context.reportError(
                             "No default decoder exists for parameter. "
                                     + "Types with a valueOf(String) method are supported, as are conjure types",
                             variableElement,
                             SafeArg.of("variableType", variableType),
-                            SafeArg.of("supportedTypes", DefaultDecoderNames.SUPPORTED_CLASSES));
+                            SafeArg.of("supportedTypes", SUPPORTED_CLASSES));
                     return CodeBlock.of("// error");
                 });
+    }
+
+    /**
+     * Generates the corresponding factory invocation for a default decoder as declared in
+     * {@link com.palantir.conjure.java.undertow.annotations.ParamDecoders}.
+     *
+     * E.g. calling {@code getDefaultDecoderMethodName(String, LIST, OPTIONAL} will return
+     * 'optionalStringCollectionParamDecoder' as the respective factory method name for
+     * {@code CollectionParamDecoder<Optional<String>>}.
+     *
+     * @param type the type of the encoder, e.g. 'string' or 'rid'.
+     * @param inputType the container type used as input for the encoder, 'LIST' or 'NONE'.
+     * @param outType the container type used as output for the encoder, 'LIST', 'SET', 'OPTIONAL', or 'NONE'.
+     */
+    private Optional<CodeBlock> getDefaultDecoderFactory(
+            TypeMirror type, ContainerType inputType, ContainerType outType) {
+        return getClassNameForTypeMirror(type)
+                .filter(SUPPORTED_CLASSES::contains)
+                .filter(className -> {
+                    // Conjure uses OptionalInt and OptionalDouble, we cannot use these methods
+                    // to construct Optional<Integer> and Optional<Double>.
+                    boolean isOptionalBoxedConjureType = outType == ContainerType.OPTIONAL
+                            && (Integer.class.getName().equals(className)
+                                    || Double.class.getName().equals(className)
+                                    || Long.class.getName().equals(className));
+                    return !isOptionalBoxedConjureType;
+                })
+                .map(className -> getDefaultDecoderMethodName(className, inputType, outType))
+                .map(decoderMethodName ->
+                        CodeBlock.of("$T.$L(runtime.plainSerDe())", ParamDecoders.class, decoderMethodName))
+                .or(() -> getComplexDecoderFactory(type, inputType, outType));
+    }
+
+    private Optional<CodeBlock> getComplexDecoderFactory(
+            TypeMirror typeMirror, ContainerType inputType, ContainerType outType) {
+        return getUnknownDecoderFactoryFunction(typeMirror)
+                .map(factoryFunction -> CodeBlock.of(
+                        "$T.$L(runtime.plainSerDe(), $L)",
+                        ParamDecoders.class,
+                        getDefaultDecoderMethodName(Optional.empty(), inputType, outType),
+                        factoryFunction));
+    }
+
+    private Optional<CodeBlock> getUnknownDecoderFactoryFunction(TypeMirror typeMirror) {
+        // No need to handle int/double/boolean because they're covered by default handlers
+        switch (typeMirror.getKind()) {
+            case FLOAT:
+                return Optional.of(CodeBlock.of("$T::parseFloat", Float.class));
+            case LONG:
+                return Optional.of(CodeBlock.of("$T::parseLong", Long.class));
+            case BYTE:
+                return Optional.of(CodeBlock.of("$T::parseByte", Byte.class));
+            case SHORT:
+                return Optional.of(CodeBlock.of("$T::parseShort", Short.class));
+            case DECLARED:
+                DeclaredType declaredType = (DeclaredType) typeMirror;
+                return getFactoryDecoderFactoryFunction(declaredType, "valueOf")
+                        .or(() -> getConstructorDecoderFactoryFunction(declaredType))
+                        .or(() -> getFactoryDecoderFactoryFunction(declaredType, "of"));
+            default:
+                return Optional.empty();
+        }
+    }
+
+    private Optional<CodeBlock> getFactoryDecoderFactoryFunction(DeclaredType declaredType, String methodName) {
+        TypeElement typeElement = (TypeElement) declaredType.asElement();
+        // T valueOf(String)
+        return typeElement.getEnclosedElements().stream()
+                .filter(element -> element.getKind() == ElementKind.METHOD)
+                .map(ExecutableElement.class::cast)
+                .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
+                        && element.getModifiers().contains(Modifier.STATIC)
+                        && element.getSimpleName().contentEquals(methodName)
+                        && element.getThrownTypes().stream().allMatch(this::isRuntimeException)
+                        && element.getParameters().size() == 1
+                        && isString(element.getParameters().get(0).asType())
+                        && Objects.equals(TypeName.get(declaredType), TypeName.get(element.getReturnType())))
+                .map(_element -> CodeBlock.of("$T::" + methodName, TypeName.get(declaredType)))
+                .findFirst();
+    }
+
+    private Optional<CodeBlock> getConstructorDecoderFactoryFunction(DeclaredType declaredType) {
+        TypeElement typeElement = (TypeElement) declaredType.asElement();
+        // new T(String)
+        return typeElement.getEnclosedElements().stream()
+                .filter(element -> element.getKind() == ElementKind.CONSTRUCTOR)
+                .map(ExecutableElement.class::cast)
+                .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
+                        && element.getThrownTypes().stream().allMatch(this::isRuntimeException)
+                        && element.getParameters().size() == 1
+                        && TypeName.get(element.getParameters().get(0).asType()).equals(ClassName.get(String.class)))
+                .map(_element -> CodeBlock.of("$T::new", TypeName.get(declaredType)))
+                .findFirst();
+    }
+
+    @VisibleForTesting
+    static String getDefaultDecoderMethodName(String className, ContainerType inputType, ContainerType outType) {
+        return getDefaultDecoderMethodName(Optional.of(className), inputType, outType);
+    }
+
+    @VisibleForTesting
+    static String getDefaultDecoderMethodName(
+            Optional<String> className, ContainerType inputType, ContainerType outType) {
+        Preconditions.checkState(
+                INPUT_TYPES.contains(inputType),
+                "Only list is allowed as container for encoders",
+                SafeArg.of("type", inputType));
+
+        String optionalPrefix = outType.equals(ContainerType.OPTIONAL) ? "optional" : "";
+        String type = className.map(ParamTypesResolver::getTypeName).orElse("Complex");
+        String decoderSuffix = inputType.equals(ContainerType.LIST) ? "CollectionParamDecoder" : "ParamDecoder";
+        String typeSuffix =
+                outType.equals(ContainerType.LIST) || outType.equals(ContainerType.SET) ? outType.toString() : "";
+
+        String[] segments = Stream.of(optionalPrefix, type, typeSuffix, decoderSuffix)
+                .filter(segment -> !segment.isEmpty())
+                .toArray(String[]::new);
+        return InstanceVariables.joinCamelCase(segments);
+    }
+
+    private static String getTypeName(String className) {
+        // We have a few special cases, where we don't want to use the full class name.
+        if (className.equals(ResourceIdentifier.class.getName())) {
+            return "rid";
+        } else if (className.equals(OffsetDateTime.class.getName())) {
+            return "dateTime";
+        } else if (className.equals(OptionalInt.class.getName())) {
+            return "optionalInteger";
+        } else {
+            int lastDelimiterIndex = className.lastIndexOf('.');
+            return lastDelimiterIndex < 0 ? className : className.substring(lastDelimiterIndex + 1);
+        }
+    }
+
+    private static Optional<String> getClassNameForTypeMirror(TypeMirror typeMirror) {
+        // Only need to support primitives that are also supported by {@link PlainSerDe}.
+        switch (typeMirror.getKind()) {
+            case INT:
+                return Optional.of(Integer.class.getName());
+            case DOUBLE:
+                return Optional.of(Double.class.getName());
+            case BOOLEAN:
+                return Optional.of(Boolean.class.getName());
+            case DECLARED:
+                DeclaredType declaredType = (DeclaredType) typeMirror;
+                TypeElement typeElement = (TypeElement) declaredType.asElement();
+                return Optional.of(typeElement.getQualifiedName().toString());
+            default:
+                return Optional.empty();
+        }
+    }
+
+    private boolean isString(TypeMirror typeMirror) {
+        return context.isSameTypes(typeMirror, String.class);
+    }
+
+    private boolean isRuntimeException(TypeMirror typeMirror) {
+        return context.isAssignable(typeMirror, RuntimeException.class);
     }
 
     private static ContainerType getOutputType(
@@ -305,5 +496,23 @@ public final class ParamTypesResolver {
             return ContainerType.OPTIONAL;
         }
         return ContainerType.NONE;
+    }
+
+    enum ContainerType {
+        NONE(""),
+        OPTIONAL("optional"),
+        LIST("list"),
+        SET("set");
+
+        private final String value;
+
+        ContainerType(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
     }
 }

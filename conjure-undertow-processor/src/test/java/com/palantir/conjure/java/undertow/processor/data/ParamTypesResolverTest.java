@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
-import com.palantir.conjure.java.undertow.processor.data.DefaultDecoderNames.ContainerType;
+import com.palantir.conjure.java.undertow.processor.data.ParamTypesResolver.ContainerType;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -36,31 +36,31 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-final class DefaultDecoderNamesTest {
+final class ParamTypesResolverTest {
 
     @Test
     void creates_default_string_decoder_method_names() {
-        assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
+        assertThat(ParamTypesResolver.getDefaultDecoderMethodName(
                         String.class.getName(), ContainerType.NONE, ContainerType.NONE))
                 .isEqualTo("stringParamDecoder");
 
-        assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
+        assertThat(ParamTypesResolver.getDefaultDecoderMethodName(
                         String.class.getName(), ContainerType.NONE, ContainerType.OPTIONAL))
                 .isEqualTo("optionalStringParamDecoder");
 
-        assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
+        assertThat(ParamTypesResolver.getDefaultDecoderMethodName(
                         String.class.getName(), ContainerType.LIST, ContainerType.NONE))
                 .isEqualTo("stringCollectionParamDecoder");
 
-        assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
+        assertThat(ParamTypesResolver.getDefaultDecoderMethodName(
                         String.class.getName(), ContainerType.LIST, ContainerType.OPTIONAL))
                 .isEqualTo("optionalStringCollectionParamDecoder");
 
-        assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
+        assertThat(ParamTypesResolver.getDefaultDecoderMethodName(
                         String.class.getName(), ContainerType.LIST, ContainerType.LIST))
                 .isEqualTo("stringListCollectionParamDecoder");
 
-        assertThat(DefaultDecoderNames.getDefaultDecoderMethodName(
+        assertThat(ParamTypesResolver.getDefaultDecoderMethodName(
                         String.class.getName(), ContainerType.LIST, ContainerType.SET))
                 .isEqualTo("stringSetCollectionParamDecoder");
     }
@@ -73,7 +73,7 @@ final class DefaultDecoderNamesTest {
                 .map(Method::getName)
                 .collect(Collectors.toSet());
 
-        String methodName = DefaultDecoderNames.getDefaultDecoderMethodName(className, inputType, outputType);
+        String methodName = ParamTypesResolver.getDefaultDecoderMethodName(className, inputType, outputType);
 
         assertThat(declaredMethodNames).contains(methodName);
     }
@@ -81,7 +81,7 @@ final class DefaultDecoderNamesTest {
     private static List<Arguments> getParamDecoderArguments() {
         List<Optional<String>> supportedClasses = Stream.concat(
                         Stream.of(Optional.<String>empty()),
-                        DefaultDecoderNames.SUPPORTED_CLASSES.stream().map(Optional::of))
+                        ParamTypesResolver.SUPPORTED_CLASSES.stream().map(Optional::of))
                 // We handle these cases differently further down this method.
                 .filter(maybeName -> maybeName
                         .map(name -> !name.equals(OptionalDouble.class.getName())
