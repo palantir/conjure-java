@@ -41,7 +41,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 final class DefaultDecoderNames {
@@ -65,6 +64,12 @@ final class DefaultDecoderNames {
     private static final ImmutableSet<ContainerType> INPUT_TYPES =
             ImmutableSet.of(ContainerType.NONE, ContainerType.LIST);
 
+    private final ResolverContext context;
+
+    DefaultDecoderNames(ResolverContext context) {
+        this.context = context;
+    }
+
     /**
      * Generates the corresponding factory invocation for a default decoder as declared in
      * {@link com.palantir.conjure.java.undertow.annotations.ParamDecoders}.
@@ -77,8 +82,7 @@ final class DefaultDecoderNames {
      * @param inputType the container type used as input for the encoder, 'LIST' or 'NONE'.
      * @param outType the container type used as output for the encoder, 'LIST', 'SET', 'OPTIONAL', or 'NONE'.
      */
-    static Optional<CodeBlock> getDefaultDecoderFactory(
-            TypeMirror type, ContainerType inputType, ContainerType outType) {
+    Optional<CodeBlock> getDefaultDecoderFactory(TypeMirror type, ContainerType inputType, ContainerType outType) {
         return getClassNameForTypeMirror(type)
                 .filter(SUPPORTED_CLASSES::contains)
                 .filter(className -> {
@@ -96,7 +100,7 @@ final class DefaultDecoderNames {
                 .or(() -> getComplexDecoderFactory(type, inputType, outType));
     }
 
-    private static Optional<CodeBlock> getComplexDecoderFactory(
+    private Optional<CodeBlock> getComplexDecoderFactory(
             TypeMirror typeMirror, ContainerType inputType, ContainerType outType) {
         return getUnknownDecoderFactoryFunction(typeMirror)
                 .map(factoryFunction -> CodeBlock.of(
@@ -106,7 +110,7 @@ final class DefaultDecoderNames {
                         factoryFunction));
     }
 
-    static Optional<CodeBlock> getUnknownDecoderFactoryFunction(TypeMirror typeMirror) {
+    Optional<CodeBlock> getUnknownDecoderFactoryFunction(TypeMirror typeMirror) {
         // No need to handle int/double/boolean because they're covered by default handlers
         switch (typeMirror.getKind()) {
             case FLOAT:
@@ -127,7 +131,7 @@ final class DefaultDecoderNames {
         }
     }
 
-    private static Optional<CodeBlock> getFactoryDecoderFactoryFunction(DeclaredType declaredType, String methodName) {
+    private Optional<CodeBlock> getFactoryDecoderFactoryFunction(DeclaredType declaredType, String methodName) {
         TypeElement typeElement = (TypeElement) declaredType.asElement();
         // T valueOf(String)
         return typeElement.getEnclosedElements().stream()
@@ -136,7 +140,7 @@ final class DefaultDecoderNames {
                 .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
                         && element.getModifiers().contains(Modifier.STATIC)
                         && element.getSimpleName().contentEquals(methodName)
-                        && element.getThrownTypes().stream().allMatch(DefaultDecoderNames::isRuntimeException)
+                        && element.getThrownTypes().stream().allMatch(this::isRuntimeException)
                         && element.getParameters().size() == 1
                         && isStringMirror(element.getParameters().get(0).asType())
                         && Objects.equals(TypeName.get(declaredType), TypeName.get(element.getReturnType())))
@@ -144,14 +148,14 @@ final class DefaultDecoderNames {
                 .findFirst();
     }
 
-    private static Optional<CodeBlock> getConstructorDecoderFactoryFunction(DeclaredType declaredType) {
+    private Optional<CodeBlock> getConstructorDecoderFactoryFunction(DeclaredType declaredType) {
         TypeElement typeElement = (TypeElement) declaredType.asElement();
         // new T(String)
         return typeElement.getEnclosedElements().stream()
                 .filter(element -> element.getKind() == ElementKind.CONSTRUCTOR)
                 .map(ExecutableElement.class::cast)
                 .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
-                        && element.getThrownTypes().stream().allMatch(DefaultDecoderNames::isRuntimeException)
+                        && element.getThrownTypes().stream().allMatch(this::isRuntimeException)
                         && element.getParameters().size() == 1
                         && TypeName.get(element.getParameters().get(0).asType()).equals(ClassName.get(String.class)))
                 .map(_element -> CodeBlock.of("$T::new", TypeName.get(declaredType)))
@@ -219,19 +223,8 @@ final class DefaultDecoderNames {
         return ClassName.get(String.class).equals(TypeName.get(typeMirror));
     }
 
-    private static boolean isRuntimeException(TypeMirror typeMirror) {
-        if (typeMirror.getKind() != TypeKind.DECLARED) {
-            return false;
-        }
-
-        if (ClassName.get(RuntimeException.class).equals(TypeName.get(typeMirror))) {
-            return true;
-        }
-
-        DeclaredType declaredType = (DeclaredType) typeMirror;
-        TypeElement typeElement = (TypeElement) declaredType.asElement();
-
-        return isRuntimeException(typeElement.getSuperclass());
+    private boolean isRuntimeException(TypeMirror typeMirror) {
+        return context.isAssignable(typeMirror, RuntimeException.class);
     }
 
     enum ContainerType {
@@ -251,6 +244,4 @@ final class DefaultDecoderNames {
             return value;
         }
     }
-
-    private DefaultDecoderNames() {}
 }
