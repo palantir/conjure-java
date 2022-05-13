@@ -59,9 +59,11 @@ public final class ParamTypesResolver {
             .collect(ImmutableSet.toImmutableSet());
 
     private final ResolverContext context;
+    private final DefaultDecoderNames defaultDecoderNames;
 
     public ParamTypesResolver(ResolverContext context) {
         this.context = context;
+        this.defaultDecoderNames = new DefaultDecoderNames(context);
     }
 
     @SuppressWarnings("CyclomaticComplexity")
@@ -250,7 +252,8 @@ public final class ParamTypesResolver {
         TypeMirror decoderType = innerOptionalType.orElse(variableType);
         ContainerType decoderOutputType = getOutputType(Optional.empty(), Optional.empty(), innerOptionalType);
 
-        return DefaultDecoderNames.getDefaultDecoderFactory(decoderType, ContainerType.NONE, decoderOutputType)
+        return defaultDecoderNames
+                .getDefaultDecoderFactory(decoderType, ContainerType.NONE, decoderOutputType)
                 .orElseGet(() -> {
                     context.reportError(
                             "No default decoder exists for parameter. "
@@ -279,7 +282,8 @@ public final class ParamTypesResolver {
                 innerListType.or(() -> innerSetType).or(() -> innerOptionalType).orElse(variableType);
         ContainerType decoderOutputType = getOutputType(innerListType, innerSetType, innerOptionalType);
 
-        return DefaultDecoderNames.getDefaultDecoderFactory(decoderType, ContainerType.LIST, decoderOutputType)
+        return defaultDecoderNames
+                .getDefaultDecoderFactory(decoderType, ContainerType.LIST, decoderOutputType)
                 .orElseGet(() -> {
                     context.reportError(
                             "No default decoder exists for parameter. "
