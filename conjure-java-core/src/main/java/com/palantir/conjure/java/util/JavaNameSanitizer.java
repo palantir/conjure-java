@@ -33,6 +33,8 @@ public final class JavaNameSanitizer {
 
     private static final ImmutableSet<String> RESERVED_FIELD_NAMES = ImmutableSet.of("memoizedHashCode");
 
+    private static final ImmutableSet<String> RESERVED_METHOD_NAMES = ImmutableSet.of("getClass");
+
     /** Sanitizes the given {@link FieldName} for use as a java specifier. */
     public static String sanitize(FieldName fieldName) {
         String identifier = null;
@@ -48,6 +50,11 @@ public final class JavaNameSanitizer {
     /** Returns a valid java name based on the input. */
     public static String sanitize(String name) {
         return SourceVersion.isName(name) ? name : escape(name);
+    }
+
+    /** Returns a valid java method name based on the input. */
+    public static String sanitizeMethod(String name) {
+        return RESERVED_METHOD_NAMES.contains(name) ? escape(name) : name;
     }
 
     /** Sanitizes parameter names taking into account default auth type parameter names. */

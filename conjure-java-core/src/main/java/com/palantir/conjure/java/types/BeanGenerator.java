@@ -638,7 +638,7 @@ public final class BeanGenerator {
 
     public static String asGetterName(String fieldName) {
         String lowerCamelCaseName = CaseConverter.toCase(fieldName, CaseConverter.Case.LOWER_CAMEL_CASE);
-        return "get" + StringUtils.capitalize(lowerCamelCaseName);
+        return JavaNameSanitizer.sanitizeMethod("get" + StringUtils.capitalize(lowerCamelCaseName));
     }
 
     /**

@@ -279,3 +279,9 @@ types:
         alias: list<string>
       SetAlias:
         alias: set<string>
+      RiskyNames:
+        fields:
+          var: string
+          class: string
+          int: string
+          len: string
