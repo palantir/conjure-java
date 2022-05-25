@@ -125,9 +125,15 @@ public interface MyService {
 }
 ```
 
-For the above endpoint, calling `GET /path/foo/bar/baz` will decode the path parameter to `["foo", "bar", "baz"]`. Note
-that unless configured differently, path segments will still be url decoded. E.g. calling `GET /path/foo%2fbar` will be
-decoded to `["foo/bar"]`.
+For the above endpoint, the following table shows how various requests are deserilized into wildcard path parameters.
+
+| Request | Params |
+| - | - |
+| `GET /path/` | `[""]` |
+| `GET /path/foo` | `["foo"]` |
+| `GET /path/foo/` | `["foo", ""]` |
+| `GET /path/foo/bar` | `["foo", "bar"]` |
+| `GET /path/foo/bar%2Fbaz` | `["foo", "bar/baz"]` |
 
 ### Using Custom Serializer or Deserializers
 
