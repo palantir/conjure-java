@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: conjure-undertow does not unnecessarily rewrite path match variables
+    into query parameters
+  links:
+  - https://github.com/palantir/conjure-java/pull/1817
