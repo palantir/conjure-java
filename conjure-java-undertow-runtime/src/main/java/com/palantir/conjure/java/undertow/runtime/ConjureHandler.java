@@ -52,7 +52,7 @@ public final class ConjureHandler implements HttpHandler {
     private final RoutingHandler routingHandler;
 
     private ConjureHandler(HttpHandler fallback, List<Endpoint> endpoints) {
-        this.routingHandler = Handlers.routing()
+        this.routingHandler = Handlers.routing(false)
                 .setFallbackHandler(fallback)
                 // The method may be valid for another handlers, the
                 // fallback handler will be used instead of 405 status.
