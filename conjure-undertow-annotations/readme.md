@@ -114,7 +114,7 @@ public interface MyService {
 
 ### Globbed Path Parameters
 
-the conjure-undertow-processor only supports a restricted version of globbed or wildcard path parameters. Only
+The conjure-undertow-processor only supports a restricted version of globbed or wildcard path parameters. Only
 as a catch-all at the end of the path when using the `@Handle.PathMultiParam` annotation:
 
 ```java
@@ -125,7 +125,7 @@ public interface MyService {
 }
 ```
 
-For the above endpoint, the following table shows how various requests are deserilized into wildcard path parameters.
+For the above endpoint, the following table shows how various requests are deserialized into wildcard path parameters.
 
 | Request | Params |
 | - | - |
@@ -134,6 +134,20 @@ For the above endpoint, the following table shows how various requests are deser
 | `GET /path/foo/` | `["foo", ""]` |
 | `GET /path/foo/bar` | `["foo", "bar"]` |
 | `GET /path/foo/bar%2Fbaz` | `["foo", "bar/baz"]` |
+
+### Using Async Handlers
+
+The conjure-undertow-processor supports async handlers by wrapping the response in a [`ListenableFuture`](https://github.com/google/guava/blob/master/guava/src/com/google/common/util/concurrent/ListenableFuture.java).
+
+```java
+public interface MyService {
+    @Handle(method = HttpMethod.GET, path = "/path/async")
+    ListenableFuture<MyResponse> asyncEndpoint();
+    
+    @Handle(method = HttpMethod.GET, path = "/path/async-void")
+    ListenableFuture<Void> asyncVoidEndpoint();
+}
+```
 
 ### Using Custom Serializer or Deserializers
 
