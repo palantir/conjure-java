@@ -35,6 +35,8 @@ import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangePara
 import com.palantir.conjure.java.undertow.processor.sample.OptionalPrimitives;
 import com.palantir.conjure.java.undertow.processor.sample.OverloadedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterConstructorThrows;
+import com.palantir.conjure.java.undertow.processor.sample.ParameterCreateFactoryThrows;
+import com.palantir.conjure.java.undertow.processor.sample.ParameterFromStringFactoryThrows;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterNotAnnotated;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterOfFactoryThrows;
 import com.palantir.conjure.java.undertow.processor.sample.ParameterValueOfFactoryThrows;
@@ -190,6 +192,18 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testParameterValueOfFactoryThrows() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterValueOfFactoryThrows.class))
+                .hadErrorContaining("No default decoder exists for parameter");
+    }
+
+    @Test
+    public void testParameterFromStringFactoryThrows() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterFromStringFactoryThrows.class))
+                .hadErrorContaining("No default decoder exists for parameter");
+    }
+
+    @Test
+    public void testParameterCreateFactoryThrows() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterCreateFactoryThrows.class))
                 .hadErrorContaining("No default decoder exists for parameter");
     }
 
