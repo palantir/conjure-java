@@ -144,7 +144,7 @@ public final class ConjureUndertowEndpointsGenerator {
         return endpointClassName;
     }
 
-    @SuppressWarnings("checkstyle:MethodLength") // TODO(ckozak): refactor
+    @SuppressWarnings("checkstyle:MethodLength", "checkstyle:CyclomaticComplexity")
     private static TypeSpec endpoint(ServiceDefinition service, EndpointDefinition endpoint) {
         List<AdditionalField> additionalFields = new ArrayList<>();
         MethodSpec.Builder handlerBuilder = MethodSpec.methodBuilder("handleRequest")
