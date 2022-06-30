@@ -1,0 +1,178 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class TaggedEndpointsEndpoints implements UndertowService {
+    private final TaggedEndpoints delegate;
+
+    private TaggedEndpointsEndpoints(TaggedEndpoints delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(TaggedEndpoints delegate) {
+        return new TaggedEndpointsEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(
+                new NoTagsEndpoint(runtime, delegate),
+                new OneTagEndpoint(runtime, delegate),
+                new TwoTagsEndpoint(runtime, delegate));
+    }
+
+    private static final class NoTagsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TaggedEndpoints delegate;
+
+        NoTagsEndpoint(UndertowRuntime runtime, TaggedEndpoints delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            this.delegate.noTags();
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/zero";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TaggedEndpoints";
+        }
+
+        @Override
+        public String name() {
+            return "noTags";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class OneTagEndpoint implements HttpHandler, Endpoint {
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("one");
+
+        private final UndertowRuntime runtime;
+
+        private final TaggedEndpoints delegate;
+
+        OneTagEndpoint(UndertowRuntime runtime, TaggedEndpoints delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            this.delegate.oneTag();
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public ImmutableSet<String> tags() {
+            return TAGS;
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/one";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TaggedEndpoints";
+        }
+
+        @Override
+        public String name() {
+            return "oneTag";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TwoTagsEndpoint implements HttpHandler, Endpoint {
+        private static final ImmutableSet<String> TAGS = ImmutableSet.of("one", "two");
+
+        private final UndertowRuntime runtime;
+
+        private final TaggedEndpoints delegate;
+
+        TwoTagsEndpoint(UndertowRuntime runtime, TaggedEndpoints delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            this.delegate.twoTags();
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public ImmutableSet<String> tags() {
+            return TAGS;
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/two";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TaggedEndpoints";
+        }
+
+        @Override
+        public String name() {
+            return "twoTags";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

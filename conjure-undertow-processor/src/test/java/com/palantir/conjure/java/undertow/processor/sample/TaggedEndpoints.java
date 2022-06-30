@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.undertow.processor.data;
+package com.palantir.conjure.java.undertow.processor.sample;
 
+import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
-import java.util.List;
-import java.util.Set;
-import org.immutables.value.Value;
 
-@Value.Immutable
-@StagedBuilder
-public interface EndpointDefinition {
+public interface TaggedEndpoints {
 
-    EndpointName endpointName();
+    @Handle(method = HttpMethod.GET, path = "/zero")
+    void noTags();
 
-    ServiceName serviceName();
+    @Handle(method = HttpMethod.GET, path = "/one", tags = "one")
+    void oneTag();
 
-    HttpMethod httpMethod();
-
-    HttpPath httpPath();
-
-    List<ArgumentDefinition> arguments();
-
-    ReturnType returns();
-
-    @Value.Default
-    default boolean deprecated() {
-        return false;
-    }
-
-    Set<String> tags();
+    @Handle(
+            method = HttpMethod.GET,
+            path = "/two",
+            tags = {"one", "two"})
+    void twoTags();
 }

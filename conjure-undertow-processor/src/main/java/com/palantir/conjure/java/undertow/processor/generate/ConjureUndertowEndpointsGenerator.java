@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.processor.generate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
@@ -143,7 +144,7 @@ public final class ConjureUndertowEndpointsGenerator {
         return endpointClassName;
     }
 
-    @SuppressWarnings("checkstyle:MethodLength") // TODO(ckozak): refactor
+    @SuppressWarnings({"checkstyle:MethodLength", "checkstyle:CyclomaticComplexity"})
     private static TypeSpec endpoint(ServiceDefinition service, EndpointDefinition endpoint) {
         List<AdditionalField> additionalFields = new ArrayList<>();
         MethodSpec.Builder handlerBuilder = MethodSpec.methodBuilder("handleRequest")
@@ -454,6 +455,28 @@ public final class ConjureUndertowEndpointsGenerator {
                     // Ideally we could scrape javadoc from the annotated method, but that's
                     // more trouble than it's worth for now.
                     .addStatement("return $T.of($S)", Optional.class, "deprecated")
+                    .build());
+        }
+
+        if (!endpoint.tags().isEmpty()) {
+            TypeName tagsType = ParameterizedTypeName.get(ImmutableSet.class, String.class);
+            String tagsField = "TAGS";
+            endpointBuilder.addField(FieldSpec.builder(tagsType, tagsField)
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                    .initializer(
+                            "$T.of($L)",
+                            ImmutableSet.class,
+                            endpoint.tags().stream()
+                                    .map(tagValue -> CodeBlock.of("$S", tagValue))
+                                    .collect(CodeBlock.joining(", ")))
+                    .build());
+            endpointBuilder.addMethod(MethodSpec.methodBuilder("tags")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .returns(tagsType)
+                    // Ideally we could scrape javadoc from the annotated method, but that's
+                    // more trouble than it's worth for now.
+                    .addStatement("return $N", tagsField)
                     .build());
         }
 

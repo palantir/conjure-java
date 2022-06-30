@@ -22,6 +22,9 @@ import com.palantir.common.streams.KeyedStream;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.lang.model.element.AnnotationMirror;
@@ -65,7 +68,21 @@ public interface AnnotationReflector {
         return getAnnotationValue(String.class);
     }
 
+    @SuppressWarnings("unchecked")
     default <T> T getAnnotationValue(String name, Class<T> valueClazz) {
+        Object value =
+                AnnotationMirrors.getAnnotationValue(annotationMirror(), name).getValue();
+        if (valueClazz.isArray()) {
+            Class<?> arrayType =
+                    Preconditions.checkNotNull(valueClazz.getComponentType(), "Unable to find array component type");
+            List<AnnotationValue> arrayValue = (List<AnnotationValue>) value;
+            List<Object> results = new ArrayList<>(arrayValue.size());
+            for (AnnotationValue annotationValue : arrayValue) {
+                results.add(arrayType.cast(annotationValue.getValue()));
+            }
+            return (T) results.toArray((Object[]) Array.newInstance(arrayType, results.size()));
+        }
+
         return valueClazz.cast(
                 AnnotationMirrors.getAnnotationValue(annotationMirror(), name).getValue());
     }

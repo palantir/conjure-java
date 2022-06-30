@@ -49,6 +49,7 @@ import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableAuthHeade
 import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableParams;
 import com.palantir.conjure.java.undertow.processor.sample.SimpleInterface;
 import com.palantir.conjure.java.undertow.processor.sample.StaticMethodAnnotatedResource;
+import com.palantir.conjure.java.undertow.processor.sample.TaggedEndpoints;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -205,6 +206,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     public void testParameterCreateFactoryThrows() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterCreateFactoryThrows.class))
                 .hadErrorContaining("No default decoder exists for parameter");
+    }
+
+    @Test
+    public void testTaggedEndpoints() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, TaggedEndpoints.class);
     }
 
     private void assertTestFileCompileAndMatches(Path basePath, Class<?> clazz) {

@@ -55,8 +55,8 @@ public @interface Handle {
     // TODO(ckozak): Custom exception handling? Not sure it should be necessary if we support custom response status
     //  codes.
 
-    // TODO(ckozak): support conjure endpoint tags
-    // String[] tags()
+    /** Conjure endpoint tags. */
+    String[] tags() default {};
 
     @Retention(RetentionPolicy.SOURCE)
     @Target(ElementType.PARAMETER)

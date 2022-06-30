@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: The conjure-undertow annotation processor supports endpoint tags
+  links:
+  - https://github.com/palantir/conjure-java/pull/1835
