@@ -104,6 +104,7 @@ public final class EndpointDefinitions {
                 .addAllArguments(argumentDefinitions)
                 .deprecated(MoreElements.isAnnotationPresent(element, Deprecated.class)
                         || MoreElements.isAnnotationPresent(element.getEnclosingElement(), Deprecated.class))
+                .addTags(requestAnnotationReflector.getAnnotationValue("tags", String[].class))
                 .build());
     }
 
