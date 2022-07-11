@@ -32,6 +32,8 @@ idea {
     }
 }
 
+enablePreview = true // TODO(dfox): this is ugly
+
 tasks.checkstyleIntegrationInput.enabled = false
 
 dependencies {
