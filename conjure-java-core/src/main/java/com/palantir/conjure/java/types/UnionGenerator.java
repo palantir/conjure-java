@@ -87,6 +87,7 @@ public final class UnionGenerator {
     // If the member type is not known, a String containing the name of the unknown type is used.
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
     private static final TypeName UNKNOWN_VALUE_TYPE = ClassName.get(Object.class);
+    private static final String KNOWN_INTERFACE = "Known";
 
     public static JavaFile generateUnionType(
             TypeMapper typeMapper,
@@ -107,6 +108,9 @@ public final class UnionGenerator {
 
         if (options.sealedUnions()) {
             ClassName unknownWrapperClass = peerWrapperClass(unionClass, FieldName.of("unknown"), options);
+
+            Map<FieldName, TypeSpec> records =
+                    generateRecords(typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options);
             TypeSpec.Builder typeBuilder = TypeSpec.interfaceBuilder(
                             typeDef.getTypeName().getName())
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
@@ -115,11 +119,9 @@ public final class UnionGenerator {
                     .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes, options))
                     .addAnnotation(jacksonIgnoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
-                    // TODO(dfox): add a 'sealed interface Known permits Variant1, Variant2, etc {}'
-                    //
+                    .addType(generateSealedKnownInterface(options, unionClass, records))
                     .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
-                    .addTypes(generateRecords(
-                            typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
+                    .addTypes(records.values())
                     .addType(generateUnknownWrapper(unknownWrapperClass, unionClass, visitorClass, options));
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
@@ -178,6 +180,15 @@ public final class UnionGenerator {
                     .indent("    ")
                     .build();
         }
+    }
+
+    private static TypeSpec generateSealedKnownInterface(Options options, ClassName unionClass, Map<FieldName, TypeSpec> records) {
+        return TypeSpec.interfaceBuilder(KNOWN_INTERFACE)
+                .addModifiers(Modifier.PUBLIC, Modifier.SEALED, Modifier.STATIC)
+                .addPermittedSubclasses(records.keySet().stream()
+                        .map(fieldName -> wrapperClass(unionClass, fieldName, options))
+                        .toList())
+                .build();
     }
 
     private static MethodSpec generateConstructor(ClassName baseClass) {
@@ -806,7 +817,7 @@ public final class UnionGenerator {
         return annotationBuilder.build();
     }
 
-    private static List<TypeSpec> generateRecords(
+    private static Map<FieldName, TypeSpec> generateRecords(
             TypeMapper typeMapper,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             ClassName superInterface,
@@ -814,70 +825,73 @@ public final class UnionGenerator {
             List<FieldDefinition> memberTypeDefs,
             Options options) {
         return memberTypeDefs.stream()
-                .map(memberTypeDef -> {
-                    boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
-                    FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
-                    TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
-                    ClassName wrapperClass = peerWrapperClass(superInterface, memberName, options);
+                .collect(StableCollectors.toLinkedMap(
+                        memberTypeDef -> sanitizeUnknown(memberTypeDef.getFieldName()), memberTypeDef -> {
+                            FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
+                            ClassName wrapperClass = peerWrapperClass(superInterface, memberName, options);
+                            boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
+                            TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
 
-                    TypeSpec.Builder typeBuilder = TypeSpec.recordBuilder(wrapperClass)
-                            .addRecordComponent(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
-                                    .build())
-                            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                            .addSuperinterface(superInterface)
-                            .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
-                                    .addMember("value", "$S", memberTypeDef.getFieldName())
-                                    .build())
-                            .addMethod(MethodSpec.constructorBuilder()
-                                    .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
-                                    .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
-                                            .addAnnotation(
-                                                    wrapperConstructorParameterAnnotation(memberTypeDef, typesMap))
-                                            .addAnnotation(Nonnull.class)
+                            TypeSpec.Builder typeBuilder = TypeSpec.recordBuilder(wrapperClass)
+                                    .addRecordComponent(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
                                             .build())
-                                    // TODO(dfox): is this null check strictly necessary?
-                                    .addStatement(
-                                            "$L",
-                                            Expressions.requireNonNull(
-                                                    VALUE_FIELD_NAME,
-                                                    String.format("%s cannot be null", memberName.get())))
-                                    .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
-                                    .build())
-                            .addMethod(MethodSpec.methodBuilder("getType")
-                                    .addModifiers(Modifier.PRIVATE)
-                                    .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                                            .addMember("value", "$S", "type")
-                                            .addMember("index", "$L", 0)
+                                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                                    .addSuperinterface(superInterface)
+                                    .addSuperinterface(superInterface.nestedClass(KNOWN_INTERFACE))
+                                    .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
+                                            .addMember("value", "$S", memberTypeDef.getFieldName())
                                             .build())
-                                    .addStatement("return $S", memberTypeDef.getFieldName())
-                                    .returns(String.class)
-                                    .build())
-                            .addMethod(MethodSpec.methodBuilder("getValue")
-                                    .addModifiers(Modifier.PRIVATE)
-                                    .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
-                                            .addMember(
-                                                    "value",
-                                                    "$S",
-                                                    memberTypeDef.getFieldName().get())
+                                    .addMethod(MethodSpec.constructorBuilder()
+                                            .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
+                                            .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
+                                                    .addAnnotation(wrapperConstructorParameterAnnotation(
+                                                            memberTypeDef, typesMap))
+                                                    .addAnnotation(Nonnull.class)
+                                                    .build())
+                                            // TODO(dfox): is this null check strictly necessary?
+                                            .addStatement(
+                                                    "$L",
+                                                    Expressions.requireNonNull(
+                                                            VALUE_FIELD_NAME,
+                                                            String.format("%s cannot be null", memberName.get())))
+                                            .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
                                             .build())
-                                    .addStatement("return $L", VALUE_FIELD_NAME)
-                                    .returns(memberType)
-                                    .build())
-                            .addMethods(
-                                    !options.sealedUnions() || options.sealedUnionVisitors()
-                                            ? List.of(createWrapperAcceptMethod(
-                                                    visitorClass,
-                                                    visitMethodName(memberName.get()),
-                                                    VALUE_FIELD_NAME,
-                                                    isDeprecated,
-                                                    options))
-                                            : List.of())
-                            .addMethod(MethodSpecs.createToString(
-                                    wrapperClass.simpleName(), List.of(FieldName.of(VALUE_FIELD_NAME))));
+                                    .addMethod(MethodSpec.methodBuilder("getType")
+                                            .addModifiers(Modifier.PRIVATE)
+                                            .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                                    .addMember("value", "$S", "type")
+                                                    .addMember("index", "$L", 0)
+                                                    .build())
+                                            .addStatement("return $S", memberTypeDef.getFieldName())
+                                            .returns(String.class)
+                                            .build())
+                                    .addMethod(MethodSpec.methodBuilder("getValue")
+                                            .addModifiers(Modifier.PRIVATE)
+                                            .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                                    .addMember(
+                                                            "value",
+                                                            "$S",
+                                                            memberTypeDef
+                                                                    .getFieldName()
+                                                                    .get())
+                                                    .build())
+                                            .addStatement("return $L", VALUE_FIELD_NAME)
+                                            .returns(memberType)
+                                            .build())
+                                    .addMethods(
+                                            !options.sealedUnions() || options.sealedUnionVisitors()
+                                                    ? List.of(createWrapperAcceptMethod(
+                                                            visitorClass,
+                                                            visitMethodName(memberName.get()),
+                                                            VALUE_FIELD_NAME,
+                                                            isDeprecated,
+                                                            options))
+                                                    : List.of())
+                                    .addMethod(MethodSpecs.createToString(
+                                            wrapperClass.simpleName(), List.of(FieldName.of(VALUE_FIELD_NAME))));
 
-                    return typeBuilder.build();
-                })
-                .collect(Collectors.toList());
+                            return typeBuilder.build();
+                        }));
     }
 
     private static List<TypeSpec> generateWrapperClasses(

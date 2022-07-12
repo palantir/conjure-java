@@ -65,8 +65,10 @@ public sealed interface Union {
         }
     }
 
+    sealed interface Known permits Foo, Bar, Baz {}
+
     @JsonTypeName("foo")
-    record Foo(String value) implements Union {
+    record Foo(String value) implements Union, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
@@ -90,7 +92,7 @@ public sealed interface Union {
     }
 
     @JsonTypeName("bar")
-    record Bar(int value) implements Union {
+    record Bar(int value) implements Union, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Bar(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
@@ -114,7 +116,7 @@ public sealed interface Union {
     }
 
     @JsonTypeName("baz")
-    record Baz(long value) implements Union {
+    record Baz(long value) implements Union, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Baz(@JsonSetter("baz") @Nonnull long value) {
             Preconditions.checkNotNull(value, "baz cannot be null");

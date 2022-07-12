@@ -32,6 +32,8 @@ public sealed interface EmptyUnionTypeExample {
         }
     }
 
+    sealed interface Known {}
+
     final class Unknown implements EmptyUnionTypeExample {
         private final String type;
 

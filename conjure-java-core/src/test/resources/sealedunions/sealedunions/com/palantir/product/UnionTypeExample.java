@@ -170,8 +170,26 @@ public sealed interface UnionTypeExample {
         }
     }
 
+    sealed interface Known
+            permits StringExample,
+                    ThisFieldIsAnInteger,
+                    AlsoAnInteger,
+                    If,
+                    New,
+                    Interface,
+                    Completed,
+                    Unknown_,
+                    Optional,
+                    List,
+                    Set,
+                    Map,
+                    OptionalAlias,
+                    ListAlias,
+                    SetAlias,
+                    MapAlias {}
+
     @JsonTypeName("stringExample")
-    record StringExample(sealedunions.com.palantir.product.StringExample value) implements UnionTypeExample {
+    record StringExample(sealedunions.com.palantir.product.StringExample value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         StringExample(@JsonSetter("stringExample") @Nonnull sealedunions.com.palantir.product.StringExample value) {
             Preconditions.checkNotNull(value, "stringExample cannot be null");
@@ -195,7 +213,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("thisFieldIsAnInteger")
-    record ThisFieldIsAnInteger(int value) implements UnionTypeExample {
+    record ThisFieldIsAnInteger(int value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ThisFieldIsAnInteger(@JsonSetter("thisFieldIsAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "thisFieldIsAnInteger cannot be null");
@@ -219,7 +237,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("alsoAnInteger")
-    record AlsoAnInteger(int value) implements UnionTypeExample {
+    record AlsoAnInteger(int value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         AlsoAnInteger(@JsonSetter("alsoAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "alsoAnInteger cannot be null");
@@ -243,7 +261,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("if")
-    record If(int value) implements UnionTypeExample {
+    record If(int value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         If(@JsonSetter("if") @Nonnull int value) {
             Preconditions.checkNotNull(value, "if cannot be null");
@@ -267,7 +285,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("new")
-    record New(int value) implements UnionTypeExample {
+    record New(int value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         New(@JsonSetter("new") @Nonnull int value) {
             Preconditions.checkNotNull(value, "new cannot be null");
@@ -291,7 +309,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("interface")
-    record Interface(int value) implements UnionTypeExample {
+    record Interface(int value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Interface(@JsonSetter("interface") @Nonnull int value) {
             Preconditions.checkNotNull(value, "interface cannot be null");
@@ -315,7 +333,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("completed")
-    record Completed(int value) implements UnionTypeExample {
+    record Completed(int value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Completed(@JsonSetter("completed") @Nonnull int value) {
             Preconditions.checkNotNull(value, "completed cannot be null");
@@ -339,7 +357,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("unknown")
-    record Unknown_(int value) implements UnionTypeExample {
+    record Unknown_(int value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Unknown_(@JsonSetter("unknown") @Nonnull int value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
@@ -363,7 +381,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("optional")
-    record Optional(java.util.Optional<String> value) implements UnionTypeExample {
+    record Optional(java.util.Optional<String> value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Optional(@JsonSetter(value = "optional", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Optional<String> value) {
             Preconditions.checkNotNull(value, "optional cannot be null");
@@ -387,7 +405,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("list")
-    record List(java.util.List<String> value) implements UnionTypeExample {
+    record List(java.util.List<String> value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         List(@JsonSetter(value = "list", nulls = Nulls.AS_EMPTY) @Nonnull java.util.List<String> value) {
             Preconditions.checkNotNull(value, "list cannot be null");
@@ -411,7 +429,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("set")
-    record Set(java.util.Set<String> value) implements UnionTypeExample {
+    record Set(java.util.Set<String> value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Set(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Set<String> value) {
             Preconditions.checkNotNull(value, "set cannot be null");
@@ -435,7 +453,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("map")
-    record Map(java.util.Map<String, String> value) implements UnionTypeExample {
+    record Map(java.util.Map<String, String> value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Map(@JsonSetter(value = "map", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Map<String, String> value) {
             Preconditions.checkNotNull(value, "map cannot be null");
@@ -459,7 +477,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("optionalAlias")
-    record OptionalAlias(sealedunions.com.palantir.product.OptionalAlias value) implements UnionTypeExample {
+    record OptionalAlias(sealedunions.com.palantir.product.OptionalAlias value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         OptionalAlias(
                 @JsonSetter(value = "optionalAlias", nulls = Nulls.AS_EMPTY) @Nonnull
@@ -485,7 +503,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("listAlias")
-    record ListAlias(sealedunions.com.palantir.product.ListAlias value) implements UnionTypeExample {
+    record ListAlias(sealedunions.com.palantir.product.ListAlias value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         ListAlias(
                 @JsonSetter(value = "listAlias", nulls = Nulls.AS_EMPTY) @Nonnull
@@ -511,7 +529,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("setAlias")
-    record SetAlias(sealedunions.com.palantir.product.SetAlias value) implements UnionTypeExample {
+    record SetAlias(sealedunions.com.palantir.product.SetAlias value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         SetAlias(
                 @JsonSetter(value = "setAlias", nulls = Nulls.AS_EMPTY) @Nonnull
@@ -537,7 +555,7 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("mapAlias")
-    record MapAlias(MapAliasExample value) implements UnionTypeExample {
+    record MapAlias(MapAliasExample value) implements UnionTypeExample, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         MapAlias(@JsonSetter(value = "mapAlias", nulls = Nulls.AS_EMPTY) @Nonnull MapAliasExample value) {
             Preconditions.checkNotNull(value, "mapAlias cannot be null");

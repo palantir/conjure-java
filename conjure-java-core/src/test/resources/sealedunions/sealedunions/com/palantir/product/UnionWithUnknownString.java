@@ -42,8 +42,10 @@ public sealed interface UnionWithUnknownString {
         }
     }
 
+    sealed interface Known permits Unknown_ {}
+
     @JsonTypeName("unknown")
-    record Unknown_(String value) implements UnionWithUnknownString {
+    record Unknown_(String value) implements UnionWithUnknownString, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Unknown_(@JsonSetter("unknown") @Nonnull String value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");

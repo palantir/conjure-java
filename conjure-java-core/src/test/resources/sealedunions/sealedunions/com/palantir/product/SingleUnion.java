@@ -42,8 +42,10 @@ public sealed interface SingleUnion {
         }
     }
 
+    sealed interface Known permits Foo {}
+
     @JsonTypeName("foo")
-    record Foo(String value) implements SingleUnion {
+    record Foo(String value) implements SingleUnion, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
         Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
