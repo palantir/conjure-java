@@ -34,6 +34,17 @@ class Union2Tests {
     }
 
     @Test
+    void record_equality() {
+        Union2 foo = Union2.foo("hello");
+        Union2 helloAgain = Union2.foo("hello");
+        Union2 bar = Union2.bar(123);
+        // Amusingly, java.lang.Record#equals says "the precise algorithm used in the implicitly provided
+        // implementation is unspecified and is subject to change"
+        assertThat(foo.equals(bar)).isFalse();
+        assertThat(foo.equals(helloAgain)).isTrue();
+    }
+
+    @Test
     void switch_statement_compiles() {
         Union2 myUnion = Union2.foo("hello");
         switch (myUnion) {

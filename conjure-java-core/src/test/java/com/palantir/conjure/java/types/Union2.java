@@ -41,21 +41,15 @@ import javax.annotation.Nonnull;
 /**
  * This is hand-rolled, I just want to make sure it's compatible.
  */
-
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
         visible = true,
         defaultImpl = UnknownVariant.class)
-@JsonSubTypes({
-        @JsonSubTypes.Type(Foo.class),
-        @JsonSubTypes.Type(Bar.class),
-        @JsonSubTypes.Type(Baz.class)
-})
+@JsonSubTypes({@JsonSubTypes.Type(Foo.class), @JsonSubTypes.Type(Bar.class), @JsonSubTypes.Type(Baz.class)})
 @JsonIgnoreProperties(ignoreUnknown = true)
-public sealed interface Union2 permits Foo, Bar, Baz,
-        UnknownVariant {
+public sealed interface Union2 {
 
     sealed interface Known permits Foo, Bar, Baz {}
 
@@ -120,19 +114,12 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         public String getValue() {
             return value;
         }
-
-        @Override
-        public String toString() {
-            return "Union2_Foo{value: " + value + '}';
-        }
     }
 
     @JsonTypeName("bar")
-    final class Bar implements Union2, Known {
-        private final int value;
-
+    record Bar(int value) implements Union2, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Bar(@JsonSetter("bar") @Nonnull int value) {
+        public Bar(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
@@ -147,34 +134,12 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         public int getValue() {
             return value;
         }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof Bar
-                    && equalTo((Bar) other));
-        }
-
-        private boolean equalTo(Bar other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return "Union2_Bar{value: " + value + '}';
-        }
     }
 
     @JsonTypeName("baz")
-    final class Baz implements Union2, Known {
-        private final long value;
-
+    record Baz(long value) implements Union2, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Baz(@JsonSetter("baz") @Nonnull long value) {
+        public Baz(@JsonSetter("baz") @Nonnull long value) {
             Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
         }
@@ -188,26 +153,6 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         @JsonProperty("baz")
         public long getValue() {
             return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof Baz
-                    && equalTo((Baz) other));
-        }
-
-        private boolean equalTo(Baz other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Long.hashCode(this.value);
-        }
-
-        @Override
-        public String toString() {
-            return "Union2_Baz{value: " + value + '}';
         }
     }
 
@@ -247,8 +192,7 @@ public sealed interface Union2 permits Foo, Bar, Baz,
 
         @Override
         public boolean equals(Object other) {
-            return this == other || (other instanceof UnknownVariant
-                    && equalTo((UnknownVariant) other));
+            return this == other || (other instanceof UnknownVariant && equalTo((UnknownVariant) other));
         }
 
         private boolean equalTo(UnknownVariant other) {
