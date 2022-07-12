@@ -1,31 +1,29 @@
-package com.palantir.product;
+package sealedunions.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
-import com.palantir.logsafe.Safe;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.Map;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
-@Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class OptionalAlias {
-    private static final OptionalAlias EMPTY = new OptionalAlias();
+public final class MapAliasExample {
+    private static final MapAliasExample EMPTY = new MapAliasExample();
 
-    private final Optional<@Safe String> value;
+    private final Map<String, Object> value;
 
-    private OptionalAlias(@Nonnull Optional<@Safe String> value) {
+    private MapAliasExample(@Nonnull Map<String, Object> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private OptionalAlias() {
-        this(Optional.empty());
+    private MapAliasExample() {
+        this(Collections.emptyMap());
     }
 
     @JsonValue
-    @Safe
-    public Optional<@Safe String> get() {
+    public Map<String, Object> get() {
         return value;
     }
 
@@ -36,7 +34,8 @@ public final class OptionalAlias {
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof OptionalAlias && this.value.equals(((OptionalAlias) other).value));
+        return this == other
+                || (other instanceof MapAliasExample && this.value.equals(((MapAliasExample) other).value));
     }
 
     @Override
@@ -45,11 +44,11 @@ public final class OptionalAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static OptionalAlias of(@Safe @Nonnull Optional<@Safe String> value) {
-        return new OptionalAlias(value);
+    public static MapAliasExample of(@Nonnull Map<String, Object> value) {
+        return new MapAliasExample(value);
     }
 
-    public static OptionalAlias empty() {
+    public static MapAliasExample empty() {
         return EMPTY;
     }
 }

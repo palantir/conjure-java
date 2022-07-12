@@ -84,6 +84,7 @@ public final class ObjectGeneratorTests {
                         .excludeEmptyOptionals(true)
                         .unionsWithUnknownValues(true)
                         .sealedUnions(true)
+                        .packagePrefix("sealedunions")
                         .build())))
                 .emit(def, tempDir);
 

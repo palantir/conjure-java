@@ -1,4 +1,4 @@
-package com.palantir.product;
+package sealedunions.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -245,11 +245,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.StringExampleWrapper
-                            && equalTo((com.palantir.product.StringExampleWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.StringExampleWrapper
+                            && equalTo((sealedunions.com.palantir.product.StringExampleWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.StringExampleWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.StringExampleWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -292,11 +292,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.ThisFieldIsAnIntegerWrapper
-                            && equalTo((com.palantir.product.ThisFieldIsAnIntegerWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.ThisFieldIsAnIntegerWrapper
+                            && equalTo((sealedunions.com.palantir.product.ThisFieldIsAnIntegerWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.ThisFieldIsAnIntegerWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.ThisFieldIsAnIntegerWrapper other) {
             return this.value == other.value;
         }
 
@@ -339,11 +339,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.AlsoAnIntegerWrapper
-                            && equalTo((com.palantir.product.AlsoAnIntegerWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.AlsoAnIntegerWrapper
+                            && equalTo((sealedunions.com.palantir.product.AlsoAnIntegerWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.AlsoAnIntegerWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.AlsoAnIntegerWrapper other) {
             return this.value == other.value;
         }
 
@@ -386,11 +386,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.IfWrapper
-                            && equalTo((com.palantir.product.IfWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.IfWrapper
+                            && equalTo((sealedunions.com.palantir.product.IfWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.IfWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.IfWrapper other) {
             return this.value == other.value;
         }
 
@@ -433,11 +433,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.NewWrapper
-                            && equalTo((com.palantir.product.NewWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.NewWrapper
+                            && equalTo((sealedunions.com.palantir.product.NewWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.NewWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.NewWrapper other) {
             return this.value == other.value;
         }
 
@@ -480,11 +480,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.InterfaceWrapper
-                            && equalTo((com.palantir.product.InterfaceWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.InterfaceWrapper
+                            && equalTo((sealedunions.com.palantir.product.InterfaceWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.InterfaceWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.InterfaceWrapper other) {
             return this.value == other.value;
         }
 
@@ -527,11 +527,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.CompletedWrapper
-                            && equalTo((com.palantir.product.CompletedWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.CompletedWrapper
+                            && equalTo((sealedunions.com.palantir.product.CompletedWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.CompletedWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.CompletedWrapper other) {
             return this.value == other.value;
         }
 
@@ -574,11 +574,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.Unknown_Wrapper
-                            && equalTo((com.palantir.product.Unknown_Wrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.Unknown_Wrapper
+                            && equalTo((sealedunions.com.palantir.product.Unknown_Wrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.Unknown_Wrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.Unknown_Wrapper other) {
             return this.value == other.value;
         }
 
@@ -622,11 +622,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.OptionalWrapper
-                            && equalTo((com.palantir.product.OptionalWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.OptionalWrapper
+                            && equalTo((sealedunions.com.palantir.product.OptionalWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.OptionalWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.OptionalWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -669,11 +669,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.ListWrapper
-                            && equalTo((com.palantir.product.ListWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.ListWrapper
+                            && equalTo((sealedunions.com.palantir.product.ListWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.ListWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.ListWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -716,11 +716,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.SetWrapper
-                            && equalTo((com.palantir.product.SetWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.SetWrapper
+                            && equalTo((sealedunions.com.palantir.product.SetWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.SetWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.SetWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -763,11 +763,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.MapWrapper
-                            && equalTo((com.palantir.product.MapWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.MapWrapper
+                            && equalTo((sealedunions.com.palantir.product.MapWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.MapWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.MapWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -811,11 +811,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.OptionalAliasWrapper
-                            && equalTo((com.palantir.product.OptionalAliasWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.OptionalAliasWrapper
+                            && equalTo((sealedunions.com.palantir.product.OptionalAliasWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.OptionalAliasWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.OptionalAliasWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -858,11 +858,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.ListAliasWrapper
-                            && equalTo((com.palantir.product.ListAliasWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.ListAliasWrapper
+                            && equalTo((sealedunions.com.palantir.product.ListAliasWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.ListAliasWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.ListAliasWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -905,11 +905,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.SetAliasWrapper
-                            && equalTo((com.palantir.product.SetAliasWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.SetAliasWrapper
+                            && equalTo((sealedunions.com.palantir.product.SetAliasWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.SetAliasWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.SetAliasWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -953,11 +953,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.MapAliasWrapper
-                            && equalTo((com.palantir.product.MapAliasWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.MapAliasWrapper
+                            && equalTo((sealedunions.com.palantir.product.MapAliasWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.MapAliasWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.MapAliasWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -1012,11 +1012,11 @@ public sealed interface UnionTypeExample {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.UnknownWrapper
-                            && equalTo((com.palantir.product.UnknownWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.UnknownWrapper
+                            && equalTo((sealedunions.com.palantir.product.UnknownWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.UnknownWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.UnknownWrapper other) {
             return this.type.equals(other.type) && this.value.equals(other.value);
         }
 

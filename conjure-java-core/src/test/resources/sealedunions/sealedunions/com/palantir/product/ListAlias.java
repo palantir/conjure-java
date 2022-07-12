@@ -1,29 +1,29 @@
-package com.palantir.product;
+package sealedunions.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class SetAlias {
-    private static final SetAlias EMPTY = new SetAlias();
+public final class ListAlias {
+    private static final ListAlias EMPTY = new ListAlias();
 
-    private final Set<String> value;
+    private final List<String> value;
 
-    private SetAlias(@Nonnull Set<String> value) {
+    private ListAlias(@Nonnull List<String> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private SetAlias() {
-        this(Collections.emptySet());
+    private ListAlias() {
+        this(Collections.emptyList());
     }
 
     @JsonValue
-    public Set<String> get() {
+    public List<String> get() {
         return value;
     }
 
@@ -34,7 +34,7 @@ public final class SetAlias {
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof SetAlias && this.value.equals(((SetAlias) other).value));
+        return this == other || (other instanceof ListAlias && this.value.equals(((ListAlias) other).value));
     }
 
     @Override
@@ -43,11 +43,11 @@ public final class SetAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static SetAlias of(@Nonnull Set<String> value) {
-        return new SetAlias(value);
+    public static ListAlias of(@Nonnull List<String> value) {
+        return new ListAlias(value);
     }
 
-    public static SetAlias empty() {
+    public static ListAlias empty() {
         return EMPTY;
     }
 }

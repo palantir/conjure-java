@@ -1,29 +1,31 @@
-package com.palantir.product;
+package sealedunions.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
-import java.util.Collections;
-import java.util.List;
+import com.palantir.logsafe.Safe;
+import java.util.Optional;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class ListAlias {
-    private static final ListAlias EMPTY = new ListAlias();
+public final class OptionalAlias {
+    private static final OptionalAlias EMPTY = new OptionalAlias();
 
-    private final List<String> value;
+    private final Optional<@Safe String> value;
 
-    private ListAlias(@Nonnull List<String> value) {
+    private OptionalAlias(@Nonnull Optional<@Safe String> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private ListAlias() {
-        this(Collections.emptyList());
+    private OptionalAlias() {
+        this(Optional.empty());
     }
 
     @JsonValue
-    public List<String> get() {
+    @Safe
+    public Optional<@Safe String> get() {
         return value;
     }
 
@@ -34,7 +36,7 @@ public final class ListAlias {
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other instanceof ListAlias && this.value.equals(((ListAlias) other).value));
+        return this == other || (other instanceof OptionalAlias && this.value.equals(((OptionalAlias) other).value));
     }
 
     @Override
@@ -43,11 +45,11 @@ public final class ListAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static ListAlias of(@Nonnull List<String> value) {
-        return new ListAlias(value);
+    public static OptionalAlias of(@Safe @Nonnull Optional<@Safe String> value) {
+        return new OptionalAlias(value);
     }
 
-    public static ListAlias empty() {
+    public static OptionalAlias empty() {
         return EMPTY;
     }
 }

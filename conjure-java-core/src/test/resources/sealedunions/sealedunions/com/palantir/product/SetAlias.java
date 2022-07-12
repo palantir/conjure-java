@@ -1,29 +1,29 @@
-package com.palantir.product;
+package sealedunions.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Collections;
-import java.util.Map;
+import java.util.Set;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class MapAliasExample {
-    private static final MapAliasExample EMPTY = new MapAliasExample();
+public final class SetAlias {
+    private static final SetAlias EMPTY = new SetAlias();
 
-    private final Map<String, Object> value;
+    private final Set<String> value;
 
-    private MapAliasExample(@Nonnull Map<String, Object> value) {
+    private SetAlias(@Nonnull Set<String> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
-    private MapAliasExample() {
-        this(Collections.emptyMap());
+    private SetAlias() {
+        this(Collections.emptySet());
     }
 
     @JsonValue
-    public Map<String, Object> get() {
+    public Set<String> get() {
         return value;
     }
 
@@ -34,8 +34,7 @@ public final class MapAliasExample {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other instanceof MapAliasExample && this.value.equals(((MapAliasExample) other).value));
+        return this == other || (other instanceof SetAlias && this.value.equals(((SetAlias) other).value));
     }
 
     @Override
@@ -44,11 +43,11 @@ public final class MapAliasExample {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static MapAliasExample of(@Nonnull Map<String, Object> value) {
-        return new MapAliasExample(value);
+    public static SetAlias of(@Nonnull Set<String> value) {
+        return new SetAlias(value);
     }
 
-    public static MapAliasExample empty() {
+    public static SetAlias empty() {
         return EMPTY;
     }
 }

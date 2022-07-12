@@ -1,4 +1,4 @@
-package com.palantir.product;
+package sealedunions.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -80,11 +80,11 @@ public sealed interface SingleUnion {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.FooWrapper
-                            && equalTo((com.palantir.product.FooWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.FooWrapper
+                            && equalTo((sealedunions.com.palantir.product.FooWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.FooWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.FooWrapper other) {
             return this.value.equals(other.value);
         }
 
@@ -139,11 +139,11 @@ public sealed interface SingleUnion {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof com.palantir.product.UnknownWrapper
-                            && equalTo((com.palantir.product.UnknownWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.UnknownWrapper
+                            && equalTo((sealedunions.com.palantir.product.UnknownWrapper) other));
         }
 
-        private boolean equalTo(com.palantir.product.UnknownWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.UnknownWrapper other) {
             return this.type.equals(other.type) && this.value.equals(other.value);
         }
 
