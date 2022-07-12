@@ -52,6 +52,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -330,10 +331,7 @@ public final class UnionGenerator {
             Map<FieldDefinition, TypeName> memberTypes,
             ClassName visitorBuilderClass,
             Options options) {
-        TypeSpec.Builder visitorBuilder = TypeSpec.interfaceBuilder(visitorClass)
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addTypeVariable(TYPE_VARIABLE)
-                .addMethods(generateMemberVisitMethods(memberTypes));
+
         MethodSpec.Builder visitUnknownBuilder = MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameter(ParameterSpec.builder(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
@@ -345,23 +343,33 @@ public final class UnionGenerator {
                     .addAnnotations(ConjureAnnotations.safety(SafetyEvaluator.UNKNOWN_UNION_VARINT_SAFETY))
                     .build());
         }
-        visitorBuilder.addMethod(visitUnknownBuilder.build());
-        visitorBuilder
-                .addMethod(MethodSpec.methodBuilder("builder")
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                        .addTypeVariable(TYPE_VARIABLE)
-                        .addStatement("return new $T<$T>()", visitorBuilderClass, TYPE_VARIABLE)
-                        .returns(ParameterizedTypeName.get(
-                                visitorStageInterfaceName(
-                                        unionClass,
-                                        sortedStageNameTypePairs(memberTypes)
-                                                .findFirst()
-                                                .get()
-                                                .memberName),
-                                TYPE_VARIABLE))
-                        .build())
+        MethodSpec visitUnknownMethod = visitUnknownBuilder.build();
+
+        Builder builderFacMethod = MethodSpec.methodBuilder("builder")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addTypeVariable(TYPE_VARIABLE)
+                .addStatement("return new $T<$T>()", visitorBuilderClass, TYPE_VARIABLE)
+                .returns(ParameterizedTypeName.get(
+                        visitorStageInterfaceName(
+                                unionClass,
+                                sortedStageNameTypePairs(memberTypes)
+                                        .findFirst()
+                                        .get()
+                                        .memberName),
+                        TYPE_VARIABLE));
+        if (options.sealedUnions()) {
+                builderFacMethod.addAnnotation(Deprecated.class);
+                builderFacMethod.addJavadoc("@Deprecated - prefer Java 17 pattern matching switch expressions.");
+        }
+        MethodSpec builderFactoryMethod = builderFacMethod.build();
+
+        return TypeSpec.interfaceBuilder(visitorClass)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addTypeVariable(TYPE_VARIABLE)
+                .addMethods(generateMemberVisitMethods(memberTypes))
+                .addMethod(visitUnknownMethod)
+                .addMethod(builderFactoryMethod)
                 .build();
-        return visitorBuilder.build();
     }
 
     private static List<MethodSpec> generateMemberVisitMethods(Map<FieldDefinition, TypeName> memberTypes) {

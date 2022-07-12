@@ -41,6 +41,10 @@ public sealed interface EmptyUnionTypeExample {
     interface Visitor<T> {
         T visitUnknown(@Safe String unknownType, Object unknownValue);
 
+        /**
+         * @Deprecated - prefer using Java 17 pattern matching switch expressions
+         */
+        @Deprecated
         static <T> UnknownStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
         }

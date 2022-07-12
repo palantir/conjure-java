@@ -52,6 +52,10 @@ public sealed interface UnionWithUnknownString {
 
         T visitUnknown(@Safe String unknownType, Object unknownValue);
 
+        /**
+         * @Deprecated - prefer using Java 17 pattern matching switch expressions
+         */
+        @Deprecated
         static <T> Unknown_StageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
         }
