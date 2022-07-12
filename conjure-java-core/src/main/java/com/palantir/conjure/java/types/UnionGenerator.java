@@ -182,7 +182,8 @@ public final class UnionGenerator {
         }
     }
 
-    private static TypeSpec generateSealedKnownInterface(Options options, ClassName unionClass, Map<FieldName, TypeSpec> records) {
+    private static TypeSpec generateSealedKnownInterface(
+            Options options, ClassName unionClass, Map<FieldName, TypeSpec> records) {
         return TypeSpec.interfaceBuilder(KNOWN_INTERFACE)
                 .addModifiers(Modifier.PUBLIC, Modifier.SEALED, Modifier.STATIC)
                 .addPermittedSubclasses(records.keySet().stream()
