@@ -43,11 +43,9 @@ public sealed interface SingleUnion {
     }
 
     @JsonTypeName("foo")
-    final class Foo implements SingleUnion {
-        private final String value;
-
+    record Foo(String value) implements SingleUnion {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Foo(@JsonSetter("foo") @Nonnull String value) {
+        Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
@@ -60,22 +58,6 @@ public sealed interface SingleUnion {
         @JsonProperty("foo")
         private String getValue() {
             return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Foo
-                            && equalTo((sealedunions.com.palantir.product.Foo) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Foo other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
         }
 
         @Override

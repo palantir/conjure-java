@@ -138,13 +138,17 @@ public interface Options {
 
     /** Generates sealed interfaces for union types. */
     @Value.Default
-    default boolean sealedUnions() { return false; }
+    default boolean sealedUnions() {
+        return false;
+    }
 
     /**
      * If {@link #sealedUnions} is enabled, this controls whether visitors should still be generated (for back-compat).
      */
     @Value.Default
-    default boolean sealedUnionVisitors() { return false; }
+    default boolean sealedUnionVisitors() {
+        return false;
+    }
 
     Optional<String> packagePrefix();
 

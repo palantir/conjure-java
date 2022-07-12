@@ -171,12 +171,9 @@ public sealed interface UnionTypeExample {
     }
 
     @JsonTypeName("stringExample")
-    final class StringExample implements UnionTypeExample {
-        private final sealedunions.com.palantir.product.StringExample value;
-
+    record StringExample(sealedunions.com.palantir.product.StringExample value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private StringExample(
-                @JsonSetter("stringExample") @Nonnull sealedunions.com.palantir.product.StringExample value) {
+        StringExample(@JsonSetter("stringExample") @Nonnull sealedunions.com.palantir.product.StringExample value) {
             Preconditions.checkNotNull(value, "stringExample cannot be null");
             this.value = value;
         }
@@ -192,33 +189,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.StringExample
-                            && equalTo((sealedunions.com.palantir.product.StringExample) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.StringExample other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "StringExample{value: " + value + '}';
         }
     }
 
     @JsonTypeName("thisFieldIsAnInteger")
-    final class ThisFieldIsAnInteger implements UnionTypeExample {
-        private final int value;
-
+    record ThisFieldIsAnInteger(int value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private ThisFieldIsAnInteger(@JsonSetter("thisFieldIsAnInteger") @Nonnull int value) {
+        ThisFieldIsAnInteger(@JsonSetter("thisFieldIsAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "thisFieldIsAnInteger cannot be null");
             this.value = value;
         }
@@ -234,33 +213,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.ThisFieldIsAnInteger
-                            && equalTo((sealedunions.com.palantir.product.ThisFieldIsAnInteger) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.ThisFieldIsAnInteger other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
         public String toString() {
             return "ThisFieldIsAnInteger{value: " + value + '}';
         }
     }
 
     @JsonTypeName("alsoAnInteger")
-    final class AlsoAnInteger implements UnionTypeExample {
-        private final int value;
-
+    record AlsoAnInteger(int value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private AlsoAnInteger(@JsonSetter("alsoAnInteger") @Nonnull int value) {
+        AlsoAnInteger(@JsonSetter("alsoAnInteger") @Nonnull int value) {
             Preconditions.checkNotNull(value, "alsoAnInteger cannot be null");
             this.value = value;
         }
@@ -276,33 +237,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.AlsoAnInteger
-                            && equalTo((sealedunions.com.palantir.product.AlsoAnInteger) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.AlsoAnInteger other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
         public String toString() {
             return "AlsoAnInteger{value: " + value + '}';
         }
     }
 
     @JsonTypeName("if")
-    final class If implements UnionTypeExample {
-        private final int value;
-
+    record If(int value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private If(@JsonSetter("if") @Nonnull int value) {
+        If(@JsonSetter("if") @Nonnull int value) {
             Preconditions.checkNotNull(value, "if cannot be null");
             this.value = value;
         }
@@ -318,33 +261,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.If
-                            && equalTo((sealedunions.com.palantir.product.If) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.If other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
         public String toString() {
             return "If{value: " + value + '}';
         }
     }
 
     @JsonTypeName("new")
-    final class New implements UnionTypeExample {
-        private final int value;
-
+    record New(int value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private New(@JsonSetter("new") @Nonnull int value) {
+        New(@JsonSetter("new") @Nonnull int value) {
             Preconditions.checkNotNull(value, "new cannot be null");
             this.value = value;
         }
@@ -360,33 +285,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.New
-                            && equalTo((sealedunions.com.palantir.product.New) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.New other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
         public String toString() {
             return "New{value: " + value + '}';
         }
     }
 
     @JsonTypeName("interface")
-    final class Interface implements UnionTypeExample {
-        private final int value;
-
+    record Interface(int value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Interface(@JsonSetter("interface") @Nonnull int value) {
+        Interface(@JsonSetter("interface") @Nonnull int value) {
             Preconditions.checkNotNull(value, "interface cannot be null");
             this.value = value;
         }
@@ -402,33 +309,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Interface
-                            && equalTo((sealedunions.com.palantir.product.Interface) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Interface other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
         public String toString() {
             return "Interface{value: " + value + '}';
         }
     }
 
     @JsonTypeName("completed")
-    final class Completed implements UnionTypeExample {
-        private final int value;
-
+    record Completed(int value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Completed(@JsonSetter("completed") @Nonnull int value) {
+        Completed(@JsonSetter("completed") @Nonnull int value) {
             Preconditions.checkNotNull(value, "completed cannot be null");
             this.value = value;
         }
@@ -444,33 +333,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Completed
-                            && equalTo((sealedunions.com.palantir.product.Completed) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Completed other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
         public String toString() {
             return "Completed{value: " + value + '}';
         }
     }
 
     @JsonTypeName("unknown")
-    final class Unknown_ implements UnionTypeExample {
-        private final int value;
-
+    record Unknown_(int value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Unknown_(@JsonSetter("unknown") @Nonnull int value) {
+        Unknown_(@JsonSetter("unknown") @Nonnull int value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
         }
@@ -486,34 +357,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Unknown_
-                            && equalTo((sealedunions.com.palantir.product.Unknown_) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Unknown_ other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
         public String toString() {
             return "Unknown_{value: " + value + '}';
         }
     }
 
     @JsonTypeName("optional")
-    final class Optional implements UnionTypeExample {
-        private final java.util.Optional<String> value;
-
+    record Optional(java.util.Optional<String> value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Optional(
-                @JsonSetter(value = "optional", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Optional<String> value) {
+        Optional(@JsonSetter(value = "optional", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Optional<String> value) {
             Preconditions.checkNotNull(value, "optional cannot be null");
             this.value = value;
         }
@@ -529,33 +381,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Optional
-                            && equalTo((sealedunions.com.palantir.product.Optional) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Optional other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "Optional{value: " + value + '}';
         }
     }
 
     @JsonTypeName("list")
-    final class List implements UnionTypeExample {
-        private final java.util.List<String> value;
-
+    record List(java.util.List<String> value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private List(@JsonSetter(value = "list", nulls = Nulls.AS_EMPTY) @Nonnull java.util.List<String> value) {
+        List(@JsonSetter(value = "list", nulls = Nulls.AS_EMPTY) @Nonnull java.util.List<String> value) {
             Preconditions.checkNotNull(value, "list cannot be null");
             this.value = value;
         }
@@ -571,33 +405,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.List
-                            && equalTo((sealedunions.com.palantir.product.List) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.List other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "List{value: " + value + '}';
         }
     }
 
     @JsonTypeName("set")
-    final class Set implements UnionTypeExample {
-        private final java.util.Set<String> value;
-
+    record Set(java.util.Set<String> value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Set(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Set<String> value) {
+        Set(@JsonSetter(value = "set", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Set<String> value) {
             Preconditions.checkNotNull(value, "set cannot be null");
             this.value = value;
         }
@@ -613,33 +429,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Set
-                            && equalTo((sealedunions.com.palantir.product.Set) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Set other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "Set{value: " + value + '}';
         }
     }
 
     @JsonTypeName("map")
-    final class Map implements UnionTypeExample {
-        private final java.util.Map<String, String> value;
-
+    record Map(java.util.Map<String, String> value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Map(@JsonSetter(value = "map", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Map<String, String> value) {
+        Map(@JsonSetter(value = "map", nulls = Nulls.AS_EMPTY) @Nonnull java.util.Map<String, String> value) {
             Preconditions.checkNotNull(value, "map cannot be null");
             this.value = value;
         }
@@ -655,33 +453,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Map
-                            && equalTo((sealedunions.com.palantir.product.Map) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Map other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "Map{value: " + value + '}';
         }
     }
 
     @JsonTypeName("optionalAlias")
-    final class OptionalAlias implements UnionTypeExample {
-        private final sealedunions.com.palantir.product.OptionalAlias value;
-
+    record OptionalAlias(sealedunions.com.palantir.product.OptionalAlias value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private OptionalAlias(
+        OptionalAlias(
                 @JsonSetter(value = "optionalAlias", nulls = Nulls.AS_EMPTY) @Nonnull
                         sealedunions.com.palantir.product.OptionalAlias value) {
             Preconditions.checkNotNull(value, "optionalAlias cannot be null");
@@ -699,33 +479,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.OptionalAlias
-                            && equalTo((sealedunions.com.palantir.product.OptionalAlias) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.OptionalAlias other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "OptionalAlias{value: " + value + '}';
         }
     }
 
     @JsonTypeName("listAlias")
-    final class ListAlias implements UnionTypeExample {
-        private final sealedunions.com.palantir.product.ListAlias value;
-
+    record ListAlias(sealedunions.com.palantir.product.ListAlias value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private ListAlias(
+        ListAlias(
                 @JsonSetter(value = "listAlias", nulls = Nulls.AS_EMPTY) @Nonnull
                         sealedunions.com.palantir.product.ListAlias value) {
             Preconditions.checkNotNull(value, "listAlias cannot be null");
@@ -743,33 +505,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.ListAlias
-                            && equalTo((sealedunions.com.palantir.product.ListAlias) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.ListAlias other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "ListAlias{value: " + value + '}';
         }
     }
 
     @JsonTypeName("setAlias")
-    final class SetAlias implements UnionTypeExample {
-        private final sealedunions.com.palantir.product.SetAlias value;
-
+    record SetAlias(sealedunions.com.palantir.product.SetAlias value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private SetAlias(
+        SetAlias(
                 @JsonSetter(value = "setAlias", nulls = Nulls.AS_EMPTY) @Nonnull
                         sealedunions.com.palantir.product.SetAlias value) {
             Preconditions.checkNotNull(value, "setAlias cannot be null");
@@ -787,33 +531,15 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.SetAlias
-                            && equalTo((sealedunions.com.palantir.product.SetAlias) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.SetAlias other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "SetAlias{value: " + value + '}';
         }
     }
 
     @JsonTypeName("mapAlias")
-    final class MapAlias implements UnionTypeExample {
-        private final MapAliasExample value;
-
+    record MapAlias(MapAliasExample value) implements UnionTypeExample {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private MapAlias(@JsonSetter(value = "mapAlias", nulls = Nulls.AS_EMPTY) @Nonnull MapAliasExample value) {
+        MapAlias(@JsonSetter(value = "mapAlias", nulls = Nulls.AS_EMPTY) @Nonnull MapAliasExample value) {
             Preconditions.checkNotNull(value, "mapAlias cannot be null");
             this.value = value;
         }
@@ -826,22 +552,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("mapAlias")
         private MapAliasExample getValue() {
             return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.MapAlias
-                            && equalTo((sealedunions.com.palantir.product.MapAlias) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.MapAlias other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
         }
 
         @Override

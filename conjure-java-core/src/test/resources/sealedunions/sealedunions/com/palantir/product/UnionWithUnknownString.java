@@ -43,11 +43,9 @@ public sealed interface UnionWithUnknownString {
     }
 
     @JsonTypeName("unknown")
-    final class Unknown_ implements UnionWithUnknownString {
-        private final String value;
-
+    record Unknown_(String value) implements UnionWithUnknownString {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Unknown_(@JsonSetter("unknown") @Nonnull String value) {
+        Unknown_(@JsonSetter("unknown") @Nonnull String value) {
             Preconditions.checkNotNull(value, "unknown_ cannot be null");
             this.value = value;
         }
@@ -60,22 +58,6 @@ public sealed interface UnionWithUnknownString {
         @JsonProperty("unknown")
         private String getValue() {
             return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Unknown_
-                            && equalTo((sealedunions.com.palantir.product.Unknown_) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Unknown_ other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
         }
 
         @Override

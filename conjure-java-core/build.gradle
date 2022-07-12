@@ -46,7 +46,7 @@ dependencies {
     api 'com.palantir.ri:resource-identifier'
     api 'com.palantir.syntactic-paths:syntactic-paths'
     api 'com.palantir.tokens:auth-tokens'
-    api 'com.squareup:javapoet'
+    api 'com.github.liachmodded:javapoet'
     api 'jakarta.annotation:jakarta.annotation-api'
     api 'jakarta.validation:jakarta.validation-api'
     api 'org.apache.commons:commons-lang3'

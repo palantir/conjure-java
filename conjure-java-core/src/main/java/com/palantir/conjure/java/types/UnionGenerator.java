@@ -116,7 +116,7 @@ public final class UnionGenerator {
                     .addAnnotation(jacksonIgnoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
                     .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
-                    .addTypes(generateWrapperClasses(
+                    .addTypes(generateRecords(
                             typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
                     .addType(generateUnknownWrapper(unknownWrapperClass, unionClass, visitorClass, options));
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
@@ -802,6 +802,80 @@ public final class UnionGenerator {
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
         subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
         return annotationBuilder.build();
+    }
+
+    private static List<TypeSpec> generateRecords(
+            TypeMapper typeMapper,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            ClassName superInterface,
+            ClassName visitorClass,
+            List<FieldDefinition> memberTypeDefs,
+            Options options) {
+        return memberTypeDefs.stream()
+                .map(memberTypeDef -> {
+                    boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
+                    FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
+                    TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
+                    ClassName wrapperClass = peerWrapperClass(superInterface, memberName, options);
+
+                    TypeSpec.Builder typeBuilder = TypeSpec.recordBuilder(wrapperClass)
+                            .addRecordComponent(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
+                                    .build())
+                            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                            .addSuperinterface(superInterface)
+                            .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
+                                    .addMember("value", "$S", memberTypeDef.getFieldName())
+                                    .build())
+                            .addMethod(MethodSpec.constructorBuilder()
+                                    .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
+                                    .addParameter(ParameterSpec.builder(memberType, VALUE_FIELD_NAME)
+                                            .addAnnotation(
+                                                    wrapperConstructorParameterAnnotation(memberTypeDef, typesMap))
+                                            .addAnnotation(Nonnull.class)
+                                            .build())
+                                    // TODO(dfox): is this null check strictly necessary?
+                                    .addStatement(
+                                            "$L",
+                                            Expressions.requireNonNull(
+                                                    VALUE_FIELD_NAME,
+                                                    String.format("%s cannot be null", memberName.get())))
+                                    .addStatement("this.$1L = $1L", VALUE_FIELD_NAME)
+                                    .build())
+                            .addMethod(MethodSpec.methodBuilder("getType")
+                                    .addModifiers(Modifier.PRIVATE)
+                                    .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                            .addMember("value", "$S", "type")
+                                            .addMember("index", "$L", 0)
+                                            .build())
+                                    .addStatement("return $S", memberTypeDef.getFieldName())
+                                    .returns(String.class)
+                                    .build())
+                            .addMethod(MethodSpec.methodBuilder("getValue")
+                                    .addModifiers(Modifier.PRIVATE)
+                                    .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
+                                            .addMember(
+                                                    "value",
+                                                    "$S",
+                                                    memberTypeDef.getFieldName().get())
+                                            .build())
+                                    .addStatement("return $L", VALUE_FIELD_NAME)
+                                    .returns(memberType)
+                                    .build())
+                            .addMethods(
+                                    !options.sealedUnions() || options.sealedUnionVisitors()
+                                            ? List.of(createWrapperAcceptMethod(
+                                                    visitorClass,
+                                                    visitMethodName(memberName.get()),
+                                                    VALUE_FIELD_NAME,
+                                                    isDeprecated,
+                                                    options))
+                                            : List.of())
+                            .addMethod(MethodSpecs.createToString(
+                                    wrapperClass.simpleName(), List.of(FieldName.of(VALUE_FIELD_NAME))));
+
+                    return typeBuilder.build();
+                })
+                .collect(Collectors.toList());
     }
 
     private static List<TypeSpec> generateWrapperClasses(

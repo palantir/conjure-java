@@ -66,11 +66,9 @@ public sealed interface Union {
     }
 
     @JsonTypeName("foo")
-    final class Foo implements Union {
-        private final String value;
-
+    record Foo(String value) implements Union {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Foo(@JsonSetter("foo") @Nonnull String value) {
+        Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
@@ -86,33 +84,15 @@ public sealed interface Union {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Foo
-                            && equalTo((sealedunions.com.palantir.product.Foo) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Foo other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
-        }
-
-        @Override
         public String toString() {
             return "Foo{value: " + value + '}';
         }
     }
 
     @JsonTypeName("bar")
-    final class Bar implements Union {
-        private final int value;
-
+    record Bar(int value) implements Union {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Bar(@JsonSetter("bar") @Nonnull int value) {
+        Bar(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
@@ -128,33 +108,15 @@ public sealed interface Union {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Bar
-                            && equalTo((sealedunions.com.palantir.product.Bar) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Bar other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value;
-        }
-
-        @Override
         public String toString() {
             return "Bar{value: " + value + '}';
         }
     }
 
     @JsonTypeName("baz")
-    final class Baz implements Union {
-        private final long value;
-
+    record Baz(long value) implements Union {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Baz(@JsonSetter("baz") @Nonnull long value) {
+        Baz(@JsonSetter("baz") @Nonnull long value) {
             Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
         }
@@ -167,22 +129,6 @@ public sealed interface Union {
         @JsonProperty("baz")
         private long getValue() {
             return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Baz
-                            && equalTo((sealedunions.com.palantir.product.Baz) other));
-        }
-
-        private boolean equalTo(sealedunions.com.palantir.product.Baz other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Long.hashCode(this.value);
         }
 
         @Override

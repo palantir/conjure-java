@@ -52,6 +52,7 @@ allprojects {
 
     repositories {
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+        maven { url 'https://jitpack.io' }
     }
 
     configurations.all {
@@ -65,6 +66,13 @@ allprojects {
                 details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
                 details.because "The error_prone_annotations dependency must be low to avoid forcing consumers to use newer releases"
             }
+        }
+    }
+
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            // Support for records hasn't merged to javapoet yet, so I'm using jitpack.io: https://github.com/square/javapoet/pull/840
+            it.substitute it.module('com.squareup:javapoet') with it.module('com.github.liachmodded:javapoet:feature~record')
         }
     }
 }

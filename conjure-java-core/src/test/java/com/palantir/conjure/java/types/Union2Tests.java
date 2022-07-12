@@ -82,12 +82,10 @@ class Union2Tests {
     void deserialization() throws JsonProcessingException {
         ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
 
-        assertThat(mapper.readValue(
-                "{\"type\":\"foo\",\"foo\":\"hello\"}",
-                Union2.class)).isEqualTo(Union2.foo("hello"));
+        assertThat(mapper.readValue("{\"type\":\"foo\",\"foo\":\"hello\"}", Union2.class))
+                .isEqualTo(Union2.foo("hello"));
 
-        assertThat(mapper.readValue(
-                "{\"type\":\"asdf\",\"asdf\":12345}",
-                Union2.class)).isEqualTo(Union2.unknown("asdf", 12345));
+        assertThat(mapper.readValue("{\"type\":\"asdf\",\"asdf\":12345}", Union2.class))
+                .isEqualTo(Union2.unknown("asdf", 12345));
     }
 }
