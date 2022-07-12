@@ -109,7 +109,8 @@ public final class UnionGenerator {
             ClassName unknownWrapperClass = unionClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
             TypeSpec.Builder typeBuilder = TypeSpec.interfaceBuilder(
                                     typeDef.getTypeName().getName())
-                            .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
+                            .addAnnotations(
+                                    ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
                             .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
                             .addAnnotation(jacksonJsonTypeInfo(unknownWrapperClass))
                             .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes))
@@ -119,17 +120,13 @@ public final class UnionGenerator {
                             .addMethod(generateAcceptVisitorMethodSignature(visitorClass))
                             .addType(generateVisitor(
                                     unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
-                            // .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass,
-                            // memberTypes, options))
-                            // .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes,
-                            // options))
-                            // .addType(generateBase(baseClass, visitorClass, memberTypes))
+                            .addType(generateVisitorBuilder(
+                                    unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
+                            .addTypes(generateVisitorBuilderStageInterfaces(
+                                    unionClass, visitorClass, memberTypes, options))
                             .addTypes(generateWrapperClasses(
                                     typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
-                            .addType(generateUnknownWrapper(
-                                    unknownWrapperClass,
-                                    unionClass, visitorClass, options
-                            ))
+                            .addType(generateUnknownWrapper(unknownWrapperClass, unionClass, visitorClass, options))
                     // .addMethod(generateEquals(unionClass))
                     // .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                     // .addMethod(MethodSpecs.createHashCode(fields))
@@ -170,10 +167,7 @@ public final class UnionGenerator {
                     .addType(generateBase(baseClass, visitorClass, memberTypes))
                     .addTypes(generateWrapperClasses(
                             typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
-                    .addType(generateUnknownWrapper(
-                            unknownWrapperClass,
-                            baseClass, visitorClass, options
-                    ))
+                    .addType(generateUnknownWrapper(unknownWrapperClass, baseClass, visitorClass, options))
                     .addMethod(generateEquals(unionClass))
                     .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                     .addMethod(MethodSpecs.createHashCode(fields))
@@ -405,7 +399,8 @@ public final class UnionGenerator {
             Options options) {
         TypeVariableName visitResultType = TypeVariableName.get("T");
         return TypeSpec.classBuilder(visitorBuilder)
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .addModifiers(
+                        options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .addTypeVariable(visitResultType)
                 .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, memberTypeMap, visitResultType))
                 .addFields(allVisitorBuilderFields(memberTypeMap, visitResultType, options))
@@ -671,7 +666,7 @@ public final class UnionGenerator {
             ClassName nextStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStageName);
             interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, member.memberName))
                     .addTypeVariable(visitResultType)
-                    .addModifiers(Modifier.PUBLIC)
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addMethod(visitorBuilderSetterPrototype(member, visitResultType, nextStageClassName, options)
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .build())
@@ -683,7 +678,7 @@ public final class UnionGenerator {
         }
         interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, COMPLETED))
                 .addTypeVariable(visitResultType)
-                .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addMethod(MethodSpec.methodBuilder("build")
                         .returns(ParameterizedTypeName.get(visitorClass, visitResultType))
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -906,8 +901,7 @@ public final class UnionGenerator {
     }
 
     private static TypeSpec generateUnknownWrapper(
-            ClassName unknownWrapperClass,
-            ClassName superinterface, ClassName visitorClass, Options options) {
+            ClassName unknownWrapperClass, ClassName superinterface, ClassName visitorClass, Options options) {
         ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
         ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")

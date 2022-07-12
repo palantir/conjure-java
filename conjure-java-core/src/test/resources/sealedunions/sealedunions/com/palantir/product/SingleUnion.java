@@ -11,10 +11,13 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -49,9 +52,79 @@ public sealed interface SingleUnion {
 
         T visitUnknown(@Safe String unknownType, Object unknownValue);
 
-        static <T> SingleUnion.FooStageVisitorBuilder<T> builder() {
-            return new SingleUnion.VisitorBuilder<T>();
+        static <T> FooStageVisitorBuilder<T> builder() {
+            return new VisitorBuilder<T>();
         }
+    }
+
+    final class VisitorBuilder<T>
+            implements FooStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
+        private Function<@Safe String, T> fooVisitor;
+
+        private BiFunction<@Safe String, Object, T> unknownVisitor;
+
+        @Override
+        public UnknownStageVisitorBuilder<T> foo(@Nonnull Function<@Safe String, T> fooVisitor) {
+            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
+            this.fooVisitor = fooVisitor;
+            return this;
+        }
+
+        @Override
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownVisitor;
+            return this;
+        }
+
+        @Override
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = (unknownType, _unknownValue) -> unknownVisitor.apply(unknownType);
+            return this;
+        }
+
+        @Override
+        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
+            this.unknownVisitor = (unknownType, _unknownValue) -> {
+                throw new SafeIllegalArgumentException(
+                        "Unknown variant of the 'SingleUnion' union", SafeArg.of("unknownType", unknownType));
+            };
+            return this;
+        }
+
+        @Override
+        public Visitor<T> build() {
+            final Function<@Safe String, T> fooVisitor = this.fooVisitor;
+            final BiFunction<@Safe String, Object, T> unknownVisitor = this.unknownVisitor;
+            return new Visitor<T>() {
+                @Override
+                public T visitFoo(String value) {
+                    return fooVisitor.apply(value);
+                }
+
+                @Override
+                public T visitUnknown(String unknownType, Object unknownValue) {
+                    return unknownVisitor.apply(unknownType, unknownValue);
+                }
+            };
+        }
+    }
+
+    interface FooStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> foo(@Nonnull Function<@Safe String, T> fooVisitor);
+    }
+
+    interface UnknownStageVisitorBuilder<T> {
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor);
+
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
+
+        Completed_StageVisitorBuilder<T> throwOnUnknown();
+    }
+
+    interface Completed_StageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 
     @JsonTypeName("foo")
