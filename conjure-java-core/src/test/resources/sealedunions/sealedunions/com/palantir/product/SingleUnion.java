@@ -15,8 +15,10 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
+@Generated("com.palantir.conjure.java.types.UnionGenerator")
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,

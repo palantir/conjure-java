@@ -19,11 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
 /**
  * A type which can either be a StringExample, a set of strings, or an integer.
  */
+@Generated("com.palantir.conjure.java.types.UnionGenerator")
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,

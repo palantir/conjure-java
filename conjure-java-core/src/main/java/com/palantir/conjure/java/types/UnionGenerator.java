@@ -109,8 +109,8 @@ public final class UnionGenerator {
             ClassName unknownWrapperClass = unionClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
             TypeSpec.Builder typeBuilder = TypeSpec.interfaceBuilder(
                                     typeDef.getTypeName().getName())
-                            // .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
-                            // .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
+                            .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
+                            .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
                             .addAnnotation(jacksonJsonTypeInfo(unknownWrapperClass))
                             .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes))
                             .addAnnotation(jacksonIgnoreUnknownAnnotation())
