@@ -209,6 +209,12 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Union visitors expose the values of unknowns in addition to their types.")
         private boolean unionsWithUnknownValues;
 
+        @CommandLine.Option(
+                names = "--sealedUnions",
+                defaultValue = "false",
+                description = "Generates sealed interfaces for union types.")
+        private boolean sealedUnions;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -277,6 +283,7 @@ public final class ConjureJavaCli implements Runnable {
                             .excludeEmptyOptionals(excludeEmptyOptionals)
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
+                            .sealedUnions(sealedUnions)
                             .build())
                     .build();
         }

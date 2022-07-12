@@ -136,6 +136,10 @@ public interface Options {
         return false;
     }
 
+    /** Generates sealed interfaces for union types. */
+    @Value.Default
+    default boolean sealedUnions() { return false; }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

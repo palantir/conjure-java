@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.UnsafeArg;
-import com.palantir.product.UnionWithUnknownString;
 import java.util.List;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
@@ -134,22 +133,6 @@ class Union2Tests {
                 return null;
             }
         });
-    }
-
-    @Test
-    public void testCreateUnknownTypeNamedUnknown() {
-        // unknown is the wire type and "unknown_" is actually unknown
-        String expectedUnknownType = "unknown_";
-        String expectedUnknownValue = "foo";
-        UnionWithUnknownString union = UnionWithUnknownString.unknown(expectedUnknownType, expectedUnknownValue);
-        union.accept(UnionWithUnknownString.Visitor.<Void>builder()
-                .unknown_(value -> failOnKnownType("unknown", value))
-                .unknown((type, value) -> {
-                    assertThat(type).isEqualTo(expectedUnknownType);
-                    assertThat(value).isEqualTo(expectedUnknownValue);
-                    return null;
-                })
-                .build());
     }
 
     private Void failOnKnownType(String type, Object value) {
