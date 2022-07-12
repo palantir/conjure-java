@@ -52,7 +52,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -324,20 +323,19 @@ public final class UnionGenerator {
             ClassName visitorBuilderClass,
             Options options) {
 
-        MethodSpec.Builder visitUnknownBuilder = MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
+        MethodSpec.Builder visitUnknownMethod = MethodSpec.methodBuilder(VISIT_UNKNOWN_METHOD_NAME)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .addParameter(ParameterSpec.builder(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
                         .addAnnotation(Safe.class)
                         .build())
                 .returns(TYPE_VARIABLE);
         if (options.unionsWithUnknownValues()) {
-            visitUnknownBuilder.addParameter(ParameterSpec.builder(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
+            visitUnknownMethod.addParameter(ParameterSpec.builder(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
                     .addAnnotations(ConjureAnnotations.safety(SafetyEvaluator.UNKNOWN_UNION_VARINT_SAFETY))
                     .build());
         }
-        MethodSpec visitUnknownMethod = visitUnknownBuilder.build();
 
-        Builder builderFacMethod = MethodSpec.methodBuilder("builder")
+        MethodSpec.Builder builderStaticFactoryMethod = MethodSpec.methodBuilder("builder")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addTypeVariable(TYPE_VARIABLE)
                 .addStatement("return new $T<$T>()", visitorBuilderClass, TYPE_VARIABLE)
@@ -350,17 +348,16 @@ public final class UnionGenerator {
                                         .memberName),
                         TYPE_VARIABLE));
         if (options.sealedUnions()) {
-            builderFacMethod.addAnnotation(Deprecated.class);
-            builderFacMethod.addJavadoc("@Deprecated - prefer Java 17 pattern matching switch expressions.");
+            builderStaticFactoryMethod.addAnnotation(Deprecated.class);
+            builderStaticFactoryMethod.addJavadoc("@Deprecated - prefer Java 17 pattern matching switch expressions.");
         }
-        MethodSpec builderFactoryMethod = builderFacMethod.build();
 
         return TypeSpec.interfaceBuilder(visitorClass)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addTypeVariable(TYPE_VARIABLE)
                 .addMethods(generateMemberVisitMethods(memberTypes))
-                .addMethod(visitUnknownMethod)
-                .addMethod(builderFactoryMethod)
+                .addMethod(visitUnknownMethod.build())
+                .addMethod(builderStaticFactoryMethod.build())
                 .build();
     }
 

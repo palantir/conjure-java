@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.UnsafeArg;
-import java.util.List;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
 
@@ -80,59 +79,6 @@ class Union2Tests {
         assertThat(mapper.readValue(
                 "{\"type\":\"asdf\",\"asdf\":12345}",
                 Union2.class)).isEqualTo(Union2.unknown("asdf", 12345));
-    }
-
-    @Test
-    public void testCreateUnknownType() {
-        String expectedUnknownType = "qux";
-        List<String> expectedUnknownValue = List.of("quux", "quuz");
-        Union2 union = Union2.unknown(expectedUnknownType, expectedUnknownValue);
-
-        // test new visitor builder
-        union.accept(Union2.Visitor.<Void>builder()
-                .bar(value -> failOnKnownType("bar", value))
-                .baz(value -> failOnKnownType("baz", value))
-                .foo(value -> failOnKnownType("foo", value))
-                .unknown(type -> {
-                    assertThat(type).isEqualTo(expectedUnknownType);
-                    return null;
-                })
-                .build());
-
-        // test old visitor builder
-        union.accept(Union2.Visitor.<Void>builder()
-                .bar(value -> failOnKnownType("bar", value))
-                .baz(value -> failOnKnownType("baz", value))
-                .foo(value -> failOnKnownType("foo", value))
-                .unknown(type -> {
-                    assertThat(type).isEqualTo(expectedUnknownType);
-                    return null;
-                })
-                .build());
-
-        // test anonymous visitor
-        union.accept(new Union2.Visitor<Void>() {
-            @Override
-            public Void visitFoo(String value) {
-                return failOnKnownType("foo", value);
-            }
-
-            @Override
-            public Void visitBar(int value) {
-                return failOnKnownType("bar", value);
-            }
-
-            @Override
-            public Void visitBaz(long value) {
-                return failOnKnownType("baz", value);
-            }
-
-            @Override
-            public Void visitUnknown(String unknownType) {
-                assertThat(unknownType).isEqualTo(expectedUnknownType);
-                return null;
-            }
-        });
     }
 
     private Void failOnKnownType(String type, Object value) {

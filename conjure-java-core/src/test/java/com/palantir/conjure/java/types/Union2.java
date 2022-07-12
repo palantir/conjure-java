@@ -36,8 +36,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
 
 /**
@@ -104,134 +102,6 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         }
     }
 
-    <T> T accept(Visitor<T> visitor);
-
-    interface Visitor<T> {
-        T visitFoo(String value);
-
-        /**
-         * @deprecated Int is deprecated.
-         */
-        @Deprecated
-        T visitBar(int value);
-
-        /**
-         * 64-bit integer.
-         * @deprecated Prefer <code>foo</code>.
-         */
-        @Deprecated
-        T visitBaz(long value);
-
-        T visitUnknown(@Safe String unknownType);
-
-        static <T> BarStageVisitorBuilder<T> builder() {
-            return new VisitorBuilder<T>();
-        }
-    }
-
-    final class VisitorBuilder<T>
-            implements BarStageVisitorBuilder<T>,
-            BazStageVisitorBuilder<T>,
-            FooStageVisitorBuilder<T>,
-            UnknownStageVisitorBuilder<T>,
-            Completed_StageVisitorBuilder<T> {
-        private IntFunction<T> barVisitor;
-
-        private Function<Long, T> bazVisitor;
-
-        private Function<String, T> fooVisitor;
-
-        private Function<String, T> unknownVisitor;
-
-        @Override
-        public BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor) {
-            Preconditions.checkNotNull(barVisitor, "barVisitor cannot be null");
-            this.barVisitor = barVisitor;
-            return this;
-        }
-
-        @Override
-        public FooStageVisitorBuilder<T> baz(@Nonnull Function<Long, T> bazVisitor) {
-            Preconditions.checkNotNull(bazVisitor, "bazVisitor cannot be null");
-            this.bazVisitor = bazVisitor;
-            return this;
-        }
-
-        @Override
-        public UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor) {
-            Preconditions.checkNotNull(fooVisitor, "fooVisitor cannot be null");
-            this.fooVisitor = fooVisitor;
-            return this;
-        }
-
-        @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor) {
-            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
-            this.unknownVisitor = unknownVisitor;
-            return this;
-        }
-
-        @Override
-        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
-            this.unknownVisitor = unknownType -> {
-                throw new SafeIllegalArgumentException(
-                        "Unknown variant of the 'Union' union", SafeArg.of("unknownType", unknownType));
-            };
-            return this;
-        }
-
-        @Override
-        public Visitor<T> build() {
-            final IntFunction<T> barVisitor = this.barVisitor;
-            final Function<Long, T> bazVisitor = this.bazVisitor;
-            final Function<String, T> fooVisitor = this.fooVisitor;
-            final Function<String, T> unknownVisitor = this.unknownVisitor;
-            return new Visitor<T>() {
-                @Override
-                public T visitBar(int value) {
-                    return barVisitor.apply(value);
-                }
-
-                @Override
-                public T visitBaz(long value) {
-                    return bazVisitor.apply(value);
-                }
-
-                @Override
-                public T visitFoo(String value) {
-                    return fooVisitor.apply(value);
-                }
-
-                @Override
-                public T visitUnknown(String value) {
-                    return unknownVisitor.apply(value);
-                }
-            };
-        }
-    }
-
-    interface BarStageVisitorBuilder<T> {
-        BazStageVisitorBuilder<T> bar(@Nonnull IntFunction<T> barVisitor);
-    }
-
-    interface BazStageVisitorBuilder<T> {
-        FooStageVisitorBuilder<T> baz(@Nonnull Function<Long, T> bazVisitor);
-    }
-
-    interface FooStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> foo(@Nonnull Function<String, T> fooVisitor);
-    }
-
-    interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<String, T> unknownVisitor);
-
-        Completed_StageVisitorBuilder<T> throwOnUnknown();
-    }
-
-    interface Completed_StageVisitorBuilder<T> {
-        Visitor<T> build();
-    }
-
     @JsonTypeName("foo")
     final class Foo implements Union2, Known {
         private final String value;
@@ -251,11 +121,6 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         @JsonProperty("foo")
         public String getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitFoo(value);
         }
 
         @Override
@@ -301,12 +166,6 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         }
 
         @Override
-        @SuppressWarnings("deprecation")
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitBar(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other || (other instanceof Bar
                     && equalTo((Bar) other));
@@ -346,12 +205,6 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         @JsonProperty("baz")
         public long getValue() {
             return value;
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitBaz(value);
         }
 
         @Override
@@ -407,11 +260,6 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         @JsonAnySetter
         private void put(String key, Object val) {
             value.put(key, val);
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnknown(type);
         }
 
         @Override
