@@ -1014,9 +1014,7 @@ public final class UnionGenerator {
     private static ClassName wrapperClass(ClassName unionClass, FieldName memberTypeName, Options options) {
         if (options.sealedUnions()) {
             return ClassName.get(
-                    unionClass.packageName(),
-                    unionClass.simpleName(),
-                    StringUtils.capitalize(memberTypeName.get()));
+                    unionClass.packageName(), unionClass.simpleName(), StringUtils.capitalize(memberTypeName.get()));
         } else {
             return ClassName.get(
                     unionClass.packageName(),
