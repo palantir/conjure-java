@@ -38,67 +38,67 @@ public sealed interface UnionTypeExample {
      * Docs for when UnionTypeExample is of type StringExample.
      */
     static UnionTypeExample stringExample(StringExample value) {
-        return new UnionTypeExample(new UnionTypeExample.StringExampleWrapper(value));
+        return new UnionTypeExample.StringExampleWrapper(value);
     }
 
     static UnionTypeExample thisFieldIsAnInteger(int value) {
-        return new UnionTypeExample(new UnionTypeExample.ThisFieldIsAnIntegerWrapper(value));
+        return new UnionTypeExample.ThisFieldIsAnIntegerWrapper(value);
     }
 
     static UnionTypeExample alsoAnInteger(int value) {
-        return new UnionTypeExample(new UnionTypeExample.AlsoAnIntegerWrapper(value));
+        return new UnionTypeExample.AlsoAnIntegerWrapper(value);
     }
 
     static UnionTypeExample if_(int value) {
-        return new UnionTypeExample(new UnionTypeExample.IfWrapper(value));
+        return new UnionTypeExample.IfWrapper(value);
     }
 
     static UnionTypeExample new_(int value) {
-        return new UnionTypeExample(new UnionTypeExample.NewWrapper(value));
+        return new UnionTypeExample.NewWrapper(value);
     }
 
     static UnionTypeExample interface_(int value) {
-        return new UnionTypeExample(new UnionTypeExample.InterfaceWrapper(value));
+        return new UnionTypeExample.InterfaceWrapper(value);
     }
 
     static UnionTypeExample completed(int value) {
-        return new UnionTypeExample(new UnionTypeExample.CompletedWrapper(value));
+        return new UnionTypeExample.CompletedWrapper(value);
     }
 
     static UnionTypeExample unknown_(int value) {
-        return new UnionTypeExample(new UnionTypeExample.Unknown_Wrapper(value));
+        return new UnionTypeExample.Unknown_Wrapper(value);
     }
 
     static UnionTypeExample optional(Optional<String> value) {
-        return new UnionTypeExample(new UnionTypeExample.OptionalWrapper(value));
+        return new UnionTypeExample.OptionalWrapper(value);
     }
 
     static UnionTypeExample list(List<String> value) {
-        return new UnionTypeExample(new UnionTypeExample.ListWrapper(value));
+        return new UnionTypeExample.ListWrapper(value);
     }
 
     static UnionTypeExample set(Set<String> value) {
-        return new UnionTypeExample(new UnionTypeExample.SetWrapper(value));
+        return new UnionTypeExample.SetWrapper(value);
     }
 
     static UnionTypeExample map(Map<String, String> value) {
-        return new UnionTypeExample(new UnionTypeExample.MapWrapper(value));
+        return new UnionTypeExample.MapWrapper(value);
     }
 
     static UnionTypeExample optionalAlias(OptionalAlias value) {
-        return new UnionTypeExample(new UnionTypeExample.OptionalAliasWrapper(value));
+        return new UnionTypeExample.OptionalAliasWrapper(value);
     }
 
     static UnionTypeExample listAlias(ListAlias value) {
-        return new UnionTypeExample(new UnionTypeExample.ListAliasWrapper(value));
+        return new UnionTypeExample.ListAliasWrapper(value);
     }
 
     static UnionTypeExample setAlias(SetAlias value) {
-        return new UnionTypeExample(new UnionTypeExample.SetAliasWrapper(value));
+        return new UnionTypeExample.SetAliasWrapper(value);
     }
 
     static UnionTypeExample mapAlias(MapAliasExample value) {
-        return new UnionTypeExample(new UnionTypeExample.MapAliasWrapper(value));
+        return new UnionTypeExample.MapAliasWrapper(value);
     }
 
     static UnionTypeExample unknown(@Safe String type, Object value) {
@@ -156,6 +156,8 @@ public sealed interface UnionTypeExample {
                         new UnionTypeExample.UnknownWrapper(type, Collections.singletonMap(type, value)));
         }
     }
+
+    <T> void accept(Visitor<T> visitor);
 
     interface Visitor<T> {
         /**

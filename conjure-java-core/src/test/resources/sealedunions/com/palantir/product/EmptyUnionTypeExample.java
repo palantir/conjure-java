@@ -17,6 +17,8 @@ public sealed interface EmptyUnionTypeExample {
         }
     }
 
+    <T> void accept(Visitor<T> visitor);
+
     interface Visitor<T> {
         T visitUnknown(@Safe String unknownType, Object unknownValue);
 

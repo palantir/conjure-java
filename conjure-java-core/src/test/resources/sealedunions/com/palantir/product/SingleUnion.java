@@ -11,7 +11,7 @@ import java.util.Collections;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface SingleUnion {
     static SingleUnion foo(@Safe String value) {
-        return new SingleUnion(new SingleUnion.FooWrapper(value));
+        return new SingleUnion.FooWrapper(value);
     }
 
     static SingleUnion unknown(@Safe String type, Object value) {
@@ -23,6 +23,8 @@ public sealed interface SingleUnion {
                 return new SingleUnion(new SingleUnion.UnknownWrapper(type, Collections.singletonMap(type, value)));
         }
     }
+
+    <T> void accept(Visitor<T> visitor);
 
     interface Visitor<T> {
         T visitFoo(@Safe String value);

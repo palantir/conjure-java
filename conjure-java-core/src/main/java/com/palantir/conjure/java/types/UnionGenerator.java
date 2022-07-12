@@ -113,9 +113,8 @@ public final class UnionGenerator {
                     .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes))
                     .addAnnotation(jacksonIgnoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
-                    // .addMethod(generateConstructor(baseClass))
-                    .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
-                    // .addMethod(generateAcceptVisitMethod(visitorClass))
+                    .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
+                    .addMethod(generateAcceptVisitorMethodSignature(visitorClass))
                     .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
                     // .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
                     // .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
@@ -153,7 +152,7 @@ public final class UnionGenerator {
                     .addFields(fields)
                     .addMethod(generateConstructor(baseClass))
                     .addMethod(generateGetValue(baseClass))
-                    .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
+                    .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
                     .addMethod(generateAcceptVisitMethod(visitorClass))
                     .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
                     .addType(generateVisitorBuilder(
@@ -205,7 +204,7 @@ public final class UnionGenerator {
     }
 
     private static List<MethodSpec> generateStaticFactories(
-            TypeMapper typeMapper, ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
+            TypeMapper typeMapper, ClassName unionClass, List<FieldDefinition> memberTypeDefs, Options options) {
         List<MethodSpec> staticFactories = memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
@@ -218,11 +217,17 @@ public final class UnionGenerator {
                             .addParameter(ParameterSpec.builder(memberType, variableName)
                                     .addAnnotations(ConjureAnnotations.safety(memberTypeDef.getSafety()))
                                     .build())
-                            .addStatement(
-                                    "return new $T(new $T($L))",
-                                    unionClass,
-                                    wrapperClass(unionClass, memberName),
-                                    variableName)
+                            .addCode(
+                                    options.sealedUnions()
+                                            ? CodeBlock.of(
+                                                    "return new $T($L);",
+                                                    wrapperClass(unionClass, memberName),
+                                                    variableName)
+                                            : CodeBlock.of(
+                                                    "return new $T(new $T($L));",
+                                                    unionClass,
+                                                    wrapperClass(unionClass, memberName),
+                                                    variableName))
                             .returns(unionClass);
                     Javadoc.render(memberTypeDef.getDocs(), memberTypeDef.getDeprecated())
                             .ifPresent(javadoc -> builder.addJavadoc("$L", javadoc));
@@ -267,6 +272,17 @@ public final class UnionGenerator {
                 CodeBlock.of("$T.singletonMap($N, $N)", Collections.class, typeParam, valueParam));
         builder.endControlFlow();
         return builder.build();
+    }
+
+    private static MethodSpec generateAcceptVisitorMethodSignature(ClassName visitorClass) {
+        ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
+        ParameterSpec visitor =
+                ParameterSpec.builder(parameterizedVisitorClass, "visitor").build();
+        return MethodSpec.methodBuilder("accept")
+                .addParameter(visitor)
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .addTypeVariable(TYPE_VARIABLE)
+                .build();
     }
 
     private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass) {

@@ -15,7 +15,7 @@ import java.util.Collections;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface Union {
     static Union foo(String value) {
-        return new Union(new Union.FooWrapper(value));
+        return new Union.FooWrapper(value);
     }
 
     /**
@@ -23,7 +23,7 @@ public sealed interface Union {
      */
     @Deprecated
     static Union bar(int value) {
-        return new Union(new Union.BarWrapper(value));
+        return new Union.BarWrapper(value);
     }
 
     /**
@@ -32,7 +32,7 @@ public sealed interface Union {
      */
     @Deprecated
     static Union baz(long value) {
-        return new Union(new Union.BazWrapper(value));
+        return new Union.BazWrapper(value);
     }
 
     static Union unknown(@Safe String type, Object value) {
@@ -50,6 +50,8 @@ public sealed interface Union {
                 return new Union(new Union.UnknownWrapper(type, Collections.singletonMap(type, value)));
         }
     }
+
+    <T> void accept(Visitor<T> visitor);
 
     interface Visitor<T> {
         T visitFoo(String value);
