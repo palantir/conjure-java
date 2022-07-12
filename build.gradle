@@ -41,7 +41,7 @@ apply plugin: 'com.palantir.baseline-java-versions'
 apply plugin: 'com.palantir.jdks.latest'
 
 javaVersions {
-    libraryTarget = 17
+    libraryTarget = 11
     runtime = 17
 }
 

@@ -399,9 +399,7 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Generates a builder class for the given {@code visitor} class.
-     */
+    /** Generates a builder class for the given {@code visitor} class. */
     private static TypeSpec generateVisitorBuilder(
             ClassName enclosingClass,
             ClassName visitor,
@@ -586,9 +584,7 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Generates all the interface type names for the different visitor builder stages.
-     */
+    /** Generates all the interface type names for the different visitor builder stages. */
     private static List<TypeName> allVisitorBuilderStages(
             ClassName enclosingClass, Map<FieldDefinition, TypeName> memberTypeMap, TypeVariableName visitResultType) {
         return Stream.concat(sortedStageNameTypePairs(memberTypeMap).map(p -> p.memberName), Stream.of(COMPLETED))
@@ -618,9 +614,7 @@ public final class UnionGenerator {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Generates the name of the interface of a visitor builder stage.
-     */
+    /** Generates the name of the interface of a visitor builder stage. */
     private static ClassName visitorStageInterfaceName(ClassName enclosingClass, String stageName) {
         return enclosingClass.nestedClass(StringUtils.capitalize(stageName) + "StageVisitorBuilder");
     }
