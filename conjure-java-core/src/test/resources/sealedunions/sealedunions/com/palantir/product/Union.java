@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ import javax.annotation.Nonnull;
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
         visible = true,
-        defaultImpl = Unknown.class)
+        defaultImpl = Union.Unknown.class)
 @JsonSubTypes({@JsonSubTypes.Type(Foo.class), @JsonSubTypes.Type(Bar.class), @JsonSubTypes.Type(Baz.class)})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface Union {
@@ -62,6 +63,15 @@ public sealed interface Union {
                         "Unknown type cannot be created as the provided type is known: baz");
             default:
                 return new Unknown(type, Collections.singletonMap(type, value));
+        }
+    }
+
+    default Known throwOnUnknown() {
+        if (this instanceof Unknown) {
+            throw new SafeIllegalArgumentException(
+                    "Unknown variant of the 'Union' union", SafeArg.of("type", ((Unknown) this).getType()));
+        } else {
+            return (Known) this;
         }
     }
 
@@ -173,12 +183,10 @@ public sealed interface Union {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Unknown
-                            && equalTo((sealedunions.com.palantir.product.Unknown) other));
+            return this == other || (other instanceof Unknown && equalTo((Unknown) other));
         }
 
-        private boolean equalTo(sealedunions.com.palantir.product.Unknown other) {
+        private boolean equalTo(Unknown other) {
             return this.type.equals(other.type) && this.value.equals(other.value);
         }
 

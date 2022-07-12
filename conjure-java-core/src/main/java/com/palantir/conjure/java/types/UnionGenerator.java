@@ -107,7 +107,7 @@ public final class UnionGenerator {
                                 typeMapper.getClassName(entry.getType()), entry.getSafety())));
 
         if (options.sealedUnions()) {
-            ClassName unknownWrapperClass = peerWrapperClass(unionClass, FieldName.of("unknown"), options);
+            ClassName unknownWrapperClass = unionClass.nestedClass("Unknown");
 
             Map<FieldName, TypeSpec> records =
                     generateRecords(typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options);
@@ -121,6 +121,7 @@ public final class UnionGenerator {
                     .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
                     .addType(generateSealedKnownInterface(options, unionClass, records))
                     .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
+                    .addMethod(generateThrowOnUnknown(unionClass, unknownWrapperClass))
                     .addTypes(records.values())
                     .addType(generateUnknownWrapper(unknownWrapperClass, unionClass, visitorClass, options));
             typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
@@ -180,6 +181,28 @@ public final class UnionGenerator {
                     .indent("    ")
                     .build();
         }
+    }
+
+    private static MethodSpec generateThrowOnUnknown(ClassName unionClass, ClassName unknownWrapperClass) {
+        ClassName knownInterface = unionClass.nestedClass(KNOWN_INTERFACE);
+        return MethodSpec.methodBuilder("throwOnUnknown")
+                .addModifiers(Modifier.PUBLIC, Modifier.DEFAULT)
+                .returns(knownInterface)
+                .addCode(CodeBlock.of(
+                        "if (this instanceof $T) {\n"
+                                + "            throw new $T(\n"
+                                + "                    \"Unknown variant of the 'Union' union\",\n"
+                                + "                    $T.of(\"type\", (($T) this).getType()));\n"
+                                + "        } else {\n"
+                                + "            return ($T) this;\n"
+                                + "        }",
+                        unknownWrapperClass,
+                        // TODO(dfox): do we want to take this opporunity to make the IAE (http 400) customizable
+                        SafeIllegalArgumentException.class,
+                        SafeArg.class,
+                        unknownWrapperClass,
+                        knownInterface))
+                .build();
     }
 
     private static TypeSpec generateSealedKnownInterface(
@@ -758,7 +781,13 @@ public final class UnionGenerator {
 
     private static TypeSpec generateBase(
             ClassName baseClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes, Options options) {
-        ClassName unknownWrapperClass = peerWrapperClass(baseClass, FieldName.of("unknown"), options);
+        ClassName unknownWrapperClass;
+        FieldName memberTypeName = FieldName.of("unknown");
+        if (options.sealedUnions()) {
+            unknownWrapperClass = baseClass.peerClass(StringUtils.capitalize(memberTypeName.get()));
+        } else {
+            unknownWrapperClass = baseClass.peerClass(StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
+        }
         TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass)
                 .addModifiers(Modifier.PRIVATE)
                 .addAnnotation(jacksonJsonTypeInfo(unknownWrapperClass));
@@ -797,15 +826,21 @@ public final class UnionGenerator {
     private static AnnotationSpec generateJacksonSubtypeAnnotation(
             ClassName baseClass, Map<FieldDefinition, TypeName> memberTypes, Options options) {
         List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
-                .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
-                        .addMember(
-                                "value",
-                                "$T.class",
-                                peerWrapperClass(
-                                        baseClass,
-                                        sanitizeUnknown(entry.getKey().getFieldName()),
-                                        options))
-                        .build())
+                .map(entry -> {
+                    ClassName result;
+                    FieldName memberTypeName = sanitizeUnknown(entry.getKey().getFieldName());
+                    if (options.sealedUnions()) {
+                        result = baseClass.peerClass(StringUtils.capitalize(memberTypeName.get()));
+                    } else {
+                        result = baseClass.peerClass(StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
+                    }
+                    return AnnotationSpec.builder(JsonSubTypes.Type.class)
+                            .addMember(
+                                    "value",
+                                    "$T.class",
+                                    result)
+                            .build();
+                })
                 .collect(Collectors.toList());
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
         subAnnotations.forEach(subAnnotation -> annotationBuilder.addMember("value", "$L", subAnnotation));
@@ -823,7 +858,13 @@ public final class UnionGenerator {
                 .collect(StableCollectors.toLinkedMap(
                         memberTypeDef -> sanitizeUnknown(memberTypeDef.getFieldName()), memberTypeDef -> {
                             FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
-                            ClassName wrapperClass = peerWrapperClass(superInterface, memberName, options);
+                            ClassName wrapperClass;
+                            if (options.sealedUnions()) {
+                                wrapperClass = superInterface.peerClass(StringUtils.capitalize(memberName.get()));
+                            } else {
+                                wrapperClass =
+                                        superInterface.peerClass(StringUtils.capitalize(memberName.get()) + "Wrapper");
+                            }
                             boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
                             TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
 
@@ -901,7 +942,12 @@ public final class UnionGenerator {
                     boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
-                    ClassName wrapperClass = peerWrapperClass(superInterface, memberName, options);
+                    ClassName wrapperClass;
+                    if (options.sealedUnions()) {
+                        wrapperClass = superInterface.peerClass(StringUtils.capitalize(memberName.get()));
+                    } else {
+                        wrapperClass = superInterface.peerClass(StringUtils.capitalize(memberName.get()) + "Wrapper");
+                    }
 
                     List<FieldSpec> fields = ImmutableList.of(
                             FieldSpec.builder(memberType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
@@ -1105,14 +1151,6 @@ public final class UnionGenerator {
                     unionClass.packageName(),
                     unionClass.simpleName(),
                     StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
-        }
-    }
-
-    private static ClassName peerWrapperClass(ClassName peerClass, FieldName memberTypeName, Options options) {
-        if (options.sealedUnions()) {
-            return peerClass.peerClass(StringUtils.capitalize(memberTypeName.get()));
-        } else {
-            return peerClass.peerClass(StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
         }
     }
 

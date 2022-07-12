@@ -46,6 +46,12 @@ class Union2Tests {
     // @Test
     // void switch_statement_compiles() {
     //     Union2 myUnion = Union2.foo("hello");
+    //
+    //     // syntax requires java 19 (see JEP 405)
+    //     // if (myUnion instanceof Union2.Foo(String value)) {
+    //     //     System.out.println(value);
+    //     // }
+    //
     //     switch (myUnion) {
     //         case Union2.Foo foo -> System.out.println(foo.getValue());
     //         case Union2.Bar bar -> System.out.println(bar.getValue());

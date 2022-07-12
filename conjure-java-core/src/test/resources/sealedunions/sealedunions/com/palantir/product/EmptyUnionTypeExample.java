@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +23,7 @@ import javax.annotation.Nonnull;
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
         visible = true,
-        defaultImpl = Unknown.class)
+        defaultImpl = EmptyUnionTypeExample.Unknown.class)
 @JsonSubTypes
 @JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface EmptyUnionTypeExample {
@@ -29,6 +31,15 @@ public sealed interface EmptyUnionTypeExample {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             default:
                 return new Unknown(type, Collections.singletonMap(type, value));
+        }
+    }
+
+    default Known throwOnUnknown() {
+        if (this instanceof Unknown) {
+            throw new SafeIllegalArgumentException(
+                    "Unknown variant of the 'Union' union", SafeArg.of("type", ((Unknown) this).getType()));
+        } else {
+            return (Known) this;
         }
     }
 
@@ -68,12 +79,10 @@ public sealed interface EmptyUnionTypeExample {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof sealedunions.com.palantir.product.Unknown
-                            && equalTo((sealedunions.com.palantir.product.Unknown) other));
+            return this == other || (other instanceof Unknown && equalTo((Unknown) other));
         }
 
-        private boolean equalTo(sealedunions.com.palantir.product.Unknown other) {
+        private boolean equalTo(Unknown other) {
             return this.type.equals(other.type) && this.value.equals(other.value);
         }
 
