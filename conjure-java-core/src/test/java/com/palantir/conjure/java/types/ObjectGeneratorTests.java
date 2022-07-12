@@ -83,7 +83,7 @@ public final class ObjectGeneratorTests {
                         .nonNullCollections(true)
                         .excludeEmptyOptionals(true)
                         .unionsWithUnknownValues(true)
-                        // .sealedUnions(true)
+                        .sealedUnions(true)
                         .build())))
                 .emit(def, tempDir);
 
