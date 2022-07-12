@@ -835,10 +835,7 @@ public final class UnionGenerator {
                         result = baseClass.peerClass(StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
                     }
                     return AnnotationSpec.builder(JsonSubTypes.Type.class)
-                            .addMember(
-                                    "value",
-                                    "$T.class",
-                                    result)
+                            .addMember("value", "$T.class", result)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -1173,8 +1170,8 @@ public final class UnionGenerator {
         return input;
     }
 
-    private static FieldName sanitizeUnknown(FieldName i) {
-        return FieldName.of(sanitizeUnknown(i.get()));
+    private static FieldName sanitizeUnknown(FieldName fieldName) {
+        return FieldName.of(sanitizeUnknown(fieldName.get()));
     }
 
     private UnionGenerator() {}
