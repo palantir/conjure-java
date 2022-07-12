@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
-import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,9 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.IntFunction;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -178,430 +174,6 @@ public sealed interface UnionTypeExample {
         }
     }
 
-    <T> void accept(Visitor<T> visitor);
-
-    interface Visitor<T> {
-        /**
-         * Docs for when UnionTypeExample is of type StringExample.
-         */
-        T visitStringExample(StringExample value);
-
-        T visitThisFieldIsAnInteger(int value);
-
-        T visitAlsoAnInteger(int value);
-
-        T visitIf(int value);
-
-        T visitNew(int value);
-
-        T visitInterface(int value);
-
-        T visitCompleted(int value);
-
-        T visitUnknown_(int value);
-
-        T visitOptional(Optional<String> value);
-
-        T visitList(List<String> value);
-
-        T visitSet(Set<String> value);
-
-        T visitMap(Map<String, String> value);
-
-        T visitOptionalAlias(OptionalAlias value);
-
-        T visitListAlias(ListAlias value);
-
-        T visitSetAlias(SetAlias value);
-
-        T visitMapAlias(MapAliasExample value);
-
-        T visitUnknown(@Safe String unknownType, Object unknownValue);
-
-        /**
-         * @Deprecated - prefer using Java 17 pattern matching switch expressions
-         */
-        @Deprecated
-        static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
-            return new VisitorBuilder<T>();
-        }
-    }
-
-    final class VisitorBuilder<T>
-            implements AlsoAnIntegerStageVisitorBuilder<T>,
-                    CompletedStageVisitorBuilder<T>,
-                    IfStageVisitorBuilder<T>,
-                    InterfaceStageVisitorBuilder<T>,
-                    ListStageVisitorBuilder<T>,
-                    ListAliasStageVisitorBuilder<T>,
-                    MapStageVisitorBuilder<T>,
-                    MapAliasStageVisitorBuilder<T>,
-                    NewStageVisitorBuilder<T>,
-                    OptionalStageVisitorBuilder<T>,
-                    OptionalAliasStageVisitorBuilder<T>,
-                    SetStageVisitorBuilder<T>,
-                    SetAliasStageVisitorBuilder<T>,
-                    StringExampleStageVisitorBuilder<T>,
-                    ThisFieldIsAnIntegerStageVisitorBuilder<T>,
-                    Unknown_StageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T>,
-                    Completed_StageVisitorBuilder<T> {
-        private IntFunction<T> alsoAnIntegerVisitor;
-
-        private IntFunction<T> completedVisitor;
-
-        private IntFunction<T> ifVisitor;
-
-        private IntFunction<T> interfaceVisitor;
-
-        private Function<List<String>, T> listVisitor;
-
-        private Function<ListAlias, T> listAliasVisitor;
-
-        private Function<Map<String, String>, T> mapVisitor;
-
-        private Function<MapAliasExample, T> mapAliasVisitor;
-
-        private IntFunction<T> newVisitor;
-
-        private Function<Optional<String>, T> optionalVisitor;
-
-        private Function<OptionalAlias, T> optionalAliasVisitor;
-
-        private Function<Set<String>, T> setVisitor;
-
-        private Function<SetAlias, T> setAliasVisitor;
-
-        private Function<StringExample, T> stringExampleVisitor;
-
-        private IntFunction<T> thisFieldIsAnIntegerVisitor;
-
-        private IntFunction<T> unknown_Visitor;
-
-        private BiFunction<@Safe String, Object, T> unknownVisitor;
-
-        @Override
-        public CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
-            Preconditions.checkNotNull(alsoAnIntegerVisitor, "alsoAnIntegerVisitor cannot be null");
-            this.alsoAnIntegerVisitor = alsoAnIntegerVisitor;
-            return this;
-        }
-
-        @Override
-        public IfStageVisitorBuilder<T> completed(@Nonnull IntFunction<T> completedVisitor) {
-            Preconditions.checkNotNull(completedVisitor, "completedVisitor cannot be null");
-            this.completedVisitor = completedVisitor;
-            return this;
-        }
-
-        @Override
-        public InterfaceStageVisitorBuilder<T> if_(@Nonnull IntFunction<T> ifVisitor) {
-            Preconditions.checkNotNull(ifVisitor, "ifVisitor cannot be null");
-            this.ifVisitor = ifVisitor;
-            return this;
-        }
-
-        @Override
-        public ListStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor) {
-            Preconditions.checkNotNull(interfaceVisitor, "interfaceVisitor cannot be null");
-            this.interfaceVisitor = interfaceVisitor;
-            return this;
-        }
-
-        @Override
-        public ListAliasStageVisitorBuilder<T> list(@Nonnull Function<List<String>, T> listVisitor) {
-            Preconditions.checkNotNull(listVisitor, "listVisitor cannot be null");
-            this.listVisitor = listVisitor;
-            return this;
-        }
-
-        @Override
-        public MapStageVisitorBuilder<T> listAlias(@Nonnull Function<ListAlias, T> listAliasVisitor) {
-            Preconditions.checkNotNull(listAliasVisitor, "listAliasVisitor cannot be null");
-            this.listAliasVisitor = listAliasVisitor;
-            return this;
-        }
-
-        @Override
-        public MapAliasStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor) {
-            Preconditions.checkNotNull(mapVisitor, "mapVisitor cannot be null");
-            this.mapVisitor = mapVisitor;
-            return this;
-        }
-
-        @Override
-        public NewStageVisitorBuilder<T> mapAlias(@Nonnull Function<MapAliasExample, T> mapAliasVisitor) {
-            Preconditions.checkNotNull(mapAliasVisitor, "mapAliasVisitor cannot be null");
-            this.mapAliasVisitor = mapAliasVisitor;
-            return this;
-        }
-
-        @Override
-        public OptionalStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor) {
-            Preconditions.checkNotNull(newVisitor, "newVisitor cannot be null");
-            this.newVisitor = newVisitor;
-            return this;
-        }
-
-        @Override
-        public OptionalAliasStageVisitorBuilder<T> optional(@Nonnull Function<Optional<String>, T> optionalVisitor) {
-            Preconditions.checkNotNull(optionalVisitor, "optionalVisitor cannot be null");
-            this.optionalVisitor = optionalVisitor;
-            return this;
-        }
-
-        @Override
-        public SetStageVisitorBuilder<T> optionalAlias(@Nonnull Function<OptionalAlias, T> optionalAliasVisitor) {
-            Preconditions.checkNotNull(optionalAliasVisitor, "optionalAliasVisitor cannot be null");
-            this.optionalAliasVisitor = optionalAliasVisitor;
-            return this;
-        }
-
-        @Override
-        public SetAliasStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor) {
-            Preconditions.checkNotNull(setVisitor, "setVisitor cannot be null");
-            this.setVisitor = setVisitor;
-            return this;
-        }
-
-        @Override
-        public StringExampleStageVisitorBuilder<T> setAlias(@Nonnull Function<SetAlias, T> setAliasVisitor) {
-            Preconditions.checkNotNull(setAliasVisitor, "setAliasVisitor cannot be null");
-            this.setAliasVisitor = setAliasVisitor;
-            return this;
-        }
-
-        @Override
-        public ThisFieldIsAnIntegerStageVisitorBuilder<T> stringExample(
-                @Nonnull Function<StringExample, T> stringExampleVisitor) {
-            Preconditions.checkNotNull(stringExampleVisitor, "stringExampleVisitor cannot be null");
-            this.stringExampleVisitor = stringExampleVisitor;
-            return this;
-        }
-
-        @Override
-        public Unknown_StageVisitorBuilder<T> thisFieldIsAnInteger(
-                @Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor) {
-            Preconditions.checkNotNull(thisFieldIsAnIntegerVisitor, "thisFieldIsAnIntegerVisitor cannot be null");
-            this.thisFieldIsAnIntegerVisitor = thisFieldIsAnIntegerVisitor;
-            return this;
-        }
-
-        @Override
-        public UnknownStageVisitorBuilder<T> unknown_(@Nonnull IntFunction<T> unknown_Visitor) {
-            Preconditions.checkNotNull(unknown_Visitor, "unknown_Visitor cannot be null");
-            this.unknown_Visitor = unknown_Visitor;
-            return this;
-        }
-
-        @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor) {
-            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
-            this.unknownVisitor = unknownVisitor;
-            return this;
-        }
-
-        @Override
-        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
-            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
-            this.unknownVisitor = (unknownType, _unknownValue) -> unknownVisitor.apply(unknownType);
-            return this;
-        }
-
-        @Override
-        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
-            this.unknownVisitor = (unknownType, _unknownValue) -> {
-                throw new SafeIllegalArgumentException(
-                        "Unknown variant of the 'UnionTypeExample' union", SafeArg.of("unknownType", unknownType));
-            };
-            return this;
-        }
-
-        @Override
-        public Visitor<T> build() {
-            final IntFunction<T> alsoAnIntegerVisitor = this.alsoAnIntegerVisitor;
-            final IntFunction<T> completedVisitor = this.completedVisitor;
-            final IntFunction<T> ifVisitor = this.ifVisitor;
-            final IntFunction<T> interfaceVisitor = this.interfaceVisitor;
-            final Function<List<String>, T> listVisitor = this.listVisitor;
-            final Function<ListAlias, T> listAliasVisitor = this.listAliasVisitor;
-            final Function<Map<String, String>, T> mapVisitor = this.mapVisitor;
-            final Function<MapAliasExample, T> mapAliasVisitor = this.mapAliasVisitor;
-            final IntFunction<T> newVisitor = this.newVisitor;
-            final Function<Optional<String>, T> optionalVisitor = this.optionalVisitor;
-            final Function<OptionalAlias, T> optionalAliasVisitor = this.optionalAliasVisitor;
-            final Function<Set<String>, T> setVisitor = this.setVisitor;
-            final Function<SetAlias, T> setAliasVisitor = this.setAliasVisitor;
-            final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
-            final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
-            final IntFunction<T> unknown_Visitor = this.unknown_Visitor;
-            final BiFunction<@Safe String, Object, T> unknownVisitor = this.unknownVisitor;
-            return new Visitor<T>() {
-                @Override
-                public T visitAlsoAnInteger(int value) {
-                    return alsoAnIntegerVisitor.apply(value);
-                }
-
-                @Override
-                public T visitCompleted(int value) {
-                    return completedVisitor.apply(value);
-                }
-
-                @Override
-                public T visitIf(int value) {
-                    return ifVisitor.apply(value);
-                }
-
-                @Override
-                public T visitInterface(int value) {
-                    return interfaceVisitor.apply(value);
-                }
-
-                @Override
-                public T visitList(List<String> value) {
-                    return listVisitor.apply(value);
-                }
-
-                @Override
-                public T visitListAlias(ListAlias value) {
-                    return listAliasVisitor.apply(value);
-                }
-
-                @Override
-                public T visitMap(Map<String, String> value) {
-                    return mapVisitor.apply(value);
-                }
-
-                @Override
-                public T visitMapAlias(MapAliasExample value) {
-                    return mapAliasVisitor.apply(value);
-                }
-
-                @Override
-                public T visitNew(int value) {
-                    return newVisitor.apply(value);
-                }
-
-                @Override
-                public T visitOptional(Optional<String> value) {
-                    return optionalVisitor.apply(value);
-                }
-
-                @Override
-                public T visitOptionalAlias(OptionalAlias value) {
-                    return optionalAliasVisitor.apply(value);
-                }
-
-                @Override
-                public T visitSet(Set<String> value) {
-                    return setVisitor.apply(value);
-                }
-
-                @Override
-                public T visitSetAlias(SetAlias value) {
-                    return setAliasVisitor.apply(value);
-                }
-
-                @Override
-                public T visitStringExample(StringExample value) {
-                    return stringExampleVisitor.apply(value);
-                }
-
-                @Override
-                public T visitThisFieldIsAnInteger(int value) {
-                    return thisFieldIsAnIntegerVisitor.apply(value);
-                }
-
-                @Override
-                public T visitUnknown_(int value) {
-                    return unknown_Visitor.apply(value);
-                }
-
-                @Override
-                public T visitUnknown(String unknownType, Object unknownValue) {
-                    return unknownVisitor.apply(unknownType, unknownValue);
-                }
-            };
-        }
-    }
-
-    interface AlsoAnIntegerStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor);
-    }
-
-    interface CompletedStageVisitorBuilder<T> {
-        IfStageVisitorBuilder<T> completed(@Nonnull IntFunction<T> completedVisitor);
-    }
-
-    interface IfStageVisitorBuilder<T> {
-        InterfaceStageVisitorBuilder<T> if_(@Nonnull IntFunction<T> ifVisitor);
-    }
-
-    interface InterfaceStageVisitorBuilder<T> {
-        ListStageVisitorBuilder<T> interface_(@Nonnull IntFunction<T> interfaceVisitor);
-    }
-
-    interface ListStageVisitorBuilder<T> {
-        ListAliasStageVisitorBuilder<T> list(@Nonnull Function<List<String>, T> listVisitor);
-    }
-
-    interface ListAliasStageVisitorBuilder<T> {
-        MapStageVisitorBuilder<T> listAlias(@Nonnull Function<ListAlias, T> listAliasVisitor);
-    }
-
-    interface MapStageVisitorBuilder<T> {
-        MapAliasStageVisitorBuilder<T> map(@Nonnull Function<Map<String, String>, T> mapVisitor);
-    }
-
-    interface MapAliasStageVisitorBuilder<T> {
-        NewStageVisitorBuilder<T> mapAlias(@Nonnull Function<MapAliasExample, T> mapAliasVisitor);
-    }
-
-    interface NewStageVisitorBuilder<T> {
-        OptionalStageVisitorBuilder<T> new_(@Nonnull IntFunction<T> newVisitor);
-    }
-
-    interface OptionalStageVisitorBuilder<T> {
-        OptionalAliasStageVisitorBuilder<T> optional(@Nonnull Function<Optional<String>, T> optionalVisitor);
-    }
-
-    interface OptionalAliasStageVisitorBuilder<T> {
-        SetStageVisitorBuilder<T> optionalAlias(@Nonnull Function<OptionalAlias, T> optionalAliasVisitor);
-    }
-
-    interface SetStageVisitorBuilder<T> {
-        SetAliasStageVisitorBuilder<T> set(@Nonnull Function<Set<String>, T> setVisitor);
-    }
-
-    interface SetAliasStageVisitorBuilder<T> {
-        StringExampleStageVisitorBuilder<T> setAlias(@Nonnull Function<SetAlias, T> setAliasVisitor);
-    }
-
-    interface StringExampleStageVisitorBuilder<T> {
-        ThisFieldIsAnIntegerStageVisitorBuilder<T> stringExample(
-                @Nonnull Function<StringExample, T> stringExampleVisitor);
-    }
-
-    interface ThisFieldIsAnIntegerStageVisitorBuilder<T> {
-        Unknown_StageVisitorBuilder<T> thisFieldIsAnInteger(@Nonnull IntFunction<T> thisFieldIsAnIntegerVisitor);
-    }
-
-    interface Unknown_StageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> unknown_(@Nonnull IntFunction<T> unknown_Visitor);
-    }
-
-    interface UnknownStageVisitorBuilder<T> {
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor);
-
-        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
-
-        Completed_StageVisitorBuilder<T> throwOnUnknown();
-    }
-
-    interface Completed_StageVisitorBuilder<T> {
-        Visitor<T> build();
-    }
-
     @JsonTypeName("stringExample")
     final class StringExampleWrapper implements UnionTypeExample {
         private final StringExample value;
@@ -620,11 +192,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("stringExample")
         private StringExample getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitStringExample(value);
         }
 
         @Override
@@ -670,11 +237,6 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitThisFieldIsAnInteger(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof sealedunions.com.palantir.product.ThisFieldIsAnIntegerWrapper
@@ -714,11 +276,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("alsoAnInteger")
         private int getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitAlsoAnInteger(value);
         }
 
         @Override
@@ -764,11 +321,6 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitIf(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof sealedunions.com.palantir.product.IfWrapper
@@ -808,11 +360,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("new")
         private int getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitNew(value);
         }
 
         @Override
@@ -858,11 +405,6 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitInterface(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof sealedunions.com.palantir.product.InterfaceWrapper
@@ -905,11 +447,6 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitCompleted(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof sealedunions.com.palantir.product.CompletedWrapper
@@ -949,11 +486,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("unknown")
         private int getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnknown_(value);
         }
 
         @Override
@@ -1000,11 +532,6 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitOptional(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof sealedunions.com.palantir.product.OptionalWrapper
@@ -1044,11 +571,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("list")
         private List<String> getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitList(value);
         }
 
         @Override
@@ -1094,11 +616,6 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitSet(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof sealedunions.com.palantir.product.SetWrapper
@@ -1138,11 +655,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("map")
         private Map<String, String> getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitMap(value);
         }
 
         @Override
@@ -1189,11 +701,6 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitOptionalAlias(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof sealedunions.com.palantir.product.OptionalAliasWrapper
@@ -1233,11 +740,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("listAlias")
         private ListAlias getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitListAlias(value);
         }
 
         @Override
@@ -1283,11 +785,6 @@ public sealed interface UnionTypeExample {
         }
 
         @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitSetAlias(value);
-        }
-
-        @Override
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof sealedunions.com.palantir.product.SetAliasWrapper
@@ -1328,11 +825,6 @@ public sealed interface UnionTypeExample {
         @JsonProperty("mapAlias")
         private MapAliasExample getValue() {
             return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitMapAlias(value);
         }
 
         @Override
@@ -1387,11 +879,6 @@ public sealed interface UnionTypeExample {
         @JsonAnySetter
         private void put(String key, Object val) {
             value.put(key, val);
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnknown(type, value.get(type));
         }
 
         @Override
