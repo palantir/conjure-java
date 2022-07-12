@@ -140,6 +140,12 @@ public interface Options {
     @Value.Default
     default boolean sealedUnions() { return false; }
 
+    /**
+     * If {@link #sealedUnions} is enabled, this controls whether visitors should still be generated (for back-compat).
+     */
+    @Value.Default
+    default boolean sealedUnionVisitors() { return false; }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();
