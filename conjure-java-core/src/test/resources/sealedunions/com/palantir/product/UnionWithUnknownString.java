@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -12,6 +13,12 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import javax.annotation.Nonnull;
 
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "type",
+        visible = true,
+        defaultImpl = UnionWithUnknownString.class)
 @JsonSubTypes(@JsonSubTypes.Type(Unknown_Wrapper.class))
 @JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface UnionWithUnknownString {

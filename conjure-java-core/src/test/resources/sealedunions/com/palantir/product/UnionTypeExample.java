@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
@@ -20,6 +21,12 @@ import javax.annotation.Nonnull;
 /**
  * A type which can either be a StringExample, a set of strings, or an integer.
  */
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        property = "type",
+        visible = true,
+        defaultImpl = UnionTypeExample.class)
 @JsonSubTypes({
     @JsonSubTypes.Type(StringExampleWrapper.class),
     @JsonSubTypes.Type(ThisFieldIsAnIntegerWrapper.class),

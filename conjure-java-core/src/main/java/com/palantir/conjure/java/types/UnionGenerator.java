@@ -110,6 +110,7 @@ public final class UnionGenerator {
                             typeDef.getTypeName().getName())
                     // .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
                     // .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
+                    .addAnnotation(jacksonJsonTypeInfo(unionClass))
                     .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes))
                     .addAnnotation(jacksonIgnoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
@@ -743,13 +744,7 @@ public final class UnionGenerator {
         ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
         TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass)
                 .addModifiers(Modifier.PRIVATE)
-                .addAnnotation(AnnotationSpec.builder(JsonTypeInfo.class)
-                        .addMember("use", "JsonTypeInfo.Id.NAME")
-                        .addMember("include", "JsonTypeInfo.As.EXISTING_PROPERTY")
-                        .addMember("property", "\"type\"")
-                        .addMember("visible", "$L", true)
-                        .addMember("defaultImpl", "$T.class", unknownWrapperClass)
-                        .build());
+                .addAnnotation(jacksonJsonTypeInfo(unknownWrapperClass));
         if (!memberTypes.isEmpty()) {
             baseBuilder.addAnnotation(generateJacksonSubtypeAnnotation(baseClass, memberTypes));
         }
@@ -764,6 +759,16 @@ public final class UnionGenerator {
                 .returns(TYPE_VARIABLE)
                 .build());
         return baseBuilder.build();
+    }
+
+    private static AnnotationSpec jacksonJsonTypeInfo(ClassName unknownWrapperClass) {
+        return AnnotationSpec.builder(JsonTypeInfo.class)
+                .addMember("use", "JsonTypeInfo.Id.NAME")
+                .addMember("include", "JsonTypeInfo.As.EXISTING_PROPERTY")
+                .addMember("property", "\"type\"")
+                .addMember("visible", "$L", true)
+                .addMember("defaultImpl", "$T.class", unknownWrapperClass)
+                .build();
     }
 
     private static AnnotationSpec jacksonIgnoreUnknownAnnotation() {
