@@ -97,50 +97,86 @@ public final class UnionGenerator {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
         ClassName unionClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
-        ClassName baseClass = unionClass.nestedClass("Base");
-        ClassName visitorClass = unionClass.nestedClass("Visitor");
-        ClassName visitorBuilderClass = unionClass.nestedClass("VisitorBuilder");
-        Map<FieldDefinition, TypeName> memberTypes = typeDef.getUnion().stream()
-                .collect(StableCollectors.toLinkedMap(
-                        Function.identity(),
-                        entry -> ConjureAnnotations.withSafety(
-                                typeMapper.getClassName(entry.getType()), entry.getSafety())));
-        List<FieldSpec> fields =
-                ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
-                        .build());
 
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
-                        typeDef.getTypeName().getName())
-                .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
-                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addFields(fields)
-                .addMethod(generateConstructor(baseClass))
-                .addMethod(generateGetValue(baseClass))
-                .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
-                .addMethod(generateAcceptVisitMethod(visitorClass))
-                .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
-                .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
-                .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
-                .addType(generateBase(baseClass, visitorClass, memberTypes))
-                .addTypes(generateWrapperClasses(
-                        typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
-                .addType(generateUnknownWrapper(baseClass, visitorClass, options))
-                .addMethod(generateEquals(unionClass))
-                .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
-                .addMethod(MethodSpecs.createHashCode(fields))
-                .addMethod(MethodSpecs.createToString(
-                        unionClass.simpleName(),
-                        fields.stream()
-                                .map(fieldSpec -> FieldName.of(fieldSpec.name))
-                                .collect(Collectors.toList())));
+        if (options.sealedUnions()) {
+            TypeSpec.Builder typeBuilder = TypeSpec.interfaceBuilder(
+                            typeDef.getTypeName().getName())
+                    // .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
+                    // .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
+                    .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
+                    // .addMethod(generateConstructor(baseClass))
+                    // .addMethod(generateGetValue(baseClass))
+                    // .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
+                    // .addMethod(generateAcceptVisitMethod(visitorClass))
+                    // .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
+                    // .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
+                    // .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
+                    // .addType(generateBase(baseClass, visitorClass, memberTypes))
+                    // .addTypes(generateWrapperClasses(
+                    //         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
+                    // .addType(generateUnknownWrapper(baseClass, visitorClass, options))
+                    // .addMethod(generateEquals(unionClass))
+                    // .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
+                    // .addMethod(MethodSpecs.createHashCode(fields))
+                    // .addMethod(MethodSpecs.createToString(
+                    //         unionClass.simpleName(),
+                    //         fields.stream()
+                    //                 .map(fieldSpec -> FieldName.of(fieldSpec.name))
+                    //                 .collect(Collectors.toList())));
+            ;
 
-        typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
+            typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
-        return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
-                .skipJavaLangImports(true)
-                .indent("    ")
-                .build();
+            return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
+                    .skipJavaLangImports(true)
+                    .indent("    ")
+                    .build();
+        } else {
+            ClassName baseClass = unionClass.nestedClass("Base");
+            ClassName visitorClass = unionClass.nestedClass("Visitor");
+            ClassName visitorBuilderClass = unionClass.nestedClass("VisitorBuilder");
+            Map<FieldDefinition, TypeName> memberTypes = typeDef.getUnion().stream()
+                    .collect(StableCollectors.toLinkedMap(
+                            Function.identity(),
+                            entry -> ConjureAnnotations.withSafety(
+                                    typeMapper.getClassName(entry.getType()), entry.getSafety())));
+            List<FieldSpec> fields =
+                    ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
+                            .build());
+
+            TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
+                            typeDef.getTypeName().getName())
+                    .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
+                    .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
+                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                    .addFields(fields)
+                    .addMethod(generateConstructor(baseClass))
+                    .addMethod(generateGetValue(baseClass))
+                    .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
+                    .addMethod(generateAcceptVisitMethod(visitorClass))
+                    .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
+                    .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
+                    .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
+                    .addType(generateBase(baseClass, visitorClass, memberTypes))
+                    .addTypes(generateWrapperClasses(
+                            typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
+                    .addType(generateUnknownWrapper(baseClass, visitorClass, options))
+                    .addMethod(generateEquals(unionClass))
+                    .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
+                    .addMethod(MethodSpecs.createHashCode(fields))
+                    .addMethod(MethodSpecs.createToString(
+                            unionClass.simpleName(),
+                            fields.stream()
+                                    .map(fieldSpec -> FieldName.of(fieldSpec.name))
+                                    .collect(Collectors.toList())));
+
+            typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
+
+            return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
+                    .skipJavaLangImports(true)
+                    .indent("    ")
+                    .build();
+        }
     }
 
     private static MethodSpec generateConstructor(ClassName baseClass) {
