@@ -319,18 +319,18 @@ public final class JerseyServiceGenerator implements Generator {
         ClassName annotationClassName;
         ClassName tokenClassName;
         String paramName;
-        String tokenName;
+        String value;
 
         if (auth.get().accept(AuthTypeVisitor.IS_HEADER)) {
             annotationClassName = ClassName.get("javax.ws.rs", "HeaderParam");
             tokenClassName = ClassName.get("com.palantir.tokens.auth", "AuthHeader");
             paramName = Auth.AUTH_HEADER_PARAM_NAME;
-            tokenName = "Authorization";
+            value = Auth.AUTH_HEADER_NAME;
         } else if (auth.get().accept(AuthTypeVisitor.IS_COOKIE)) {
             annotationClassName = ClassName.get("javax.ws.rs", "CookieParam");
             tokenClassName = ClassName.get("com.palantir.tokens.auth", "BearerToken");
             paramName = Auth.COOKIE_AUTH_PARAM_NAME;
-            tokenName = auth.get().accept(AuthTypeVisitor.COOKIE).getCookieName();
+            value = auth.get().accept(AuthTypeVisitor.COOKIE).getCookieName();
         } else {
             throw new IllegalStateException("Unrecognized auth type: " + auth.get());
         }
@@ -338,7 +338,7 @@ public final class JerseyServiceGenerator implements Generator {
         ParameterSpec.Builder paramSpec = ParameterSpec.builder(tokenClassName, paramName);
         if (withAnnotations) {
             paramSpec.addAnnotation(AnnotationSpec.builder(annotationClassName)
-                    .addMember("value", "$S", tokenName)
+                    .addMember("value", "$S", value)
                     .build());
             if (options.requireNotNullAuthAndBodyParams()) {
                 paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());

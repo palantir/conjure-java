@@ -45,6 +45,7 @@ import com.palantir.conjure.visitor.AuthTypeVisitor;
 import com.palantir.conjure.visitor.ParameterTypeVisitor;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
+import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.util.syntacticpath.Path;
 import com.palantir.util.syntacticpath.Paths;
 import com.squareup.javapoet.AnnotationSpec;
@@ -73,7 +74,6 @@ public final class Retrofit2ServiceGenerator implements Generator {
 
     private static final ClassName LISTENABLE_FUTURE_TYPE =
             ClassName.get("com.google.common.util.concurrent", "ListenableFuture");
-    private static final String AUTH_HEADER_NAME = "Authorization";
 
     private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get("okhttp3", "RequestBody");
     private static final ClassName BINARY_RETURN_TYPE = ClassName.get("okhttp3", "ResponseBody");
@@ -341,12 +341,11 @@ public final class Retrofit2ServiceGenerator implements Generator {
 
         AuthType authType = auth.get();
         if (authType.accept(AuthTypeVisitor.IS_HEADER)) {
-            return Optional.of(
-                    ParameterSpec.builder(ClassName.get("com.palantir.tokens.auth", "AuthHeader"), "authHeader")
-                            .addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Header"))
-                                    .addMember("value", "$S", AUTH_HEADER_NAME)
-                                    .build())
-                            .build());
+            return Optional.of(ParameterSpec.builder(ClassName.get(AuthHeader.class), Auth.AUTH_HEADER_PARAM_NAME)
+                    .addAnnotation(AnnotationSpec.builder(ClassName.get("retrofit2.http", "Header"))
+                            .addMember("value", "$S", Auth.AUTH_HEADER_NAME)
+                            .build())
+                    .build());
         } else if (authType.accept(AuthTypeVisitor.IS_COOKIE)) {
             // TODO(melliot): generate required retrofit logic to support this
             log.error("Retrofit does not support Cookie arguments");

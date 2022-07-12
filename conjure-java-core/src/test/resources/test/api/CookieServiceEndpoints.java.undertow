@@ -43,8 +43,8 @@ public final class CookieServiceEndpoints implements UndertowService {
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
-            BearerToken cookieToken = runtime.auth().cookie(exchange, "PALANTIR_TOKEN");
-            delegate.eatCookies(cookieToken);
+            BearerToken token = runtime.auth().cookie(exchange, "PALANTIR_TOKEN");
+            delegate.eatCookies(token);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
 

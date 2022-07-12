@@ -19,6 +19,7 @@ package com.palantir.conjure.java.util;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureTags;
+import com.palantir.conjure.java.services.Auth;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.CookieAuthType;
 import com.palantir.conjure.spec.EndpointDefinition;
@@ -64,12 +65,12 @@ public final class JavaNameSanitizer {
                 .map(authType -> authType.accept(new AuthType.Visitor<String>() {
                     @Override
                     public String visitHeader(HeaderAuthType _header) {
-                        return "authHeader";
+                        return Auth.AUTH_HEADER_PARAM_NAME;
                     }
 
                     @Override
                     public String visitCookie(CookieAuthType _cookie) {
-                        return "cookieToken";
+                        return Auth.COOKIE_AUTH_PARAM_NAME;
                     }
 
                     @Override

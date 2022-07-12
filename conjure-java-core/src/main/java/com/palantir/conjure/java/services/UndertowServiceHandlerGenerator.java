@@ -104,8 +104,6 @@ final class UndertowServiceHandlerGenerator {
     private static final String RUNTIME_VAR_NAME = "runtime";
     private static final String DESERIALIZER_VAR_NAME = "deserializer";
     private static final String SERIALIZER_VAR_NAME = "serializer";
-    private static final String AUTH_HEADER_VAR_NAME = "authHeader";
-    private static final String COOKIE_TOKEN_VAR_NAME = "cookieToken";
     private static final String RESULT_VAR_NAME = "result";
 
     private static final ImmutableSet<String> RESERVED_PARAM_NAMES = ImmutableSet.of(
@@ -661,10 +659,10 @@ final class UndertowServiceHandlerGenerator {
                 code.addStatement(
                         "$1T $2N = $3N.auth().header($4N)",
                         AuthHeader.class,
-                        AUTH_HEADER_VAR_NAME,
+                        Auth.AUTH_HEADER_PARAM_NAME,
                         RUNTIME_VAR_NAME,
                         EXCHANGE_VAR_NAME);
-                return Optional.of(AUTH_HEADER_VAR_NAME);
+                return Optional.of(Auth.AUTH_HEADER_PARAM_NAME);
             }
 
             @Override
@@ -672,7 +670,7 @@ final class UndertowServiceHandlerGenerator {
                 code.addStatement(
                         "$1T $2N = $3N.auth().cookie($4N, $5S)",
                         BearerToken.class,
-                        COOKIE_TOKEN_VAR_NAME,
+                        Auth.COOKIE_AUTH_PARAM_NAME,
                         RUNTIME_VAR_NAME,
                         EXCHANGE_VAR_NAME,
                         endpointDefinition
@@ -680,7 +678,7 @@ final class UndertowServiceHandlerGenerator {
                                 .get()
                                 .accept(AuthTypeVisitor.COOKIE)
                                 .getCookieName());
-                return Optional.of(COOKIE_TOKEN_VAR_NAME);
+                return Optional.of(Auth.COOKIE_AUTH_PARAM_NAME);
             }
 
             @Override

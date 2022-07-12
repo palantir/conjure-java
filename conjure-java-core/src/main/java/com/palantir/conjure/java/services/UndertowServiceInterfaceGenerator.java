@@ -116,13 +116,13 @@ final class UndertowServiceInterfaceGenerator {
                 .ifPresent(authType -> parameterSpecs.add(authType.accept(new AuthType.Visitor<ParameterSpec>() {
                     @Override
                     public ParameterSpec visitHeader(HeaderAuthType _value) {
-                        return ParameterSpec.builder(ClassName.get(AuthHeader.class), "authHeader")
+                        return ParameterSpec.builder(ClassName.get(AuthHeader.class), Auth.AUTH_HEADER_PARAM_NAME)
                                 .build();
                     }
 
                     @Override
                     public ParameterSpec visitCookie(CookieAuthType _value) {
-                        return ParameterSpec.builder(ClassName.get(BearerToken.class), "cookieToken")
+                        return ParameterSpec.builder(ClassName.get(BearerToken.class), Auth.COOKIE_AUTH_PARAM_NAME)
                                 .build();
                     }
 

@@ -26,7 +26,7 @@ import com.palantir.tokens.auth.BearerToken;
 import com.squareup.javapoet.ParameterSpec;
 
 public final class Auth {
-    // TODO(forozco): consolidate usage
+
     public static final String AUTH_HEADER_NAME = "Authorization";
     public static final String AUTH_HEADER_PARAM_NAME = "authHeader";
     public static final String COOKIE_AUTH_PARAM_NAME = "token";
