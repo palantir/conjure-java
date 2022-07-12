@@ -24,12 +24,12 @@ import javax.annotation.Nonnull;
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
         visible = true,
-        defaultImpl = UnknownWrapper.class)
-@JsonSubTypes(@JsonSubTypes.Type(FooWrapper.class))
+        defaultImpl = Unknown.class)
+@JsonSubTypes(@JsonSubTypes.Type(Foo.class))
 @JsonIgnoreProperties(ignoreUnknown = true)
 public sealed interface SingleUnion {
     static SingleUnion foo(@Safe String value) {
-        return new FooWrapper(value);
+        return new Foo(value);
     }
 
     static SingleUnion unknown(@Safe String type, Object value) {
@@ -38,16 +38,16 @@ public sealed interface SingleUnion {
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: foo");
             default:
-                return new UnknownWrapper(type, Collections.singletonMap(type, value));
+                return new Unknown(type, Collections.singletonMap(type, value));
         }
     }
 
     @JsonTypeName("foo")
-    final class FooWrapper implements SingleUnion {
+    final class Foo implements SingleUnion {
         private final String value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private FooWrapper(@JsonSetter("foo") @Nonnull String value) {
+        private Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
@@ -65,11 +65,11 @@ public sealed interface SingleUnion {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof sealedunions.com.palantir.product.FooWrapper
-                            && equalTo((sealedunions.com.palantir.product.FooWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.Foo
+                            && equalTo((sealedunions.com.palantir.product.Foo) other));
         }
 
-        private boolean equalTo(sealedunions.com.palantir.product.FooWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.Foo other) {
             return this.value.equals(other.value);
         }
 
@@ -80,21 +80,21 @@ public sealed interface SingleUnion {
 
         @Override
         public String toString() {
-            return "FooWrapper{value: " + value + '}';
+            return "Foo{value: " + value + '}';
         }
     }
 
-    final class UnknownWrapper implements SingleUnion {
+    final class Unknown implements SingleUnion {
         private final String type;
 
         private final Map<String, Object> value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private UnknownWrapper(@JsonProperty("type") String type) {
+        private Unknown(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }
 
-        private UnknownWrapper(@Nonnull String type, @Nonnull Map<String, Object> value) {
+        private Unknown(@Nonnull String type, @Nonnull Map<String, Object> value) {
             Preconditions.checkNotNull(type, "type cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
             this.type = type;
@@ -119,11 +119,11 @@ public sealed interface SingleUnion {
         @Override
         public boolean equals(Object other) {
             return this == other
-                    || (other instanceof sealedunions.com.palantir.product.UnknownWrapper
-                            && equalTo((sealedunions.com.palantir.product.UnknownWrapper) other));
+                    || (other instanceof sealedunions.com.palantir.product.Unknown
+                            && equalTo((sealedunions.com.palantir.product.Unknown) other));
         }
 
-        private boolean equalTo(sealedunions.com.palantir.product.UnknownWrapper other) {
+        private boolean equalTo(sealedunions.com.palantir.product.Unknown other) {
             return this.type.equals(other.type) && this.value.equals(other.value);
         }
 
@@ -137,7 +137,7 @@ public sealed interface SingleUnion {
 
         @Override
         public String toString() {
-            return "UnknownWrapper{type: " + type + ", value: " + value + '}';
+            return "Unknown{type: " + type + ", value: " + value + '}';
         }
     }
 }

@@ -106,13 +106,13 @@ public final class UnionGenerator {
                                 typeMapper.getClassName(entry.getType()), entry.getSafety())));
 
         if (options.sealedUnions()) {
-            ClassName unknownWrapperClass = unionClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
+            ClassName unknownWrapperClass = peerWrapperClass(unionClass, FieldName.of("unknown"), options);
             TypeSpec.Builder typeBuilder = TypeSpec.interfaceBuilder(
                             typeDef.getTypeName().getName())
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
                     .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
                     .addAnnotation(jacksonJsonTypeInfo(unknownWrapperClass))
-                    .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes))
+                    .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes, options))
                     .addAnnotation(jacksonIgnoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
                     .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
@@ -156,7 +156,7 @@ public final class UnionGenerator {
                     .addType(
                             generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
                     .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
-                    .addType(generateBase(baseClass, visitorClass, memberTypes))
+                    .addType(generateBase(baseClass, visitorClass, memberTypes, options))
                     .addTypes(generateWrapperClasses(
                             typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
                     .addType(generateUnknownWrapper(unknownWrapperClass, baseClass, visitorClass, options))
@@ -215,12 +215,12 @@ public final class UnionGenerator {
                                     options.sealedUnions()
                                             ? CodeBlock.of(
                                                     "return new $T($L);",
-                                                    wrapperClass(unionClass, memberName),
+                                                    wrapperClass(unionClass, memberName, options),
                                                     variableName)
                                             : CodeBlock.of(
                                                     "return new $T(new $T($L));",
                                                     unionClass,
-                                                    wrapperClass(unionClass, memberName),
+                                                    wrapperClass(unionClass, memberName, options),
                                                     variableName))
                             .returns(unionClass);
                     Javadoc.render(memberTypeDef.getDocs(), memberTypeDef.getDeprecated())
@@ -265,13 +265,13 @@ public final class UnionGenerator {
                 options.sealedUnions()
                         ? CodeBlock.of(
                                 "return new $T($N, $L)",
-                                wrapperClass(unionClass, FieldName.of("unknown")),
+                                wrapperClass(unionClass, FieldName.of("unknown"), options),
                                 typeParam,
                                 singletonMap)
                         : CodeBlock.of(
                                 "return new $T(new $T($N, $L))",
                                 unionClass,
-                                wrapperClass(unionClass, FieldName.of("unknown")),
+                                wrapperClass(unionClass, FieldName.of("unknown"), options),
                                 typeParam,
                                 singletonMap));
         builder.endControlFlow();
@@ -749,13 +749,13 @@ public final class UnionGenerator {
     }
 
     private static TypeSpec generateBase(
-            ClassName baseClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes) {
-        ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
+            ClassName baseClass, ClassName visitorClass, Map<FieldDefinition, TypeName> memberTypes, Options options) {
+        ClassName unknownWrapperClass = peerWrapperClass(baseClass, FieldName.of("unknown"), options);
         TypeSpec.Builder baseBuilder = TypeSpec.interfaceBuilder(baseClass)
                 .addModifiers(Modifier.PRIVATE)
                 .addAnnotation(jacksonJsonTypeInfo(unknownWrapperClass));
         if (!memberTypes.isEmpty()) {
-            baseBuilder.addAnnotation(generateJacksonSubtypeAnnotation(baseClass, memberTypes));
+            baseBuilder.addAnnotation(generateJacksonSubtypeAnnotation(baseClass, memberTypes, options));
         }
         baseBuilder.addAnnotation(jacksonIgnoreUnknownAnnotation());
         ParameterizedTypeName parameterizedVisitorClass = ParameterizedTypeName.get(visitorClass, TYPE_VARIABLE);
@@ -787,7 +787,7 @@ public final class UnionGenerator {
     }
 
     private static AnnotationSpec generateJacksonSubtypeAnnotation(
-            ClassName baseClass, Map<FieldDefinition, TypeName> memberTypes) {
+            ClassName baseClass, Map<FieldDefinition, TypeName> memberTypes, Options options) {
         List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
                 .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
                         .addMember(
@@ -795,7 +795,8 @@ public final class UnionGenerator {
                                 "$T.class",
                                 peerWrapperClass(
                                         baseClass,
-                                        sanitizeUnknown(entry.getKey().getFieldName())))
+                                        sanitizeUnknown(entry.getKey().getFieldName()),
+                                        options))
                         .build())
                 .collect(Collectors.toList());
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSubTypes.class);
@@ -815,7 +816,7 @@ public final class UnionGenerator {
                     boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
-                    ClassName wrapperClass = peerWrapperClass(superInterface, memberName);
+                    ClassName wrapperClass = peerWrapperClass(superInterface, memberName, options);
 
                     List<FieldSpec> fields = ImmutableList.of(
                             FieldSpec.builder(memberType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
@@ -1010,15 +1011,26 @@ public final class UnionGenerator {
         return methodBuilder.build();
     }
 
-    private static ClassName wrapperClass(ClassName unionClass, FieldName memberTypeName) {
-        return ClassName.get(
-                unionClass.packageName(),
-                unionClass.simpleName(),
-                StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
+    private static ClassName wrapperClass(ClassName unionClass, FieldName memberTypeName, Options options) {
+        if (options.sealedUnions()) {
+            return ClassName.get(
+                    unionClass.packageName(),
+                    unionClass.simpleName(),
+                    StringUtils.capitalize(memberTypeName.get()));
+        } else {
+            return ClassName.get(
+                    unionClass.packageName(),
+                    unionClass.simpleName(),
+                    StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
+        }
     }
 
-    private static ClassName peerWrapperClass(ClassName peerClass, FieldName memberTypeName) {
-        return peerClass.peerClass(StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
+    private static ClassName peerWrapperClass(ClassName peerClass, FieldName memberTypeName, Options options) {
+        if (options.sealedUnions()) {
+            return peerClass.peerClass(StringUtils.capitalize(memberTypeName.get()));
+        } else {
+            return peerClass.peerClass(StringUtils.capitalize(memberTypeName.get()) + "Wrapper");
+        }
     }
 
     private static String visitMethodName(String fieldName) {
