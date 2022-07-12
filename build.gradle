@@ -71,8 +71,12 @@ allprojects {
 
     configurations.configureEach {
         resolutionStrategy.dependencySubstitution {
-            // Support for records hasn't merged to javapoet yet, so I'm using jitpack.io: https://github.com/square/javapoet/pull/840
-            it.substitute it.module('com.squareup:javapoet') with it.module('com.github.liachmodded:javapoet:feature~record')
+            // javapoet hasn't merged contributions in a while. Specifically, I want:
+            //  - records https://github.com/square/javapoet/pull/840
+            //  - permits https://github.com/square/javapoet/issues/823
+            // It appears that @liach has implemented both of these, and merged them to the javapoet fork https://github.com/FabricMC/javapoet.
+            // I'm using jitpack.io to compile a jar of the specific commit (from master) of that fork.
+            it.substitute it.module('com.squareup:javapoet') with it.module('com.github.FabricMC:javapoet:d9b7dba158')
         }
     }
 }

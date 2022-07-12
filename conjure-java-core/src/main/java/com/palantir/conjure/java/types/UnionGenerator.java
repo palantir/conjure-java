@@ -115,6 +115,8 @@ public final class UnionGenerator {
                     .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes, options))
                     .addAnnotation(jacksonIgnoreUnknownAnnotation())
                     .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
+                    // TODO(dfox): add a 'sealed interface Known permits Variant1, Variant2, etc {}'
+                    //
                     .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
                     .addTypes(generateRecords(
                             typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
