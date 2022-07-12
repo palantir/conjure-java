@@ -25,10 +25,10 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.palantir.conjure.java.types.Union2.Union2_Bar;
-import com.palantir.conjure.java.types.Union2.Union2_Baz;
-import com.palantir.conjure.java.types.Union2.Union2_Foo;
-import com.palantir.conjure.java.types.Union2.Union2_UnknownVariant;
+import com.palantir.conjure.java.types.Union2.Bar;
+import com.palantir.conjure.java.types.Union2.Baz;
+import com.palantir.conjure.java.types.Union2.Foo;
+import com.palantir.conjure.java.types.Union2.UnknownVariant;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -49,20 +49,20 @@ import javax.annotation.Nonnull;
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
         visible = true,
-        defaultImpl = Union2_UnknownVariant.class)
+        defaultImpl = UnknownVariant.class)
 @JsonSubTypes({
-        @JsonSubTypes.Type(Union2_Foo.class),
-        @JsonSubTypes.Type(Union2_Bar.class),
-        @JsonSubTypes.Type(Union2_Baz.class)
+        @JsonSubTypes.Type(Foo.class),
+        @JsonSubTypes.Type(Bar.class),
+        @JsonSubTypes.Type(Baz.class)
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Union2.Union2_Baz,
-        Union2_UnknownVariant {
+public sealed interface Union2 permits Foo, Bar, Baz,
+        UnknownVariant {
 
-    sealed interface Known permits Union2.Union2_Foo, Union2.Union2_Bar, Union2.Union2_Baz {}
+    sealed interface Known permits Foo, Bar, Baz {}
 
     static Union2 foo(String value) {
-        return new Union2_Foo(value);
+        return new Foo(value);
     }
 
     /**
@@ -70,7 +70,7 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
      */
     @Deprecated
     static Union2 bar(int value) {
-        return new Union2_Bar(value);
+        return new Bar(value);
     }
 
     /**
@@ -79,7 +79,7 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
      */
     @Deprecated
     static Union2 baz(long value) {
-        return new Union2_Baz(value);
+        return new Baz(value);
     }
 
     static Union2 unknown(@Safe String type, Object value) {
@@ -90,14 +90,15 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
                     "Unknown type cannot be created as the provided type is known: bar");
             case "baz" -> throw new SafeIllegalArgumentException(
                     "Unknown type cannot be created as the provided type is known: baz");
-            default -> new Union2_UnknownVariant(type, Collections.singletonMap(type, value));
+            default -> new UnknownVariant(type, Collections.singletonMap(type, value));
         };
     }
 
     default Known throwOnUnknown() {
-        if (this instanceof Union2_UnknownVariant u) {
+        if (this instanceof UnknownVariant) {
             throw new SafeIllegalArgumentException(
-                    "Unknown variant of the 'Union' union", SafeArg.of("unknownType", u.getType()));
+                    "Unknown variant of the 'Union' union",
+                    SafeArg.of("unknownType", ((UnknownVariant) this).getType()));
         } else {
             return (Known) this;
         }
@@ -232,11 +233,11 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
     }
 
     @JsonTypeName("foo")
-    final class Union2_Foo implements Union2, Known {
+    final class Foo implements Union2, Known {
         private final String value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Union2_Foo(@JsonSetter("foo") @Nonnull String value) {
+        private Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
@@ -259,11 +260,11 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
 
         @Override
         public boolean equals(Object other) {
-            return this == other || (other instanceof Union2_Foo
-                    && equalTo((Union2_Foo) other));
+            return this == other || (other instanceof Foo
+                    && equalTo((Foo) other));
         }
 
-        private boolean equalTo(Union2_Foo other) {
+        private boolean equalTo(Foo other) {
             return this.value.equals(other.value);
         }
 
@@ -279,11 +280,11 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
     }
 
     @JsonTypeName("bar")
-    final class Union2_Bar implements Union2, Known {
+    final class Bar implements Union2, Known {
         private final int value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Union2_Bar(@JsonSetter("bar") @Nonnull int value) {
+        private Bar(@JsonSetter("bar") @Nonnull int value) {
             Preconditions.checkNotNull(value, "bar cannot be null");
             this.value = value;
         }
@@ -307,11 +308,11 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
 
         @Override
         public boolean equals(Object other) {
-            return this == other || (other instanceof Union2_Bar
-                    && equalTo((Union2_Bar) other));
+            return this == other || (other instanceof Bar
+                    && equalTo((Bar) other));
         }
 
-        private boolean equalTo(Union2_Bar other) {
+        private boolean equalTo(Bar other) {
             return this.value == other.value;
         }
 
@@ -327,11 +328,11 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
     }
 
     @JsonTypeName("baz")
-    final class Union2_Baz implements Union2, Known {
+    final class Baz implements Union2, Known {
         private final long value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Union2_Baz(@JsonSetter("baz") @Nonnull long value) {
+        private Baz(@JsonSetter("baz") @Nonnull long value) {
             Preconditions.checkNotNull(value, "baz cannot be null");
             this.value = value;
         }
@@ -355,11 +356,11 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
 
         @Override
         public boolean equals(Object other) {
-            return this == other || (other instanceof Union2_Baz
-                    && equalTo((Union2_Baz) other));
+            return this == other || (other instanceof Baz
+                    && equalTo((Baz) other));
         }
 
-        private boolean equalTo(Union2_Baz other) {
+        private boolean equalTo(Baz other) {
             return this.value == other.value;
         }
 
@@ -374,17 +375,17 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
         }
     }
 
-    final class Union2_UnknownVariant implements Union2 {
+    final class UnknownVariant implements Union2 {
         private final String type;
 
         private final Map<String, Object> value;
 
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Union2_UnknownVariant(@JsonProperty("type") String type) {
+        private UnknownVariant(@JsonProperty("type") String type) {
             this(type, new HashMap<String, Object>());
         }
 
-        private Union2_UnknownVariant(@Nonnull String type, @Nonnull Map<String, Object> value) {
+        private UnknownVariant(@Nonnull String type, @Nonnull Map<String, Object> value) {
             Preconditions.checkNotNull(type, "type cannot be null");
             Preconditions.checkNotNull(value, "value cannot be null");
             this.type = type;
@@ -415,11 +416,11 @@ public sealed interface Union2 permits Union2.Union2_Foo, Union2.Union2_Bar, Uni
 
         @Override
         public boolean equals(Object other) {
-            return this == other || (other instanceof Union2_UnknownVariant
-                    && equalTo((Union2_UnknownVariant) other));
+            return this == other || (other instanceof UnknownVariant
+                    && equalTo((UnknownVariant) other));
         }
 
-        private boolean equalTo(Union2_UnknownVariant other) {
+        private boolean equalTo(UnknownVariant other) {
             return this.type.equals(other.type) && this.value.equals(other.value);
         }
 

@@ -19,12 +19,9 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.java.types.Union2.Union2_Bar;
-import com.palantir.conjure.java.types.Union2.Union2_Baz;
-import com.palantir.conjure.java.types.Union2.Union2_Foo;
-import com.palantir.conjure.java.types.Union2.Union2_UnknownVariant;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.product.UnionWithUnknownString;
 import java.util.List;
@@ -44,10 +41,10 @@ class Union2Tests {
     void switch_statement_compiles() {
         Union2 myUnion = Union2.foo("hello");
         switch (myUnion) {
-            case Union2_Foo foo -> System.out.println(foo.getValue());
-            case Union2_Bar bar -> System.out.println(bar.getValue());
-            case Union2_Baz baz -> System.out.println(baz.getValue());
-            case Union2_UnknownVariant unknownWrapper -> System.out.println(unknownWrapper);
+            case Union2.Foo foo -> System.out.println(foo.getValue());
+            case Union2.Bar bar -> System.out.println(bar.getValue());
+            case Union2.Baz baz -> System.out.println(baz.getValue());
+            case Union2.UnknownVariant unknownWrapper -> System.out.println(unknownWrapper);
         }
     }
 
@@ -56,10 +53,34 @@ class Union2Tests {
         Union2 myUnion = Union2.foo("hello");
         Union2.Known narrowedSubtype = myUnion.throwOnUnknown();
         switch (narrowedSubtype) {
-            case Union2_Foo foo -> System.out.println(foo.getValue());
-            case Union2_Bar bar -> System.out.println(bar.getValue());
-            case Union2_Baz baz -> System.out.println(baz.getValue());
+            case Union2.Foo foo -> System.out.println(foo.getValue());
+            case Union2.Bar bar -> System.out.println(bar.getValue());
+            case Union2.Baz baz -> System.out.println(baz.getValue());
         }
+    }
+
+    @Test
+    void serialization() throws JsonProcessingException {
+        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+
+        Union2 foo = Union2.foo("hello");
+        assertThat(mapper.writeValueAsString(foo)).isEqualTo("{\"type\":\"foo\",\"foo\":\"hello\"}");
+
+        Union2 unknownVariant = Union2.unknown("asdf", 12345);
+        assertThat(mapper.writeValueAsString(unknownVariant)).isEqualTo("{\"type\":\"asdf\",\"asdf\":12345}");
+    }
+
+    @Test
+    void deserialization() throws JsonProcessingException {
+        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+
+        assertThat(mapper.readValue(
+                "{\"type\":\"foo\",\"foo\":\"hello\"}",
+                Union2.class)).isEqualTo(Union2.foo("hello"));
+
+        assertThat(mapper.readValue(
+                "{\"type\":\"asdf\",\"asdf\":12345}",
+                Union2.class)).isEqualTo(Union2.unknown("asdf", 12345));
     }
 
     @Test
