@@ -22,8 +22,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.logsafe.UnsafeArg;
-import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.Test;
 
 class Union2Tests {
@@ -79,13 +77,5 @@ class Union2Tests {
         assertThat(mapper.readValue(
                 "{\"type\":\"asdf\",\"asdf\":12345}",
                 Union2.class)).isEqualTo(Union2.unknown("asdf", 12345));
-    }
-
-    private Void failOnKnownType(String type, Object value) {
-        Fail.fail(
-                "Visited known type when expected unknown type",
-                UnsafeArg.of("type", type),
-                UnsafeArg.of("value", value));
-        return null;
     }
 }

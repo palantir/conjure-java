@@ -103,11 +103,9 @@ public sealed interface Union2 permits Foo, Bar, Baz,
     }
 
     @JsonTypeName("foo")
-    final class Foo implements Union2, Known {
-        private final String value;
-
+    record Foo(String value) implements Union2, Known {
         @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private Foo(@JsonSetter("foo") @Nonnull String value) {
+        public Foo(@JsonSetter("foo") @Nonnull String value) {
             Preconditions.checkNotNull(value, "foo cannot be null");
             this.value = value;
         }
@@ -121,21 +119,6 @@ public sealed interface Union2 permits Foo, Bar, Baz,
         @JsonProperty("foo")
         public String getValue() {
             return value;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this == other || (other instanceof Foo
-                    && equalTo((Foo) other));
-        }
-
-        private boolean equalTo(Foo other) {
-            return this.value.equals(other.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return this.value.hashCode();
         }
 
         @Override
