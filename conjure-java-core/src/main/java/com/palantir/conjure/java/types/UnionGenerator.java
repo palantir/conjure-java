@@ -119,8 +119,8 @@ public final class UnionGenerator {
                     // .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
                     // .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
                     // .addType(generateBase(baseClass, visitorClass, memberTypes))
-                    // .addTypes(generateWrapperClasses(
-                    //         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
+                    .addTypes(generateWrapperClasses(
+                            typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
                     // .addType(generateUnknownWrapper(baseClass, visitorClass, options))
                     // .addMethod(generateEquals(unionClass))
                     // .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
@@ -793,7 +793,7 @@ public final class UnionGenerator {
     private static List<TypeSpec> generateWrapperClasses(
             TypeMapper typeMapper,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            ClassName baseClass,
+            ClassName superInterface,
             ClassName visitorClass,
             List<FieldDefinition> memberTypeDefs,
             Options options) {
@@ -802,15 +802,16 @@ public final class UnionGenerator {
                     boolean isDeprecated = memberTypeDef.getDeprecated().isPresent();
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
-                    ClassName wrapperClass = peerWrapperClass(baseClass, memberName);
+                    ClassName wrapperClass = peerWrapperClass(superInterface, memberName);
 
                     List<FieldSpec> fields = ImmutableList.of(
                             FieldSpec.builder(memberType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                                     .build());
 
                     TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
-                            .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                            .addSuperinterface(baseClass)
+                            .addModifiers(options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE, Modifier.STATIC,
+                                    Modifier.FINAL)
+                            .addSuperinterface(superInterface)
                             .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
                                     .addMember("value", "$S", memberTypeDef.getFieldName())
                                     .build())
