@@ -32,6 +32,7 @@ types:
           interface: integer
           completed: integer
           unknown: integer
+          known: string
           optional: optional<string>
           list: list<string>
           set: set<string>

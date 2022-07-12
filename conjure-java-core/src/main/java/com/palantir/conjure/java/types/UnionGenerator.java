@@ -1129,11 +1129,14 @@ public final class UnionGenerator {
     }
 
     private static String sanitizeUnknown(String input) {
-        return "unknown".equalsIgnoreCase(input) ? input + '_' : input;
+        if ("unknown".equalsIgnoreCase(input) || "known".equalsIgnoreCase(input)) {
+            return input + '_';
+        }
+        return input;
     }
 
-    private static FieldName sanitizeUnknown(FieldName input) {
-        return "unknown".equalsIgnoreCase(input.get()) ? FieldName.of(input.get() + '_') : input;
+    private static FieldName sanitizeUnknown(FieldName i) {
+        return FieldName.of(sanitizeUnknown(i.get()));
     }
 
     private UnionGenerator() {}

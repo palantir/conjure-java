@@ -37,6 +37,7 @@ import javax.annotation.Nonnull;
     @JsonSubTypes.Type(Interface.class),
     @JsonSubTypes.Type(Completed.class),
     @JsonSubTypes.Type(Unknown_.class),
+    @JsonSubTypes.Type(Known_.class),
     @JsonSubTypes.Type(Optional.class),
     @JsonSubTypes.Type(List.class),
     @JsonSubTypes.Type(Set.class),
@@ -81,6 +82,10 @@ public sealed interface UnionTypeExample {
 
     static UnionTypeExample unknown_(int value) {
         return new Unknown_(value);
+    }
+
+    static UnionTypeExample known_(String value) {
+        return new Known_(value);
     }
 
     static UnionTypeExample optional(java.util.Optional<String> value) {
@@ -141,6 +146,9 @@ public sealed interface UnionTypeExample {
             case "unknown":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: unknown");
+            case "known":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: known");
             case "optional":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: optional");
@@ -179,6 +187,7 @@ public sealed interface UnionTypeExample {
                     Interface,
                     Completed,
                     Unknown_,
+                    Known_,
                     Optional,
                     List,
                     Set,
@@ -377,6 +386,30 @@ public sealed interface UnionTypeExample {
         @Override
         public String toString() {
             return "Unknown_{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("known")
+    record Known_(String value) implements UnionTypeExample, Known {
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        Known_(@JsonSetter("known") @Nonnull String value) {
+            Preconditions.checkNotNull(value, "known_ cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "known";
+        }
+
+        @JsonProperty("known")
+        private String getValue() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return "Known_{value: " + value + '}';
         }
     }
 

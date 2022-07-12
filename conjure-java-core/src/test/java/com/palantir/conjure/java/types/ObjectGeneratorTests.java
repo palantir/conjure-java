@@ -237,7 +237,7 @@ public final class ObjectGeneratorTests {
         for (Path file : files) {
             Path relativized = tempDir.toPath().relativize(file);
             Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+            if (!System.getenv().containsKey("CI") || Boolean.valueOf(System.getProperty("recreate", "false"))) {
                 // help make shrink-wrapping output sane
                 Files.createDirectories(expectedFile.getParent());
                 Files.deleteIfExists(expectedFile);
