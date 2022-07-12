@@ -106,23 +106,30 @@ public final class UnionGenerator {
                                 typeMapper.getClassName(entry.getType()), entry.getSafety())));
 
         if (options.sealedUnions()) {
+            ClassName unknownWrapperClass = unionClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
             TypeSpec.Builder typeBuilder = TypeSpec.interfaceBuilder(
-                            typeDef.getTypeName().getName())
-                    // .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
-                    // .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
-                    .addAnnotation(jacksonJsonTypeInfo(unionClass))
-                    .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes))
-                    .addAnnotation(jacksonIgnoreUnknownAnnotation())
-                    .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
-                    .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
-                    .addMethod(generateAcceptVisitorMethodSignature(visitorClass))
-                    .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
-                    // .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
-                    // .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
-                    // .addType(generateBase(baseClass, visitorClass, memberTypes))
-                    .addTypes(generateWrapperClasses(
-                            typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
-                    // .addType(generateUnknownWrapper(baseClass, visitorClass, options))
+                                    typeDef.getTypeName().getName())
+                            // .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
+                            // .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
+                            .addAnnotation(jacksonJsonTypeInfo(unknownWrapperClass))
+                            .addAnnotation(generateJacksonSubtypeAnnotation(unionClass, memberTypes))
+                            .addAnnotation(jacksonIgnoreUnknownAnnotation())
+                            .addModifiers(Modifier.PUBLIC, Modifier.SEALED)
+                            .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
+                            .addMethod(generateAcceptVisitorMethodSignature(visitorClass))
+                            .addType(generateVisitor(
+                                    unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
+                            // .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass,
+                            // memberTypes, options))
+                            // .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes,
+                            // options))
+                            // .addType(generateBase(baseClass, visitorClass, memberTypes))
+                            .addTypes(generateWrapperClasses(
+                                    typeMapper, typesMap, unionClass, visitorClass, typeDef.getUnion(), options))
+                            .addType(generateUnknownWrapper(
+                                    unknownWrapperClass,
+                                    unionClass, visitorClass, options
+                            ))
                     // .addMethod(generateEquals(unionClass))
                     // .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                     // .addMethod(MethodSpecs.createHashCode(fields))
@@ -141,6 +148,7 @@ public final class UnionGenerator {
                     .build();
         } else {
             ClassName baseClass = unionClass.nestedClass("Base");
+            ClassName unknownWrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
             List<FieldSpec> fields =
                     ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                             .build());
@@ -156,17 +164,16 @@ public final class UnionGenerator {
                     .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), options))
                     .addMethod(generateAcceptVisitMethod(visitorClass))
                     .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
-                    .addType(generateVisitorBuilder(
-                            unionClass,
-                            visitorClass,
-                            visitorBuilderClass,
-                            memberTypes,
-                            options))
+                    .addType(
+                            generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
                     .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
                     .addType(generateBase(baseClass, visitorClass, memberTypes))
                     .addTypes(generateWrapperClasses(
                             typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
-                    .addType(generateUnknownWrapper(baseClass, visitorClass, options))
+                    .addType(generateUnknownWrapper(
+                            unknownWrapperClass,
+                            baseClass, visitorClass, options
+                    ))
                     .addMethod(generateEquals(unionClass))
                     .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                     .addMethod(MethodSpecs.createHashCode(fields))
@@ -236,11 +243,12 @@ public final class UnionGenerator {
                     return builder.build();
                 })
                 .collect(Collectors.toList());
-        staticFactories.add(generateUnknownStaticFactory(unionClass, memberTypeDefs));
+        staticFactories.add(generateUnknownStaticFactory(unionClass, memberTypeDefs, options));
         return staticFactories;
     }
 
-    private static MethodSpec generateUnknownStaticFactory(ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
+    private static MethodSpec generateUnknownStaticFactory(
+            ClassName unionClass, List<FieldDefinition> memberTypeDefs, Options options) {
         String typeParam = "type";
         String valueParam = "value";
         MethodSpec.Builder builder = MethodSpec.methodBuilder("unknown")
@@ -265,12 +273,21 @@ public final class UnionGenerator {
         });
         // add default case, which actually builds the unknown
         builder.addCode("default:");
+        CodeBlock singletonMap = CodeBlock.of("$T.singletonMap($N, $N)", Collections.class, typeParam, valueParam);
+
         builder.addStatement(
-                "return new $T(new $T($N, $L))",
-                unionClass,
-                wrapperClass(unionClass, FieldName.of("unknown")),
-                typeParam,
-                CodeBlock.of("$T.singletonMap($N, $N)", Collections.class, typeParam, valueParam));
+                options.sealedUnions()
+                        ? CodeBlock.of(
+                                "return new $T($N, $L)",
+                                wrapperClass(unionClass, FieldName.of("unknown")),
+                                typeParam,
+                                singletonMap)
+                        : CodeBlock.of(
+                                "return new $T(new $T($N, $L))",
+                                unionClass,
+                                wrapperClass(unionClass, FieldName.of("unknown")),
+                                typeParam,
+                                singletonMap));
         builder.endControlFlow();
         return builder.build();
     }
@@ -542,17 +559,17 @@ public final class UnionGenerator {
         return sortedStageNameTypePairs(memberTypeMap)
                 .map(pair -> NameTypeMetadata.UNKNOWN.equals(pair) && options.unionsWithUnknownValues()
                         ? MethodSpec.methodBuilder(visitMethodName(pair.memberName))
-                        .addModifiers(Modifier.PUBLIC)
-                        .addAnnotation(Override.class)
-                        .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
-                        .addParameter(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
-                        .addStatement(
-                                "return $N.apply($N, $N)",
-                                visitorFieldName(pair.memberName),
-                                UNKNOWN_TYPE_PARAM_NAME,
-                                UNKNOWN_VALUE_PARAM_NAME)
-                        .returns(visitorResultType)
-                        .build()
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(Override.class)
+                                .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
+                                .addParameter(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
+                                .addStatement(
+                                        "return $N.apply($N, $N)",
+                                        visitorFieldName(pair.memberName),
+                                        UNKNOWN_TYPE_PARAM_NAME,
+                                        UNKNOWN_VALUE_PARAM_NAME)
+                                .returns(visitorResultType)
+                                .build()
                         : MethodSpec.methodBuilder(visitMethodName(pair.memberName))
                                 .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(Override.class)
@@ -778,8 +795,7 @@ public final class UnionGenerator {
     }
 
     private static AnnotationSpec generateJacksonSubtypeAnnotation(
-            ClassName baseClass,
-            Map<FieldDefinition, TypeName> memberTypes) {
+            ClassName baseClass, Map<FieldDefinition, TypeName> memberTypes) {
         List<AnnotationSpec> subAnnotations = memberTypes.entrySet().stream()
                 .map(entry -> AnnotationSpec.builder(JsonSubTypes.Type.class)
                         .addMember(
@@ -814,7 +830,9 @@ public final class UnionGenerator {
                                     .build());
 
                     TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
-                            .addModifiers(options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE, Modifier.STATIC,
+                            .addModifiers(
+                                    options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE,
+                                    Modifier.STATIC,
                                     Modifier.FINAL)
                             .addSuperinterface(superInterface)
                             .addAnnotation(AnnotationSpec.builder(JsonTypeName.class)
@@ -887,7 +905,9 @@ public final class UnionGenerator {
         return builder.build();
     }
 
-    private static TypeSpec generateUnknownWrapper(ClassName baseClass, ClassName visitorClass, Options options) {
+    private static TypeSpec generateUnknownWrapper(
+            ClassName unknownWrapperClass,
+            ClassName superinterface, ClassName visitorClass, Options options) {
         ParameterizedTypeName genericMapType = ParameterizedTypeName.get(Map.class, String.class, Object.class);
         ParameterizedTypeName genericHashMapType = ParameterizedTypeName.get(HashMap.class, String.class, Object.class);
         ParameterSpec typeParameter = ParameterSpec.builder(String.class, "type")
@@ -899,15 +919,15 @@ public final class UnionGenerator {
                         .build())
                 .build();
 
-        ClassName wrapperClass = baseClass.peerClass(UNKNOWN_WRAPPER_CLASS_NAME);
         List<FieldSpec> fields = ImmutableList.of(
                 FieldSpec.builder(UNKNOWN_MEMBER_TYPE, "type", Modifier.PRIVATE, Modifier.FINAL)
                         .build(),
                 FieldSpec.builder(genericMapType, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(wrapperClass)
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                .addSuperinterface(baseClass)
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(unknownWrapperClass)
+                .addModifiers(
+                        options.sealedUnions() ? Modifier.PUBLIC : Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .addSuperinterface(superinterface)
                 .addFields(fields)
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PRIVATE)
@@ -953,11 +973,11 @@ public final class UnionGenerator {
                         .build())
                 .addMethod(createWrapperAcceptMethod(
                         visitorClass, VISIT_UNKNOWN_METHOD_NAME, typeParameter.name, false, options))
-                .addMethod(MethodSpecs.createEquals(wrapperClass))
-                .addMethod(MethodSpecs.createEqualTo(wrapperClass, fields))
+                .addMethod(MethodSpecs.createEquals(unknownWrapperClass))
+                .addMethod(MethodSpecs.createEqualTo(unknownWrapperClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
                 .addMethod(MethodSpecs.createToString(
-                        wrapperClass.simpleName(),
+                        unknownWrapperClass.simpleName(),
                         fields.stream()
                                 .map(fieldSpec -> FieldName.of(fieldSpec.name))
                                 .collect(Collectors.toList())));
