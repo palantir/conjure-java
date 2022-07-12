@@ -8,5 +8,5 @@ public interface CookieService {
     /**
      * @apiNote {@code GET /cookies}
      */
-    void eatCookies(BearerToken cookieToken);
+    void eatCookies(BearerToken token);
 }
