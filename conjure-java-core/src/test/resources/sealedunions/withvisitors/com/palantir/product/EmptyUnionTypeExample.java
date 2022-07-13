@@ -1,4 +1,4 @@
-package sealedunions.com.palantir.product;
+package withvisitors.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -14,6 +14,8 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import javax.annotation.Generated;
 import javax.annotation.Nonnull;
 
@@ -42,6 +44,8 @@ public sealed interface EmptyUnionTypeExample {
             return (Known) this;
         }
     }
+
+    <T> void accept(Visitor<T> visitor);
 
     sealed interface Known {}
 
@@ -78,6 +82,11 @@ public sealed interface EmptyUnionTypeExample {
         }
 
         @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnknown(type, value.get(type));
+        }
+
+        @Override
         public boolean equals(Object other) {
             return this == other || (other instanceof Unknown && equalTo((Unknown) other));
         }
@@ -98,5 +107,67 @@ public sealed interface EmptyUnionTypeExample {
         public String toString() {
             return "Unknown{type: " + type + ", value: " + value + '}';
         }
+    }
+
+    interface Visitor<T> {
+        T visitUnknown(@Safe String unknownType, Object unknownValue);
+
+        /**
+         * @Deprecated - prefer Java 17 pattern matching switch expressions.
+         */
+        @Deprecated
+        static <T> UnknownStageVisitorBuilder<T> builder() {
+            return new VisitorBuilder<T>();
+        }
+    }
+
+    final class VisitorBuilder<T> implements UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
+        private BiFunction<@Safe String, Object, T> unknownVisitor;
+
+        @Override
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownVisitor;
+            return this;
+        }
+
+        @Override
+        public Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = (unknownType, _unknownValue) -> unknownVisitor.apply(unknownType);
+            return this;
+        }
+
+        @Override
+        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
+            this.unknownVisitor = (unknownType, _unknownValue) -> {
+                throw new SafeIllegalArgumentException(
+                        "Unknown variant of the 'EmptyUnionTypeExample' union", SafeArg.of("unknownType", unknownType));
+            };
+            return this;
+        }
+
+        @Override
+        public Visitor<T> build() {
+            final BiFunction<@Safe String, Object, T> unknownVisitor = this.unknownVisitor;
+            return new Visitor<T>() {
+                @Override
+                public T visitUnknown(String unknownType, Object unknownValue) {
+                    return unknownVisitor.apply(unknownType, unknownValue);
+                }
+            };
+        }
+    }
+
+    interface UnknownStageVisitorBuilder<T> {
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull BiFunction<@Safe String, Object, T> unknownVisitor);
+
+        Completed_StageVisitorBuilder<T> unknown(@Nonnull Function<@Safe String, T> unknownVisitor);
+
+        Completed_StageVisitorBuilder<T> throwOnUnknown();
+    }
+
+    interface Completed_StageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 }

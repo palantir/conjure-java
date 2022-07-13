@@ -1,4 +1,4 @@
-package sealedunions.com.palantir.product;
+package withvisitors.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;

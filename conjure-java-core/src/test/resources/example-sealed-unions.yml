@@ -46,7 +46,7 @@ types:
           unknown: string
       EmptyUnionTypeExample:
         union: {}
-      Union:
+      SampleConjureUnion:
         union:
           foo: string
           bar:
