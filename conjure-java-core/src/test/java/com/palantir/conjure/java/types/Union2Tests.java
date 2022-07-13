@@ -43,33 +43,33 @@ class Union2Tests {
     }
 
     // These tests require Java 17 AND --enable-preview, see https://github.com/palantir/gradle-baseline/pull/2319
-    // @Test
-    // void switch_statement_compiles() {
-    //     Union2 myUnion = Union2.foo("hello");
-    //
-    //     // syntax requires java 19 (see JEP 405)
-    //     // if (myUnion instanceof Union2.Foo(String value)) {
-    //     //     System.out.println(value);
-    //     // }
-    //
-    //     switch (myUnion) {
-    //         case Union2.Foo foo -> System.out.println(foo.getValue());
-    //         case Union2.Bar bar -> System.out.println(bar.getValue());
-    //         case Union2.Baz baz -> System.out.println(baz.getValue());
-    //         case Union2.UnknownVariant unknownWrapper -> System.out.println(unknownWrapper);
-    //     }
-    // }
-    //
-    // @Test
-    // void throwOnUnknown_allows_narrowing_to_a_specific_subtype() {
-    //     Union2 myUnion = Union2.foo("hello");
-    //     Union2.Known narrowedSubtype = myUnion.throwOnUnknown();
-    //     switch (narrowedSubtype) {
-    //         case Union2.Foo foo -> System.out.println(foo.getValue());
-    //         case Union2.Bar bar -> System.out.println(bar.getValue());
-    //         case Union2.Baz baz -> System.out.println(baz.getValue());
-    //     }
-    // }
+    @Test
+    void switch_statement_compiles() {
+        Union2 myUnion = Union2.foo("hello");
+
+        // syntax requires java 19 (see JEP 405)
+        // if (myUnion instanceof Union2.Foo(String value)) {
+        //     System.out.println(value);
+        // }
+
+        switch (myUnion) {
+            case Union2.Foo foo -> System.out.println(foo.getValue());
+            case Union2.Bar bar -> System.out.println(bar.getValue());
+            case Union2.Baz baz -> System.out.println(baz.getValue());
+            case Union2.UnknownVariant unknownWrapper -> System.out.println(unknownWrapper);
+        }
+    }
+
+    @Test
+    void throwOnUnknown_allows_narrowing_to_a_specific_subtype() {
+        Union2 myUnion = Union2.foo("hello");
+        Union2.Known narrowedSubtype = myUnion.throwOnUnknown();
+        switch (narrowedSubtype) {
+            case Union2.Foo foo -> System.out.println(foo.getValue());
+            case Union2.Bar bar -> System.out.println(bar.getValue());
+            case Union2.Baz baz -> System.out.println(baz.getValue());
+        }
+    }
 
     @Test
     void serialization() throws JsonProcessingException {
