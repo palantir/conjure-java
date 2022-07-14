@@ -81,6 +81,11 @@ public final class ReservedKeyExample {
     }
 
     private boolean equalTo(ReservedKeyExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.package_.equals(other.package_)
                 && this.interface_.equals(other.interface_)
                 && this.fieldNameWithDashes.equals(other.fieldNameWithDashes)

@@ -1,0 +1,15 @@
+type: improvement
+improvement:
+  description: |-
+    Generated equals uses memoizedHashCode if available
+
+    When we generate a memoizedHashCode field for a conjure object, the
+    equals & equalTo implementation now compare memoizedHashCode for objects
+    being compared, and will short circuit and return false if both objects
+    have already computed their hashCode and they do not match.
+
+    This is beneficial for complex conjure types that may be used as keys in
+    hash based collections, including graphs that rely on both hashCode and
+    equals.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1842

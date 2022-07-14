@@ -117,10 +117,11 @@ public final class BeanGenerator {
                 .addMethods(createGetters(fields, typesMap, options));
 
         if (!poetFields.isEmpty()) {
+            boolean useCachedHashCode = useCachedHashCode(fields);
             typeBuilder
                     .addMethod(MethodSpecs.createEquals(objectClass))
-                    .addMethod(MethodSpecs.createEqualTo(objectClass, poetFields));
-            if (useCachedHashCode(fields)) {
+                    .addMethod(MethodSpecs.createEqualTo(objectClass, poetFields, useCachedHashCode));
+            if (useCachedHashCode) {
                 MethodSpecs.addCachedHashCode(typeBuilder, poetFields);
             } else {
                 typeBuilder.addMethod(MethodSpecs.createHashCode(poetFields));

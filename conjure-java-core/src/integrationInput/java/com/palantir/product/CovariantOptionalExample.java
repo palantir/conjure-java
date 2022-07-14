@@ -50,6 +50,11 @@ public final class CovariantOptionalExample {
     }
 
     private boolean equalTo(CovariantOptionalExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.item.equals(other.item) && this.setItem.equals(other.setItem);
     }
 

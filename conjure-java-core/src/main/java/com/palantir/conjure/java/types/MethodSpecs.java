@@ -38,6 +38,8 @@ import javax.lang.model.element.Modifier;
 
 public final class MethodSpecs {
 
+    private static final String MEMOIZED_HASH_CODE = "memoizedHashCode";
+
     public static MethodSpec createEquals(TypeName thisClass) {
         ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other").build();
         return MethodSpec.methodBuilder("equals")
@@ -50,6 +52,22 @@ public final class MethodSpecs {
     }
 
     public static MethodSpec createEqualTo(TypeName thisClass, Collection<FieldSpec> fields) {
+        return createEqualTo(thisClass, fields, false);
+    }
+
+    public static MethodSpec createEqualTo(
+            TypeName thisClass, Collection<FieldSpec> fields, boolean useMemoizedHashCode) {
+        CodeBlock hashComparison = useMemoizedHashCode
+                ? CodeBlock.builder()
+                        .beginControlFlow(
+                                "if ($1L != 0 && $2L != 0 && $1L != $2L)",
+                                "this." + MEMOIZED_HASH_CODE,
+                                "other." + MEMOIZED_HASH_CODE)
+                        .addStatement("return false")
+                        .endControlFlow()
+                        .build()
+                : CodeBlock.of("");
+
         CodeBlock equalsTo = fields.isEmpty()
                 ? CodeBlock.of("$L", true)
                 : CodeBlocks.of(
@@ -59,6 +77,7 @@ public final class MethodSpecs {
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(thisClass, "other")
                 .returns(TypeName.BOOLEAN)
+                .addCode(hashComparison)
                 .addStatement("return $L", equalsTo)
                 .build();
     }
@@ -90,7 +109,7 @@ public final class MethodSpecs {
 
     public static void addCachedHashCode(TypeSpec.Builder typeBuilder, Collection<FieldSpec> fields) {
         FieldSpec field = FieldSpec.builder(
-                        TypeName.INT, JavaNameSanitizer.sanitize("memoizedHashCode"), Modifier.PRIVATE)
+                        TypeName.INT, JavaNameSanitizer.sanitize(MEMOIZED_HASH_CODE), Modifier.PRIVATE)
                 .build();
         typeBuilder.addField(field);
         typeBuilder.addMethod(createCachedHashCode(fields, field));

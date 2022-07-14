@@ -59,6 +59,11 @@ public final class RiskyNames {
     }
 
     private boolean equalTo(RiskyNames other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.var.equals(other.var)
                 && this.class_.equals(other.class_)
                 && this.int_.equals(other.int_)

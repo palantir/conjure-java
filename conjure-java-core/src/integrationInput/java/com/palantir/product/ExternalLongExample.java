@@ -57,6 +57,11 @@ public final class ExternalLongExample {
     }
 
     private boolean equalTo(ExternalLongExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.externalLong == other.externalLong
                 && this.optionalExternalLong.equals(other.optionalExternalLong)
                 && this.listExternalLong.equals(other.listExternalLong);

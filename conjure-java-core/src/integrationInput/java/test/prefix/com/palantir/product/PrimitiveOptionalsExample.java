@@ -240,6 +240,11 @@ public final class PrimitiveOptionalsExample {
     }
 
     private boolean equalTo(PrimitiveOptionalsExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.num.equals(other.num)
                 && this.bool.equals(other.bool)
                 && this.integer.equals(other.integer)

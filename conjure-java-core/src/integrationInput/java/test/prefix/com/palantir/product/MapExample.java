@@ -59,6 +59,11 @@ public final class MapExample {
     }
 
     private boolean equalTo(MapExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.items.equals(other.items)
                 && this.optionalItems.equals(other.optionalItems)
                 && this.aliasOptionalItems.equals(other.aliasOptionalItems);

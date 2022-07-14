@@ -85,6 +85,11 @@ public final class ListExample {
     }
 
     private boolean equalTo(ListExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.items.equals(other.items)
                 && this.primitiveItems.equals(other.primitiveItems)
                 && this.doubleItems.equals(other.doubleItems)

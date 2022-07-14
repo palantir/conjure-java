@@ -90,6 +90,11 @@ public final class MultipleOrderedStages {
     }
 
     private boolean equalTo(MultipleOrderedStages other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.token.equals(other.token)
                 && this.item.equals(other.item)
                 && this.items.equals(other.items)

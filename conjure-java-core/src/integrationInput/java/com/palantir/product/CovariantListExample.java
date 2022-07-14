@@ -46,6 +46,11 @@ public final class CovariantListExample {
     }
 
     private boolean equalTo(CovariantListExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.items.equals(other.items) && this.externalItems.equals(other.externalItems);
     }
 

@@ -95,6 +95,11 @@ public final class AliasAsMapKeyExample {
     }
 
     private boolean equalTo(AliasAsMapKeyExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.strings.equals(other.strings)
                 && this.rids.equals(other.rids)
                 && this.bearertokens.equals(other.bearertokens)
