@@ -127,6 +127,11 @@ public final class MultipleFieldsOnlyFinalStage {
     }
 
     private boolean equalTo(MultipleFieldsOnlyFinalStage other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.items.equals(other.items)
                 && this.itemsMap.equals(other.itemsMap)
                 && this.optionalItem.equals(other.optionalItem)

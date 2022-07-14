@@ -38,6 +38,11 @@ public final class AnyMapExample {
     }
 
     private boolean equalTo(AnyMapExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.items.equals(other.items);
     }
 

@@ -137,6 +137,11 @@ public final class ManyFieldExample {
     }
 
     private boolean equalTo(ManyFieldExample other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
         return this.string.equals(other.string)
                 && this.integer == other.integer
                 && Double.doubleToLongBits(this.doubleValue) == Double.doubleToLongBits(other.doubleValue)
