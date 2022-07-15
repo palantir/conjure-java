@@ -16,7 +16,6 @@ com.palantir.tokens:* = 3.14.0
 com.palantir.tracing:* = 6.11.0
 com.palantir.websecurity:dropwizard-web-security = 1.1.0
 com.squareup.okhttp3:* = 3.14.1
-com.squareup:javapoet = 1.13.0
 info.picocli:picocli = 4.6.3
 io.dropwizard.metrics:metrics-core = 4.1.0
 io.dropwizard:dropwizard-* = 2.0.2

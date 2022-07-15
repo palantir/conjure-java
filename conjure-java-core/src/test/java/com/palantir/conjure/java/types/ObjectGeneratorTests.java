@@ -72,6 +72,27 @@ public final class ObjectGeneratorTests {
     }
 
     @Test
+    public void testSealedUnions() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-sealed-unions.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .useImmutableBytes(true)
+                                .strictObjects(true)
+                                .nonNullCollections(true)
+                                .excludeEmptyOptionals(true)
+                                .unionsWithUnknownValues(true)
+                                .sealedUnions(true)
+                                .sealedUnionVisitors(true)
+                                .packagePrefix("withvisitors")
+                                .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, "src/test/resources/sealedunions");
+    }
+
+    @Test
     public void testObjectGenerator_byteBufferCompatibility() throws IOException {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
@@ -217,7 +238,7 @@ public final class ObjectGeneratorTests {
         for (Path file : files) {
             Path relativized = tempDir.toPath().relativize(file);
             Path expectedFile = Paths.get(referenceFilesFolder, relativized.toString());
-            if (Boolean.valueOf(System.getProperty("recreate", "false"))) {
+            if (!System.getenv().containsKey("CI") || Boolean.valueOf(System.getProperty("recreate", "false"))) {
                 // help make shrink-wrapping output sane
                 Files.createDirectories(expectedFile.getParent());
                 Files.deleteIfExists(expectedFile);

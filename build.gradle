@@ -39,9 +39,10 @@ apply plugin: 'com.palantir.git-version'
 apply plugin: 'com.palantir.consistent-versions'
 apply plugin: 'com.palantir.baseline-java-versions'
 apply plugin: 'com.palantir.jdks.latest'
+apply plugin: 'com.palantir.baseline-enable-preview-flag'
 
 javaVersions {
-    libraryTarget = 11
+    libraryTarget = 17
     runtime = 17
 }
 
@@ -52,6 +53,7 @@ allprojects {
 
     repositories {
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+        maven { url 'https://jitpack.io' }
     }
 
     configurations.all {
@@ -65,6 +67,17 @@ allprojects {
                 details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
                 details.because "The error_prone_annotations dependency must be low to avoid forcing consumers to use newer releases"
             }
+        }
+    }
+
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            // javapoet hasn't merged contributions in a while. Specifically, I want:
+            //  - records https://github.com/square/javapoet/pull/840
+            //  - permits https://github.com/square/javapoet/issues/823
+            // It appears that @liach has implemented both of these, and merged them to the javapoet fork https://github.com/FabricMC/javapoet.
+            // I'm using jitpack.io to compile a jar of the specific commit (from master) of that fork.
+            it.substitute it.module('com.squareup:javapoet') with it.module('com.github.FabricMC:javapoet:d9b7dba158')
         }
     }
 }

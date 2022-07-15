@@ -1,0 +1,63 @@
+types:
+  imports:
+    ExternalLong:
+      base-type: safelong
+      external:
+        java: java.lang.Long
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      StringExample:
+        fields:
+          string: string
+      ListAlias:
+        alias: list<string>
+      OptionalAlias:
+        alias: optional<string>
+        safety: safe
+      SetAlias:
+        alias: set<string>
+      MapAliasExample:
+        alias: map<string, any>
+      UnionTypeExample:
+        docs: A type which can either be a StringExample, a set of strings, or an integer.
+        union:
+          stringExample:
+            type: StringExample
+            docs: Docs for when UnionTypeExample is of type StringExample.
+          thisFieldIsAnInteger: integer
+          alsoAnInteger: integer
+          if: integer # some 'bad' member names!
+          new: integer
+          interface: integer
+          completed: integer
+          unknown: integer
+          known: string
+          optional: optional<string>
+          list: list<string>
+          set: set<string>
+          map: map<string, string>
+          optionalAlias: OptionalAlias
+          listAlias: ListAlias
+          setAlias: SetAlias
+          mapAlias: MapAliasExample
+      UnionWithUnknownString:
+        union:
+          unknown: string
+      EmptyUnionTypeExample:
+        union: {}
+      SampleConjureUnion:
+        union:
+          foo: string
+          bar:
+            type: integer
+            deprecated: Int is deprecated.
+          baz:
+            type: ExternalLong
+            docs: 64-bit integer.
+            deprecated: Prefer `foo`.
+      SingleUnion:
+        union:
+          foo:
+            type: string
+            safety: safe
