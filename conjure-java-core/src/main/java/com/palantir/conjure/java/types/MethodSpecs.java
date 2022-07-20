@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import static com.palantir.logsafe.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.spec.FieldName;
@@ -27,6 +28,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.time.OffsetDateTime;
@@ -38,6 +40,8 @@ import javax.lang.model.element.Modifier;
 
 public final class MethodSpecs {
 
+    private static final ImmutableSet<String> COLLECTION_TYPES =
+            ImmutableSet.of("java.util.List", "java.util.Set", "java.util.Map");
     private static final String MEMOIZED_HASH_CODE = "memoizedHashCode";
 
     public static MethodSpec createEquals(TypeName thisClass) {
@@ -70,8 +74,10 @@ public final class MethodSpecs {
 
         CodeBlock equalsTo = fields.isEmpty()
                 ? CodeBlock.of("$L", true)
-                : CodeBlocks.of(
-                        fields.stream().map(MethodSpecs::createEqualsStatement).collect(joining(CodeBlock.of(" && "))));
+                : CodeBlocks.of(fields.stream()
+                        .sorted(MethodSpecs::collectionsLastForEquals)
+                        .map(MethodSpecs::createEqualsStatement)
+                        .collect(joining(CodeBlock.of(" && "))));
 
         return MethodSpec.methodBuilder("equalTo")
                 .addModifiers(Modifier.PRIVATE)
@@ -80,6 +86,29 @@ public final class MethodSpecs {
                 .addCode(hashComparison)
                 .addStatement("return $L", equalsTo)
                 .build();
+    }
+
+    private static int collectionsLastForEquals(FieldSpec field1, FieldSpec field2) {
+        if (COLLECTION_TYPES.contains(getTypeForEquals(field1.type))) {
+            if (COLLECTION_TYPES.contains(getTypeForEquals(field2.type))) {
+                return 0; // both are collections, keep in place
+            }
+            return 1; // sort collections last for equals comparison
+        }
+        return 0; // keep in place
+    }
+
+    private static String getTypeForEquals(TypeName typeName) {
+        if (typeName instanceof ParameterizedTypeName) {
+            ParameterizedTypeName parameterizedTypeName = (ParameterizedTypeName) typeName;
+            String canonicalName = parameterizedTypeName.rawType.canonicalName();
+            if ("java.util.Optional".equals(canonicalName)) {
+                return getTypeForEquals(
+                        parameterizedTypeName.typeArguments.iterator().next());
+            }
+            return canonicalName;
+        }
+        return typeName.toString();
     }
 
     private static CodeBlock createEqualsStatement(FieldSpec field) {
