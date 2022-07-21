@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Allow customization of the ObjectMapper used by Jackson based Undertow
+    encodings
+  links:
+  - https://github.com/palantir/conjure-java/pull/1848
