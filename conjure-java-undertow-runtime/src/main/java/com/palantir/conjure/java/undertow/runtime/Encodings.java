@@ -29,6 +29,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 // TODO(rfink): Consider async Jackson, see
 //              https://github.com/spring-projects/spring-framework/commit/31e0e537500c0763a36d3af2570d5c253a374690
@@ -112,40 +113,50 @@ public final class Encodings {
         }
     }
 
-    /** Returns a serializer for the Conjure JSON wire format. */
-    public static Encoding json() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newServerObjectMapper())) {
-            private static final String CONTENT_TYPE = "application/json";
-
+    /** Returns a serializer for a generic object mapper. */
+    public static Encoding generic(ObjectMapper mapper, String contentType) {
+        return new AbstractJacksonEncoding(configure(mapper.copy())) {
             @Override
             public String getContentType() {
-                return CONTENT_TYPE;
+                return contentType;
             }
         };
+    }
+
+    /** Returns a serializer for the Conjure JSON wire format. */
+    public static Encoding json() {
+        return json(_mapper -> {});
+    }
+
+    /** Returns a serializer for a JSON wire format.  A customizer can be provided to adjust the ObjectMapper. */
+    public static Encoding json(Consumer<ObjectMapper> customizer) {
+        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+        customizer.accept(mapper);
+        return generic(mapper, "application/json");
     }
 
     /** Returns a serializer for the Conjure CBOR wire format. */
     public static Encoding cbor() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newCborServerObjectMapper())) {
-            private static final String CONTENT_TYPE = "application/cbor";
+        return cbor(_mapper -> {});
+    }
 
-            @Override
-            public String getContentType() {
-                return CONTENT_TYPE;
-            }
-        };
+    /** Returns a serializer for a CBOR wire format.  A customizer can be provided to adjust the ObjectMapper. */
+    public static Encoding cbor(Consumer<ObjectMapper> customizer) {
+        ObjectMapper mapper = ObjectMappers.newCborServerObjectMapper();
+        customizer.accept(mapper);
+        return generic(mapper, "application/cbor");
     }
 
     /** Returns a serializer for the Conjure Smile wire format. */
     public static Encoding smile() {
-        return new AbstractJacksonEncoding(configure(ObjectMappers.newSmileServerObjectMapper())) {
-            private static final String CONTENT_TYPE = "application/x-jackson-smile";
+        return smile(_mapper -> {});
+    }
 
-            @Override
-            public String getContentType() {
-                return CONTENT_TYPE;
-            }
-        };
+    /** Returns a serializer for a Smile wire format.  A customizer can be provided to adjust the ObjectMapper. */
+    public static Encoding smile(Consumer<ObjectMapper> customizer) {
+        ObjectMapper mapper = ObjectMappers.newSmileServerObjectMapper();
+        customizer.accept(mapper);
+        return generic(mapper, "application/x-jackson-smile");
     }
 
     private static ObjectMapper configure(ObjectMapper mapper) {
