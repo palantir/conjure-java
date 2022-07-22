@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Collection setters use constructor when clearing
+  links:
+  - https://github.com/palantir/conjure-java/pull/1852
