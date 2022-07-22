@@ -10,6 +10,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -124,8 +125,13 @@ public final class SetExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items.clear();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            if (items instanceof Collection) {
+                this.items =
+                        new LinkedHashSet<>((Collection) Preconditions.checkNotNull(items, "items cannot be null"));
+            } else {
+                this.items.clear();
+                ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            }
             return this;
         }
 
@@ -144,9 +150,14 @@ public final class SetExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems.clear();
-            ConjureCollections.addAll(
-                    this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
+            if (doubleItems instanceof Collection) {
+                this.doubleItems = new LinkedHashSet<>(
+                        (Collection) Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
+            } else {
+                this.doubleItems.clear();
+                ConjureCollections.addAll(
+                        this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
+            }
             return this;
         }
 

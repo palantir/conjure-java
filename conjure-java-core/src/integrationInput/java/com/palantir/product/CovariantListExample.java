@@ -9,6 +9,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Generated;
@@ -121,8 +122,12 @@ public final class CovariantListExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<?> items) {
             checkNotBuilt();
-            this.items.clear();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            if (items instanceof Collection) {
+                this.items = new ArrayList<>((Collection) Preconditions.checkNotNull(items, "items cannot be null"));
+            } else {
+                this.items.clear();
+                ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            }
             return this;
         }
 
@@ -141,9 +146,14 @@ public final class CovariantListExample {
         @JsonSetter(value = "externalItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder externalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             checkNotBuilt();
-            this.externalItems.clear();
-            ConjureCollections.addAll(
-                    this.externalItems, Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
+            if (externalItems instanceof Collection) {
+                this.externalItems = new ArrayList<>(
+                        (Collection) Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
+            } else {
+                this.externalItems.clear();
+                ConjureCollections.addAll(
+                        this.externalItems, Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
+            }
             return this;
         }
 

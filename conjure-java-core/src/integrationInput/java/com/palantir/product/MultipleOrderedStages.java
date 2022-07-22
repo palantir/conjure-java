@@ -14,6 +14,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.ri.ResourceIdentifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -289,8 +290,13 @@ public final class MultipleOrderedStages {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<SafeLong> items) {
             checkNotBuilt();
-            this.items.clear();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            if (items instanceof Collection) {
+                this.items =
+                        new LinkedHashSet<>((Collection) Preconditions.checkNotNull(items, "items cannot be null"));
+            } else {
+                this.items.clear();
+                ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            }
             return this;
         }
 
@@ -312,8 +318,7 @@ public final class MultipleOrderedStages {
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
-            this.mappedRids.clear();
-            this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
+            this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
             return this;
         }
 
