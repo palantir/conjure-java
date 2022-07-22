@@ -28,6 +28,7 @@ import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.TypeFunctions;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ExternalReference;
@@ -72,6 +73,23 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 public final class BeanBuilderGenerator {
+
+    private static final Type.Visitor<Class<?>> COLLECTION_CONCRETE_TYPE = new DefaultTypeVisitor<>() {
+        @Override
+        public Class<?> visitList(ListType _value) {
+            return ArrayList.class;
+        }
+
+        @Override
+        public Class<?> visitSet(SetType _value) {
+            return LinkedHashSet.class;
+        }
+
+        @Override
+        public Class<?> visitMap(MapType _value) {
+            return LinkedHashMap.class;
+        }
+    };
 
     private static final String BUILT_FIELD = "_buildInvoked";
     private static final String CHECK_NOT_BUILT_METHOD = "checkNotBuilt";
@@ -349,17 +367,36 @@ public final class BeanBuilderGenerator {
                     ConjureCollections.class,
                     spec.name,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
-            return shouldClearFirst
-                    ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
-                    : addStatement;
+            if (shouldClearFirst) {
+                return CodeBlock.builder()
+                        .beginControlFlow("if ($1N instanceof $2T)", spec.name, Collection.class)
+                        .addStatement(
+                                "this.$1N = new $2T<>(($3T) $4L)",
+                                spec.name,
+                                type.accept(COLLECTION_CONCRETE_TYPE),
+                                Collection.class,
+                                Expressions.requireNonNull(
+                                        spec.name, enriched.fieldName().get() + " cannot be null"))
+                        .nextControlFlow("else")
+                        .addStatement("this.$1N.clear()", spec.name)
+                        .add(addStatement)
+                        .endControlFlow()
+                        .build();
+            }
+            return addStatement;
         } else if (type.accept(TypeVisitor.IS_MAP)) {
-            CodeBlock addStatement = CodeBlocks.statement(
+            if (shouldClearFirst) {
+                return CodeBlocks.statement(
+                                "this.$1N = new $2T<>($3L)",
+                                spec.name,
+                                type.accept(COLLECTION_CONCRETE_TYPE),
+                                Expressions.requireNonNull(
+                                        spec.name, enriched.fieldName().get() + " cannot be null"));
+            }
+            return CodeBlocks.statement(
                     "this.$1N.putAll($2L)",
                     spec.name,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
-            return shouldClearFirst
-                    ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
-                    : addStatement;
         } else if (isByteBuffer(type)) {
             return CodeBlock.builder()
                     .addStatement(
