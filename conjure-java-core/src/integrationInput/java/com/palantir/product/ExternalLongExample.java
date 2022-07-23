@@ -10,7 +10,6 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -170,15 +169,8 @@ public final class ExternalLongExample {
         @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder listExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
             checkNotBuilt();
-            if (listExternalLong instanceof Collection) {
-                this.listExternalLong = new ArrayList<>(
-                        (Collection) Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
-            } else {
-                this.listExternalLong.clear();
-                ConjureCollections.addAll(
-                        this.listExternalLong,
-                        Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
-            }
+            this.listExternalLong = ConjureCollections.newArrayList(
+                    Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
             return this;
         }
 
