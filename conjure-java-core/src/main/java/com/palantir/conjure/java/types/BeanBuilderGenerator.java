@@ -362,28 +362,20 @@ public final class BeanBuilderGenerator {
     private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
-            CodeBlock addStatement = CodeBlocks.statement(
+            if (shouldClearFirst) {
+                return CodeBlocks.statement(
+                        "this.$1N = $2T.new$3T($4L)",
+                        spec.name,
+                        ConjureCollections.class,
+                        type.accept(COLLECTION_CONCRETE_TYPE),
+                        Expressions.requireNonNull(
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
+            }
+            return CodeBlocks.statement(
                     "$1T.addAll(this.$2N, $3L)",
                     ConjureCollections.class,
                     spec.name,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
-            if (shouldClearFirst) {
-                return CodeBlock.builder()
-                        .beginControlFlow("if ($1N instanceof $2T)", spec.name, Collection.class)
-                        .addStatement(
-                                "this.$1N = new $2T<>(($3T) $4L)",
-                                spec.name,
-                                type.accept(COLLECTION_CONCRETE_TYPE),
-                                Collection.class,
-                                Expressions.requireNonNull(
-                                        spec.name, enriched.fieldName().get() + " cannot be null"))
-                        .nextControlFlow("else")
-                        .addStatement("this.$1N.clear()", spec.name)
-                        .add(addStatement)
-                        .endControlFlow()
-                        .build();
-            }
-            return addStatement;
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             if (shouldClearFirst) {
                 return CodeBlocks.statement(
