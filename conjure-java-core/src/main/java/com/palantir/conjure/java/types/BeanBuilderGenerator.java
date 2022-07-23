@@ -387,11 +387,11 @@ public final class BeanBuilderGenerator {
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             if (shouldClearFirst) {
                 return CodeBlocks.statement(
-                                "this.$1N = new $2T<>($3L)",
-                                spec.name,
-                                type.accept(COLLECTION_CONCRETE_TYPE),
-                                Expressions.requireNonNull(
-                                        spec.name, enriched.fieldName().get() + " cannot be null"));
+                        "this.$1N = new $2T<>($3L)",
+                        spec.name,
+                        type.accept(COLLECTION_CONCRETE_TYPE),
+                        Expressions.requireNonNull(
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
             }
             return CodeBlocks.statement(
                     "this.$1N.putAll($2L)",
