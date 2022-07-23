@@ -262,18 +262,15 @@ public final class BeanBuilderGenerator {
     }
 
     private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
-        TypeName typeName = ConjureAnnotations.withSafety(typeMapper.getClassName(field.getType()), field.getSafety());
+        Type type = field.getType();
+        TypeName typeName = ConjureAnnotations.withSafety(typeMapper.getClassName(type), field.getSafety());
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
-        if (field.getType().accept(TypeVisitor.IS_LIST)) {
-            spec.initializer("new $T<>()", ArrayList.class);
-        } else if (field.getType().accept(TypeVisitor.IS_SET)) {
-            spec.initializer("new $T<>()", LinkedHashSet.class);
-        } else if (field.getType().accept(TypeVisitor.IS_MAP)) {
-            spec.initializer("new $T<>()", LinkedHashMap.class);
-        } else if (field.getType().accept(TypeVisitor.IS_OPTIONAL)) {
-            spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(field.getType())));
-        } else if (field.getType().accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
-            com.palantir.conjure.spec.TypeName name = field.getType().accept(TypeVisitor.REFERENCE);
+        if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
+            spec.initializer("new $T<>()", type.accept(COLLECTION_CONCRETE_TYPE));
+        } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+            spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(type)));
+        } else if (type.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
+            com.palantir.conjure.spec.TypeName name = type.accept(TypeVisitor.REFERENCE);
             typeMapper
                     .getType(name)
                     .filter(definition -> definition.accept(TypeDefinitionVisitor.IS_ALIAS))
@@ -281,7 +278,7 @@ public final class BeanBuilderGenerator {
                     .ifPresent(aliasDefinition -> {
                         Type aliasType = aliasDefinition.getAlias();
                         if (aliasType.accept(MoreVisitors.IS_COLLECTION) || aliasType.accept(TypeVisitor.IS_OPTIONAL)) {
-                            spec.initializer("$T.empty()", typeMapper.getClassName(field.getType()));
+                            spec.initializer("$T.empty()", typeMapper.getClassName(type));
                         }
                     });
         }
