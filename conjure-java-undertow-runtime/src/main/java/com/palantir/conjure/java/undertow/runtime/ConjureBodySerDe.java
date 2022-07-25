@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import org.xnio.IoUtils;
 
@@ -100,7 +101,7 @@ final class ConjureBodySerDe implements BodySerDe {
     @Override
     public InputStream deserializeInputStream(HttpServerExchange exchange) {
         String contentType = getContentType(exchange);
-        if (!contentType.toLowerCase().startsWith(BINARY_CONTENT_TYPE)) {
+        if (!contentType.toLowerCase(Locale.ROOT).startsWith(BINARY_CONTENT_TYPE)) {
             throw FrameworkException.unsupportedMediaType(
                     "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
         }
