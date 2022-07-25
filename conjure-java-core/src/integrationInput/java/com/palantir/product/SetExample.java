@@ -122,8 +122,7 @@ public final class SetExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items.clear();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newLinkedHashSet(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -142,9 +141,8 @@ public final class SetExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems.clear();
-            ConjureCollections.addAll(
-                    this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
+            this.doubleItems = ConjureCollections.newLinkedHashSet(
+                    Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 

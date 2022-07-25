@@ -153,8 +153,7 @@ public final class MapExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Map<String, String> items) {
             checkNotBuilt();
-            this.items.clear();
-            this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = new LinkedHashMap<>(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -173,8 +172,8 @@ public final class MapExample {
         @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder optionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
             checkNotBuilt();
-            this.optionalItems.clear();
-            this.optionalItems.putAll(Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
+            this.optionalItems =
+                    new LinkedHashMap<>(Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
@@ -193,8 +192,7 @@ public final class MapExample {
         @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
             checkNotBuilt();
-            this.aliasOptionalItems.clear();
-            this.aliasOptionalItems.putAll(
+            this.aliasOptionalItems = new LinkedHashMap<>(
                     Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
             return this;
         }

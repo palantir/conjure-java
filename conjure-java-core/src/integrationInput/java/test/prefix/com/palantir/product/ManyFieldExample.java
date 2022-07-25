@@ -315,8 +315,7 @@ public final class ManyFieldExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items.clear();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -344,8 +343,7 @@ public final class ManyFieldExample {
         @JsonSetter(value = "set", nulls = Nulls.SKIP)
         public Builder set(@Nonnull Iterable<String> set) {
             checkNotBuilt();
-            this.set.clear();
-            ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
+            this.set = ConjureCollections.newLinkedHashSet(Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
@@ -374,8 +372,7 @@ public final class ManyFieldExample {
         @JsonSetter(value = "map", nulls = Nulls.SKIP)
         public Builder map(@Nonnull Map<String, String> map) {
             checkNotBuilt();
-            this.map.clear();
-            this.map.putAll(Preconditions.checkNotNull(map, "map cannot be null"));
+            this.map = new LinkedHashMap<>(Preconditions.checkNotNull(map, "map cannot be null"));
             return this;
         }
 

@@ -206,8 +206,7 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "strings", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder strings(@Nonnull Map<StringAliasExample, ManyFieldExample> strings) {
             checkNotBuilt();
-            this.strings.clear();
-            this.strings.putAll(Preconditions.checkNotNull(strings, "strings cannot be null"));
+            this.strings = new LinkedHashMap<>(Preconditions.checkNotNull(strings, "strings cannot be null"));
             return this;
         }
 
@@ -226,8 +225,7 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "rids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder rids(@Nonnull Map<RidAliasExample, ManyFieldExample> rids) {
             checkNotBuilt();
-            this.rids.clear();
-            this.rids.putAll(Preconditions.checkNotNull(rids, "rids cannot be null"));
+            this.rids = new LinkedHashMap<>(Preconditions.checkNotNull(rids, "rids cannot be null"));
             return this;
         }
 
@@ -246,8 +244,8 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "bearertokens", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder bearertokens(@Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
             checkNotBuilt();
-            this.bearertokens.clear();
-            this.bearertokens.putAll(Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
+            this.bearertokens =
+                    new LinkedHashMap<>(Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
             return this;
         }
 
@@ -266,8 +264,7 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "integers", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder integers(@Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
             checkNotBuilt();
-            this.integers.clear();
-            this.integers.putAll(Preconditions.checkNotNull(integers, "integers cannot be null"));
+            this.integers = new LinkedHashMap<>(Preconditions.checkNotNull(integers, "integers cannot be null"));
             return this;
         }
 
@@ -286,8 +283,7 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "safelongs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
             checkNotBuilt();
-            this.safelongs.clear();
-            this.safelongs.putAll(Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
+            this.safelongs = new LinkedHashMap<>(Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
             return this;
         }
 
@@ -306,8 +302,7 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "datetimes", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder datetimes(@Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
             checkNotBuilt();
-            this.datetimes.clear();
-            this.datetimes.putAll(Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
+            this.datetimes = new LinkedHashMap<>(Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
             return this;
         }
 
@@ -326,8 +321,7 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "uuids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder uuids(@Nonnull Map<UuidAliasExample, ManyFieldExample> uuids) {
             checkNotBuilt();
-            this.uuids.clear();
-            this.uuids.putAll(Preconditions.checkNotNull(uuids, "uuids cannot be null"));
+            this.uuids = new LinkedHashMap<>(Preconditions.checkNotNull(uuids, "uuids cannot be null"));
             return this;
         }
 

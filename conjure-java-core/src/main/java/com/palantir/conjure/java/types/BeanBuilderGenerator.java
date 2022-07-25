@@ -28,6 +28,7 @@ import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.TypeFunctions;
+import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ExternalReference;
@@ -72,6 +73,23 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 public final class BeanBuilderGenerator {
+
+    private static final Type.Visitor<Class<?>> COLLECTION_CONCRETE_TYPE = new DefaultTypeVisitor<>() {
+        @Override
+        public Class<?> visitList(ListType _value) {
+            return ArrayList.class;
+        }
+
+        @Override
+        public Class<?> visitSet(SetType _value) {
+            return LinkedHashSet.class;
+        }
+
+        @Override
+        public Class<?> visitMap(MapType _value) {
+            return LinkedHashMap.class;
+        }
+    };
 
     private static final String BUILT_FIELD = "_buildInvoked";
     private static final String CHECK_NOT_BUILT_METHOD = "checkNotBuilt";
@@ -244,18 +262,15 @@ public final class BeanBuilderGenerator {
     }
 
     private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
-        TypeName typeName = ConjureAnnotations.withSafety(typeMapper.getClassName(field.getType()), field.getSafety());
+        Type type = field.getType();
+        TypeName typeName = ConjureAnnotations.withSafety(typeMapper.getClassName(type), field.getSafety());
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
-        if (field.getType().accept(TypeVisitor.IS_LIST)) {
-            spec.initializer("new $T<>()", ArrayList.class);
-        } else if (field.getType().accept(TypeVisitor.IS_SET)) {
-            spec.initializer("new $T<>()", LinkedHashSet.class);
-        } else if (field.getType().accept(TypeVisitor.IS_MAP)) {
-            spec.initializer("new $T<>()", LinkedHashMap.class);
-        } else if (field.getType().accept(TypeVisitor.IS_OPTIONAL)) {
-            spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(field.getType())));
-        } else if (field.getType().accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
-            com.palantir.conjure.spec.TypeName name = field.getType().accept(TypeVisitor.REFERENCE);
+        if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
+            spec.initializer("new $T<>()", type.accept(COLLECTION_CONCRETE_TYPE));
+        } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+            spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(type)));
+        } else if (type.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
+            com.palantir.conjure.spec.TypeName name = type.accept(TypeVisitor.REFERENCE);
             typeMapper
                     .getType(name)
                     .filter(definition -> definition.accept(TypeDefinitionVisitor.IS_ALIAS))
@@ -263,7 +278,7 @@ public final class BeanBuilderGenerator {
                     .ifPresent(aliasDefinition -> {
                         Type aliasType = aliasDefinition.getAlias();
                         if (aliasType.accept(MoreVisitors.IS_COLLECTION) || aliasType.accept(TypeVisitor.IS_OPTIONAL)) {
-                            spec.initializer("$T.empty()", typeMapper.getClassName(field.getType()));
+                            spec.initializer("$T.empty()", typeMapper.getClassName(type));
                         }
                     });
         }
@@ -344,22 +359,33 @@ public final class BeanBuilderGenerator {
     private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
-            CodeBlock addStatement = CodeBlocks.statement(
+            if (shouldClearFirst) {
+                return CodeBlocks.statement(
+                        "this.$1N = $2T.new$3T($4L)",
+                        spec.name,
+                        ConjureCollections.class,
+                        type.accept(COLLECTION_CONCRETE_TYPE),
+                        Expressions.requireNonNull(
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
+            }
+            return CodeBlocks.statement(
                     "$1T.addAll(this.$2N, $3L)",
                     ConjureCollections.class,
                     spec.name,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
-            return shouldClearFirst
-                    ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
-                    : addStatement;
         } else if (type.accept(TypeVisitor.IS_MAP)) {
-            CodeBlock addStatement = CodeBlocks.statement(
+            if (shouldClearFirst) {
+                return CodeBlocks.statement(
+                        "this.$1N = new $2T<>($3L)",
+                        spec.name,
+                        type.accept(COLLECTION_CONCRETE_TYPE),
+                        Expressions.requireNonNull(
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
+            }
+            return CodeBlocks.statement(
                     "this.$1N.putAll($2L)",
                     spec.name,
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
-            return shouldClearFirst
-                    ? CodeBlocks.of(CodeBlocks.statement("this.$1N.clear()", spec.name), addStatement)
-                    : addStatement;
         } else if (isByteBuffer(type)) {
             return CodeBlock.builder()
                     .addStatement(

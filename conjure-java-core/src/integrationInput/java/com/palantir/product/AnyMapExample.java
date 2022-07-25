@@ -106,8 +106,7 @@ public final class AnyMapExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Map<String, Object> items) {
             checkNotBuilt();
-            this.items.clear();
-            this.items.putAll(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = new LinkedHashMap<>(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
