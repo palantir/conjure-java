@@ -100,7 +100,7 @@ final class ConjureBodySerDe implements BodySerDe {
     @Override
     public InputStream deserializeInputStream(HttpServerExchange exchange) {
         String contentType = getContentType(exchange);
-        if (!contentType.startsWith(BINARY_CONTENT_TYPE)) {
+        if (!contentType.toLowerCase().startsWith(BINARY_CONTENT_TYPE)) {
             throw FrameworkException.unsupportedMediaType(
                     "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
         }
