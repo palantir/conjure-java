@@ -40,7 +40,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import org.xnio.IoUtils;
 
@@ -101,7 +100,10 @@ final class ConjureBodySerDe implements BodySerDe {
     @Override
     public InputStream deserializeInputStream(HttpServerExchange exchange) {
         String contentType = getContentType(exchange);
-        if (!contentType.toLowerCase(Locale.ROOT).startsWith(BINARY_CONTENT_TYPE)) {
+        // Compare using 'String#regionMatches' to avoid allocation
+        if (contentType.length() < BINARY_CONTENT_TYPE.length()
+                || !contentType.regionMatches(
+                        /* ignoreCase = */ true, 0, BINARY_CONTENT_TYPE, 0, BINARY_CONTENT_TYPE.length())) {
             throw FrameworkException.unsupportedMediaType(
                     "Unsupported Content-Type", SafeArg.of("Content-Type", contentType));
         }
@@ -272,6 +274,8 @@ final class ConjureBodySerDe implements BodySerDe {
      * a warning. This notifies us in the unexpected case when multiple
      * content-type headers are incorrectly sent to the server, it's not clear which should
      * be used.
+     * <p>
+     * Note that the returned content-type needs to be compared case-insensitive.
      */
     private static String getContentType(HttpServerExchange exchange) {
         HeaderValues contentTypeValues = exchange.getRequestHeaders().get(Headers.CONTENT_TYPE);
