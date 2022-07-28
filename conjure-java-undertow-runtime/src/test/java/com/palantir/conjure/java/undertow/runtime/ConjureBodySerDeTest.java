@@ -76,6 +76,15 @@ public class ConjureBodySerDeTest {
     }
 
     @Test
+    public void testBinaryRequestContentType_caseInsensitive() {
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().put(Headers.CONTENT_TYPE, "Application/Octet-Stream");
+        BodySerDe serializers = new ConjureBodySerDe(ImmutableList.of(new StubEncoding("application/octet-stream")));
+        // Test that no "Unsupported Content-Type" exception is thrown
+        serializers.deserializeInputStream(exchange);
+    }
+
+    @Test
     public void testResponseContentType() throws IOException {
         Encoding json = new StubEncoding("application/json");
         Encoding plain = new StubEncoding("text/plain");

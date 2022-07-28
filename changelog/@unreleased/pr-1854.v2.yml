@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Compare content-type case insensitive
+  links:
+  - https://github.com/palantir/conjure-java/pull/1854
