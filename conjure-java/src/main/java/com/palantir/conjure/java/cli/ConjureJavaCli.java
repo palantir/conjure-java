@@ -96,6 +96,12 @@ public final class ConjureJavaCli implements Runnable {
         private boolean generateJersey;
 
         @CommandLine.Option(
+                names = "--jakartaPackages",
+                defaultValue = "false",
+                description = "When generating jax-rs annotation interfaces, use the newer jakarta prefixes")
+        private boolean jakartaPackages;
+
+        @CommandLine.Option(
                 names = "--undertow",
                 defaultValue = "false",
                 description = "Generate undertow service interfaces and endpoint wrappers for server usage")
@@ -268,6 +274,7 @@ public final class ConjureJavaCli implements Runnable {
                             .useImmutableBytes(useImmutableBytes)
                             .undertowListenableFutures(undertowListenableFutures)
                             .experimentalUndertowAsyncMarkers(experimentalUndertowAsyncMarkers)
+                            .jakartaPackages(jakartaPackages)
                             .strictObjects(strictObjects)
                             .nonNullCollections(nonNullCollections)
                             .nonNullTopLevelCollectionValues(nonNullCollections || nonNullTopLevelCollectionValues)

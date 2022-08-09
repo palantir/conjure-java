@@ -43,6 +43,9 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
                      Generate POJOs that by default will fail to deserialize collections with null values
         --useStagedBuilders
                      Generates compile-time safe builders to ensure all required attributes are set.
+        --jakartaPackages
+                     Generates jax-rs annotated interfaces which use the newer 'jakarta` packages instead of the
+                     legacy 'javax' packages.
 
 ### Known Tag Values
 

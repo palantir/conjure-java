@@ -87,6 +87,17 @@ public interface Options {
     }
 
     /**
+     * Instructs the code generator, when generating JAX-RS classes to generate them with the <code>jakarta.</code>
+     * prefix instead of the legacy <code>jaxrs.</code> prefix. At the moment for backwards compatibility
+     * this is default false, with the intention that when enough adoption has occurred that this will become
+     * default true in the future.
+     */
+    @Value.Default
+    default boolean jakartaPackages() {
+        return false;
+    }
+
+    /**
      * Instructs the {@link ObjectGenerator} to generate objects that fail to deserialize collections with null values.
      */
     @Value.Default
