@@ -50,7 +50,7 @@ public final class ConjureAnnotations {
             .build();
 
     public static AnnotationSpec getConjureGeneratedAnnotation(Class<?> clazz) {
-        return AnnotationSpec.builder(ClassName.get("javax.annotation", "Generated"))
+        return AnnotationSpec.builder(ClassName.get("javax.annotation.processing", "Generated"))
                 .addMember("value", "$S", clazz.getCanonicalName())
                 .build();
     }
