@@ -89,8 +89,8 @@ public final class JerseyServiceGenerator implements Generator {
         ClassName binaryReturnType =
                 options.jerseyBinaryAsResponse() ? binaryReturnTypeResponse : binaryReturnTypeOutput;
 
-        TypeName optionalBinaryReturnType =
-                options.jerseyBinaryAsResponse() ? binaryReturnTypeResponse : this.optionalBinaryReturnType;
+        TypeName optionalBinaryReturnTypeGenerated =
+                options.jerseyBinaryAsResponse() ? binaryReturnTypeResponse : optionalBinaryReturnType;
 
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
@@ -98,7 +98,7 @@ public final class JerseyServiceGenerator implements Generator {
         TypeMapper returnTypeMapper = new TypeMapper(
                 types,
                 new SpecializeBinaryClassNameVisitor(
-                        defaultVisitor, types, binaryReturnType, optionalBinaryReturnType));
+                        defaultVisitor, types, binaryReturnType, optionalBinaryReturnTypeGenerated));
 
         TypeMapper argumentTypeMapper = new TypeMapper(
                 types, new SpecializeBinaryClassNameVisitor(defaultVisitor, types, BINARY_ARGUMENT_TYPE));
