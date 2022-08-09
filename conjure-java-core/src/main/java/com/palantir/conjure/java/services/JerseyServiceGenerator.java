@@ -62,32 +62,35 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
 public final class JerseyServiceGenerator implements Generator {
 
     private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
 
     private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get(InputStream.class);
-    private static final ClassName BINARY_RETURN_TYPE_RESPONSE = ClassName.get(Response.class);
-    private static final ClassName BINARY_RETURN_TYPE_OUTPUT = ClassName.get(StreamingOutput.class);
-    private static final TypeName OPTIONAL_BINARY_RETURN_TYPE =
-            ParameterizedTypeName.get(ClassName.get(Optional.class), BINARY_RETURN_TYPE_OUTPUT);
+
+    private final ClassName binaryReturnTypeResponse;
+    private final ClassName binaryReturnTypeOutput;
+
+    private final TypeName optionalBinaryReturnType;
 
     private final Options options;
 
     public JerseyServiceGenerator(Options options) {
         this.options = options;
+        this.binaryReturnTypeResponse = ClassName.get(jaxrsPackage("core"), "Response");
+        this.binaryReturnTypeOutput = ClassName.get(jaxrsPackage("core"), "StreamingOutput");
+        this.optionalBinaryReturnType =
+                ParameterizedTypeName.get(ClassName.get(Optional.class), binaryReturnTypeOutput);
     }
 
     @Override
     public Stream<JavaFile> generate(ConjureDefinition conjureDefinition) {
         ClassName binaryReturnType =
-                options.jerseyBinaryAsResponse() ? BINARY_RETURN_TYPE_RESPONSE : BINARY_RETURN_TYPE_OUTPUT;
+                options.jerseyBinaryAsResponse() ? binaryReturnTypeResponse : binaryReturnTypeOutput;
 
         TypeName optionalBinaryReturnType =
-                options.jerseyBinaryAsResponse() ? BINARY_RETURN_TYPE_RESPONSE : OPTIONAL_BINARY_RETURN_TYPE;
+                options.jerseyBinaryAsResponse() ? binaryReturnTypeResponse : this.optionalBinaryReturnType;
 
         Map<com.palantir.conjure.spec.TypeName, TypeDefinition> types = TypeFunctions.toTypesMap(conjureDefinition);
         ClassNameVisitor defaultVisitor = new DefaultClassNameVisitor(types.keySet(), options);
@@ -113,13 +116,13 @@ public final class JerseyServiceGenerator implements Generator {
                 Packages.getPrefixedName(serviceDefinition.getServiceName(), options.packagePrefix());
         TypeSpec.Builder serviceBuilder = TypeSpec.interfaceBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Consumes"))
-                        .addMember("value", "$T.APPLICATION_JSON", ClassName.get("javax.ws.rs.core", "MediaType"))
+                .addAnnotation(AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "Consumes"))
+                        .addMember("value", "$T.APPLICATION_JSON", ClassName.get(jaxrsPackage("core"), "MediaType"))
                         .build())
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Produces"))
-                        .addMember("value", "$T.APPLICATION_JSON", ClassName.get("javax.ws.rs.core", "MediaType"))
+                .addAnnotation(AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "Produces"))
+                        .addMember("value", "$T.APPLICATION_JSON", ClassName.get(jaxrsPackage("core"), "MediaType"))
                         .build())
-                .addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
+                .addAnnotation(AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "Path"))
                         .addMember("value", "$S", "/")
                         .build())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(JerseyServiceGenerator.class));
@@ -162,16 +165,16 @@ public final class JerseyServiceGenerator implements Generator {
         String rawHttpPath = endpointDef.getHttpPath().get();
         String httpPath = rawHttpPath.startsWith("/") ? rawHttpPath.substring(1) : rawHttpPath;
         if (!httpPath.isEmpty()) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Path"))
+            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "Path"))
                     .addMember("value", "$S", httpPath)
                     .build());
         }
 
-        if (returnType.equals(BINARY_RETURN_TYPE_OUTPUT)
-                || returnType.equals(BINARY_RETURN_TYPE_RESPONSE)
-                || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Produces"))
-                    .addMember("value", "$T.APPLICATION_OCTET_STREAM", ClassName.get("javax.ws.rs.core", "MediaType"))
+        if (returnType.equals(binaryReturnTypeOutput)
+                || returnType.equals(binaryReturnTypeResponse)
+                || returnType.equals(optionalBinaryReturnType)) {
+            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "Produces"))
+                    .addMember("value", "$T.APPLICATION_OCTET_STREAM", ClassName.get(jaxrsPackage("core"), "MediaType"))
                     .build());
         }
 
@@ -181,8 +184,8 @@ public final class JerseyServiceGenerator implements Generator {
                 .anyMatch(BINARY_ARGUMENT_TYPE::equals);
 
         if (consumesTypeIsBinary) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("javax.ws.rs", "Consumes"))
-                    .addMember("value", "$T.APPLICATION_OCTET_STREAM", ClassName.get("javax.ws.rs.core", "MediaType"))
+            methodBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "Consumes"))
+                    .addMember("value", "$T.APPLICATION_OCTET_STREAM", ClassName.get(jaxrsPackage("core"), "MediaType"))
                     .build());
         }
 
@@ -322,12 +325,12 @@ public final class JerseyServiceGenerator implements Generator {
         String value;
 
         if (auth.get().accept(AuthTypeVisitor.IS_HEADER)) {
-            annotationClassName = ClassName.get("javax.ws.rs", "HeaderParam");
+            annotationClassName = ClassName.get(jaxrsPackage(), "HeaderParam");
             tokenClassName = ClassName.get("com.palantir.tokens.auth", "AuthHeader");
             paramName = Auth.AUTH_HEADER_PARAM_NAME;
             value = Auth.AUTH_HEADER_NAME;
         } else if (auth.get().accept(AuthTypeVisitor.IS_COOKIE)) {
-            annotationClassName = ClassName.get("javax.ws.rs", "CookieParam");
+            annotationClassName = ClassName.get(jaxrsPackage(), "CookieParam");
             tokenClassName = ClassName.get("com.palantir.tokens.auth", "BearerToken");
             paramName = Auth.COOKIE_AUTH_PARAM_NAME;
             value = auth.get().accept(AuthTypeVisitor.COOKIE).getCookieName();
@@ -351,15 +354,15 @@ public final class JerseyServiceGenerator implements Generator {
         AnnotationSpec.Builder annotationSpecBuilder;
         ParameterType paramType = def.getParamType();
         if (paramType.accept(ParameterTypeVisitor.IS_PATH)) {
-            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "PathParam"))
+            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "PathParam"))
                     .addMember("value", "$S", def.getArgName().get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_QUERY)) {
             ParameterId paramId = paramType.accept(ParameterTypeVisitor.QUERY).getParamId();
-            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "QueryParam"))
+            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "QueryParam"))
                     .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_HEADER)) {
             ParameterId paramId = paramType.accept(ParameterTypeVisitor.HEADER).getParamId();
-            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get("javax.ws.rs", "HeaderParam"))
+            annotationSpecBuilder = AnnotationSpec.builder(ClassName.get(jaxrsPackage(), "HeaderParam"))
                     .addMember("value", "$S", paramId.get());
         } else if (paramType.accept(ParameterTypeVisitor.IS_BODY)) {
             if (def.getType().accept(TypeVisitor.IS_OPTIONAL) || !options.requireNotNullAuthAndBodyParams()) {
@@ -373,17 +376,25 @@ public final class JerseyServiceGenerator implements Generator {
         return Optional.of(annotationSpecBuilder.build());
     }
 
-    private static ClassName httpMethodToClassName(String method) {
+    private ClassName httpMethodToClassName(String method) {
         switch (method) {
             case "DELETE":
-                return ClassName.get("javax.ws.rs", "DELETE");
+                return ClassName.get(jaxrsPackage(), "DELETE");
             case "GET":
-                return ClassName.get("javax.ws.rs", "GET");
+                return ClassName.get(jaxrsPackage(), "GET");
             case "PUT":
-                return ClassName.get("javax.ws.rs", "PUT");
+                return ClassName.get(jaxrsPackage(), "PUT");
             case "POST":
-                return ClassName.get("javax.ws.rs", "POST");
+                return ClassName.get(jaxrsPackage(), "POST");
         }
         throw new IllegalArgumentException("Unrecognized HTTP method: " + method);
+    }
+
+    private String jaxrsPackage() {
+        return options.jakartaPackages() ? "jakarta.ws.rs" : "javax.ws.rs";
+    }
+
+    private String jaxrsPackage(String rest) {
+        return jaxrsPackage() + "." + rest;
     }
 }
