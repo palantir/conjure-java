@@ -28,6 +28,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIoException;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.IOException;
 
 // TODO(rfink): Consider async Jackson, see
@@ -90,23 +91,32 @@ public final class Encodings {
                     // validation (setter null checks) fail in our objects.
                     throw FrameworkException.unprocessableEntity(
                             "Failed to deserialize request",
-                            e,
-                            SafeArg.of("contentType", getContentType()),
-                            SafeArg.of("type", type));
+                            // Note that we add diagnostic information to a causal exception so that it is
+                            // available for debugging, but isn't sent to clients where the data is
+                            // irrelevant.
+                            new SafeRuntimeException(
+                                    "Request metadata",
+                                    e,
+                                    SafeArg.of("contentType", getContentType()),
+                                    SafeArg.of("type", type)));
                 } catch (JsonParseException | NullPointerException e) {
                     // JsonParseException is thrown when the input cannot be parsed as JSON, for example '{"value"}'.
                     // NPE is often thrown when an unexpected `null` is contained within the request, e.g. '[null]'.
                     throw new SafeIllegalArgumentException(
                             "Failed to parse request due to malformed content",
-                            e,
-                            SafeArg.of("contentType", getContentType()),
-                            SafeArg.of("type", type));
+                            new SafeRuntimeException(
+                                    "Request metadata",
+                                    e,
+                                    SafeArg.of("contentType", getContentType()),
+                                    SafeArg.of("type", type)));
                 } catch (IOException e) {
                     throw new SafeIoException(
                             "Failed to deserialize request",
-                            e,
-                            SafeArg.of("contentType", getContentType()),
-                            SafeArg.of("type", type));
+                            new SafeRuntimeException(
+                                    "Request metadata",
+                                    e,
+                                    SafeArg.of("contentType", getContentType()),
+                                    SafeArg.of("type", type)));
                 }
             };
         }
