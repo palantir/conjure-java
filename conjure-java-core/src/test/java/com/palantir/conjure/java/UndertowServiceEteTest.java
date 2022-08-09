@@ -235,6 +235,9 @@ public final class UndertowServiceEteTest extends TestBase {
             SerializableError error = CLIENT_OBJECT_MAPPER.readValue(responseBody, SerializableError.class);
             assertThat(error.errorCode()).isEqualTo("INVALID_ARGUMENT");
             assertThat(error.errorName()).isEqualTo("Conjure:UnprocessableEntity");
+            assertThat(error.parameters())
+                    .as("Diagnostic data is logged, not transmitted")
+                    .isEmpty();
         }
     }
 
