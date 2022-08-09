@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Optional;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class StringAliasTwo {

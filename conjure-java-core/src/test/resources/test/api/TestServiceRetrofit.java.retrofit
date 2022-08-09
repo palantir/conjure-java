@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;

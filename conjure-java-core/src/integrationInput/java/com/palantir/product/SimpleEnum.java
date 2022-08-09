@@ -9,8 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 /**
  * This class is used instead of a native enum to support unknown values.

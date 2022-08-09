@@ -14,8 +14,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = SetExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")

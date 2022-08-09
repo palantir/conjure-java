@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class EteServiceEndpoints implements UndertowService {

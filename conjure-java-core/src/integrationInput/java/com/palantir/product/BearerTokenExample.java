@@ -10,8 +10,8 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 @DoNotLog
 @JsonDeserialize(builder = BearerTokenExample.Builder.class)

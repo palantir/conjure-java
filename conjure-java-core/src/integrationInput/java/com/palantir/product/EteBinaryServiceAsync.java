@@ -17,7 +17,7 @@ import java.io.InputStream;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Optional;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EteBinaryServiceAsync.Factory.class)

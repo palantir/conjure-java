@@ -1,0 +1,17 @@
+type: improvement
+improvement:
+  description: |-
+    Modern JDKs (anything >= JDK9) use the newer version of this annotation
+    to represent Generated types. This change does force a minimum JRE
+    dependency of Conjure to JRE9 or later at compile time (this annotation
+    only has source retention).
+
+    Annotation processors are able to get away with detecting the JDK
+    and generating code specfic to that JDK, I don't believe we can
+    do that with Java Poet, so this is potentially a more invasive change
+    than I'd traditionally like to make.
+
+    One option is to add an option to the Options type to opt out of this
+    behavior, or we can just force Java 9+.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1866

@@ -2,7 +2,7 @@ package com.palantir.product;
 
 import com.palantir.tokens.auth.AuthHeader;
 import java.util.Optional;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowAliasTestService {

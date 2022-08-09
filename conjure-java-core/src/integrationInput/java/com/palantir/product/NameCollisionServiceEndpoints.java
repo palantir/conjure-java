@@ -23,7 +23,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class NameCollisionServiceEndpoints implements UndertowService {

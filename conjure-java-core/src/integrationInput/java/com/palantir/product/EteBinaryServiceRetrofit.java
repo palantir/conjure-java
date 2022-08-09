@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.tokens.auth.AuthHeader;
 import java.util.Optional;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;

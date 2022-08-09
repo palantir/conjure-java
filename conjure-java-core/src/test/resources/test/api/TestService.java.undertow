@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.Set;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 /**
  * A Markdown description of the service.

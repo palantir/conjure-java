@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.logsafe.Safe;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Safe
 @JsonSerialize

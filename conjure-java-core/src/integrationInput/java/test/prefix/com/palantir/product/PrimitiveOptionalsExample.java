@@ -22,8 +22,8 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 @DoNotLog
 @JsonDeserialize(builder = PrimitiveOptionalsExample.Builder.class)

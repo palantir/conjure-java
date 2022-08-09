@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EteServiceBlocking.Factory.class)

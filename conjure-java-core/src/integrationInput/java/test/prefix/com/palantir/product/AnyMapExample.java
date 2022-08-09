@@ -13,8 +13,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = AnyMapExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")

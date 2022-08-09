@@ -11,8 +11,8 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 import test.api.ExampleExternalReference;
 
 @JsonDeserialize(builder = CovariantListExample.Builder.class)

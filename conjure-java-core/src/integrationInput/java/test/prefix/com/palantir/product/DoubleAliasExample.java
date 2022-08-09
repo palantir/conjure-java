@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import java.math.BigDecimal;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class DoubleAliasExample implements Comparable<DoubleAliasExample> {

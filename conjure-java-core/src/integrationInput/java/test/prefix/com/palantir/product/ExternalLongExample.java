@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = ExternalLongExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
