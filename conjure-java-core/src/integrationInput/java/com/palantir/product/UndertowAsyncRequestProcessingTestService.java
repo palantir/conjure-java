@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.undertow.lib.BinaryResponseBody;
 import java.util.Optional;
 import java.util.OptionalInt;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowAsyncRequestProcessingTestService {

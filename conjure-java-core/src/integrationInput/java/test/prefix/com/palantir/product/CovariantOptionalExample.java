@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import javax.annotation.Generated;
 import javax.annotation.Nonnull;
+import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = CovariantOptionalExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")

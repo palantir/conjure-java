@@ -16,7 +16,7 @@ import com.palantir.tokens.auth.BearerToken;
 import java.lang.Override;
 import java.lang.String;
 import java.lang.Void;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(CookieServiceAsync.Factory.class)

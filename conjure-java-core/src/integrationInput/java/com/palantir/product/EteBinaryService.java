@@ -4,7 +4,7 @@ import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.util.Optional;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

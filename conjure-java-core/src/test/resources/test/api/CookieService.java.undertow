@@ -1,7 +1,7 @@
 package test.api;
 
 import com.palantir.tokens.auth.BearerToken;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface CookieService {

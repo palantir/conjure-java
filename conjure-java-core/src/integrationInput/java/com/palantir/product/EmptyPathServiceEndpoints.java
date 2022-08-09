@@ -12,7 +12,7 @@ import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
 import java.util.List;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
 public final class EmptyPathServiceEndpoints implements UndertowService {

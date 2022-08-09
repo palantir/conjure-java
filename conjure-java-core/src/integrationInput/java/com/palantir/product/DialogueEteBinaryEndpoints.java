@@ -7,7 +7,7 @@ import com.palantir.dialogue.PathTemplate;
 import com.palantir.dialogue.UrlBuilder;
 import java.lang.Override;
 import java.lang.String;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueEteBinaryEndpoints implements Endpoint {

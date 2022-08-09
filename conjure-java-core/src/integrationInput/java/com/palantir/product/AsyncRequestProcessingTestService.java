@@ -3,7 +3,7 @@ package com.palantir.product;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import java.util.Optional;
 import java.util.OptionalInt;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

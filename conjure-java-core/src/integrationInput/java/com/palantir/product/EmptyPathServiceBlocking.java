@@ -15,7 +15,7 @@ import com.palantir.dialogue.TypeMarker;
 import java.lang.Boolean;
 import java.lang.Override;
 import java.lang.String;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(EmptyPathServiceBlocking.Factory.class)
