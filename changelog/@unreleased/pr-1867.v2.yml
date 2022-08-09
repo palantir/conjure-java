@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: conjure-undertow error responses are more concise
+  links:
+  - https://github.com/palantir/conjure-java/pull/1867
