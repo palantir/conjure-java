@@ -392,13 +392,13 @@ public final class JerseyServiceGenerator implements Generator {
         return options.jakartaPackages() ? "jakarta.ws.rs" : "javax.ws.rs";
     }
 
+    private String jaxrsPackage(String rest) {
+        return jaxrsPackage() + "." + rest;
+    }
+
     private ClassName notNullType() {
         return options.jakartaPackages()
                 ? ClassName.get("jakarta.validation.constraints", "NotNull")
                 : ClassName.get("javax.validation.constraints", "NotNull");
-    }
-
-    private String jaxrsPackage(String rest) {
-        return jaxrsPackage() + "." + rest;
     }
 }
