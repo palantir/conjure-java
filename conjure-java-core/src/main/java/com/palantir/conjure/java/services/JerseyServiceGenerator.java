@@ -65,8 +65,6 @@ import javax.lang.model.element.Modifier;
 
 public final class JerseyServiceGenerator implements Generator {
 
-    private static final ClassName NOT_NULL = ClassName.get("javax.validation.constraints", "NotNull");
-
     private static final ClassName BINARY_ARGUMENT_TYPE = ClassName.get(InputStream.class);
 
     private final ClassName binaryReturnTypeResponse;
@@ -344,7 +342,7 @@ public final class JerseyServiceGenerator implements Generator {
                     .addMember("value", "$S", value)
                     .build());
             if (options.requireNotNullAuthAndBodyParams()) {
-                paramSpec.addAnnotation(AnnotationSpec.builder(NOT_NULL).build());
+                paramSpec.addAnnotation(AnnotationSpec.builder(notNullType()).build());
             }
         }
         return Optional.of(paramSpec.build());
@@ -368,7 +366,7 @@ public final class JerseyServiceGenerator implements Generator {
             if (def.getType().accept(TypeVisitor.IS_OPTIONAL) || !options.requireNotNullAuthAndBodyParams()) {
                 return Optional.empty();
             }
-            annotationSpecBuilder = AnnotationSpec.builder(NOT_NULL);
+            annotationSpecBuilder = AnnotationSpec.builder(notNullType());
         } else {
             throw new IllegalStateException("Unrecognized argument type: " + def.getParamType());
         }
@@ -396,5 +394,11 @@ public final class JerseyServiceGenerator implements Generator {
 
     private String jaxrsPackage(String rest) {
         return jaxrsPackage() + "." + rest;
+    }
+
+    private ClassName notNullType() {
+        return options.jakartaPackages()
+                ? ClassName.get("jakarta.validation.constraints", "NotNull")
+                : ClassName.get("javax.validation.constraints", "NotNull");
     }
 }
