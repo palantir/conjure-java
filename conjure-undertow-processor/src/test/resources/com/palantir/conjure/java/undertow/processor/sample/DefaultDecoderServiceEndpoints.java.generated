@@ -3,6 +3,7 @@ package com.palantir.conjure.java.undertow.processor.sample;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.annotations.FormParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
 import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
@@ -49,6 +50,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
     public List<Endpoint> endpoints(UndertowRuntime runtime) {
         return ImmutableList.of(
                 new QueryParamEndpoint(runtime, delegate),
+                new FormParamEndpoint(runtime, delegate),
                 new HeadersEndpoint(runtime, delegate),
                 new PathParamEndpoint(runtime, delegate));
     }
@@ -217,6 +219,178 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "queryParam";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class FormParamEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final DefaultDecoderService delegate;
+
+        private final Deserializer<String> stringParamDeserializer;
+
+        private final Deserializer<Boolean> booleanParamDeserializer;
+
+        private final Deserializer<Set<String>> stringSetParamDeserializer;
+
+        private final Deserializer<List<String>> stringListParamDeserializer;
+
+        private final Deserializer<Optional<String>> optionalStringParamDeserializer;
+
+        private final Deserializer<Float> floatBoxedDeserializer;
+
+        private final Deserializer<Float> floatUnboxedDeserializer;
+
+        private final Deserializer<OptionalInt> optionalIntParamDeserializer;
+
+        private final Deserializer<OffsetDateTime> dateTimeParamDeserializer;
+
+        private final Deserializer<Set<ResourceIdentifier>> ridSetParamDeserializer;
+
+        private final Deserializer<Optional<SafeLong>> optionalSafeLongParamDeserializer;
+
+        private final Deserializer<UUID> uuidParamDeserializer;
+
+        private final Deserializer<String> decoderParamDeserializer;
+
+        private final Deserializer<DefaultDecoderService.Constructor> constructorDeserializer;
+
+        private final Deserializer<DefaultDecoderService.OfFactory> ofFactoryDeserializer;
+
+        private final Deserializer<DefaultDecoderService.ValueOfFactory> valueOfFactoryDeserializer;
+
+        private final Deserializer<DefaultDecoderService.FromStringFactory> fromStringFactoryDeserializer;
+
+        private final Deserializer<DefaultDecoderService.CreateFactory> createFactoryDeserializer;
+
+        private final Serializer<String> formParamSerializer;
+
+        FormParamEndpoint(UndertowRuntime runtime, DefaultDecoderService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.stringParamDeserializer = new FormParamDeserializer<>(
+                    "stringParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.booleanParamDeserializer = new FormParamDeserializer<>(
+                    "booleanParam", ParamDecoders.booleanCollectionParamDecoder(runtime.plainSerDe()));
+            this.stringSetParamDeserializer = new FormParamDeserializer<>(
+                    "stringSetParam", ParamDecoders.stringSetCollectionParamDecoder(runtime.plainSerDe()));
+            this.stringListParamDeserializer = new FormParamDeserializer<>(
+                    "stringListParam", ParamDecoders.stringListCollectionParamDecoder(runtime.plainSerDe()));
+            this.optionalStringParamDeserializer = new FormParamDeserializer<>(
+                    "optionalStringParam", ParamDecoders.optionalStringCollectionParamDecoder(runtime.plainSerDe()));
+            this.floatBoxedDeserializer = new FormParamDeserializer<>(
+                    "floatBoxed", ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::valueOf));
+            this.floatUnboxedDeserializer = new FormParamDeserializer<>(
+                    "floatUnboxed",
+                    ParamDecoders.complexCollectionParamDecoder(runtime.plainSerDe(), Float::parseFloat));
+            this.optionalIntParamDeserializer = new FormParamDeserializer<>(
+                    "optionalInt", ParamDecoders.optionalIntegerCollectionParamDecoder(runtime.plainSerDe()));
+            this.dateTimeParamDeserializer = new FormParamDeserializer<>(
+                    "dateTime", ParamDecoders.dateTimeCollectionParamDecoder(runtime.plainSerDe()));
+            this.ridSetParamDeserializer = new FormParamDeserializer<>(
+                    "ridSetParam", ParamDecoders.ridSetCollectionParamDecoder(runtime.plainSerDe()));
+            this.optionalSafeLongParamDeserializer = new FormParamDeserializer<>(
+                    "optionalSafeLongParam",
+                    ParamDecoders.optionalSafeLongCollectionParamDecoder(runtime.plainSerDe()));
+            this.uuidParamDeserializer = new FormParamDeserializer<>(
+                    "uuidParam", ParamDecoders.uuidCollectionParamDecoder(runtime.plainSerDe()));
+            this.decoderParamDeserializer =
+                    new FormParamDeserializer<>("decoderParam", DefaultDecoderService.StringCollectionDecoder.INSTANCE);
+            this.constructorDeserializer = new FormParamDeserializer<>(
+                    "constructor",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.Constructor::new));
+            this.ofFactoryDeserializer = new FormParamDeserializer<>(
+                    "ofFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.OfFactory::of));
+            this.valueOfFactoryDeserializer = new FormParamDeserializer<>(
+                    "valueOfFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.ValueOfFactory::valueOf));
+            this.fromStringFactoryDeserializer = new FormParamDeserializer<>(
+                    "fromStringFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.FromStringFactory::fromString));
+            this.createFactoryDeserializer = new FormParamDeserializer<>(
+                    "createFactory",
+                    ParamDecoders.complexCollectionParamDecoder(
+                            runtime.plainSerDe(), DefaultDecoderService.CreateFactory::create));
+            this.formParamSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String stringParam = this.stringParamDeserializer.deserialize(exchange);
+            Boolean booleanParam = this.booleanParamDeserializer.deserialize(exchange);
+            Set<String> stringSetParam = this.stringSetParamDeserializer.deserialize(exchange);
+            List<String> stringListParam = this.stringListParamDeserializer.deserialize(exchange);
+            Optional<String> optionalStringParam = this.optionalStringParamDeserializer.deserialize(exchange);
+            Float floatBoxed = this.floatBoxedDeserializer.deserialize(exchange);
+            float floatUnboxed = this.floatUnboxedDeserializer.deserialize(exchange);
+            OptionalInt optionalIntParam = this.optionalIntParamDeserializer.deserialize(exchange);
+            OffsetDateTime dateTimeParam = this.dateTimeParamDeserializer.deserialize(exchange);
+            Set<ResourceIdentifier> ridSetParam = this.ridSetParamDeserializer.deserialize(exchange);
+            Optional<SafeLong> optionalSafeLongParam = this.optionalSafeLongParamDeserializer.deserialize(exchange);
+            UUID uuidParam = this.uuidParamDeserializer.deserialize(exchange);
+            String decoderParam = this.decoderParamDeserializer.deserialize(exchange);
+            DefaultDecoderService.Constructor constructor = this.constructorDeserializer.deserialize(exchange);
+            DefaultDecoderService.OfFactory ofFactory = this.ofFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.ValueOfFactory valueOfFactory = this.valueOfFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.FromStringFactory fromStringFactory =
+                    this.fromStringFactoryDeserializer.deserialize(exchange);
+            DefaultDecoderService.CreateFactory createFactory = this.createFactoryDeserializer.deserialize(exchange);
+            write(
+                    this.delegate.formParam(
+                            stringParam,
+                            booleanParam,
+                            stringSetParam,
+                            stringListParam,
+                            optionalStringParam,
+                            floatBoxed,
+                            floatUnboxed,
+                            optionalIntParam,
+                            dateTimeParam,
+                            ridSetParam,
+                            optionalSafeLongParam,
+                            uuidParam,
+                            decoderParam,
+                            constructor,
+                            ofFactory,
+                            valueOfFactory,
+                            fromStringFactory,
+                            createFactory),
+                    exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.formParamSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/formParam";
+        }
+
+        @Override
+        public String serviceName() {
+            return "DefaultDecoderService";
+        }
+
+        @Override
+        public String name() {
+            return "formParam";
         }
 
         @Override

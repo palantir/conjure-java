@@ -37,6 +37,12 @@ public interface SafeLoggableParams {
             @Safe @Handle.QueryParam("safeParam") String safeParam,
             @Unsafe @Handle.QueryParam("unsafeParam") String unsafeParam);
 
+    @Handle(method = HttpMethod.POST, path = "/formParams")
+    void formParams(
+            @Handle.FormParam("noAnnotation") String noAnnotationParam,
+            @Safe @Handle.FormParam("safeParam") String safeParam,
+            @Unsafe @Handle.FormParam("unsafeParam") String unsafeParam);
+
     @Handle(method = HttpMethod.GET, path = "/headerParams")
     void headerParams(
             @Handle.Header("noAnnotation") String noAnnotationParam,

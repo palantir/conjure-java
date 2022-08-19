@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
+import com.palantir.conjure.java.undertow.annotations.FormParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.PathMultiParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
@@ -317,6 +318,35 @@ public final class ConjureUndertowEndpointsGenerator {
             }
 
             @Override
+            public Void form(
+                    String variableName,
+                    String paramName,
+                    String deserializerFieldName,
+                    CodeBlock deserializerFactory,
+                    SafeLoggingAnnotation safeLoggable) {
+                TypeName paramType = def.argType().match(ArgTypeTypeName.INSTANCE);
+                additionalFields.add(ImmutableAdditionalField.builder()
+                        .field(FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Deserializer.class), paramType.box()),
+                                        deserializerFieldName,
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL)
+                                .build())
+                        .constructorInitializer(CodeBlock.builder()
+                                .addStatement(
+                                        "this.$N = new $T<>($S, $L)",
+                                        deserializerFieldName,
+                                        FormParamDeserializer.class,
+                                        paramName,
+                                        deserializerFactory)
+                                .build())
+                        .build());
+                handlerBuilder.addStatement("$T $N = $L", paramType, variableName, invokeDeserializer(def));
+                getSafeLogging(paramName, variableName, safeLoggable).ifPresent(handlerBuilder::addStatement);
+                return null;
+            }
+
+            @Override
             public Void cookie(
                     String variableName,
                     String cookieName,
@@ -567,6 +597,16 @@ public final class ConjureUndertowEndpointsGenerator {
             }
 
             @Override
+            public CodeBlock form(
+                    String _variableName,
+                    String _paramName,
+                    String deserializerFieldName,
+                    CodeBlock _deserializerFactory,
+                    SafeLoggingAnnotation _safeLoggable) {
+                return CodeBlock.of("this.$N.deserialize($N)", deserializerFieldName, EXCHANGE_NAME);
+            }
+
+            @Override
             public CodeBlock cookie(
                     String _variableName,
                     String _cookieName,
@@ -640,6 +680,16 @@ public final class ConjureUndertowEndpointsGenerator {
 
                     @Override
                     public CodeBlock query(
+                            String variableName,
+                            String _paramName,
+                            String _deserializerFieldName,
+                            CodeBlock _deserializerFactory,
+                            SafeLoggingAnnotation _safeLoggable) {
+                        return CodeBlock.of(variableName);
+                    }
+
+                    @Override
+                    public CodeBlock form(
                             String variableName,
                             String _paramName,
                             String _deserializerFieldName,

@@ -133,6 +133,18 @@ public @interface Handle {
 
     @Retention(RetentionPolicy.CLASS)
     @Target(ElementType.PARAMETER)
+    @interface FormParam {
+        String value();
+
+        /**
+         * Decoder for deserializing form parameter value. If omitted, tries to use a default decoder in
+         * {@link ParamDecoders}.
+         */
+        Class<? extends CollectionParamDecoder<?>> decoder() default DefaultParamDecoder.class;
+    }
+
+    @Retention(RetentionPolicy.CLASS)
+    @Target(ElementType.PARAMETER)
     @interface Cookie {
         String value();
 

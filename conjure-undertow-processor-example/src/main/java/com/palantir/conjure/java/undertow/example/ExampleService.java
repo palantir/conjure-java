@@ -74,6 +74,10 @@ public interface ExampleService {
     String queryParam(
             @Handle.QueryParam(value = "q", decoder = StringCollectionParameterDecoder.class) String queryParameter);
 
+    @Handle(method = HttpMethod.POST, path = "/formParam")
+    String formParam(
+            @Handle.FormParam(value = "f", decoder = StringCollectionParameterDecoder.class) String formParameter);
+
     @Handle(method = HttpMethod.GET, path = "/path/{param}")
     String pathParam(@Handle.PathParam(decoder = StringParameterDecoder.class) String param);
 

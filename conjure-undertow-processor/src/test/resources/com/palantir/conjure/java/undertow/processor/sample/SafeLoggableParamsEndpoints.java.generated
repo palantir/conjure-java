@@ -3,6 +3,7 @@ package com.palantir.conjure.java.undertow.processor.sample;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.annotations.FormParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.HeaderParamDeserializer;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
 import com.palantir.conjure.java.undertow.annotations.PathMultiParamDeserializer;
@@ -47,6 +48,7 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
         return ImmutableList.of(
                 new PathParamsEndpoint(runtime, delegate),
                 new QueryParamsEndpoint(runtime, delegate),
+                new FormParamsEndpoint(runtime, delegate),
                 new HeaderParamsEndpoint(runtime, delegate),
                 new CookieParamsEndpoint(runtime, delegate),
                 new SafeLoggingReusesContextEndpoint(runtime, delegate),
@@ -171,6 +173,66 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
         @Override
         public String name() {
             return "queryParams";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class FormParamsEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final SafeLoggableParams delegate;
+
+        private final Deserializer<String> noAnnotationParamDeserializer;
+
+        private final Deserializer<String> safeParamDeserializer;
+
+        private final Deserializer<String> unsafeParamDeserializer;
+
+        FormParamsEndpoint(UndertowRuntime runtime, SafeLoggableParams delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.noAnnotationParamDeserializer = new FormParamDeserializer<>(
+                    "noAnnotation", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.safeParamDeserializer = new FormParamDeserializer<>(
+                    "safeParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+            this.unsafeParamDeserializer = new FormParamDeserializer<>(
+                    "unsafeParam", ParamDecoders.stringCollectionParamDecoder(runtime.plainSerDe()));
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            RequestContext requestContext = this.runtime.contexts().createContext(exchange, this);
+            String noAnnotationParam = this.noAnnotationParamDeserializer.deserialize(exchange);
+            String safeParam = this.safeParamDeserializer.deserialize(exchange);
+            requestContext.requestArg(SafeArg.of("safeParam", safeParam));
+            String unsafeParam = this.unsafeParamDeserializer.deserialize(exchange);
+            requestContext.requestArg(UnsafeArg.of("unsafeParam", unsafeParam));
+            this.delegate.formParams(noAnnotationParam, safeParam, unsafeParam);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/formParams";
+        }
+
+        @Override
+        public String serviceName() {
+            return "SafeLoggableParams";
+        }
+
+        @Override
+        public String name() {
+            return "formParams";
         }
 
         @Override
