@@ -25,13 +25,22 @@ import java.lang.annotation.Target;
 
 /**
  * Annotates an RPC endpoint.
- *
- * This annotation provides namespace for annotations for dialogue client generation.
  */
 @Documented
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
 public @interface Handle {
+
+    /**
+     * Generate annotation which is implied by default, however may be applied to an interface to
+     * opt out of codegen using <code>@Handle.Generate(false)</code>, for instance to allow a subclass/implementor
+     * to opt into code-generation. Implementors may annotate themselves with <code>@Handle.Generate</code>.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @Target(ElementType.TYPE)
+    @interface Generate {
+        boolean value() default true;
+    }
 
     HttpMethod method();
 
@@ -58,7 +67,7 @@ public @interface Handle {
     /** Conjure endpoint tags. */
     String[] tags() default {};
 
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.CLASS)
     @Target(ElementType.PARAMETER)
     @interface Body {
 
@@ -71,7 +80,7 @@ public @interface Handle {
         Class<? extends DeserializerFactory> value() default DefaultSerDe.class;
     }
 
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.CLASS)
     @Target(ElementType.PARAMETER)
     @interface Header {
         String value();
@@ -83,7 +92,7 @@ public @interface Handle {
         Class<? extends CollectionParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
 
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.CLASS)
     @Target(ElementType.PARAMETER)
     @interface PathParam {
         /**
@@ -100,7 +109,7 @@ public @interface Handle {
      * is surfaced as {@code ['foo', 'bar']} while {@code /foo%2Fbar} is surfaced as {@code ['foo/bar']}.
      */
     @Beta
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.CLASS)
     @Target(ElementType.PARAMETER)
     @interface PathMultiParam {
         /**
@@ -110,7 +119,7 @@ public @interface Handle {
         Class<? extends CollectionParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
 
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.CLASS)
     @Target(ElementType.PARAMETER)
     @interface QueryParam {
         String value();
@@ -122,7 +131,7 @@ public @interface Handle {
         Class<? extends CollectionParamDecoder<?>> decoder() default DefaultParamDecoder.class;
     }
 
-    @Retention(RetentionPolicy.SOURCE)
+    @Retention(RetentionPolicy.CLASS)
     @Target(ElementType.PARAMETER)
     @interface Cookie {
         String value();

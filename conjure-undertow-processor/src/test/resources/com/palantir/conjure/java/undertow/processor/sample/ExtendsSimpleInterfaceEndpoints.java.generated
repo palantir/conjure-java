@@ -1,0 +1,130 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.io.IOException;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class ExtendsSimpleInterfaceEndpoints implements UndertowService {
+    private final ExtendsSimpleInterface delegate;
+
+    private ExtendsSimpleInterfaceEndpoints(ExtendsSimpleInterface delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(ExtendsSimpleInterface delegate) {
+        return new ExtendsSimpleInterfaceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new PingEndpoint(runtime, delegate), new GreetEndpoint(runtime, delegate));
+    }
+
+    private static final class PingEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final ExtendsSimpleInterface delegate;
+
+        PingEndpoint(UndertowRuntime runtime, ExtendsSimpleInterface delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            this.delegate.ping();
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/ping";
+        }
+
+        @Override
+        public String serviceName() {
+            return "SimpleInterface";
+        }
+
+        @Override
+        public String name() {
+            return "ping";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class GreetEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<String> {
+        private final UndertowRuntime runtime;
+
+        private final ExtendsSimpleInterface delegate;
+
+        private final Serializer<String> greetSerializer;
+
+        GreetEndpoint(UndertowRuntime runtime, ExtendsSimpleInterface delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.greetSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<String>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            write(this.delegate.greet(), exchange);
+        }
+
+        @Override
+        public void write(String returnValue, HttpServerExchange exchange) throws IOException {
+            this.greetSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/greet";
+        }
+
+        @Override
+        public String serviceName() {
+            return "ExtendsSimpleInterface";
+        }
+
+        @Override
+        public String name() {
+            return "greet";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}
