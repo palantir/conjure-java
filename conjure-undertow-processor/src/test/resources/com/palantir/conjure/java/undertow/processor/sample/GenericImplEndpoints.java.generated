@@ -1,0 +1,93 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
+import com.palantir.conjure.java.undertow.lib.Serializer;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import java.io.IOException;
+import java.lang.Exception;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class GenericImplEndpoints implements UndertowService {
+    private final GenericImpl delegate;
+
+    private GenericImplEndpoints(GenericImpl delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(GenericImpl delegate) {
+        return new GenericImplEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new GenericEndpoint(runtime, delegate));
+    }
+
+    private static final class GenericEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<Integer> {
+        private final UndertowRuntime runtime;
+
+        private final GenericImpl delegate;
+
+        private final Deserializer<String> inputDeserializer;
+
+        private final Serializer<Integer> genericSerializer;
+
+        GenericEndpoint(UndertowRuntime runtime, GenericImpl delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.inputDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
+            this.genericSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<Integer>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            String input = inputDeserializer.deserialize(exchange);
+            write(this.delegate.generic(input), exchange);
+        }
+
+        @Override
+        public void write(Integer returnValue, HttpServerExchange exchange) throws IOException {
+            this.genericSerializer.serialize(returnValue, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/generic";
+        }
+
+        @Override
+        public String serviceName() {
+            return "GenericIface";
+        }
+
+        @Override
+        public String name() {
+            return "generic";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

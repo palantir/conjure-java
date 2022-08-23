@@ -102,7 +102,7 @@ public final class ParamTypesResolver {
     }
 
     @SuppressWarnings("CyclomaticComplexity")
-    public Optional<ParameterType> getParameterType(VariableElement variableElement) {
+    public Optional<ParameterType> getParameterType(VariableElement variableElement, TypeMirror parameterType) {
         List<AnnotationMirror> paramAnnotationMirrors = new ArrayList<>();
         for (AnnotationMirror annotationMirror : variableElement.getAnnotationMirrors()) {
             TypeElement annotationTypeElement =
@@ -132,16 +132,16 @@ public final class ParamTypesResolver {
                 context.reportError(
                         "Parameter type cannot be annotated with safe logging annotations",
                         variableElement,
-                        SafeArg.of("type", variableElement.asType()));
+                        SafeArg.of("type", parameterType));
                 return Optional.empty();
             }
 
-            if (context.isSameTypes(variableElement.asType(), AuthHeader.class)) {
+            if (context.isSameTypes(parameterType, AuthHeader.class)) {
                 return Optional.of(ParameterTypes.authHeader(
                         variableElement.getSimpleName().toString()));
-            } else if (context.isSameTypes(variableElement.asType(), HttpServerExchange.class)) {
+            } else if (context.isSameTypes(parameterType, HttpServerExchange.class)) {
                 return Optional.of(ParameterTypes.exchange());
-            } else if (context.isSameTypes(variableElement.asType(), RequestContext.class)) {
+            } else if (context.isSameTypes(parameterType, RequestContext.class)) {
                 return Optional.of(ParameterTypes.context());
             } else {
                 context.reportError(

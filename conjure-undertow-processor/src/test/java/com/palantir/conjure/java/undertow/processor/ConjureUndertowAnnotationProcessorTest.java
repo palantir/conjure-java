@@ -31,6 +31,7 @@ import com.palantir.conjure.java.undertow.processor.sample.DeprecatedEndpointRes
 import com.palantir.conjure.java.undertow.processor.sample.DeprecatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ExtendsNested;
 import com.palantir.conjure.java.undertow.processor.sample.ExtendsSimpleInterface;
+import com.palantir.conjure.java.undertow.processor.sample.GenericImpl;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
@@ -139,6 +140,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testExtendsNested() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, ExtendsNested.class);
+    }
+
+    @Test
+    public void testBindsGeneric() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, GenericImpl.class);
     }
 
     @Test

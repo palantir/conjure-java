@@ -74,8 +74,8 @@ public final class ArgumentTypesResolver {
                 ArgumentTypes.primitive(integerType, planSerDeMethodName(integerType), Optional.empty());
     }
 
-    public ArgumentType getArgumentType(VariableElement param) {
-        return getArgumentTypeImpl(param, param.asType());
+    public ArgumentType getArgumentType(VariableElement param, TypeMirror paramType) {
+        return getArgumentTypeImpl(param, paramType);
     }
 
     @SuppressWarnings("CyclomaticComplexity")

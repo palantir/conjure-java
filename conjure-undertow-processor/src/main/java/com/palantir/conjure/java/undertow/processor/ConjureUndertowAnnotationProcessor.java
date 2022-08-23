@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.processor;
 
 import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
@@ -56,6 +57,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
@@ -121,8 +123,10 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
     }
 
     private JavaFile generateUndertowServiceEndpoints(Element annotatedType) {
+        TypeElement annotatedTypeElement = (TypeElement) annotatedType;
+        DeclaredType annotatedDeclaredType = MoreTypes.asDeclared(annotatedTypeElement.asType());
         Collection<? extends Element> annotatedMethods =
-                MoreElements.getAllMethods((TypeElement) annotatedType, types, elements).stream()
+                MoreElements.getAllMethods(annotatedTypeElement, types, elements).stream()
                         .filter(element -> MoreElements.getAnnotationMirror(element, Handle.class)
                                 .isPresent())
                         .collect(Collectors.toList());
@@ -146,7 +150,7 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
             EndpointDefinitions endpointDefinitions = new EndpointDefinitions(ctx, elements, types);
             List<Optional<EndpointDefinition>> maybeEndpoints = annotatedMethods.stream()
                     .map(MoreElements::asExecutable)
-                    .map(endpointDefinitions::tryParseEndpointDefinition)
+                    .map(element -> endpointDefinitions.tryParseEndpointDefinition(annotatedDeclaredType, element))
                     .collect(Collectors.toList());
 
             Preconditions.checkArgument(
