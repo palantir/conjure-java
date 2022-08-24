@@ -22,11 +22,16 @@ import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.processor.ErrorContext;
 import com.palantir.conjure.java.undertow.processor.data.ParameterTypeVisitors.IsPathMultiParamsVisitor;
+import com.palantir.logsafe.SafeArg;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
@@ -35,17 +40,19 @@ public final class EndpointDefinitions {
     private final ParamTypesResolver paramTypesResolver;
     private final ArgumentTypesResolver argumentTypesResolver;
     private final ReturnTypesResolver returnTypesResolver;
+    private final ResolverContext context;
     private final ErrorContext errorContext;
 
     public EndpointDefinitions(ErrorContext errorContext, Elements elements, Types types) {
         this.errorContext = errorContext;
-        ResolverContext context = new ResolverContext(errorContext, elements, types);
+        this.context = new ResolverContext(errorContext, elements, types);
         this.paramTypesResolver = new ParamTypesResolver(context);
         this.argumentTypesResolver = new ArgumentTypesResolver(context);
         this.returnTypesResolver = new ReturnTypesResolver(context);
     }
 
-    public Optional<EndpointDefinition> tryParseEndpointDefinition(ExecutableElement element) {
+    public Optional<EndpointDefinition> tryParseEndpointDefinition(
+            DeclaredType annotatedType, ExecutableElement element) {
         AnnotationReflector requestAnnotationReflector = MoreElements.getAnnotationMirror(element, Handle.class)
                 .toJavaUtil()
                 .map(ImmutableAnnotationReflector::of)
@@ -62,10 +69,23 @@ public final class EndpointDefinitions {
                 .toString());
         HttpPath path = HttpPath.of(requestAnnotationReflector.getAnnotationValue("path", String.class));
         Optional<ReturnType> maybeReturnType =
-                returnTypesResolver.getReturnType(endpointName, element, requestAnnotationReflector);
-        List<Optional<ArgumentDefinition>> args = element.getParameters().stream()
-                .map(this::getArgumentDefinition)
-                .collect(Collectors.toList());
+                returnTypesResolver.getReturnType(endpointName, annotatedType, element, requestAnnotationReflector);
+        ExecutableType executableType = context.asMemberOf(annotatedType, element);
+        List<? extends TypeMirror> boundParameterTypes = executableType.getParameterTypes();
+        List<? extends VariableElement> parameters = element.getParameters();
+        if (boundParameterTypes.size() != parameters.size()) {
+            errorContext.reportError(
+                    "parameters and boundParameters sizes differ unexpectedly",
+                    element,
+                    SafeArg.of("boundParameterTypes", boundParameterTypes),
+                    SafeArg.of("parameters", parameters));
+        }
+        List<Optional<ArgumentDefinition>> args = new ArrayList<>();
+        for (int i = 0; i < parameters.size(); i++) {
+            VariableElement parameter = parameters.get(i);
+            TypeMirror parameterType = boundParameterTypes.get(i);
+            args.add(getArgumentDefinition(parameter, parameterType));
+        }
 
         if (!args.stream()
                         .filter(Predicates.not(Optional::isPresent))
@@ -108,9 +128,9 @@ public final class EndpointDefinitions {
                 .build());
     }
 
-    private Optional<ArgumentDefinition> getArgumentDefinition(VariableElement param) {
-        ArgumentType argumentType = argumentTypesResolver.getArgumentType(param);
-        Optional<ParameterType> parameterType = paramTypesResolver.getParameterType(param);
+    private Optional<ArgumentDefinition> getArgumentDefinition(VariableElement param, TypeMirror paramType) {
+        ArgumentType argumentType = argumentTypesResolver.getArgumentType(param, paramType);
+        Optional<ParameterType> parameterType = paramTypesResolver.getParameterType(param, paramType);
 
         if (parameterType.isEmpty()) {
             return Optional.empty();

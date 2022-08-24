@@ -29,6 +29,9 @@ import com.palantir.conjure.java.undertow.processor.sample.CookieParams;
 import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoderService;
 import com.palantir.conjure.java.undertow.processor.sample.DeprecatedEndpointResource;
 import com.palantir.conjure.java.undertow.processor.sample.DeprecatedResource;
+import com.palantir.conjure.java.undertow.processor.sample.ExtendsNested;
+import com.palantir.conjure.java.undertow.processor.sample.ExtendsSimpleInterface;
+import com.palantir.conjure.java.undertow.processor.sample.GenericImpl;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
@@ -127,6 +130,21 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testPackagePrivateInterface() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, PackagePrivateInterface.class);
+    }
+
+    @Test
+    public void testExtendsSimpleInterface() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, ExtendsSimpleInterface.class);
+    }
+
+    @Test
+    public void testExtendsNested() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, ExtendsNested.class);
+    }
+
+    @Test
+    public void testBindsGeneric() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, GenericImpl.class);
     }
 
     @Test

@@ -17,14 +17,15 @@
 package com.palantir.conjure.java.undertow.processor;
 
 import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
 import com.google.common.base.Predicates;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CompileTimeConstant;
-import com.palantir.common.streams.KeyedStream;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.processor.data.EndpointDefinition;
 import com.palantir.conjure.java.undertow.processor.data.EndpointDefinitions;
+import com.palantir.conjure.java.undertow.processor.data.ImmutableAnnotationReflector;
 import com.palantir.conjure.java.undertow.processor.data.ImmutableServiceDefinition;
 import com.palantir.conjure.java.undertow.processor.data.ServiceDefinition;
 import com.palantir.conjure.java.undertow.processor.data.Visibility;
@@ -45,6 +46,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -55,6 +57,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
@@ -77,7 +80,7 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return ImmutableSet.of(Handle.class.getCanonicalName());
+        return ImmutableSet.of(Handle.class.getCanonicalName(), Handle.Generate.class.getCanonicalName());
     }
 
     @Override
@@ -91,14 +94,19 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
             return false;
         }
 
-        KeyedStream.of(roundEnv.getElementsAnnotatedWith(Handle.class))
-                .mapKeys(Element::getEnclosingElement)
-                .collectToSetMultimap()
-                .asMap()
-                .forEach((interfaceElement, annotatedMethods) -> {
+        Stream.concat(
+                        roundEnv.getElementsAnnotatedWith(Handle.class).stream().map(Element::getEnclosingElement),
+                        roundEnv.getElementsAnnotatedWith(Handle.Generate.class).stream())
+                .distinct()
+                .filter(element -> MoreElements.getAnnotationMirror(element, Handle.Generate.class)
+                        .toJavaUtil()
+                        .map(mirror -> ImmutableAnnotationReflector.of(mirror).getAnnotationValue(Boolean.class))
+                        // Default is true, when no annotation is present
+                        .orElse(true))
+                .forEach(interfaceElement -> {
                     JavaFile javaFile;
                     try {
-                        javaFile = generateUndertowServiceEndpoints(interfaceElement, annotatedMethods);
+                        javaFile = generateUndertowServiceEndpoints(interfaceElement);
                     } catch (Throwable e) {
                         error("Code generation failed", interfaceElement, e);
                         return;
@@ -114,8 +122,14 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
         return false;
     }
 
-    private JavaFile generateUndertowServiceEndpoints(
-            Element annotatedType, Collection<? extends Element> annotatedMethods) {
+    private JavaFile generateUndertowServiceEndpoints(Element annotatedType) {
+        TypeElement annotatedTypeElement = (TypeElement) annotatedType;
+        DeclaredType annotatedDeclaredType = MoreTypes.asDeclared(annotatedTypeElement.asType());
+        Collection<? extends Element> annotatedMethods =
+                MoreElements.getAllMethods(annotatedTypeElement, types, elements).stream()
+                        .filter(element -> MoreElements.getAnnotationMirror(element, Handle.class)
+                                .isPresent())
+                        .collect(Collectors.toList());
         validationStep(ctx -> {
             for (Element element : annotatedMethods) {
                 if (!element.getKind().equals(ElementKind.METHOD)) {
@@ -136,7 +150,7 @@ public final class ConjureUndertowAnnotationProcessor extends AbstractProcessor 
             EndpointDefinitions endpointDefinitions = new EndpointDefinitions(ctx, elements, types);
             List<Optional<EndpointDefinition>> maybeEndpoints = annotatedMethods.stream()
                     .map(MoreElements::asExecutable)
-                    .map(endpointDefinitions::tryParseEndpointDefinition)
+                    .map(element -> endpointDefinitions.tryParseEndpointDefinition(annotatedDeclaredType, element))
                     .collect(Collectors.toList());
 
             Preconditions.checkArgument(

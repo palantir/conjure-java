@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.processor.data;
 
+import com.google.auto.common.MoreTypes;
 import com.google.common.collect.Iterables;
 import com.google.errorprone.annotations.CompileTimeConstant;
 import com.palantir.conjure.java.undertow.processor.ErrorContext;
@@ -23,8 +24,10 @@ import com.palantir.logsafe.Arg;
 import com.squareup.javapoet.TypeName;
 import java.util.Optional;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleTypeVisitor9;
@@ -81,6 +84,10 @@ public final class ResolverContext implements ErrorContext {
                 return Optional.empty();
             }
         });
+    }
+
+    public ExecutableType asMemberOf(DeclaredType owner, ExecutableElement method) {
+        return MoreTypes.asExecutable(types.asMemberOf(owner, method));
     }
 
     @Override

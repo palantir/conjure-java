@@ -21,6 +21,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import java.util.Optional;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 public final class ReturnTypesResolver {
@@ -32,8 +33,11 @@ public final class ReturnTypesResolver {
     }
 
     public Optional<ReturnType> getReturnType(
-            EndpointName endpointName, ExecutableElement element, AnnotationReflector handleAnnotation) {
-        TypeMirror returnType = element.getReturnType();
+            EndpointName endpointName,
+            DeclaredType annotatedType,
+            ExecutableElement element,
+            AnnotationReflector handleAnnotation) {
+        TypeMirror returnType = context.asMemberOf(annotatedType, element).getReturnType();
 
         Optional<TypeMirror> maybeListenableFutureInnerType = getListenableFutureInnerType(returnType);
         // TODO(ckozak): Validate deserializer types match
