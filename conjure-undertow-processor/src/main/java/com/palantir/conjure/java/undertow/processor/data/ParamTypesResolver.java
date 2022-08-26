@@ -167,15 +167,15 @@ public final class ParamTypesResolver {
         if (annotationReflector.isAnnotation(Handle.Body.class)) {
             return Optional.of(bodyParameter(variableElement, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.Header.class)) {
-            return Optional.of(headerParameter(variableElement, annotationReflector, safeLoggable));
+            return Optional.of(headerParameter(variableElement, parameterType, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.PathParam.class)) {
-            return Optional.of(pathParameter(variableElement, annotationReflector, safeLoggable));
+            return Optional.of(pathParameter(variableElement, annotationReflector, safeLoggable, parameterType));
         } else if (annotationReflector.isAnnotation(Handle.PathMultiParam.class)) {
-            return Optional.of(pathMultiParameter(variableElement, annotationReflector, safeLoggable));
+            return Optional.of(pathMultiParameter(variableElement, parameterType, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.QueryParam.class)) {
-            return Optional.of(queryParameter(variableElement, annotationReflector, safeLoggable));
+            return Optional.of(queryParameter(variableElement, parameterType, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.Cookie.class)) {
-            return cookieParameter(variableElement, annotationReflector, safeLoggable);
+            return cookieParameter(variableElement, parameterType, annotationReflector, safeLoggable);
         }
 
         throw new SafeIllegalStateException("Not possible");
@@ -194,6 +194,7 @@ public final class ParamTypesResolver {
 
     private ParameterType headerParameter(
             VariableElement variableElement,
+            TypeMirror parameterType,
             AnnotationReflector annotationReflector,
             SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
@@ -202,25 +203,27 @@ public final class ParamTypesResolver {
                 javaParameterName,
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getCollectionParamDecoder(variableElement, annotationReflector),
+                getCollectionParamDecoder(variableElement, parameterType, annotationReflector),
                 safeLoggable);
     }
 
     private ParameterType pathParameter(
             VariableElement variableElement,
             AnnotationReflector annotationReflector,
-            SafeLoggingAnnotation safeLoggable) {
+            SafeLoggingAnnotation safeLoggable,
+            TypeMirror parameterType) {
         String javaParameterName = variableElement.getSimpleName().toString();
         String deserializerName = InstanceVariables.joinCamelCase(javaParameterName, "Deserializer");
         return ParameterTypes.path(
                 javaParameterName,
                 deserializerName,
-                getParamDecoder(variableElement, annotationReflector),
+                getParamDecoder(variableElement, parameterType, annotationReflector),
                 safeLoggable);
     }
 
     private ParameterType pathMultiParameter(
             VariableElement variableElement,
+            TypeMirror parameterType,
             AnnotationReflector annotationReflector,
             SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
@@ -228,12 +231,13 @@ public final class ParamTypesResolver {
         return ParameterTypes.pathMulti(
                 javaParameterName,
                 deserializerName,
-                getCollectionParamDecoder(variableElement, annotationReflector),
+                getCollectionParamDecoder(variableElement, parameterType, annotationReflector),
                 safeLoggable);
     }
 
     private ParameterType queryParameter(
             VariableElement variableElement,
+            TypeMirror parameterType,
             AnnotationReflector annotationReflector,
             SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
@@ -243,12 +247,13 @@ public final class ParamTypesResolver {
                 javaParameterName,
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getCollectionParamDecoder(variableElement, annotationReflector),
+                getCollectionParamDecoder(variableElement, parameterType, annotationReflector),
                 safeLoggable);
     }
 
     private Optional<ParameterType> cookieParameter(
             VariableElement variableElement,
+            TypeMirror parameterType,
             AnnotationReflector annotationReflector,
             SafeLoggingAnnotation safeLoggable) {
         String javaParameterName = variableElement.getSimpleName().toString();
@@ -270,21 +275,21 @@ public final class ParamTypesResolver {
                 javaParameterName,
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
-                getParamDecoder(variableElement, annotationReflector),
+                getParamDecoder(variableElement, parameterType, annotationReflector),
                 safeLoggable));
     }
 
-    private CodeBlock getParamDecoder(VariableElement variableElement, AnnotationReflector annotationReflector) {
+    private CodeBlock getParamDecoder(
+            VariableElement variableElement, TypeMirror parameterType, AnnotationReflector annotationReflector) {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultParamDecoder.class)) {
             return Instantiables.instantiate(typeMirror);
         }
 
-        TypeMirror variableType = variableElement.asType();
         // For param decoders, we don't support list and set container types.
-        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);
-        TypeMirror decoderType = innerOptionalType.orElse(variableType);
+        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, parameterType);
+        TypeMirror decoderType = innerOptionalType.orElse(parameterType);
         ContainerType decoderOutputType = getOutputType(Optional.empty(), Optional.empty(), innerOptionalType);
 
         return getDefaultDecoderFactory(decoderType, ContainerType.NONE, decoderOutputType)
@@ -293,27 +298,26 @@ public final class ParamTypesResolver {
                             "No default decoder exists for parameter. "
                                     + "Types with a valueOf(String) method are supported, as are conjure types",
                             variableElement,
-                            SafeArg.of("variableType", variableType),
+                            SafeArg.of("variableType", parameterType),
                             SafeArg.of("supportedTypes", SUPPORTED_CLASSES));
                     return CodeBlock.of("// error");
                 });
     }
 
     private CodeBlock getCollectionParamDecoder(
-            VariableElement variableElement, AnnotationReflector annotationReflector) {
+            VariableElement variableElement, TypeMirror parameterType, AnnotationReflector annotationReflector) {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultParamDecoder.class)) {
             return Instantiables.instantiate(typeMirror);
         }
 
-        TypeMirror variableType = variableElement.asType();
-        Optional<TypeMirror> innerListType = context.getGenericInnerType(List.class, variableType);
-        Optional<TypeMirror> innerSetType = context.getGenericInnerType(Set.class, variableType);
-        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, variableType);
+        Optional<TypeMirror> innerListType = context.getGenericInnerType(List.class, parameterType);
+        Optional<TypeMirror> innerSetType = context.getGenericInnerType(Set.class, parameterType);
+        Optional<TypeMirror> innerOptionalType = context.getGenericInnerType(Optional.class, parameterType);
 
         TypeMirror decoderType =
-                innerListType.or(() -> innerSetType).or(() -> innerOptionalType).orElse(variableType);
+                innerListType.or(() -> innerSetType).or(() -> innerOptionalType).orElse(parameterType);
         ContainerType decoderOutputType = getOutputType(innerListType, innerSetType, innerOptionalType);
 
         return getDefaultDecoderFactory(decoderType, ContainerType.LIST, decoderOutputType)
@@ -322,7 +326,7 @@ public final class ParamTypesResolver {
                             "No default decoder exists for parameter. "
                                     + "Types with a valueOf(String) method are supported, as are conjure types",
                             variableElement,
-                            SafeArg.of("variableType", variableType),
+                            SafeArg.of("variableType", parameterType),
                             SafeArg.of("supportedTypes", SUPPORTED_CLASSES));
                     return CodeBlock.of("// error");
                 });
