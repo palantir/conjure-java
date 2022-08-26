@@ -2,6 +2,9 @@ package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
+import com.palantir.conjure.java.undertow.annotations.PathParamDeserializer;
+import com.palantir.conjure.java.undertow.annotations.QueryParamDeserializer;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.ReturnValueWriter;
@@ -14,6 +17,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
+import java.lang.Boolean;
 import java.lang.Exception;
 import java.lang.Integer;
 import java.lang.Override;
@@ -38,30 +42,41 @@ public final class GenericImplEndpoints implements UndertowService {
         return ImmutableList.of(new GenericEndpoint(runtime, delegate));
     }
 
-    private static final class GenericEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<Integer> {
+    private static final class GenericEndpoint implements HttpHandler, Endpoint, ReturnValueWriter<Boolean> {
         private final UndertowRuntime runtime;
 
         private final GenericImpl delegate;
 
         private final Deserializer<String> inputDeserializer;
 
-        private final Serializer<Integer> genericSerializer;
+        private final Deserializer<GenericImpl.ParamExample> pathParamDeserializer;
+
+        private final Deserializer<Integer> queryParamDeserializer;
+
+        private final Serializer<Boolean> genericSerializer;
 
         GenericEndpoint(UndertowRuntime runtime, GenericImpl delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
             this.inputDeserializer = DefaultSerDe.INSTANCE.deserializer(new TypeMarker<String>() {}, runtime, this);
-            this.genericSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<Integer>() {}, runtime, this);
+            this.pathParamDeserializer = new PathParamDeserializer<>(
+                    "pathParam",
+                    ParamDecoders.complexParamDecoder(runtime.plainSerDe(), GenericImpl.ParamExample::valueOf));
+            this.queryParamDeserializer = new QueryParamDeserializer<>(
+                    "queryParam", ParamDecoders.integerCollectionParamDecoder(runtime.plainSerDe()));
+            this.genericSerializer = DefaultSerDe.INSTANCE.serializer(new TypeMarker<Boolean>() {}, runtime, this);
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws Exception {
             String input = inputDeserializer.deserialize(exchange);
-            write(this.delegate.generic(input), exchange);
+            GenericImpl.ParamExample pathParam = this.pathParamDeserializer.deserialize(exchange);
+            Integer queryParam = this.queryParamDeserializer.deserialize(exchange);
+            write(this.delegate.generic(input, pathParam, queryParam), exchange);
         }
 
         @Override
-        public void write(Integer returnValue, HttpServerExchange exchange) throws IOException {
+        public void write(Boolean returnValue, HttpServerExchange exchange) throws IOException {
             this.genericSerializer.serialize(returnValue, exchange);
         }
 

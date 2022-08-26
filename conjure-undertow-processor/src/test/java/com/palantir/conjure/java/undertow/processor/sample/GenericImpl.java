@@ -17,6 +17,19 @@
 package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.palantir.conjure.java.undertow.annotations.Handle;
+import com.palantir.conjure.java.undertow.processor.sample.GenericImpl.ParamExample;
 
 @Handle.Generate
-public interface GenericImpl extends GenericIface<String, Integer> {}
+public interface GenericImpl extends GenericIface<String, Integer, ParamExample, Boolean> {
+    class ParamExample {
+        String value;
+
+        public ParamExample(String value) {
+            this.value = value;
+        }
+
+        public static ParamExample valueOf(String value) {
+            return new ParamExample(value);
+        }
+    }
+}
