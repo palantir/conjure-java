@@ -353,8 +353,8 @@ public final class ParamTypesResolver {
                     // to construct Optional<Integer> and Optional<Double>.
                     boolean isOptionalBoxedConjureType = outType == ContainerType.OPTIONAL
                             && (Integer.class.getName().equals(className)
-                            || Double.class.getName().equals(className)
-                            || Long.class.getName().equals(className));
+                                    || Double.class.getName().equals(className)
+                                    || Long.class.getName().equals(className));
                     return !isOptionalBoxedConjureType;
                 })
                 .map(className -> getDefaultDecoderMethodName(className, inputType, outType))
