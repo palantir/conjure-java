@@ -55,6 +55,27 @@ public interface DefaultDecoderService {
             @Handle.QueryParam("fromStringFactory") FromStringFactory fromStringFactory,
             @Handle.QueryParam("createFactory") CreateFactory createFactory);
 
+    @Handle(method = HttpMethod.POST, path = "/formParam")
+    String formParam(
+            @Handle.FormParam("stringParam") String stringParam,
+            @Handle.FormParam("booleanParam") Boolean booleanParam,
+            @Handle.FormParam("stringSetParam") Set<String> stringSetParam,
+            @Handle.FormParam("stringListParam") List<String> stringListParam,
+            @Handle.FormParam("optionalStringParam") Optional<String> optionalStringParam,
+            @Handle.FormParam("floatBoxed") Float floatBoxed,
+            @Handle.FormParam("floatUnboxed") float floatUnboxed,
+            @Handle.FormParam("optionalInt") OptionalInt optionalIntParam,
+            @Handle.FormParam("dateTime") OffsetDateTime dateTimeParam,
+            @Handle.FormParam("ridSetParam") Set<ResourceIdentifier> ridSetParam,
+            @Handle.FormParam("optionalSafeLongParam") Optional<SafeLong> optionalSafeLongParam,
+            @Handle.FormParam("uuidParam") UUID uuidParam,
+            @Handle.FormParam(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
+            @Handle.FormParam("constructor") Constructor constructor,
+            @Handle.FormParam("ofFactory") OfFactory ofFactory,
+            @Handle.FormParam("valueOfFactory") ValueOfFactory valueOfFactory,
+            @Handle.FormParam("fromStringFactory") FromStringFactory fromStringFactory,
+            @Handle.FormParam("createFactory") CreateFactory createFactory);
+
     @Handle(method = HttpMethod.GET, path = "/headers")
     String headers(
             @Handle.Header("stringParam") String stringParam,

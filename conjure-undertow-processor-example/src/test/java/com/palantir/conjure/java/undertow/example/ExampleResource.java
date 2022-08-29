@@ -91,6 +91,11 @@ final class ExampleResource implements ExampleService {
     }
 
     @Override
+    public String formParam(String formParameter) {
+        return Preconditions.checkNotNull(formParameter, "Form parameter is required");
+    }
+
+    @Override
     public String pathParam(String param) {
         return Preconditions.checkNotNull(param, "Path parameter is required");
     }

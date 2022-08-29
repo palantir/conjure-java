@@ -55,6 +55,13 @@ public interface ParameterType {
                 CodeBlock deserializerFactory,
                 SafeLoggingAnnotation safeLoggable);
 
+        R form(
+                String variableName,
+                String paramName,
+                String deserializerFieldName,
+                CodeBlock deserializerFactory,
+                SafeLoggingAnnotation safeLoggable);
+
         R cookie(
                 String variableName,
                 String cookieName,

@@ -73,6 +73,16 @@ public final class ParameterTypeVisitors {
         }
 
         @Override
+        public Boolean form(
+                String _variableName,
+                String _paramName,
+                String _deserializerFieldName,
+                CodeBlock _deserializerFactory,
+                SafeLoggingAnnotation safeLoggable) {
+            return !safeLoggable.equals(SafeLoggingAnnotation.UNKNOWN);
+        }
+
+        @Override
         public Boolean cookie(
                 String _variableName,
                 String _cookieName,
@@ -145,6 +155,16 @@ public final class ParameterTypeVisitors {
 
         @Override
         public Boolean query(
+                String _variableName,
+                String _paramName,
+                String _deserializerFieldName,
+                CodeBlock _deserializerFactory,
+                SafeLoggingAnnotation _safeLoggable) {
+            return false;
+        }
+
+        @Override
+        public Boolean form(
                 String _variableName,
                 String _paramName,
                 String _deserializerFieldName,

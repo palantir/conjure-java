@@ -65,10 +65,11 @@ public final class ParamTypesResolver {
 
     private static final ImmutableSet<Class<?>> PARAM_ANNOTATION_CLASSES = ImmutableSet.of(
             Handle.Body.class,
+            Handle.Header.class,
             Handle.PathParam.class,
             Handle.PathMultiParam.class,
             Handle.QueryParam.class,
-            Handle.Header.class,
+            Handle.FormParam.class,
             Handle.Cookie.class);
     private static final ImmutableSet<String> SUPPORTED_ANNOTATIONS = Stream.concat(
                     Stream.of(Safe.class, Unsafe.class), PARAM_ANNOTATION_CLASSES.stream())
@@ -174,6 +175,8 @@ public final class ParamTypesResolver {
             return Optional.of(pathMultiParameter(variableElement, parameterType, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.QueryParam.class)) {
             return Optional.of(queryParameter(variableElement, parameterType, annotationReflector, safeLoggable));
+        } else if (annotationReflector.isAnnotation(Handle.FormParam.class)) {
+            return Optional.of(formParameter(variableElement, parameterType, annotationReflector, safeLoggable));
         } else if (annotationReflector.isAnnotation(Handle.Cookie.class)) {
             return cookieParameter(variableElement, parameterType, annotationReflector, safeLoggable);
         }
@@ -244,6 +247,22 @@ public final class ParamTypesResolver {
         String deserializerName =
                 InstanceVariables.joinCamelCase(variableElement.getSimpleName().toString(), "Deserializer");
         return ParameterTypes.query(
+                javaParameterName,
+                annotationReflector.getAnnotationValue(String.class),
+                deserializerName,
+                getCollectionParamDecoder(variableElement, parameterType, annotationReflector),
+                safeLoggable);
+    }
+
+    private ParameterType formParameter(
+            VariableElement variableElement,
+            TypeMirror parameterType,
+            AnnotationReflector annotationReflector,
+            SafeLoggingAnnotation safeLoggable) {
+        String javaParameterName = variableElement.getSimpleName().toString();
+        String deserializerName =
+                InstanceVariables.joinCamelCase(variableElement.getSimpleName().toString(), "Deserializer");
+        return ParameterTypes.form(
                 javaParameterName,
                 annotationReflector.getAnnotationValue(String.class),
                 deserializerName,
