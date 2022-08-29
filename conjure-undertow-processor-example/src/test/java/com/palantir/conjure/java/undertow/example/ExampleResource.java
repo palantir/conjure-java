@@ -92,7 +92,7 @@ final class ExampleResource implements ExampleService {
 
     @Override
     public String formParam(String formParameter) {
-        return Preconditions.checkNotNull(formParameter, "Query parameter is required");
+        return Preconditions.checkNotNull(formParameter, "Form parameter is required");
     }
 
     @Override
