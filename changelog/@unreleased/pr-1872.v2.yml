@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: Add a `@FormParam` annotation for easily declaring endpoints that use
+    form data.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1872
