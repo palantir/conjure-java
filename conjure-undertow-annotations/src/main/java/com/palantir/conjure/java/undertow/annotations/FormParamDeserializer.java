@@ -62,7 +62,7 @@ public final class FormParamDeserializer<T> implements Deserializer<T> {
             return Collections.emptyList();
         }
 
-        Collection<String> values = new ArrayList<>();
+        Collection<String> values = new ArrayList<>(maybeValues.size());
 
         for (FormValue value : maybeValues) {
             Preconditions.checkArgument(!value.isFileItem(), "Form value was a file item");
