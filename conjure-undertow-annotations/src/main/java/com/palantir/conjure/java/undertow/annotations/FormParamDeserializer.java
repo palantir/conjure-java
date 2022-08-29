@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.undertow.annotations;
 
-import com.google.common.collect.Collections2;
 import com.palantir.conjure.java.undertow.lib.Deserializer;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -27,6 +26,7 @@ import io.undertow.server.handlers.form.FormDataParser;
 import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.util.Headers;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -62,11 +62,14 @@ public final class FormParamDeserializer<T> implements Deserializer<T> {
             return Collections.emptyList();
         }
 
+        Collection<String> values = new ArrayList<>();
+
         for (FormValue value : maybeValues) {
             Preconditions.checkArgument(!value.isFileItem(), "Form value was a file item");
+            values.add(value.getValue());
         }
 
-        return Collections.unmodifiableCollection(Collections2.transform(maybeValues, FormValue::getValue));
+        return Collections.unmodifiableCollection(values);
     }
 
     @Override
