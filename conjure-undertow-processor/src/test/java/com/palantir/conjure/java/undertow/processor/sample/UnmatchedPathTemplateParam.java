@@ -17,17 +17,10 @@
 package com.palantir.conjure.java.undertow.processor.sample;
 
 import com.palantir.conjure.java.undertow.annotations.Handle;
-import com.palantir.conjure.java.undertow.annotations.Handle.Body;
-import com.palantir.conjure.java.undertow.annotations.Handle.PathParam;
-import com.palantir.conjure.java.undertow.annotations.Handle.QueryParam;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 
-@Handle.Generate(false)
-public interface GenericIface<TBody, TQueryParam, TPathParam, TReturn> {
+public interface UnmatchedPathTemplateParam {
 
-    @Handle(method = HttpMethod.POST, path = "/generic/{pathParam}")
-    TReturn generic(
-            @Body TBody input,
-            @PathParam TPathParam pathParam,
-            @QueryParam(value = "queryParam") TQueryParam queryParam);
+    @Handle(method = HttpMethod.GET, path = "/{param}")
+    void unmatchedPathTemplateParam();
 }

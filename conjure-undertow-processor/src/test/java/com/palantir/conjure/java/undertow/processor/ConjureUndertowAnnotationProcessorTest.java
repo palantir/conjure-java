@@ -32,6 +32,7 @@ import com.palantir.conjure.java.undertow.processor.sample.DeprecatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.ExtendsNested;
 import com.palantir.conjure.java.undertow.processor.sample.ExtendsSimpleInterface;
 import com.palantir.conjure.java.undertow.processor.sample.GenericImpl;
+import com.palantir.conjure.java.undertow.processor.sample.MismatchedPathParam;
 import com.palantir.conjure.java.undertow.processor.sample.MultipleBodyInterface;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashContextParam;
 import com.palantir.conjure.java.undertow.processor.sample.NameClashExchangeParam;
@@ -53,6 +54,8 @@ import com.palantir.conjure.java.undertow.processor.sample.SafeLoggableParams;
 import com.palantir.conjure.java.undertow.processor.sample.SimpleInterface;
 import com.palantir.conjure.java.undertow.processor.sample.StaticMethodAnnotatedResource;
 import com.palantir.conjure.java.undertow.processor.sample.TaggedEndpoints;
+import com.palantir.conjure.java.undertow.processor.sample.UnmatchedPathParam;
+import com.palantir.conjure.java.undertow.processor.sample.UnmatchedPathTemplateParam;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -224,6 +227,24 @@ public class ConjureUndertowAnnotationProcessorTest {
     public void testParameterCreateFactoryThrows() {
         assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, ParameterCreateFactoryThrows.class))
                 .hadErrorContaining("No default decoder exists for parameter");
+    }
+
+    @Test
+    public void mismatchedPathParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, MismatchedPathParam.class))
+                .hadErrorContaining("Path template parameters do not match method path parameters");
+    }
+
+    @Test
+    public void unmatchedPathParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, UnmatchedPathParam.class))
+                .hadErrorContaining("Path template parameters do not match method path parameters");
+    }
+
+    @Test
+    public void unmatchedPathTemplateParam() {
+        assertThat(compileTestClass(TEST_CLASSES_BASE_DIR, UnmatchedPathTemplateParam.class))
+                .hadErrorContaining("Path template parameters do not match method path parameters");
     }
 
     @Test

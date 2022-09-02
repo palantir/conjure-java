@@ -94,8 +94,8 @@ public interface DefaultDecoderService {
 
     @Handle(
             method = HttpMethod.GET,
-            path = "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{bigInt}"
-                    + "/{constructor}/{ofFactory}/{valueOfFactory}")
+            path = "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{constructor}"
+                    + "/{ofFactory}/{valueOfFactory}/{fromStringFactory}/{createFactory}")
     String pathParam(
             @Handle.PathParam String stringParam,
             @Handle.PathParam Boolean booleanParam,

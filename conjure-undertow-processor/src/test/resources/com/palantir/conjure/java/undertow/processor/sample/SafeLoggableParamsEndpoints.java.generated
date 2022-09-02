@@ -102,7 +102,7 @@ public final class SafeLoggableParamsEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/pathParams/{noAnnotation}/{safeParam}/{unsafeParam}/*";
+            return "/pathParams/{noAnnotationParam}/{safeParam}/{unsafeParam}/*";
         }
 
         @Override
