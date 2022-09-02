@@ -21,11 +21,13 @@ import com.google.common.base.Predicates;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.processor.ErrorContext;
-import com.palantir.conjure.java.undertow.processor.data.ParameterTypeVisitors.IsPathMultiParamsVisitor;
 import com.palantir.logsafe.SafeArg;
+import io.undertow.util.PathTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
@@ -36,6 +38,11 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 public final class EndpointDefinitions {
+
+    private static final Function<ParameterType, Boolean> IS_PATH_PARAMETER =
+            ParameterTypes.cases().path_(true).otherwise_(false);
+    private static final Function<ParameterType, Boolean> IS_PATH_MULTI_PARAMETER =
+            ParameterTypes.cases().pathMulti_(true).otherwise_(false);
 
     private final ParamTypesResolver paramTypesResolver;
     private final ArgumentTypesResolver argumentTypesResolver;
@@ -115,6 +122,16 @@ public final class EndpointDefinitions {
             path = HttpPath.of(pathString.substring(0, pathString.length() - expectedEnd.length()) + "/*");
         }
 
+        Set<String> expectedPathParams = PathTemplate.create(path.path()).getParameterNames();
+        Set<String> actualPathParams = argumentDefinitions.stream()
+                .filter(argument -> IS_PATH_PARAMETER.apply(argument.paramType()))
+                .map(argument -> argument.argName().get())
+                .collect(Collectors.toUnmodifiableSet());
+        if (!actualPathParams.equals(expectedPathParams)) {
+            errorContext.reportError("Path template parameters do not match method path parameters", element);
+            return Optional.empty();
+        }
+
         return Optional.of(ImmutableEndpointDefinition.builder()
                 .endpointName(endpointName)
                 .serviceName(serviceName)
@@ -148,7 +165,7 @@ public final class EndpointDefinitions {
 
     private static List<ArgumentDefinition> getPathMultiParams(List<ArgumentDefinition> argumentDefinitions) {
         return argumentDefinitions.stream()
-                .filter(definition -> definition.paramType().match(IsPathMultiParamsVisitor.INSTANCE))
+                .filter(definition -> IS_PATH_MULTI_PARAMETER.apply(definition.paramType()))
                 .collect(Collectors.toList());
     }
 }

@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: '`conjure-undertow-processor` now validates that the path template
+    parameters match the `@PathParam` method parameters.'
+  links:
+  - https://github.com/palantir/conjure-java/pull/1876

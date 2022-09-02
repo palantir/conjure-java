@@ -24,7 +24,9 @@ import com.palantir.logsafe.Unsafe;
 
 public interface SafeLoggableParams {
 
-    @Handle(method = HttpMethod.GET, path = "/pathParams/{noAnnotation}/{safeParam}/{unsafeParam}/{safeMultiParam}")
+    @Handle(
+            method = HttpMethod.GET,
+            path = "/pathParams/{noAnnotationParam}/{safeParam}/{unsafeParam}/{safeMultiParam}")
     void pathParams(
             @Handle.PathParam String noAnnotationParam,
             @Safe @Handle.PathParam String safeParam,

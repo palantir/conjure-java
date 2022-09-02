@@ -641,7 +641,7 @@ public final class DefaultDecoderServiceEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{bigInt}/{constructor}/{ofFactory}/{valueOfFactory}";
+            return "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{constructor}/{ofFactory}/{valueOfFactory}/{fromStringFactory}/{createFactory}";
         }
 
         @Override
