@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = SetExample.Builder.class)
@@ -43,7 +44,7 @@ public final class SetExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof SetExample && equalTo((SetExample) other));
     }
 

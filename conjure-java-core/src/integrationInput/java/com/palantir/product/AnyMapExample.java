@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = AnyMapExample.Builder.class)
@@ -33,7 +34,7 @@ public final class AnyMapExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof AnyMapExample && equalTo((AnyMapExample) other));
     }
 

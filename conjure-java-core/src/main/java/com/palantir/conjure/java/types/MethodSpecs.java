@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collector;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 public final class MethodSpecs {
@@ -41,7 +42,9 @@ public final class MethodSpecs {
     private static final String MEMOIZED_HASH_CODE = "memoizedHashCode";
 
     public static MethodSpec createEquals(TypeName thisClass) {
-        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other").build();
+        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other")
+                .addAnnotation(Nullable.class)
+                .build();
         return MethodSpec.methodBuilder("equals")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
