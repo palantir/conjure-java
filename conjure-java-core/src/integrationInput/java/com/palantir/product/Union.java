@@ -21,6 +21,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
@@ -274,7 +275,7 @@ public final class Union {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof FooWrapper && equalTo((FooWrapper) other));
         }
 
@@ -320,7 +321,7 @@ public final class Union {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof BarWrapper && equalTo((BarWrapper) other));
         }
 
@@ -366,7 +367,7 @@ public final class Union {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof BazWrapper && equalTo((BazWrapper) other));
         }
 
@@ -423,7 +424,7 @@ public final class Union {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
         }
 

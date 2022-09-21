@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = OneFieldOnlyFinalStage.Builder.class)
@@ -32,7 +33,7 @@ public final class OneFieldOnlyFinalStage {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof OneFieldOnlyFinalStage && equalTo((OneFieldOnlyFinalStage) other));
     }
 

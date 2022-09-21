@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @DoNotLog
@@ -90,7 +91,7 @@ public final class AliasAsMapKeyExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof AliasAsMapKeyExample && equalTo((AliasAsMapKeyExample) other));
     }
 
