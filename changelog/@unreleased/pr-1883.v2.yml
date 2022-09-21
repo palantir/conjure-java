@@ -1,5 +1,5 @@
 type: improvement
 improvement:
-  description: Mark the argument to .equals on a conjure bean as @Nullable
+  description: Mark the argument to .equals on a conjure bean as `@Nullable`
   links:
   - https://github.com/palantir/conjure-java/pull/1883
