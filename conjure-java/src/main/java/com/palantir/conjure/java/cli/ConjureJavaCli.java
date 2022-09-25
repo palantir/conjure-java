@@ -102,6 +102,12 @@ public final class ConjureJavaCli implements Runnable {
         private boolean jakartaPackages;
 
         @CommandLine.Option(
+                names = "--jetbrainsContractAnnotations",
+                defaultValue = "false",
+                description = "When generating conjure errors, use the newer Jetbrains contract annotations")
+        private boolean jetbrainsContractAnnotations;
+
+        @CommandLine.Option(
                 names = "--undertow",
                 defaultValue = "false",
                 description = "Generate undertow service interfaces and endpoint wrappers for server usage")
@@ -275,6 +281,7 @@ public final class ConjureJavaCli implements Runnable {
                             .undertowListenableFutures(undertowListenableFutures)
                             .experimentalUndertowAsyncMarkers(experimentalUndertowAsyncMarkers)
                             .jakartaPackages(jakartaPackages)
+                            .jetbrainsContractAnnotations(jetbrainsContractAnnotations)
                             .strictObjects(strictObjects)
                             .nonNullCollections(nonNullCollections)
                             .nonNullTopLevelCollectionValues(nonNullCollections || nonNullTopLevelCollectionValues)

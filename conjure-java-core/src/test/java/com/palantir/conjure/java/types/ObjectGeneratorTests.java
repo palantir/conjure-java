@@ -65,6 +65,7 @@ public final class ObjectGeneratorTests {
                                 .nonNullCollections(true)
                                 .excludeEmptyOptionals(true)
                                 .unionsWithUnknownValues(true)
+                                .jetbrainsContractAnnotations(true)
                                 .build())))
                 .emit(def, tempDir);
 
@@ -77,8 +78,10 @@ public final class ObjectGeneratorTests {
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(
-                                Options.builder().excludeEmptyOptionals(true).build())))
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .excludeEmptyOptionals(true)
+                                .jetbrainsContractAnnotations(true)
+                                .build())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -92,6 +95,7 @@ public final class ObjectGeneratorTests {
                         ImmutableSet.of(new ObjectGenerator(Options.builder()
                                 .packagePrefix("test.prefix")
                                 .excludeEmptyOptionals(true)
+                                .jetbrainsContractAnnotations(true)
                                 .build())))
                 .emit(def, tempDir);
 
@@ -107,6 +111,7 @@ public final class ObjectGeneratorTests {
                         ImmutableSet.of(new ObjectGenerator(Options.builder()
                                 .useStagedBuilders(true)
                                 .excludeEmptyOptionals(true)
+                                .jetbrainsContractAnnotations(true)
                                 .build())))
                 .emit(def, tempDir);
 
@@ -119,8 +124,10 @@ public final class ObjectGeneratorTests {
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/exclude-empty-collections.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(
-                                Options.builder().excludeEmptyCollections(true).build())))
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .excludeEmptyCollections(true)
+                                .jetbrainsContractAnnotations(true)
+                                .build())))
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
@@ -138,6 +145,7 @@ public final class ObjectGeneratorTests {
                         ImmutableSet.of(new ObjectGenerator(Options.builder()
                                 .useImmutableBytes(true)
                                 .excludeEmptyOptionals(true)
+                                .jetbrainsContractAnnotations(true)
                                 .build())))
                 .emit(conjure, src);
 
@@ -161,6 +169,7 @@ public final class ObjectGeneratorTests {
                         ImmutableSet.of(new ErrorGenerator(Options.builder()
                                 .useImmutableBytes(true)
                                 .excludeEmptyOptionals(true)
+                                .jetbrainsContractAnnotations(true)
                                 .build())))
                 .emit(def, tempDir);
 
@@ -172,6 +181,7 @@ public final class ObjectGeneratorTests {
         ErrorGenerator errorGenerator = new ErrorGenerator(Options.builder()
                 .useImmutableBytes(true)
                 .excludeEmptyOptionals(true)
+                .jetbrainsContractAnnotations(true)
                 .build());
         TypeName unsafeAliasName = TypeName.of("UnsafeAlias", "com.palantir.product");
         TypeDefinition unsafeAlias = TypeDefinition.alias(AliasDefinition.builder()
@@ -207,6 +217,7 @@ public final class ObjectGeneratorTests {
                         ImmutableSet.of(new ObjectGenerator(Options.builder()
                                 .useImmutableBytes(true)
                                 .strictObjects(false)
+                                .jetbrainsContractAnnotations(true)
                                 .build())))
                 .emit(def, tempDir);
 

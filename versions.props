@@ -31,6 +31,7 @@ org.glassfish.jersey.*:* = 2.34
 org.hamcrest:hamcrest-core = 2.2
 org.immutables:value = 2.8.8
 org.javassist:javassist = 3.22.0-GA
+org.jetbrains:annotations = 23.0.0
 org.junit.jupiter:* = 5.8.2
 org.junit.vintage:* = 5.8.2
 org.mockito:* = 4.6.1

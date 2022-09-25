@@ -5,6 +5,7 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.processing.Generated;
+import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureJavaErrors {
@@ -26,8 +27,10 @@ public final class ConjureJavaErrors {
 
     /**
      * Throws a {@link ServiceException} of type JavaCompilationFailed when {@code shouldThrow} is true.
+     *
      * @param shouldThrow Cause the method to throw when true
      */
+    @Contract("true -> fail")
     public static void throwIfJavaCompilationFailed(boolean shouldThrow) {
         if (shouldThrow) {
             throw javaCompilationFailed();
