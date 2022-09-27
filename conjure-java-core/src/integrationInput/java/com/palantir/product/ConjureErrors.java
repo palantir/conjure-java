@@ -9,6 +9,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
 import javax.annotation.processing.Generated;
+import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
@@ -63,10 +64,12 @@ public final class ConjureErrors {
 
     /**
      * Throws a {@link ServiceException} of type InvalidServiceDefinition when {@code shouldThrow} is true.
+     *
      * @param shouldThrow Cause the method to throw when true
      * @param serviceName Name of the invalid service definition.
      * @param serviceDef Details of the invalid service definition.
      */
+    @Contract("true, _, _ -> fail")
     public static void throwIfInvalidServiceDefinition(
             boolean shouldThrow, @Safe String serviceName, @Unsafe Object serviceDef) {
         if (shouldThrow) {
@@ -76,10 +79,12 @@ public final class ConjureErrors {
 
     /**
      * Throws a {@link ServiceException} of type InvalidTypeDefinition when {@code shouldThrow} is true.
+     *
      * @param shouldThrow Cause the method to throw when true
      * @param typeName
      * @param typeDef
      */
+    @Contract("true, _, _ -> fail")
     public static void throwIfInvalidTypeDefinition(
             boolean shouldThrow, @Safe String typeName, @Unsafe Object typeDef) {
         if (shouldThrow) {

@@ -574,6 +574,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 .undertowServicePrefix(true)
                 .nonNullCollections(true)
                 .excludeEmptyOptionals(true)
+                .jetbrainsContractAnnotations(true)
                 .build();
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),

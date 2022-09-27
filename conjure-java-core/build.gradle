@@ -86,6 +86,7 @@ dependencies {
     integrationInputImplementation 'jakarta.validation:jakarta.validation-api'
     integrationInputImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     integrationInputImplementation 'com.palantir.dialogue:dialogue-target'
+    integrationInputImplementation 'org.jetbrains:annotations'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'

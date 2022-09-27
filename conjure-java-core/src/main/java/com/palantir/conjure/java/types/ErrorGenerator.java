@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Generator;
@@ -35,6 +36,7 @@ import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -94,16 +96,9 @@ public final class ErrorGenerator implements Generator {
         return pkgToNamespacedErrorDefs;
     }
 
-    private static JavaFile generateErrorTypesForNamespace(
-            TypeMapper typeMapper,
-            SafetyEvaluator safetyEvaluator,
-            String conjurePackage,
-            ErrorNamespace namespace,
-            List<ErrorDefinition> errorTypeDefinitions) {
-        ClassName className = errorTypesClassName(conjurePackage, namespace);
-
-        // Generate ErrorType definitions
-        List<FieldSpec> fieldSpecs = errorTypeDefinitions.stream()
+    private static ImmutableList<FieldSpec> generateErrorTypeFields(
+            ErrorNamespace namespace, List<ErrorDefinition> errorTypeDefinitions) {
+        return errorTypeDefinitions.stream()
                 .map(errorDef -> {
                     CodeBlock initializer = CodeBlock.of(
                             "ErrorType.create(ErrorType.Code.$L, \"$L:$L\")",
@@ -122,8 +117,15 @@ public final class ErrorGenerator implements Generator {
                     errorDef.getDocs().ifPresent(docs -> fieldSpecBuilder.addJavadoc(docs.get()));
                     return fieldSpecBuilder.build();
                 })
-                .collect(Collectors.toList());
+                .collect(ImmutableList.toImmutableList());
+    }
 
+    private JavaFile generateErrorTypesForNamespace(
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            String conjurePackage,
+            ErrorNamespace namespace,
+            List<ErrorDefinition> errorTypeDefinitions) {
         // Generate ServiceException factory methods
         List<MethodSpec> methodSpecs = errorTypeDefinitions.stream()
                 .flatMap(entry -> {
@@ -144,60 +146,77 @@ public final class ErrorGenerator implements Generator {
 
                     MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(methodName)
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                            .addParameter(TypeName.BOOLEAN, shouldThrowVar);
-
-                    methodBuilder.addJavadoc(
-                            "Throws a {@link ServiceException} of type $L when {@code $L} is true.\n",
-                            entry.getErrorName().getName(),
-                            shouldThrowVar);
-                    methodBuilder.addJavadoc("@param $L $L\n", shouldThrowVar, "Cause the method to throw when true");
-                    Streams.concat(
-                                    entry.getSafeArgs().stream().map(field -> FieldDefinition.builder()
-                                            .from(field)
-                                            .safety(LogSafety.SAFE)
-                                            .build()),
-                                    entry.getUnsafeArgs().stream().map(field -> FieldDefinition.builder()
-                                            .from(field)
-                                            .safety(LogSafety.UNSAFE)
-                                            .build()))
-                            .forEach(arg -> {
-                                TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
-                                Optional<LogSafety> required = arg.getSafety();
-                                Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(arg.getType());
-                                if (!SafetyEvaluator.allows(required, typeSafety)) {
-                                    throw new IllegalStateException(String.format(
-                                            "Cannot use %s type %s as a %s parameter in error %s -> %s",
-                                            typeSafety.map(Object::toString).orElse("unknown"),
-                                            argumentTypeName,
-                                            required.map(Object::toString).orElse("unknown"),
-                                            entry.getErrorName().getName(),
-                                            arg.getFieldName()));
-                                }
-                                methodBuilder.addParameter(ParameterSpec.builder(
-                                                argumentTypeName,
-                                                arg.getFieldName().get())
-                                        .addAnnotations(ConjureAnnotations.safety(arg.getSafety()))
+                            .addJavadoc(
+                                    "Throws a {@link $T} of type $L when {@code $L} is true.\n",
+                                    ServiceException.class,
+                                    entry.getErrorName().getName(),
+                                    shouldThrowVar)
+                            .addParameter(ParameterSpec.builder(TypeName.BOOLEAN, shouldThrowVar)
+                                    .addJavadoc("Cause the method to throw when true\n")
+                                    .build())
+                            .addParameters(Streams.concat(
+                                            entry.getSafeArgs().stream().map(field -> FieldDefinition.builder()
+                                                    .from(field)
+                                                    .safety(LogSafety.SAFE)
+                                                    .build()),
+                                            entry.getUnsafeArgs().stream().map(field -> FieldDefinition.builder()
+                                                    .from(field)
+                                                    .safety(LogSafety.UNSAFE)
+                                                    .build()))
+                                    .map(arg -> {
+                                        TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
+                                        Optional<LogSafety> required = arg.getSafety();
+                                        Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(arg.getType());
+                                        if (!SafetyEvaluator.allows(required, typeSafety)) {
+                                            throw new IllegalStateException(String.format(
+                                                    "Cannot use %s type %s as a %s parameter in error %s -> %s",
+                                                    typeSafety
+                                                            .map(Object::toString)
+                                                            .orElse("unknown"),
+                                                    argumentTypeName,
+                                                    required.map(Object::toString)
+                                                            .orElse("unknown"),
+                                                    entry.getErrorName().getName(),
+                                                    arg.getFieldName()));
+                                        }
+                                        return ParameterSpec.builder(
+                                                        argumentTypeName,
+                                                        arg.getFieldName().get())
+                                                .addAnnotations(ConjureAnnotations.safety(arg.getSafety()))
+                                                .addJavadoc(
+                                                        "$L",
+                                                        StringUtils.appendIfMissing(
+                                                                arg.getDocs()
+                                                                        .map(Javadoc::render)
+                                                                        .orElse(""),
+                                                                "\n"))
+                                                .build();
+                                    })
+                                    .collect(ImmutableList.toImmutableList()));
+                    if (options.jetbrainsContractAnnotations()) {
+                        String contract = String.format(
+                                "true%s -> fail",
+                                ", _"
+                                        .repeat(entry.getSafeArgs().size()
+                                                + entry.getUnsafeArgs().size()));
+                        methodBuilder.addAnnotation(
+                                AnnotationSpec.builder(ClassName.get("org.jetbrains.annotations", "Contract"))
+                                        .addMember("value", "$S", contract)
                                         .build());
-                                methodBuilder.addJavadoc(
-                                        "@param $L $L",
-                                        arg.getFieldName().get(),
-                                        StringUtils.appendIfMissing(
-                                                arg.getDocs()
-                                                        .map(Javadoc::render)
-                                                        .orElse(""),
-                                                "\n"));
-                            });
+                    }
 
-                    methodBuilder.addCode("if ($L) {", shouldThrowVar);
-                    methodBuilder.addCode(
-                            "throw $L;",
-                            Expressions.localMethodCall(
-                                    exceptionMethodName,
-                                    Streams.concat(entry.getSafeArgs().stream(), entry.getUnsafeArgs().stream())
-                                            .map(arg -> arg.getFieldName().get())
-                                            .collect(Collectors.toList())));
-                    methodBuilder.addCode("}");
-                    return methodBuilder.build();
+                    return methodBuilder
+                            .beginControlFlow("if ($N)", shouldThrowVar)
+                            .addCode(
+                                    "throw $L;",
+                                    Expressions.localMethodCall(
+                                            exceptionMethodName,
+                                            Streams.concat(entry.getSafeArgs().stream(), entry.getUnsafeArgs().stream())
+                                                    .map(arg ->
+                                                            arg.getFieldName().get())
+                                                    .collect(Collectors.toList())))
+                            .endControlFlow()
+                            .build();
                 })
                 .collect(Collectors.toList());
 
@@ -226,10 +245,10 @@ public final class ErrorGenerator implements Generator {
                 })
                 .collect(Collectors.toList());
 
-        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(className)
+        TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(errorTypesClassName(conjurePackage, namespace))
                 .addMethod(privateConstructor())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addFields(fieldSpecs)
+                .addFields(generateErrorTypeFields(namespace, errorTypeDefinitions))
                 .addMethods(methodSpecs)
                 .addMethods(checkMethodSpecs)
                 .addMethods(isRemoteExceptionDefinitions)
@@ -272,14 +291,15 @@ public final class ErrorGenerator implements Generator {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
         String argName = argDefinition.getFieldName().get();
         TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
-        methodBuilder.addParameter(ParameterSpec.builder(argType, argName)
-                .addAnnotations(ConjureAnnotations.safety(safety))
-                .build());
-        Class<?> clazz = isSafe ? SafeArg.class : UnsafeArg.class;
-        methodBuilder.addCode(",\n    $T.of($S, $L)", clazz, argName, argName);
+        ParameterSpec.Builder parameterBuilder =
+                ParameterSpec.builder(argType, argName).addAnnotations(ConjureAnnotations.safety(safety));
         argDefinition
                 .getDocs()
-                .ifPresent(docs -> methodBuilder.addJavadoc("@param $L $L", argName, Javadoc.render(docs)));
+                .ifPresent(docs ->
+                        parameterBuilder.addJavadoc("$L", StringUtils.appendIfMissing(Javadoc.render(docs), "\n")));
+        methodBuilder.addParameter(parameterBuilder.build());
+        Class<?> clazz = isSafe ? SafeArg.class : UnsafeArg.class;
+        methodBuilder.addCode(",\n    $T.of($S, $L)", clazz, argName, argName);
     }
 
     private static ClassName errorTypesClassName(String conjurePackage, ErrorNamespace namespace) {
