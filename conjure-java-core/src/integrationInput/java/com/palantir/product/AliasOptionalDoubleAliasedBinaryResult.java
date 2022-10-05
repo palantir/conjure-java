@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
 import java.util.Optional;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
@@ -32,7 +33,7 @@ public final class AliasOptionalDoubleAliasedBinaryResult {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other
                 || (other instanceof AliasOptionalDoubleAliasedBinaryResult
                         && this.value.equals(((AliasOptionalDoubleAliasedBinaryResult) other).value));

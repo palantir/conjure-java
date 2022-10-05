@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
@@ -26,7 +27,7 @@ public final class AliasedSafeLong implements Comparable<AliasedSafeLong> {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other
                 || (other instanceof AliasedSafeLong && this.value.equals(((AliasedSafeLong) other).value));
     }
