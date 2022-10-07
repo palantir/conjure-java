@@ -440,7 +440,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             .put(PrimitiveType.Value.SAFELONG, "SafeLong")
             .put(PrimitiveType.Value.STRING, "String")
             .put(PrimitiveType.Value.UUID, "Uuid")
-            .build();
+            .buildOrThrow();
 
     private static String primitiveTypeName(PrimitiveType in) {
         String typeName = PRIMITIVE_TO_TYPE_NAME.get(in.get());

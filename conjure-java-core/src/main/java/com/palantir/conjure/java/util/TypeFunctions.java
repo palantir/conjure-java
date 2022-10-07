@@ -50,7 +50,7 @@ public final class TypeFunctions {
             .put(PrimitiveType.Value.SAFELONG, "SafeLong")
             .put(PrimitiveType.Value.STRING, "String")
             .put(PrimitiveType.Value.UUID, "Uuid")
-            .build();
+            .buildOrThrow();
 
     public static boolean isReferenceType(Type type) {
         return type.accept(IS_REFERENCE_VISITOR);
@@ -163,7 +163,7 @@ public final class TypeFunctions {
         ImmutableMap.Builder<TypeName, TypeDefinition> builder =
                 ImmutableMap.builderWithExpectedSize(typeDefinitions.size());
         typeDefinitions.forEach(def -> builder.put(def.accept(TypeDefinitionVisitor.TYPE_NAME), def));
-        return builder.build();
+        return builder.buildOrThrow();
     }
 
     public static final GetTypeVisitor<PrimitiveType> PRIMITIVE_VISITOR = new GetTypeVisitor<PrimitiveType>() {
