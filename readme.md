@@ -114,6 +114,17 @@ Conjure-java objects are always immutable and thread-safe.  Fields are never nul
     ```
 
     Visitors may seem clunky in Java, but they have the upside of compile-time assurance that you've handled all the possible variants.  If you upgrade an API dependency and the API author added a new variant, the Java compiler will force you to explicitly deal with this new variant.  We intentionally avoid `switch` statements and `instanceof` checks for this exact reason.
+    
+    There is also a more concise visitor builders pattern that can be used to create a visitor:
+    
+    ```java
+    Foo output = unionTypeExample.accept(Visitor.<Foo>builder()
+        .stringExample(value -> ...)
+        .set(value -> ...)
+        .throwOnUnknown()
+        .build());
+    });
+    ```
 
 - **Conjure enum: [EnumExample](./conjure-java-core/src/integrationInput/java/com/palantir/product/EnumExample.java)**
 
