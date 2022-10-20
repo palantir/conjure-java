@@ -58,6 +58,7 @@ dependencies {
     implementation 'com.palantir.common:streams'
     implementation 'com.palantir.goethe:goethe'
     implementation 'com.palantir.safe-logging:logger'
+    implementation 'com.palantir.safe-logging:preconditions'
     implementation 'com.palantir.human-readable-types:human-readable-types'
 
     testImplementation sourceSets.integrationInput.output

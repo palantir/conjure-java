@@ -16,12 +16,12 @@
 
 package com.palantir.conjure.java.services;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.humanreadabletypes.HumanReadableDuration;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
