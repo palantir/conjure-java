@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = UuidExample.Builder.class)
@@ -28,7 +29,7 @@ public final class UuidExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof UuidExample && equalTo((UuidExample) other));
     }
 

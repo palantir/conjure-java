@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = BinaryExample.Builder.class)
@@ -30,7 +31,7 @@ public final class BinaryExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof BinaryExample && equalTo((BinaryExample) other));
     }
 

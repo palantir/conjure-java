@@ -59,6 +59,7 @@ public final class ConjureHandlerTest {
     private List<Integer> wrappersBeforeBlockingCallOrder;
 
     @BeforeEach
+    @SuppressWarnings("DirectInvocationOnMock")
     public void before() {
         wrappersBeforeBlockingCallOrder = new ArrayList<>();
         HttpHandler httpHandler = _exchange -> {

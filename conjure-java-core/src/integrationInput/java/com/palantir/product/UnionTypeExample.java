@@ -25,6 +25,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 /**
@@ -662,7 +663,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof StringExampleWrapper && equalTo((StringExampleWrapper) other));
         }
 
@@ -707,7 +708,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other
                     || (other instanceof ThisFieldIsAnIntegerWrapper && equalTo((ThisFieldIsAnIntegerWrapper) other));
         }
@@ -753,7 +754,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof AlsoAnIntegerWrapper && equalTo((AlsoAnIntegerWrapper) other));
         }
 
@@ -798,7 +799,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof IfWrapper && equalTo((IfWrapper) other));
         }
 
@@ -843,7 +844,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof NewWrapper && equalTo((NewWrapper) other));
         }
 
@@ -888,7 +889,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof InterfaceWrapper && equalTo((InterfaceWrapper) other));
         }
 
@@ -933,7 +934,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof CompletedWrapper && equalTo((CompletedWrapper) other));
         }
 
@@ -978,7 +979,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof Unknown_Wrapper && equalTo((Unknown_Wrapper) other));
         }
 
@@ -1024,7 +1025,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof OptionalWrapper && equalTo((OptionalWrapper) other));
         }
 
@@ -1069,7 +1070,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof ListWrapper && equalTo((ListWrapper) other));
         }
 
@@ -1114,7 +1115,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof SetWrapper && equalTo((SetWrapper) other));
         }
 
@@ -1159,7 +1160,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof MapWrapper && equalTo((MapWrapper) other));
         }
 
@@ -1205,7 +1206,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof OptionalAliasWrapper && equalTo((OptionalAliasWrapper) other));
         }
 
@@ -1250,7 +1251,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof ListAliasWrapper && equalTo((ListAliasWrapper) other));
         }
 
@@ -1295,7 +1296,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof SetAliasWrapper && equalTo((SetAliasWrapper) other));
         }
 
@@ -1341,7 +1342,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof MapAliasWrapper && equalTo((MapAliasWrapper) other));
         }
 
@@ -1398,7 +1399,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
         }
 

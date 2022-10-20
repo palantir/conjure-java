@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
@@ -181,7 +182,7 @@ public final class SingleUnion {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof FooWrapper && equalTo((FooWrapper) other));
         }
 
@@ -238,7 +239,7 @@ public final class SingleUnion {
         }
 
         @Override
-        public boolean equals(Object other) {
+        public boolean equals(@Nullable Object other) {
             return this == other || (other instanceof UnknownWrapper && equalTo((UnknownWrapper) other));
         }
 

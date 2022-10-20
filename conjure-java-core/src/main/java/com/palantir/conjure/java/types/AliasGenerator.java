@@ -53,6 +53,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 public final class AliasGenerator {
@@ -95,7 +96,9 @@ public final class AliasGenerator {
                 .addMethod(MethodSpec.methodBuilder("equals")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
-                        .addParameter(ClassName.OBJECT, "other")
+                        .addParameter(ParameterSpec.builder(ClassName.OBJECT, "other")
+                                .addAnnotation(Nullable.class)
+                                .build())
                         .returns(TypeName.BOOLEAN)
                         .addCode(primitiveSafeEquality(thisClass, aliasTypeName, typeDef))
                         .build())

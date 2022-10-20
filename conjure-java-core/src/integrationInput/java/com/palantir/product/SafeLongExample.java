@@ -10,6 +10,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = SafeLongExample.Builder.class)
@@ -28,7 +29,7 @@ public final class SafeLongExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof SafeLongExample && equalTo((SafeLongExample) other));
     }
 

@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = CovariantOptionalExample.Builder.class)
@@ -45,7 +46,7 @@ public final class CovariantOptionalExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other
                 || (other instanceof CovariantOptionalExample && equalTo((CovariantOptionalExample) other));
     }

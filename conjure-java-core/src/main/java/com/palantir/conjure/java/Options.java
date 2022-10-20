@@ -147,6 +147,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Instructs the {@link com.palantir.conjure.java.types.ErrorGenerator} to add {@code Contract} annotations
+     * to check methods for stronger static analysis.
+     */
+    @Value.Default
+    default boolean jetbrainsContractAnnotations() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();

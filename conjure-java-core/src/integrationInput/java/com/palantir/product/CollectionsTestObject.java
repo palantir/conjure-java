@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @JsonDeserialize(builder = CollectionsTestObject.Builder.class)
@@ -100,7 +101,7 @@ public final class CollectionsTestObject {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof CollectionsTestObject && equalTo((CollectionsTestObject) other));
     }
 
