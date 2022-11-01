@@ -90,6 +90,7 @@ public final class AliasGenerator {
                 .addMethod(MethodSpec.methodBuilder("toString")
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
+                        .addAnnotations(safetyAnnotations)
                         .returns(String.class)
                         .addCode(primitiveSafeToString(aliasTypeName))
                         .build())
