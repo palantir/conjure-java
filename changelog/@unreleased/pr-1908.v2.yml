@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Declare safety annotations on generated toString methods
+  links:
+  - https://github.com/palantir/conjure-java/pull/1908
