@@ -46,6 +46,7 @@ public final class BearerTokenExample {
     }
 
     @Override
+    @DoNotLog
     public String toString() {
         return "BearerTokenExample{bearerTokenValue: " + bearerTokenValue + '}';
     }

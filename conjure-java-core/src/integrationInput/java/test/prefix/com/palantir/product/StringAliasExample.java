@@ -24,6 +24,7 @@ public final class StringAliasExample implements Comparable<StringAliasExample> 
     }
 
     @Override
+    @Safe
     public String toString() {
         return value.toString();
     }

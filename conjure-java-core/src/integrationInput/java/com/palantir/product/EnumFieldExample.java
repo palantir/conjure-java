@@ -44,6 +44,7 @@ public final class EnumFieldExample {
     }
 
     @Override
+    @Safe
     public String toString() {
         return "EnumFieldExample{enum: " + enum_ + '}';
     }

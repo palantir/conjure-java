@@ -47,6 +47,7 @@ public final class OptionalAliasExample {
     }
 
     @Override
+    @Safe
     public String toString() {
         return "OptionalAliasExample{optionalAlias: " + optionalAlias + '}';
     }
