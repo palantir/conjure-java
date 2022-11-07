@@ -108,10 +108,12 @@ public final class UnionGenerator {
         List<FieldSpec> fields =
                 ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
+        List<AnnotationSpec> safety =
+                ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef)));
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
                         typeDef.getTypeName().getName())
-                .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.evaluate(TypeDefinition.union(typeDef))))
+                .addAnnotations(safety)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
@@ -130,10 +132,13 @@ public final class UnionGenerator {
                 .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
                 .addMethod(MethodSpecs.createToString(
-                        unionClass.simpleName(),
-                        fields.stream()
-                                .map(fieldSpec -> FieldName.of(fieldSpec.name))
-                                .collect(Collectors.toList())));
+                                unionClass.simpleName(),
+                                fields.stream()
+                                        .map(fieldSpec -> FieldName.of(fieldSpec.name))
+                                        .collect(Collectors.toList()))
+                        .toBuilder()
+                        .addAnnotations(safety)
+                        .build());
 
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 

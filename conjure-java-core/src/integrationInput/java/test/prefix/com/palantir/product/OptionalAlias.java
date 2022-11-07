@@ -31,6 +31,7 @@ public final class OptionalAlias {
     }
 
     @Override
+    @Safe
     public String toString() {
         return value.toString();
     }

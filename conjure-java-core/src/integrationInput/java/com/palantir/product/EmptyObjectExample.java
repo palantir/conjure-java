@@ -14,6 +14,7 @@ public final class EmptyObjectExample {
     private EmptyObjectExample() {}
 
     @Override
+    @Safe
     public String toString() {
         return "EmptyObjectExample{}";
     }

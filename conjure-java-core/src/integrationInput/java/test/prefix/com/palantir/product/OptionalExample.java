@@ -50,6 +50,7 @@ public final class OptionalExample {
     }
 
     @Override
+    @Safe
     public String toString() {
         return "OptionalExample{item: " + item + '}';
     }
