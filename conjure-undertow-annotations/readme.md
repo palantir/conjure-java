@@ -149,6 +149,19 @@ public interface MyService {
 }
 ```
 
+### Multipart Form Data
+
+Endpoints handling multipart form data can be supported by using multiple `@Handle.Body` annotations. Each annotation can provide a separate serializer, accessing a different field of the request form data (inside the serializer, form data can be accessed using [`FormParserFactory#createParser(HttpServerExchange)`](https://github.com/undertow-io/undertow/blob/master/core/src/main/java/io/undertow/server/handlers/form/FormParserFactory.java#L53)).
+
+```java
+public interface MyService {
+    @Handle(method = HttpMethod.POST, path = "/path/form-data")
+    void myEndpoint(
+            @Handle.Body(ParamASerializer.class) String paramA,
+            @Handle.Body(ParamBSerializer.class) long paramB);
+}
+```
+
 ### Using Custom Serializer or Deserializers
 
 Per default, conjure-undertow-processor supports decoding parameters for all [plain Conjure types](https://palantir.github.io/conjure/#/docs/spec/wire?id=_7-plain-format)
