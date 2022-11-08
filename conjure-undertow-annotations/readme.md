@@ -151,16 +151,18 @@ public interface MyService {
 
 ### Multipart Form Data
 
-Endpoints handling multipart form data can be supported by using multiple `@Handle.Body` annotations. Each annotation can provide a separate serializer, accessing a different field of the request form data (inside the serializer, form data can be accessed using [`FormParserFactory#createParser(HttpServerExchange)`](https://github.com/undertow-io/undertow/blob/master/core/src/main/java/io/undertow/server/handlers/form/FormParserFactory.java#L53)).
+For endpoints using form data, you can use the `@Handle.FormParam` annotation.
 
 ```java
 public interface MyService {
     @Handle(method = HttpMethod.POST, path = "/path/form-data")
     void myEndpoint(
-            @Handle.Body(ParamASerializer.class) String paramA,
-            @Handle.Body(ParamBSerializer.class) long paramB);
+            @Handle.FormParam("fieldA") String fieldA,
+            @Handle.FormParam(value = "fieldB", decoder = MyTypeDecoder.clas) MyType fieldB);
 }
 ```
+
+Note that file form parameters are currently not supported by this annotation but can be accessed using a `@Handle.Body` annotation with a custom serializer.
 
 ### Using Custom Serializer or Deserializers
 
