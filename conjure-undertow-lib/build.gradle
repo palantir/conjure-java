@@ -23,4 +23,11 @@ dependencies {
     // Ideally we would declare a dependency on 'com.google.guava:listenablefuture:1.0' without all of guava,
     // however gcv forces consistent versions across the project.
     api 'com.google.guava:guava'
+
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
+    implementation 'com.palantir.ri:resource-identifier'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'com.palantir.tokens:auth-tokens'
 }

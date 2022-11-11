@@ -27,7 +27,6 @@ dependencies {
     testCases 'com.palantir.conjure.verification:verification-server-test-cases'
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
-    testImplementation project(':conjure-java-core')
     testImplementation project('verification-server-api')
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
@@ -46,13 +45,11 @@ dependencies {
     testImplementation 'com.palantir.dialogue:dialogue-serde'
     testImplementation 'com.palantir.refreshable:refreshable'
     testImplementation 'com.palantir.safe-logging:logger'
-    testImplementation 'io.dropwizard:dropwizard-testing'
     testImplementation 'org.apache.commons:commons-lang3'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.junit.jupiter:junit-jupiter-params'
-    testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.slf4j:slf4j-api'
 
     compileOnly 'org.immutables:value::annotations'
@@ -65,6 +62,18 @@ project('verification-server-api') {
         api project(':conjure-lib')
         api 'com.palantir.dialogue:dialogue-clients'
         api 'com.palantir.dialogue:dialogue-serde'
+
+        implementation 'com.fasterxml.jackson.core:jackson-annotations'
+        implementation 'com.fasterxml.jackson.core:jackson-databind'
+        implementation 'com.google.code.findbugs:jsr305'
+        implementation 'com.google.errorprone:error_prone_annotations'
+        implementation 'com.google.guava:guava'
+        implementation 'com.palantir.dialogue:dialogue-target'
+        implementation 'com.palantir.ri:resource-identifier'
+        implementation 'com.palantir.safe-logging:preconditions'
+        implementation 'com.palantir.safe-logging:safe-logging'
+        implementation 'com.palantir.tokens:auth-tokens'
+        implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     }
 }
 

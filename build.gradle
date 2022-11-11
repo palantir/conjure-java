@@ -84,6 +84,15 @@ subprojects {
     tasks.withType(Test) {
         systemProperty 'recreate', System.getProperty('recreate', 'false')
     }
+
+    checkUnusedDependencies {
+        // avoid spurious flags
+        ignore 'org.jetbrains', 'annotations'
+    }
+
+    tasks.check.dependsOn(checkImplicitDependencies)
+    tasks.check.dependsOn(checkUnusedDependencies)
+    tasks.check.dependsOn(checkUnusedConstraints)
 }
 
 configurations {

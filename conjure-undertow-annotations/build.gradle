@@ -2,4 +2,14 @@ apply plugin: 'com.palantir.external-publish-jar'
 
 dependencies {
     api project(':conjure-undertow-lib')
+
+    implementation project(':conjure-lib')
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.guava:guava'
+    implementation 'com.palantir.ri:resource-identifier'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'com.palantir.tokens:auth-tokens'
+    implementation 'io.undertow:undertow-core'
+    implementation 'org.jboss.xnio:xnio-api'
 }

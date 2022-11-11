@@ -26,10 +26,15 @@ dependencies {
     api 'jakarta.ws.rs:jakarta.ws.rs-api'
     api 'com.google.errorprone:error_prone_annotations'
 
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.palantir.safe-logging:safe-logging'
+
     testImplementation 'org.assertj:assertj-core'
-    testImplementation 'org.mockito:mockito-core'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'
