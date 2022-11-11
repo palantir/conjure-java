@@ -38,7 +38,6 @@ dependencies {
     testImplementation 'com.palantir.dialogue:dialogue-clients'
     testImplementation 'com.palantir.dialogue:dialogue-serde'
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
