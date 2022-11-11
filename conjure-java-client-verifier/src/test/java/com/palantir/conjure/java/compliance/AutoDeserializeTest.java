@@ -16,6 +16,9 @@
 
 package com.palantir.conjure.java.compliance;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
 import com.palantir.conjure.java.com.palantir.conjure.verification.server.AutoDeserializeService;
@@ -26,19 +29,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
-import org.assertj.core.api.Assertions;
-import org.junit.Assume;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(Parameterized.class)
 public class AutoDeserializeTest {
 
-    @ClassRule
+    @RegisterExtension
     public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
@@ -47,72 +47,63 @@ public class AutoDeserializeTest {
             VerificationClients.dialogueAutoDeserializeService(server);
     private static final AutoDeserializeConfirmService confirmService = VerificationClients.confirmService(server);
 
-    @Parameterized.Parameter(0)
-    public EndpointName endpointName;
-
-    @Parameterized.Parameter(1)
-    public int index;
-
-    @Parameterized.Parameter(2)
-    public boolean shouldSucceed;
-
-    @Parameterized.Parameter(3)
-    public String jsonString;
-
-    @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
-    public static Collection<Object[]> data() {
-        List<Object[]> objects = new ArrayList<>();
+    private static Collection<Arguments> data() {
+        List<Arguments> objects = new ArrayList<>();
         Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
             IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[] {
-                        endpointName,
-                        i,
-                        true,
-                        positiveAndNegativeTestCases.getPositive().get(i)
-                    }));
+                    .forEach(i -> objects.add(Arguments.of(
+                            endpointName,
+                            i,
+                            true,
+                            positiveAndNegativeTestCases.getPositive().get(i))));
 
             IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[] {
-                        endpointName,
-                        positiveSize + i,
-                        false,
-                        positiveAndNegativeTestCases.getNegative().get(i)
-                    }));
+                    .forEach(i -> objects.add(Arguments.of(
+                            endpointName,
+                            positiveSize + i,
+                            false,
+                            positiveAndNegativeTestCases.getNegative().get(i))));
         });
         return objects;
     }
 
-    @Test
-    public void runConjureJavaRuntimeTestCase() throws Exception {
-        runTestCase(jerseyTestService);
+    @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
+    @MethodSource("data")
+    public void runConjureJavaRuntimeTestCase(
+            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) throws Exception {
+        runTestCase(jerseyTestService, endpointName, index, shouldSucceed, jsonString);
     }
 
-    @Test
-    public void runConjureDialogueTestCase() throws Exception {
-        runTestCase(dialogueTestService);
+    @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
+    @MethodSource("data")
+    public void runConjureDialogueTestCase(
+            EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) throws Exception {
+        runTestCase(dialogueTestService, endpointName, index, shouldSucceed, jsonString);
     }
 
-    private void runTestCase(Object service) throws Exception {
-        Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
+    private void runTestCase(
+            Object service, EndpointName endpointName, int index, boolean shouldSucceed, String jsonString)
+            throws Exception {
+        assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         Method method = service.getClass().getMethod(endpointName.get(), int.class);
         // Need to set accessible true work around dialogues anonymous class impl
         method.setAccessible(true);
-        System.out.println(String.format(
-                "Test case %s: Invoking %s(%s), expected %s",
-                index, endpointName, jsonString, shouldSucceed ? "success" : "failure"));
+        System.out.printf(
+                "Test case %s: Invoking %s(%s), expected %s%n",
+                index, endpointName, jsonString, shouldSucceed ? "success" : "failure");
 
         if (shouldSucceed) {
-            expectSuccess(service, method);
+            expectSuccess(service, method, endpointName, index);
         } else {
-            expectFailure(service, method);
+            expectFailure(service, method, endpointName, index);
         }
     }
 
-    private void expectSuccess(Object service, Method method) throws Exception {
+    private void expectSuccess(Object service, Method method, EndpointName endpointName, int index) throws Exception {
         try {
             Object resultFromServer = method.invoke(service, index);
             log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
@@ -123,10 +114,12 @@ public class AutoDeserializeTest {
         }
     }
 
-    private void expectFailure(Object service, Method method) {
-        Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
-            Object result = method.invoke(service, index);
-            log.error("Result should have caused an exception but deserialized to: {}", result);
-        });
+    private void expectFailure(Object service, Method method, EndpointName endpointName, int index) {
+        assertThatExceptionOfType(Exception.class)
+                .as("Endpoint %s should have caused exception", endpointName)
+                .isThrownBy(() -> {
+                    Object result = method.invoke(service, index);
+                    log.error("Result should have caused an exception but deserialized to: {}", result);
+                });
     }
 }
