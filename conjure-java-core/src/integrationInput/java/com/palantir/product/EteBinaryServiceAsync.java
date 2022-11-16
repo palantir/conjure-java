@@ -64,8 +64,6 @@ public interface EteBinaryServiceAsync {
      */
     static EteBinaryServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteBinaryServiceAsync() {
-            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
-
             private final EndpointChannel postBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinary);
 
@@ -83,6 +81,8 @@ public interface EteBinaryServiceAsync {
 
             private final EndpointChannel getAliasedChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getAliased);
+
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             @Override
             public ListenableFuture<InputStream> postBinary(AuthHeader authHeader, BinaryRequestBody body) {

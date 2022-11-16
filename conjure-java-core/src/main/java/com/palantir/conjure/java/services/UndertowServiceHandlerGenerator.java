@@ -69,6 +69,7 @@ import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -231,6 +232,13 @@ final class UndertowServiceHandlerGenerator {
                 .addException(IOException.class)
                 .addCode(endpointInvocation(
                         endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper, safetyEvaluator));
+
+        endpointDefinition
+                .getDeprecated()
+                .ifPresent(deprecatedDocsValue ->
+                        handleMethodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                                .addMember("value", "$S", "deprecation")
+                                .build()));
 
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
                 .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)

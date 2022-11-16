@@ -26,7 +26,6 @@ import java.lang.Double;
 import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.lang.Void;
 import java.util.Map;
 import java.util.Optional;
@@ -202,8 +201,6 @@ public interface TestServiceBlocking {
      */
     static TestServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new TestServiceBlocking() {
-            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
-
             private final EndpointChannel getFileSystemsChannel =
                     _endpointChannelFactory.endpoint(DialogueTestEndpoints.getFileSystems);
 
@@ -336,6 +333,8 @@ public interface TestServiceBlocking {
             private final Deserializer<Void> getForStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
             @Override
             public Map<String, BackingFileSystem> getFileSystems(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
@@ -433,7 +432,6 @@ public interface TestServiceBlocking {
             }
 
             @Override
-            @SuppressWarnings("deprecation")
             public Set<String> getBranchesDeprecated(AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());

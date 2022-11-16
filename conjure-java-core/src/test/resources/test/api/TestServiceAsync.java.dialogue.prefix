@@ -26,7 +26,6 @@ import java.lang.Double;
 import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.lang.Void;
 import java.util.Map;
 import java.util.Optional;
@@ -204,8 +203,6 @@ public interface TestServiceAsync {
      */
     static TestServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new TestServiceAsync() {
-            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
-
             private final EndpointChannel getFileSystemsChannel =
                     _endpointChannelFactory.endpoint(DialogueTestEndpoints.getFileSystems);
 
@@ -338,6 +335,8 @@ public interface TestServiceAsync {
             private final Deserializer<Void> getForStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
 
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
+
             @Override
             public ListenableFuture<Map<String, BackingFileSystem>> getFileSystems(AuthHeader authHeader) {
                 Request.Builder _request = Request.builder();
@@ -437,7 +436,6 @@ public interface TestServiceAsync {
             }
 
             @Override
-            @SuppressWarnings("deprecation")
             public ListenableFuture<Set<String>> getBranchesDeprecated(
                     AuthHeader authHeader, ResourceIdentifier datasetRid) {
                 Request.Builder _request = Request.builder();

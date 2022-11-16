@@ -31,13 +31,13 @@ public interface CookieServiceBlocking {
      */
     static CookieServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceBlocking() {
-            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
-
             private final EndpointChannel eatCookiesChannel =
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
 
             private final Deserializer<Void> eatCookiesDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             @Override
             public void eatCookies(BearerToken token) {
