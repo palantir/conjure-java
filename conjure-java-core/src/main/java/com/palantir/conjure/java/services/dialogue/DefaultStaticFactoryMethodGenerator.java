@@ -52,7 +52,6 @@ import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -75,6 +74,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
     private final StaticFactoryMethodType methodType;
+    private final ThreadLocal<Boolean> shouldGeneratePlainSerDe = ThreadLocal.withInitial(() -> false);
 
     public DefaultStaticFactoryMethodGenerator(
             Options options,
@@ -91,13 +91,9 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
     @Override
     public MethodSpec generate(ServiceDefinition def) {
+        shouldGeneratePlainSerDe.set(false);
         ClassName className = getClassName(def);
         TypeSpec.Builder impl = TypeSpec.anonymousClassBuilder("").addSuperinterface(className);
-
-        impl.addField(FieldSpec.builder(PlainSerDe.class, PLAIN_SER_DE)
-                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                .initializer(CodeBlock.of("$L.plainSerDe()", StaticFactoryMethodGenerator.RUNTIME))
-                .build());
 
         def.getEndpoints().forEach(endpoint -> {
             endpoint.getArgs().stream()
@@ -113,6 +109,13 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
         impl.addMethod(DefaultStaticFactoryMethodGenerator.toStringMethod(className));
 
+        if (shouldGeneratePlainSerDe.get()) {
+            impl.addField(FieldSpec.builder(PlainSerDe.class, PLAIN_SER_DE)
+                    .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                    .initializer(CodeBlock.of("$L.plainSerDe()", StaticFactoryMethodGenerator.RUNTIME))
+                    .build());
+        }
+
         String javadoc = methodType.switchBy(
                 "Creates a synchronous/blocking client for a $L service.",
                 "Creates an " + "asynchronous/non-blocking client for a $L service.");
@@ -124,6 +127,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .addParameter(ConjureRuntime.class, StaticFactoryMethodGenerator.RUNTIME)
                 .addCode(CodeBlock.builder().add("return $L;", impl.build()).build())
                 .build();
+
         return method;
     }
 
@@ -200,20 +204,12 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .addParameters(params)
                 .addAnnotation(Override.class);
 
-        if (def.getDeprecated().isPresent()) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
-                    .addMember("value", "$S", "deprecation")
-                    .build());
-        }
-
         TypeName returnType =
                 methodType.switchBy(returnTypes.baseType(def.getReturns()), returnTypes.async(def.getReturns()));
         methodBuilder.returns(returnType);
 
         CodeBlock.Builder requestParams = CodeBlock.builder();
-        def.getAuth()
-                .map(DefaultStaticFactoryMethodGenerator::generateAuthHeader)
-                .ifPresent(requestParams::add);
+        def.getAuth().map(this::generateAuthHeader).ifPresent(requestParams::add);
 
         def.getArgs().stream()
                 .map(param -> generateParam(def.getEndpointName().get(), param))
@@ -311,6 +307,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         return type.accept(new Type.Visitor<CodeBlock>() {
             @Override
             public CodeBlock visitPrimitive(PrimitiveType primitiveType) {
+                shouldGeneratePlainSerDe.set(true);
                 return CodeBlock.of(
                         "$L.$L($S, $L.serialize$L($L));",
                         "_request",
@@ -388,7 +385,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         });
     }
 
-    private static CodeBlock generateAuthHeader(AuthType auth) {
+    private CodeBlock generateAuthHeader(AuthType auth) {
         return auth.accept(new AuthType.Visitor<CodeBlock>() {
             @Override
             public CodeBlock visitHeader(HeaderAuthType value) {
@@ -401,6 +398,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
 
             @Override
             public CodeBlock visitCookie(CookieAuthType value) {
+                shouldGeneratePlainSerDe.set(true);
                 return CodeBlock.of(
                         "$L.putHeaderParams($S, \"$L=\" + $L.serializeBearerToken($L));",
                         REQUEST,

@@ -910,11 +910,6 @@ public final class UnionGenerator {
         } else {
             methodBuilder.addStatement("return $N.$N($N)", visitor, visitMethodName, valueName);
         }
-        if (isDeprecated) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
-                    .addMember("value", "$S", "deprecation")
-                    .build());
-        }
         return methodBuilder.build();
     }
 
