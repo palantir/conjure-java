@@ -305,6 +305,7 @@ public final class Union {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitBar(value);
         }
@@ -350,6 +351,7 @@ public final class Union {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public <T> T accept(Visitor<T> visitor) {
             return visitor.visitBaz(value);
         }
