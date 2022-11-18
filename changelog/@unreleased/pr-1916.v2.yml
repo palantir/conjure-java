@@ -1,5 +1,5 @@
 type: improvement
 improvement:
-  description: Fix warnings in eclipse
+  description: Fix unused warnings in eclipse
   links:
   - https://github.com/palantir/conjure-java/pull/1916
