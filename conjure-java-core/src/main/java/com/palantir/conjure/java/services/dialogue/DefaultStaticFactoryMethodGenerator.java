@@ -52,6 +52,7 @@ import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -63,6 +64,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.lang.model.element.Modifier;
 
 public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryMethodGenerator {
@@ -74,7 +76,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     private final ParameterTypeMapper parameterTypes;
     private final ReturnTypeMapper returnTypes;
     private final StaticFactoryMethodType methodType;
-    private final ThreadLocal<Boolean> shouldGeneratePlainSerDe = ThreadLocal.withInitial(() -> false);
+    private final AtomicBoolean shouldGeneratePlainSerDe = new AtomicBoolean(false);
 
     public DefaultStaticFactoryMethodGenerator(
             Options options,
