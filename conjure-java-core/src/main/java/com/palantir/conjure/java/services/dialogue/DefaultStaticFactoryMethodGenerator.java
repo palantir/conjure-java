@@ -200,12 +200,6 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
                 .addParameters(params)
                 .addAnnotation(Override.class);
 
-        if (def.getDeprecated().isPresent()) {
-            methodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
-                    .addMember("value", "$S", "deprecation")
-                    .build());
-        }
-
         TypeName returnType =
                 methodType.switchBy(returnTypes.baseType(def.getReturns()), returnTypes.async(def.getReturns()));
         methodBuilder.returns(returnType);
