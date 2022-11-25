@@ -67,7 +67,10 @@ public final class EnumExample {
 
     @Override
     public boolean equals(Object other) {
-        return (this == other) || (other instanceof EnumExample && this.string.equals(((EnumExample) other).string));
+        return (this == other)
+                || (other instanceof EnumExample
+                        && ((this.value == ((EnumExample) other).value)
+                                || (this.value == Value.UNKNOWN && this.string.equals(((EnumExample) other).string))));
     }
 
     @Override
