@@ -314,7 +314,8 @@ public final class EnumGenerator {
                 .addParameter(other)
                 .returns(TypeName.BOOLEAN)
                 .addStatement(
-                        "return (this == $1N) || ($1N instanceof $2T && this.string.equals((($2T) $1N).string))",
+                        "return (this == $1N) || (this.value == Value.UNKNOWN && $1N instanceof $2T "
+                                + "&& this.string.equals((($2T) $1N).string))",
                         other,
                         thisClass)
                 .build();
