@@ -39,7 +39,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -55,8 +54,7 @@ public final class EnumGenerator {
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
 
-    private EnumGenerator() {
-    }
+    private EnumGenerator() {}
 
     public static JavaFile generateEnumType(EnumDefinition typeDef, Options options) {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
@@ -215,8 +213,8 @@ public final class EnumGenerator {
                 .addAnnotations(
                         anyDeprecatedValues
                                 ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)
-                                .addMember("value", "$S", "deprecation")
-                                .build())
+                                        .addMember("value", "$S", "deprecation")
+                                        .build())
                                 : ImmutableList.of())
                 .build();
     }
@@ -266,8 +264,8 @@ public final class EnumGenerator {
                 .addAnnotations(
                         anyDeprecatedValues
                                 ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)
-                                .addMember("value", "$S", "deprecation")
-                                .build())
+                                        .addMember("value", "$S", "deprecation")
+                                        .build())
                                 : ImmutableList.of())
                 .addParameter(param)
                 .addStatement("$L", Expressions.requireNonNull(param.name, param.name + " cannot be null"))
@@ -294,8 +292,8 @@ public final class EnumGenerator {
                 .addAnnotations(
                         anyDeprecatedValues
                                 ? ImmutableList.of(AnnotationSpec.builder(SuppressWarnings.class)
-                                .addMember("value", "$S", "deprecation")
-                                .build())
+                                        .addMember("value", "$S", "deprecation")
+                                        .build())
                                 : ImmutableList.of())
                 .build();
     }
