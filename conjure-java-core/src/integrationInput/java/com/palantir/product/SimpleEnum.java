@@ -53,8 +53,8 @@ public final class SimpleEnum {
     public boolean equals(Object other) {
         return (this == other)
                 || (other instanceof SimpleEnum
-                        && ((this.value == ((SimpleEnum) other).value)
-                                || (this.value == Value.UNKNOWN && this.string.equals(((SimpleEnum) other).string))));
+                        && this.value == Value.UNKNOWN
+                        && this.string.equals(((SimpleEnum) other).string));
     }
 
     @Override
