@@ -52,8 +52,8 @@ public final class SimpleEnum {
     @Override
     public boolean equals(Object other) {
         return (this == other)
-                || (other instanceof SimpleEnum
-                        && this.value == Value.UNKNOWN
+                || (this.value == Value.UNKNOWN
+                        && other instanceof SimpleEnum
                         && this.string.equals(((SimpleEnum) other).string));
     }
 
