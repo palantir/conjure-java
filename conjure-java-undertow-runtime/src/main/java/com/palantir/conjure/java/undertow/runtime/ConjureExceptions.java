@@ -94,7 +94,9 @@ public enum ConjureExceptions implements ExceptionHandler {
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
         qosException.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
 
-        if (qosExceptionHasAdditionalMetadata(qosException) || qosLoggingRateLimiter.tryAcquire()) {
+        if (log.isDebugEnabled()) {
+            log.debug("Quality-of-Service error handling request", qosException);
+        } else if (qosExceptionHasAdditionalMetadata(qosException) || qosLoggingRateLimiter.tryAcquire()) {
             log.info("Quality-of-Service error handling request", qosException);
         }
 
