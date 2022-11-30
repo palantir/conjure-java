@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -49,6 +50,9 @@ public enum ConjureExceptions implements ExceptionHandler {
     // Exceptions should always be serialized using JSON
     private static final Serializer<SerializableError> serializer =
             new ConjureBodySerDe(Collections.singletonList(Encodings.json())).serializer(new TypeMarker<>() {});
+
+    // Log at most once every second
+    private static final RateLimiter qosLoggingRateLimiter = RateLimiter.create(1);
 
     @Override
     public void handle(HttpServerExchange exchange, Throwable throwable) {
@@ -89,8 +93,27 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
         qosException.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
-        log.info("quality-of-service intervention", qosException);
+
+        if (qosExceptionHasAdditionalMetadata(qosException) || qosLoggingRateLimiter.tryAcquire()) {
+            log.info("Quality-of-Service error handling request", qosException);
+        }
+
         writeResponse(exchange, Optional.empty(), qosException.accept(QOS_EXCEPTION_STATUS_CODE));
+    }
+
+    /** Returns true if {@link QosException} provides additional metadata and should be logged at {@code info}. */
+    private static boolean qosExceptionHasAdditionalMetadata(QosException qosException) {
+        try {
+            if (qosException.getCause() != null) {
+                return true;
+            }
+            Throwable[] suppressed = qosException.getSuppressed();
+            return suppressed != null && suppressed.length > 1;
+        } catch (Throwable t) {
+            // Fallback in case of unexpected bytecode manipulation (getCause or getSuppressed throws due to
+            // poor instrumentation/mocks)
+            return true;
+        }
     }
 
     // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
