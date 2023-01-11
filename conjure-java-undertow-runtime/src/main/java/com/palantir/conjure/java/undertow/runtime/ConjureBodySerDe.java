@@ -88,7 +88,11 @@ final class ConjureBodySerDe implements BodySerDe {
     @Override
     public void serialize(BinaryResponseBody value, HttpServerExchange exchange) throws IOException {
         Preconditions.checkNotNull(value, "A BinaryResponseBody value is required");
-        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
+        // Only set the Content-Type header if it isn't present.
+        // This allows implementations to set custom binary content types for images/videos.
+        if (!exchange.getResponseHeaders().contains(Headers.CONTENT_TYPE)) {
+            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
+        }
         Tracer.fastStartSpan(TracedEncoding.SERIALIZE_OPERATION);
         try {
             value.write(exchange.getOutputStream());
