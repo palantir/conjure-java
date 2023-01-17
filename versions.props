@@ -42,6 +42,7 @@ com.palantir.human-readable-types:* = 1.6.0
 org.derive4j:* = 1.1.1
 com.google.auto:auto-common = 1.2.1
 com.google.testing.compile:compile-testing = 0.19
+org.wildfly.common:wildfly-common = 1.6.0.Final
 
 # dependency-upgrader:OFF
 # Avoid forcing consumers to upgrade jackson
