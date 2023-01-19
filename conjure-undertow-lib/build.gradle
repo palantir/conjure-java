@@ -23,4 +23,6 @@ dependencies {
     // Ideally we would declare a dependency on 'com.google.guava:listenablefuture:1.0' without all of guava,
     // however gcv forces consistent versions across the project.
     api 'com.google.guava:guava'
+    // Recommend a higher version of wildfly (1.6.0.Final+) then the one shipped with undertow to avoid CVEs.
+    runtimeOnly 'org.wildfly.common:wildfly-common'
 }
