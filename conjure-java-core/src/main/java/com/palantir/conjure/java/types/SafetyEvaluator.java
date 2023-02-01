@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -89,7 +90,7 @@ public final class SafetyEvaluator {
 
         @Override
         public Optional<LogSafety> visitAlias(AliasDefinition value) {
-            return with(value.getTypeName(), () -> getSafety(value.getAlias(), value.getSafety()));
+            return with(value.getTypeName(), () -> getSafety(value.getAlias(), SafetyUtils.getSafety(value)));
         }
 
         @Override
@@ -102,7 +103,7 @@ public final class SafetyEvaluator {
             return with(value.getTypeName(), () -> {
                 Optional<LogSafety> safety = Optional.of(LogSafety.SAFE);
                 for (FieldDefinition field : value.getFields()) {
-                    safety = combine(safety, getSafety(field.getType(), field.getSafety()));
+                    safety = combine(safety, getSafety(field.getType(), SafetyUtils.getSafety(field)));
                 }
                 return safety;
             });
@@ -113,7 +114,7 @@ public final class SafetyEvaluator {
             return with(value.getTypeName(), () -> {
                 Optional<LogSafety> safety = UNKNOWN_UNION_VARINT_SAFETY;
                 for (FieldDefinition variant : value.getUnion()) {
-                    safety = combine(safety, getSafety(variant.getType(), variant.getSafety()));
+                    safety = combine(safety, getSafety(variant.getType(), SafetyUtils.getSafety(variant)));
                 }
                 return safety;
             });
@@ -187,9 +188,8 @@ public final class SafetyEvaluator {
         }
 
         @Override
-        public Optional<LogSafety> visitExternal(ExternalReference _value) {
-            // External types have unknown safety for now
-            return Optional.empty();
+        public Optional<LogSafety> visitExternal(ExternalReference value) {
+            return value.getSafety();
         }
 
         @Override

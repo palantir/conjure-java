@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.MapType;
@@ -57,7 +58,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(Parameters.nonnullParameter(
                         widenParameterIfPossible(field.type, type, typeMapper),
                         field.name,
-                        enriched.conjureDef().getSafety()));
+                        SafetyUtils.getSafety(enriched.conjureDef())));
     }
 
     public static MethodSpec.Builder createOptionalSetterBuilder(
@@ -68,7 +69,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(Parameters.nonnullParameter(
                         typeMapper.getClassName(type.getItemType()),
                         field.name,
-                        enriched.conjureDef().getSafety()));
+                        SafetyUtils.getSafety(enriched.conjureDef())));
     }
 
     public static MethodSpec.Builder createItemSetterBuilder(

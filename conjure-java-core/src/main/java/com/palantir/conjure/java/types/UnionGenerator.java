@@ -34,6 +34,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
@@ -104,7 +105,7 @@ public final class UnionGenerator {
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(),
                         entry -> ConjureAnnotations.withSafety(
-                                typeMapper.getClassName(entry.getType()), entry.getSafety())));
+                                typeMapper.getClassName(entry.getType()), SafetyUtils.getSafety(entry))));
         List<FieldSpec> fields =
                 ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
@@ -174,7 +175,7 @@ public final class UnionGenerator {
                     MethodSpec.Builder builder = MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addParameter(ParameterSpec.builder(memberType, variableName)
-                                    .addAnnotations(ConjureAnnotations.safety(memberTypeDef.getSafety()))
+                                    .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getSafety(memberTypeDef)))
                                     .build())
                             .addStatement(
                                     "return new $T(new $T($L))",
@@ -309,8 +310,7 @@ public final class UnionGenerator {
                                     entry.getKey().getDeprecated()))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .addParameter(ParameterSpec.builder(entry.getValue(), variableName)
-                                    .addAnnotations(ConjureAnnotations.safety(
-                                            entry.getKey().getSafety()))
+                                    .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getSafety(entry.getKey())))
                                     .build())
                             .returns(TYPE_VARIABLE)
                             .build();
@@ -645,7 +645,7 @@ public final class UnionGenerator {
                         .map(entry -> new NameTypeMetadata(
                                 sanitizeUnknown(entry.getKey().getFieldName().get()),
                                 entry.getValue(),
-                                entry.getKey().getSafety()))
+                                SafetyUtils.getSafety(entry.getKey())))
                         .sorted(Comparator.comparing(p -> p.memberName)),
                 Stream.of(NameTypeMetadata.UNKNOWN));
     }

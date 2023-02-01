@@ -19,11 +19,13 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.Iterables;
+import com.palantir.conjure.defs.SafetyDeclarationRequirements;
 import com.palantir.conjure.defs.validator.ConjureDefinitionValidator;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EnumDefinition;
+import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.LogSafety;
@@ -35,7 +37,12 @@ import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
 import com.palantir.conjure.spec.UnionDefinition;
 import java.util.Optional;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class SafetyEvaluatorTest {
     private static final String PACKAGE = "package";
@@ -130,10 +137,84 @@ class SafetyEvaluatorTest {
                 .types(object)
                 .types(SAFE_ALIAS)
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        // there's an ABI break between 4.28.0 -> 4.36.0
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(object)).isEmpty();
     }
+
+    private static Stream<Arguments> providesExternalRefTypes_ImportTime() {
+        Type external = Type.external(ExternalReference.builder()
+                .externalReference(TypeName.of("Long", "java.lang"))
+                .fallback(Type.primitive(PrimitiveType.STRING))
+                .safety(LogSafety.DO_NOT_LOG)
+                .build());
+        return getTypes_SafetyAtImportTime(external);
+    }
+
+    @ParameterizedTest
+    @MethodSource("providesExternalRefTypes_ImportTime")
+    void testExternalRefType_AtImportTime(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        assertThat(evaluator.evaluate(typeDefinition)).hasValue(LogSafety.DO_NOT_LOG);
+    }
+
+    private static Stream<Arguments> providesExternalRefTypes_NoSafety() {
+        Type external = Type.external(ExternalReference.builder()
+                .externalReference(TypeName.of("Long", "java.lang"))
+                .fallback(Type.primitive(PrimitiveType.STRING))
+                .build());
+        return getTypes_SafetyAtImportTime(external);
+    }
+
+    @ParameterizedTest
+    @MethodSource("providesExternalRefTypes_NoSafety")
+    void testExternalRefType_NoSafety(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        assertThat(evaluator.evaluate(typeDefinition)).isEmpty();
+    }
+
+    private static Stream<Arguments> providesExternalRefTypes_ImportAndUsageTime() {
+        Type external = Type.external(ExternalReference.builder()
+                .externalReference(TypeName.of("Long", "java.lang"))
+                .fallback(Type.primitive(PrimitiveType.STRING))
+                .safety(LogSafety.DO_NOT_LOG)
+                .build());
+        return getTypes_SafetyAtUsageTime(external);
+    }
+
+    // We should never hit this case because validation should enforce that external imports declare safety
+    // at import time, not usage time
+    @ParameterizedTest
+    @MethodSource("providesExternalRefTypes_ImportAndUsageTime")
+    void testExternalRefType_AtImportAndUsageTime(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
+        // ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        assertThat(evaluator.evaluate(typeDefinition)).hasValue(LogSafety.DO_NOT_LOG);
+    }
+
+    private static Stream<Arguments> providesExternalRefTypes_OnlyAtUsageTime() {
+        Type external = Type.external(ExternalReference.builder()
+                .externalReference(TypeName.of("Long", "java.lang"))
+                .fallback(Type.primitive(PrimitiveType.STRING))
+                .build());
+        return getTypes_SafetyAtUsageTime(external);
+    }
+
+    // We should never hit this case because validation should enforce that external imports declare safety
+    // at import time, not usage time
+    @ParameterizedTest
+    @MethodSource("providesExternalRefTypes_OnlyAtUsageTime")
+    void testExternalRefType_OnlyAtUsageTime(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
+        // ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
+        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
+        assertThat(evaluator.evaluate(typeDefinition)).isEmpty();
+    }
+
+    // TODO: how will I test endpoints
+    // and the generation logic?? like an E2E test
 
     @Test
     void testMapSafetyUnsafeValue() {
@@ -150,7 +231,7 @@ class SafetyEvaluatorTest {
                 .types(SAFE_ALIAS)
                 .types(UNSAFE_ALIAS)
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(object)).hasValue(LogSafety.UNSAFE);
     }
@@ -170,7 +251,7 @@ class SafetyEvaluatorTest {
                 .types(SAFE_ALIAS)
                 .types(UNSAFE_ALIAS)
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(object)).hasValue(LogSafety.SAFE);
     }
@@ -203,7 +284,7 @@ class SafetyEvaluatorTest {
                 .types(secondObject)
                 .types(UNSAFE_ALIAS)
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(firstObject)).hasValue(LogSafety.UNSAFE);
     }
@@ -222,7 +303,7 @@ class SafetyEvaluatorTest {
                                 .build())
                         .build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.UNSAFE);
@@ -241,7 +322,7 @@ class SafetyEvaluatorTest {
                                 .build())
                         .build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .isEmpty();
@@ -254,7 +335,7 @@ class SafetyEvaluatorTest {
                 .types(TypeDefinition.union(
                         UnionDefinition.builder().typeName(FOO).build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .as("No guarantees can be made about future union values, "
@@ -275,7 +356,7 @@ class SafetyEvaluatorTest {
                                 .build())
                         .build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.UNSAFE);
@@ -294,7 +375,7 @@ class SafetyEvaluatorTest {
                                 .build())
                         .build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.DO_NOT_LOG);
@@ -307,7 +388,7 @@ class SafetyEvaluatorTest {
                 .types(TypeDefinition.object(
                         ObjectDefinition.builder().typeName(FOO).build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.SAFE);
@@ -320,9 +401,100 @@ class SafetyEvaluatorTest {
                 .types(TypeDefinition.enum_(
                         EnumDefinition.builder().typeName(FOO).build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.SAFE);
+    }
+
+    private static Stream<Arguments> getTypes_SafetyAtImportTime(Type externalReference) {
+        TypeDefinition objectType = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(FOO)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("import"))
+                        .type(externalReference)
+                        .docs(DOCS)
+                        .build())
+                .build());
+        ConjureDefinition conjureObjectDef = ConjureDefinition.builder()
+                .version(1)
+                .types(objectType)
+                .types(UNSAFE_ALIAS)
+                .build();
+
+        TypeDefinition aliasType = TypeDefinition.alias(
+                AliasDefinition.builder().typeName(FOO).alias(externalReference).build());
+        ConjureDefinition conjureAliasDef = ConjureDefinition.builder()
+                .version(1)
+                .types(aliasType)
+                .types(UNSAFE_ALIAS)
+                .build();
+
+        TypeDefinition unionType = TypeDefinition.union(UnionDefinition.builder()
+                .union(FieldDefinition.builder()
+                        .fieldName(FieldName.of("importOne"))
+                        .type(externalReference)
+                        .docs(DOCS)
+                        .build())
+                .typeName(FOO)
+                .build());
+        ConjureDefinition conjureUnionDef = ConjureDefinition.builder()
+                .version(1)
+                .types(unionType)
+                .types(UNSAFE_ALIAS)
+                .build();
+
+        return Stream.of(
+                Arguments.of(Named.of("Object", objectType), conjureObjectDef),
+                Arguments.of(Named.of("Alias", aliasType), conjureAliasDef),
+                Arguments.of(Named.of("Union", unionType), conjureUnionDef));
+    }
+
+    private static Stream<Arguments> getTypes_SafetyAtUsageTime(Type externalReference) {
+        TypeDefinition objectType = TypeDefinition.object(ObjectDefinition.builder()
+                .typeName(FOO)
+                .fields(FieldDefinition.builder()
+                        .fieldName(FieldName.of("import"))
+                        .type(externalReference)
+                        .docs(DOCS)
+                        .safety(LogSafety.UNSAFE)
+                        .build())
+                .build());
+        ConjureDefinition conjureObjectDef = ConjureDefinition.builder()
+                .version(1)
+                .types(objectType)
+                .types(UNSAFE_ALIAS)
+                .build();
+
+        TypeDefinition aliasType = TypeDefinition.alias(AliasDefinition.builder()
+                .typeName(FOO)
+                .alias(externalReference)
+                .safety(LogSafety.UNSAFE)
+                .build());
+        ConjureDefinition conjureAliasDef = ConjureDefinition.builder()
+                .version(1)
+                .types(aliasType)
+                .types(UNSAFE_ALIAS)
+                .build();
+
+        TypeDefinition unionType = TypeDefinition.union(UnionDefinition.builder()
+                .union(FieldDefinition.builder()
+                        .fieldName(FieldName.of("importOne"))
+                        .type(externalReference)
+                        .safety(LogSafety.DO_NOT_LOG)
+                        .docs(DOCS)
+                        .build())
+                .typeName(FOO)
+                .build());
+        ConjureDefinition conjureUnionDef = ConjureDefinition.builder()
+                .version(1)
+                .types(unionType)
+                .types(UNSAFE_ALIAS)
+                .build();
+
+        return Stream.of(
+                Arguments.of(Named.of("Object", objectType), conjureObjectDef),
+                Arguments.of(Named.of("Alias", aliasType), conjureAliasDef),
+                Arguments.of(Named.of("Union", unionType), conjureUnionDef));
     }
 }
