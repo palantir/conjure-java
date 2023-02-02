@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import java.math.BigDecimal;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
@@ -25,7 +26,7 @@ public final class DoubleAliasExample implements Comparable<DoubleAliasExample> 
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other
                 || (other instanceof DoubleAliasExample
                         && Double.doubleToLongBits(this.value)

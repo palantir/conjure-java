@@ -130,8 +130,11 @@ public final class BeanGenerator {
         }
 
         typeBuilder.addMethod(MethodSpecs.createToString(
-                prefixedName.getName(),
-                fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList())));
+                        prefixedName.getName(),
+                        fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList()))
+                .toBuilder()
+                .addAnnotations(safety)
+                .build());
 
         if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
             typeBuilder.addMethod(createStaticFactoryMethod(fields, objectClass));

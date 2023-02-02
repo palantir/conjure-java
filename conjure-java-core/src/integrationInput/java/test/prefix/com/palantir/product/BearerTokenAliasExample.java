@@ -6,6 +6,7 @@ import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.BearerToken;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @DoNotLog
@@ -28,7 +29,7 @@ public final class BearerTokenAliasExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other
                 || (other instanceof BearerTokenAliasExample
                         && this.value.equals(((BearerTokenAliasExample) other).value));

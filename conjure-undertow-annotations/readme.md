@@ -149,6 +149,21 @@ public interface MyService {
 }
 ```
 
+### Multipart Form Data
+
+For endpoints using form data, you can use the `@Handle.FormParam` annotation.
+
+```java
+public interface MyService {
+    @Handle(method = HttpMethod.POST, path = "/path/form-data")
+    void myEndpoint(
+            @Handle.FormParam("fieldA") String fieldA,
+            @Handle.FormParam(value = "fieldB", decoder = MyTypeDecoder.clas) MyType fieldB);
+}
+```
+
+Note that file form parameters are currently not supported by this annotation but can be accessed using a `@Handle.Body` annotation with a custom serializer.
+
 ### Using Custom Serializer or Deserializers
 
 Per default, conjure-undertow-processor supports decoding parameters for all [plain Conjure types](https://palantir.github.io/conjure/#/docs/spec/wire?id=_7-plain-format)

@@ -295,6 +295,7 @@ public final class PrimitiveOptionalsExample {
     }
 
     @Override
+    @DoNotLog
     public String toString() {
         return "PrimitiveOptionalsExample{num: " + num + ", bool: " + bool + ", integer: " + integer + ", safelong: "
                 + safelong + ", rid: " + rid + ", bearertoken: " + bearertoken + ", uuid: " + uuid + ", map: " + map

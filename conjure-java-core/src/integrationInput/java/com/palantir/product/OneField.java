@@ -46,6 +46,7 @@ public final class OneField {
     }
 
     @Override
+    @DoNotLog
     public String toString() {
         return "OneField{bearerTokenValue: " + bearerTokenValue + '}';
     }

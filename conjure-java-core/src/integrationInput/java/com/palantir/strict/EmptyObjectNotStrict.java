@@ -16,6 +16,7 @@ public final class EmptyObjectNotStrict {
     private EmptyObjectNotStrict() {}
 
     @Override
+    @Safe
     public String toString() {
         return "EmptyObjectNotStrict{}";
     }

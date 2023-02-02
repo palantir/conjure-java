@@ -120,6 +120,7 @@ public final class MultipleOrderedStages {
     }
 
     @Override
+    @DoNotLog
     public String toString() {
         return "MultipleOrderedStages{token: " + token + ", item: " + item + ", items: " + items + ", mappedRids: "
                 + mappedRids + ", optionalItem: " + optionalItem + '}';

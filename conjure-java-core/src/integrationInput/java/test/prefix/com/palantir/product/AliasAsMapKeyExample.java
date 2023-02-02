@@ -130,6 +130,7 @@ public final class AliasAsMapKeyExample {
     }
 
     @Override
+    @DoNotLog
     public String toString() {
         return "AliasAsMapKeyExample{strings: " + strings + ", rids: " + rids + ", bearertokens: " + bearertokens
                 + ", integers: " + integers + ", safelongs: " + safelongs + ", datetimes: " + datetimes + ", uuids: "
