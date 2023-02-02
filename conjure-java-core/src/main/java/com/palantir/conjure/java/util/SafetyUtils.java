@@ -27,21 +27,21 @@ public final class SafetyUtils {
 
     private SafetyUtils() {}
 
-    public static Optional<LogSafety> getSafety(AliasDefinition alias) {
+    public static Optional<LogSafety> getMaybeExternalSafety(AliasDefinition alias) {
         if (alias.getAlias().accept(MoreVisitors.IS_EXTERNAL)) {
             return alias.getAlias().accept(MoreVisitors.EXTERNAL).getSafety();
         }
         return alias.getSafety();
     }
 
-    public static Optional<LogSafety> getSafety(FieldDefinition field) {
+    public static Optional<LogSafety> getMaybeExternalSafety(FieldDefinition field) {
         if (field.getType().accept(MoreVisitors.IS_EXTERNAL)) {
             return field.getType().accept(MoreVisitors.EXTERNAL).getSafety();
         }
         return field.getSafety();
     }
 
-    public static Optional<LogSafety> getSafety(ArgumentDefinition argument) {
+    public static Optional<LogSafety> getMaybeExternalSafety(ArgumentDefinition argument) {
         if (argument.getType().accept(MoreVisitors.IS_EXTERNAL)) {
             return argument.getType().accept(MoreVisitors.EXTERNAL).getSafety();
         }

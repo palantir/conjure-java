@@ -66,7 +66,7 @@ public final class AliasGenerator {
             TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, AliasDefinition typeDef, Options options) {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
-        Optional<LogSafety> safety = SafetyUtils.getSafety(typeDef);
+        Optional<LogSafety> safety = SafetyUtils.getMaybeExternalSafety(typeDef);
         TypeName aliasTypeName = ConjureAnnotations.withSafety(typeMapper.getClassName(typeDef.getAlias()), safety);
 
         ClassName thisClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());

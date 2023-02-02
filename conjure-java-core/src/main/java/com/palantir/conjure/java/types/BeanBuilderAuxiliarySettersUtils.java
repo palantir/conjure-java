@@ -58,7 +58,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(Parameters.nonnullParameter(
                         widenParameterIfPossible(field.type, type, typeMapper),
                         field.name,
-                        SafetyUtils.getSafety(enriched.conjureDef())));
+                        SafetyUtils.getMaybeExternalSafety(enriched.conjureDef())));
     }
 
     public static MethodSpec.Builder createOptionalSetterBuilder(
@@ -69,7 +69,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(Parameters.nonnullParameter(
                         typeMapper.getClassName(type.getItemType()),
                         field.name,
-                        SafetyUtils.getSafety(enriched.conjureDef())));
+                        SafetyUtils.getMaybeExternalSafety(enriched.conjureDef())));
     }
 
     public static MethodSpec.Builder createItemSetterBuilder(

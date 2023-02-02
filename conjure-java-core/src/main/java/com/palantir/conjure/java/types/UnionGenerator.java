@@ -105,7 +105,7 @@ public final class UnionGenerator {
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(),
                         entry -> ConjureAnnotations.withSafety(
-                                typeMapper.getClassName(entry.getType()), SafetyUtils.getSafety(entry))));
+                                typeMapper.getClassName(entry.getType()), SafetyUtils.getMaybeExternalSafety(entry))));
         List<FieldSpec> fields =
                 ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
@@ -180,7 +180,8 @@ public final class UnionGenerator {
                     MethodSpec.Builder builder = MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addParameter(ParameterSpec.builder(memberType, variableName)
-                                    .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getSafety(memberTypeDef)))
+                                    .addAnnotations(ConjureAnnotations.safety(
+                                            SafetyUtils.getMaybeExternalSafety(memberTypeDef)))
                                     .build())
                             .addStatement(
                                     "return new $T(new $T($L))",
@@ -315,7 +316,8 @@ public final class UnionGenerator {
                                     entry.getKey().getDeprecated()))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .addParameter(ParameterSpec.builder(entry.getValue(), variableName)
-                                    .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getSafety(entry.getKey())))
+                                    .addAnnotations(ConjureAnnotations.safety(
+                                            SafetyUtils.getMaybeExternalSafety(entry.getKey())))
                                     .build())
                             .returns(TYPE_VARIABLE)
                             .build();
@@ -650,7 +652,7 @@ public final class UnionGenerator {
                         .map(entry -> new NameTypeMetadata(
                                 sanitizeUnknown(entry.getKey().getFieldName().get()),
                                 entry.getValue(),
-                                SafetyUtils.getSafety(entry.getKey())))
+                                SafetyUtils.getMaybeExternalSafety(entry.getKey())))
                         .sorted(Comparator.comparing(p -> p.memberName)),
                 Stream.of(NameTypeMetadata.UNKNOWN));
     }

@@ -82,9 +82,7 @@ public final class ConjureTags {
     public static Optional<LogSafety> safety(ArgumentDefinition argument) {
         validateTags(argument);
 
-        // Always prefer the external import's safety. If EI are supported, this is correct. If not, there won't be an
-        // annotation anywhere so it doesn't matter.
-        Optional<LogSafety> argumentSafety = SafetyUtils.getSafety(argument);
+        Optional<LogSafety> argumentSafety = SafetyUtils.getMaybeExternalSafety(argument);
         if (argumentSafety.isPresent()) {
             return argumentSafety;
         }
@@ -109,12 +107,12 @@ public final class ConjureTags {
                     isSafe(tags) ? "safe" : "unsafe",
                     argument.getArgName()));
         }
-        Optional<LogSafety> argumentSafety = SafetyUtils.getSafety(argument);
+        Optional<LogSafety> argumentSafety = SafetyUtils.getMaybeExternalSafety(argument);
         if (argumentSafety.isPresent()) {
             if (markerSafety.isPresent()) {
                 throw new IllegalStateException(String.format(
                         "Unexpected 'safety: %s' value in addition to a '%s' marker on argument '%s'",
-                        argument.getSafety().get().accept(DefFormatSafetyVisitor.INSTANCE),
+                        argumentSafety.get().accept(DefFormatSafetyVisitor.INSTANCE),
                         markerSafety.get().accept(MarkerNameLogSafetyVisitor.INSTANCE),
                         argument.getArgName()));
             }

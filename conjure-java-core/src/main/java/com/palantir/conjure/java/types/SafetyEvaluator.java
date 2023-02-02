@@ -90,7 +90,8 @@ public final class SafetyEvaluator {
 
         @Override
         public Optional<LogSafety> visitAlias(AliasDefinition value) {
-            return with(value.getTypeName(), () -> getSafety(value.getAlias(), SafetyUtils.getSafety(value)));
+            return with(
+                    value.getTypeName(), () -> getSafety(value.getAlias(), SafetyUtils.getMaybeExternalSafety(value)));
         }
 
         @Override
@@ -103,7 +104,7 @@ public final class SafetyEvaluator {
             return with(value.getTypeName(), () -> {
                 Optional<LogSafety> safety = Optional.of(LogSafety.SAFE);
                 for (FieldDefinition field : value.getFields()) {
-                    safety = combine(safety, getSafety(field.getType(), SafetyUtils.getSafety(field)));
+                    safety = combine(safety, getSafety(field.getType(), SafetyUtils.getMaybeExternalSafety(field)));
                 }
                 return safety;
             });
@@ -114,7 +115,7 @@ public final class SafetyEvaluator {
             return with(value.getTypeName(), () -> {
                 Optional<LogSafety> safety = UNKNOWN_UNION_VARINT_SAFETY;
                 for (FieldDefinition variant : value.getUnion()) {
-                    safety = combine(safety, getSafety(variant.getType(), SafetyUtils.getSafety(variant)));
+                    safety = combine(safety, getSafety(variant.getType(), SafetyUtils.getMaybeExternalSafety(variant)));
                 }
                 return safety;
             });

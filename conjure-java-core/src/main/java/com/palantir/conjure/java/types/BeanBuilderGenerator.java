@@ -264,7 +264,8 @@ public final class BeanBuilderGenerator {
 
     private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
         Type type = field.getType();
-        TypeName typeName = ConjureAnnotations.withSafety(typeMapper.getClassName(type), SafetyUtils.getSafety(field));
+        TypeName typeName =
+                ConjureAnnotations.withSafety(typeMapper.getClassName(type), SafetyUtils.getMaybeExternalSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
             spec.initializer("new $T<>()", type.accept(COLLECTION_CONCRETE_TYPE));
@@ -329,7 +330,7 @@ public final class BeanBuilderGenerator {
                 .addParameter(Parameters.nonnullParameter(
                         BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(field.type, type, typeMapper),
                         field.name,
-                        SafetyUtils.getSafety(enriched.conjureDef())))
+                        SafetyUtils.getMaybeExternalSafety(enriched.conjureDef())))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 

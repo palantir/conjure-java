@@ -465,7 +465,7 @@ public final class BeanGenerator {
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
                         .build())
-                .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getSafety(field.conjureDef())))
+                .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getMaybeExternalSafety(field.conjureDef())))
                 .returns(field.poetSpec().type);
         Type conjureDefType = field.conjureDef().getType();
         if (featureFlags.excludeEmptyOptionals()) {
@@ -542,10 +542,10 @@ public final class BeanGenerator {
                     .addCode("return $L;", SINGLETON_INSTANCE_NAME);
         } else {
             builder.addCode("return builder()");
-            fields.forEach(field -> builder.addParameter(
-                    ParameterSpec.builder(getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
-                            .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getSafety(field.conjureDef())))
-                            .build()));
+            fields.forEach(field -> builder.addParameter(ParameterSpec.builder(
+                            getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
+                    .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getMaybeExternalSafety(field.conjureDef())))
+                    .build()));
             // Follow order on adding methods on builder to comply with staged builders option if set
             sortedEnrichedFields(fields).map(EnrichedField::poetSpec).forEach(spec -> {
                 if (isOptional(spec)) {
