@@ -137,13 +137,12 @@ class SafetyEvaluatorTest {
                 .types(object)
                 .types(SAFE_ALIAS)
                 .build();
-        // there's an ABI break between 4.28.0 -> 4.36.0
         ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(object)).isEmpty();
     }
 
-    private static Stream<Arguments> providesExternalRefTypes_ImportTime() {
+    private static Stream<Arguments> providesExternalRefTypes_WithSafety() {
         Type external = Type.external(ExternalReference.builder()
                 .externalReference(TypeName.of("Long", "java.lang"))
                 .fallback(Type.primitive(PrimitiveType.STRING))
@@ -153,8 +152,8 @@ class SafetyEvaluatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("providesExternalRefTypes_ImportTime")
-    void testExternalRefType_AtImportTime(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
+    @MethodSource("providesExternalRefTypes_WithSafety")
+    void testExternalRefType_WithSafety(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
         ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(typeDefinition)).hasValue(LogSafety.DO_NOT_LOG);
