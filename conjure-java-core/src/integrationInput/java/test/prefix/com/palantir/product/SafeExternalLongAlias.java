@@ -3,6 +3,7 @@ package test.prefix.com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Safe;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Safe
@@ -21,12 +22,13 @@ public final class SafeExternalLongAlias {
     }
 
     @Override
+    @Safe
     public String toString() {
         return String.valueOf(value);
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other
                 || (other instanceof SafeExternalLongAlias && this.value == ((SafeExternalLongAlias) other).value);
     }

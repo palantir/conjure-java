@@ -44,6 +44,7 @@ public final class SafeExternalLongExample {
     }
 
     @Override
+    @Safe
     public String toString() {
         return "SafeExternalLongExample{safeExternalLongValue: " + safeExternalLongValue + '}';
     }
