@@ -216,8 +216,6 @@ class SafetyEvaluatorTest {
         assertThat(evaluator.evaluate(typeDefinition)).isEmpty();
     }
 
-    // TODO test the generation logic?? like an E2E test
-
     @Test
     void testMapSafetyUnsafeValue() {
         TypeDefinition object = TypeDefinition.object(ObjectDefinition.builder()
