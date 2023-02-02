@@ -1,0 +1,20 @@
+types:
+  imports:
+    DangerousLong:
+      external:
+        java: java.lang.Long
+      safety: do-not-log
+
+services:
+  ExternalLongTestService:
+    name: External Long Test Service
+    package: com.palantir.product
+    default-auth: header
+    base-path: /external-long
+
+    endpoints:
+      testExternalLongArg:
+        http: POST /test
+        args:
+          externalLong:
+            type: DangerousLong

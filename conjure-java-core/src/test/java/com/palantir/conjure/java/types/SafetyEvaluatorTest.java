@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.defs.SafetyDeclarationRequirements;
@@ -185,12 +186,13 @@ class SafetyEvaluatorTest {
         return getTypes_SafetyAtUsageTime(external);
     }
 
-    // We should never hit this case because validation should enforce that external imports declare safety
-    // at import time, not usage time
     @ParameterizedTest
     @MethodSource("providesExternalRefTypes_ImportAndUsageTime")
     void testExternalRefType_AtImportAndUsageTime(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
-        // ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
+        // upstream validation logic should catch this degenerate case, but codegen should still prefer the import time
+        // annotations
+        assertThatThrownBy(
+                () -> ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED));
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(typeDefinition)).hasValue(LogSafety.DO_NOT_LOG);
     }
@@ -203,18 +205,18 @@ class SafetyEvaluatorTest {
         return getTypes_SafetyAtUsageTime(external);
     }
 
-    // We should never hit this case because validation should enforce that external imports declare safety
-    // at import time, not usage time
     @ParameterizedTest
     @MethodSource("providesExternalRefTypes_OnlyAtUsageTime")
     void testExternalRefType_OnlyAtUsageTime(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
-        // ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
+        // upstream validation logic should catch this degenerate case, but codegen should still prefer the import time
+        // annotations
+        assertThatThrownBy(
+                () -> ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED));
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(typeDefinition)).isEmpty();
     }
 
-    // TODO: how will I test endpoints
-    // and the generation logic?? like an E2E test
+    // TODO test the generation logic?? like an E2E test
 
     @Test
     void testMapSafetyUnsafeValue() {
