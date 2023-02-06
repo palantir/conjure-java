@@ -187,9 +187,8 @@ public final class SafetyEvaluator {
         }
 
         @Override
-        public Optional<LogSafety> visitExternal(ExternalReference _value) {
-            // External types have unknown safety for now
-            return Optional.empty();
+        public Optional<LogSafety> visitExternal(ExternalReference value) {
+            return value.getSafety();
         }
 
         @Override
