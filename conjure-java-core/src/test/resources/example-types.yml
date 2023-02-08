@@ -33,6 +33,7 @@ types:
       SafeExternalLongExample:
         fields:
           safeExternalLongValue: SafeExternalLong
+          optionalSafeExternalLong: optional<SafeExternalLong>
       RidExample:
         fields:
           ridValue: rid
@@ -139,8 +140,6 @@ types:
         alias: datetime
       BinaryAliasExample:
         alias: binary
-      SafeExternalAliasExample:
-        alias: SafeExternalLongAlias
       PrimitiveOptionalsExample:
         fields:
           num: optional<double>
