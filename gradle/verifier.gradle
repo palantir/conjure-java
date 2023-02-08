@@ -33,6 +33,7 @@ conjure {
 subprojects {
     dependencies {
         api project(':conjure-lib')
+        api 'jakarta.ws.rs:jakarta.ws.rs-api'
     }
 }
 
