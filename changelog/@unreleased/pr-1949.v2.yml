@@ -1,0 +1,5 @@
+type: break
+break:
+  description: Remove unused jaxrs dependency from conjure-lib
+  links:
+  - https://github.com/palantir/conjure-java/pull/1949
