@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 /**
- * A union of a safe and unsafe external long.
+ * A union of a safe long.
  */
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class ExternalLongUnionExample {
@@ -44,18 +44,11 @@ public final class ExternalLongUnionExample {
         return new ExternalLongUnionExample(new SafeLongWrapper(value));
     }
 
-    public static ExternalLongUnionExample unsafeLong(long value) {
-        return new ExternalLongUnionExample(new UnsafeLongWrapper(value));
-    }
-
     public static ExternalLongUnionExample unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "safeLong":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: safeLong");
-            case "unsafeLong":
-                throw new SafeIllegalArgumentException(
-                        "Unknown type cannot be created as the provided type is known: unsafeLong");
             default:
                 return new ExternalLongUnionExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
         }
@@ -88,8 +81,6 @@ public final class ExternalLongUnionExample {
     public interface Visitor<T> {
         T visitSafeLong(@Safe long value);
 
-        T visitUnsafeLong(long value);
-
         T visitUnknown(@Safe String unknownType, Object unknownValue);
 
         static <T> SafeLongStageVisitorBuilder<T> builder() {
@@ -98,27 +89,15 @@ public final class ExternalLongUnionExample {
     }
 
     private static final class VisitorBuilder<T>
-            implements SafeLongStageVisitorBuilder<T>,
-                    UnsafeLongStageVisitorBuilder<T>,
-                    UnknownStageVisitorBuilder<T>,
-                    Completed_StageVisitorBuilder<T> {
+            implements SafeLongStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
         private Function<@Safe Long, T> safeLongVisitor;
-
-        private Function<Long, T> unsafeLongVisitor;
 
         private BiFunction<@Safe String, Object, T> unknownVisitor;
 
         @Override
-        public UnsafeLongStageVisitorBuilder<T> safeLong(@Nonnull Function<@Safe Long, T> safeLongVisitor) {
+        public UnknownStageVisitorBuilder<T> safeLong(@Nonnull Function<@Safe Long, T> safeLongVisitor) {
             Preconditions.checkNotNull(safeLongVisitor, "safeLongVisitor cannot be null");
             this.safeLongVisitor = safeLongVisitor;
-            return this;
-        }
-
-        @Override
-        public UnknownStageVisitorBuilder<T> unsafeLong(@Nonnull Function<Long, T> unsafeLongVisitor) {
-            Preconditions.checkNotNull(unsafeLongVisitor, "unsafeLongVisitor cannot be null");
-            this.unsafeLongVisitor = unsafeLongVisitor;
             return this;
         }
 
@@ -148,18 +127,13 @@ public final class ExternalLongUnionExample {
 
         @Override
         public Visitor<T> build() {
+            // TODO: can i skip this???
             final Function<@Safe Long, T> safeLongVisitor = this.safeLongVisitor;
-            final Function<Long, T> unsafeLongVisitor = this.unsafeLongVisitor;
             final BiFunction<@Safe String, Object, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
                 public T visitSafeLong(long value) {
                     return safeLongVisitor.apply(value);
-                }
-
-                @Override
-                public T visitUnsafeLong(long value) {
-                    return unsafeLongVisitor.apply(value);
                 }
 
                 @Override
@@ -171,11 +145,7 @@ public final class ExternalLongUnionExample {
     }
 
     public interface SafeLongStageVisitorBuilder<T> {
-        UnsafeLongStageVisitorBuilder<T> safeLong(@Nonnull Function<@Safe Long, T> safeLongVisitor);
-    }
-
-    public interface UnsafeLongStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> unsafeLong(@Nonnull Function<Long, T> unsafeLongVisitor);
+        UnknownStageVisitorBuilder<T> safeLong(@Nonnull Function<@Safe Long, T> safeLongVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
@@ -196,7 +166,7 @@ public final class ExternalLongUnionExample {
             property = "type",
             visible = true,
             defaultImpl = UnknownWrapper.class)
-    @JsonSubTypes({@JsonSubTypes.Type(SafeLongWrapper.class), @JsonSubTypes.Type(UnsafeLongWrapper.class)})
+    @JsonSubTypes(@JsonSubTypes.Type(SafeLongWrapper.class))
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
         <T> T accept(Visitor<T> visitor);
@@ -244,51 +214,6 @@ public final class ExternalLongUnionExample {
         @Override
         public String toString() {
             return "SafeLongWrapper{value: " + value + '}';
-        }
-    }
-
-    @JsonTypeName("unsafeLong")
-    private static final class UnsafeLongWrapper implements Base {
-        private final long value;
-
-        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-        private UnsafeLongWrapper(@JsonSetter("unsafeLong") @Nonnull long value) {
-            Preconditions.checkNotNull(value, "unsafeLong cannot be null");
-            this.value = value;
-        }
-
-        @JsonProperty(value = "type", index = 0)
-        private String getType() {
-            return "unsafeLong";
-        }
-
-        @JsonProperty("unsafeLong")
-        private long getValue() {
-            return value;
-        }
-
-        @Override
-        public <T> T accept(Visitor<T> visitor) {
-            return visitor.visitUnsafeLong(value);
-        }
-
-        @Override
-        public boolean equals(@Nullable Object other) {
-            return this == other || (other instanceof UnsafeLongWrapper && equalTo((UnsafeLongWrapper) other));
-        }
-
-        private boolean equalTo(UnsafeLongWrapper other) {
-            return this.value == other.value;
-        }
-
-        @Override
-        public int hashCode() {
-            return Long.hashCode(this.value);
-        }
-
-        @Override
-        public String toString() {
-            return "UnsafeLongWrapper{value: " + value + '}';
         }
     }
 

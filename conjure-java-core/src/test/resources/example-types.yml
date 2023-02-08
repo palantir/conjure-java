@@ -224,10 +224,9 @@ types:
       EmptyUnionTypeExample:
         union: {}
       ExternalLongUnionExample:
-        docs: A union of a safe and unsafe external long.
+        docs: A union of a safe long.
         union:
           safeLong: SafeExternalLong
-          unsafeLong: ExternalLong
       EmptyObjectExample:
         fields: {}
       AliasAsMapKeyExample:
