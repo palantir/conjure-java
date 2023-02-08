@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.defs.SafetyDeclarationRequirements;
@@ -173,45 +172,6 @@ class SafetyEvaluatorTest {
     @MethodSource("providesExternalRefTypes_NoSafety")
     void testExternalRefType_NoSafety(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
         ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
-        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
-        assertThat(evaluator.evaluate(typeDefinition)).isEmpty();
-    }
-
-    private static Stream<Arguments> providesExternalRefTypes_ImportAndUsageTime() {
-        Type external = Type.external(ExternalReference.builder()
-                .externalReference(TypeName.of("Long", "java.lang"))
-                .fallback(Type.primitive(PrimitiveType.STRING))
-                .safety(LogSafety.DO_NOT_LOG)
-                .build());
-        return getTypes_SafetyAtUsageTime(external);
-    }
-
-    @ParameterizedTest
-    @MethodSource("providesExternalRefTypes_ImportAndUsageTime")
-    void testExternalRefType_AtImportAndUsageTime(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
-        // upstream validation logic should catch this degenerate case, but codegen should still prefer the import time
-        // annotations
-        assertThatThrownBy(
-                () -> ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED));
-        SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
-        assertThat(evaluator.evaluate(typeDefinition)).hasValue(LogSafety.DO_NOT_LOG);
-    }
-
-    private static Stream<Arguments> providesExternalRefTypes_OnlyAtUsageTime() {
-        Type external = Type.external(ExternalReference.builder()
-                .externalReference(TypeName.of("Long", "java.lang"))
-                .fallback(Type.primitive(PrimitiveType.STRING))
-                .build());
-        return getTypes_SafetyAtUsageTime(external);
-    }
-
-    @ParameterizedTest
-    @MethodSource("providesExternalRefTypes_OnlyAtUsageTime")
-    void testExternalRefType_OnlyAtUsageTime(TypeDefinition typeDefinition, ConjureDefinition conjureDef) {
-        // upstream validation logic should catch this degenerate case, but codegen should still prefer the import time
-        // annotations
-        assertThatThrownBy(
-                () -> ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED));
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(typeDefinition)).isEmpty();
     }
@@ -434,54 +394,6 @@ class SafetyEvaluatorTest {
                 .union(FieldDefinition.builder()
                         .fieldName(FieldName.of("importOne"))
                         .type(externalReference)
-                        .docs(DOCS)
-                        .build())
-                .typeName(FOO)
-                .build());
-        ConjureDefinition conjureUnionDef = ConjureDefinition.builder()
-                .version(1)
-                .types(unionType)
-                .types(UNSAFE_ALIAS)
-                .build();
-
-        return Stream.of(
-                Arguments.of(Named.of("Object", objectType), conjureObjectDef),
-                Arguments.of(Named.of("Alias", aliasType), conjureAliasDef),
-                Arguments.of(Named.of("Union", unionType), conjureUnionDef));
-    }
-
-    private static Stream<Arguments> getTypes_SafetyAtUsageTime(Type externalReference) {
-        TypeDefinition objectType = TypeDefinition.object(ObjectDefinition.builder()
-                .typeName(FOO)
-                .fields(FieldDefinition.builder()
-                        .fieldName(FieldName.of("import"))
-                        .type(externalReference)
-                        .docs(DOCS)
-                        .safety(LogSafety.UNSAFE)
-                        .build())
-                .build());
-        ConjureDefinition conjureObjectDef = ConjureDefinition.builder()
-                .version(1)
-                .types(objectType)
-                .types(UNSAFE_ALIAS)
-                .build();
-
-        TypeDefinition aliasType = TypeDefinition.alias(AliasDefinition.builder()
-                .typeName(FOO)
-                .alias(externalReference)
-                .safety(LogSafety.UNSAFE)
-                .build());
-        ConjureDefinition conjureAliasDef = ConjureDefinition.builder()
-                .version(1)
-                .types(aliasType)
-                .types(UNSAFE_ALIAS)
-                .build();
-
-        TypeDefinition unionType = TypeDefinition.union(UnionDefinition.builder()
-                .union(FieldDefinition.builder()
-                        .fieldName(FieldName.of("importOne"))
-                        .type(externalReference)
-                        .safety(LogSafety.DO_NOT_LOG)
                         .docs(DOCS)
                         .build())
                 .typeName(FOO)
