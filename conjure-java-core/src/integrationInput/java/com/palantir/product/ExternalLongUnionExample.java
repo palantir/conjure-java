@@ -127,7 +127,6 @@ public final class ExternalLongUnionExample {
 
         @Override
         public Visitor<T> build() {
-            // TODO: can i skip this???
             final Function<@Safe Long, T> safeLongVisitor = this.safeLongVisitor;
             final BiFunction<@Safe String, Object, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
