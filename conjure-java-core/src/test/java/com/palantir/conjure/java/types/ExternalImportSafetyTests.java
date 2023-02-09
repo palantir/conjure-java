@@ -27,11 +27,11 @@ import com.palantir.product.UndertowExternalLongTestService;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -56,11 +56,8 @@ public class ExternalImportSafetyTests {
 
         assertMethodParamHasAnnotation(SafeExternalLongExample.class, "of", "safeExternalLongValue", Safe.class);
 
-        Optional<Class<?>> builder = Arrays.stream(SafeExternalLongExample.class.getClasses())
-                .filter(subclass -> subclass.getName().contains("Builder"))
-                .findAny();
-        assertThat(builder).isPresent();
-        assertMethodParamHasAnnotation(builder.get(), "safeExternalLongValue", "safeExternalLongValue", Safe.class);
+        Class<?> builder = getMatchingSubclass(SafeExternalLongExample.class, "Builder");
+        assertMethodParamHasAnnotation(builder, "safeExternalLongValue", "safeExternalLongValue", Safe.class);
     }
 
     @Test
@@ -74,76 +71,48 @@ public class ExternalImportSafetyTests {
         assertMethodParamHasAnnotation(ExternalLongUnionExample.class, "safeLong", "value", Safe.class);
         assertMethodParamHasAnnotation(ExternalLongUnionExample.class, "unknown", "type", Safe.class);
 
-        Optional<Class<?>> visitor = Arrays.stream(ExternalLongUnionExample.class.getClasses())
-                .filter(subclass -> subclass.getName().contains("$Visitor"))
-                .findAny();
-        assertThat(visitor).isPresent();
-        assertMethodParamHasAnnotation(visitor.get(), "visitSafeLong", "value", Safe.class);
-        assertMethodParamHasAnnotation(visitor.get(), "visitUnknown", "unknownType", Safe.class);
+        Class<?> visitor = getMatchingSubclass(ExternalLongUnionExample.class, "$Visitor");
+        assertMethodParamHasAnnotation(visitor, "visitSafeLong", "value", Safe.class);
+        assertMethodParamHasAnnotation(visitor, "visitUnknown", "unknownType", Safe.class);
 
-        Optional<Class<?>> visitorBuilder = Arrays.stream(ExternalLongUnionExample.class.getDeclaredClasses())
-                .filter(subclass -> subclass.getName().contains("$VisitorBuilder"))
-                .findAny();
-        assertThat(visitorBuilder).isPresent();
-        assertFieldTypeParamHasAnnotation(visitorBuilder.get(), "safeLongVisitor", "Long", Safe.class);
-        assertFieldTypeParamHasAnnotation(visitorBuilder.get(), "unknownVisitor", "String", Safe.class);
+        Class<?> visitorBuilder = getMatchingSubclass(ExternalLongUnionExample.class, "$VisitorBuilder");
+        assertFieldTypeParamHasAnnotation(visitorBuilder, "safeLongVisitor", "Long", Safe.class);
+        assertFieldTypeParamHasAnnotation(visitorBuilder, "unknownVisitor", "String", Safe.class);
         assertMethodParamWithTypeParameterHasAnnotation(
-                visitorBuilder.get(), "safeLong", "safeLongVisitor", "Long", Safe.class);
+                visitorBuilder, "safeLong", "safeLongVisitor", "Long", Safe.class);
         assertMethodParamWithTypeParameterHasAnnotation(
-                visitorBuilder.get(), "unknown", "unknownVisitor", "Long", Safe.class);
+                visitorBuilder, "unknown", "unknownVisitor", "String", Safe.class);
 
-        Optional<Class<?>> stageVisitorBuilder = Arrays.stream(ExternalLongUnionExample.class.getDeclaredClasses())
-                .filter(subclass -> subclass.getName().contains("SafeLongStageVisitorBuilder"))
-                .findAny();
-        assertThat(stageVisitorBuilder).isPresent();
+        Class<?> stageVisitorBuilder =
+                getMatchingSubclass(ExternalLongUnionExample.class, "SafeLongStageVisitorBuilder");
         assertMethodParamWithTypeParameterHasAnnotation(
-                stageVisitorBuilder.get(), "safeLong", "safeLongVisitor", "Long", Safe.class);
+                stageVisitorBuilder, "safeLong", "safeLongVisitor", "Long", Safe.class);
 
-        Optional<Class<?>> unknownStageVisitorBuilder = Arrays.stream(
-                        ExternalLongUnionExample.class.getDeclaredClasses())
-                .filter(subclass -> subclass.getName().contains("UnknownStageVisitorBuilder"))
-                .findAny();
-        assertThat(unknownStageVisitorBuilder).isPresent();
+        Class<?> unknownStageVisitorBuilder =
+                getMatchingSubclass(ExternalLongUnionExample.class, "UnknownStageVisitorBuilder");
         assertMethodParamWithTypeParameterHasAnnotation(
-                unknownStageVisitorBuilder.get(), "unknown", "unknownVisitor", "Long", Safe.class);
-    }
-
-    private void assertFieldTypeParamHasAnnotation(
-            Class<?> parentClass, String fieldName, String typeName, Class<? extends Annotation> annotation) {
-        AnnotatedType type = Arrays.stream(parentClass.getDeclaredFields())
-                .filter(field -> field.getName().contains(fieldName))
-                .findAny()
-                .get()
-                .getAnnotatedType();
-        assertThat(((AnnotatedParameterizedType) type).getAnnotatedActualTypeArguments())
-                .filteredOn(t -> t.getType().getTypeName().contains(typeName))
-                .hasSize(1)
-                .allMatch(t -> t.isAnnotationPresent(annotation));
+                unknownStageVisitorBuilder, "unknown", "unknownVisitor", "String", Safe.class);
     }
 
     private void assertMethodHasAnnotation(
             Class<?> parentClass, String methodName, Class<? extends Annotation> annotation) {
-        Method[] methods = parentClass.getMethods();
-        assertThat(methods)
-                .filteredOn(method -> method.getName().equals(methodName))
-                .hasSize(1)
+        Stream<Method> desiredMethods = getMatchingMethods(parentClass, methodName);
+        assertThat(desiredMethods)
+                .withFailMessage(String.format(
+                        "Expected %s:%s to have annotation %s",
+                        parentClass.getName(), methodName, annotation.getName()))
                 .allMatch(method -> method.isAnnotationPresent(annotation));
     }
 
     private void assertMethodParamHasAnnotation(
             Class<?> parentClass, String methodName, String parameterName, Class<? extends Annotation> annotation) {
-        Method[] methods = parentClass.getMethods();
-        Optional<Method> desiredMethod = Arrays.stream(methods)
-                .filter(method -> method.getName().equals(methodName))
-                .findAny();
-        assertThat(desiredMethod).isPresent();
-        assertThat(desiredMethod)
-                .map(method -> Arrays.stream(desiredMethod.get().getParameters())
-                        .filter(parameter -> parameter.getName().contains(parameterName))
-                        .findAny())
-                .isPresent()
-                .get()
-                .satisfies(parameter -> parameter.get().isAnnotationPresent(annotation));
+        Stream<Method> desiredMethods = getMatchingMethods(parentClass, methodName);
+        assertThat(desiredMethods)
+                .withFailMessage(String.format(
+                        "Expected %s:%s parameter %s to have annotation %s",
+                        parentClass.getName(), methodName, parameterName, annotation.getName()))
+                .map(method -> getMatchingParameter(method, parameterName))
+                .allMatch(parameter -> parameter.isAnnotationPresent(annotation));
     }
 
     private void assertMethodParamWithTypeParameterHasAnnotation(
@@ -152,20 +121,63 @@ public class ExternalImportSafetyTests {
             String parameterName,
             String typeParameter,
             Class<? extends Annotation> annotation) {
-        Method[] methods = parentClass.getMethods();
-        List<Method> desiredMethods = Arrays.stream(methods)
-                .filter(method -> method.getName().equals(methodName))
-                .collect(Collectors.toList());
-        assertThat(desiredMethods).isNotEmpty();
-        Stream<AnnotatedType> annotatedTypes = desiredMethods.stream()
-                .map(method -> Arrays.stream(method.getParameters())
-                        .filter(parameter -> parameter.getName().contains(parameterName))
-                        .findAny()
-                        .get()
-                        .getAnnotatedType());
-        assertThat(annotatedTypes).allMatch(annotatedType -> Arrays.stream(
-                        ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments())
-                .filter(t -> t.getType().getTypeName().contains(typeParameter))
-                .allMatch(t -> t.isAnnotationPresent(annotation)));
+        Stream<Method> desiredMethods = getMatchingMethods(parentClass, methodName);
+        Stream<AnnotatedType> annotatedTypes = desiredMethods.map(
+                method -> getMatchingParameter(method, parameterName).getAnnotatedType());
+        assertThat(annotatedTypes)
+                .withFailMessage(String.format(
+                        "Expected %s:%s parameter %s of type %s to have annotation %s",
+                        parentClass.getName(), methodName, parameterName, typeParameter, annotation.getName()))
+                .map(annotatedType -> getAnnotatedTypeParameter(annotatedType, typeParameter))
+                .allMatch(t -> t.isAnnotationPresent(annotation));
+    }
+
+    private void assertFieldTypeParamHasAnnotation(
+            Class<?> parentClass, String fieldName, String typeName, Class<? extends Annotation> annotation) {
+        Stream<Field> desiredFields = Arrays.stream(parentClass.getDeclaredFields())
+                .filter(field -> field.getName().contains(fieldName));
+        Stream<AnnotatedType> annotatedTypeParameters =
+                desiredFields.map(Field::getAnnotatedType).map(type -> getAnnotatedTypeParameter(type, typeName));
+        assertThat(annotatedTypeParameters)
+                .withFailMessage(String.format(
+                        "Expected %s:%s of type %s to have annotation %s",
+                        parentClass.getName(), fieldName, typeName, annotation.getName()))
+                .allMatch(t -> t.isAnnotationPresent(annotation));
+    }
+
+    private Stream<Method> getMatchingMethods(Class<?> parentClass, String methodName) {
+        return Arrays.stream(parentClass.getMethods())
+                .filter(method -> method.getName().equals(methodName));
+    }
+
+    private Class<?> getMatchingSubclass(Class<?> parentClass, String subclassName) {
+        Optional<Class<?>> subclassIfExists = Arrays.stream(SafeExternalLongExample.class.getClasses())
+                .filter(subclass -> subclass.getName().contains("Builder"))
+                .findAny();
+        assertThat(subclassIfExists)
+                .withFailMessage(String.format("Expected %s:%s to exist", parentClass, subclassName))
+                .isPresent();
+        return subclassIfExists.get();
+    }
+
+    private Parameter getMatchingParameter(Method method, String parameterName) {
+        Optional<Parameter> parameterIfExists = Arrays.stream(method.getParameters())
+                .filter(parameter -> parameter.getName().contains(parameterName))
+                .findAny();
+        assertThat(parameterIfExists)
+                .withFailMessage(String.format("Expected to find parameter %s on method %s", parameterName, method))
+                .isPresent();
+        return parameterIfExists.get();
+    }
+
+    private AnnotatedType getAnnotatedTypeParameter(AnnotatedType parameterizedType, String parameter) {
+        Optional<AnnotatedType> typeParameterIfExists = Arrays.stream(
+                        ((AnnotatedParameterizedType) parameterizedType).getAnnotatedActualTypeArguments())
+                .filter(t -> t.getType().getTypeName().contains(parameter))
+                .findAny();
+        assertThat(typeParameterIfExists)
+                .withFailMessage("Expected type parameter %s on type %s", parameter, parameterizedType)
+                .isPresent();
+        return typeParameterIfExists.get();
     }
 }

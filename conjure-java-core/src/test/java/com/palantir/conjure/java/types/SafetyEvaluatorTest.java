@@ -137,7 +137,6 @@ class SafetyEvaluatorTest {
                 .types(object)
                 .types(SAFE_ALIAS)
                 .build();
-        // there's an ABI break between 4.28.0 -> 4.36.0
         ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(object)).isEmpty();
