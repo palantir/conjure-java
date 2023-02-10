@@ -39,6 +39,7 @@ import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
@@ -326,6 +327,7 @@ public final class BeanGenerator {
         List<MethodSpec> methodSpecs = new ArrayList<>();
         Type type = enriched.conjureDef().getType();
         FieldDefinition definition = enriched.conjureDef();
+        Optional<LogSafety> safety = SafetyUtils.getMaybeExternalSafety(definition);
 
         methodSpecs.add(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(enriched.fieldName()))
                 .addParameter(ParameterSpec.builder(
@@ -348,7 +350,7 @@ public final class BeanGenerator {
                     .addModifiers(Modifier.ABSTRACT)
                     .build());
             methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(
-                            enriched, type.accept(TypeVisitor.LIST).getItemType(), typeMapper, returnClass)
+                            enriched, type.accept(TypeVisitor.LIST).getItemType(), typeMapper, returnClass, safety)
                     .addModifiers(Modifier.ABSTRACT)
                     .build());
         }
@@ -359,7 +361,7 @@ public final class BeanGenerator {
                     .addModifiers(Modifier.ABSTRACT)
                     .build());
             methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(
-                            enriched, type.accept(TypeVisitor.SET).getItemType(), typeMapper, returnClass)
+                            enriched, type.accept(TypeVisitor.SET).getItemType(), typeMapper, returnClass, safety)
                     .addModifiers(Modifier.ABSTRACT)
                     .build());
         }

@@ -74,9 +74,15 @@ public final class BeanBuilderAuxiliarySettersUtils {
     }
 
     public static MethodSpec.Builder createItemSetterBuilder(
-            EnrichedField enriched, Type itemType, TypeMapper typeMapper, ClassName returnClass) {
+            EnrichedField enriched,
+            Type itemType,
+            TypeMapper typeMapper,
+            ClassName returnClass,
+            Optional<LogSafety> safety) {
         FieldSpec field = enriched.poetSpec();
-        return publicSetter(enriched, returnClass).addParameter(typeMapper.getClassName(itemType), field.name);
+        return publicSetter(enriched, returnClass)
+                .addParameter(
+                        typeMapper.getClassName(itemType).annotated(ConjureAnnotations.safety(safety)), field.name);
     }
 
     public static MethodSpec.Builder createMapSetterBuilder(
@@ -98,14 +104,12 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .returns(returnClass);
     }
 
-    public static TypeName widenParameterIfPossible(
-            TypeName current, Type type, TypeMapper typeMapper, Optional<LogSafety> safety) {
-        // if inner type name is external
+    public static TypeName widenParameterIfPossible(TypeName current, Type type, TypeMapper typeMapper) {
         if (type.accept(TypeVisitor.IS_LIST)) {
             Type innerType = type.accept(TypeVisitor.LIST).getItemType();
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
             if (isWidenableContainedType(innerType)) {
-                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName).annotated(ConjureAnnotations.safety(safety));
+                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
             return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
         }
@@ -114,7 +118,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
             Type innerType = type.accept(TypeVisitor.SET).getItemType();
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
             if (isWidenableContainedType(innerType)) {
-                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName).annotated(ConjureAnnotations.safety(safety));
+                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
 
             return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
@@ -126,17 +130,10 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 return current;
             }
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
-            WildcardTypeName wildcard =
-                    WildcardTypeName.subtypeOf(innerTypeName).annotated(ConjureAnnotations.safety(safety));
-            ParameterizedTypeName p = ParameterizedTypeName.get(ClassName.get(Optional.class), wildcard);
-            return p;
+            return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerTypeName));
         }
 
         return current;
-    }
-
-    public static TypeName widenParameterIfPossible(TypeName current, Type type, TypeMapper typeMapper) {
-        return widenParameterIfPossible(current, type, typeMapper, Optional.empty());
     }
 
     // we want to widen containers of anything that's not a primitive, a conjure reference or an optional

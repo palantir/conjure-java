@@ -96,8 +96,33 @@ public class ExternalImportSafetyTests {
 
     @Test
     public void testOptionalAnnotations() {
-        assertFieldTypeParamHasAnnotation(
-                SafeExternalLongExample.class, "optionalSafeExternalLong", "Long", Safe.class);
+        assertMethodHasAnnotation(SafeExternalLongExample.class, "getOptionalSafeExternalLong", Safe.class);
+
+        Class<?> builderSubclass = getMatchingSubclass(SafeExternalLongExample.class, "$Builder");
+        assertFieldTypeParamHasAnnotation(builderSubclass, "optionalSafeExternalLong", "Long", Safe.class);
+        assertMethodParamHasAnnotation(
+                builderSubclass, "optionalSafeExternalLong", "optionalSafeExternalLong", Safe.class);
+    }
+
+    @Test
+    public void testListAnnotations() {
+        assertMethodHasAnnotation(SafeExternalLongExample.class, "getSafeExternalLongList", Safe.class);
+
+        Class<?> builderSubclass = getMatchingSubclass(SafeExternalLongExample.class, "$Builder");
+        assertFieldTypeParamHasAnnotation(builderSubclass, "safeExternalLongList", "Long", Safe.class);
+        assertMethodParamHasAnnotation(builderSubclass, "safeExternalLongList", "safeExternalLongList", Safe.class);
+        assertMethodParamHasAnnotation(
+                builderSubclass, "addAllSafeExternalLongList", "safeExternalLongList", Safe.class);
+    }
+
+    @Test
+    public void testSetAnnotations() {
+        assertMethodHasAnnotation(SafeExternalLongExample.class, "getSafeExternalLongSet", Safe.class);
+
+        Class<?> builderSubclass = getMatchingSubclass(SafeExternalLongExample.class, "$Builder");
+        assertFieldTypeParamHasAnnotation(builderSubclass, "safeExternalLongSet", "Long", Safe.class);
+        assertMethodParamHasAnnotation(builderSubclass, "safeExternalLongSet", "safeExternalLongSet", Safe.class);
+        assertMethodParamHasAnnotation(builderSubclass, "addAllSafeExternalLongSet", "safeExternalLongSet", Safe.class);
     }
 
     private void assertMethodHasAnnotation(

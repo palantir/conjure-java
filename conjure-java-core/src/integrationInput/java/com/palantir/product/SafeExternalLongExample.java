@@ -204,7 +204,7 @@ public final class SafeExternalLongExample {
             return this;
         }
 
-        public Builder safeExternalLongList(long safeExternalLongList) {
+        public Builder safeExternalLongList(@Safe long safeExternalLongList) {
             checkNotBuilt();
             this.safeExternalLongList.add(safeExternalLongList);
             return this;
@@ -226,7 +226,7 @@ public final class SafeExternalLongExample {
             return this;
         }
 
-        public Builder safeExternalLongSet(long safeExternalLongSet) {
+        public Builder safeExternalLongSet(@Safe long safeExternalLongSet) {
             checkNotBuilt();
             this.safeExternalLongSet.add(safeExternalLongSet);
             return this;
