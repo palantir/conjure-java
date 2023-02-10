@@ -1,0 +1,17 @@
+types:
+  imports:
+    SafeExternalLong:
+      base-type: string
+      external:
+        java: java.lang.Long
+      safety: safe
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      NestedTypesExample:
+        fields:
+          optionalString: 
+            type: optional<string>
+            safety: safe
+          optionalLong:
+            type: optional<SafeExternalLong>

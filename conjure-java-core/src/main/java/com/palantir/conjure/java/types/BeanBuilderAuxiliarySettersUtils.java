@@ -128,7 +128,8 @@ public final class BeanBuilderAuxiliarySettersUtils {
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
             WildcardTypeName wildcard =
                     WildcardTypeName.subtypeOf(innerTypeName).annotated(ConjureAnnotations.safety(safety));
-            return ParameterizedTypeName.get(ClassName.get(Optional.class), wildcard);
+            ParameterizedTypeName p = ParameterizedTypeName.get(ClassName.get(Optional.class), wildcard);
+            return p;
         }
 
         return current;

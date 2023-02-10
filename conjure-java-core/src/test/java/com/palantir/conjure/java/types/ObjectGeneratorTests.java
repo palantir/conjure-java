@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
+import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.spec.AliasDefinition;
@@ -37,6 +38,11 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.TypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,6 +50,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
+import javax.lang.model.element.Modifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -189,6 +197,23 @@ public final class ObjectGeneratorTests {
                 .emit(def, tempDir);
 
         assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
+    public void testPoet() throws IOException {
+        WildcardTypeName wildcard = WildcardTypeName.subtypeOf(com.squareup.javapoet.TypeName.LONG.box())
+                .annotated(ConjureAnnotations.safety(Optional.of(LogSafety.SAFE)));
+        ParameterizedTypeName paramTypeName = ParameterizedTypeName.get(ClassName.get(Optional.class), wildcard);
+        TypeSpec types = TypeSpec.classBuilder("PoetTestClass")
+                .addField(paramTypeName, "testWildcardField", Modifier.PRIVATE)
+                .build();
+        JavaFile file = JavaFile.builder("com.palantir.test", types)
+                .skipJavaLangImports(true)
+                .indent("    ")
+                .build();
+        file.writeTo(tempDir.toPath(), StandardCharsets.UTF_8);
+        assertThat(compiledFileContent(tempDir, "com/palantir/test/PoetTestClass.java"))
+                .doesNotContain("@Safe ? extends");
     }
 
     @Test
