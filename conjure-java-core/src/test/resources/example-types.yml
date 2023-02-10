@@ -34,6 +34,19 @@ types:
         fields:
           safeExternalLongValue: SafeExternalLong
           optionalSafeExternalLong: optional<SafeExternalLong>
+          safeExternalLongList: list<SafeExternalLong>
+          safeExternalLongSet: set<SafeExternalLong>
+      NestedTypesExample:
+        fields:
+          optionalString: 
+            type: optional<string>
+            safety: safe
+          stringList:
+            type: list<string>
+            safety: safe
+          stringSet:
+            type: set<string>
+            safety: safe
       RidExample:
         fields:
           ridValue: rid

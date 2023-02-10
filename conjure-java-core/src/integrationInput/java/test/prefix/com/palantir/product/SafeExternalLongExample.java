@@ -6,13 +6,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,12 +30,22 @@ public final class SafeExternalLongExample {
 
     private final Optional<Long> optionalSafeExternalLong;
 
+    private final List<Long> safeExternalLongList;
+
+    private final Set<Long> safeExternalLongSet;
+
     private int memoizedHashCode;
 
-    private SafeExternalLongExample(long safeExternalLongValue, Optional<Long> optionalSafeExternalLong) {
-        validateFields(optionalSafeExternalLong);
+    private SafeExternalLongExample(
+            long safeExternalLongValue,
+            Optional<Long> optionalSafeExternalLong,
+            List<Long> safeExternalLongList,
+            Set<Long> safeExternalLongSet) {
+        validateFields(optionalSafeExternalLong, safeExternalLongList, safeExternalLongSet);
         this.safeExternalLongValue = safeExternalLongValue;
         this.optionalSafeExternalLong = optionalSafeExternalLong;
+        this.safeExternalLongList = Collections.unmodifiableList(safeExternalLongList);
+        this.safeExternalLongSet = Collections.unmodifiableSet(safeExternalLongSet);
     }
 
     @JsonProperty("safeExternalLongValue")
@@ -41,9 +55,22 @@ public final class SafeExternalLongExample {
     }
 
     @JsonProperty("optionalSafeExternalLong")
+    @Safe
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Optional<Long> getOptionalSafeExternalLong() {
         return this.optionalSafeExternalLong;
+    }
+
+    @JsonProperty("safeExternalLongList")
+    @Safe
+    public List<Long> getSafeExternalLongList() {
+        return this.safeExternalLongList;
+    }
+
+    @JsonProperty("safeExternalLongSet")
+    @Safe
+    public Set<Long> getSafeExternalLongSet() {
+        return this.safeExternalLongSet;
     }
 
     @Override
@@ -58,7 +85,9 @@ public final class SafeExternalLongExample {
             return false;
         }
         return this.safeExternalLongValue == other.safeExternalLongValue
-                && this.optionalSafeExternalLong.equals(other.optionalSafeExternalLong);
+                && this.optionalSafeExternalLong.equals(other.optionalSafeExternalLong)
+                && this.safeExternalLongList.equals(other.safeExternalLongList)
+                && this.safeExternalLongSet.equals(other.safeExternalLongSet);
     }
 
     @Override
@@ -68,6 +97,8 @@ public final class SafeExternalLongExample {
             int hash = 1;
             hash = 31 * hash + Long.hashCode(this.safeExternalLongValue);
             hash = 31 * hash + this.optionalSafeExternalLong.hashCode();
+            hash = 31 * hash + this.safeExternalLongList.hashCode();
+            hash = 31 * hash + this.safeExternalLongSet.hashCode();
             result = hash;
             memoizedHashCode = result;
         }
@@ -78,19 +109,16 @@ public final class SafeExternalLongExample {
     @Safe
     public String toString() {
         return "SafeExternalLongExample{safeExternalLongValue: " + safeExternalLongValue
-                + ", optionalSafeExternalLong: " + optionalSafeExternalLong + '}';
+                + ", optionalSafeExternalLong: " + optionalSafeExternalLong + ", safeExternalLongList: "
+                + safeExternalLongList + ", safeExternalLongSet: " + safeExternalLongSet + '}';
     }
 
-    public static SafeExternalLongExample of(@Safe long safeExternalLongValue, long optionalSafeExternalLong) {
-        return builder()
-                .safeExternalLongValue(safeExternalLongValue)
-                .optionalSafeExternalLong(Optional.of(optionalSafeExternalLong))
-                .build();
-    }
-
-    private static void validateFields(Optional<Long> optionalSafeExternalLong) {
+    private static void validateFields(
+            Optional<Long> optionalSafeExternalLong, List<Long> safeExternalLongList, Set<Long> safeExternalLongSet) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, optionalSafeExternalLong, "optionalSafeExternalLong");
+        missingFields = addFieldIfMissing(missingFields, safeExternalLongList, "safeExternalLongList");
+        missingFields = addFieldIfMissing(missingFields, safeExternalLongSet, "safeExternalLongSet");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -101,7 +129,7 @@ public final class SafeExternalLongExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(1);
+                missingFields = new ArrayList<>(3);
             }
             missingFields.add(fieldName);
         }
@@ -119,7 +147,11 @@ public final class SafeExternalLongExample {
 
         private long safeExternalLongValue;
 
-        private Optional<Long> optionalSafeExternalLong = Optional.empty();
+        private Optional<@Safe Long> optionalSafeExternalLong = Optional.empty();
+
+        private List<@Safe Long> safeExternalLongList = new ArrayList<>();
+
+        private Set<@Safe Long> safeExternalLongSet = new LinkedHashSet<>();
 
         private boolean _safeExternalLongValueInitialized = false;
 
@@ -129,6 +161,8 @@ public final class SafeExternalLongExample {
             checkNotBuilt();
             safeExternalLongValue(other.getSafeExternalLongValue());
             optionalSafeExternalLong(other.getOptionalSafeExternalLong());
+            safeExternalLongList(other.getSafeExternalLongList());
+            safeExternalLongSet(other.getSafeExternalLongSet());
             return this;
         }
 
@@ -141,7 +175,7 @@ public final class SafeExternalLongExample {
         }
 
         @JsonSetter(value = "optionalSafeExternalLong", nulls = Nulls.SKIP)
-        public Builder optionalSafeExternalLong(@Nonnull Optional<? extends Long> optionalSafeExternalLong) {
+        public Builder optionalSafeExternalLong(@Safe @Nonnull Optional<? extends Long> optionalSafeExternalLong) {
             checkNotBuilt();
             this.optionalSafeExternalLong = Preconditions.checkNotNull(
                             optionalSafeExternalLong, "optionalSafeExternalLong cannot be null")
@@ -149,10 +183,54 @@ public final class SafeExternalLongExample {
             return this;
         }
 
-        public Builder optionalSafeExternalLong(long optionalSafeExternalLong) {
+        public Builder optionalSafeExternalLong(@Safe long optionalSafeExternalLong) {
             checkNotBuilt();
             this.optionalSafeExternalLong = Optional.of(
                     Preconditions.checkNotNull(optionalSafeExternalLong, "optionalSafeExternalLong cannot be null"));
+            return this;
+        }
+
+        @JsonSetter(value = "safeExternalLongList", nulls = Nulls.SKIP)
+        public Builder safeExternalLongList(@Safe @Nonnull Iterable<? extends Long> safeExternalLongList) {
+            checkNotBuilt();
+            this.safeExternalLongList = ConjureCollections.newArrayList(
+                    Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
+            return this;
+        }
+
+        public Builder addAllSafeExternalLongList(@Safe @Nonnull Iterable<? extends Long> safeExternalLongList) {
+            checkNotBuilt();
+            ConjureCollections.addAll(
+                    this.safeExternalLongList,
+                    Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
+            return this;
+        }
+
+        public Builder safeExternalLongList(long safeExternalLongList) {
+            checkNotBuilt();
+            this.safeExternalLongList.add(safeExternalLongList);
+            return this;
+        }
+
+        @JsonSetter(value = "safeExternalLongSet", nulls = Nulls.SKIP)
+        public Builder safeExternalLongSet(@Safe @Nonnull Iterable<? extends Long> safeExternalLongSet) {
+            checkNotBuilt();
+            this.safeExternalLongSet = ConjureCollections.newLinkedHashSet(
+                    Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
+            return this;
+        }
+
+        public Builder addAllSafeExternalLongSet(@Safe @Nonnull Iterable<? extends Long> safeExternalLongSet) {
+            checkNotBuilt();
+            ConjureCollections.addAll(
+                    this.safeExternalLongSet,
+                    Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
+            return this;
+        }
+
+        public Builder safeExternalLongSet(long safeExternalLongSet) {
+            checkNotBuilt();
+            this.safeExternalLongSet.add(safeExternalLongSet);
             return this;
         }
 
@@ -181,7 +259,8 @@ public final class SafeExternalLongExample {
             checkNotBuilt();
             this._buildInvoked = true;
             validatePrimitiveFieldsHaveBeenInitialized();
-            return new SafeExternalLongExample(safeExternalLongValue, optionalSafeExternalLong);
+            return new SafeExternalLongExample(
+                    safeExternalLongValue, optionalSafeExternalLong, safeExternalLongList, safeExternalLongSet);
         }
 
         private void checkNotBuilt() {

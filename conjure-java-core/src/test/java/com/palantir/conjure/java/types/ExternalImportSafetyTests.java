@@ -94,6 +94,12 @@ public class ExternalImportSafetyTests {
                 unknownStageVisitorBuilder, "unknown", "unknownVisitor", "String", Safe.class);
     }
 
+    @Test
+    public void testOptionalAnnotations() {
+        assertFieldTypeParamHasAnnotation(
+                SafeExternalLongExample.class, "optionalSafeExternalLong", "Long", Safe.class);
+    }
+
     private void assertMethodHasAnnotation(
             Class<?> parentClass, String methodName, Class<? extends Annotation> annotation) {
         Stream<Method> desiredMethods = getMatchingMethods(parentClass, methodName);
