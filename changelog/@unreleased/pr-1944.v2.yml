@@ -1,0 +1,4 @@
+type: feature
+feature: Adds support for log safety annotations to external import types. For example, an alias of an external reference type will now have safety annotations on the class, getters, and setters.
+links:
+  - https://github.com/palantir/conjure-java/pull/1944
