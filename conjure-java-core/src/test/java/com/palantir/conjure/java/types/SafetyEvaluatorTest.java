@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.Iterables;
+import com.palantir.conjure.defs.SafetyDeclarationRequirements;
 import com.palantir.conjure.defs.validator.ConjureDefinitionValidator;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
@@ -130,7 +131,7 @@ class SafetyEvaluatorTest {
                 .types(object)
                 .types(SAFE_ALIAS)
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(object)).isEmpty();
     }
@@ -150,7 +151,7 @@ class SafetyEvaluatorTest {
                 .types(SAFE_ALIAS)
                 .types(UNSAFE_ALIAS)
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(object)).hasValue(LogSafety.UNSAFE);
     }
@@ -170,7 +171,7 @@ class SafetyEvaluatorTest {
                 .types(SAFE_ALIAS)
                 .types(UNSAFE_ALIAS)
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(object)).hasValue(LogSafety.SAFE);
     }
@@ -203,7 +204,7 @@ class SafetyEvaluatorTest {
                 .types(secondObject)
                 .types(UNSAFE_ALIAS)
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(firstObject)).hasValue(LogSafety.UNSAFE);
     }
@@ -222,7 +223,7 @@ class SafetyEvaluatorTest {
                                 .build())
                         .build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.UNSAFE);
@@ -241,7 +242,7 @@ class SafetyEvaluatorTest {
                                 .build())
                         .build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .isEmpty();
@@ -254,7 +255,7 @@ class SafetyEvaluatorTest {
                 .types(TypeDefinition.union(
                         UnionDefinition.builder().typeName(FOO).build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .as("No guarantees can be made about future union values, "
@@ -275,7 +276,7 @@ class SafetyEvaluatorTest {
                                 .build())
                         .build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.UNSAFE);
@@ -294,7 +295,7 @@ class SafetyEvaluatorTest {
                                 .build())
                         .build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.DO_NOT_LOG);
@@ -307,7 +308,7 @@ class SafetyEvaluatorTest {
                 .types(TypeDefinition.object(
                         ObjectDefinition.builder().typeName(FOO).build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.SAFE);
@@ -320,7 +321,7 @@ class SafetyEvaluatorTest {
                 .types(TypeDefinition.enum_(
                         EnumDefinition.builder().typeName(FOO).build()))
                 .build();
-        ConjureDefinitionValidator.validateAll(conjureDef);
+        ConjureDefinitionValidator.validateAll(conjureDef, SafetyDeclarationRequirements.ALLOWED);
         SafetyEvaluator evaluator = new SafetyEvaluator(conjureDef);
         assertThat(evaluator.evaluate(Iterables.getOnlyElement(conjureDef.getTypes())))
                 .hasValue(LogSafety.SAFE);
