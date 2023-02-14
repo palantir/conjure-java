@@ -148,7 +148,7 @@ class SafetyEvaluatorTest {
                 .fallback(Type.primitive(PrimitiveType.STRING))
                 .safety(LogSafety.DO_NOT_LOG)
                 .build());
-        return getTypes_SafetyAtImportTime(external);
+        return getTypes(external);
     }
 
     @ParameterizedTest
@@ -164,7 +164,7 @@ class SafetyEvaluatorTest {
                 .externalReference(TypeName.of("Long", "java.lang"))
                 .fallback(Type.primitive(PrimitiveType.STRING))
                 .build());
-        return getTypes_SafetyAtImportTime(external);
+        return getTypes(external);
     }
 
     @ParameterizedTest
@@ -366,7 +366,7 @@ class SafetyEvaluatorTest {
                 .hasValue(LogSafety.SAFE);
     }
 
-    private static Stream<Arguments> getTypes_SafetyAtImportTime(Type externalReference) {
+    private static Stream<Arguments> getTypes(Type externalReference) {
         TypeDefinition objectType = TypeDefinition.object(ObjectDefinition.builder()
                 .typeName(FOO)
                 .fields(FieldDefinition.builder()

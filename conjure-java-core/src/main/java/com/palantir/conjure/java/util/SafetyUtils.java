@@ -28,7 +28,6 @@ import com.palantir.conjure.spec.PrimitiveType;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeName;
-import com.palantir.logsafe.Safe;
 import java.util.Optional;
 
 public final class SafetyUtils {
@@ -60,7 +59,7 @@ public final class SafetyUtils {
         INSTANCE;
 
         @Override
-        public java.lang.Boolean visitPrimitive(PrimitiveType value) {
+        public java.lang.Boolean visitPrimitive(PrimitiveType _value) {
             return false;
         }
 
@@ -139,7 +138,7 @@ public final class SafetyUtils {
         }
 
         @Override
-        public Optional<LogSafety> visitUnknown(@Safe String unknownType) {
+        public Optional<LogSafety> visitUnknown(String _unknownType) {
             return Optional.empty();
         }
     }

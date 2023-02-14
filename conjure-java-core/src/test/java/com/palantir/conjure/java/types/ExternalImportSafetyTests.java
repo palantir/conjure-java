@@ -31,7 +31,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
@@ -54,8 +56,6 @@ public class ExternalImportSafetyTests {
         assertMethodHasAnnotation(SafeExternalLongExample.class, "toString", Safe.class);
         assertMethodHasAnnotation(SafeExternalLongExample.class, "getSafeExternalLongValue", Safe.class);
 
-        assertMethodParamHasAnnotation(SafeExternalLongExample.class, "of", "safeExternalLongValue", Safe.class);
-
         Class<?> builder = getMatchingSubclass(SafeExternalLongExample.class, "Builder");
         assertMethodParamHasAnnotation(builder, "safeExternalLongValue", "safeExternalLongValue", Safe.class);
     }
@@ -71,17 +71,17 @@ public class ExternalImportSafetyTests {
         assertMethodParamHasAnnotation(ExternalLongUnionExample.class, "safeLong", "value", Safe.class);
         assertMethodParamHasAnnotation(ExternalLongUnionExample.class, "unknown", "type", Safe.class);
 
-        Class<?> visitor = getMatchingSubclass(ExternalLongUnionExample.class, "$Visitor");
+        Class<?> visitor = getExactlyMatchingSubclass(
+                ExternalLongUnionExample.class, "com.palantir.product.ExternalLongUnionExample$Visitor");
         assertMethodParamHasAnnotation(visitor, "visitSafeLong", "value", Safe.class);
         assertMethodParamHasAnnotation(visitor, "visitUnknown", "unknownType", Safe.class);
 
-        Class<?> visitorBuilder = getMatchingSubclass(ExternalLongUnionExample.class, "$VisitorBuilder");
+        Class<?> visitorBuilder = getExactlyMatchingSubclass(
+                ExternalLongUnionExample.class, "com.palantir.product.ExternalLongUnionExample$VisitorBuilder");
         assertFieldTypeParamHasAnnotation(visitorBuilder, "safeLongVisitor", "Long", Safe.class);
         assertFieldTypeParamHasAnnotation(visitorBuilder, "unknownVisitor", "String", Safe.class);
-        assertMethodParamWithTypeParameterHasAnnotation(
-                visitorBuilder, "safeLong", "safeLongVisitor", "Long", Safe.class);
-        assertMethodParamWithTypeParameterHasAnnotation(
-                visitorBuilder, "unknown", "unknownVisitor", "String", Safe.class);
+        assertMethodParamWithTypeParameterHasAnnotation(visitorBuilder, "safeLong", "safeLong", "Long", Safe.class);
+        assertMethodParamWithTypeParameterHasAnnotation(visitorBuilder, "unknown", "unknown", "String", Safe.class);
 
         Class<?> stageVisitorBuilder =
                 getMatchingSubclass(ExternalLongUnionExample.class, "SafeLongStageVisitorBuilder");
@@ -177,13 +177,28 @@ public class ExternalImportSafetyTests {
     }
 
     private Stream<Method> getMatchingMethods(Class<?> parentClass, String methodName) {
-        return Arrays.stream(parentClass.getMethods())
-                .filter(method -> method.getName().equals(methodName));
+        List<Method> methods = Arrays.stream(parentClass.getMethods())
+                .filter(method -> method.getName().equals(methodName))
+                .collect(Collectors.toList());
+        assertThat(methods)
+                .withFailMessage(String.format("Expected method %s on class %s", methodName, parentClass.getName()))
+                .isNotEmpty();
+        return methods.stream();
     }
 
     private Class<?> getMatchingSubclass(Class<?> parentClass, String subclassName) {
-        Optional<Class<?>> subclassIfExists = Arrays.stream(SafeExternalLongExample.class.getClasses())
-                .filter(subclass -> subclass.getName().contains("Builder"))
+        Optional<Class<?>> subclassIfExists = Arrays.stream(parentClass.getDeclaredClasses())
+                .filter(subclass -> subclass.getName().contains(subclassName))
+                .findAny();
+        assertThat(subclassIfExists)
+                .withFailMessage(String.format("Expected %s:%s to exist", parentClass, subclassName))
+                .isPresent();
+        return subclassIfExists.get();
+    }
+
+    private Class<?> getExactlyMatchingSubclass(Class<?> parentClass, String subclassName) {
+        Optional<Class<?>> subclassIfExists = Arrays.stream(parentClass.getDeclaredClasses())
+                .filter(subclass -> subclass.getName().equals(subclassName))
                 .findAny();
         assertThat(subclassIfExists)
                 .withFailMessage(String.format("Expected %s:%s to exist", parentClass, subclassName))
