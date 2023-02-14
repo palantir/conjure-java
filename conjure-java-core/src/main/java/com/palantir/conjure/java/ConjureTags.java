@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.types.SafetyEvaluator;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.LogSafety;
@@ -80,8 +81,10 @@ public final class ConjureTags {
 
     public static Optional<LogSafety> safety(ArgumentDefinition argument) {
         validateTags(argument);
-        if (argument.getSafety().isPresent()) {
-            return argument.getSafety();
+
+        Optional<LogSafety> argumentSafety = SafetyUtils.getMaybeExternalSafety(argument);
+        if (argumentSafety.isPresent()) {
+            return argumentSafety;
         }
         Set<String> tags = argument.getTags();
         if (isSafe(tags)) {
@@ -104,18 +107,19 @@ public final class ConjureTags {
                     isSafe(tags) ? "safe" : "unsafe",
                     argument.getArgName()));
         }
-        if (argument.getSafety().isPresent()) {
+        Optional<LogSafety> argumentSafety = SafetyUtils.getMaybeExternalSafety(argument);
+        if (argumentSafety.isPresent()) {
             if (markerSafety.isPresent()) {
                 throw new IllegalStateException(String.format(
                         "Unexpected 'safety: %s' value in addition to a '%s' marker on argument '%s'",
-                        argument.getSafety().get().accept(DefFormatSafetyVisitor.INSTANCE),
+                        argumentSafety.get().accept(DefFormatSafetyVisitor.INSTANCE),
                         markerSafety.get().accept(MarkerNameLogSafetyVisitor.INSTANCE),
                         argument.getArgName()));
             }
             if (isSafe(tags) || isUnsafe(tags)) {
                 throw new IllegalStateException(String.format(
                         "Unexpected 'safety: %s' value in addition to a '%s' tag on argument '%s'",
-                        argument.getSafety().get().accept(DefFormatSafetyVisitor.INSTANCE),
+                        argumentSafety.get().accept(DefFormatSafetyVisitor.INSTANCE),
                         isSafe(tags) ? "safe" : "unsafe",
                         argument.getArgName()));
             }

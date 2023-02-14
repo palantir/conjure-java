@@ -569,7 +569,8 @@ public final class UndertowServiceEteTest extends TestBase {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(
                 new File("src/test/resources/ete-service.yml"),
                 new File("src/test/resources/ete-binary.yml"),
-                new File("src/test/resources/alias-test-service.yml")));
+                new File("src/test/resources/alias-test-service.yml"),
+                new File("src/test/resources/external-long-test-service.yml")));
         Options options = Options.builder()
                 .undertowServicePrefix(true)
                 .nonNullCollections(true)

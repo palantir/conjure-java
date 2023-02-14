@@ -19,8 +19,10 @@ package com.palantir.conjure.java.types;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
@@ -57,7 +59,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(Parameters.nonnullParameter(
                         widenParameterIfPossible(field.type, type, typeMapper),
                         field.name,
-                        enriched.conjureDef().getSafety()));
+                        SafetyUtils.getMaybeExternalSafety(enriched.conjureDef())));
     }
 
     public static MethodSpec.Builder createOptionalSetterBuilder(
@@ -68,13 +70,19 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(Parameters.nonnullParameter(
                         typeMapper.getClassName(type.getItemType()),
                         field.name,
-                        enriched.conjureDef().getSafety()));
+                        SafetyUtils.getMaybeExternalSafety(enriched.conjureDef())));
     }
 
     public static MethodSpec.Builder createItemSetterBuilder(
-            EnrichedField enriched, Type itemType, TypeMapper typeMapper, ClassName returnClass) {
+            EnrichedField enriched,
+            Type itemType,
+            TypeMapper typeMapper,
+            ClassName returnClass,
+            Optional<LogSafety> safety) {
         FieldSpec field = enriched.poetSpec();
-        return publicSetter(enriched, returnClass).addParameter(typeMapper.getClassName(itemType), field.name);
+        return publicSetter(enriched, returnClass)
+                .addParameter(
+                        typeMapper.getClassName(itemType).annotated(ConjureAnnotations.safety(safety)), field.name);
     }
 
     public static MethodSpec.Builder createMapSetterBuilder(

@@ -23,6 +23,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
@@ -65,13 +66,12 @@ public final class AliasGenerator {
             TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, AliasDefinition typeDef, Options options) {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
-        TypeName aliasTypeName =
-                ConjureAnnotations.withSafety(typeMapper.getClassName(typeDef.getAlias()), typeDef.getSafety());
+        Optional<LogSafety> safety = SafetyUtils.getMaybeExternalSafety(typeDef);
+        TypeName aliasTypeName = ConjureAnnotations.withSafety(typeMapper.getClassName(typeDef.getAlias()), safety);
 
         ClassName thisClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
-        Optional<LogSafety> safety = typeDef.getSafety();
         ImmutableList<AnnotationSpec> safetyAnnotations = ConjureAnnotations.safety(safety);
-        Optional<LogSafety> computedSafety = safetyEvaluator.evaluate(typeDef.getAlias(), typeDef.getSafety());
+        Optional<LogSafety> computedSafety = safetyEvaluator.evaluate(typeDef.getAlias(), safety);
         ImmutableList<AnnotationSpec> computedSafetyAnnotations = ConjureAnnotations.safety(computedSafety);
 
         TypeSpec.Builder spec = TypeSpec.classBuilder(prefixedTypeName.getName())
