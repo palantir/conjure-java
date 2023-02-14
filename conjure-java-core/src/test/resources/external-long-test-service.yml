@@ -26,8 +26,33 @@ services:
     base-path: /external-long
 
     endpoints:
-      testExternalLongArg:
+      testDangerousLong:
         http: POST /test
         args:
-          externalLong:
+          dangerousLong:
             type: DangerousLong
+      testSafeExternalLong:
+        http: POST /test
+        args:
+          safeExternalLong:
+            type: SafeExternalLong
+      testLong:
+        http: POST /test
+        args:
+          long:
+            type: Long
+      testDangerousLongAlias:
+        http: POST /test
+        args:
+          dangerousLongAlias:
+            type: DangerousLongAlias
+      testSafeExternalLongAlias:
+        http: POST /test
+        args:
+          safeExternalLongAlias:
+            type: SafeExternalLongAlias
+      testLongAlias:
+        http: POST /test
+        args:
+          longAlias:
+            type: LongAlias
