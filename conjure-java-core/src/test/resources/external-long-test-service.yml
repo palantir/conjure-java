@@ -11,12 +11,15 @@ types:
     Long:
       external:
         java: java.lang.Long
-    DangerousLongAlias:
-      alias: DangerousLong
-    SafeExternalLongAlias:
-      alias: SafeExternalLong
-    LongAlias:
-      alias: Long
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      DangerousLongAliasEndpoint:
+        alias: DangerousLong
+      SafeExternalLongAliasEndpoint:
+        alias: SafeExternalLong
+      LongAliasEndpoint:
+        alias: Long
 
 services:
   ExternalLongTestService:
@@ -27,32 +30,32 @@ services:
 
     endpoints:
       testDangerousLong:
-        http: POST /test
+        http: POST /testDangerousLong
         args:
           dangerousLong:
             type: DangerousLong
       testSafeExternalLong:
-        http: POST /test
+        http: POST /testSafeExternalLong
         args:
           safeExternalLong:
             type: SafeExternalLong
       testLong:
-        http: POST /test
+        http: POST /testLong
         args:
           long:
             type: Long
       testDangerousLongAlias:
-        http: POST /test
+        http: POST /testDangerousLongAlias
         args:
           dangerousLongAlias:
-            type: DangerousLongAlias
+            type: DangerousLongAliasEndpoint
       testSafeExternalLongAlias:
-        http: POST /test
+        http: POST /testSafeExternalLongAlias
         args:
           safeExternalLongAlias:
-            type: SafeExternalLongAlias
+            type: SafeExternalLongAliasEndpoint
       testLongAlias:
-        http: POST /test
+        http: POST /testLongAlias
         args:
           longAlias:
-            type: LongAlias
+            type: LongAliasEndpoint
