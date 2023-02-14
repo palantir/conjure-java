@@ -185,18 +185,18 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
 
         private final UndertowExternalLongTestService delegate;
 
-        private final Deserializer<DangerousLongAliasEndpoint> deserializer;
+        private final Deserializer<DangerousLongAlias> deserializer;
 
         TestDangerousLongAliasEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<DangerousLongAliasEndpoint>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<DangerousLongAlias>() {}, this);
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
-            DangerousLongAliasEndpoint dangerousLongAlias = deserializer.deserialize(exchange);
+            DangerousLongAlias dangerousLongAlias = deserializer.deserialize(exchange);
             delegate.testDangerousLongAlias(authHeader, dangerousLongAlias);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -232,19 +232,18 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
 
         private final UndertowExternalLongTestService delegate;
 
-        private final Deserializer<SafeExternalLongAliasEndpoint> deserializer;
+        private final Deserializer<SafeLongAlias> deserializer;
 
         TestSafeExternalLongAliasEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer =
-                    runtime.bodySerDe().deserializer(new TypeMarker<SafeExternalLongAliasEndpoint>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<SafeLongAlias>() {}, this);
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
-            SafeExternalLongAliasEndpoint safeExternalLongAlias = deserializer.deserialize(exchange);
+            SafeLongAlias safeExternalLongAlias = deserializer.deserialize(exchange);
             delegate.testSafeExternalLongAlias(authHeader, safeExternalLongAlias);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }
@@ -280,18 +279,18 @@ public final class ExternalLongTestServiceEndpoints implements UndertowService {
 
         private final UndertowExternalLongTestService delegate;
 
-        private final Deserializer<LongAliasEndpoint> deserializer;
+        private final Deserializer<ExternalLongAlias> deserializer;
 
         TestLongAliasEndpoint(UndertowRuntime runtime, UndertowExternalLongTestService delegate) {
             this.runtime = runtime;
             this.delegate = delegate;
-            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<LongAliasEndpoint>() {}, this);
+            this.deserializer = runtime.bodySerDe().deserializer(new TypeMarker<ExternalLongAlias>() {}, this);
         }
 
         @Override
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
-            LongAliasEndpoint longAlias = deserializer.deserialize(exchange);
+            ExternalLongAlias longAlias = deserializer.deserialize(exchange);
             delegate.testLongAlias(authHeader, longAlias);
             exchange.setStatusCode(StatusCodes.NO_CONTENT);
         }

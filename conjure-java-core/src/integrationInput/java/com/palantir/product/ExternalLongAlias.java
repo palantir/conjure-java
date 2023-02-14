@@ -6,10 +6,10 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class LongAliasEndpoint {
+public final class ExternalLongAlias {
     private final long value;
 
-    private LongAliasEndpoint(long value) {
+    private ExternalLongAlias(long value) {
         this.value = value;
     }
 
@@ -25,7 +25,7 @@ public final class LongAliasEndpoint {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof LongAliasEndpoint && this.value == ((LongAliasEndpoint) other).value);
+        return this == other || (other instanceof ExternalLongAlias && this.value == ((ExternalLongAlias) other).value);
     }
 
     @Override
@@ -34,7 +34,7 @@ public final class LongAliasEndpoint {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static LongAliasEndpoint of(long value) {
-        return new LongAliasEndpoint(value);
+    public static ExternalLongAlias of(long value) {
+        return new ExternalLongAlias(value);
     }
 }

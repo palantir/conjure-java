@@ -23,15 +23,15 @@ public interface UndertowExternalLongTestService {
     /**
      * @apiNote {@code POST /external-long/testDangerousLongAlias}
      */
-    void testDangerousLongAlias(AuthHeader authHeader, DangerousLongAliasEndpoint dangerousLongAlias);
+    void testDangerousLongAlias(AuthHeader authHeader, DangerousLongAlias dangerousLongAlias);
 
     /**
      * @apiNote {@code POST /external-long/testSafeExternalLongAlias}
      */
-    void testSafeExternalLongAlias(AuthHeader authHeader, SafeExternalLongAliasEndpoint safeExternalLongAlias);
+    void testSafeExternalLongAlias(AuthHeader authHeader, SafeLongAlias safeExternalLongAlias);
 
     /**
      * @apiNote {@code POST /external-long/testLongAlias}
      */
-    void testLongAlias(AuthHeader authHeader, LongAliasEndpoint longAlias);
+    void testLongAlias(AuthHeader authHeader, ExternalLongAlias longAlias);
 }

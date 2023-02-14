@@ -14,11 +14,11 @@ types:
   definitions:
     default-package: com.palantir.product
     objects:
-      DangerousLongAliasEndpoint:
+      DangerousLongAlias:
         alias: DangerousLong
-      SafeExternalLongAliasEndpoint:
+      SafeLongAlias:
         alias: SafeExternalLong
-      LongAliasEndpoint:
+      ExternalLongAlias:
         alias: Long
 
 services:
@@ -48,14 +48,14 @@ services:
         http: POST /testDangerousLongAlias
         args:
           dangerousLongAlias:
-            type: DangerousLongAliasEndpoint
+            type: DangerousLongAlias
       testSafeExternalLongAlias:
         http: POST /testSafeExternalLongAlias
         args:
           safeExternalLongAlias:
-            type: SafeExternalLongAliasEndpoint
+            type: SafeLongAlias
       testLongAlias:
         http: POST /testLongAlias
         args:
           longAlias:
-            type: LongAliasEndpoint
+            type: ExternalLongAlias
