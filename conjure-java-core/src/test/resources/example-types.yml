@@ -65,7 +65,9 @@ types:
           optionalAlias: OptionalAlias
       ListExample:
         fields:
-          items: list<string>
+          items: 
+            type: list<string>
+            safety: safe
           primitiveItems: list<integer>
           doubleItems: list<double>
           optionalItems: list<optional<string>>
