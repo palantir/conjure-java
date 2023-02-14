@@ -201,7 +201,7 @@ public final class ListExample {
             return this;
         }
 
-        public Builder items(String items) {
+        public Builder items(@Safe String items) {
             checkNotBuilt();
             this.items.add(items);
             return this;
