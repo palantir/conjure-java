@@ -19,6 +19,7 @@ package com.palantir.conjure.java.types;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.LogSafety;
@@ -57,10 +58,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .returns(returnClass)
                 .addParameter(Parameters.nonnullParameter(
                         widenParameterIfPossible(
-                                field.type,
-                                type,
-                                typeMapper,
-                                enriched.conjureDef().getSafety()),
+                                field.type, type, typeMapper, SafetyUtils.getUsageTimeSafety(enriched.conjureDef())),
                         field.name));
     }
 
@@ -72,7 +70,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addParameter(Parameters.nonnullParameter(
                         ConjureAnnotations.withSafety(
                                 typeMapper.getClassName(type.getItemType()),
-                                enriched.conjureDef().getSafety()),
+                                SafetyUtils.getUsageTimeSafety(enriched.conjureDef())),
                         field.name));
     }
 

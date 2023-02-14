@@ -27,6 +27,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
@@ -264,7 +265,8 @@ public final class BeanBuilderGenerator {
 
     private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
         Type type = field.getType();
-        TypeName typeName = ConjureAnnotations.withSafety(typeMapper.getClassName(type), field.getSafety());
+        TypeName typeName =
+                ConjureAnnotations.withSafety(typeMapper.getClassName(type), SafetyUtils.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
             spec.initializer("new $T<>()", type.accept(COLLECTION_CONCRETE_TYPE));
@@ -328,10 +330,7 @@ public final class BeanBuilderGenerator {
         MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
                 .addParameter(Parameters.nonnullParameter(
                         BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                field.type,
-                                type,
-                                typeMapper,
-                                enriched.conjureDef().getSafety()),
+                                field.type, type, typeMapper, SafetyUtils.getUsageTimeSafety(enriched.conjureDef())),
                         field.name))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
@@ -430,7 +429,7 @@ public final class BeanBuilderGenerator {
 
     private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched, boolean override) {
         Type type = enriched.conjureDef().getType();
-        Optional<LogSafety> safety = enriched.conjureDef().getSafety();
+        Optional<LogSafety> safety = SafetyUtils.getUsageTimeSafety(enriched.conjureDef());
 
         if (type.accept(TypeVisitor.IS_LIST)) {
             return ImmutableList.of(

@@ -27,6 +27,7 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
@@ -165,16 +166,17 @@ public final class ErrorGenerator implements Generator {
                                                     .build()))
                                     .map(arg -> {
                                         TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
-                                        Optional<LogSafety> required = arg.getSafety();
+                                        Optional<LogSafety> underlyingTypeSafety = SafetyUtils.getUsageTimeSafety(arg);
                                         Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(arg.getType());
-                                        if (!SafetyEvaluator.allows(required, typeSafety)) {
+                                        if (!SafetyEvaluator.allows(underlyingTypeSafety, typeSafety)) {
                                             throw new IllegalStateException(String.format(
                                                     "Cannot use %s type %s as a %s parameter in error %s -> %s",
                                                     typeSafety
                                                             .map(Object::toString)
                                                             .orElse("unknown"),
                                                     argumentTypeName,
-                                                    required.map(Object::toString)
+                                                    underlyingTypeSafety
+                                                            .map(Object::toString)
                                                             .orElse("unknown"),
                                                     entry.getErrorName().getName(),
                                                     arg.getFieldName()));
@@ -182,7 +184,7 @@ public final class ErrorGenerator implements Generator {
                                         return ParameterSpec.builder(
                                                         argumentTypeName,
                                                         arg.getFieldName().get())
-                                                .addAnnotations(ConjureAnnotations.safety(arg.getSafety()))
+                                                .addAnnotations(ConjureAnnotations.safety(underlyingTypeSafety))
                                                 .addJavadoc(
                                                         "$L",
                                                         StringUtils.appendIfMissing(

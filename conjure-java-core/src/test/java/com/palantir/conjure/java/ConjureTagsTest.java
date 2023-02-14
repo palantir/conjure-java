@@ -192,6 +192,37 @@ class ConjureTagsTest {
                 .hasMessageContaining("Declared argument safety is incompatible with the provided type");
     }
 
+    @Test
+    void testExternalImport_AtImportTime() {
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(ImmutableMap.of());
+        Type external = Type.external(ExternalReference.builder()
+                .externalReference(TypeName.of("Long", "java.lang"))
+                .fallback(Type.primitive(PrimitiveType.STRING))
+                .safety(LogSafety.DO_NOT_LOG)
+                .build());
+        ArgumentDefinition argument = ArgumentDefinition.builder()
+                .argName(ArgumentName.of("testArgument"))
+                .type(external)
+                .paramType(ParameterType.body(BodyParameterType.of()))
+                .build();
+        assertThat(ConjureTags.validateArgument(argument, safetyEvaluator)).hasValue(LogSafety.DO_NOT_LOG);
+    }
+
+    @Test
+    void testExternalImport_NoSafety() {
+        SafetyEvaluator safetyEvaluator = new SafetyEvaluator(ImmutableMap.of());
+        Type external = Type.external(ExternalReference.builder()
+                .externalReference(TypeName.of("Long", "java.lang"))
+                .fallback(Type.primitive(PrimitiveType.STRING))
+                .build());
+        ArgumentDefinition argument = ArgumentDefinition.builder()
+                .argName(ArgumentName.of("testArgument"))
+                .type(external)
+                .paramType(ParameterType.body(BodyParameterType.of()))
+                .build();
+        assertThat(ConjureTags.validateArgument(argument, safetyEvaluator)).isEmpty();
+    }
+
     private static ArgumentDefinition tags(String... tags) {
         return ArgumentDefinition.builder()
                 .argName(ArgumentName.of("name"))

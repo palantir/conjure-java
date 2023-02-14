@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.util;
 
+import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -34,21 +35,25 @@ import java.util.Optional;
 public final class SafetyUtils {
     private SafetyUtils() {}
 
-    public static Optional<LogSafety> getUsageTimeSafety(AliasDefinition alias, SafetyEvaluator safetyEvaluator) {
+    // SafetyEvaluator uses its TypeDefinitionMap to resolve the safety of reference types, but these utils
+    // only evaluate the safety of external imports and primitives, so it's safe to use a placeholder
+    private static final SafetyEvaluator safetyEvaluator = new SafetyEvaluator(ImmutableMap.of());
+
+    public static Optional<LogSafety> getUsageTimeSafety(AliasDefinition alias) {
         if (alias.getAlias().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
             return safetyEvaluator.evaluate(alias.getAlias(), alias.getSafety());
         }
         return alias.getSafety();
     }
 
-    public static Optional<LogSafety> getUsageTimeSafety(FieldDefinition field, SafetyEvaluator safetyEvaluator) {
+    public static Optional<LogSafety> getUsageTimeSafety(FieldDefinition field) {
         if (field.getType().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
             return safetyEvaluator.evaluate(field.getType(), field.getSafety());
         }
         return field.getSafety();
     }
 
-    public static Optional<LogSafety> getUsageTimeSafety(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
+    public static Optional<LogSafety> getUsageTimeSafety(ArgumentDefinition argument) {
         if (argument.getType().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
             return safetyEvaluator.evaluate(argument.getType(), argument.getSafety());
         }
@@ -61,8 +66,8 @@ public final class SafetyUtils {
         INSTANCE;
 
         @Override
-        public java.lang.Boolean visitPrimitive(PrimitiveType _value) {
-            return true;
+        public java.lang.Boolean visitPrimitive(PrimitiveType value) {
+            return !value.equals(PrimitiveType.BEARERTOKEN);
         }
 
         @Override

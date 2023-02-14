@@ -32,12 +32,14 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
@@ -325,6 +327,7 @@ public final class BeanGenerator {
         List<MethodSpec> methodSpecs = new ArrayList<>();
         Type type = enriched.conjureDef().getType();
         FieldDefinition definition = enriched.conjureDef();
+        Optional<LogSafety> safety = SafetyUtils.getUsageTimeSafety(definition);
 
         methodSpecs.add(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(enriched.fieldName()))
                 .addParameter(ParameterSpec.builder(
@@ -472,7 +475,7 @@ public final class BeanGenerator {
                 .addAnnotation(AnnotationSpec.builder(JsonProperty.class)
                         .addMember("value", "$S", field.fieldName().get())
                         .build())
-                .addAnnotations(ConjureAnnotations.safety(field.conjureDef().getSafety()))
+                .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getUsageTimeSafety(field.conjureDef())))
                 .returns(field.poetSpec().type);
         Type conjureDefType = field.conjureDef().getType();
         if (featureFlags.excludeEmptyOptionals()) {
@@ -551,7 +554,7 @@ public final class BeanGenerator {
             builder.addCode("return builder()");
             fields.forEach(field -> builder.addParameter(ParameterSpec.builder(
                             getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
-                    .addAnnotations(ConjureAnnotations.safety(field.conjureDef().getSafety()))
+                    .addAnnotations(ConjureAnnotations.safety(SafetyUtils.getUsageTimeSafety(field.conjureDef())))
                     .build()));
             // Follow order on adding methods on builder to comply with staged builders option if set
             sortedEnrichedFields(fields).map(EnrichedField::poetSpec).forEach(spec -> {

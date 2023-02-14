@@ -39,7 +39,7 @@ public final class ExternalLongUnionExample {
         return value;
     }
 
-    public static ExternalLongUnionExample safeLong(long value) {
+    public static ExternalLongUnionExample safeLong(@Safe long value) {
         return new ExternalLongUnionExample(new SafeLongWrapper(value));
     }
 
@@ -78,7 +78,7 @@ public final class ExternalLongUnionExample {
     }
 
     public interface Visitor<T> {
-        T visitSafeLong(long value);
+        T visitSafeLong(@Safe long value);
 
         T visitUnknown(@Safe String unknownType);
 
@@ -89,12 +89,12 @@ public final class ExternalLongUnionExample {
 
     private static final class VisitorBuilder<T>
             implements SafeLongStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
-        private Function<Long, T> safeLongVisitor;
+        private Function<@Safe Long, T> safeLongVisitor;
 
         private Function<String, T> unknownVisitor;
 
         @Override
-        public UnknownStageVisitorBuilder<T> safeLong(@Nonnull Function<Long, T> safeLongVisitor) {
+        public UnknownStageVisitorBuilder<T> safeLong(@Nonnull Function<@Safe Long, T> safeLongVisitor) {
             Preconditions.checkNotNull(safeLongVisitor, "safeLongVisitor cannot be null");
             this.safeLongVisitor = safeLongVisitor;
             return this;
@@ -119,7 +119,7 @@ public final class ExternalLongUnionExample {
 
         @Override
         public Visitor<T> build() {
-            final Function<Long, T> safeLongVisitor = this.safeLongVisitor;
+            final Function<@Safe Long, T> safeLongVisitor = this.safeLongVisitor;
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
@@ -136,7 +136,7 @@ public final class ExternalLongUnionExample {
     }
 
     public interface SafeLongStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> safeLong(@Nonnull Function<Long, T> safeLongVisitor);
+        UnknownStageVisitorBuilder<T> safeLong(@Nonnull Function<@Safe Long, T> safeLongVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {

@@ -34,6 +34,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
@@ -102,7 +103,7 @@ public final class UnionGenerator {
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(),
                         entry -> ConjureAnnotations.withSafety(
-                                typeMapper.getClassName(entry.getType()), entry.getSafety())));
+                                typeMapper.getClassName(entry.getType()), SafetyUtils.getUsageTimeSafety(entry))));
         List<FieldSpec> fields =
                 ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
@@ -171,7 +172,8 @@ public final class UnionGenerator {
                 .map(memberTypeDef -> {
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = ConjureAnnotations.withSafety(
-                            typeMapper.getClassName(memberTypeDef.getType()), memberTypeDef.getSafety());
+                            typeMapper.getClassName(memberTypeDef.getType()),
+                            SafetyUtils.getUsageTimeSafety(memberTypeDef));
                     String variableName = variableName();
                     // memberName is guarded to be a valid Java identifier and not to end in an underscore, so this is
                     // safe
@@ -311,7 +313,10 @@ public final class UnionGenerator {
                             .addAnnotations(ConjureAnnotations.deprecation(
                                     entry.getKey().getDeprecated()))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                            .addParameter(ParameterSpec.builder(entry.getValue(), variableName)
+                            .addParameter(ParameterSpec.builder(
+                                            ConjureAnnotations.withSafety(
+                                                    entry.getValue(), SafetyUtils.getUsageTimeSafety(entry.getKey())),
+                                            variableName)
                                     .build())
                             .returns(TYPE_VARIABLE)
                             .build();
