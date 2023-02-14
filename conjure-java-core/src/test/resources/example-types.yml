@@ -13,6 +13,11 @@ types:
       base-type: string
       external:
         java: java.lang.String
+    SafeExternalLong:
+      base-type: safelong
+      external:
+        java: java.lang.Long
+      safety: safe
   definitions:
     default-package: com.palantir.product
     objects:
@@ -25,6 +30,12 @@ types:
       SafeLongExample:
         fields:
           safeLongValue: safelong
+      SafeExternalLongExample:
+        fields:
+          safeExternalLongValue: SafeExternalLong
+          optionalSafeExternalLong: optional<SafeExternalLong>
+          safeExternalLongList: list<SafeExternalLong>
+          safeExternalLongSet: set<SafeExternalLong>
       RidExample:
         fields:
           ridValue: rid
@@ -214,6 +225,10 @@ types:
           unknown: string
       EmptyUnionTypeExample:
         union: {}
+      ExternalLongUnionExample:
+        docs: A union of a safe long.
+        union:
+          safeLong: SafeExternalLong
       EmptyObjectExample:
         fields: {}
       AliasAsMapKeyExample:
@@ -272,6 +287,8 @@ types:
         alias: ExternalLong
       ExternalLongAliasTwo:
         alias: ExternalLongAliasOne
+      SafeExternalLongAlias:
+        alias: SafeExternalLong
       OptionalAlias:
         alias: optional<string>
         safety: safe
