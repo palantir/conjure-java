@@ -35,6 +35,7 @@ import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
 import com.palantir.conjure.spec.ListType;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
@@ -326,9 +327,12 @@ public final class BeanBuilderGenerator {
         boolean shouldClearFirst = true;
         MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
                 .addParameter(Parameters.nonnullParameter(
-                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(field.type, type, typeMapper),
-                        field.name,
-                        enriched.conjureDef().getSafety()))
+                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
+                                field.type,
+                                type,
+                                typeMapper,
+                                enriched.conjureDef().getSafety()),
+                        field.name))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
@@ -426,17 +430,18 @@ public final class BeanBuilderGenerator {
 
     private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched, boolean override) {
         Type type = enriched.conjureDef().getType();
+        Optional<LogSafety> safety = enriched.conjureDef().getSafety();
 
         if (type.accept(TypeVisitor.IS_LIST)) {
             return ImmutableList.of(
                     createCollectionSetter("addAll", enriched, override),
-                    createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override));
+                    createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
             return ImmutableList.of(
                     createCollectionSetter("addAll", enriched, override),
-                    createItemSetter(enriched, type.accept(TypeVisitor.SET).getItemType(), override));
+                    createItemSetter(enriched, type.accept(TypeVisitor.SET).getItemType(), override, safety));
         }
 
         if (type.accept(TypeVisitor.IS_MAP)) {
@@ -488,9 +493,11 @@ public final class BeanBuilderGenerator {
                         optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
     }
 
-    private MethodSpec createItemSetter(EnrichedField enriched, Type itemType, boolean override) {
+    private MethodSpec createItemSetter(
+            EnrichedField enriched, Type itemType, boolean override, Optional<LogSafety> safety) {
         FieldSpec field = enriched.poetSpec();
-        return BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(enriched, itemType, typeMapper, builderClass)
+        return BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(
+                        enriched, itemType, typeMapper, builderClass, safety)
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
                 .addStatement("this.$1N.add($1N)", field.name)

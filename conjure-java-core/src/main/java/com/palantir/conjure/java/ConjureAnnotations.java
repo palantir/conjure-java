@@ -120,6 +120,7 @@ public final class ConjureAnnotations {
                     }
                 }
             }
+            return typeName.annotated(safety(maybeSafety));
         }
         return typeName;
     }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public final class ListExample {
     }
 
     @JsonProperty("items")
+    @Safe
     public List<String> getItems() {
         return this.items;
     }
@@ -163,7 +165,7 @@ public final class ListExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<String> items = new ArrayList<>();
+        private List<@Safe String> items = new ArrayList<>();
 
         private List<Integer> primitiveItems = new ArrayList<>();
 
@@ -189,19 +191,19 @@ public final class ListExample {
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
-        public Builder items(@Nonnull Iterable<String> items) {
+        public Builder items(@Nonnull Iterable<@Safe String> items) {
             checkNotBuilt();
             this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        public Builder addAllItems(@Nonnull Iterable<String> items) {
+        public Builder addAllItems(@Nonnull Iterable<@Safe String> items) {
             checkNotBuilt();
             ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
-        public Builder items(String items) {
+        public Builder items(@Safe String items) {
             checkNotBuilt();
             this.items.add(items);
             return this;
