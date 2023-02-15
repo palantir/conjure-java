@@ -39,7 +39,7 @@ public final class NestedStringAliasExample {
         return value.hashCode();
     }
 
-    public static NestedStringAliasExample valueOf(String value) {
+    public static NestedStringAliasExample valueOf(@Safe String value) {
         return of(StringAliasExample.valueOf(value));
     }
 

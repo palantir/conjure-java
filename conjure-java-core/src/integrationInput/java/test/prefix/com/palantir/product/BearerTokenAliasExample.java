@@ -40,7 +40,7 @@ public final class BearerTokenAliasExample {
         return value.hashCode();
     }
 
-    public static BearerTokenAliasExample valueOf(String value) {
+    public static BearerTokenAliasExample valueOf(@DoNotLog String value) {
         return of(BearerToken.valueOf(value));
     }
 

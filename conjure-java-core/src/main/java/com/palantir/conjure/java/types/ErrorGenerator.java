@@ -291,8 +291,7 @@ public final class ErrorGenerator implements Generator {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
         String argName = argDefinition.getFieldName().get();
         TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
-        ParameterSpec.Builder parameterBuilder =
-                ParameterSpec.builder(argType, argName).addAnnotations(ConjureAnnotations.safety(safety));
+        ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(argType, argName);
         argDefinition
                 .getDocs()
                 .ifPresent(docs ->
