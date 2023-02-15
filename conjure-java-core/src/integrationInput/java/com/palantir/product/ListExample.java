@@ -189,7 +189,7 @@ public final class ListExample {
         }
 
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder items(@Nonnull Iterable<String> items) {
+        public Builder items(@Nonnull Iterable<@Safe String> items) {
             checkNotBuilt();
             this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;

@@ -329,7 +329,7 @@ public final class BeanGenerator {
         methodSpecs.add(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(enriched.fieldName()))
                 .addParameter(ParameterSpec.builder(
                                 BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                        enriched.poetSpec().type, type, typeMapper),
+                                        enriched.poetSpec().type, type, typeMapper, definition.getSafety()),
                                 JavaNameSanitizer.sanitize(enriched.fieldName()))
                         .addAnnotation(Nonnull.class)
                         .build())

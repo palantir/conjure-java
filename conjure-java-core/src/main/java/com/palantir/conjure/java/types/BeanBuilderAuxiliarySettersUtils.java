@@ -56,8 +56,10 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(returnClass)
                 .addParameter(Parameters.nonnullParameter(
-                        ConjureAnnotations.withSafety(
-                                widenParameterIfPossible(field.type, type, typeMapper),
+                        widenParameterIfPossible(
+                                field.type,
+                                type,
+                                typeMapper,
                                 enriched.conjureDef().getSafety()),
                         field.name));
     }
@@ -104,14 +106,16 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .returns(returnClass);
     }
 
-    public static TypeName widenParameterIfPossible(TypeName current, Type type, TypeMapper typeMapper) {
+    public static TypeName widenParameterIfPossible(
+            TypeName current, Type type, TypeMapper typeMapper, Optional<LogSafety> safety) {
         if (type.accept(TypeVisitor.IS_LIST)) {
             Type innerType = type.accept(TypeVisitor.LIST).getItemType();
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
             if (isWidenableContainedType(innerType)) {
                 innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
+            return ParameterizedTypeName.get(
+                    ClassName.get(Iterable.class), ConjureAnnotations.withSafety(innerTypeName, safety));
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
@@ -121,7 +125,8 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
 
-            return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
+            return ParameterizedTypeName.get(
+                    ClassName.get(Iterable.class), ConjureAnnotations.withSafety(innerTypeName, safety));
         }
 
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
@@ -130,7 +135,9 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 return current;
             }
             TypeName innerTypeName = typeMapper.getClassName(innerType).box();
-            return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerTypeName));
+            return ParameterizedTypeName.get(
+                    ClassName.get(Optional.class),
+                    WildcardTypeName.subtypeOf(ConjureAnnotations.withSafety(innerTypeName, safety)));
         }
 
         return current;

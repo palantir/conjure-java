@@ -327,7 +327,11 @@ public final class BeanBuilderGenerator {
         boolean shouldClearFirst = true;
         MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
                 .addParameter(Parameters.nonnullParameter(
-                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(field.type, type, typeMapper),
+                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
+                                field.type,
+                                type,
+                                typeMapper,
+                                enriched.conjureDef().getSafety()),
                         field.name))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
