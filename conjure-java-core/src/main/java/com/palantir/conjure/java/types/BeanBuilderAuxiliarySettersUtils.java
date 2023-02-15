@@ -109,18 +109,20 @@ public final class BeanBuilderAuxiliarySettersUtils {
             TypeName current, Type type, TypeMapper typeMapper, Optional<LogSafety> safety) {
         if (type.accept(TypeVisitor.IS_LIST)) {
             Type innerType = type.accept(TypeVisitor.LIST).getItemType();
-            TypeName innerTypeName = PrimitiveHelpers.box(typeMapper.getClassName(innerType));
+            TypeName innerTypeName =
+                    ConjureAnnotations.withSafety(PrimitiveHelpers.box(typeMapper.getClassName(innerType)), safety);
             if (isWidenableContainedType(innerType)) {
-                innerTypeName = WildcardTypeName.subtypeOf(ConjureAnnotations.withSafety(innerTypeName, safety));
+                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
             return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
             Type innerType = type.accept(TypeVisitor.SET).getItemType();
-            TypeName innerTypeName = PrimitiveHelpers.box(typeMapper.getClassName(innerType));
+            TypeName innerTypeName =
+                    ConjureAnnotations.withSafety(PrimitiveHelpers.box(typeMapper.getClassName(innerType)), safety);
             if (isWidenableContainedType(innerType)) {
-                innerTypeName = WildcardTypeName.subtypeOf(ConjureAnnotations.withSafety(innerTypeName, safety));
+                innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
 
             return ParameterizedTypeName.get(ClassName.get(Iterable.class), innerTypeName);
