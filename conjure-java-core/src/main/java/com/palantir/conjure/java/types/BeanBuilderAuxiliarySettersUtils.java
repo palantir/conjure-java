@@ -56,9 +56,10 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(returnClass)
                 .addParameter(Parameters.nonnullParameter(
-                        widenParameterIfPossible(field.type, type, typeMapper),
-                        field.name,
-                        enriched.conjureDef().getSafety()));
+                        ConjureAnnotations.withSafety(
+                                widenParameterIfPossible(field.type, type, typeMapper),
+                                enriched.conjureDef().getSafety()),
+                        field.name));
     }
 
     public static MethodSpec.Builder createOptionalSetterBuilder(
@@ -67,9 +68,10 @@ public final class BeanBuilderAuxiliarySettersUtils {
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
         return publicSetter(enriched, returnClass)
                 .addParameter(Parameters.nonnullParameter(
-                        typeMapper.getClassName(type.getItemType()),
-                        field.name,
-                        enriched.conjureDef().getSafety()));
+                        ConjureAnnotations.withSafety(
+                                typeMapper.getClassName(type.getItemType()),
+                                enriched.conjureDef().getSafety()),
+                        field.name));
     }
 
     public static MethodSpec.Builder createItemSetterBuilder(
@@ -80,8 +82,7 @@ public final class BeanBuilderAuxiliarySettersUtils {
             Optional<LogSafety> safety) {
         FieldSpec field = enriched.poetSpec();
         return publicSetter(enriched, returnClass)
-                .addParameter(
-                        typeMapper.getClassName(itemType).annotated(ConjureAnnotations.safety(safety)), field.name);
+                .addParameter(ConjureAnnotations.withSafety(typeMapper.getClassName(itemType), safety), field.name);
     }
 
     public static MethodSpec.Builder createMapSetterBuilder(
