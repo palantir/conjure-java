@@ -32,6 +32,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.PrimitiveHelpers;
 import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -84,7 +85,7 @@ public final class BeanGenerator {
     /** The name of the singleton instance field generated for empty types. */
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
-    @SuppressWarnings("CyclomaticComplexity")
+    @SuppressWarnings({"CyclomaticComplexity", "MethodLength"})
     public static JavaFile generateBeanType(
             TypeMapper typeMapper,
             SafetyEvaluator safetyEvaluator,
@@ -207,8 +208,9 @@ public final class BeanGenerator {
                                                                 "Builder"))
                                         .build())
                                 .collect(Collectors.toSet()))
-                        .addSuperinterfaces(
-                                interfacesAsClasses.stream().map(ClassName::box).collect(Collectors.toList()))
+                        .addSuperinterfaces(interfacesAsClasses.stream()
+                                .map(PrimitiveHelpers::box)
+                                .collect(Collectors.toList()))
                         .build();
 
                 typeBuilder
@@ -291,7 +293,7 @@ public final class BeanGenerator {
                                     .addAnnotation(Nonnull.class)
                                     .build())
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                            .returns(nextStageClassName.box())
+                            .returns(PrimitiveHelpers.box(nextStageClassName))
                             .build()));
         }
 
@@ -301,7 +303,7 @@ public final class BeanGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addMethod(MethodSpec.methodBuilder("build")
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                        .returns(objectClass.box())
+                        .returns(PrimitiveHelpers.box(objectClass))
                         .build());
 
         completedStage.addMethods(otherFields.stream()
@@ -341,7 +343,7 @@ public final class BeanGenerator {
                         .orElseGet(() -> CodeBlock.builder().build()))
                 .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .returns(returnClass.box())
+                .returns(PrimitiveHelpers.box(returnClass))
                 .build());
 
         if (type.accept(TypeVisitor.IS_LIST)) {
@@ -427,7 +429,8 @@ public final class BeanGenerator {
     private static MethodSpec createConstructor(Collection<EnrichedField> fields, Collection<FieldSpec> poetFields) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE);
 
-        Collection<FieldSpec> nonPrimitivePoetFields = Collections2.filter(poetFields, f -> !f.type.isPrimitive());
+        Collection<FieldSpec> nonPrimitivePoetFields =
+                Collections2.filter(poetFields, f -> !PrimitiveHelpers.isPrimitive(f.type));
         if (!nonPrimitivePoetFields.isEmpty()) {
             builder.addStatement("$L", Expressions.localMethodCall("validateFields", nonPrimitivePoetFields));
         }
@@ -609,7 +612,7 @@ public final class BeanGenerator {
             return spec.type;
         }
         TypeName typeName = ((ParameterizedTypeName) spec.type).typeArguments.get(0);
-        return typeName.isBoxedPrimitive() ? typeName.unbox() : typeName;
+        return PrimitiveHelpers.isBoxedPrimitive(typeName) ? PrimitiveHelpers.unbox(typeName) : typeName;
     }
 
     private static boolean isOptional(FieldSpec spec) {
@@ -639,7 +642,7 @@ public final class BeanGenerator {
 
         @Value.Derived
         default boolean isPrimitive() {
-            return poetSpec().type.isPrimitive();
+            return PrimitiveHelpers.isPrimitive(poetSpec().type);
         }
 
         static EnrichedField of(FieldName fieldName, FieldDefinition conjureDef, FieldSpec poetSpec) {

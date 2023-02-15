@@ -27,6 +27,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.util.PrimitiveHelpers;
 import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -416,7 +417,7 @@ public final class BeanBuilderGenerator {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
             }
         } else {
-            CodeBlock nullCheckedValue = spec.type.isPrimitive()
+            CodeBlock nullCheckedValue = PrimitiveHelpers.isPrimitive(spec.type)
                     ? CodeBlock.of("$N", spec.name) // primitive types can't be null, so no need for requireNonNull!
                     : Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null");
             return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);

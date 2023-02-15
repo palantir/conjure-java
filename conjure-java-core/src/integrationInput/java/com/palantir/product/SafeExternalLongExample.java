@@ -143,7 +143,7 @@ public final class SafeExternalLongExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private long safeExternalLongValue;
+        private @Safe long safeExternalLongValue;
 
         private Optional<@Safe Long> optionalSafeExternalLong = Optional.empty();
 
@@ -173,7 +173,7 @@ public final class SafeExternalLongExample {
         }
 
         @JsonSetter(value = "optionalSafeExternalLong", nulls = Nulls.SKIP)
-        public Builder optionalSafeExternalLong(@Safe @Nonnull Optional<? extends Long> optionalSafeExternalLong) {
+        public Builder optionalSafeExternalLong(@Nonnull Optional<? extends @Safe Long> optionalSafeExternalLong) {
             checkNotBuilt();
             this.optionalSafeExternalLong = Preconditions.checkNotNull(
                             optionalSafeExternalLong, "optionalSafeExternalLong cannot be null")
@@ -189,14 +189,14 @@ public final class SafeExternalLongExample {
         }
 
         @JsonSetter(value = "safeExternalLongList", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder safeExternalLongList(@Safe @Nonnull Iterable<? extends Long> safeExternalLongList) {
+        public Builder safeExternalLongList(@Nonnull Iterable<? extends @Safe Long> safeExternalLongList) {
             checkNotBuilt();
             this.safeExternalLongList = ConjureCollections.newArrayList(
                     Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
             return this;
         }
 
-        public Builder addAllSafeExternalLongList(@Safe @Nonnull Iterable<? extends Long> safeExternalLongList) {
+        public Builder addAllSafeExternalLongList(@Nonnull Iterable<? extends @Safe Long> safeExternalLongList) {
             checkNotBuilt();
             ConjureCollections.addAll(
                     this.safeExternalLongList,
@@ -211,14 +211,14 @@ public final class SafeExternalLongExample {
         }
 
         @JsonSetter(value = "safeExternalLongSet", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
-        public Builder safeExternalLongSet(@Safe @Nonnull Iterable<? extends Long> safeExternalLongSet) {
+        public Builder safeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
             this.safeExternalLongSet = ConjureCollections.newLinkedHashSet(
                     Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
             return this;
         }
 
-        public Builder addAllSafeExternalLongSet(@Safe @Nonnull Iterable<? extends Long> safeExternalLongSet) {
+        public Builder addAllSafeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
             ConjureCollections.addAll(
                     this.safeExternalLongSet,

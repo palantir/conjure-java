@@ -123,7 +123,7 @@ public final class ExternalLongUnionExample {
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
-                public T visitSafeLong(long value) {
+                public T visitSafeLong(@Safe long value) {
                     return safeLongVisitor.apply(value);
                 }
 

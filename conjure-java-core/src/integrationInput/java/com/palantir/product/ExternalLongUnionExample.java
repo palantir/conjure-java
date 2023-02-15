@@ -131,7 +131,7 @@ public final class ExternalLongUnionExample {
             final BiFunction<@Safe String, Object, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
-                public T visitSafeLong(long value) {
+                public T visitSafeLong(@Safe long value) {
                     return safeLongVisitor.apply(value);
                 }
 

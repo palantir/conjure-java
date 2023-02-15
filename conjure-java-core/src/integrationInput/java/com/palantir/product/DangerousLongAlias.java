@@ -9,15 +9,14 @@ import javax.annotation.processing.Generated;
 @DoNotLog
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class DangerousLongAlias {
-    private final long value;
+    private final @DoNotLog long value;
 
-    private DangerousLongAlias(long value) {
+    private DangerousLongAlias(@DoNotLog long value) {
         this.value = value;
     }
 
     @JsonValue
-    @DoNotLog
-    public long get() {
+    public @DoNotLog long get() {
         return value;
     }
 

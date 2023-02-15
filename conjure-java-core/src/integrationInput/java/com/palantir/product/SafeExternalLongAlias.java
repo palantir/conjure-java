@@ -9,15 +9,14 @@ import javax.annotation.processing.Generated;
 @Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class SafeExternalLongAlias {
-    private final long value;
+    private final @Safe long value;
 
-    private SafeExternalLongAlias(long value) {
+    private SafeExternalLongAlias(@Safe long value) {
         this.value = value;
     }
 
     @JsonValue
-    @Safe
-    public long get() {
+    public @Safe long get() {
         return value;
     }
 

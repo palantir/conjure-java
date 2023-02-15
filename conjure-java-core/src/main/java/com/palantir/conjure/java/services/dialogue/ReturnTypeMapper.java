@@ -18,6 +18,7 @@ package com.palantir.conjure.java.services.dialogue;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.PrimitiveHelpers;
 import com.palantir.conjure.spec.Type;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -41,6 +42,6 @@ public final class ReturnTypeMapper {
     }
 
     public TypeName async(Optional<Type> type) {
-        return ParameterizedTypeName.get(LISTENABLE_FUTURE, baseType(type).box());
+        return ParameterizedTypeName.get(LISTENABLE_FUTURE, PrimitiveHelpers.box(baseType(type)));
     }
 }

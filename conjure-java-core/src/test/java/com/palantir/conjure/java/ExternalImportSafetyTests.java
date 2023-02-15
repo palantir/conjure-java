@@ -108,8 +108,13 @@ public class ExternalImportSafetyTests {
 
         Class<?> builderSubclass = getMatchingSubclass(SafeExternalLongExample.class, "$Builder");
         assertFieldTypeParamHasAnnotation(builderSubclass, "optionalSafeExternalLong", "Long", Safe.class);
-        assertMethodParamHasAnnotation(
-                builderSubclass, "optionalSafeExternalLong", "optionalSafeExternalLong", Safe.class);
+        assertMethodParamWithWildcardTypeParameterHasAnnotation(
+                builderSubclass,
+                "optionalSafeExternalLong",
+                "optionalSafeExternalLong",
+                "Optional",
+                "Long",
+                Safe.class);
     }
 
     @Test
@@ -118,9 +123,10 @@ public class ExternalImportSafetyTests {
 
         Class<?> builderSubclass = getMatchingSubclass(SafeExternalLongExample.class, "$Builder");
         assertFieldTypeParamHasAnnotation(builderSubclass, "safeExternalLongList", "Long", Safe.class);
-        assertMethodParamHasAnnotation(builderSubclass, "safeExternalLongList", "safeExternalLongList", Safe.class);
-        assertMethodParamHasAnnotation(
-                builderSubclass, "addAllSafeExternalLongList", "safeExternalLongList", Safe.class);
+        assertMethodParamWithWildcardTypeParameterHasAnnotation(
+                builderSubclass, "safeExternalLongList", "safeExternalLongList", "Iterable", "Long", Safe.class);
+        assertMethodParamWithWildcardTypeParameterHasAnnotation(
+                builderSubclass, "addAllSafeExternalLongList", "safeExternalLongList", "Iterable", "Long", Safe.class);
     }
 
     @Test
@@ -129,8 +135,10 @@ public class ExternalImportSafetyTests {
 
         Class<?> builderSubclass = getMatchingSubclass(SafeExternalLongExample.class, "$Builder");
         assertFieldTypeParamHasAnnotation(builderSubclass, "safeExternalLongSet", "Long", Safe.class);
-        assertMethodParamHasAnnotation(builderSubclass, "safeExternalLongSet", "safeExternalLongSet", Safe.class);
-        assertMethodParamHasAnnotation(builderSubclass, "addAllSafeExternalLongSet", "safeExternalLongSet", Safe.class);
+        assertMethodParamWithWildcardTypeParameterHasAnnotation(
+                builderSubclass, "safeExternalLongSet", "safeExternalLongSet", "Iterable", "Long", Safe.class);
+        assertMethodParamWithWildcardTypeParameterHasAnnotation(
+                builderSubclass, "addAllSafeExternalLongSet", "safeExternalLongSet", "Iterable", "Long", Safe.class);
     }
 
     private void assertMethodHasAnnotation(
@@ -179,6 +187,26 @@ public class ExternalImportSafetyTests {
                         parentClass.getName(), methodName, parameterName, typeParameter, annotation.getName()))
                 .map(annotatedType -> getAnnotatedTypeParameter(annotatedType, typeParameter))
                 .allMatch(t -> t.isAnnotationPresent(annotation));
+    }
+
+    private void assertMethodParamWithWildcardTypeParameterHasAnnotation(
+            Class<?> parentClass,
+            String methodName,
+            String parameterName,
+            String parameterType,
+            String typeParameter,
+            Class<? extends Annotation> annotation) {
+        Stream<Method> desiredMethods = getMatchingMethods(parentClass, methodName)
+                .filter(method -> hasMatchingParameter(method, parameterName, parameterType));
+        Stream<AnnotatedType> annotatedTypes = desiredMethods
+                .map(method -> getMatchingParameter(method, parameterName, parameterType)
+                        .getAnnotatedType())
+                .filter(annotatedType -> hasTypeParameter(annotatedType, typeParameter));
+        assertThat(annotatedTypes)
+                .withFailMessage(String.format(
+                        "Expected %s:%s parameter %s of type %s to have annotation %s",
+                        parentClass.getName(), methodName, parameterName, typeParameter, annotation.getName()))
+                .allMatch(t -> t.toString().contains("@com.palantir.logsafe.Safe()"));
     }
 
     private void assertFieldTypeParamHasAnnotation(
@@ -232,6 +260,34 @@ public class ExternalImportSafetyTests {
                 .withFailMessage(String.format("Expected to find parameter %s on method %s", parameterName, method))
                 .isPresent();
         return parameterIfExists.get();
+    }
+
+    private Parameter getMatchingParameter(Method method, String parameterName, String parameterType) {
+        Optional<Parameter> parameterIfExists = Arrays.stream(method.getParameters())
+                .filter(parameter -> parameter.getName().contains(parameterName))
+                .filter(parameter -> parameter.getType().getName().contains(parameterType))
+                .findAny();
+        assertThat(parameterIfExists)
+                .withFailMessage(String.format(
+                        "Expected to find parameter %s of type %s on method %s", parameterName, parameterType, method))
+                .isPresent();
+        return parameterIfExists.get();
+    }
+
+    private boolean hasMatchingParameter(Method method, String parameterName, String parameterType) {
+        Optional<Parameter> parameterIfExists = Arrays.stream(method.getParameters())
+                .filter(parameter -> parameter.getName().contains(parameterName))
+                .filter(parameter -> parameter.getType().getName().contains(parameterType))
+                .findAny();
+        return parameterIfExists.isPresent();
+    }
+
+    private boolean hasTypeParameter(AnnotatedType parameterizedType, String parameter) {
+        Optional<AnnotatedType> typeParameterIfExists = Arrays.stream(
+                        ((AnnotatedParameterizedType) parameterizedType).getAnnotatedActualTypeArguments())
+                .filter(t -> t.getType().getTypeName().contains(parameter))
+                .findAny();
+        return typeParameterIfExists.isPresent();
     }
 
     private AnnotatedType getAnnotatedTypeParameter(AnnotatedType parameterizedType, String parameter) {
