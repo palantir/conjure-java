@@ -19,6 +19,7 @@ package com.palantir.conjure.java.services;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.types.TypeMapper;
+import com.palantir.conjure.java.util.PrimitiveHelpers;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.humanreadabletypes.HumanReadableDuration;
 import com.palantir.logsafe.Preconditions;
@@ -95,10 +96,8 @@ final class UndertowTypeFunctions {
                 isAsync(endpoint, flags), "Endpoint must be async", SafeArg.of("endpoint", endpoint));
         return ParameterizedTypeName.get(
                 ClassName.get(ListenableFuture.class),
-                endpoint.getReturns()
-                        .map(mapper::getClassName)
-                        .orElseGet(() -> ClassName.get(Void.class))
-                        .box());
+                PrimitiveHelpers.box(
+                        endpoint.getReturns().map(mapper::getClassName).orElseGet(() -> ClassName.get(Void.class))));
     }
 
     private UndertowTypeFunctions() {}

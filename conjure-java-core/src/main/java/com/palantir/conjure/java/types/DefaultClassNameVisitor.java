@@ -20,6 +20,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.PrimitiveHelpers;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -56,7 +57,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
 
     @Override
     public TypeName visitList(ListType type) {
-        TypeName itemType = type.getItemType().accept(this).box();
+        TypeName itemType = PrimitiveHelpers.box(type.getItemType().accept(this));
         return ParameterizedTypeName.get(ClassName.get(java.util.List.class), itemType);
     }
 
@@ -64,8 +65,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     public TypeName visitMap(MapType type) {
         return ParameterizedTypeName.get(
                 ClassName.get(java.util.Map.class),
-                type.getKeyType().accept(this).box(),
-                type.getValueType().accept(this).box());
+                PrimitiveHelpers.box(type.getKeyType().accept(this)),
+                PrimitiveHelpers.box(type.getValueType().accept(this)));
     }
 
     @Override
@@ -96,9 +97,9 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
         }
 
         TypeName itemType = type.getItemType().accept(this);
-        if (itemType.isPrimitive()) {
+        if (PrimitiveHelpers.isPrimitive(itemType)) {
             // Safe for primitives (e.g. Booleans with Java 8)
-            itemType = itemType.box();
+            itemType = PrimitiveHelpers.box(itemType);
         }
         return ParameterizedTypeName.get(ClassName.get(Optional.class), itemType);
     }
@@ -151,12 +152,12 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
         String conjurePackage = externalType.getExternalReference().getPackage();
         ClassName typeName = ClassName.get(
                 conjurePackage, externalType.getExternalReference().getName());
-        return typeName.isBoxedPrimitive() ? typeName.unbox() : typeName;
+        return PrimitiveHelpers.isBoxedPrimitive(typeName) ? PrimitiveHelpers.unbox(typeName) : typeName;
     }
 
     @Override
     public TypeName visitSet(SetType type) {
-        TypeName itemType = type.getItemType().accept(this).box();
+        TypeName itemType = PrimitiveHelpers.box(type.getItemType().accept(this));
         return ParameterizedTypeName.get(ClassName.get(Set.class), itemType);
     }
 

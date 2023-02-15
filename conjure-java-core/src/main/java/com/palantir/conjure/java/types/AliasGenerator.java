@@ -23,6 +23,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.PrimitiveHelpers;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
@@ -346,9 +347,11 @@ public final class AliasGenerator {
                                     options)
                             .isPresent()
                     && hasValueOfFactory(reference.getExternalReference())
-                    && aliasTypeName.isPrimitive()) {
+                    && PrimitiveHelpers.isPrimitive(aliasTypeName)) {
                 return Optional.of(CodeBlock.builder()
-                        .addStatement("return of($T.valueOf(value))", aliasTypeName.box())
+                        .addStatement(
+                                "return of($T.valueOf(value))",
+                                PrimitiveHelpers.box(aliasTypeName).withoutAnnotations())
                         .build());
             }
         }
@@ -362,15 +365,15 @@ public final class AliasGenerator {
                 return CodeBlock.builder().addStatement("return of(value)").build();
             case DOUBLE:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseDouble(value))", aliasTypeName.box())
+                        .addStatement("return of($T.parseDouble(value))", PrimitiveHelpers.box(aliasTypeName))
                         .build();
             case INTEGER:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseInt(value))", aliasTypeName.box())
+                        .addStatement("return of($T.parseInt(value))", PrimitiveHelpers.box(aliasTypeName))
                         .build();
             case BOOLEAN:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseBoolean(value))", aliasTypeName.box())
+                        .addStatement("return of($T.parseBoolean(value))", PrimitiveHelpers.box(aliasTypeName))
                         .build();
             case SAFELONG:
             case RID:
@@ -413,7 +416,7 @@ public final class AliasGenerator {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"));
-        if (!aliasTypeName.isPrimitive()) {
+        if (!PrimitiveHelpers.isPrimitive(aliasTypeName)) {
             builder.addStatement("this.value = $T.checkNotNull(value, \"value cannot be null\")", Preconditions.class);
         } else {
             builder.addStatement("this.value = value");
@@ -436,7 +439,7 @@ public final class AliasGenerator {
                     Double.class);
         }
 
-        if (aliasTypeName.isPrimitive()) {
+        if (PrimitiveHelpers.isPrimitive(aliasTypeName)) {
             return CodeBlocks.statement(
                     "return this == other || (other instanceof $1T && this.value == (($1T) other).value)", thisClass);
         }
@@ -446,15 +449,17 @@ public final class AliasGenerator {
     }
 
     private static CodeBlock primitiveSafeToString(TypeName aliasTypeName) {
-        if (aliasTypeName.isPrimitive()) {
+        if (PrimitiveHelpers.isPrimitive(aliasTypeName)) {
             return CodeBlocks.statement("return $T.valueOf(value)", String.class);
         }
         return CodeBlocks.statement("return value.toString()");
     }
 
     private static CodeBlock primitiveSafeHashCode(TypeName aliasTypeName) {
-        if (aliasTypeName.isPrimitive()) {
-            return CodeBlocks.statement("return $T.hashCode(value)", aliasTypeName.box());
+        if (PrimitiveHelpers.isPrimitive(aliasTypeName)) {
+            return CodeBlocks.statement(
+                    "return $T.hashCode(value)",
+                    PrimitiveHelpers.box(aliasTypeName).withoutAnnotations());
         }
         return CodeBlocks.statement("return value.hashCode()");
     }
