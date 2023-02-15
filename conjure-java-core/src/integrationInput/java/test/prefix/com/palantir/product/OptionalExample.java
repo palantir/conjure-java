@@ -99,13 +99,13 @@ public final class OptionalExample {
         }
 
         @JsonSetter(value = "item", nulls = Nulls.SKIP)
-        public Builder item(@Safe @Nonnull Optional<@Safe String> item) {
+        public Builder item(@Nonnull Optional<@Safe String> item) {
             checkNotBuilt();
             this.item = Preconditions.checkNotNull(item, "item cannot be null");
             return this;
         }
 
-        public Builder item(@Safe @Nonnull String item) {
+        public Builder item(@Nonnull @Safe String item) {
             checkNotBuilt();
             this.item = Optional.of(Preconditions.checkNotNull(item, "item cannot be null"));
             return this;
