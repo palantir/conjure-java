@@ -124,6 +124,7 @@ types:
         alias: boolean
       SafeLongAliasExample:
         alias: safelong
+        safety: safe
       RidAliasExample:
         alias: rid
       BearerTokenAliasExample:
