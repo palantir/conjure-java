@@ -707,6 +707,11 @@ public final class WireFormatTests {
         }
 
         @Override
+        public Integer visitBooleanField(boolean _value) {
+            return -1;
+        }
+
+        @Override
         public Integer visitIf(int value) {
             return value;
         }
