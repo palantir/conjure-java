@@ -360,34 +360,35 @@ public final class AliasGenerator {
 
     @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private static CodeBlock valueOfFactoryMethodForPrimitive(PrimitiveType primitiveType, TypeName aliasTypeName) {
+        TypeName boxedTypeName = PrimitiveHelpers.box(aliasTypeName).withoutAnnotations();
         switch (primitiveType.get()) {
             case STRING:
                 return CodeBlock.builder().addStatement("return of(value)").build();
             case DOUBLE:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseDouble(value))", PrimitiveHelpers.box(aliasTypeName))
+                        .addStatement("return of($T.parseDouble(value))", boxedTypeName)
                         .build();
             case INTEGER:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseInt(value))", PrimitiveHelpers.box(aliasTypeName))
+                        .addStatement("return of($T.parseInt(value))", boxedTypeName)
                         .build();
             case BOOLEAN:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parseBoolean(value))", PrimitiveHelpers.box(aliasTypeName))
+                        .addStatement("return of($T.parseBoolean(value))", boxedTypeName)
                         .build();
             case SAFELONG:
             case RID:
             case BEARERTOKEN:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.valueOf(value))", aliasTypeName)
+                        .addStatement("return of($T.valueOf(value))", aliasTypeName.withoutAnnotations())
                         .build();
             case UUID:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.fromString(value))", aliasTypeName)
+                        .addStatement("return of($T.fromString(value))", aliasTypeName.withoutAnnotations())
                         .build();
             case DATETIME:
                 return CodeBlock.builder()
-                        .addStatement("return of($T.parse(value))", aliasTypeName)
+                        .addStatement("return of($T.parse(value))", aliasTypeName.withoutAnnotations())
                         .build();
             case BINARY:
             case ANY:
