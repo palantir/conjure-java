@@ -19,7 +19,7 @@ package com.palantir.conjure.java.services.dialogue;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.Auth;
-import com.palantir.conjure.java.util.PrimitiveHelpers;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.AuthType;
 import com.palantir.conjure.spec.BodyParameterType;
@@ -147,7 +147,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
         if (type.accept(TypeVisitor.IS_BINARY)) {
             return Optional.empty();
         }
-        TypeName className = PrimitiveHelpers.box(returnTypes.baseType(type));
+        TypeName className = Primitives.box(returnTypes.baseType(type));
         ParameterizedTypeName deserializerType = ParameterizedTypeName.get(ClassName.get(Serializer.class), className);
         return Optional.of(FieldSpec.builder(deserializerType, endpointName + "Serializer")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -160,7 +160,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
     }
 
     private Optional<FieldSpec> deserializer(EndpointName endpointName, Optional<Type> type) {
-        TypeName className = PrimitiveHelpers.box(returnTypes.baseType(type));
+        TypeName className = Primitives.box(returnTypes.baseType(type));
         if (isBinaryOrOptionalBinary(className, returnTypes)) {
             return Optional.empty();
         }

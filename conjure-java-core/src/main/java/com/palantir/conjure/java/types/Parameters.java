@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.java.util.PrimitiveHelpers;
+import com.palantir.conjure.java.util.Primitives;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
@@ -29,7 +29,7 @@ final class Parameters {
 
     static ParameterSpec nonnullParameter(TypeName typeName, String paramName, Modifier... modifiers) {
         ParameterSpec.Builder builder = ParameterSpec.builder(typeName, paramName, modifiers);
-        if (PrimitiveHelpers.isPrimitive(typeName)) {
+        if (Primitives.isPrimitive(typeName)) {
             return builder.build();
         }
         return builder.addAnnotation(AnnotationSpec.builder(Nonnull.class).build())

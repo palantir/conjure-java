@@ -34,8 +34,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
-import com.palantir.conjure.java.util.PrimitiveHelpers;
-import com.palantir.conjure.java.util.SafetyUtils;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
@@ -104,7 +103,7 @@ public final class UnionGenerator {
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(),
                         entry -> ConjureAnnotations.withSafety(
-                                typeMapper.getClassName(entry.getType()), SafetyUtils.getUsageTimeSafety(entry))));
+                                typeMapper.getClassName(entry.getType()), safetyEvaluator.getUsageTimeSafety(entry))));
         List<FieldSpec> fields =
                 ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
@@ -119,7 +118,7 @@ public final class UnionGenerator {
                 .addFields(fields)
                 .addMethod(generateConstructor(baseClass))
                 .addMethod(generateGetValue(baseClass))
-                .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
+                .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator))
                 .addMethod(generateAcceptVisitMethod(visitorClass))
                 .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
                 .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
@@ -168,13 +167,16 @@ public final class UnionGenerator {
     }
 
     private static List<MethodSpec> generateStaticFactories(
-            TypeMapper typeMapper, ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
+            TypeMapper typeMapper,
+            ClassName unionClass,
+            List<FieldDefinition> memberTypeDefs,
+            SafetyEvaluator safetyEvaluator) {
         List<MethodSpec> staticFactories = memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
                     TypeName memberType = ConjureAnnotations.withSafety(
                             typeMapper.getClassName(memberTypeDef.getType()),
-                            SafetyUtils.getUsageTimeSafety(memberTypeDef));
+                            safetyEvaluator.getUsageTimeSafety(memberTypeDef));
                     String variableName = variableName();
                     // memberName is guarded to be a valid Java identifier and not to end in an underscore, so this is
                     // safe
@@ -561,7 +563,7 @@ public final class UnionGenerator {
                     visitResultType);
         } else {
             return ParameterizedTypeName.get(
-                    ClassName.get(Function.class), PrimitiveHelpers.box(member.type), visitResultType);
+                    ClassName.get(Function.class), Primitives.box(member.type), visitResultType);
         }
     }
 

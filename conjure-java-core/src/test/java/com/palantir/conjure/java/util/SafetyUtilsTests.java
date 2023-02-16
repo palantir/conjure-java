@@ -18,6 +18,8 @@ package com.palantir.conjure.java.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.ImmutableMap;
+import com.palantir.conjure.java.types.SafetyEvaluator;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
@@ -36,13 +38,18 @@ public class SafetyUtilsTests {
             .safety(LogSafety.SAFE)
             .build());
 
+    private static final SafetyEvaluator TEST_SAFETY_EVALUATOR = new SafetyEvaluator(ImmutableMap.of());
+
     @Test
     public void externalField() {
         FieldDefinition field = FieldDefinition.builder()
                 .fieldName(FieldName.of("testField"))
                 .type(SAFE_EXTERNAL)
                 .build();
-        assertThat(SafetyUtils.getUsageTimeSafety(field)).isPresent().get().isEqualTo(LogSafety.SAFE);
+        assertThat(TEST_SAFETY_EVALUATOR.getUsageTimeSafety(field))
+                .isPresent()
+                .get()
+                .isEqualTo(LogSafety.SAFE);
     }
 
     @Test
@@ -52,7 +59,10 @@ public class SafetyUtilsTests {
                 .type(Type.primitive(PrimitiveType.STRING))
                 .safety(LogSafety.SAFE)
                 .build();
-        assertThat(SafetyUtils.getUsageTimeSafety(field)).isPresent().get().isEqualTo(LogSafety.SAFE);
+        assertThat(TEST_SAFETY_EVALUATOR.getUsageTimeSafety(field))
+                .isPresent()
+                .get()
+                .isEqualTo(LogSafety.SAFE);
     }
 
     @Test
@@ -61,7 +71,10 @@ public class SafetyUtilsTests {
                 .fieldName(FieldName.of("testField"))
                 .type(Type.list(ListType.builder().itemType(SAFE_EXTERNAL).build()))
                 .build();
-        assertThat(SafetyUtils.getUsageTimeSafety(field)).isPresent().get().isEqualTo(LogSafety.SAFE);
+        assertThat(TEST_SAFETY_EVALUATOR.getUsageTimeSafety(field))
+                .isPresent()
+                .get()
+                .isEqualTo(LogSafety.SAFE);
     }
 
     @Test
@@ -73,7 +86,10 @@ public class SafetyUtilsTests {
                         .build()))
                 .safety(LogSafety.SAFE)
                 .build();
-        assertThat(SafetyUtils.getUsageTimeSafety(field)).isPresent().get().isEqualTo(LogSafety.SAFE);
+        assertThat(TEST_SAFETY_EVALUATOR.getUsageTimeSafety(field))
+                .isPresent()
+                .get()
+                .isEqualTo(LogSafety.SAFE);
     }
 
     @Test
@@ -82,7 +98,7 @@ public class SafetyUtilsTests {
                 .fieldName(FieldName.of("testField"))
                 .type(Type.primitive(PrimitiveType.BEARERTOKEN))
                 .build();
-        assertThat(SafetyUtils.getUsageTimeSafety(field)).isEmpty();
+        assertThat(TEST_SAFETY_EVALUATOR.getUsageTimeSafety(field)).isEmpty();
     }
 
     @Test
@@ -93,6 +109,6 @@ public class SafetyUtilsTests {
                         .itemType(Type.primitive(PrimitiveType.BEARERTOKEN))
                         .build()))
                 .build();
-        assertThat(SafetyUtils.getUsageTimeSafety(field)).isEmpty();
+        assertThat(TEST_SAFETY_EVALUATOR.getUsageTimeSafety(field)).isEmpty();
     }
 }

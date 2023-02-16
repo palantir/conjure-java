@@ -23,8 +23,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
-import com.palantir.conjure.java.util.PrimitiveHelpers;
-import com.palantir.conjure.java.util.SafetyUtils;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ExternalReference;
@@ -67,7 +66,7 @@ public final class AliasGenerator {
             TypeMapper typeMapper, SafetyEvaluator safetyEvaluator, AliasDefinition typeDef, Options options) {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
-        Optional<LogSafety> safety = SafetyUtils.getUsageTimeSafety(typeDef);
+        Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(typeDef);
         TypeName aliasTypeName = ConjureAnnotations.withSafety(typeMapper.getClassName(typeDef.getAlias()), safety);
 
         ClassName thisClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
@@ -347,11 +346,11 @@ public final class AliasGenerator {
                                     options)
                             .isPresent()
                     && hasValueOfFactory(reference.getExternalReference())
-                    && PrimitiveHelpers.isPrimitive(aliasTypeName)) {
+                    && Primitives.isPrimitive(aliasTypeName)) {
                 return Optional.of(CodeBlock.builder()
                         .addStatement(
                                 "return of($T.valueOf(value))",
-                                PrimitiveHelpers.box(aliasTypeName).withoutAnnotations())
+                                Primitives.box(aliasTypeName).withoutAnnotations())
                         .build());
             }
         }
@@ -360,7 +359,7 @@ public final class AliasGenerator {
 
     @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private static CodeBlock valueOfFactoryMethodForPrimitive(PrimitiveType primitiveType, TypeName aliasTypeName) {
-        TypeName boxedTypeName = PrimitiveHelpers.box(aliasTypeName).withoutAnnotations();
+        TypeName boxedTypeName = Primitives.box(aliasTypeName).withoutAnnotations();
         switch (primitiveType.get()) {
             case STRING:
                 return CodeBlock.builder().addStatement("return of(value)").build();
@@ -417,7 +416,7 @@ public final class AliasGenerator {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(Parameters.nonnullParameter(aliasTypeName, "value"));
-        if (!PrimitiveHelpers.isPrimitive(aliasTypeName)) {
+        if (!Primitives.isPrimitive(aliasTypeName)) {
             builder.addStatement("this.value = $T.checkNotNull(value, \"value cannot be null\")", Preconditions.class);
         } else {
             builder.addStatement("this.value = value");
@@ -440,7 +439,7 @@ public final class AliasGenerator {
                     Double.class);
         }
 
-        if (PrimitiveHelpers.isPrimitive(aliasTypeName)) {
+        if (Primitives.isPrimitive(aliasTypeName)) {
             return CodeBlocks.statement(
                     "return this == other || (other instanceof $1T && this.value == (($1T) other).value)", thisClass);
         }
@@ -450,17 +449,16 @@ public final class AliasGenerator {
     }
 
     private static CodeBlock primitiveSafeToString(TypeName aliasTypeName) {
-        if (PrimitiveHelpers.isPrimitive(aliasTypeName)) {
+        if (Primitives.isPrimitive(aliasTypeName)) {
             return CodeBlocks.statement("return $T.valueOf(value)", String.class);
         }
         return CodeBlocks.statement("return value.toString()");
     }
 
     private static CodeBlock primitiveSafeHashCode(TypeName aliasTypeName) {
-        if (PrimitiveHelpers.isPrimitive(aliasTypeName)) {
+        if (Primitives.isPrimitive(aliasTypeName)) {
             return CodeBlocks.statement(
-                    "return $T.hashCode(value)",
-                    PrimitiveHelpers.box(aliasTypeName).withoutAnnotations());
+                    "return $T.hashCode(value)", Primitives.box(aliasTypeName).withoutAnnotations());
         }
         return CodeBlocks.statement("return value.hashCode()");
     }

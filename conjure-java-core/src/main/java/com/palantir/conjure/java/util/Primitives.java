@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public final class PrimitiveHelpers {
+public final class Primitives {
 
-    private PrimitiveHelpers() {}
+    private Primitives() {}
 
     private static final Map<TypeName, TypeName> PRIMITIVES = Map.ofEntries(
             Map.entry(TypeName.INT, TypeName.INT.box()),

@@ -27,8 +27,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
-import com.palantir.conjure.java.util.PrimitiveHelpers;
-import com.palantir.conjure.java.util.SafetyUtils;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
@@ -267,7 +266,7 @@ public final class BeanBuilderGenerator {
     private EnrichedField createField(FieldName fieldName, FieldDefinition field) {
         Type type = field.getType();
         TypeName typeName =
-                ConjureAnnotations.withSafety(typeMapper.getClassName(type), SafetyUtils.getUsageTimeSafety(field));
+                ConjureAnnotations.withSafety(typeMapper.getClassName(type), safetyEvaluator.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
             spec.initializer("new $T<>()", type.accept(COLLECTION_CONCRETE_TYPE));
@@ -331,7 +330,10 @@ public final class BeanBuilderGenerator {
         MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
                 .addParameter(Parameters.nonnullParameter(
                         BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                field.type, type, typeMapper, SafetyUtils.getUsageTimeSafety(enriched.conjureDef())),
+                                field.type,
+                                type,
+                                typeMapper,
+                                safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
                         field.name))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
@@ -352,7 +354,7 @@ public final class BeanBuilderGenerator {
         Type type = definition.getType();
         boolean shouldClearFirst = false;
         return BeanBuilderAuxiliarySettersUtils.createCollectionSetterBuilder(
-                        prefix, enriched, typeMapper, builderClass)
+                        prefix, enriched, typeMapper, builderClass, safetyEvaluator)
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst))
@@ -417,7 +419,7 @@ public final class BeanBuilderGenerator {
                 return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
             }
         } else {
-            CodeBlock nullCheckedValue = PrimitiveHelpers.isPrimitive(spec.type)
+            CodeBlock nullCheckedValue = Primitives.isPrimitive(spec.type)
                     ? CodeBlock.of("$N", spec.name) // primitive types can't be null, so no need for requireNonNull!
                     : Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null");
             return CodeBlocks.statement("this.$1L = $2L", spec.name, nullCheckedValue);
@@ -430,7 +432,7 @@ public final class BeanBuilderGenerator {
 
     private List<MethodSpec> createAuxiliarySetters(EnrichedField enriched, boolean override) {
         Type type = enriched.conjureDef().getType();
-        Optional<LogSafety> safety = SafetyUtils.getUsageTimeSafety(enriched.conjureDef());
+        Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(enriched.conjureDef());
 
         if (type.accept(TypeVisitor.IS_LIST)) {
             return ImmutableList.of(
@@ -458,7 +460,8 @@ public final class BeanBuilderGenerator {
 
     private MethodSpec createOptionalSetter(EnrichedField enriched, boolean override) {
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
-        return BeanBuilderAuxiliarySettersUtils.createOptionalSetterBuilder(enriched, typeMapper, builderClass)
+        return BeanBuilderAuxiliarySettersUtils.createOptionalSetterBuilder(
+                        enriched, typeMapper, builderClass, safetyEvaluator)
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
                 .addCode(optionalAssignmentStatement(enriched, type))

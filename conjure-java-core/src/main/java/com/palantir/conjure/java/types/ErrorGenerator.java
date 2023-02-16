@@ -27,7 +27,6 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
-import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorDefinition;
@@ -166,7 +165,8 @@ public final class ErrorGenerator implements Generator {
                                                     .build()))
                                     .map(arg -> {
                                         TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
-                                        Optional<LogSafety> underlyingTypeSafety = SafetyUtils.getUsageTimeSafety(arg);
+                                        Optional<LogSafety> underlyingTypeSafety =
+                                                safetyEvaluator.getUsageTimeSafety(arg);
                                         Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(arg.getType());
                                         if (!SafetyEvaluator.allows(underlyingTypeSafety, typeSafety)) {
                                             throw new IllegalStateException(String.format(

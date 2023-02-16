@@ -18,7 +18,6 @@ package com.palantir.conjure.java;
 
 import com.google.common.collect.ImmutableSet;
 import com.palantir.conjure.java.types.SafetyEvaluator;
-import com.palantir.conjure.java.util.SafetyUtils;
 import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.LogSafety;
@@ -65,7 +64,7 @@ public final class ConjureTags {
      * type, and returns the declared safety.
      */
     public static Optional<LogSafety> validateArgument(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
-        Optional<LogSafety> tagSafety = safety(argument);
+        Optional<LogSafety> tagSafety = safety(argument, safetyEvaluator);
         if (tagSafety.isPresent()) {
             Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(argument.getType());
             if (!SafetyEvaluator.allows(tagSafety, typeSafety)) {
@@ -79,9 +78,9 @@ public final class ConjureTags {
         return tagSafety;
     }
 
-    public static Optional<LogSafety> safety(ArgumentDefinition argument) {
-        validateTags(argument);
-        Optional<LogSafety> argumentSafety = SafetyUtils.getUsageTimeSafety(argument);
+    public static Optional<LogSafety> safety(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
+        validateTags(argument, safetyEvaluator);
+        Optional<LogSafety> argumentSafety = safetyEvaluator.getUsageTimeSafety(argument);
         if (argumentSafety.isPresent()) {
             return argumentSafety;
         }
@@ -95,7 +94,7 @@ public final class ConjureTags {
         return ConjureMarkers.markerSafety(argument);
     }
 
-    public static void validateTags(ArgumentDefinition argument) {
+    public static void validateTags(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
         Set<String> tags = argument.getTags();
         validateTags(tags);
         Optional<LogSafety> markerSafety = ConjureMarkers.markerSafety(argument);
@@ -106,7 +105,7 @@ public final class ConjureTags {
                     isSafe(tags) ? "safe" : "unsafe",
                     argument.getArgName()));
         }
-        Optional<LogSafety> argumentSafety = SafetyUtils.getUsageTimeSafety(argument);
+        Optional<LogSafety> argumentSafety = safetyEvaluator.getUsageTimeSafety(argument);
         if (argumentSafety.isPresent()) {
             if (markerSafety.isPresent()) {
                 throw new IllegalStateException(String.format(
