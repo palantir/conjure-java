@@ -21,7 +21,7 @@ import static com.palantir.logsafe.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
-import com.palantir.conjure.java.util.PrimitiveHelpers;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.FieldName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -93,7 +93,7 @@ public final class MethodSpecs {
         if (field.type.equals(TypeName.DOUBLE)) {
             return CodeBlock.of(
                     "$1T.doubleToLongBits($2L) == $1T.doubleToLongBits($3L)", Double.class, thisField, otherField);
-        } else if (PrimitiveHelpers.isPrimitive(field.type)) {
+        } else if (Primitives.isPrimitive(field.type)) {
             return CodeBlock.of("$L == $L", thisField, otherField);
         } else if (field.type.equals(ClassName.get(OffsetDateTime.class))) {
             return CodeBlock.of("$L.isEqual($L)", thisField, otherField);
@@ -165,12 +165,12 @@ public final class MethodSpecs {
     }
 
     private static CodeBlock computeHashCode(FieldSpec fieldSpec) {
-        if (PrimitiveHelpers.isPrimitive(fieldSpec.type)) {
+        if (Primitives.isPrimitive(fieldSpec.type)) {
             if (TypeName.INT.equals(fieldSpec.type)) {
                 return createHashInput(fieldSpec);
             } else {
                 return CodeBlock.of(
-                        "$1T.$2N($3L)", PrimitiveHelpers.box(fieldSpec.type), "hashCode", createHashInput(fieldSpec));
+                        "$1T.$2N($3L)", Primitives.box(fieldSpec.type), "hashCode", createHashInput(fieldSpec));
             }
         }
         return CodeBlock.of("$L.hashCode()", createHashInput(fieldSpec));

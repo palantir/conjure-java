@@ -64,7 +64,7 @@ public final class ConjureTags {
      * type, and returns the declared safety.
      */
     public static Optional<LogSafety> validateArgument(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
-        Optional<LogSafety> tagSafety = safety(argument);
+        Optional<LogSafety> tagSafety = safety(argument, safetyEvaluator);
         if (tagSafety.isPresent()) {
             Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(argument.getType());
             if (!SafetyEvaluator.allows(tagSafety, typeSafety)) {
@@ -78,10 +78,11 @@ public final class ConjureTags {
         return tagSafety;
     }
 
-    public static Optional<LogSafety> safety(ArgumentDefinition argument) {
-        validateTags(argument);
-        if (argument.getSafety().isPresent()) {
-            return argument.getSafety();
+    public static Optional<LogSafety> safety(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
+        validateTags(argument, safetyEvaluator);
+        Optional<LogSafety> argumentSafety = safetyEvaluator.getUsageTimeSafety(argument);
+        if (argumentSafety.isPresent()) {
+            return argumentSafety;
         }
         Set<String> tags = argument.getTags();
         if (isSafe(tags)) {
@@ -93,7 +94,7 @@ public final class ConjureTags {
         return ConjureMarkers.markerSafety(argument);
     }
 
-    public static void validateTags(ArgumentDefinition argument) {
+    public static void validateTags(ArgumentDefinition argument, SafetyEvaluator safetyEvaluator) {
         Set<String> tags = argument.getTags();
         validateTags(tags);
         Optional<LogSafety> markerSafety = ConjureMarkers.markerSafety(argument);
@@ -104,18 +105,19 @@ public final class ConjureTags {
                     isSafe(tags) ? "safe" : "unsafe",
                     argument.getArgName()));
         }
-        if (argument.getSafety().isPresent()) {
+        Optional<LogSafety> argumentSafety = safetyEvaluator.getUsageTimeSafety(argument);
+        if (argumentSafety.isPresent()) {
             if (markerSafety.isPresent()) {
                 throw new IllegalStateException(String.format(
                         "Unexpected 'safety: %s' value in addition to a '%s' marker on argument '%s'",
-                        argument.getSafety().get().accept(DefFormatSafetyVisitor.INSTANCE),
+                        argumentSafety.get().accept(DefFormatSafetyVisitor.INSTANCE),
                         markerSafety.get().accept(MarkerNameLogSafetyVisitor.INSTANCE),
                         argument.getArgName()));
             }
             if (isSafe(tags) || isUnsafe(tags)) {
                 throw new IllegalStateException(String.format(
                         "Unexpected 'safety: %s' value in addition to a '%s' tag on argument '%s'",
-                        argument.getSafety().get().accept(DefFormatSafetyVisitor.INSTANCE),
+                        argumentSafety.get().accept(DefFormatSafetyVisitor.INSTANCE),
                         isSafe(tags) ? "safe" : "unsafe",
                         argument.getArgName()));
             }

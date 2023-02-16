@@ -18,6 +18,7 @@ package com.palantir.conjure.java.types;
 
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.spec.AliasDefinition;
+import com.palantir.conjure.spec.ArgumentDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.ExternalReference;
@@ -76,6 +77,42 @@ public final class SafetyEvaluator {
 
     public Optional<LogSafety> evaluate(Type type, Optional<LogSafety> declaredSafety) {
         return declaredSafety.or(() -> evaluate(type));
+    }
+
+    /**
+     * Certain types (e.g. primitives and external imports) must declare safety at usage time, while others (e.g.
+     * conjure objects) must do so themselves at declaration time. This is a utility method to extract usage time safety
+     * declarations if any are needed.
+     * */
+    public Optional<LogSafety> getUsageTimeSafety(ArgumentDefinition argument) {
+        if (argument.getType().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
+            return evaluate(argument.getType(), argument.getSafety());
+        }
+        return argument.getSafety();
+    }
+
+    /**
+     * Certain types (e.g. primitives and external imports) must declare safety at usage time, while others (e.g.
+     * conjure objects) must do so themselves at declaration time. This is a utility method to extract usage time safety
+     * declarations if any are needed.
+     * */
+    public Optional<LogSafety> getUsageTimeSafety(AliasDefinition alias) {
+        if (alias.getAlias().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
+            return evaluate(alias.getAlias(), alias.getSafety());
+        }
+        return alias.getSafety();
+    }
+
+    /**
+     * Certain types (e.g. primitives and external imports) must declare safety at usage time, while others (e.g.
+     * conjure objects) must do so themselves at declaration time. This is a utility method to extract usage time safety
+     * declarations if any are needed.
+     * */
+    public Optional<LogSafety> getUsageTimeSafety(FieldDefinition field) {
+        if (field.getType().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
+            return evaluate(field.getType(), field.getSafety());
+        }
+        return field.getSafety();
     }
 
     private static final class TypeDefinitionSafetyVisitor implements TypeDefinition.Visitor<Optional<LogSafety>> {
@@ -187,9 +224,8 @@ public final class SafetyEvaluator {
         }
 
         @Override
-        public Optional<LogSafety> visitExternal(ExternalReference _value) {
-            // External types have unknown safety for now
-            return Optional.empty();
+        public Optional<LogSafety> visitExternal(ExternalReference value) {
+            return value.getSafety();
         }
 
         @Override
@@ -318,5 +354,50 @@ public final class SafetyEvaluator {
                 throw new IllegalStateException("Unknown LogSafety value: " + unknownValue);
             }
         });
+    }
+    // primitive and external types (and types that wrap them) must declare their safety at usage time
+    // for all other types, assume the generated class declares safety at definition time
+    private enum RequiresSafetyAtUsageTime implements Type.Visitor<Boolean> {
+        INSTANCE;
+
+        @Override
+        public java.lang.Boolean visitPrimitive(PrimitiveType value) {
+            return !value.equals(PrimitiveType.BEARERTOKEN);
+        }
+
+        @Override
+        public Boolean visitOptional(OptionalType value) {
+            return value.getItemType().accept(INSTANCE);
+        }
+
+        @Override
+        public Boolean visitList(ListType value) {
+            return value.getItemType().accept(INSTANCE);
+        }
+
+        @Override
+        public Boolean visitSet(SetType value) {
+            return value.getItemType().accept(INSTANCE);
+        }
+
+        @Override
+        public Boolean visitMap(MapType _value) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitReference(TypeName _value) {
+            return false;
+        }
+
+        @Override
+        public Boolean visitExternal(ExternalReference _value) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitUnknown(String _unknownType) {
+            return false;
+        }
     }
 }

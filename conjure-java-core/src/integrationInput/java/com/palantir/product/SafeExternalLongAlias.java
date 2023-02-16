@@ -2,23 +2,26 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.logsafe.Safe;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
+@Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class SafeExternalLongAlias {
-    private final long value;
+    private final @Safe long value;
 
-    private SafeExternalLongAlias(long value) {
+    private SafeExternalLongAlias(@Safe long value) {
         this.value = value;
     }
 
     @JsonValue
-    public long get() {
+    public @Safe long get() {
         return value;
     }
 
     @Override
+    @Safe
     public String toString() {
         return String.valueOf(value);
     }
@@ -35,12 +38,12 @@ public final class SafeExternalLongAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static SafeExternalLongAlias valueOf(String value) {
+    public static SafeExternalLongAlias valueOf(@Safe String value) {
         return of(Long.valueOf(value));
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static SafeExternalLongAlias of(long value) {
+    public static SafeExternalLongAlias of(@Safe long value) {
         return new SafeExternalLongAlias(value);
     }
 }

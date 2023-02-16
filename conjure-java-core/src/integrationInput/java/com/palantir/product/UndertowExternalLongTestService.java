@@ -1,5 +1,7 @@
 package com.palantir.product;
 
+import com.palantir.logsafe.DoNotLog;
+import com.palantir.logsafe.Safe;
 import com.palantir.tokens.auth.AuthHeader;
 import javax.annotation.processing.Generated;
 
@@ -8,12 +10,12 @@ public interface UndertowExternalLongTestService {
     /**
      * @apiNote {@code POST /external-long/testDangerousLong}
      */
-    void testDangerousLong(AuthHeader authHeader, long dangerousLong);
+    void testDangerousLong(AuthHeader authHeader, @DoNotLog long dangerousLong);
 
     /**
      * @apiNote {@code POST /external-long/testSafeExternalLong}
      */
-    void testSafeExternalLong(AuthHeader authHeader, long safeExternalLong);
+    void testSafeExternalLong(AuthHeader authHeader, @Safe long safeExternalLong);
 
     /**
      * @apiNote {@code POST /external-long/testLong}
