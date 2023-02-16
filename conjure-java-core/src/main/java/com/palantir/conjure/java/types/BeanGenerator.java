@@ -334,7 +334,7 @@ public final class BeanGenerator {
         methodSpecs.add(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(enriched.fieldName()))
                 .addParameter(ParameterSpec.builder(
                                 BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                        enriched.poetSpec().type, type, typeMapper, definition.getSafety()),
+                                        enriched.poetSpec().type, type, typeMapper, safety),
                                 JavaNameSanitizer.sanitize(enriched.fieldName()))
                         .addAnnotation(Nonnull.class)
                         .build())
@@ -352,11 +352,7 @@ public final class BeanGenerator {
                     .addModifiers(Modifier.ABSTRACT)
                     .build());
             methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(
-                            enriched,
-                            type.accept(TypeVisitor.LIST).getItemType(),
-                            typeMapper,
-                            returnClass,
-                            definition.getSafety())
+                            enriched, type.accept(TypeVisitor.LIST).getItemType(), typeMapper, returnClass, safety)
                     .addModifiers(Modifier.ABSTRACT)
                     .build());
         }
@@ -367,11 +363,7 @@ public final class BeanGenerator {
                     .addModifiers(Modifier.ABSTRACT)
                     .build());
             methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(
-                            enriched,
-                            type.accept(TypeVisitor.SET).getItemType(),
-                            typeMapper,
-                            returnClass,
-                            definition.getSafety())
+                            enriched, type.accept(TypeVisitor.SET).getItemType(), typeMapper, returnClass, safety)
                     .addModifiers(Modifier.ABSTRACT)
                     .build());
         }
