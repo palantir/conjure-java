@@ -79,6 +79,11 @@ public final class SafetyEvaluator {
         return declaredSafety.or(() -> evaluate(type));
     }
 
+    /**
+     * Certain types (e.g. primitives and external imports) must declare safety at usage time, while others (e.g.
+     * conjure objects) must do so themselves at declaration time. This is a utility method to extract usage time safety
+     * declarations if any are needed.
+     * */
     public Optional<LogSafety> getUsageTimeSafety(ArgumentDefinition argument) {
         if (argument.getType().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
             return evaluate(argument.getType(), argument.getSafety());
@@ -86,6 +91,11 @@ public final class SafetyEvaluator {
         return argument.getSafety();
     }
 
+    /**
+     * Certain types (e.g. primitives and external imports) must declare safety at usage time, while others (e.g.
+     * conjure objects) must do so themselves at declaration time. This is a utility method to extract usage time safety
+     * declarations if any are needed.
+     * */
     public Optional<LogSafety> getUsageTimeSafety(AliasDefinition alias) {
         if (alias.getAlias().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
             return evaluate(alias.getAlias(), alias.getSafety());
@@ -93,6 +103,11 @@ public final class SafetyEvaluator {
         return alias.getSafety();
     }
 
+    /**
+     * Certain types (e.g. primitives and external imports) must declare safety at usage time, while others (e.g.
+     * conjure objects) must do so themselves at declaration time. This is a utility method to extract usage time safety
+     * declarations if any are needed.
+     * */
     public Optional<LogSafety> getUsageTimeSafety(FieldDefinition field) {
         if (field.getType().accept(RequiresSafetyAtUsageTime.INSTANCE)) {
             return evaluate(field.getType(), field.getSafety());
