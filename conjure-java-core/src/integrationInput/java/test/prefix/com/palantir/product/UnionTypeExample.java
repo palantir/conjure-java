@@ -111,6 +111,10 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new MapAliasWrapper(value));
     }
 
+    public static UnionTypeExample booleanField(@Safe boolean value) {
+        return new UnionTypeExample(new BooleanFieldWrapper(value));
+    }
+
     public static UnionTypeExample unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "stringExample":
@@ -161,6 +165,9 @@ public final class UnionTypeExample {
             case "mapAlias":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: mapAlias");
+            case "booleanField":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: booleanField");
             default:
                 return new UnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
         }
@@ -225,6 +232,8 @@ public final class UnionTypeExample {
 
         T visitMapAlias(MapAliasExample value);
 
+        T visitBooleanField(@Safe boolean value);
+
         T visitUnknown(@Safe String unknownType);
 
         static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
@@ -234,6 +243,7 @@ public final class UnionTypeExample {
 
     private static final class VisitorBuilder<T>
             implements AlsoAnIntegerStageVisitorBuilder<T>,
+                    BooleanFieldStageVisitorBuilder<T>,
                     CompletedStageVisitorBuilder<T>,
                     IfStageVisitorBuilder<T>,
                     InterfaceStageVisitorBuilder<T>,
@@ -252,6 +262,8 @@ public final class UnionTypeExample {
                     UnknownStageVisitorBuilder<T>,
                     Completed_StageVisitorBuilder<T> {
         private IntFunction<T> alsoAnIntegerVisitor;
+
+        private Function<@Safe Boolean, T> booleanFieldVisitor;
 
         private IntFunction<T> completedVisitor;
 
@@ -286,9 +298,16 @@ public final class UnionTypeExample {
         private Function<String, T> unknownVisitor;
 
         @Override
-        public CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
+        public BooleanFieldStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor) {
             Preconditions.checkNotNull(alsoAnIntegerVisitor, "alsoAnIntegerVisitor cannot be null");
             this.alsoAnIntegerVisitor = alsoAnIntegerVisitor;
+            return this;
+        }
+
+        @Override
+        public CompletedStageVisitorBuilder<T> booleanField(@Nonnull Function<@Safe Boolean, T> booleanFieldVisitor) {
+            Preconditions.checkNotNull(booleanFieldVisitor, "booleanFieldVisitor cannot be null");
+            this.booleanFieldVisitor = booleanFieldVisitor;
             return this;
         }
 
@@ -418,6 +437,7 @@ public final class UnionTypeExample {
         @Override
         public Visitor<T> build() {
             final IntFunction<T> alsoAnIntegerVisitor = this.alsoAnIntegerVisitor;
+            final Function<@Safe Boolean, T> booleanFieldVisitor = this.booleanFieldVisitor;
             final IntFunction<T> completedVisitor = this.completedVisitor;
             final IntFunction<T> ifVisitor = this.ifVisitor;
             final IntFunction<T> interfaceVisitor = this.interfaceVisitor;
@@ -438,6 +458,11 @@ public final class UnionTypeExample {
                 @Override
                 public T visitAlsoAnInteger(int value) {
                     return alsoAnIntegerVisitor.apply(value);
+                }
+
+                @Override
+                public T visitBooleanField(@Safe boolean value) {
+                    return booleanFieldVisitor.apply(value);
                 }
 
                 @Override
@@ -524,7 +549,11 @@ public final class UnionTypeExample {
     }
 
     public interface AlsoAnIntegerStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor);
+        BooleanFieldStageVisitorBuilder<T> alsoAnInteger(@Nonnull IntFunction<T> alsoAnIntegerVisitor);
+    }
+
+    public interface BooleanFieldStageVisitorBuilder<T> {
+        CompletedStageVisitorBuilder<T> booleanField(@Nonnull Function<@Safe Boolean, T> booleanFieldVisitor);
     }
 
     public interface CompletedStageVisitorBuilder<T> {
@@ -620,7 +649,8 @@ public final class UnionTypeExample {
         @JsonSubTypes.Type(OptionalAliasWrapper.class),
         @JsonSubTypes.Type(ListAliasWrapper.class),
         @JsonSubTypes.Type(SetAliasWrapper.class),
-        @JsonSubTypes.Type(MapAliasWrapper.class)
+        @JsonSubTypes.Type(MapAliasWrapper.class),
+        @JsonSubTypes.Type(BooleanFieldWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
@@ -1348,6 +1378,51 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return "MapAliasWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("booleanField")
+    private static final class BooleanFieldWrapper implements Base {
+        private final boolean value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private BooleanFieldWrapper(@JsonSetter("booleanField") @Nonnull boolean value) {
+            Preconditions.checkNotNull(value, "booleanField cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "booleanField";
+        }
+
+        @JsonProperty("booleanField")
+        private boolean getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitBooleanField(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof BooleanFieldWrapper && equalTo((BooleanFieldWrapper) other));
+        }
+
+        private boolean equalTo(BooleanFieldWrapper other) {
+            return this.value == other.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Boolean.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "BooleanFieldWrapper{value: " + value + '}';
         }
     }
 

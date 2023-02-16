@@ -34,6 +34,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.PrimitiveHelpers;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
@@ -557,7 +558,8 @@ public final class UnionGenerator {
                             ConjureAnnotations.safety(SafetyEvaluator.UNKNOWN_UNION_VARINT_SAFETY)),
                     visitResultType);
         } else {
-            return ParameterizedTypeName.get(ClassName.get(Function.class), member.type.box(), visitResultType);
+            return ParameterizedTypeName.get(
+                    ClassName.get(Function.class), PrimitiveHelpers.box(member.type), visitResultType);
         }
     }
 

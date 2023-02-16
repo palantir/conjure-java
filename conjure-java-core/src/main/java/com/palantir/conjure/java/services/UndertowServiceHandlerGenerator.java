@@ -42,6 +42,7 @@ import com.palantir.conjure.java.undertow.lib.UndertowService;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
+import com.palantir.conjure.java.util.PrimitiveHelpers;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
@@ -266,7 +267,7 @@ final class UndertowServiceHandlerGenerator {
                     return TypeFunctions.isBinaryOrOptionalBinary(dealiased) ? Optional.empty() : Optional.of(type);
                 })
                 .map(typeMapper::getClassName)
-                .map(TypeName::box)
+                .map(PrimitiveHelpers::box)
                 .map(this::immutableCollection)
                 .ifPresent(typeName -> {
                     TypeName type = ParameterizedTypeName.get(ClassName.get(Deserializer.class), typeName);
@@ -283,7 +284,7 @@ final class UndertowServiceHandlerGenerator {
         endpointDefinition.getReturns().ifPresent(returnType -> {
             Type dealiased = TypeFunctions.toConjureTypeWithoutAliases(returnType, typeDefinitions);
             if (!TypeFunctions.isBinaryOrOptionalBinary(dealiased)) {
-                TypeName typeName = returnTypeMapper.getClassName(returnType).box();
+                TypeName typeName = PrimitiveHelpers.box(returnTypeMapper.getClassName(returnType));
                 TypeName type = ParameterizedTypeName.get(ClassName.get(Serializer.class), typeName);
                 endpointBuilder.addField(FieldSpec.builder(type, SERIALIZER_VAR_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
@@ -467,7 +468,7 @@ final class UndertowServiceHandlerGenerator {
             } else {
                 code.addStatement(
                         "$1T $2N = $3N.deserialize($4N)",
-                        typeMapper.getClassName(bodyParam.getType()).box(),
+                        PrimitiveHelpers.box(typeMapper.getClassName(bodyParam.getType())),
                         paramName,
                         DESERIALIZER_VAR_NAME,
                         EXCHANGE_VAR_NAME);
@@ -608,7 +609,9 @@ final class UndertowServiceHandlerGenerator {
                         argument.getMarkers().stream()
                                 .map(typeMapper::getClassName)
                                 .filter(typeName -> !ConjureMarkers.SAFETY_CLASS_NAMES.contains(typeName))
-                                .map(name -> name.box().withoutAnnotations().toString()),
+                                .map(name -> PrimitiveHelpers.box(name)
+                                        .withoutAnnotations()
+                                        .toString()),
                         argument.getTags().stream().filter(item -> !ConjureTags.HANDLED_ARGUMENT_TAGS.contains(item)))
                 .filter(item -> !Safe.class.getName().equals(item) && !"safe".equals(item))
                 .collect(ImmutableSet.toImmutableSet());
@@ -852,7 +855,7 @@ final class UndertowServiceHandlerGenerator {
                     "$1T $2N = $3T.valueOf($4N.plainSerDe().deserializeString($5N.get($6S)))",
                     typeMapper.getClassName(type),
                     resultVarName,
-                    typeMapper.getClassName(type).box(),
+                    PrimitiveHelpers.box(typeMapper.getClassName(type)),
                     RUNTIME_VAR_NAME,
                     paramsVarName,
                     paramId);
@@ -925,7 +928,7 @@ final class UndertowServiceHandlerGenerator {
                         functionName,
                         paramsVarName,
                         paramId,
-                        typeMapper.getClassName(getComplexType(type)).box()));
+                        PrimitiveHelpers.box(typeMapper.getClassName(getComplexType(type)))));
     }
 
     /**
