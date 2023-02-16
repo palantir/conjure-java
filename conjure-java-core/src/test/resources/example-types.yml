@@ -222,6 +222,9 @@ types:
           listAlias: ListAlias
           setAlias: SetAlias
           mapAlias: MapAliasExample
+          booleanField:
+            type: boolean
+            safety: safe
       UnionWithUnknownString:
         union:
           unknown: string
