@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2022 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.palantir.external-publish-jar'
+package com.palantir.conjure.java.undertow.processor.sample;
 
-dependencies {
-    api project(':conjure-lib')
-    // Generated code depends on Undertow APIs
-    api 'io.undertow:undertow-core'
-    // Generated code depends on ListenableFuture and immutable collections
-    api 'com.google.guava:guava'
-    // Recommend a higher version of wildfly (1.6.0.Final+) then the one shipped with undertow to avoid CVEs.
-    runtimeOnly 'org.wildfly.common:wildfly-common'
+import com.palantir.conjure.java.undertow.annotations.Handle;
+import com.palantir.conjure.java.undertow.annotations.HttpMethod;
+import java.util.List;
+import java.util.Set;
+
+public interface CollectionBodyParam {
+
+    @Handle(method = HttpMethod.POST, path = "/list")
+    void list(@Handle.Body List<String> values);
+
+    @Handle(method = HttpMethod.POST, path = "/set")
+    void set(@Handle.Body Set<String> values);
 }

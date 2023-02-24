@@ -1,0 +1,132 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class CollectionBodyParamEndpoints implements UndertowService {
+    private final CollectionBodyParam delegate;
+
+    private CollectionBodyParamEndpoints(CollectionBodyParam delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(CollectionBodyParam delegate) {
+        return new CollectionBodyParamEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(new ListEndpoint(runtime, delegate), new SetEndpoint(runtime, delegate));
+    }
+
+    private static final class ListEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableList<String>> valuesDeserializer;
+
+        ListEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer =
+                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableList<String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableList<String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.list(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/list";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "list";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class SetEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableSet<String>> valuesDeserializer;
+
+        SetEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer =
+                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableSet<String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableSet<String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.set(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/set";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "set";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

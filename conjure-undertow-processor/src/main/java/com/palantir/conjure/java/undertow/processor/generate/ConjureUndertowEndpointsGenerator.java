@@ -64,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
 import org.immutables.value.Value;
@@ -179,8 +180,9 @@ public final class ConjureUndertowEndpointsGenerator {
                     CodeBlock deserializerFactory,
                     String deserializerFieldName,
                     SafeLoggingAnnotation safeLoggable) {
-                TypeName requestBodyType =
-                        def.argType().match(ArgTypeTypeName.INSTANCE).box();
+                TypeName requestBodyType = immutableCollection(
+                        def.argType().match(ArgTypeTypeName.INSTANCE).box());
+
                 additionalFields.add(ImmutableAdditionalField.builder()
                         .field(FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Deserializer.class), requestBodyType),
@@ -753,6 +755,26 @@ public final class ConjureUndertowEndpointsGenerator {
             default:
                 throw new SafeIllegalStateException("Illegal value", SafeArg.of("value", safeLoggable));
         }
+    }
+
+    private static final ClassName LIST_NAME = ClassName.get(List.class);
+    private static final ClassName IMMUTABLE_LIST_NAME = ClassName.get(ImmutableList.class);
+    private static final ClassName SET_NAME = ClassName.get(Set.class);
+    private static final ClassName IMMUTABLE_SET_NAME = ClassName.get(ImmutableSet.class);
+
+    private static TypeName immutableCollection(TypeName input) {
+        if (input instanceof ParameterizedTypeName) {
+            ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
+            if (LIST_NAME.equals(parameterized.rawType)) {
+                return ParameterizedTypeName.get(
+                        IMMUTABLE_LIST_NAME, parameterized.typeArguments.toArray(new TypeName[0]));
+            } else if (SET_NAME.equals(parameterized.rawType)) {
+                return ParameterizedTypeName.get(
+                        IMMUTABLE_SET_NAME, parameterized.typeArguments.toArray(new TypeName[0]));
+            }
+        }
+
+        return input;
     }
 
     @Value.Immutable
