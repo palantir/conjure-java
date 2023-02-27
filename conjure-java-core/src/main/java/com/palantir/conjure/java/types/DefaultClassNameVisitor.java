@@ -35,6 +35,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -58,13 +60,19 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
     @Override
     public TypeName visitList(ListType type) {
         TypeName itemType = Primitives.box(type.getItemType().accept(this));
-        return ParameterizedTypeName.get(ClassName.get(java.util.List.class), itemType);
+        return ParameterizedTypeName.get(ClassName.get(List.class), itemType);
+    }
+
+    @Override
+    public TypeName visitSet(SetType type) {
+        TypeName itemType = Primitives.box(type.getItemType().accept(this));
+        return ParameterizedTypeName.get(ClassName.get(Set.class), itemType);
     }
 
     @Override
     public TypeName visitMap(MapType type) {
         return ParameterizedTypeName.get(
-                ClassName.get(java.util.Map.class),
+                ClassName.get(Map.class),
                 Primitives.box(type.getKeyType().accept(this)),
                 Primitives.box(type.getValueType().accept(this)));
     }
@@ -153,12 +161,6 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
         ClassName typeName = ClassName.get(
                 conjurePackage, externalType.getExternalReference().getName());
         return Primitives.isBoxedPrimitive(typeName) ? Primitives.unbox(typeName) : typeName;
-    }
-
-    @Override
-    public TypeName visitSet(SetType type) {
-        TypeName itemType = Primitives.box(type.getItemType().accept(this));
-        return ParameterizedTypeName.get(ClassName.get(Set.class), itemType);
     }
 
     @Override
