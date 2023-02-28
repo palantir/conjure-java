@@ -1,0 +1,426 @@
+package com.palantir.conjure.java.undertow.processor.sample;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultiset;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.palantir.conjure.java.undertow.annotations.DefaultSerDe;
+import com.palantir.conjure.java.undertow.lib.Deserializer;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.TypeMarker;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import io.undertow.server.HttpHandler;
+import io.undertow.server.HttpServerExchange;
+import io.undertow.util.HttpString;
+import io.undertow.util.Methods;
+import io.undertow.util.StatusCodes;
+import java.lang.Exception;
+import java.lang.Override;
+import java.lang.String;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.undertow.processor.generate.ConjureUndertowEndpointsGenerator")
+public final class CollectionBodyParamEndpoints implements UndertowService {
+    private final CollectionBodyParam delegate;
+
+    private CollectionBodyParamEndpoints(CollectionBodyParam delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(CollectionBodyParam delegate) {
+        return new CollectionBodyParamEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of(
+                new CollectionEndpoint(runtime, delegate),
+                new ListEndpoint(runtime, delegate),
+                new SetEndpoint(runtime, delegate),
+                new MapEndpoint(runtime, delegate),
+                new MultisetEndpoint(runtime, delegate),
+                new MultimapEndpoint(runtime, delegate),
+                new ListMultimapEndpoint(runtime, delegate),
+                new SetMultimapEndpoint(runtime, delegate));
+    }
+
+    private static final class CollectionEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableList<String>> valuesDeserializer;
+
+        CollectionEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer =
+                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableList<String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableList<String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.collection(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/collection";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "collection";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ListEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableList<String>> valuesDeserializer;
+
+        ListEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer =
+                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableList<String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableList<String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.list(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/list";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "list";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class SetEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableSet<String>> valuesDeserializer;
+
+        SetEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer =
+                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableSet<String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableSet<String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.set(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/set";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "set";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class MapEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableMap<String, String>> valuesDeserializer;
+
+        MapEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    new TypeMarker<ImmutableMap<String, String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableMap<String, String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.map(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/map";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "map";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class MultisetEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableMultiset<String>> valuesDeserializer;
+
+        MultisetEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer =
+                    DefaultSerDe.INSTANCE.deserializer(new TypeMarker<ImmutableMultiset<String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableMultiset<String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.multiset(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/multiset";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "multiset";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class MultimapEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableListMultimap<String, String>> valuesDeserializer;
+
+        MultimapEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    new TypeMarker<ImmutableListMultimap<String, String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableListMultimap<String, String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.multimap(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/multimap";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "multimap";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class ListMultimapEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableListMultimap<String, String>> valuesDeserializer;
+
+        ListMultimapEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    new TypeMarker<ImmutableListMultimap<String, String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableListMultimap<String, String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.listMultimap(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/listMultimap";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "listMultimap";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class SetMultimapEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final CollectionBodyParam delegate;
+
+        private final Deserializer<ImmutableSetMultimap<String, String>> valuesDeserializer;
+
+        SetMultimapEndpoint(UndertowRuntime runtime, CollectionBodyParam delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.valuesDeserializer = DefaultSerDe.INSTANCE.deserializer(
+                    new TypeMarker<ImmutableSetMultimap<String, String>>() {}, runtime, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws Exception {
+            ImmutableSetMultimap<String, String> values = valuesDeserializer.deserialize(exchange);
+            this.delegate.setMultimap(values);
+            exchange.setStatusCode(StatusCodes.NO_CONTENT);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.POST;
+        }
+
+        @Override
+        public String template() {
+            return "/setMultimap";
+        }
+
+        @Override
+        public String serviceName() {
+            return "CollectionBodyParam";
+        }
+
+        @Override
+        public String name() {
+            return "setMultimap";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+}

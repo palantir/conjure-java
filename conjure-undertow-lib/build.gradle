@@ -20,8 +20,7 @@ dependencies {
     api project(':conjure-lib')
     // Generated code depends on Undertow APIs
     api 'io.undertow:undertow-core'
-    // Ideally we would declare a dependency on 'com.google.guava:listenablefuture:1.0' without all of guava,
-    // however gcv forces consistent versions across the project.
+    // Generated code depends on ListenableFuture and immutable collections
     api 'com.google.guava:guava'
     // Recommend a higher version of wildfly (1.6.0.Final+) then the one shipped with undertow to avoid CVEs.
     runtimeOnly 'org.wildfly.common:wildfly-common'

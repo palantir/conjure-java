@@ -17,7 +17,15 @@
 package com.palantir.conjure.java.undertow.processor.generate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.SetMultimap;
 import com.palantir.conjure.java.undertow.annotations.BearerTokenCookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.CookieDeserializer;
 import com.palantir.conjure.java.undertow.annotations.FormParamDeserializer;
@@ -61,9 +69,12 @@ import io.undertow.util.Methods;
 import io.undertow.util.StatusCodes;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
 import org.immutables.value.Value;
@@ -179,8 +190,9 @@ public final class ConjureUndertowEndpointsGenerator {
                     CodeBlock deserializerFactory,
                     String deserializerFieldName,
                     SafeLoggingAnnotation safeLoggable) {
-                TypeName requestBodyType =
-                        def.argType().match(ArgTypeTypeName.INSTANCE).box();
+                TypeName requestBodyType = immutableCollection(
+                        def.argType().match(ArgTypeTypeName.INSTANCE).box());
+
                 additionalFields.add(ImmutableAdditionalField.builder()
                         .field(FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Deserializer.class), requestBodyType),
@@ -753,6 +765,31 @@ public final class ConjureUndertowEndpointsGenerator {
             default:
                 throw new SafeIllegalStateException("Illegal value", SafeArg.of("value", safeLoggable));
         }
+    }
+
+    private static final Map<ClassName, Class<?>> COLLECTION_CLASSES = ImmutableMap.<ClassName, Class<?>>builder()
+            .put(ClassName.get(Collection.class), ImmutableList.class)
+            .put(ClassName.get(List.class), ImmutableList.class)
+            .put(ClassName.get(Set.class), ImmutableSet.class)
+            .put(ClassName.get(Map.class), ImmutableMap.class)
+            .put(ClassName.get(Multiset.class), ImmutableMultiset.class)
+            .put(ClassName.get(Multimap.class), ImmutableListMultimap.class)
+            .put(ClassName.get(ListMultimap.class), ImmutableListMultimap.class)
+            .put(ClassName.get(SetMultimap.class), ImmutableSetMultimap.class)
+            .buildOrThrow();
+
+    private static TypeName immutableCollection(TypeName input) {
+        if (input instanceof ParameterizedTypeName) {
+            ParameterizedTypeName parameterized = (ParameterizedTypeName) input;
+
+            Class<?> collectionClass = COLLECTION_CLASSES.get(parameterized.rawType);
+            if (collectionClass != null) {
+                return ParameterizedTypeName.get(
+                        ClassName.get(collectionClass), parameterized.typeArguments.toArray(new TypeName[0]));
+            }
+        }
+
+        return input;
     }
 
     @Value.Immutable

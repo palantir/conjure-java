@@ -25,6 +25,7 @@ import com.google.common.io.ByteStreams;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
+import com.palantir.conjure.java.undertow.processor.sample.CollectionBodyParam;
 import com.palantir.conjure.java.undertow.processor.sample.CookieParams;
 import com.palantir.conjure.java.undertow.processor.sample.DefaultDecoderService;
 import com.palantir.conjure.java.undertow.processor.sample.DeprecatedEndpointResource;
@@ -82,6 +83,11 @@ public class ConjureUndertowAnnotationProcessorTest {
     @Test
     public void testPrimitiveBodyParam() {
         assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, PrimitiveBodyParam.class);
+    }
+
+    @Test
+    public void testCollectionBodyParam() {
+        assertTestFileCompileAndMatches(TEST_CLASSES_BASE_DIR, CollectionBodyParam.class);
     }
 
     @Test
