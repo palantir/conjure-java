@@ -266,7 +266,9 @@ public final class AliasGenerator {
                     .addModifiers(Modifier.PRIVATE)
                     .addStatement(
                             "this($T.empty())",
-                            aliasTypeName instanceof ParameterizedTypeName ? Optional.class : aliasTypeName)
+                            aliasTypeName instanceof ParameterizedTypeName
+                                    ? Optional.class
+                                    : aliasTypeName.withoutAnnotations())
                     .build());
         }
 
