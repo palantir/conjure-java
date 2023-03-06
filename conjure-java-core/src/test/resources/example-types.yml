@@ -63,6 +63,9 @@ types:
       OptionalAliasExample:
         fields:
           optionalAlias: OptionalAlias
+      OptionalDoubleAlias:
+        alias: optional<double>
+        safety: unsafe
       ListExample:
         fields:
           items: 
