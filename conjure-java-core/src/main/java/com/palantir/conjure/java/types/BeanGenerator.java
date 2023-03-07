@@ -122,7 +122,7 @@ public final class BeanGenerator {
         }
 
         typeBuilder.addFields(poetFields);
-        addConstructor(typeBuilder, fields, poetFields);
+        addConstructor(typeBuilder, fields);
         addGetters(
                 typeBuilder,
                 fields,
@@ -279,10 +279,12 @@ public final class BeanGenerator {
                         .thenComparing(enrichedFields::indexOf));
     }
 
+    // Move into a new file: BeanStagedBuilderGenerator
     private static ClassName stageBuilderInterfaceName(ClassName enclosingClass, String stageName) {
         return enclosingClass.nestedClass(StringUtils.capitalize(stageName) + "StageBuilder");
     }
 
+    // Move into a new file: BeanStagedBuilderGenerator
     private static List<TypeSpec> generateStageInterfaces(
             ClassName objectClass,
             ClassName builderClass,
@@ -344,6 +346,7 @@ public final class BeanGenerator {
         return interfaces.stream().map(TypeSpec.Builder::build).collect(Collectors.toList());
     }
 
+    // Move into a new file: BeanStagedBuilderGenerator
     private static List<MethodSpec> generateMethodsForFinalStageField(
             EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass, SafetyEvaluator safetyEvaluator) {
         List<MethodSpec> methodSpecs = new ArrayList<>();
@@ -470,18 +473,19 @@ public final class BeanGenerator {
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private static void addConstructor(
-            TypeSpec.Builder builder, Collection<EnrichedField> fields, Collection<FieldSpec> poetFields) {
-        builder.addMethod(createConstructor(fields, poetFields));
+    private static void addConstructor(TypeSpec.Builder builder, Collection<EnrichedField> fields) {
+        builder.addMethod(createConstructor(fields));
     }
 
-    private static MethodSpec createConstructor(Collection<EnrichedField> fields, Collection<FieldSpec> poetFields) {
+    private static MethodSpec createConstructor(Collection<EnrichedField> fields) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE);
 
-        Collection<FieldSpec> nonPrimitivePoetFields =
-                Collections2.filter(poetFields, f -> !Primitives.isPrimitive(f.type));
-        if (!nonPrimitivePoetFields.isEmpty()) {
-            builder.addStatement("$L", Expressions.localMethodCall("validateFields", nonPrimitivePoetFields));
+        Collection<EnrichedField> nonPrimitiveEnrichedFields = Collections2.filter(fields, f -> !f.isPrimitive());
+        if (!nonPrimitiveEnrichedFields.isEmpty()) {
+            builder.addStatement(
+                    "$L",
+                    Expressions.localMethodCall(
+                            "validateFields", EnrichedField.toPoetSpecs(nonPrimitiveEnrichedFields)));
         }
 
         CodeBlock.Builder body = CodeBlock.builder();
