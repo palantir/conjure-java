@@ -80,9 +80,9 @@ public final class OneField {
     }
 
     public interface BearerTokenValueStageBuilder {
-        Builder from(OneField other);
-
         Completed_StageBuilder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
+
+        Builder from(OneField other);
     }
 
     public interface Completed_StageBuilder {
@@ -91,10 +91,10 @@ public final class OneField {
 
     public interface Builder extends BearerTokenValueStageBuilder, Completed_StageBuilder {
         @Override
-        Builder from(OneField other);
+        Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
 
         @Override
-        Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
+        Builder from(OneField other);
 
         @Override
         OneField build();

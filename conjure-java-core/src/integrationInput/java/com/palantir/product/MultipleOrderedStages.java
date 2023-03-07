@@ -160,9 +160,9 @@ public final class MultipleOrderedStages {
     }
 
     public interface TokenStageBuilder {
-        Builder from(MultipleOrderedStages other);
-
         ItemStageBuilder token(@Nonnull OneField token);
+
+        Builder from(MultipleOrderedStages other);
     }
 
     public interface ItemStageBuilder {
@@ -199,10 +199,10 @@ public final class MultipleOrderedStages {
 
     public interface Builder extends TokenStageBuilder, ItemStageBuilder, Completed_StageBuilder {
         @Override
-        Builder from(MultipleOrderedStages other);
+        Builder token(@Nonnull OneField token);
 
         @Override
-        Builder token(@Nonnull OneField token);
+        Builder from(MultipleOrderedStages other);
 
         @Override
         Builder item(@Nonnull String item);
