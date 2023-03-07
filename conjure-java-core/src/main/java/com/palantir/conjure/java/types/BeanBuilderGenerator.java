@@ -115,6 +115,19 @@ public final class BeanBuilderGenerator {
         this.options = options;
     }
 
+    public static void addBuilder(
+            TypeSpec.Builder spec,
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            ClassName objectClass,
+            ClassName builderClass,
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options options,
+            Optional<ClassName> builderInterfaceClass) {
+        return;
+    }
+
     public static TypeSpec generate(
             TypeMapper typeMapper,
             SafetyEvaluator safetyEvaluator,

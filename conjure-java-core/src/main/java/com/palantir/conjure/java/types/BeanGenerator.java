@@ -93,17 +93,11 @@ public final class BeanGenerator {
             Options options) {
         ImmutableList<EnrichedField> fields = createFields(typeMapper, typeDef.getFields());
         ImmutableList<FieldSpec> poetFields = EnrichedField.toPoetSpecs(fields);
-        ImmutableList<EnrichedField> nonPrimitiveEnrichedFields =
-                fields.stream().filter(field -> !field.isPrimitive()).collect(ImmutableList.toImmutableList());
+        boolean hasFields = !fields.isEmpty();
 
         com.palantir.conjure.spec.TypeName prefixedName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
         ClassName objectClass = ClassName.get(prefixedName.getPackage(), prefixedName.getName());
-        ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
-        ClassName builderImplementation =
-                options.useStagedBuilders() && fields.stream().anyMatch(field -> !fieldShouldBeInFinalStage(field))
-                        ? ClassName.get(objectClass.packageName(), objectClass.simpleName(), "DefaultBuilder")
-                        : builderClass;
 
         // Use the fully-resolved/computed safety value for the top-level class, however
         // fields (setters/getters) are annotated with declared values because complex objects
@@ -113,41 +107,9 @@ public final class BeanGenerator {
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addAnnotations(safety)
-                .addFields(poetFields)
-                .addMethod(createConstructor(fields, poetFields))
-                .addMethods(createGetters(fields, typesMap, options, safetyEvaluator));
+                .addAnnotations(safety);
 
-        if (!poetFields.isEmpty()) {
-            boolean useCachedHashCode = useCachedHashCode(fields);
-            typeBuilder
-                    .addMethod(MethodSpecs.createEquals(objectClass))
-                    .addMethod(MethodSpecs.createEqualTo(objectClass, poetFields, useCachedHashCode));
-            if (useCachedHashCode) {
-                MethodSpecs.addCachedHashCode(typeBuilder, poetFields);
-            } else {
-                typeBuilder.addMethod(MethodSpecs.createHashCode(poetFields));
-            }
-        }
-
-        typeBuilder.addMethod(MethodSpecs.createToString(
-                        prefixedName.getName(),
-                        fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList()))
-                .toBuilder()
-                .addAnnotations(safety)
-                .build());
-
-        if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
-            typeBuilder.addMethod(createStaticFactoryMethod(fields, objectClass, safetyEvaluator));
-        }
-
-        if (!nonPrimitiveEnrichedFields.isEmpty()) {
-            typeBuilder
-                    .addMethod(createValidateFields(nonPrimitiveEnrichedFields))
-                    .addMethod(createAddFieldIfMissing(nonPrimitiveEnrichedFields.size()));
-        }
-
-        if (poetFields.isEmpty()) {
+        if (!hasFields) {
             // Need to add JsonSerialize annotation which indicates that the empty bean serializer should be used to
             // serialize this class. Without this annotation no serializer will be set for this class, thus preventing
             // serialization.
@@ -157,16 +119,64 @@ public final class BeanGenerator {
                         .addMember("ignoreUnknown", "$L", true)
                         .build());
             }
-        } else {
+        }
+
+        typeBuilder.addFields(poetFields);
+        addConstructor(typeBuilder, fields, poetFields);
+        addGetters(
+                typeBuilder,
+                fields,
+                typesMap,
+                options.excludeEmptyOptionals(),
+                options.excludeEmptyCollections(),
+                options.useImmutableBytes(),
+                safetyEvaluator);
+
+        addEquals(typeBuilder, fields, objectClass);
+        addEqualsTo(typeBuilder, fields, poetFields, objectClass);
+        addHashCode(typeBuilder, fields, poetFields);
+
+        // addToString(...)
+        // addStaticFactory(...)
+        // addValidateFields(...)
+        // addAddFieldIfMissing(...)
+        // addBuilder(...)
+
+        typeBuilder.addMethod(MethodSpecs.createToString(
+                        prefixedName.getName(),
+                        fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList()))
+                .toBuilder()
+                .addAnnotations(safety)
+                .build());
+
+        if (fields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
+            typeBuilder.addMethod(createStaticFactoryMethod(fields, objectClass, safetyEvaluator));
+        }
+
+        ImmutableList<EnrichedField> nonPrimitiveEnrichedFields =
+                fields.stream().filter(field -> !field.isPrimitive()).collect(ImmutableList.toImmutableList());
+        if (!nonPrimitiveEnrichedFields.isEmpty()) {
+            typeBuilder
+                    .addMethod(createValidateFields(nonPrimitiveEnrichedFields))
+                    .addMethod(createAddFieldIfMissing(nonPrimitiveEnrichedFields.size()));
+        }
+
+        if (hasFields) {
+            ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
             ImmutableList<EnrichedField> fieldsNeedingBuilderStage = fields.stream()
                     .filter(field -> !fieldShouldBeInFinalStage(field))
                     .collect(ImmutableList.toImmutableList());
-            typeBuilder.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                    .addMember("builder", "$T.class", builderImplementation)
-                    .build());
+
             if (!options.useStagedBuilders() || fieldsNeedingBuilderStage.isEmpty()) {
                 typeBuilder
-                        .addMethod(createBuilder(builderClass))
+                        .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                                .addMember("builder", "$T.class", builderClass)
+                                .build())
+                        .addMethod(MethodSpec.methodBuilder("builder")
+                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                                .returns(builderClass)
+                                .addStatement("return new $T()", builderClass)
+                                .build())
                         .addType(BeanBuilderGenerator.generate(
                                 typeMapper,
                                 safetyEvaluator,
@@ -177,6 +187,7 @@ public final class BeanGenerator {
                                 options,
                                 Optional.empty()));
             } else {
+                // BeanStagedBuilderGenerator.addBuilder(...)
                 List<TypeSpec> interfaces = generateStageInterfaces(
                         objectClass,
                         builderClass,
@@ -194,6 +205,8 @@ public final class BeanGenerator {
 
                 TypeSpec builderInterface = TypeSpec.interfaceBuilder("Builder")
                         .addModifiers(Modifier.PUBLIC)
+                        // TODO(pritham): Why were we boxing primitives? A primitive shouldn't be an interface here?
+                        .addSuperinterfaces(interfacesAsClasses)
                         .addMethods(interfaces.stream()
                                 .map(stageInterface -> stageInterface.methodSpecs)
                                 .flatMap(List::stream)
@@ -201,6 +214,7 @@ public final class BeanGenerator {
                                         .addAnnotation(Override.class)
                                         .returns(
                                                 method.name.equals("build")
+                                                        // TODO(pritham): when would this not be the class name?
                                                         ? method.returnType
                                                         : ClassName.get(
                                                                 objectClass.packageName(),
@@ -208,12 +222,16 @@ public final class BeanGenerator {
                                                                 "Builder"))
                                         .build())
                                 .collect(Collectors.toSet()))
-                        .addSuperinterfaces(interfacesAsClasses.stream()
-                                .map(Primitives::box)
-                                .collect(Collectors.toList()))
                         .build();
 
                 typeBuilder
+                        .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                                .addMember(
+                                        "builder",
+                                        "$T.class",
+                                        ClassName.get(
+                                                objectClass.packageName(), objectClass.simpleName(), "DefaultBuilder"))
+                                .build())
                         .addTypes(interfaces)
                         .addType(builderInterface)
                         .addMethod(MethodSpec.methodBuilder("builder")
@@ -398,6 +416,38 @@ public final class BeanGenerator {
         return true;
     }
 
+    private static void addEquals(
+            TypeSpec.Builder builder, ImmutableList<EnrichedField> fields, ClassName objectClass) {
+        if (fields.isEmpty()) {
+            return;
+        }
+
+        builder.addMethod(MethodSpecs.createEquals(objectClass));
+    }
+
+    private static void addEqualsTo(
+            TypeSpec.Builder builder,
+            ImmutableList<EnrichedField> fields,
+            ImmutableList<FieldSpec> poetFields,
+            ClassName objectClass) {
+        if (fields.isEmpty()) {
+            return;
+        }
+        builder.addMethod(MethodSpecs.createEqualTo(objectClass, poetFields, useCachedHashCode(fields)));
+    }
+
+    private static void addHashCode(
+            TypeSpec.Builder builder, ImmutableList<EnrichedField> fields, ImmutableList<FieldSpec> poetFields) {
+        if (fields.isEmpty()) {
+            return;
+        }
+        if (useCachedHashCode(fields)) {
+            MethodSpecs.addCachedHashCode(builder, poetFields);
+        } else {
+            builder.addMethod(MethodSpecs.createHashCode(poetFields));
+        }
+    }
+
     private static FieldSpec createSingletonField(ClassName objectClass) {
         return FieldSpec.builder(
                         objectClass, SINGLETON_INSTANCE_NAME, Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
@@ -418,6 +468,11 @@ public final class BeanGenerator {
                                         Modifier.FINAL)
                                 .build()))
                 .collect(ImmutableList.toImmutableList());
+    }
+
+    private static void addConstructor(
+            TypeSpec.Builder builder, Collection<EnrichedField> fields, Collection<FieldSpec> poetFields) {
+        builder.addMethod(createConstructor(fields, poetFields));
     }
 
     private static MethodSpec createConstructor(Collection<EnrichedField> fields, Collection<FieldSpec> poetFields) {
@@ -454,20 +509,42 @@ public final class BeanGenerator {
         return builder.build();
     }
 
+    private static void addGetters(
+            TypeSpec.Builder builder,
+            Collection<EnrichedField> fields,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            boolean excludeEmptyOptionals,
+            boolean excludeEmptyCollections,
+            boolean useImmutableBytes,
+            SafetyEvaluator safetyEvaluator) {
+        builder.addMethods(createGetters(
+                fields, typesMap, excludeEmptyOptionals, excludeEmptyCollections, useImmutableBytes, safetyEvaluator));
+    }
+
     private static Collection<MethodSpec> createGetters(
             Collection<EnrichedField> fields,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            Options featureFlags,
+            boolean excludeEmptyOptionals,
+            boolean excludeEmptyCollections,
+            boolean useImmutableBytes,
             SafetyEvaluator safetyEvaluator) {
         return fields.stream()
-                .map(field -> BeanGenerator.createGetter(field, typesMap, featureFlags, safetyEvaluator))
+                .map(field -> BeanGenerator.createGetter(
+                        field,
+                        typesMap,
+                        excludeEmptyOptionals,
+                        excludeEmptyCollections,
+                        useImmutableBytes,
+                        safetyEvaluator))
                 .collect(Collectors.toList());
     }
 
     private static MethodSpec createGetter(
             EnrichedField field,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            Options featureFlags,
+            boolean excludeEmptyOptionals,
+            boolean excludeEmptyCollections,
+            boolean useImmutableBytes,
             SafetyEvaluator safetyEvaluator) {
         MethodSpec.Builder getterBuilder = MethodSpec.methodBuilder(field.getterName())
                 .addModifiers(Modifier.PUBLIC)
@@ -477,7 +554,7 @@ public final class BeanGenerator {
                 .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                 .returns(field.poetSpec().type);
         Type conjureDefType = field.conjureDef().getType();
-        if (featureFlags.excludeEmptyOptionals()) {
+        if (excludeEmptyOptionals) {
             if (conjureDefType.accept(TypeVisitor.IS_OPTIONAL)) {
                 // NON_ABSENT is most accurate for java Optional types (including OptionalDouble/OptionalInt, etc)
                 getterBuilder.addAnnotation(AnnotationSpec.builder(JsonInclude.class)
@@ -494,7 +571,7 @@ public final class BeanGenerator {
             }
         }
 
-        if (featureFlags.excludeEmptyCollections()) {
+        if (excludeEmptyCollections) {
             Type dealiased = conjureDefType.accept(TypeVisitor.IS_REFERENCE)
                     ? TypeFunctions.toConjureTypeWithoutAliases(conjureDefType, typesMap)
                     : conjureDefType;
@@ -505,7 +582,7 @@ public final class BeanGenerator {
             }
         }
 
-        if (conjureDefType.accept(TypeVisitor.IS_BINARY) && !featureFlags.useImmutableBytes()) {
+        if (conjureDefType.accept(TypeVisitor.IS_BINARY) && !useImmutableBytes) {
             getterBuilder.addStatement("return this.$N.asReadOnlyBuffer()", field.poetSpec().name);
         } else {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);
@@ -593,14 +670,6 @@ public final class BeanGenerator {
                 .addStatement("missingFields.add($N)", fieldNameParam)
                 .endControlFlow()
                 .addStatement("return missingFields")
-                .build();
-    }
-
-    private static MethodSpec createBuilder(ClassName builderClass) {
-        return MethodSpec.methodBuilder("builder")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(builderClass)
-                .addStatement("return new $T()", builderClass)
                 .build();
     }
 
