@@ -207,7 +207,7 @@ public final class BeanGenerator {
                                                                 objectClass.simpleName(),
                                                                 "Builder"))
                                         .build())
-                                .collect(Collectors.toSet()))
+                                .collect(Collectors.toList()))
                         .addSuperinterfaces(interfacesAsClasses.stream()
                                 .map(Primitives::box)
                                 .collect(Collectors.toList()))
