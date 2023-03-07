@@ -48,6 +48,7 @@ import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.visitor.TypeVisitor;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
@@ -132,14 +133,18 @@ public final class BeanGenerator {
                 options.useImmutableBytes(),
                 safetyEvaluator);
 
-        addEquals(typeBuilder, fields, objectClass);
-        addEqualsTo(typeBuilder, fields, poetFields, objectClass);
-        addHashCode(typeBuilder, fields, poetFields);
+        if (hasFields) {
+            addEquals(typeBuilder, fields, objectClass);
+            addEqualsTo(typeBuilder, fields, poetFields, objectClass);
+            addHashCode(typeBuilder, fields, poetFields);
+        }
 
         // addToString(...)
-        // addStaticFactory(...)
-        // addValidateFields(...)
-        // addAddFieldIfMissing(...)
+        // if (fields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
+        //   addStaticFactory(...)
+        // }
+        // addValidateFields(nonPrimitiveEnrichedFields, ...)
+        // addAddFieldIfMissing(nonPrimitiveEnrichedFields, ...)
         // addBuilder(...)
 
         typeBuilder.addMethod(MethodSpecs.createToString(
@@ -162,94 +167,8 @@ public final class BeanGenerator {
         }
 
         if (hasFields) {
-            ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
-            ImmutableList<EnrichedField> fieldsNeedingBuilderStage = fields.stream()
-                    .filter(field -> !fieldShouldBeInFinalStage(field))
-                    .collect(ImmutableList.toImmutableList());
-
-            if (!options.useStagedBuilders() || fieldsNeedingBuilderStage.isEmpty()) {
-                typeBuilder
-                        .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                                .addMember("builder", "$T.class", builderClass)
-                                .build())
-                        .addMethod(MethodSpec.methodBuilder("builder")
-                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                                .returns(builderClass)
-                                .addStatement("return new $T()", builderClass)
-                                .build())
-                        .addType(BeanBuilderGenerator.generate(
-                                typeMapper,
-                                safetyEvaluator,
-                                objectClass,
-                                builderClass,
-                                typeDef,
-                                typesMap,
-                                options,
-                                Optional.empty()));
-            } else {
-                // BeanStagedBuilderGenerator.addBuilder(...)
-                List<TypeSpec> interfaces = generateStageInterfaces(
-                        objectClass,
-                        builderClass,
-                        typeMapper,
-                        fieldsNeedingBuilderStage,
-                        fields.stream()
-                                .filter(BeanGenerator::fieldShouldBeInFinalStage)
-                                .collect(ImmutableList.toImmutableList()),
-                        safetyEvaluator);
-
-                List<ClassName> interfacesAsClasses = interfaces.stream()
-                        .map(stageInterface ->
-                                ClassName.get(objectClass.packageName(), objectClass.simpleName(), stageInterface.name))
-                        .collect(Collectors.toList());
-
-                TypeSpec builderInterface = TypeSpec.interfaceBuilder("Builder")
-                        .addModifiers(Modifier.PUBLIC)
-                        // TODO(pritham): Why were we boxing primitives? A primitive shouldn't be an interface here?
-                        .addSuperinterfaces(interfacesAsClasses)
-                        .addMethods(interfaces.stream()
-                                .map(stageInterface -> stageInterface.methodSpecs)
-                                .flatMap(List::stream)
-                                .map(method -> method.toBuilder()
-                                        .addAnnotation(Override.class)
-                                        .returns(
-                                                method.name.equals("build")
-                                                        // TODO(pritham): when would this not be the class name?
-                                                        ? method.returnType
-                                                        : ClassName.get(
-                                                                objectClass.packageName(),
-                                                                objectClass.simpleName(),
-                                                                "Builder"))
-                                        .build())
-                                .collect(Collectors.toSet()))
-                        .build();
-
-                typeBuilder
-                        .addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                                .addMember(
-                                        "builder",
-                                        "$T.class",
-                                        ClassName.get(
-                                                objectClass.packageName(), objectClass.simpleName(), "DefaultBuilder"))
-                                .build())
-                        .addTypes(interfaces)
-                        .addType(builderInterface)
-                        .addMethod(MethodSpec.methodBuilder("builder")
-                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                                .returns(interfacesAsClasses.get(0))
-                                .addStatement("return new DefaultBuilder()")
-                                .build())
-                        .addType(BeanBuilderGenerator.generate(
-                                typeMapper,
-                                safetyEvaluator,
-                                objectClass,
-                                builderClass,
-                                typeDef,
-                                typesMap,
-                                options,
-                                Optional.of(ClassName.get(
-                                        objectClass.packageName(), objectClass.simpleName(), builderInterface.name))));
-            }
+            addBuilder(typeBuilder, objectClass, fields, typeMapper, safetyEvaluator, typeDef, typesMap, options);
+            // Preferably, pass in the members of `options` required.
         }
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
 
@@ -277,6 +196,103 @@ public final class BeanGenerator {
         return enrichedFields.stream()
                 .sorted(Comparator.comparing(BeanGenerator::fieldShouldBeInFinalStage)
                         .thenComparing(enrichedFields::indexOf));
+    }
+
+    // Move this is to BeanBuilderGenerator
+    public static void addBuilder(
+            TypeSpec.Builder builder,
+            ClassName objectClass,
+            Collection<EnrichedField> fields,
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options options) {
+        ClassName builderClass = ClassName.get(objectClass.packageName(), objectClass.simpleName(), "Builder");
+        ImmutableList<EnrichedField> fieldsNeedingBuilderStage = fields.stream()
+                .filter(field -> !fieldShouldBeInFinalStage(field))
+                .collect(ImmutableList.toImmutableList());
+
+        if (!options.useStagedBuilders() || fieldsNeedingBuilderStage.isEmpty()) {
+            builder.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                            .addMember("builder", "$T.class", builderClass)
+                            .build())
+                    .addMethod(MethodSpec.methodBuilder("builder")
+                            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                            .returns(builderClass)
+                            .addStatement("return new $T()", builderClass)
+                            .build())
+                    .addType(BeanBuilderGenerator.generate(
+                            typeMapper,
+                            safetyEvaluator,
+                            objectClass,
+                            builderClass,
+                            typeDef,
+                            typesMap,
+                            options,
+                            Optional.empty()));
+        } else {
+            List<TypeSpec> interfaces = generateStageInterfaces(
+                    objectClass,
+                    builderClass,
+                    typeMapper,
+                    fieldsNeedingBuilderStage,
+                    fields.stream()
+                            .filter(BeanGenerator::fieldShouldBeInFinalStage)
+                            .collect(ImmutableList.toImmutableList()),
+                    safetyEvaluator);
+
+            List<ClassName> interfacesAsClasses = interfaces.stream()
+                    .map(stageInterface ->
+                            ClassName.get(objectClass.packageName(), objectClass.simpleName(), stageInterface.name))
+                    .collect(Collectors.toList());
+
+            TypeSpec builderInterface = TypeSpec.interfaceBuilder("Builder")
+                    .addModifiers(Modifier.PUBLIC)
+                    // TODO(pritham): Why were we boxing primitives? A primitive shouldn't be an interface here?
+                    .addSuperinterfaces(interfacesAsClasses)
+                    .addMethods(interfaces.stream()
+                            .map(stageInterface -> stageInterface.methodSpecs)
+                            .flatMap(List::stream)
+                            .map(method -> method.toBuilder()
+                                    .addAnnotation(Override.class)
+                                    .returns(
+                                            method.name.equals("build")
+                                                    // TODO(pritham): when would this not be the class name?
+                                                    ? method.returnType
+                                                    : ClassName.get(
+                                                            objectClass.packageName(),
+                                                            objectClass.simpleName(),
+                                                            "Builder"))
+                                    .build())
+                            .collect(Collectors.toSet()))
+                    .build();
+
+            builder.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                            .addMember(
+                                    "builder",
+                                    "$T.class",
+                                    ClassName.get(
+                                            objectClass.packageName(), objectClass.simpleName(), "DefaultBuilder"))
+                            .build())
+                    .addTypes(interfaces)
+                    .addType(builderInterface)
+                    .addMethod(MethodSpec.methodBuilder("builder")
+                            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                            .returns(interfacesAsClasses.get(0))
+                            .addStatement("return new DefaultBuilder()")
+                            .build())
+                    .addType(BeanBuilderGenerator.generate(
+                            typeMapper,
+                            safetyEvaluator,
+                            objectClass,
+                            builderClass,
+                            typeDef,
+                            typesMap,
+                            options,
+                            Optional.of(ClassName.get(
+                                    objectClass.packageName(), objectClass.simpleName(), builderInterface.name))));
+        }
     }
 
     // Move into a new file: BeanStagedBuilderGenerator
@@ -421,10 +437,7 @@ public final class BeanGenerator {
 
     private static void addEquals(
             TypeSpec.Builder builder, ImmutableList<EnrichedField> fields, ClassName objectClass) {
-        if (fields.isEmpty()) {
-            return;
-        }
-
+        Preconditions.checkState(fields.size() > 0);
         builder.addMethod(MethodSpecs.createEquals(objectClass));
     }
 
@@ -433,17 +446,13 @@ public final class BeanGenerator {
             ImmutableList<EnrichedField> fields,
             ImmutableList<FieldSpec> poetFields,
             ClassName objectClass) {
-        if (fields.isEmpty()) {
-            return;
-        }
+        Preconditions.checkState(fields.size() > 0);
         builder.addMethod(MethodSpecs.createEqualTo(objectClass, poetFields, useCachedHashCode(fields)));
     }
 
     private static void addHashCode(
             TypeSpec.Builder builder, ImmutableList<EnrichedField> fields, ImmutableList<FieldSpec> poetFields) {
-        if (fields.isEmpty()) {
-            return;
-        }
+        Preconditions.checkState(fields.size() > 0);
         if (useCachedHashCode(fields)) {
             MethodSpecs.addCachedHashCode(builder, poetFields);
         } else {
@@ -474,6 +483,8 @@ public final class BeanGenerator {
     }
 
     private static void addConstructor(TypeSpec.Builder builder, Collection<EnrichedField> fields) {
+        // there's no reason to keep `createConstructor` around, we can do everything in this method. I'm just making a
+        // call to `createConstructor` here for clarity.
         builder.addMethod(createConstructor(fields));
     }
 
