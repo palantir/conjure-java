@@ -24,8 +24,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
@@ -207,7 +205,7 @@ public final class BeanGenerator {
                                                                 objectClass.simpleName(),
                                                                 "Builder"))
                                         .build())
-                                .collect(Collectors.toSet()))
+                                .collect(Collectors.toList()))
                         .addSuperinterfaces(interfacesAsClasses.stream()
                                 .map(Primitives::box)
                                 .collect(Collectors.toList()))
@@ -274,21 +272,28 @@ public final class BeanGenerator {
             SafetyEvaluator safetyEvaluator) {
         List<TypeSpec.Builder> interfaces = new ArrayList<>();
 
-        PeekingIterator<EnrichedField> fieldPeekingIterator = Iterators.peekingIterator(
-                sortedEnrichedFields(fieldsNeedingBuilderStage).iterator());
-
-        while (fieldPeekingIterator.hasNext()) {
-            EnrichedField field = fieldPeekingIterator.next();
-            String nextBuilderStageName = fieldPeekingIterator.hasNext()
-                    ? JavaNameSanitizer.sanitize(fieldPeekingIterator.peek().fieldName())
+        List<EnrichedField> fields =
+                sortedEnrichedFields(fieldsNeedingBuilderStage).collect(Collectors.toList());
+        for (int i = 0; i < fields.size(); i++) {
+            EnrichedField field = fields.get(i);
+            String nextBuilderStageName = i < fields.size() - 1
+                    ? JavaNameSanitizer.sanitize(fields.get(i + 1).fieldName())
                     : "completed_";
 
             ClassName nextStageClassName = stageBuilderInterfaceName(objectClass, nextBuilderStageName);
 
-            interfaces.add(TypeSpec.interfaceBuilder(
+            TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder(
                             stageBuilderInterfaceName(objectClass, JavaNameSanitizer.sanitize(field.fieldName())))
-                    .addModifiers(Modifier.PUBLIC)
-                    .addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
+                    .addModifiers(Modifier.PUBLIC);
+            if (i == 0) {
+                interfaceBuilder.addMethod(MethodSpec.methodBuilder("from")
+                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        .returns(builderClass)
+                        .addParameter(objectClass, "other")
+                        .build());
+            }
+            interfaces.add(
+                    interfaceBuilder.addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
                             .addParameter(ParameterSpec.builder(
                                             field.poetSpec().type, JavaNameSanitizer.sanitize(field.fieldName()))
                                     .addAnnotation(Nonnull.class)
@@ -314,15 +319,6 @@ public final class BeanGenerator {
                 .collect(Collectors.toList()));
 
         interfaces.add(completedStage);
-
-        interfaces
-                .get(0)
-                .addMethod(MethodSpec.methodBuilder("from")
-                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                        .returns(builderClass)
-                        .addParameter(objectClass, "other")
-                        .build());
-
         return interfaces.stream().map(TypeSpec.Builder::build).collect(Collectors.toList());
     }
 
