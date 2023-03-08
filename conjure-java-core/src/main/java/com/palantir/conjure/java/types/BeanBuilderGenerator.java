@@ -19,14 +19,18 @@ package com.palantir.conjure.java.types;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
+import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
@@ -64,6 +68,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -72,7 +77,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
+import org.apache.commons.lang3.StringUtils;
 
 public final class BeanBuilderGenerator {
 
@@ -95,6 +103,8 @@ public final class BeanBuilderGenerator {
 
     private static final String BUILT_FIELD = "_buildInvoked";
     private static final String CHECK_NOT_BUILT_METHOD = "checkNotBuilt";
+    private static final String STAGED_BUILDER_INTERFACE_NAME = "Builder";
+    private static final String STAGED_BUILDER_IMPLEMENTATION_NAME = "DefaultBuilder";
 
     private final TypeMapper typeMapper;
     private final SafetyEvaluator safetyEvaluator;
@@ -113,6 +123,19 @@ public final class BeanBuilderGenerator {
         this.builderClass = builderClass;
         this.objectClass = objectClass;
         this.options = options;
+    }
+
+    public static void generateStagedBuilder(
+            TypeSpec.Builder specBuilder,
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            ClassName objectClass,
+            ClassName builderClass,
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options options) {
+        new BeanBuilderGenerator(typeMapper, safetyEvaluator, builderClass, objectClass, options)
+                .addStagedBuilder(specBuilder, typeDef, typesMap);
     }
 
     public static TypeSpec generate(
@@ -162,6 +185,252 @@ public final class BeanBuilderGenerator {
         }
 
         return builder.build();
+    }
+
+    public void addStagedBuilder(
+            TypeSpec.Builder builder,
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+        // Select fields to create interfaces for
+        ImmutableList<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
+        ImmutableList<EnrichedField> fieldsNeedingBuilderStage = enrichedFields.stream()
+                .filter(field -> !fieldShouldBeInFinalStage(field))
+                .collect(ImmutableList.toImmutableList());
+
+        builder.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
+                .addMember(
+                        "builder",
+                        "$T.class",
+                        ClassName.get(
+                                objectClass.packageName(),
+                                objectClass.simpleName(),
+                                STAGED_BUILDER_IMPLEMENTATION_NAME))
+                .build());
+        addStageInterfacesAndBuilderMethod(builder, enrichedFields, fieldsNeedingBuilderStage);
+        TypeSpec.Builder implementationBuilder = TypeSpec.classBuilder(STAGED_BUILDER_IMPLEMENTATION_NAME);
+        addBuilderImplementation(
+                implementationBuilder,
+                typeDef,
+                typesMap,
+                Optional.of(ClassName.get(
+                        objectClass.packageName(), objectClass.simpleName(), STAGED_BUILDER_INTERFACE_NAME)));
+        builder.addType(implementationBuilder.build());
+    }
+
+    private void addStageInterfacesAndBuilderMethod(
+            TypeSpec.Builder specBuilder,
+            ImmutableList<EnrichedField> allFields,
+            ImmutableList<EnrichedField> fieldsNeedingBuilderStage) {
+        Preconditions.checkState(!fieldsNeedingBuilderStage.isEmpty(), "TODO(pritham)");
+        List<TypeSpec> interfaces = generateStageInterfaces(
+                objectClass,
+                builderClass,
+                typeMapper,
+                fieldsNeedingBuilderStage,
+                allFields.stream()
+                        .filter(f -> !fieldsNeedingBuilderStage.contains(f))
+                        .collect(ImmutableList.toImmutableList()),
+                safetyEvaluator);
+
+        List<TypeName> interfaceClassNames = interfaces.stream()
+                .map(stageInterface ->
+                        ClassName.get(objectClass.packageName(), objectClass.simpleName(), stageInterface.name))
+                .map(Primitives::box)
+                .collect(Collectors.toList());
+
+        TypeSpec builderInterface = TypeSpec.interfaceBuilder("Builder")
+                .addModifiers(Modifier.PUBLIC)
+                .addMethods(interfaces.stream()
+                        .map(stageInterface -> stageInterface.methodSpecs)
+                        .flatMap(List::stream)
+                        .map(method -> method.toBuilder()
+                                .addAnnotation(Override.class)
+                                .returns(
+                                        method.name.equals("build")
+                                                ? method.returnType
+                                                : ClassName.get(
+                                                        objectClass.packageName(), objectClass.simpleName(), "Builder"))
+                                .build())
+                        .collect(Collectors.toList()))
+                .addSuperinterfaces(interfaceClassNames)
+                .build();
+
+        specBuilder
+                .addTypes(interfaces)
+                .addType(builderInterface)
+                .addMethod(MethodSpec.methodBuilder("builder")
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .returns(interfaceClassNames.get(0))
+                        .addStatement("return new DefaultBuilder()")
+                        .build());
+    }
+
+    private static List<TypeSpec> generateStageInterfaces(
+            ClassName objectClass,
+            ClassName builderClass,
+            TypeMapper typeMapper,
+            ImmutableList<EnrichedField> fieldsNeedingBuilderStage,
+            ImmutableList<EnrichedField> otherFields,
+            SafetyEvaluator safetyEvaluator) {
+        List<TypeSpec.Builder> interfaces = new ArrayList<>();
+
+        PeekingIterator<EnrichedField> fieldPeekingIterator = Iterators.peekingIterator(
+                sortedEnrichedFields(fieldsNeedingBuilderStage).iterator());
+
+        while (fieldPeekingIterator.hasNext()) {
+            EnrichedField field = fieldPeekingIterator.next();
+            String nextBuilderStageName = fieldPeekingIterator.hasNext()
+                    ? JavaNameSanitizer.sanitize(fieldPeekingIterator.peek().fieldName())
+                    : "completed_";
+
+            ClassName nextStageClassName = stageBuilderInterfaceName(objectClass, nextBuilderStageName);
+
+            interfaces.add(TypeSpec.interfaceBuilder(
+                            stageBuilderInterfaceName(objectClass, JavaNameSanitizer.sanitize(field.fieldName())))
+                    .addModifiers(Modifier.PUBLIC)
+                    .addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
+                            .addParameter(ParameterSpec.builder(
+                                            field.poetSpec().type, JavaNameSanitizer.sanitize(field.fieldName()))
+                                    .addAnnotation(Nonnull.class)
+                                    .build())
+                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                            .returns(Primitives.box(nextStageClassName))
+                            .build()));
+        }
+
+        ClassName completedStageClass = stageBuilderInterfaceName(objectClass, "completed_");
+
+        TypeSpec.Builder completedStage = TypeSpec.interfaceBuilder(completedStageClass)
+                .addModifiers(Modifier.PUBLIC)
+                .addMethod(MethodSpec.methodBuilder("build")
+                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        .returns(Primitives.box(objectClass))
+                        .build());
+
+        completedStage.addMethods(otherFields.stream()
+                .map(field ->
+                        generateMethodsForFinalStageField(field, typeMapper, completedStageClass, safetyEvaluator))
+                .flatMap(List::stream)
+                .collect(Collectors.toList()));
+
+        interfaces.add(completedStage);
+
+        interfaces
+                .get(0)
+                .addMethod(MethodSpec.methodBuilder("from")
+                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        .returns(builderClass)
+                        .addParameter(objectClass, "other")
+                        .build());
+
+        return interfaces.stream().map(TypeSpec.Builder::build).collect(Collectors.toList());
+    }
+
+    private static ClassName stageBuilderInterfaceName(ClassName enclosingClass, String stageName) {
+        return enclosingClass.nestedClass(StringUtils.capitalize(stageName) + "StageBuilder");
+    }
+
+    private static List<MethodSpec> generateMethodsForFinalStageField(
+            EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass, SafetyEvaluator safetyEvaluator) {
+        List<MethodSpec> methodSpecs = new ArrayList<>();
+        Type type = enriched.conjureDef().getType();
+        FieldDefinition definition = enriched.conjureDef();
+        Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(definition);
+
+        methodSpecs.add(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(enriched.fieldName()))
+                .addParameter(ParameterSpec.builder(
+                                BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
+                                        enriched.poetSpec().type, type, typeMapper, safety),
+                                JavaNameSanitizer.sanitize(enriched.fieldName()))
+                        .addAnnotation(Nonnull.class)
+                        .build())
+                .addJavadoc(Javadoc.render(definition.getDocs(), definition.getDeprecated())
+                        .map(rendered -> CodeBlock.of("$L", rendered))
+                        .orElseGet(() -> CodeBlock.builder().build()))
+                .addAnnotations(ConjureAnnotations.deprecation(definition.getDeprecated()))
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .returns(Primitives.box(returnClass))
+                .build());
+
+        if (type.accept(TypeVisitor.IS_LIST)) {
+            methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createCollectionSetterBuilder(
+                            "addAll", enriched, typeMapper, returnClass, safetyEvaluator)
+                    .addModifiers(Modifier.ABSTRACT)
+                    .build());
+            methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(
+                            enriched, type.accept(TypeVisitor.LIST).getItemType(), typeMapper, returnClass, safety)
+                    .addModifiers(Modifier.ABSTRACT)
+                    .build());
+        }
+
+        if (type.accept(TypeVisitor.IS_SET)) {
+            methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createCollectionSetterBuilder(
+                            "addAll", enriched, typeMapper, returnClass, safetyEvaluator)
+                    .addModifiers(Modifier.ABSTRACT)
+                    .build());
+            methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createItemSetterBuilder(
+                            enriched, type.accept(TypeVisitor.SET).getItemType(), typeMapper, returnClass, safety)
+                    .addModifiers(Modifier.ABSTRACT)
+                    .build());
+        }
+
+        if (type.accept(TypeVisitor.IS_MAP)) {
+            methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createCollectionSetterBuilder(
+                            "putAll", enriched, typeMapper, returnClass, safetyEvaluator)
+                    .addModifiers(Modifier.ABSTRACT)
+                    .build());
+            methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(enriched, typeMapper, returnClass)
+                    .addModifiers(Modifier.ABSTRACT)
+                    .build());
+        }
+
+        if (type.accept(TypeVisitor.IS_OPTIONAL)) {
+            methodSpecs.add(BeanBuilderAuxiliarySettersUtils.createOptionalSetterBuilder(
+                            enriched, typeMapper, returnClass, safetyEvaluator)
+                    .addModifiers(Modifier.ABSTRACT)
+                    .build());
+        }
+
+        return methodSpecs;
+    }
+
+    public static boolean fieldShouldBeInFinalStage(EnrichedField field) {
+        Type type = field.conjureDef().getType();
+        return type.accept(TypeVisitor.IS_LIST)
+                || type.accept(TypeVisitor.IS_SET)
+                || type.accept(TypeVisitor.IS_MAP)
+                || type.accept(TypeVisitor.IS_OPTIONAL);
+    }
+
+    private void addBuilderImplementation(
+            TypeSpec.Builder specBuilder,
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Optional<ClassName> builderInterfaceClass) {
+        Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
+        Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
+        boolean implementsInterface = builderInterfaceClass.isPresent();
+        if (implementsInterface) {
+            specBuilder.addSuperinterface(builderInterfaceClass.get());
+        }
+        specBuilder
+                .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
+                .addModifiers(Modifier.STATIC, Modifier.FINAL)
+                .addField(FieldSpec.builder(boolean.class, BUILT_FIELD).build())
+                .addFields(poetFields)
+                .addFields(primitivesInitializedFields(enrichedFields))
+                .addMethod(createConstructor())
+                .addMethod(createFromObject(enrichedFields, implementsInterface))
+                .addMethods(createSetters(enrichedFields, typesMap, implementsInterface))
+                .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
+                .addMethod(createBuild(enrichedFields, poetFields, implementsInterface))
+                .addMethod(createCheckNotBuilt());
+
+        if (!options.strictObjects()) {
+            specBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+                    .addMember("ignoreUnknown", "$L", true)
+                    .build());
+        }
     }
 
     private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {
@@ -238,8 +507,18 @@ public final class BeanBuilderGenerator {
         return "_" + JavaNameSanitizer.sanitize(field.conjureDef().getFieldName()) + "Initialized";
     }
 
-    private Collection<EnrichedField> enrichFields(List<FieldDefinition> fields) {
-        return fields.stream().map(e -> createField(e.getFieldName(), e)).collect(Collectors.toList());
+    private ImmutableList<EnrichedField> enrichFields(List<FieldDefinition> fields) {
+        return fields.stream().map(e -> createField(e.getFieldName(), e)).collect(ImmutableList.toImmutableList());
+    }
+
+    /**
+     * Sorts input fields in the order they should be applied to the builder: Original order with required
+     * fields prior to optional/collection values.
+     */
+    public static Stream<EnrichedField> sortedEnrichedFields(ImmutableList<EnrichedField> enrichedFields) {
+        return enrichedFields.stream()
+                .sorted(Comparator.comparing(BeanBuilderGenerator::fieldShouldBeInFinalStage)
+                        .thenComparing(enrichedFields::indexOf));
     }
 
     private static MethodSpec createConstructor() {
