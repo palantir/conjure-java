@@ -102,7 +102,9 @@ public final class BeanBuilderGenerator {
     private static final String BUILT_FIELD = "_buildInvoked";
     private static final String CHECK_NOT_BUILT_METHOD = "checkNotBuilt";
     private static final String BUILDER_IMPLEMENTATION_NAME = "Builder";
+    /* The name of the interface extending all stage interfaces. */
     private static final String STAGED_BUILDER_INTERFACE_NAME = "Builder";
+    /* The name of the class implementing the interface extending all stage interfaces. */
     private static final String STAGED_BUILDER_IMPLEMENTATION_NAME = "DefaultBuilder";
 
     private final TypeMapper typeMapper;
@@ -224,7 +226,7 @@ public final class BeanBuilderGenerator {
                 .map(Primitives::box)
                 .collect(Collectors.toList());
 
-        TypeSpec builderInterface = TypeSpec.interfaceBuilder("Builder")
+        TypeSpec builderInterface = TypeSpec.interfaceBuilder(STAGED_BUILDER_INTERFACE_NAME)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(interfaces.stream()
                         .map(stageInterface -> stageInterface.methodSpecs)
@@ -235,7 +237,9 @@ public final class BeanBuilderGenerator {
                                         method.name.equals("build")
                                                 ? method.returnType
                                                 : ClassName.get(
-                                                        objectClass.packageName(), objectClass.simpleName(), "Builder"))
+                                                        objectClass.packageName(),
+                                                        objectClass.simpleName(),
+                                                        STAGED_BUILDER_INTERFACE_NAME))
                                 .build())
                         .collect(Collectors.toList()))
                 .addSuperinterfaces(interfaceClassNames)
@@ -247,7 +251,7 @@ public final class BeanBuilderGenerator {
                 .addMethod(MethodSpec.methodBuilder("builder")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(interfaceClassNames.get(0))
-                        .addStatement("return new DefaultBuilder()")
+                        .addStatement(String.format("return new %s()", STAGED_BUILDER_IMPLEMENTATION_NAME))
                         .build());
     }
 
