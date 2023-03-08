@@ -532,6 +532,11 @@ public final class BeanGenerator {
         return builder.build();
     }
 
+    /**
+     * Generate a static factory method using the provided {@code fields}. If {@code useStagedBuilders} is true, the
+     * fields will be ordered with collections and optional fields last. {@code fields} is expected to be an ordered
+     * collection.
+     */
     private static MethodSpec createStaticFactoryMethod(
             ImmutableList<EnrichedField> fields,
             ClassName objectClass,
@@ -550,7 +555,6 @@ public final class BeanGenerator {
                             getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                     .build()));
-            // Follow order on adding methods on builder to comply with staged builders option if set
             Stream<EnrichedField> methodArgs = useStagedBuilders
                     ? fields.stream().sorted(Comparator.comparing(BeanGenerator::fieldShouldBeInFinalStage))
                     : fields.stream();
