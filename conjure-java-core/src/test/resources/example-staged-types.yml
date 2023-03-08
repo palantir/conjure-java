@@ -35,3 +35,10 @@ types:
           optionalItem:
             type: optional<OneField>
             deprecated: this optional is deprecated
+      MultipleFieldsOneFinalStage:
+        fields:
+          mappedRids: map<rid, string>
+          token: OneField
+          optionalItem:
+            type: optional<OneField>
+            deprecated: this optional is deprecated
