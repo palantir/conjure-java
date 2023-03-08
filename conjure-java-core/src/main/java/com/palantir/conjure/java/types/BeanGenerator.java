@@ -19,7 +19,6 @@ package com.palantir.conjure.java.types;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -62,7 +61,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
@@ -147,40 +145,12 @@ public final class BeanGenerator {
                         .addMember("ignoreUnknown", "$L", true)
                         .build());
             }
+        } else if (options.useStagedBuilders()) {
+            BeanBuilderGenerator.addStagedBuilder(
+                    typeBuilder, typeMapper, safetyEvaluator, objectClass, builderClass, typeDef, typesMap, options);
         } else {
-            ClassName builderImplementation = options.useStagedBuilders()
-                            && fields.stream().anyMatch(field -> !BeanBuilderGenerator.fieldShouldBeInFinalStage(field))
-                    ? ClassName.get(objectClass.packageName(), objectClass.simpleName(), "DefaultBuilder")
-                    : builderClass;
-            ImmutableList<EnrichedField> fieldsNeedingBuilderStage = fields.stream()
-                    .filter(field -> !BeanBuilderGenerator.fieldShouldBeInFinalStage(field))
-                    .collect(ImmutableList.toImmutableList());
-            if (!options.useStagedBuilders() || fieldsNeedingBuilderStage.isEmpty()) {
-                typeBuilder.addAnnotation(AnnotationSpec.builder(JsonDeserialize.class)
-                        .addMember("builder", "$T.class", builderImplementation)
-                        .build());
-                typeBuilder
-                        .addMethod(createBuilder(builderClass))
-                        .addType(BeanBuilderGenerator.generate(
-                                typeMapper,
-                                safetyEvaluator,
-                                objectClass,
-                                builderClass,
-                                typeDef,
-                                typesMap,
-                                options,
-                                Optional.empty()));
-            } else {
-                BeanBuilderGenerator.generateStagedBuilder(
-                        typeBuilder,
-                        typeMapper,
-                        safetyEvaluator,
-                        objectClass,
-                        builderClass,
-                        typeDef,
-                        typesMap,
-                        options);
-            }
+            BeanBuilderGenerator.addBuilder(
+                    typeBuilder, typeMapper, safetyEvaluator, objectClass, builderClass, typeDef, typesMap, options);
         }
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
 
@@ -358,16 +328,13 @@ public final class BeanGenerator {
                             getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                     .build()));
-            // Follow order on adding methods on builder to comply with staged builders option if set
-            BeanBuilderGenerator.sortedEnrichedFields(fields)
-                    .map(EnrichedField::poetSpec)
-                    .forEach(spec -> {
-                        if (isOptional(spec)) {
-                            builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
-                        } else {
-                            builder.addCode("\n    .$L($L)", spec.name, spec.name);
-                        }
-                    });
+            fields.stream().map(EnrichedField::poetSpec).forEach(spec -> {
+                if (isOptional(spec)) {
+                    builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
+                } else {
+                    builder.addCode("\n    .$L($L)", spec.name, spec.name);
+                }
+            });
             builder.addCode("\n    .build();\n");
         }
 
@@ -397,14 +364,6 @@ public final class BeanGenerator {
                 .addStatement("missingFields.add($N)", fieldNameParam)
                 .endControlFlow()
                 .addStatement("return missingFields")
-                .build();
-    }
-
-    private static MethodSpec createBuilder(ClassName builderClass) {
-        return MethodSpec.methodBuilder("builder")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(builderClass)
-                .addStatement("return new $T()", builderClass)
                 .build();
     }
 
