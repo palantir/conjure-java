@@ -174,7 +174,7 @@ public final class BeanBuilderGenerator {
     }
 
     private void addStagedBuilderImpl(
-            TypeSpec.Builder builder,
+            TypeSpec.Builder specBuilder,
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
         List<EnrichedField> allFields = enrichFields(typeDef.getFields());
@@ -182,13 +182,13 @@ public final class BeanBuilderGenerator {
                 allFields.stream().filter(f -> !fieldShouldBeInFinalStage(f)).collect(Collectors.toList());
 
         if (fieldsNeedingBuilderStage.isEmpty()) {
-            addBuilderImpl(builder, typeDef, typesMap);
+            addBuilderImpl(specBuilder, typeDef, typesMap);
             return;
         }
 
-        addJsonDeserializeUsingBuilderAnnotation(builder, STAGED_BUILDER_IMPLEMENTATION_NAME);
-        addStageInterfacesAndBuilderMethod(builder, allFields, fieldsNeedingBuilderStage);
-        builder.addType(generateBuilderImplementation(
+        addJsonDeserializeUsingBuilderAnnotation(specBuilder, STAGED_BUILDER_IMPLEMENTATION_NAME);
+        addStageInterfacesAndBuilderMethod(specBuilder, allFields, fieldsNeedingBuilderStage);
+        specBuilder.addType(generateBuilderImplementation(
                 typeDef, typesMap, STAGED_BUILDER_IMPLEMENTATION_NAME, Optional.of(STAGED_BUILDER_INTERFACE_NAME)));
     }
 
