@@ -320,7 +320,7 @@ public final class BeanGenerator {
             ImmutableList<EnrichedField> fields,
             ClassName objectClass,
             SafetyEvaluator safetyEvaluator,
-            boolean orderFieldsInFinalBuilderStagesLast) {
+            boolean useStagedBuilders) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
@@ -335,7 +335,7 @@ public final class BeanGenerator {
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                     .build()));
 
-            Stream<EnrichedField> methodArgs = orderFieldsInFinalBuilderStagesLast
+            Stream<EnrichedField> methodArgs = useStagedBuilders
                     ? fields.stream().sorted(Comparator.comparing(BeanBuilderGenerator::fieldShouldBeInFinalStage))
                     : fields.stream();
 
