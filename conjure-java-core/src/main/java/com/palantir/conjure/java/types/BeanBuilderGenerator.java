@@ -251,7 +251,7 @@ public final class BeanBuilderGenerator {
                 .addMethod(MethodSpec.methodBuilder("builder")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(interfaceClassNames.get(0))
-                        .addStatement(String.format("return new %s()", STAGED_BUILDER_IMPLEMENTATION_NAME))
+                        .addStatement("return new $N()", STAGED_BUILDER_IMPLEMENTATION_NAME)
                         .build());
     }
 
