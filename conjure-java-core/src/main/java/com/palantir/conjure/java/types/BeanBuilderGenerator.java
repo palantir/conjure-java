@@ -206,7 +206,8 @@ public final class BeanBuilderGenerator {
             TypeSpec.Builder specBuilder,
             List<EnrichedField> allFields,
             List<EnrichedField> fieldsNeedingBuilderStage) {
-        Preconditions.checkState(!fieldsNeedingBuilderStage.isEmpty(), "TODO(pritham)");
+        Preconditions.checkState(
+                !fieldsNeedingBuilderStage.isEmpty(), "Expected at least one field needing a builder stage.");
         List<TypeSpec> interfaces = generateStageInterfaces(
                 objectClass,
                 builderClass,
