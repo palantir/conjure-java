@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Collect methods to be added to a staged builder interface in a list
+  links:
+  - https://github.com/palantir/conjure-java/pull/1979

@@ -199,10 +199,22 @@ public final class MultipleOrderedStages {
 
     public interface Builder extends TokenStageBuilder, ItemStageBuilder, Completed_StageBuilder {
         @Override
+        Builder token(@Nonnull OneField token);
+
+        @Override
+        Builder from(MultipleOrderedStages other);
+
+        @Override
+        Builder item(@Nonnull String item);
+
+        @Override
         MultipleOrderedStages build();
 
         @Override
         Builder items(@Nonnull Iterable<SafeLong> items);
+
+        @Override
+        Builder addAllItems(@Nonnull Iterable<SafeLong> items);
 
         @Override
         Builder items(SafeLong items);
@@ -211,13 +223,10 @@ public final class MultipleOrderedStages {
         Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
         @Override
-        Builder from(MultipleOrderedStages other);
-
-        @Override
-        Builder addAllItems(@Nonnull Iterable<SafeLong> items);
-
-        @Override
         Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+
+        @Override
+        Builder mappedRids(ResourceIdentifier key, String value);
 
         /**
          * @deprecated this optional is deprecated
@@ -225,15 +234,6 @@ public final class MultipleOrderedStages {
         @Deprecated
         @Override
         Builder optionalItem(@Nonnull Optional<OneField> optionalItem);
-
-        @Override
-        Builder token(@Nonnull OneField token);
-
-        @Override
-        Builder mappedRids(ResourceIdentifier key, String value);
-
-        @Override
-        Builder item(@Nonnull String item);
 
         /**
          * @deprecated this optional is deprecated
