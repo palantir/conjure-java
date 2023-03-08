@@ -150,6 +150,14 @@ public final class BeanBuilderGenerator {
                 .addStagedBuilderImpl(specBuilder, typeDef, typesMap);
     }
 
+    public static boolean fieldShouldBeInFinalStage(EnrichedField field) {
+        Type type = field.conjureDef().getType();
+        return type.accept(TypeVisitor.IS_LIST)
+                || type.accept(TypeVisitor.IS_SET)
+                || type.accept(TypeVisitor.IS_MAP)
+                || type.accept(TypeVisitor.IS_OPTIONAL);
+    }
+
     private void addBuilderImpl(
             TypeSpec.Builder specBuilder,
             ObjectDefinition typeDef,
@@ -192,14 +200,6 @@ public final class BeanBuilderGenerator {
                         "$T.class",
                         ClassName.get(objectClass.packageName(), objectClass.simpleName(), implementationClassName))
                 .build());
-    }
-
-    private static boolean fieldShouldBeInFinalStage(EnrichedField field) {
-        Type type = field.conjureDef().getType();
-        return type.accept(TypeVisitor.IS_LIST)
-                || type.accept(TypeVisitor.IS_SET)
-                || type.accept(TypeVisitor.IS_MAP)
-                || type.accept(TypeVisitor.IS_OPTIONAL);
     }
 
     private void addStageInterfacesAndBuilderMethod(

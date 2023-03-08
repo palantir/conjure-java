@@ -59,9 +59,11 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
@@ -126,7 +128,8 @@ public final class BeanGenerator {
                 .build());
 
         if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
-            typeBuilder.addMethod(createStaticFactoryMethod(fields, objectClass, safetyEvaluator));
+            typeBuilder.addMethod(
+                    createStaticFactoryMethod(fields, objectClass, safetyEvaluator, options.useStagedBuilders()));
         }
 
         if (!nonPrimitiveEnrichedFields.isEmpty()) {
@@ -314,7 +317,10 @@ public final class BeanGenerator {
     }
 
     private static MethodSpec createStaticFactoryMethod(
-            ImmutableList<EnrichedField> fields, ClassName objectClass, SafetyEvaluator safetyEvaluator) {
+            ImmutableList<EnrichedField> fields,
+            ClassName objectClass,
+            SafetyEvaluator safetyEvaluator,
+            boolean orderFieldsInFinalBuilderStagesLast) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
@@ -328,7 +334,12 @@ public final class BeanGenerator {
                             getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                     .build()));
-            fields.stream().map(EnrichedField::poetSpec).forEach(spec -> {
+
+            Stream<EnrichedField> methodArgs = orderFieldsInFinalBuilderStagesLast
+                    ? fields.stream().sorted(Comparator.comparing(BeanBuilderGenerator::fieldShouldBeInFinalStage))
+                    : fields.stream();
+
+            methodArgs.map(EnrichedField::poetSpec).forEach(spec -> {
                 if (isOptional(spec)) {
                     builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
                 } else {
