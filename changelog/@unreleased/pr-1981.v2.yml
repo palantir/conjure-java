@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: 'Staged Builders: Remove unneeded sort, and only sort arguments of
+    static factory when using staged builders'
+  links:
+  - https://github.com/palantir/conjure-java/pull/1981
