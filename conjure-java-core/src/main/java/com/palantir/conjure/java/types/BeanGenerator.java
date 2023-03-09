@@ -138,7 +138,8 @@ public final class BeanGenerator {
                 .build());
 
         if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
-            typeBuilder.addMethod(createStaticFactoryMethod(fields, objectClass, safetyEvaluator));
+            typeBuilder.addMethod(
+                    createStaticFactoryMethod(fields, objectClass, safetyEvaluator, options.useStagedBuilders()));
         }
 
         if (!nonPrimitiveEnrichedFields.isEmpty()) {
@@ -251,16 +252,6 @@ public final class BeanGenerator {
                 || type.accept(TypeVisitor.IS_OPTIONAL);
     }
 
-    /**
-     * Sorts input fields in the order they should be applied to the builder: Original order with required
-     * fields prior to optional/collection values.
-     */
-    private static Stream<EnrichedField> sortedEnrichedFields(ImmutableList<EnrichedField> enrichedFields) {
-        return enrichedFields.stream()
-                .sorted(Comparator.comparing(BeanGenerator::fieldShouldBeInFinalStage)
-                        .thenComparing(enrichedFields::indexOf));
-    }
-
     private static ClassName stageBuilderInterfaceName(ClassName enclosingClass, String stageName) {
         return enclosingClass.nestedClass(StringUtils.capitalize(stageName) + "StageBuilder");
     }
@@ -274,8 +265,8 @@ public final class BeanGenerator {
             SafetyEvaluator safetyEvaluator) {
         List<TypeSpec.Builder> interfaces = new ArrayList<>();
 
-        PeekingIterator<EnrichedField> fieldPeekingIterator = Iterators.peekingIterator(
-                sortedEnrichedFields(fieldsNeedingBuilderStage).iterator());
+        PeekingIterator<EnrichedField> fieldPeekingIterator =
+                Iterators.peekingIterator(fieldsNeedingBuilderStage.iterator());
 
         while (fieldPeekingIterator.hasNext()) {
             EnrichedField field = fieldPeekingIterator.next();
@@ -541,8 +532,16 @@ public final class BeanGenerator {
         return builder.build();
     }
 
+    /**
+     * Generate a static factory method using the provided {@code fields}. If {@code useStagedBuilders} is true, the
+     * fields will be ordered with collections and optional fields last. {@code fields} is expected to be an ordered
+     * collection.
+     */
     private static MethodSpec createStaticFactoryMethod(
-            ImmutableList<EnrichedField> fields, ClassName objectClass, SafetyEvaluator safetyEvaluator) {
+            ImmutableList<EnrichedField> fields,
+            ClassName objectClass,
+            SafetyEvaluator safetyEvaluator,
+            boolean useStagedBuilders) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
@@ -556,8 +555,10 @@ public final class BeanGenerator {
                             getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                     .build()));
-            // Follow order on adding methods on builder to comply with staged builders option if set
-            sortedEnrichedFields(fields).map(EnrichedField::poetSpec).forEach(spec -> {
+            Stream<EnrichedField> methodArgs = useStagedBuilders
+                    ? fields.stream().sorted(Comparator.comparing(BeanGenerator::fieldShouldBeInFinalStage))
+                    : fields.stream();
+            methodArgs.map(EnrichedField::poetSpec).forEach(spec -> {
                 if (isOptional(spec)) {
                     builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
                 } else {
