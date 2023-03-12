@@ -2,6 +2,7 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -10,6 +11,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Safe
+@Immutable
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class SafeLongAliasExample implements Comparable<SafeLongAliasExample> {
     private final @Safe SafeLong value;

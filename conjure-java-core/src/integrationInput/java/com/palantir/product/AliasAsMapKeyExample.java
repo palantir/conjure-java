@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -18,6 +19,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @DoNotLog
+@Immutable
 @JsonDeserialize(builder = AliasAsMapKeyExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class AliasAsMapKeyExample {
@@ -173,6 +175,7 @@ public final class AliasAsMapKeyExample {
         return new Builder();
     }
 
+    @Immutable
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
     public static final class Builder {
         boolean _buildInvoked;

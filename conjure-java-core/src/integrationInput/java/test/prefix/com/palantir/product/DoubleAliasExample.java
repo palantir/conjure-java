@@ -2,11 +2,13 @@ package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.conjure.java.lib.SafeLong;
 import java.math.BigDecimal;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
+@Immutable
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class DoubleAliasExample implements Comparable<DoubleAliasExample> {
     private final double value;

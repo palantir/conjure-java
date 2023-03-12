@@ -2,12 +2,14 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.Preconditions;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
+@Immutable
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class UuidAliasExample {
     private final UUID value;

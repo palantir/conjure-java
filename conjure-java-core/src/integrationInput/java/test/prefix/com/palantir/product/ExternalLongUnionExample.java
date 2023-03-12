@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -25,6 +26,7 @@ import javax.annotation.processing.Generated;
 /**
  * A union of a safe long.
  */
+@Immutable
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class ExternalLongUnionExample {
     private final Base value;

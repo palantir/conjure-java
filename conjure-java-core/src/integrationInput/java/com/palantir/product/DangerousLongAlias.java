@@ -2,11 +2,13 @@ package com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.DoNotLog;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @DoNotLog
+@Immutable
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class DangerousLongAlias {
     private final @DoNotLog long value;

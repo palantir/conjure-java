@@ -2,6 +2,7 @@ package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.BearerToken;
@@ -10,6 +11,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @DoNotLog
+@Immutable
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class BearerTokenAliasExample {
     private final BearerToken value;

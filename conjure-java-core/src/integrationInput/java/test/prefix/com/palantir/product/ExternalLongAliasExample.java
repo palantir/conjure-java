@@ -2,9 +2,11 @@ package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.errorprone.annotations.Immutable;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
+@Immutable
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class ExternalLongAliasExample {
     private final long value;

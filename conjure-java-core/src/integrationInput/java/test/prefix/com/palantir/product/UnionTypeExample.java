@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.Nulls;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -30,6 +31,7 @@ import javax.annotation.processing.Generated;
 /**
  * A type which can either be a StringExample, a set of strings, or an integer.
  */
+@Immutable
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionTypeExample {
     private final Base value;

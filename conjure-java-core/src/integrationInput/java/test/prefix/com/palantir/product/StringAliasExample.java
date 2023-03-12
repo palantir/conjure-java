@@ -2,6 +2,7 @@ package test.prefix.com.palantir.product;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import javax.annotation.Nonnull;
@@ -9,6 +10,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 @Safe
+@Immutable
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class StringAliasExample implements Comparable<StringAliasExample> {
     private final @Safe String value;
