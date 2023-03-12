@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.conjure.CaseConverter;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
@@ -103,6 +104,7 @@ public final class BeanGenerator {
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addAnnotations(safety)
+                .addAnnotation(Immutable.class)
                 .addFields(poetFields)
                 .addMethod(createConstructor(fields, poetFields))
                 .addMethods(createGetters(fields, typesMap, options, safetyEvaluator));

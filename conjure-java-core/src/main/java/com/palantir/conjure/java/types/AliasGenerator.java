@@ -18,6 +18,7 @@ package com.palantir.conjure.java.types;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.SafeLong;
@@ -76,6 +77,7 @@ public final class AliasGenerator {
 
         TypeSpec.Builder spec = TypeSpec.classBuilder(prefixedTypeName.getName())
                 .addAnnotations(computedSafetyAnnotations)
+                .addAnnotation(Immutable.class)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(AliasGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(aliasTypeName, "value", Modifier.PRIVATE, Modifier.FINAL)

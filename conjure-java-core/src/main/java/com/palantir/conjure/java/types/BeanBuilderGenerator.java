@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
@@ -403,6 +404,7 @@ public final class BeanBuilderGenerator {
         }
 
         specBuilder
+                .addAnnotation(Immutable.class)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanBuilderGenerator.class))
                 .addModifiers(Modifier.STATIC, Modifier.FINAL)
                 .addField(FieldSpec.builder(boolean.class, BUILT_FIELD).build())

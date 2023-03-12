@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
+import com.google.errorprone.annotations.Immutable;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -113,6 +114,7 @@ public final class UnionGenerator {
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(
                         typeDef.getTypeName().getName())
                 .addAnnotations(safety)
+                .addAnnotation(Immutable.class)
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(UnionGenerator.class))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addFields(fields)
