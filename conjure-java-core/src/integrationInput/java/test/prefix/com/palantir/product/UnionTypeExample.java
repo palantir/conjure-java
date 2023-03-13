@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
@@ -308,7 +309,7 @@ public final class UnionTypeExample {
 
         private Function<OptionalAlias, T> optionalAliasVisitor;
 
-        private Function<@Safe Integer, T> safeIntVisitor;
+        private IntFunction<T> safeIntVisitor;
 
         private Function<Set<String>, T> setVisitor;
 
@@ -320,7 +321,7 @@ public final class UnionTypeExample {
 
         private IntFunction<T> unknown_Visitor;
 
-        private Function<@Unsafe Double, T> unsafeDoubleVisitor;
+        private DoubleFunction<T> unsafeDoubleVisitor;
 
         private Function<String, T> unknownVisitor;
 
@@ -409,7 +410,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public SetStageVisitorBuilder<T> safeInt(@Nonnull Function<@Safe Integer, T> safeIntVisitor) {
+        public SetStageVisitorBuilder<T> safeInt(@Nonnull IntFunction<T> safeIntVisitor) {
             Preconditions.checkNotNull(safeIntVisitor, "safeIntVisitor cannot be null");
             this.safeIntVisitor = safeIntVisitor;
             return this;
@@ -453,7 +454,7 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public UnknownStageVisitorBuilder<T> unsafeDouble(@Nonnull Function<@Unsafe Double, T> unsafeDoubleVisitor) {
+        public UnknownStageVisitorBuilder<T> unsafeDouble(@Nonnull DoubleFunction<T> unsafeDoubleVisitor) {
             Preconditions.checkNotNull(unsafeDoubleVisitor, "unsafeDoubleVisitor cannot be null");
             this.unsafeDoubleVisitor = unsafeDoubleVisitor;
             return this;
@@ -489,13 +490,13 @@ public final class UnionTypeExample {
             final IntFunction<T> newVisitor = this.newVisitor;
             final Function<Optional<String>, T> optionalVisitor = this.optionalVisitor;
             final Function<OptionalAlias, T> optionalAliasVisitor = this.optionalAliasVisitor;
-            final Function<@Safe Integer, T> safeIntVisitor = this.safeIntVisitor;
+            final IntFunction<T> safeIntVisitor = this.safeIntVisitor;
             final Function<Set<String>, T> setVisitor = this.setVisitor;
             final Function<SetAlias, T> setAliasVisitor = this.setAliasVisitor;
             final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
             final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
             final IntFunction<T> unknown_Visitor = this.unknown_Visitor;
-            final Function<@Unsafe Double, T> unsafeDoubleVisitor = this.unsafeDoubleVisitor;
+            final DoubleFunction<T> unsafeDoubleVisitor = this.unsafeDoubleVisitor;
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
@@ -650,7 +651,7 @@ public final class UnionTypeExample {
     }
 
     public interface SafeIntStageVisitorBuilder<T> {
-        SetStageVisitorBuilder<T> safeInt(@Nonnull Function<@Safe Integer, T> safeIntVisitor);
+        SetStageVisitorBuilder<T> safeInt(@Nonnull IntFunction<T> safeIntVisitor);
     }
 
     public interface SetStageVisitorBuilder<T> {
@@ -675,7 +676,7 @@ public final class UnionTypeExample {
     }
 
     public interface UnsafeDoubleStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> unsafeDouble(@Nonnull Function<@Unsafe Double, T> unsafeDoubleVisitor);
+        UnknownStageVisitorBuilder<T> unsafeDouble(@Nonnull DoubleFunction<T> unsafeDoubleVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
