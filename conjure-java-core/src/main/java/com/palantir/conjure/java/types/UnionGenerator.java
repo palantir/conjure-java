@@ -549,9 +549,9 @@ public final class UnionGenerator {
      * of the new unknownVisitor.
      */
     private static TypeName visitorObjectTypeName(NameTypeMetadata member, TypeName visitResultType, Options options) {
-        if (member.type.equals(TypeName.INT)) {
+        if (member.type.withoutAnnotations().equals(TypeName.INT)) {
             return ParameterizedTypeName.get(ClassName.get(IntFunction.class), visitResultType);
-        } else if (member.type.equals(TypeName.DOUBLE)) {
+        } else if (member.type.withoutAnnotations().equals(TypeName.DOUBLE)) {
             return ParameterizedTypeName.get(ClassName.get(DoubleFunction.class), visitResultType);
         } else if (NameTypeMetadata.UNKNOWN.equals(member) && options.unionsWithUnknownValues()) {
             return ParameterizedTypeName.get(

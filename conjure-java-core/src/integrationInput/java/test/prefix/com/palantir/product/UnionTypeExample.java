@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import javax.annotation.Nonnull;
@@ -30,6 +32,7 @@ import javax.annotation.processing.Generated;
 /**
  * A type which can either be a StringExample, a set of strings, or an integer.
  */
+@Unsafe
 @Generated("com.palantir.conjure.java.types.UnionGenerator")
 public final class UnionTypeExample {
     private final Base value;
@@ -115,6 +118,14 @@ public final class UnionTypeExample {
         return new UnionTypeExample(new BooleanFieldWrapper(value));
     }
 
+    public static UnionTypeExample safeInt(@Safe int value) {
+        return new UnionTypeExample(new SafeIntWrapper(value));
+    }
+
+    public static UnionTypeExample unsafeDouble(@Unsafe double value) {
+        return new UnionTypeExample(new UnsafeDoubleWrapper(value));
+    }
+
     public static UnionTypeExample unknown(@Safe String type, Object value) {
         switch (Preconditions.checkNotNull(type, "Type is required")) {
             case "stringExample":
@@ -168,6 +179,12 @@ public final class UnionTypeExample {
             case "booleanField":
                 throw new SafeIllegalArgumentException(
                         "Unknown type cannot be created as the provided type is known: booleanField");
+            case "safeInt":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: safeInt");
+            case "unsafeDouble":
+                throw new SafeIllegalArgumentException(
+                        "Unknown type cannot be created as the provided type is known: unsafeDouble");
             default:
                 return new UnionTypeExample(new UnknownWrapper(type, Collections.singletonMap(type, value)));
         }
@@ -192,6 +209,7 @@ public final class UnionTypeExample {
     }
 
     @Override
+    @Unsafe
     public String toString() {
         return "UnionTypeExample{value: " + value + '}';
     }
@@ -234,6 +252,10 @@ public final class UnionTypeExample {
 
         T visitBooleanField(@Safe boolean value);
 
+        T visitSafeInt(@Safe int value);
+
+        T visitUnsafeDouble(@Unsafe double value);
+
         T visitUnknown(@Safe String unknownType);
 
         static <T> AlsoAnIntegerStageVisitorBuilder<T> builder() {
@@ -254,11 +276,13 @@ public final class UnionTypeExample {
                     NewStageVisitorBuilder<T>,
                     OptionalStageVisitorBuilder<T>,
                     OptionalAliasStageVisitorBuilder<T>,
+                    SafeIntStageVisitorBuilder<T>,
                     SetStageVisitorBuilder<T>,
                     SetAliasStageVisitorBuilder<T>,
                     StringExampleStageVisitorBuilder<T>,
                     ThisFieldIsAnIntegerStageVisitorBuilder<T>,
                     Unknown_StageVisitorBuilder<T>,
+                    UnsafeDoubleStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
                     Completed_StageVisitorBuilder<T> {
         private IntFunction<T> alsoAnIntegerVisitor;
@@ -285,6 +309,8 @@ public final class UnionTypeExample {
 
         private Function<OptionalAlias, T> optionalAliasVisitor;
 
+        private IntFunction<T> safeIntVisitor;
+
         private Function<Set<String>, T> setVisitor;
 
         private Function<SetAlias, T> setAliasVisitor;
@@ -294,6 +320,8 @@ public final class UnionTypeExample {
         private IntFunction<T> thisFieldIsAnIntegerVisitor;
 
         private IntFunction<T> unknown_Visitor;
+
+        private DoubleFunction<T> unsafeDoubleVisitor;
 
         private Function<String, T> unknownVisitor;
 
@@ -375,9 +403,16 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public SetStageVisitorBuilder<T> optionalAlias(@Nonnull Function<OptionalAlias, T> optionalAliasVisitor) {
+        public SafeIntStageVisitorBuilder<T> optionalAlias(@Nonnull Function<OptionalAlias, T> optionalAliasVisitor) {
             Preconditions.checkNotNull(optionalAliasVisitor, "optionalAliasVisitor cannot be null");
             this.optionalAliasVisitor = optionalAliasVisitor;
+            return this;
+        }
+
+        @Override
+        public SetStageVisitorBuilder<T> safeInt(@Nonnull IntFunction<T> safeIntVisitor) {
+            Preconditions.checkNotNull(safeIntVisitor, "safeIntVisitor cannot be null");
+            this.safeIntVisitor = safeIntVisitor;
             return this;
         }
 
@@ -412,9 +447,16 @@ public final class UnionTypeExample {
         }
 
         @Override
-        public UnknownStageVisitorBuilder<T> unknown_(@Nonnull IntFunction<T> unknown_Visitor) {
+        public UnsafeDoubleStageVisitorBuilder<T> unknown_(@Nonnull IntFunction<T> unknown_Visitor) {
             Preconditions.checkNotNull(unknown_Visitor, "unknown_Visitor cannot be null");
             this.unknown_Visitor = unknown_Visitor;
+            return this;
+        }
+
+        @Override
+        public UnknownStageVisitorBuilder<T> unsafeDouble(@Nonnull DoubleFunction<T> unsafeDoubleVisitor) {
+            Preconditions.checkNotNull(unsafeDoubleVisitor, "unsafeDoubleVisitor cannot be null");
+            this.unsafeDoubleVisitor = unsafeDoubleVisitor;
             return this;
         }
 
@@ -448,11 +490,13 @@ public final class UnionTypeExample {
             final IntFunction<T> newVisitor = this.newVisitor;
             final Function<Optional<String>, T> optionalVisitor = this.optionalVisitor;
             final Function<OptionalAlias, T> optionalAliasVisitor = this.optionalAliasVisitor;
+            final IntFunction<T> safeIntVisitor = this.safeIntVisitor;
             final Function<Set<String>, T> setVisitor = this.setVisitor;
             final Function<SetAlias, T> setAliasVisitor = this.setAliasVisitor;
             final Function<StringExample, T> stringExampleVisitor = this.stringExampleVisitor;
             final IntFunction<T> thisFieldIsAnIntegerVisitor = this.thisFieldIsAnIntegerVisitor;
             final IntFunction<T> unknown_Visitor = this.unknown_Visitor;
+            final DoubleFunction<T> unsafeDoubleVisitor = this.unsafeDoubleVisitor;
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
@@ -516,6 +560,11 @@ public final class UnionTypeExample {
                 }
 
                 @Override
+                public T visitSafeInt(@Safe int value) {
+                    return safeIntVisitor.apply(value);
+                }
+
+                @Override
                 public T visitSet(Set<String> value) {
                     return setVisitor.apply(value);
                 }
@@ -538,6 +587,11 @@ public final class UnionTypeExample {
                 @Override
                 public T visitUnknown_(int value) {
                     return unknown_Visitor.apply(value);
+                }
+
+                @Override
+                public T visitUnsafeDouble(@Unsafe double value) {
+                    return unsafeDoubleVisitor.apply(value);
                 }
 
                 @Override
@@ -593,7 +647,11 @@ public final class UnionTypeExample {
     }
 
     public interface OptionalAliasStageVisitorBuilder<T> {
-        SetStageVisitorBuilder<T> optionalAlias(@Nonnull Function<OptionalAlias, T> optionalAliasVisitor);
+        SafeIntStageVisitorBuilder<T> optionalAlias(@Nonnull Function<OptionalAlias, T> optionalAliasVisitor);
+    }
+
+    public interface SafeIntStageVisitorBuilder<T> {
+        SetStageVisitorBuilder<T> safeInt(@Nonnull IntFunction<T> safeIntVisitor);
     }
 
     public interface SetStageVisitorBuilder<T> {
@@ -614,7 +672,11 @@ public final class UnionTypeExample {
     }
 
     public interface Unknown_StageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> unknown_(@Nonnull IntFunction<T> unknown_Visitor);
+        UnsafeDoubleStageVisitorBuilder<T> unknown_(@Nonnull IntFunction<T> unknown_Visitor);
+    }
+
+    public interface UnsafeDoubleStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> unsafeDouble(@Nonnull DoubleFunction<T> unsafeDoubleVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {
@@ -650,7 +712,9 @@ public final class UnionTypeExample {
         @JsonSubTypes.Type(ListAliasWrapper.class),
         @JsonSubTypes.Type(SetAliasWrapper.class),
         @JsonSubTypes.Type(MapAliasWrapper.class),
-        @JsonSubTypes.Type(BooleanFieldWrapper.class)
+        @JsonSubTypes.Type(BooleanFieldWrapper.class),
+        @JsonSubTypes.Type(SafeIntWrapper.class),
+        @JsonSubTypes.Type(UnsafeDoubleWrapper.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface Base {
@@ -1423,6 +1487,96 @@ public final class UnionTypeExample {
         @Override
         public String toString() {
             return "BooleanFieldWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("safeInt")
+    private static final class SafeIntWrapper implements Base {
+        private final int value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private SafeIntWrapper(@JsonSetter("safeInt") @Nonnull int value) {
+            Preconditions.checkNotNull(value, "safeInt cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "safeInt";
+        }
+
+        @JsonProperty("safeInt")
+        private int getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitSafeInt(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof SafeIntWrapper && equalTo((SafeIntWrapper) other));
+        }
+
+        private boolean equalTo(SafeIntWrapper other) {
+            return this.value == other.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.value;
+        }
+
+        @Override
+        public String toString() {
+            return "SafeIntWrapper{value: " + value + '}';
+        }
+    }
+
+    @JsonTypeName("unsafeDouble")
+    private static final class UnsafeDoubleWrapper implements Base {
+        private final double value;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        private UnsafeDoubleWrapper(@JsonSetter("unsafeDouble") @Nonnull double value) {
+            Preconditions.checkNotNull(value, "unsafeDouble cannot be null");
+            this.value = value;
+        }
+
+        @JsonProperty(value = "type", index = 0)
+        private String getType() {
+            return "unsafeDouble";
+        }
+
+        @JsonProperty("unsafeDouble")
+        private double getValue() {
+            return value;
+        }
+
+        @Override
+        public <T> T accept(Visitor<T> visitor) {
+            return visitor.visitUnsafeDouble(value);
+        }
+
+        @Override
+        public boolean equals(@Nullable Object other) {
+            return this == other || (other instanceof UnsafeDoubleWrapper && equalTo((UnsafeDoubleWrapper) other));
+        }
+
+        private boolean equalTo(UnsafeDoubleWrapper other) {
+            return Double.doubleToLongBits(this.value) == Double.doubleToLongBits(other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Double.hashCode(this.value);
+        }
+
+        @Override
+        public String toString() {
+            return "UnsafeDoubleWrapper{value: " + value + '}';
         }
     }
 

@@ -712,6 +712,16 @@ public final class WireFormatTests {
         }
 
         @Override
+        public Integer visitSafeInt(int value) {
+            return null;
+        }
+
+        @Override
+        public Integer visitUnsafeDouble(double value) {
+            return (int) value;
+        }
+
+        @Override
         public Integer visitIf(int value) {
             return value;
         }

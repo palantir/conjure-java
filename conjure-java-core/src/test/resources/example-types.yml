@@ -229,6 +229,12 @@ types:
           booleanField:
             type: boolean
             safety: safe
+          safeInt:
+            type: integer
+            safety: safe
+          unsafeDouble:
+            type: double
+            safety: unsafe
       UnionWithUnknownString:
         union:
           unknown: string
