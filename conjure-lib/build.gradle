@@ -23,7 +23,6 @@ dependencies {
     api 'com.palantir.tokens:auth-tokens'
     api 'com.palantir.conjure.java.api:errors'
     api 'javax.annotation:javax.annotation-api'
-    api 'javax.ws.rs:javax.ws.rs-api'
     api 'com.google.errorprone:error_prone_annotations'
 
     testImplementation 'org.assertj:assertj-core'
