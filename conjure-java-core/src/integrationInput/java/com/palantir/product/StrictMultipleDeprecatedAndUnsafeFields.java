@@ -195,7 +195,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     }
 
     public interface MyListStageBuilder {
-        BearerTokenValueStageBuilder myList(@Nonnull List<@Unsafe String> myList);
+        BearerTokenValueStageBuilder myList(@Nonnull Iterable<@Unsafe String> myList);
 
         Builder from(StrictMultipleDeprecatedAndUnsafeFields other);
     }
@@ -238,7 +238,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
                     StrictFourFieldsObjectStageBuilder,
                     Completed_StageBuilder {
         @Override
-        Builder myList(@Nonnull List<@Unsafe String> myList);
+        Builder myList(@Nonnull Iterable<@Unsafe String> myList);
 
         @Override
         Builder from(StrictMultipleDeprecatedAndUnsafeFields other);
@@ -308,7 +308,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         @Deprecated
         @Override
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
-        public Builder myList(@Nonnull List<@Unsafe String> myList) {
+        public Builder myList(@Nonnull Iterable<@Unsafe String> myList) {
             checkNotBuilt();
             this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;

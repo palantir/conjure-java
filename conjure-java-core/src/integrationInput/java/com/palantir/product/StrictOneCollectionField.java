@@ -92,7 +92,7 @@ public final class StrictOneCollectionField {
     }
 
     public interface MyListStageBuilder {
-        Completed_StageBuilder myList(@Nonnull List<String> myList);
+        Completed_StageBuilder myList(@Nonnull Iterable<String> myList);
 
         Builder from(StrictOneCollectionField other);
     }
@@ -103,7 +103,7 @@ public final class StrictOneCollectionField {
 
     public interface Builder extends MyListStageBuilder, Completed_StageBuilder {
         @Override
-        Builder myList(@Nonnull List<String> myList);
+        Builder myList(@Nonnull Iterable<String> myList);
 
         @Override
         Builder from(StrictOneCollectionField other);
@@ -130,7 +130,7 @@ public final class StrictOneCollectionField {
 
         @Override
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
-        public Builder myList(@Nonnull List<String> myList) {
+        public Builder myList(@Nonnull Iterable<String> myList) {
             checkNotBuilt();
             this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;

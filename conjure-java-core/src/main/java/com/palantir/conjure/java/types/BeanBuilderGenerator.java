@@ -312,7 +312,12 @@ public final class BeanBuilderGenerator {
                     .addModifiers(Modifier.PUBLIC)
                     .addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
                             .addParameter(ParameterSpec.builder(
-                                            field.poetSpec().type, JavaNameSanitizer.sanitize(field.fieldName()))
+                                            BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
+                                                    field.poetSpec().type,
+                                                    field.conjureDef().getType(),
+                                                    typeMapper,
+                                                    safetyEvaluator.getUsageTimeSafety(field.conjureDef())),
+                                            JavaNameSanitizer.sanitize(field.fieldName()))
                                     .addAnnotation(Nonnull.class)
                                     .build())
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -625,15 +630,11 @@ public final class BeanBuilderGenerator {
         boolean shouldClearFirst = true;
         MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
                 .addParameter(Parameters.nonnullParameter(
-                        // If the builder is strict, do not widen the parameter, and require an argument of the exact
-                        // type defined in the schema.
-                        strict
-                                ? field.type
-                                : BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                        field.type,
-                                        type,
-                                        typeMapper,
-                                        safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
+                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
+                                field.type,
+                                type,
+                                typeMapper,
+                                safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
                         field.name))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));

@@ -141,7 +141,7 @@ public final class StrictFourFields {
     }
 
     public interface MyListStageBuilder {
-        BearerTokenValueStageBuilder myList(@Nonnull List<String> myList);
+        BearerTokenValueStageBuilder myList(@Nonnull Iterable<String> myList);
 
         Builder from(StrictFourFields other);
     }
@@ -169,7 +169,7 @@ public final class StrictFourFields {
                     MappedRidsStageBuilder,
                     Completed_StageBuilder {
         @Override
-        Builder myList(@Nonnull List<String> myList);
+        Builder myList(@Nonnull Iterable<String> myList);
 
         @Override
         Builder from(StrictFourFields other);
@@ -214,7 +214,7 @@ public final class StrictFourFields {
 
         @Override
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
-        public Builder myList(@Nonnull List<String> myList) {
+        public Builder myList(@Nonnull Iterable<String> myList) {
             checkNotBuilt();
             this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;
