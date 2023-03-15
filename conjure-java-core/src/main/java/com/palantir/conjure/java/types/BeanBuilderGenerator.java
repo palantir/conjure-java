@@ -627,13 +627,13 @@ public final class BeanBuilderGenerator {
                 .addParameter(Parameters.nonnullParameter(
                         // If the builder is strict, do not widen the parameter, and require an argument of the exact
                         // type defined in the schema.
-                        !strict
-                                ? BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
+                        strict
+                                ? field.type
+                                : BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
                                         field.type,
                                         type,
                                         typeMapper,
-                                        safetyEvaluator.getUsageTimeSafety(enriched.conjureDef()))
-                                : field.type,
+                                        safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
                         field.name))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
