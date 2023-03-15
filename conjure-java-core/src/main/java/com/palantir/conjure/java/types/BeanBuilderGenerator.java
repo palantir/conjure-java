@@ -306,8 +306,7 @@ public final class BeanBuilderGenerator {
                     : "completed_";
 
             ClassName nextStageClassName = stageBuilderInterfaceName(objectClass, nextBuilderStageName);
-
-            TypeSpec.Builder stageInterface = TypeSpec.interfaceBuilder(
+            interfaces.add(TypeSpec.interfaceBuilder(
                             stageBuilderInterfaceName(objectClass, JavaNameSanitizer.sanitize(field.fieldName())))
                     .addModifiers(Modifier.PUBLIC)
                     .addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
@@ -317,8 +316,7 @@ public final class BeanBuilderGenerator {
                                     .build())
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .returns(Primitives.box(nextStageClassName))
-                            .build());
-            interfaces.add(stageInterface);
+                            .build()));
         }
 
         ClassName completedStageClass = stageBuilderInterfaceName(objectClass, "completed_");
