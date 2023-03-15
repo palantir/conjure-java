@@ -123,6 +123,14 @@ public interface Options {
     }
 
     /**
+     * TODO(pritham).
+     */
+    @Value.Default
+    default boolean useStrictStagedBuilders() {
+        return false;
+    }
+
+    /**
      * Generated objects which exclude fields with empty optional values.
      */
     @Value.Default

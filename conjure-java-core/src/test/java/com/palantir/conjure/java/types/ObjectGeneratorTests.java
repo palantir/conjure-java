@@ -119,6 +119,22 @@ public final class ObjectGeneratorTests {
     }
 
     @Test
+    public void testObjectGenerator_strictStagedBuilder() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-strict-staged-types.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .useStrictStagedBuilders(true)
+                                .excludeEmptyOptionals(true)
+                                .jetbrainsContractAnnotations(true)
+                                .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
     public void testObjectGenerator_excludeEmptyCollections() throws IOException {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/exclude-empty-collections.yml")));

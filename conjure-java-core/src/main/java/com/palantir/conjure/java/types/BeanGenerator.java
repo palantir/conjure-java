@@ -147,6 +147,10 @@ public final class BeanGenerator {
                         .addMember("ignoreUnknown", "$L", true)
                         .build());
             }
+        } else if (options.useStrictStagedBuilders()) {
+            // TODO(pritham): docs saying that if strict staged and staged is set, strict is used.
+            BeanBuilderGenerator.addStrictStagedBuilder(
+                    typeBuilder, typeMapper, safetyEvaluator, objectClass, builderClass, typeDef, typesMap, options);
         } else if (options.useStagedBuilders()) {
             BeanBuilderGenerator.addStagedBuilder(
                     typeBuilder, typeMapper, safetyEvaluator, objectClass, builderClass, typeDef, typesMap, options);

@@ -201,6 +201,9 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Generates compile-time safe builders to ensure all required attributes are set.")
         private boolean useStagedBuilders;
 
+        @CommandLine.Option(names = "--useStrictStagedBuilders", defaultValue = "false", description = "TODO(pritham)")
+        private boolean useStrictStagedBuilders;
+
         @CommandLine.Option(
                 names = "--excludeEmptyOptionals",
                 defaultValue = "false",
@@ -288,6 +291,7 @@ public final class ConjureJavaCli implements Runnable {
                             .packagePrefix(Optional.ofNullable(packagePrefix))
                             .apiVersion(Optional.ofNullable(apiVersion))
                             .useStagedBuilders(useStagedBuilders)
+                            .useStrictStagedBuilders(useStrictStagedBuilders)
                             .excludeEmptyOptionals(excludeEmptyOptionals)
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)

@@ -139,6 +139,19 @@ public final class BeanBuilderGenerator {
                 .addBuilderImpl(specBuilder, typeDef, typesMap);
     }
 
+    public static void addStrictStagedBuilder(
+            TypeSpec.Builder specBuilder,
+            TypeMapper typeMapper,
+            SafetyEvaluator safetyEvaluator,
+            ClassName objectClass,
+            ClassName builderClass,
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
+            Options options) {
+        new BeanBuilderGenerator(typeMapper, safetyEvaluator, builderClass, objectClass, options)
+                .addStrictStagedBuilderImpl(specBuilder, typeDef, typesMap);
+    }
+
     public static void addStagedBuilder(
             TypeSpec.Builder specBuilder,
             TypeMapper typeMapper,
@@ -172,7 +185,22 @@ public final class BeanBuilderGenerator {
                         .addStatement("return new $T()", builderClass)
                         .build())
                 .addType(generateBuilderImplementation(
-                        typeDef, typesMap, BUILDER_IMPLEMENTATION_NAME, Optional.empty()));
+                        typeDef, typesMap, BUILDER_IMPLEMENTATION_NAME, Optional.empty(), false));
+    }
+
+    private void addStrictStagedBuilderImpl(
+            TypeSpec.Builder specBuilder,
+            ObjectDefinition typeDef,
+            Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
+        List<EnrichedField> allFields = enrichFields(typeDef.getFields());
+        addJsonDeserializeUsingBuilderAnnotation(specBuilder, STAGED_BUILDER_IMPLEMENTATION_NAME);
+        addStageInterfacesAndBuilderMethod(specBuilder, allFields, allFields);
+        specBuilder.addType(generateBuilderImplementation(
+                typeDef,
+                typesMap,
+                STAGED_BUILDER_IMPLEMENTATION_NAME,
+                Optional.of(STAGED_BUILDER_INTERFACE_NAME),
+                true));
     }
 
     private void addStagedBuilderImpl(
@@ -191,7 +219,11 @@ public final class BeanBuilderGenerator {
         addJsonDeserializeUsingBuilderAnnotation(specBuilder, STAGED_BUILDER_IMPLEMENTATION_NAME);
         addStageInterfacesAndBuilderMethod(specBuilder, allFields, fieldsNeedingBuilderStage);
         specBuilder.addType(generateBuilderImplementation(
-                typeDef, typesMap, STAGED_BUILDER_IMPLEMENTATION_NAME, Optional.of(STAGED_BUILDER_INTERFACE_NAME)));
+                typeDef,
+                typesMap,
+                STAGED_BUILDER_IMPLEMENTATION_NAME,
+                Optional.of(STAGED_BUILDER_INTERFACE_NAME),
+                false));
     }
 
     private void addJsonDeserializeUsingBuilderAnnotation(
@@ -275,7 +307,7 @@ public final class BeanBuilderGenerator {
 
             ClassName nextStageClassName = stageBuilderInterfaceName(objectClass, nextBuilderStageName);
 
-            interfaces.add(TypeSpec.interfaceBuilder(
+            TypeSpec.Builder stageInterface = TypeSpec.interfaceBuilder(
                             stageBuilderInterfaceName(objectClass, JavaNameSanitizer.sanitize(field.fieldName())))
                     .addModifiers(Modifier.PUBLIC)
                     .addMethod(MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(field.fieldName()))
@@ -285,7 +317,8 @@ public final class BeanBuilderGenerator {
                                     .build())
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .returns(Primitives.box(nextStageClassName))
-                            .build()));
+                            .build());
+            interfaces.add(stageInterface);
         }
 
         ClassName completedStageClass = stageBuilderInterfaceName(objectClass, "completed_");
@@ -297,6 +330,7 @@ public final class BeanBuilderGenerator {
                         .returns(Primitives.box(objectClass))
                         .build());
 
+        // Problem: we want to add auxiliary methods for collections in the completed stage.
         completedStage.addMethods(otherFields.stream()
                 .map(field ->
                         generateMethodsForFinalStageField(field, typeMapper, completedStageClass, safetyEvaluator))
@@ -388,7 +422,8 @@ public final class BeanBuilderGenerator {
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
             String className,
-            Optional<String> builderInterfaceClass) {
+            Optional<String> builderInterfaceClass,
+            boolean strict) {
         Collection<EnrichedField> enrichedFields = enrichFields(typeDef.getFields());
         Collection<FieldSpec> poetFields = EnrichedField.toPoetSpecs(enrichedFields);
         TypeSpec.Builder specBuilder = TypeSpec.classBuilder(className);
@@ -410,7 +445,7 @@ public final class BeanBuilderGenerator {
                 .addFields(primitivesInitializedFields(enrichedFields))
                 .addMethod(createConstructor())
                 .addMethod(createFromObject(enrichedFields, implementsInterface))
-                .addMethods(createSetters(enrichedFields, typesMap, implementsInterface))
+                .addMethods(createSetters(enrichedFields, typesMap, implementsInterface, strict))
                 .addMethods(maybeCreateValidateFieldsMethods(enrichedFields))
                 .addMethod(createBuild(enrichedFields, poetFields, implementsInterface))
                 .addMethod(createCheckNotBuilt());
@@ -552,11 +587,14 @@ public final class BeanBuilderGenerator {
     private Iterable<MethodSpec> createSetters(
             Collection<EnrichedField> fields,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            boolean override) {
+            boolean override,
+            boolean strict) {
         Collection<MethodSpec> setters = Lists.newArrayListWithExpectedSize(fields.size());
         for (EnrichedField field : fields) {
-            setters.add(createSetter(field, typesMap, override));
-            setters.addAll(createAuxiliarySetters(field, override));
+            setters.add(createSetter(field, typesMap, override, strict));
+            if (!strict) {
+                setters.addAll(createAuxiliarySetters(field, override));
+            }
         }
         return setters;
     }
@@ -564,7 +602,8 @@ public final class BeanBuilderGenerator {
     private MethodSpec createSetter(
             EnrichedField enriched,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap,
-            boolean override) {
+            boolean override,
+            boolean strict) {
         FieldSpec field = enriched.poetSpec();
         Type type = enriched.conjureDef().getType();
         AnnotationSpec.Builder annotationBuilder = AnnotationSpec.builder(JsonSetter.class)
@@ -588,11 +627,15 @@ public final class BeanBuilderGenerator {
         boolean shouldClearFirst = true;
         MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
                 .addParameter(Parameters.nonnullParameter(
-                        BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
-                                field.type,
-                                type,
-                                typeMapper,
-                                safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
+                        // If the builder is strict, do not widen the parameter, and require an argument of the exact
+                        // type defined in the schema.
+                        !strict
+                                ? BeanBuilderAuxiliarySettersUtils.widenParameterIfPossible(
+                                        field.type,
+                                        type,
+                                        typeMapper,
+                                        safetyEvaluator.getUsageTimeSafety(enriched.conjureDef()))
+                                : field.type,
                         field.name))
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
