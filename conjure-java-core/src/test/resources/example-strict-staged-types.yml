@@ -11,7 +11,12 @@ types:
       StrictOneCollectionField:
         fields:
           myList: list<string>
-      StrictMultipleFields:
+      StrictThreeFields:
+        fields:
+          myList: list<string>
+          bearerTokenValue: bearertoken
+          optionalItem: optional<string>
+      StrictFourFields:
         fields:
           myList: list<string>
           bearerTokenValue: bearertoken
@@ -35,4 +40,4 @@ types:
             type: optional<string>
             safety: unsafe
           mappedRids: map<rid, string>
-          strictMultipleFieldsObject: StrictMultipleFields
+          strictFourFieldsObject: StrictFourFields

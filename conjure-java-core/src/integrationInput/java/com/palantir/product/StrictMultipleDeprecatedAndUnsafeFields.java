@@ -41,7 +41,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
     private final Map<ResourceIdentifier, String> mappedRids;
 
-    private final StrictMultipleFields strictMultipleFieldsObject;
+    private final StrictFourFields strictFourFieldsObject;
 
     private int memoizedHashCode;
 
@@ -52,15 +52,15 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
             int myInteger,
             Optional<String> optionalItem,
             Map<ResourceIdentifier, String> mappedRids,
-            StrictMultipleFields strictMultipleFieldsObject) {
-        validateFields(myList, bearerTokenValue, safeLongValue, optionalItem, mappedRids, strictMultipleFieldsObject);
+            StrictFourFields strictFourFieldsObject) {
+        validateFields(myList, bearerTokenValue, safeLongValue, optionalItem, mappedRids, strictFourFieldsObject);
         this.myList = Collections.unmodifiableList(myList);
         this.bearerTokenValue = bearerTokenValue;
         this.safeLongValue = safeLongValue;
         this.myInteger = myInteger;
         this.optionalItem = optionalItem;
         this.mappedRids = Collections.unmodifiableMap(mappedRids);
-        this.strictMultipleFieldsObject = strictMultipleFieldsObject;
+        this.strictFourFieldsObject = strictFourFieldsObject;
     }
 
     /**
@@ -106,9 +106,9 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         return this.mappedRids;
     }
 
-    @JsonProperty("strictMultipleFieldsObject")
-    public StrictMultipleFields getStrictMultipleFieldsObject() {
-        return this.strictMultipleFieldsObject;
+    @JsonProperty("strictFourFieldsObject")
+    public StrictFourFields getStrictFourFieldsObject() {
+        return this.strictFourFieldsObject;
     }
 
     @Override
@@ -130,7 +130,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
                 && this.myInteger == other.myInteger
                 && this.optionalItem.equals(other.optionalItem)
                 && this.mappedRids.equals(other.mappedRids)
-                && this.strictMultipleFieldsObject.equals(other.strictMultipleFieldsObject);
+                && this.strictFourFieldsObject.equals(other.strictFourFieldsObject);
     }
 
     @Override
@@ -144,7 +144,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
             hash = 31 * hash + this.myInteger;
             hash = 31 * hash + this.optionalItem.hashCode();
             hash = 31 * hash + this.mappedRids.hashCode();
-            hash = 31 * hash + this.strictMultipleFieldsObject.hashCode();
+            hash = 31 * hash + this.strictFourFieldsObject.hashCode();
             result = hash;
             memoizedHashCode = result;
         }
@@ -156,7 +156,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     public String toString() {
         return "StrictMultipleDeprecatedAndUnsafeFields{myList: " + myList + ", bearerTokenValue: " + bearerTokenValue
                 + ", safeLongValue: " + safeLongValue + ", myInteger: " + myInteger + ", optionalItem: " + optionalItem
-                + ", mappedRids: " + mappedRids + ", strictMultipleFieldsObject: " + strictMultipleFieldsObject + '}';
+                + ", mappedRids: " + mappedRids + ", strictFourFieldsObject: " + strictFourFieldsObject + '}';
     }
 
     private static void validateFields(
@@ -165,14 +165,14 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
             SafeLong safeLongValue,
             Optional<String> optionalItem,
             Map<ResourceIdentifier, String> mappedRids,
-            StrictMultipleFields strictMultipleFieldsObject) {
+            StrictFourFields strictFourFieldsObject) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, myList, "myList");
         missingFields = addFieldIfMissing(missingFields, bearerTokenValue, "bearerTokenValue");
         missingFields = addFieldIfMissing(missingFields, safeLongValue, "safeLongValue");
         missingFields = addFieldIfMissing(missingFields, optionalItem, "optionalItem");
         missingFields = addFieldIfMissing(missingFields, mappedRids, "mappedRids");
-        missingFields = addFieldIfMissing(missingFields, strictMultipleFieldsObject, "strictMultipleFieldsObject");
+        missingFields = addFieldIfMissing(missingFields, strictFourFieldsObject, "strictFourFieldsObject");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -217,11 +217,11 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     }
 
     public interface MappedRidsStageBuilder {
-        StrictMultipleFieldsObjectStageBuilder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+        StrictFourFieldsObjectStageBuilder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
     }
 
-    public interface StrictMultipleFieldsObjectStageBuilder {
-        Completed_StageBuilder strictMultipleFieldsObject(@Nonnull StrictMultipleFields strictMultipleFieldsObject);
+    public interface StrictFourFieldsObjectStageBuilder {
+        Completed_StageBuilder strictFourFieldsObject(@Nonnull StrictFourFields strictFourFieldsObject);
     }
 
     public interface Completed_StageBuilder {
@@ -235,7 +235,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
                     MyIntegerStageBuilder,
                     OptionalItemStageBuilder,
                     MappedRidsStageBuilder,
-                    StrictMultipleFieldsObjectStageBuilder,
+                    StrictFourFieldsObjectStageBuilder,
                     Completed_StageBuilder {
         @Override
         Builder myList(@Nonnull List<@Unsafe String> myList);
@@ -259,7 +259,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
         @Override
-        Builder strictMultipleFieldsObject(@Nonnull StrictMultipleFields strictMultipleFieldsObject);
+        Builder strictFourFieldsObject(@Nonnull StrictFourFields strictFourFieldsObject);
 
         @Override
         StrictMultipleDeprecatedAndUnsafeFields build();
@@ -282,7 +282,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
-        private StrictMultipleFields strictMultipleFieldsObject;
+        private StrictFourFields strictFourFieldsObject;
 
         private boolean _myIntegerInitialized = false;
 
@@ -297,7 +297,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
             myInteger(other.getMyInteger());
             optionalItem(other.getOptionalItem());
             mappedRids(other.getMappedRids());
-            strictMultipleFieldsObject(other.getStrictMultipleFieldsObject());
+            strictFourFieldsObject(other.getStrictFourFieldsObject());
             return this;
         }
 
@@ -360,11 +360,11 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         }
 
         @Override
-        @JsonSetter("strictMultipleFieldsObject")
-        public Builder strictMultipleFieldsObject(@Nonnull StrictMultipleFields strictMultipleFieldsObject) {
+        @JsonSetter("strictFourFieldsObject")
+        public Builder strictFourFieldsObject(@Nonnull StrictFourFields strictFourFieldsObject) {
             checkNotBuilt();
-            this.strictMultipleFieldsObject =
-                    Preconditions.checkNotNull(strictMultipleFieldsObject, "strictMultipleFieldsObject cannot be null");
+            this.strictFourFieldsObject =
+                    Preconditions.checkNotNull(strictFourFieldsObject, "strictFourFieldsObject cannot be null");
             return this;
         }
 
@@ -400,7 +400,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
                     myInteger,
                     optionalItem,
                     mappedRids,
-                    strictMultipleFieldsObject);
+                    strictFourFieldsObject);
         }
 
         private void checkNotBuilt() {

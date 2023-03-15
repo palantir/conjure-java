@@ -165,7 +165,7 @@ public final class BeanBuilderGenerator {
                 .addStagedBuilderImpl(specBuilder, typeDef, typesMap);
     }
 
-    public static boolean fieldShouldBeInFinalStage(EnrichedField field) {
+    public static boolean stagedBuilderFieldShouldBeInFinalStage(EnrichedField field) {
         Type type = field.conjureDef().getType();
         return type.accept(TypeVisitor.IS_LIST)
                 || type.accept(TypeVisitor.IS_SET)
@@ -208,8 +208,9 @@ public final class BeanBuilderGenerator {
             ObjectDefinition typeDef,
             Map<com.palantir.conjure.spec.TypeName, TypeDefinition> typesMap) {
         List<EnrichedField> allFields = enrichFields(typeDef.getFields());
-        List<EnrichedField> fieldsNeedingBuilderStage =
-                allFields.stream().filter(f -> !fieldShouldBeInFinalStage(f)).collect(Collectors.toList());
+        List<EnrichedField> fieldsNeedingBuilderStage = allFields.stream()
+                .filter(field -> !BeanBuilderGenerator.stagedBuilderFieldShouldBeInFinalStage(field))
+                .collect(Collectors.toList());
 
         if (fieldsNeedingBuilderStage.isEmpty()) {
             addBuilderImpl(specBuilder, typeDef, typesMap);

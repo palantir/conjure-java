@@ -127,8 +127,11 @@ public final class BeanGenerator {
                 .build());
 
         if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
-            typeBuilder.addMethod(
-                    createStaticFactoryMethod(fields, objectClass, safetyEvaluator, options.useStagedBuilders()));
+            typeBuilder.addMethod(createStaticFactoryMethod(
+                    fields,
+                    objectClass,
+                    safetyEvaluator,
+                    options.useStagedBuilders() && !options.useStrictStagedBuilders()));
         }
 
         if (!nonPrimitiveEnrichedFields.isEmpty()) {
@@ -327,7 +330,7 @@ public final class BeanGenerator {
             ImmutableList<EnrichedField> fields,
             ClassName objectClass,
             SafetyEvaluator safetyEvaluator,
-            boolean useStagedBuilders) {
+            boolean useUnstrictStagedBuilders) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
@@ -342,10 +345,10 @@ public final class BeanGenerator {
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                     .build()));
 
-            Stream<EnrichedField> methodArgs = useStagedBuilders
-                    ? fields.stream().sorted(Comparator.comparing(BeanBuilderGenerator::fieldShouldBeInFinalStage))
+            Stream<EnrichedField> methodArgs = useUnstrictStagedBuilders
+                    ? fields.stream()
+                            .sorted(Comparator.comparing(BeanBuilderGenerator::stagedBuilderFieldShouldBeInFinalStage))
                     : fields.stream();
-
             methodArgs.map(EnrichedField::poetSpec).forEach(spec -> {
                 if (isOptional(spec)) {
                     builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
