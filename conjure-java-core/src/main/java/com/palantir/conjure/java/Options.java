@@ -115,7 +115,8 @@ public interface Options {
     }
 
     /**
-     * Generates compile-time safe builders to ensure all required attributes are set.
+     * Generates compile-time safe builders to ensure all attributes are set, except those of type list, set, map, or
+     * optional. If {@link Options#useStrictStagedBuilders} is true, this option is ignored.
      */
     @Value.Default
     default boolean useStagedBuilders() {
@@ -123,7 +124,7 @@ public interface Options {
     }
 
     /**
-     * TODO(pritham).
+     * Generates compile-time safe builders to ensure all attributes are set.
      */
     @Value.Default
     default boolean useStrictStagedBuilders() {

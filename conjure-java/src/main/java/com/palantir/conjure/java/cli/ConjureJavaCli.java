@@ -198,10 +198,16 @@ public final class ConjureJavaCli implements Runnable {
         @CommandLine.Option(
                 names = "--useStagedBuilders",
                 defaultValue = "false",
-                description = "Generates compile-time safe builders to ensure all required attributes are set.")
+                description =
+                        "Generates compile-time safe builders to ensure all attributes are set, except those of type"
+                                + " list, set, map, or optional. If --useStrictStagedBuilders is set, this option is"
+                                + " ignored.")
         private boolean useStagedBuilders;
 
-        @CommandLine.Option(names = "--useStrictStagedBuilders", defaultValue = "false", description = "TODO(pritham)")
+        @CommandLine.Option(
+                names = "--useStrictStagedBuilders",
+                defaultValue = "false",
+                description = "Generates compile-time safe builders to ensure all attributes are set.")
         private boolean useStrictStagedBuilders;
 
         @CommandLine.Option(

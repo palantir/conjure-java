@@ -328,7 +328,6 @@ public final class BeanBuilderGenerator {
                         .returns(Primitives.box(objectClass))
                         .build());
 
-        // Problem: we want to add auxiliary methods for collections in the completed stage.
         completedStage.addMethods(otherFields.stream()
                 .map(field ->
                         generateMethodsForFinalStageField(field, typeMapper, completedStageClass, safetyEvaluator))
