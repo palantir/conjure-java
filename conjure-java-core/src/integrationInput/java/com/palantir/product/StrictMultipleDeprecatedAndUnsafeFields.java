@@ -214,6 +214,8 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
     public interface OptionalItemStageBuilder {
         MappedRidsStageBuilder optionalItem(@Nonnull Optional<@Unsafe String> optionalItem);
+
+        MappedRidsStageBuilder optionalItem(@Nonnull @Unsafe String optionalItem);
     }
 
     public interface MappedRidsStageBuilder {
@@ -226,6 +228,24 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
     public interface Completed_StageBuilder {
         StrictMultipleDeprecatedAndUnsafeFields build();
+
+        /**
+         * these are docs.
+         * @deprecated this is deprecated.
+         */
+        @Deprecated
+        Completed_StageBuilder addAllMyList(@Nonnull Iterable<@Unsafe String> myList);
+
+        /**
+         * these are docs.
+         * @deprecated this is deprecated.
+         */
+        @Deprecated
+        Completed_StageBuilder myList(@Unsafe String myList);
+
+        Completed_StageBuilder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+
+        Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
     }
 
     public interface Builder
@@ -256,6 +276,9 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         Builder optionalItem(@Nonnull Optional<@Unsafe String> optionalItem);
 
         @Override
+        Builder optionalItem(@Nonnull @Unsafe String optionalItem);
+
+        @Override
         Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
         @Override
@@ -263,6 +286,28 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
         @Override
         StrictMultipleDeprecatedAndUnsafeFields build();
+
+        /**
+         * these are docs.
+         * @deprecated this is deprecated.
+         */
+        @Deprecated
+        @Override
+        Builder addAllMyList(@Nonnull Iterable<@Unsafe String> myList);
+
+        /**
+         * these are docs.
+         * @deprecated this is deprecated.
+         */
+        @Deprecated
+        @Override
+        Builder myList(@Unsafe String myList);
+
+        @Override
+        Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+
+        @Override
+        Builder mappedRids(ResourceIdentifier key, String value);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
@@ -315,6 +360,30 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         }
 
         /**
+         * these are docs.
+         * @deprecated this is deprecated.
+         */
+        @Deprecated
+        @Override
+        public Builder addAllMyList(@Nonnull Iterable<@Unsafe String> myList) {
+            checkNotBuilt();
+            ConjureCollections.addAll(this.myList, Preconditions.checkNotNull(myList, "myList cannot be null"));
+            return this;
+        }
+
+        /**
+         * these are docs.
+         * @deprecated this is deprecated.
+         */
+        @Deprecated
+        @Override
+        public Builder myList(@Unsafe String myList) {
+            checkNotBuilt();
+            this.myList.add(myList);
+            return this;
+        }
+
+        /**
          * @deprecated this is deprecated.
          */
         @Deprecated
@@ -352,10 +421,31 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         }
 
         @Override
+        public Builder optionalItem(@Nonnull @Unsafe String optionalItem) {
+            checkNotBuilt();
+            this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
+            return this;
+        }
+
+        @Override
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
+            return this;
+        }
+
+        @Override
+        public Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
+            checkNotBuilt();
+            this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
+            return this;
+        }
+
+        @Override
+        public Builder mappedRids(ResourceIdentifier key, String value) {
+            checkNotBuilt();
+            this.mappedRids.put(key, value);
             return this;
         }
 

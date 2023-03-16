@@ -99,6 +99,10 @@ public final class StrictOneCollectionField {
 
     public interface Completed_StageBuilder {
         StrictOneCollectionField build();
+
+        Completed_StageBuilder addAllMyList(@Nonnull Iterable<String> myList);
+
+        Completed_StageBuilder myList(String myList);
     }
 
     public interface Builder extends MyListStageBuilder, Completed_StageBuilder {
@@ -110,6 +114,12 @@ public final class StrictOneCollectionField {
 
         @Override
         StrictOneCollectionField build();
+
+        @Override
+        Builder addAllMyList(@Nonnull Iterable<String> myList);
+
+        @Override
+        Builder myList(String myList);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
@@ -133,6 +143,20 @@ public final class StrictOneCollectionField {
         public Builder myList(@Nonnull Iterable<String> myList) {
             checkNotBuilt();
             this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
+            return this;
+        }
+
+        @Override
+        public Builder addAllMyList(@Nonnull Iterable<String> myList) {
+            checkNotBuilt();
+            ConjureCollections.addAll(this.myList, Preconditions.checkNotNull(myList, "myList cannot be null"));
+            return this;
+        }
+
+        @Override
+        public Builder myList(String myList) {
+            checkNotBuilt();
+            this.myList.add(myList);
             return this;
         }
 

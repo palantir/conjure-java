@@ -152,6 +152,8 @@ public final class StrictFourFields {
 
     public interface OptionalItemStageBuilder {
         MappedRidsStageBuilder optionalItem(@Nonnull Optional<String> optionalItem);
+
+        MappedRidsStageBuilder optionalItem(@Nonnull String optionalItem);
     }
 
     public interface MappedRidsStageBuilder {
@@ -160,6 +162,14 @@ public final class StrictFourFields {
 
     public interface Completed_StageBuilder {
         StrictFourFields build();
+
+        Completed_StageBuilder addAllMyList(@Nonnull Iterable<String> myList);
+
+        Completed_StageBuilder myList(String myList);
+
+        Completed_StageBuilder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+
+        Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
     }
 
     public interface Builder
@@ -181,10 +191,25 @@ public final class StrictFourFields {
         Builder optionalItem(@Nonnull Optional<String> optionalItem);
 
         @Override
+        Builder optionalItem(@Nonnull String optionalItem);
+
+        @Override
         Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
         @Override
         StrictFourFields build();
+
+        @Override
+        Builder addAllMyList(@Nonnull Iterable<String> myList);
+
+        @Override
+        Builder myList(String myList);
+
+        @Override
+        Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
+
+        @Override
+        Builder mappedRids(ResourceIdentifier key, String value);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
@@ -221,6 +246,20 @@ public final class StrictFourFields {
         }
 
         @Override
+        public Builder addAllMyList(@Nonnull Iterable<String> myList) {
+            checkNotBuilt();
+            ConjureCollections.addAll(this.myList, Preconditions.checkNotNull(myList, "myList cannot be null"));
+            return this;
+        }
+
+        @Override
+        public Builder myList(String myList) {
+            checkNotBuilt();
+            this.myList.add(myList);
+            return this;
+        }
+
+        @Override
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
             checkNotBuilt();
@@ -237,10 +276,31 @@ public final class StrictFourFields {
         }
 
         @Override
+        public Builder optionalItem(@Nonnull String optionalItem) {
+            checkNotBuilt();
+            this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
+            return this;
+        }
+
+        @Override
         @JsonSetter(value = "mappedRids", nulls = Nulls.SKIP)
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
+            return this;
+        }
+
+        @Override
+        public Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
+            checkNotBuilt();
+            this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
+            return this;
+        }
+
+        @Override
+        public Builder mappedRids(ResourceIdentifier key, String value) {
+            checkNotBuilt();
+            this.mappedRids.put(key, value);
             return this;
         }
 

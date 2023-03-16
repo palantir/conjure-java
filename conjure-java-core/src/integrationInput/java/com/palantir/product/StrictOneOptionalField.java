@@ -82,6 +82,8 @@ public final class StrictOneOptionalField {
     public interface OptionalItemStageBuilder {
         Completed_StageBuilder optionalItem(@Nonnull Optional<String> optionalItem);
 
+        Completed_StageBuilder optionalItem(@Nonnull String optionalItem);
+
         Builder from(StrictOneOptionalField other);
     }
 
@@ -92,6 +94,9 @@ public final class StrictOneOptionalField {
     public interface Builder extends OptionalItemStageBuilder, Completed_StageBuilder {
         @Override
         Builder optionalItem(@Nonnull Optional<String> optionalItem);
+
+        @Override
+        Builder optionalItem(@Nonnull String optionalItem);
 
         @Override
         Builder from(StrictOneOptionalField other);
@@ -121,6 +126,13 @@ public final class StrictOneOptionalField {
         public Builder optionalItem(@Nonnull Optional<String> optionalItem) {
             checkNotBuilt();
             this.optionalItem = Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null");
+            return this;
+        }
+
+        @Override
+        public Builder optionalItem(@Nonnull String optionalItem) {
+            checkNotBuilt();
+            this.optionalItem = Optional.of(Preconditions.checkNotNull(optionalItem, "optionalItem cannot be null"));
             return this;
         }
 

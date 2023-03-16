@@ -330,7 +330,7 @@ public final class BeanGenerator {
             ImmutableList<EnrichedField> fields,
             ClassName objectClass,
             SafetyEvaluator safetyEvaluator,
-            boolean useUnstrictStagedBuilders) {
+            boolean useNonStrictStagedBuilders) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
@@ -345,7 +345,7 @@ public final class BeanGenerator {
                     .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
                     .build()));
 
-            Stream<EnrichedField> methodArgs = useUnstrictStagedBuilders
+            Stream<EnrichedField> methodArgs = useNonStrictStagedBuilders
                     ? fields.stream()
                             .sorted(Comparator.comparing(BeanBuilderGenerator::stagedBuilderFieldShouldBeInFinalStage))
                     : fields.stream();
