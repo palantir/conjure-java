@@ -162,14 +162,6 @@ public final class StrictFourFields {
 
     public interface Completed_StageBuilder {
         StrictFourFields build();
-
-        Completed_StageBuilder addAllMyList(@Nonnull Iterable<String> myList);
-
-        Completed_StageBuilder myList(String myList);
-
-        Completed_StageBuilder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
-
-        Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
     }
 
     public interface Builder
@@ -198,18 +190,6 @@ public final class StrictFourFields {
 
         @Override
         StrictFourFields build();
-
-        @Override
-        Builder addAllMyList(@Nonnull Iterable<String> myList);
-
-        @Override
-        Builder myList(String myList);
-
-        @Override
-        Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
-
-        @Override
-        Builder mappedRids(ResourceIdentifier key, String value);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")

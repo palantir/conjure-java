@@ -228,24 +228,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
     public interface Completed_StageBuilder {
         StrictMultipleDeprecatedAndUnsafeFields build();
-
-        /**
-         * these are docs.
-         * @deprecated this is deprecated.
-         */
-        @Deprecated
-        Completed_StageBuilder addAllMyList(@Nonnull Iterable<@Unsafe String> myList);
-
-        /**
-         * these are docs.
-         * @deprecated this is deprecated.
-         */
-        @Deprecated
-        Completed_StageBuilder myList(@Unsafe String myList);
-
-        Completed_StageBuilder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
-
-        Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
     }
 
     public interface Builder
@@ -286,28 +268,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
         @Override
         StrictMultipleDeprecatedAndUnsafeFields build();
-
-        /**
-         * these are docs.
-         * @deprecated this is deprecated.
-         */
-        @Deprecated
-        @Override
-        Builder addAllMyList(@Nonnull Iterable<@Unsafe String> myList);
-
-        /**
-         * these are docs.
-         * @deprecated this is deprecated.
-         */
-        @Deprecated
-        @Override
-        Builder myList(@Unsafe String myList);
-
-        @Override
-        Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
-
-        @Override
-        Builder mappedRids(ResourceIdentifier key, String value);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")

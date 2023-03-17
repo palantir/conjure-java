@@ -199,17 +199,7 @@ public final class BeanBuilderGenerator {
         List<EnrichedField> allFields = enrichFields(typeDef.getFields());
         List<TypeSpec> interfaces =
                 generateIntermediateStageInterfaces(objectClass, builderClass, typeMapper, allFields, safetyEvaluator);
-        // Add auxiliary methods for lists, sets, and maps.
-        List<EnrichedField> fieldToAddAuxiliaryMethodsFor = allFields.stream()
-                .filter(field -> {
-                    Type type = field.conjureDef().getType();
-                    return type.accept(TypeVisitor.IS_LIST)
-                            || type.accept(TypeVisitor.IS_SET)
-                            || type.accept(TypeVisitor.IS_MAP);
-                })
-                .collect(Collectors.toList());
-        interfaces.add(generateStrictBuilderFinalStageInterface(
-                objectClass, typeMapper, fieldToAddAuxiliaryMethodsFor, safetyEvaluator));
+        interfaces.add(generateBuilderFinalStageInterface(objectClass, typeMapper, List.of(), safetyEvaluator));
         specBuilder.addTypes(interfaces);
 
         addBuilderInterfaceAndMethod(specBuilder, interfaces);
@@ -240,7 +230,7 @@ public final class BeanBuilderGenerator {
 
         List<TypeSpec> interfaces = generateIntermediateStageInterfaces(
                 objectClass, builderClass, typeMapper, fieldsNeedingBuilderStage, safetyEvaluator);
-        interfaces.add(generateNonStrictBuilderFinalStageInterface(
+        interfaces.add(generateBuilderFinalStageInterface(
                 objectClass,
                 typeMapper,
                 allFields.stream()
@@ -359,7 +349,7 @@ public final class BeanBuilderGenerator {
         return interfaces.stream().map(TypeSpec.Builder::build).collect(Collectors.toList());
     }
 
-    private static TypeSpec generateNonStrictBuilderFinalStageInterface(
+    private static TypeSpec generateBuilderFinalStageInterface(
             ClassName objectClass, TypeMapper typeMapper, List<EnrichedField> fields, SafetyEvaluator safetyEvaluator) {
         ClassName completedStageClass = stageBuilderInterfaceName(objectClass, "completed_");
         return TypeSpec.interfaceBuilder(completedStageClass)
@@ -375,27 +365,6 @@ public final class BeanBuilderGenerator {
                                 generateAuxiliaryMethodsForFinalStageInterfaceField(
                                         field, typeMapper, completedStageClass, safetyEvaluator)
                                         .stream()))
-                        .collect(Collectors.toList()))
-                .build();
-    }
-
-    private static TypeSpec generateStrictBuilderFinalStageInterface(
-            ClassName objectClass,
-            TypeMapper typeMapper,
-            List<EnrichedField> fieldsToCreateAuxiliaryMethodsFor,
-            SafetyEvaluator safetyEvaluator) {
-        ClassName completedStageClass = stageBuilderInterfaceName(objectClass, "completed_");
-        return TypeSpec.interfaceBuilder(completedStageClass)
-                .addModifiers(Modifier.PUBLIC)
-                .addMethod(MethodSpec.methodBuilder("build")
-                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                        .returns(Primitives.box(objectClass))
-                        .build())
-                .addMethods(fieldsToCreateAuxiliaryMethodsFor.stream()
-                        .flatMap(field ->
-                                generateAuxiliaryMethodsForFinalStageInterfaceField(
-                                        field, typeMapper, completedStageClass, safetyEvaluator)
-                                        .stream())
                         .collect(Collectors.toList()))
                 .build();
     }

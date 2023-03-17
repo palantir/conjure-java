@@ -145,10 +145,6 @@ public final class StrictThreeFields {
 
     public interface Completed_StageBuilder {
         StrictThreeFields build();
-
-        Completed_StageBuilder addAllMyList(@Nonnull Iterable<String> myList);
-
-        Completed_StageBuilder myList(String myList);
     }
 
     public interface Builder
@@ -170,12 +166,6 @@ public final class StrictThreeFields {
 
         @Override
         StrictThreeFields build();
-
-        @Override
-        Builder addAllMyList(@Nonnull Iterable<String> myList);
-
-        @Override
-        Builder myList(String myList);
     }
 
     @Generated("com.palantir.conjure.java.types.BeanBuilderGenerator")
