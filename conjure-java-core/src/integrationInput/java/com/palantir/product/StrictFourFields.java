@@ -226,20 +226,6 @@ public final class StrictFourFields {
         }
 
         @Override
-        public Builder addAllMyList(@Nonnull Iterable<String> myList) {
-            checkNotBuilt();
-            ConjureCollections.addAll(this.myList, Preconditions.checkNotNull(myList, "myList cannot be null"));
-            return this;
-        }
-
-        @Override
-        public Builder myList(String myList) {
-            checkNotBuilt();
-            this.myList.add(myList);
-            return this;
-        }
-
-        @Override
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
             checkNotBuilt();
@@ -267,20 +253,6 @@ public final class StrictFourFields {
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
-            return this;
-        }
-
-        @Override
-        public Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
-            checkNotBuilt();
-            this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
-            return this;
-        }
-
-        @Override
-        public Builder mappedRids(ResourceIdentifier key, String value) {
-            checkNotBuilt();
-            this.mappedRids.put(key, value);
             return this;
         }
 

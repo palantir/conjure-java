@@ -137,20 +137,6 @@ public final class StrictOneCollectionField {
         }
 
         @Override
-        public Builder addAllMyList(@Nonnull Iterable<String> myList) {
-            checkNotBuilt();
-            ConjureCollections.addAll(this.myList, Preconditions.checkNotNull(myList, "myList cannot be null"));
-            return this;
-        }
-
-        @Override
-        public Builder myList(String myList) {
-            checkNotBuilt();
-            this.myList.add(myList);
-            return this;
-        }
-
-        @Override
         public StrictOneCollectionField build() {
             checkNotBuilt();
             this._buildInvoked = true;

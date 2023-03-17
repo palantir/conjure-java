@@ -199,20 +199,6 @@ public final class StrictThreeFields {
         }
 
         @Override
-        public Builder addAllMyList(@Nonnull Iterable<String> myList) {
-            checkNotBuilt();
-            ConjureCollections.addAll(this.myList, Preconditions.checkNotNull(myList, "myList cannot be null"));
-            return this;
-        }
-
-        @Override
-        public Builder myList(String myList) {
-            checkNotBuilt();
-            this.myList.add(myList);
-            return this;
-        }
-
-        @Override
         @JsonSetter("bearerTokenValue")
         public Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue) {
             checkNotBuilt();

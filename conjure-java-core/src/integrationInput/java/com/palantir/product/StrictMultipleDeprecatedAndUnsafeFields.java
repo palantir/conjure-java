@@ -320,30 +320,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         }
 
         /**
-         * these are docs.
-         * @deprecated this is deprecated.
-         */
-        @Deprecated
-        @Override
-        public Builder addAllMyList(@Nonnull Iterable<@Unsafe String> myList) {
-            checkNotBuilt();
-            ConjureCollections.addAll(this.myList, Preconditions.checkNotNull(myList, "myList cannot be null"));
-            return this;
-        }
-
-        /**
-         * these are docs.
-         * @deprecated this is deprecated.
-         */
-        @Deprecated
-        @Override
-        public Builder myList(@Unsafe String myList) {
-            checkNotBuilt();
-            this.myList.add(myList);
-            return this;
-        }
-
-        /**
          * @deprecated this is deprecated.
          */
         @Deprecated
@@ -392,20 +368,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         public Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
             checkNotBuilt();
             this.mappedRids = new LinkedHashMap<>(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
-            return this;
-        }
-
-        @Override
-        public Builder putAllMappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids) {
-            checkNotBuilt();
-            this.mappedRids.putAll(Preconditions.checkNotNull(mappedRids, "mappedRids cannot be null"));
-            return this;
-        }
-
-        @Override
-        public Builder mappedRids(ResourceIdentifier key, String value) {
-            checkNotBuilt();
-            this.mappedRids.put(key, value);
             return this;
         }
 
