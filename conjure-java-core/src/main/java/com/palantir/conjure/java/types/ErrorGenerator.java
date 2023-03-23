@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -276,7 +277,10 @@ public final class ErrorGenerator implements Generator {
         methodBuilder.addCode("return new $T($L", ServiceException.class, typeName);
 
         if (withCause) {
-            methodBuilder.addParameter(Throwable.class, "cause");
+            ParameterSpec causeParameter = ParameterSpec.builder(Throwable.class, "cause")
+                    .addAnnotation(Nullable.class)
+                    .build();
+            methodBuilder.addParameter(causeParameter);
             methodBuilder.addCode(", cause");
         }
 
