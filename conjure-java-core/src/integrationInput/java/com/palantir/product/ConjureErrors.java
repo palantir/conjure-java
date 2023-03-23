@@ -8,6 +8,7 @@ import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.Unsafe;
 import com.palantir.logsafe.UnsafeArg;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
@@ -43,7 +44,7 @@ public final class ConjureErrors {
      * @param serviceDef Details of the invalid service definition.
      */
     public static ServiceException invalidServiceDefinition(
-            Throwable cause, @Safe String serviceName, @Unsafe Object serviceDef) {
+            @Nullable Throwable cause, @Safe String serviceName, @Unsafe Object serviceDef) {
         return new ServiceException(
                 INVALID_SERVICE_DEFINITION,
                 cause,
@@ -57,7 +58,7 @@ public final class ConjureErrors {
     }
 
     public static ServiceException invalidTypeDefinition(
-            Throwable cause, @Safe String typeName, @Unsafe Object typeDef) {
+            @Nullable Throwable cause, @Safe String typeName, @Unsafe Object typeDef) {
         return new ServiceException(
                 INVALID_TYPE_DEFINITION, cause, SafeArg.of("typeName", typeName), UnsafeArg.of("typeDef", typeDef));
     }

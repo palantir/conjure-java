@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Conjure errors have the "Throwable cause" parameter marked as Nullable
+  links:
+  - https://github.com/palantir/conjure-java/pull/2001
