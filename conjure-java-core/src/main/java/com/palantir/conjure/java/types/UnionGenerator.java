@@ -127,7 +127,7 @@ public final class UnionGenerator {
                 .addTypes(generateWrapperClasses(
                         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
                 .addType(generateUnknownWrapper(baseClass, visitorClass, options))
-                .addMethod(generateEquals(unionClass))
+                .addMethod(MethodSpecs.createEquals(unionClass))
                 .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
                 .addMethod(MethodSpecs.createToString(
@@ -245,20 +245,6 @@ public final class UnionGenerator {
                 .addTypeVariable(TYPE_VARIABLE)
                 .addStatement("return $L.accept($N)", VALUE_FIELD_NAME, visitor)
                 .returns(TYPE_VARIABLE)
-                .build();
-    }
-
-    private static MethodSpec generateEquals(ClassName unionClass) {
-        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other").build();
-        CodeBlock.Builder codeBuilder = CodeBlock.builder()
-                .add("return this == $1N || ($1N instanceof $2T && equalTo(($2T) $1N))", other, unionClass);
-
-        return MethodSpec.methodBuilder("equals")
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Override.class)
-                .addParameter(other)
-                .returns(TypeName.BOOLEAN)
-                .addStatement("$L", codeBuilder.build())
                 .build();
     }
 
