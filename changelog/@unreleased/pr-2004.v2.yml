@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Enums and Union types now have an `@Nullable` annotation for the `other`
+    parameter in the generated `equals` method
+  links:
+  - https://github.com/palantir/conjure-java/pull/2004

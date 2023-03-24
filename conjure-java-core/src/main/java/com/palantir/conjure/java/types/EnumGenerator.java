@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 public final class EnumGenerator {
@@ -307,7 +308,9 @@ public final class EnumGenerator {
     }
 
     private static MethodSpec createEquals(TypeName thisClass) {
-        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other").build();
+        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other")
+                .addAnnotation(Nullable.class)
+                .build();
         return MethodSpec.methodBuilder("equals")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)

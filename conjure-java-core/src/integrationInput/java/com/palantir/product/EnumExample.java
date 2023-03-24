@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 /**
@@ -66,7 +67,7 @@ public final class EnumExample {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return (this == other)
                 || (this.value == Value.UNKNOWN
                         && other instanceof EnumExample
