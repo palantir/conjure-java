@@ -1,0 +1,43 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      StrictOneField:
+        fields:
+          bearerTokenValue: bearertoken
+      StrictOneOptionalField:
+        fields:
+          optionalItem: optional<string>
+      StrictOneCollectionField:
+        fields:
+          myList: list<string>
+      StrictThreeFields:
+        fields:
+          myList: list<string>
+          bearerTokenValue: bearertoken
+          optionalItem: optional<string>
+      StrictFourFields:
+        fields:
+          myList: list<string>
+          bearerTokenValue: bearertoken
+          optionalItem: optional<string>
+          mappedRids: map<rid, string>
+      StrictMultipleDeprecatedAndUnsafeFields:
+        fields:
+          myList:
+            type: list<string>
+            deprecated: this is deprecated.
+            docs: these are docs.
+            safety: unsafe
+          bearerTokenValue:
+            type: bearertoken
+            deprecated: this is deprecated.
+          safeLongValue:
+            type: safelong
+            safety: do-not-log
+          myInteger: integer
+          optionalItem:
+            type: optional<string>
+            safety: unsafe
+          mappedRids: map<rid, string>
+          strictFourFieldsObject: StrictFourFields
