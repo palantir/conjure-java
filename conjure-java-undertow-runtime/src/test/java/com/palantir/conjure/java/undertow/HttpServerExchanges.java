@@ -28,6 +28,7 @@ import io.undertow.util.Protocols;
 import org.xnio.OptionMap;
 import org.xnio.StreamConnection;
 import org.xnio.XnioIoThread;
+import org.xnio.channels.Configurable;
 import org.xnio.conduits.ConduitStreamSinkChannel;
 import org.xnio.conduits.ConduitStreamSourceChannel;
 import org.xnio.conduits.StreamSinkConduit;
@@ -43,10 +44,11 @@ public final class HttpServerExchanges {
 
     private static StreamConnection createStreamConnection() {
         StreamConnection streamConnection = mock(StreamConnection.class);
-        ConduitStreamSinkChannel sinkChannel = new ConduitStreamSinkChannel(null, mock(StreamSinkConduit.class));
+        ConduitStreamSinkChannel sinkChannel =
+                new ConduitStreamSinkChannel(Configurable.EMPTY, mock(StreamSinkConduit.class));
         lenient().when(streamConnection.getSinkChannel()).thenReturn(sinkChannel);
         ConduitStreamSourceChannel sourceChannel =
-                new ConduitStreamSourceChannel(null, mock(StreamSourceConduit.class));
+                new ConduitStreamSourceChannel(Configurable.EMPTY, mock(StreamSourceConduit.class));
         lenient().when(streamConnection.getSourceChannel()).thenReturn(sourceChannel);
         XnioIoThread ioThread = mock(XnioIoThread.class);
         lenient().when(streamConnection.getIoThread()).thenReturn(ioThread);
