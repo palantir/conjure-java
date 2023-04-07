@@ -17,6 +17,8 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.CountingInputStream;
+import com.google.common.io.CountingOutputStream;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.tracing.Tracer;
@@ -102,10 +104,15 @@ final class TracedEncoding implements Encoding {
         @Override
         public void serialize(T value, OutputStream output) throws IOException {
             Tracer.fastStartSpan(operation);
+            CountingOutputStream countingOutput = new CountingOutputStream(output);
             try {
-                delegate.serialize(value, output);
+                delegate.serialize(value, countingOutput);
             } finally {
-                Tracer.fastCompleteSpan(tags);
+                ImmutableMap<String, String> metadata = ImmutableMap.<String, String>builder()
+                        .putAll(tags)
+                        .put("outputSize", Long.toString(countingOutput.getCount()))
+                        .build();
+                Tracer.fastCompleteSpan(metadata);
             }
         }
     }
@@ -125,10 +132,15 @@ final class TracedEncoding implements Encoding {
         @Override
         public T deserialize(InputStream input) throws IOException {
             Tracer.fastStartSpan(operation);
+            CountingInputStream countingInput = new CountingInputStream(input);
             try {
-                return delegate.deserialize(input);
+                return delegate.deserialize(countingInput);
             } finally {
-                Tracer.fastCompleteSpan(tags);
+                ImmutableMap<String, String> metadata = ImmutableMap.<String, String>builder()
+                        .putAll(tags)
+                        .put("inputSize", Long.toString(countingInput.getCount()))
+                        .build();
+                Tracer.fastCompleteSpan(metadata);
             }
         }
     }
