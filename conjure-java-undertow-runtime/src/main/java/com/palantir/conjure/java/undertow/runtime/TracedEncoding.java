@@ -111,7 +111,7 @@ final class TracedEncoding implements Encoding {
                 ImmutableMap<String, String> metadata = ImmutableMap.<String, String>builder()
                         .putAll(tags)
                         .put("outputSize", Long.toString(countingOutput.getCount()))
-                        .build();
+                        .buildOrThrow();
                 Tracer.fastCompleteSpan(metadata);
             }
         }
@@ -139,7 +139,7 @@ final class TracedEncoding implements Encoding {
                 ImmutableMap<String, String> metadata = ImmutableMap.<String, String>builder()
                         .putAll(tags)
                         .put("inputSize", Long.toString(countingInput.getCount()))
-                        .build();
+                        .buildOrThrow();
                 Tracer.fastCompleteSpan(metadata);
             }
         }
