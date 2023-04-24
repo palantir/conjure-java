@@ -30,6 +30,13 @@ import java.util.Optional;
 public interface RequestContext {
 
     /**
+     * Returns the <a href="https://www.rfc-editor.org/rfc/rfc7230#section-5.3">request target</a>.
+     *
+     * This includes the query string and is not decoded in any way.
+     */
+    String requestTarget();
+
+    /**
      * Returns all values of the header named {@code headerName}. The name is case insensitive. An empty list is
      * returned if no such header exists.
      */

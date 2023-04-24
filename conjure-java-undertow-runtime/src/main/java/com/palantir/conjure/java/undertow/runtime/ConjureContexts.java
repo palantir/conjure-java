@@ -61,6 +61,13 @@ final class ConjureContexts implements Contexts {
         }
 
         @Override
+        public String requestTarget() {
+            String requestUri = exchange.getRequestURI();
+            String queryString = exchange.getQueryString();
+            return queryString.isEmpty() ? requestUri : requestUri + "?" + queryString;
+        }
+
+        @Override
         public List<String> header(String headerName) {
             HeaderValues header = exchange.getRequestHeaders().get(headerName);
             return header == null ? ImmutableList.of() : Collections.unmodifiableList(header);
