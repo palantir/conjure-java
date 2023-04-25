@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Add `RequestContext` method to get the request target.
+  links:
+  - https://github.com/palantir/conjure-java/pull/2030
