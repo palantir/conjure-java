@@ -25,6 +25,7 @@ import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
 import java.security.cert.Certificate;
 import java.util.Collections;
@@ -69,6 +70,11 @@ final class ConjureContexts implements Contexts {
         @Override
         public Optional<String> firstHeader(String headerName) {
             return Optional.ofNullable(exchange.getRequestHeaders().getFirst(headerName));
+        }
+
+        @Override
+        public Optional<String> cookie(String cookieName) {
+            return Optional.ofNullable(exchange.getRequestCookie(cookieName)).map(Cookie::getValue);
         }
 
         @Override
