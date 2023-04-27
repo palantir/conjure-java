@@ -42,6 +42,12 @@ public interface RequestContext {
     Optional<String> firstHeader(String headerName);
 
     /**
+     * Returns the value of the cookie named {@code cookieName}.
+     * An {@link Optional#empty()} is returned if no such cookie exists.
+     */
+    Optional<String> cookie(String cookieName);
+
+    /**
      * Returns all query parameters associated with the current request.
      */
     ListMultimap<String, String> queryParameters();
