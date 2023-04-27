@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.palantir.conjure.java.undertow.lib.Contexts;
@@ -64,7 +65,7 @@ final class ConjureContexts implements Contexts {
         public String requestTarget() {
             String requestUri = exchange.getRequestURI();
             String queryString = exchange.getQueryString();
-            return queryString.isEmpty() ? requestUri : requestUri + "?" + queryString;
+            return Strings.isNullOrEmpty(queryString) ? requestUri : requestUri + "?" + queryString;
         }
 
         @Override

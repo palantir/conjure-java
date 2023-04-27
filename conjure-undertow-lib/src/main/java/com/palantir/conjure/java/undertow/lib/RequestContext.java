@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.lib;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.Unsafe;
 import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,7 @@ public interface RequestContext {
      *
      * This includes the query string and is not decoded in any way.
      */
+    @Unsafe
     String requestTarget();
 
     /**
