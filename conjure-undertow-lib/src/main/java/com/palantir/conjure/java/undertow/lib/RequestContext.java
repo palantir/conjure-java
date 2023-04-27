@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.lib;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.Unsafe;
 import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,14 @@ import java.util.Optional;
  * parameters. This is a read only interface which should only be implemented by {@code conjure-java-undertow-runtime}.
  */
 public interface RequestContext {
+
+    /**
+     * Returns the <a href="https://www.rfc-editor.org/rfc/rfc7230#section-5.3">request target</a>.
+     *
+     * This includes the query string and is not decoded in any way.
+     */
+    @Unsafe
+    String requestTarget();
 
     /**
      * Returns all values of the header named {@code headerName}. The name is case insensitive. An empty list is
