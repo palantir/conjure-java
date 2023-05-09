@@ -26,6 +26,7 @@ import io.undertow.server.handlers.form.FormDataParser;
 import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.util.Headers;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,8 +34,9 @@ import java.util.Deque;
 
 public final class FormParamDeserializer<T> implements Deserializer<T> {
 
-    private static final FormParserFactory FORM_PARSER_FACTORY =
-            FormParserFactory.builder().build();
+    private static final FormParserFactory FORM_PARSER_FACTORY = FormParserFactory.builder()
+            .withDefaultCharset(StandardCharsets.UTF_8.name())
+            .build();
 
     private final String parameter;
     private final CollectionParamDecoder<? extends T> decoder;

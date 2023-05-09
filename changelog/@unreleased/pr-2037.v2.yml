@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: '`application/x-www-form-urlencoded` request parameters are decode
+    as `UTF-8` the request does not specify a charset.'
+  links:
+  - https://github.com/palantir/conjure-java/pull/2037
