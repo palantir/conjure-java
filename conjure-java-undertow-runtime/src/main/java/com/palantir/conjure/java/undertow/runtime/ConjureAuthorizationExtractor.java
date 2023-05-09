@@ -43,8 +43,11 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
     private static final String USER_ID_KEY = "userId";
     private static final String SESSION_ID_KEY = "sessionId";
     private static final String TOKEN_ID_KEY = "tokenId";
-    private static Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
-    private static Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
+    private static final String ORGANIZATION_ID_KEY = "organizationId";
+    private static final Consumer<String> sessionIdSetter = sessionId -> MDC.put(SESSION_ID_KEY, sessionId);
+    private static final Consumer<String> tokenIdSetter = tokenId -> MDC.put(TOKEN_ID_KEY, tokenId);
+    private static final Consumer<String> organizationIdSetter =
+            organizationId -> MDC.put(ORGANIZATION_ID_KEY, organizationId);
     private static final ErrorType MISSING_CREDENTIAL_ERROR_TYPE =
             ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials");
     private static final ErrorType MALFORMED_CREDENTIAL_ERROR_TYPE =
@@ -91,6 +94,7 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
             MDC.put(USER_ID_KEY, jwt.getUnverifiedUserId());
             jwt.getUnverifiedSessionId().ifPresent(sessionIdSetter);
             jwt.getUnverifiedTokenId().ifPresent(tokenIdSetter);
+            jwt.getUnverifiedOrganizationId().ifPresent(organizationIdSetter);
         }
     }
 

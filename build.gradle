@@ -78,7 +78,7 @@ subprojects {
 
     tasks.withType(JavaCompile) {
         options.compilerArgs += ['-Werror']
-        options.errorprone.disable 'PreferSafeLoggingPreconditions', 'PreferSafeLoggableExceptions'
+        options.errorprone.disable 'PreferSafeLoggableExceptions', 'PreferSafeLoggingPreconditions', 'UnnecessaryLambda'
     }
 
     // Run `./gradlew test -Drecreate=true` to recreate all the expected
