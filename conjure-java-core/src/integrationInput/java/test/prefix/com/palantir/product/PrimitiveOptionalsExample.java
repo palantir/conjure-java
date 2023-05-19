@@ -66,7 +66,7 @@ public final class PrimitiveOptionalsExample {
 
     private final OptionalSetAliasExample aliasOptionalSet;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private PrimitiveOptionalsExample(
             OptionalDouble num,

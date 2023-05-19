@@ -27,7 +27,7 @@ public final class MapExample {
 
     private final Map<String, OptionalAlias> aliasOptionalItems;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private MapExample(
             Map<String, String> items,

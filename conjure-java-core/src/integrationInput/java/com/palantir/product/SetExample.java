@@ -24,7 +24,7 @@ public final class SetExample {
 
     private final Set<Double> doubleItems;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private SetExample(Set<String> items, Set<Double> doubleItems) {
         validateFields(items, doubleItems);

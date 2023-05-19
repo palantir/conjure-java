@@ -24,7 +24,7 @@ public final class RiskyNames {
 
     private final String len;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private RiskyNames(String var, String class_, String int_, String len) {
         validateFields(var, class_, int_, len);

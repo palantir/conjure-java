@@ -33,7 +33,7 @@ public final class SafeExternalLongExample {
 
     private final Set<Long> safeExternalLongSet;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private SafeExternalLongExample(
             long safeExternalLongValue,

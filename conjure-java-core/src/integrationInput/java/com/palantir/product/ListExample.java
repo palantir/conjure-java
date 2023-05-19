@@ -32,7 +32,7 @@ public final class ListExample {
 
     private final List<List<String>> nestedItems;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private ListExample(
             List<String> items,

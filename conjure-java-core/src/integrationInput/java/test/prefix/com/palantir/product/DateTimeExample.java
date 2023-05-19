@@ -19,7 +19,7 @@ import javax.annotation.processing.Generated;
 public final class DateTimeExample {
     private final OffsetDateTime datetime;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private DateTimeExample(OffsetDateTime datetime) {
         validateFields(datetime);

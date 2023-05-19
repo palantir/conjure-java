@@ -39,7 +39,7 @@ public final class CollectionsTestObject {
 
     private final CollectionsTestAliasMap amap;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private CollectionsTestObject(
             List<String> items,

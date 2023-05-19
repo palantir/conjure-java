@@ -35,7 +35,7 @@ public final class StrictFourFields {
 
     private final Map<ResourceIdentifier, String> mappedRids;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private StrictFourFields(
             List<String> myList,

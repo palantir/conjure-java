@@ -113,7 +113,10 @@ public final class MethodSpecs {
 
     public static void addCachedHashCode(TypeSpec.Builder typeBuilder, Collection<FieldSpec> fields) {
         FieldSpec field = FieldSpec.builder(
-                        TypeName.INT, JavaNameSanitizer.sanitize(MEMOIZED_HASH_CODE), Modifier.PRIVATE)
+                        TypeName.INT,
+                        JavaNameSanitizer.sanitize(MEMOIZED_HASH_CODE),
+                        Modifier.PRIVATE,
+                        Modifier.VOLATILE)
                 .build();
         typeBuilder.addField(field);
         typeBuilder.addMethod(createCachedHashCode(fields, field));

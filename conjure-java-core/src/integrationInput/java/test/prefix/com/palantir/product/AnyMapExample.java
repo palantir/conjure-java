@@ -22,7 +22,7 @@ import javax.annotation.processing.Generated;
 public final class AnyMapExample {
     private final Map<String, Object> items;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private AnyMapExample(Map<String, Object> items) {
         validateFields(items);

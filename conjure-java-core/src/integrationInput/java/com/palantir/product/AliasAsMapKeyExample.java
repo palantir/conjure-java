@@ -35,7 +35,7 @@ public final class AliasAsMapKeyExample {
 
     private final Map<UuidAliasExample, ManyFieldExample> uuids;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private AliasAsMapKeyExample(
             Map<StringAliasExample, ManyFieldExample> strings,

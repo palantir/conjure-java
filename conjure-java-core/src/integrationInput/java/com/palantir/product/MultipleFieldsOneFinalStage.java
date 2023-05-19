@@ -31,7 +31,7 @@ public final class MultipleFieldsOneFinalStage {
 
     private final Optional<OneField> optionalItem;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private MultipleFieldsOneFinalStage(
             Map<ResourceIdentifier, String> mappedRids, OneField token, Optional<OneField> optionalItem) {

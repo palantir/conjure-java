@@ -41,7 +41,7 @@ public final class MultipleFieldsOnlyFinalStage {
 
     private final Set<String> itemsSetOld;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private MultipleFieldsOnlyFinalStage(
             List<String> items,

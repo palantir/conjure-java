@@ -43,7 +43,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
     private final StrictFourFields strictFourFieldsObject;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private StrictMultipleDeprecatedAndUnsafeFields(
             List<String> myList,

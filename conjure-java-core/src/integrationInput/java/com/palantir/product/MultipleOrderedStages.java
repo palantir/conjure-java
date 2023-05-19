@@ -39,7 +39,7 @@ public final class MultipleOrderedStages {
 
     private final Optional<OneField> optionalItem;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private MultipleOrderedStages(
             OneField token,

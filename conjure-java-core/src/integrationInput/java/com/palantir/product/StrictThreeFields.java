@@ -30,7 +30,7 @@ public final class StrictThreeFields {
 
     private final Optional<String> optionalItem;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private StrictThreeFields(List<String> myList, BearerToken bearerTokenValue, Optional<String> optionalItem) {
         validateFields(myList, bearerTokenValue, optionalItem);

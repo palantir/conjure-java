@@ -21,7 +21,7 @@ import javax.annotation.processing.Generated;
 public final class StrictOneCollectionField {
     private final List<String> myList;
 
-    private int memoizedHashCode;
+    private volatile int memoizedHashCode;
 
     private StrictOneCollectionField(List<String> myList) {
         validateFields(myList);
