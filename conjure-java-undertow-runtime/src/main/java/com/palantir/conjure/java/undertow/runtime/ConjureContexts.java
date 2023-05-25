@@ -19,6 +19,7 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.palantir.conjure.java.undertow.lib.Contexts;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
@@ -86,7 +87,7 @@ final class ConjureContexts implements Contexts {
         }
 
         @Override
-        public ImmutableListMultimap<String, String> queryParameters() {
+        public ListMultimap<String, String> queryParameters() {
             ImmutableListMultimap<String, String> cachedQueryParamsSnapshot = cachedQueryParams;
             if (cachedQueryParamsSnapshot == null) {
                 cachedQueryParamsSnapshot = buildQueryParameters();
@@ -101,7 +102,7 @@ final class ConjureContexts implements Contexts {
         }
 
         @Override
-        public ImmutableList<Certificate> peerCertificates() {
+        public List<Certificate> peerCertificates() {
             SSLSession sslSession = exchange.getConnection().getSslSession();
             if (sslSession != null) {
                 try {

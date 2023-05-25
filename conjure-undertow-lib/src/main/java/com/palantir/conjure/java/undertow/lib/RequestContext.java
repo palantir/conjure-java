@@ -75,5 +75,5 @@ public interface RequestContext {
      *
      * @see javax.net.ssl.SSLSession#getPeerCertificates()
      */
-    ImmutableList<Certificate> peerCertificates();
+    List<Certificate> peerCertificates();
 }
