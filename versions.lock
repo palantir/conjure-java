@@ -88,7 +88,7 @@ org.yaml:snakeyaml:1.33 (1 constraints: 6f17f827)
 
 [Test dependencies]
 ch.qos.logback:logback-access:1.2.11 (1 constraints: e31129f4)
-ch.qos.logback:logback-classic:1.2.11 (5 constraints: a84def4d)
+ch.qos.logback:logback-classic:1.2.11 (6 constraints: de520609)
 ch.qos.logback:logback-core:1.2.11 (5 constraints: f74abe3c)
 com.fasterxml:classmate:1.5.1 (3 constraints: 8530e55a)
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.14.2 (2 constraints: db2e8469)
