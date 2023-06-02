@@ -1,4 +1,4 @@
-ch.qos.logback:* = 1.2.11
+# Dropwizard is used for testing, do not take major version upgradesch.qos.logback:* = 1.2.11
 com.atlassian.commonmark:* = 0.12.1
 com.fasterxml.jackson.core:jackson-databind = 2.14.2
 com.google.code.findbugs:jsr305 = 3.0.2
@@ -18,8 +18,6 @@ com.palantir.websecurity:dropwizard-web-security = 1.1.0
 com.squareup.okhttp3:* = 3.14.1
 com.squareup:javapoet = 1.13.0
 info.picocli:picocli = 4.7.3
-io.dropwizard.metrics:metrics-core = 4.2.19
-io.dropwizard:dropwizard-* = 4.0.0
 io.undertow:* = 2.2.24.Final
 javax.annotation:javax.annotation-api = 1.3.2
 javax.validation:validation-api = 2.0.1.Final
@@ -51,4 +49,6 @@ com.fasterxml.jackson.*:jackson-* = 2.12.3
 com.palantir.javaformat:palantir-java-format = 1.1.0
 # Do not force up the minimum error_prone_annotations dependency version
 com.google.errorprone:error_prone_annotations = 2.7.1
+# Dropwizard is used for testing, do not take major version upgrades
+io.dropwizard:dropwizard-* = 2.0.34
 # dependency-upgrader:ON
