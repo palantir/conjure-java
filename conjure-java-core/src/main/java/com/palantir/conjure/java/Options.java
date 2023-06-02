@@ -21,15 +21,14 @@ import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import java.util.Optional;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.Response;
 import org.immutables.value.Value;
 
 @Value.Immutable
 public interface Options {
 
     /**
-     * Instructs the {@link JerseyServiceGenerator} to generate binary response endpoints with the {@link Response}
-     * type.
+     * Instructs the {@link JerseyServiceGenerator} to generate binary response endpoints with the
+     * {@code javax.ws.rs.core.Response} type.
      */
     @Value.Default
     default boolean jerseyBinaryAsResponse() {

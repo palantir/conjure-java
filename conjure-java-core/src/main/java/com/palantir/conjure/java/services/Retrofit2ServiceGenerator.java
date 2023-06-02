@@ -69,7 +69,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
-import javax.ws.rs.core.MediaType;
 
 public final class Retrofit2ServiceGenerator implements Generator {
 
@@ -357,8 +356,8 @@ public final class Retrofit2ServiceGenerator implements Generator {
 
     private static String getReturnMediaType(TypeName returnType) {
         return returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)
-                ? MediaType.APPLICATION_OCTET_STREAM
-                : MediaType.APPLICATION_JSON;
+                ? "application/octet-stream"
+                : "application/json";
     }
 
     private static ClassName httpMethodToClassName(String method) {
