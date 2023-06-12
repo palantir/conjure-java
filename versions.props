@@ -38,7 +38,7 @@ com.palantir.goethe:* = 0.10.0
 com.github.stefanbirkner:system-lambda = 1.2.0
 com.palantir.human-readable-types:* = 1.6.0
 org.derive4j:* = 1.1.1
-com.google.auto:auto-common = 1.2.1
+com.google.auto:auto-common = 1.2.2
 com.google.testing.compile:compile-testing = 0.19
 org.wildfly.common:wildfly-common = 1.6.0.Final
 
