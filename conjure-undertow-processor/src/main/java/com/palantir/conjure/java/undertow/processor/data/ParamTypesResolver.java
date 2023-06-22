@@ -39,7 +39,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import io.undertow.server.HttpServerExchange;
-import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -146,9 +145,8 @@ public final class ParamTypesResolver {
                 return Optional.of(ParameterTypes.context());
             } else {
                 context.reportError(
-                        "At least one annotation should be present or type should be InputStream",
+                        "At least one annotation should be present",
                         variableElement,
-                        SafeArg.of("requestBody", InputStream.class),
                         SafeArg.of("supportedAnnotations", PARAM_ANNOTATION_CLASSES));
                 return Optional.empty();
             }
