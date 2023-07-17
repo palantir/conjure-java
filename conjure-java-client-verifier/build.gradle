@@ -27,18 +27,14 @@ dependencies {
     testCases 'com.palantir.conjure.verification:verification-server-test-cases'
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
-    testImplementation project(':conjure-java-core')
     testImplementation project('verification-server-api')
     testImplementation 'org.assertj:assertj-core'
-    testImplementation 'org.mockito:mockito-core'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
     testImplementation 'com.palantir.conjure.java.runtime:keystores'
-    testImplementation 'io.dropwizard:dropwizard-testing'
     testImplementation 'com.palantir.dialogue:dialogue-clients'
     testImplementation 'com.palantir.dialogue:dialogue-serde'
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'

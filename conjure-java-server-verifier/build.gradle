@@ -30,10 +30,8 @@ dependencies {
     verifier "com.palantir.conjure.verification:verification-client::${osClassifier}@tgz"
 
     testImplementation project('verification-client-api')
-    testImplementation project(':conjure-java-core')
     testImplementation project(':conjure-java-undertow-runtime')
     testImplementation 'org.assertj:assertj-core'
-    testImplementation 'org.mockito:mockito-core'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jersey-server'

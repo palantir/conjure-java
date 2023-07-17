@@ -54,7 +54,6 @@ dependencies {
 
     implementation 'org.glassfish.jersey.core:jersey-common'
     implementation 'com.palantir.dialogue:dialogue-target'
-    implementation 'com.palantir.dialogue:dialogue-serde'
     implementation 'com.palantir.common:streams'
     implementation 'com.palantir.goethe:goethe'
     implementation 'com.palantir.safe-logging:logger'
@@ -73,8 +72,6 @@ dependencies {
     testImplementation 'com.palantir.tracing:tracing'
     testImplementation 'io.dropwizard:dropwizard-testing'
     testImplementation 'org.assertj:assertj-core'
-    testImplementation 'org.mockito:mockito-core'
-    testImplementation 'javax.xml.bind:jaxb-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'com.github.stefanbirkner:system-lambda'
 
