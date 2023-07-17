@@ -21,12 +21,11 @@ dependencies {
 
     implementation 'com.google.guava:guava'
     implementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
+    implementation 'com.palantir.safe-logging:logger'
     implementation 'com.palantir.tracing:tracing-undertow'
     implementation 'org.slf4j:slf4j-api'
 
     testImplementation 'com.squareup.okhttp3:okhttp'
-    // Required for tests using the slf4j MDC which is not implemented in slf4j-simple
-    testImplementation 'ch.qos.logback:logback-classic'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.mockito:mockito-core'
@@ -34,7 +33,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'com.palantir.conjure.java.api:test-utils'
 
+    // Required for tests using the slf4j MDC which is not implemented in slf4j-simple
+    testRuntimeOnly 'ch.qos.logback:logback-classic'
+
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
-    implementation 'com.palantir.safe-logging:logger'
 }

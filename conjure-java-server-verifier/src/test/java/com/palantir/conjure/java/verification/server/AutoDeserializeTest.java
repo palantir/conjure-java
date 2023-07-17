@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
-import org.junit.Assume;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.parallel.Execution;
@@ -63,10 +63,10 @@ public final class AutoDeserializeTest {
 
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
-    @MethodSource("getTestCases")
+    @MethodSource("testCases")
     public @interface AutoDeserializeTestCases {}
 
-    public static Stream<Arguments> getTestCases() {
+    static Stream<Arguments> testCases() {
         return Cases.TEST_CASES.getAutoDeserialize().entrySet().stream().flatMap(testCase -> {
             EndpointName endpointName = testCase.getKey();
             PositiveAndNegativeTestCases positiveAndNegativeTestCases = testCase.getValue();
@@ -100,7 +100,7 @@ public final class AutoDeserializeTest {
     }
 
     public void runTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString, int port) {
-        Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
+        Assumptions.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         if (shouldSucceed) {
             expectSuccess(endpointName, index, port);

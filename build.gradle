@@ -86,6 +86,8 @@ subprojects {
     tasks.withType(Test) {
         systemProperty 'recreate', System.getProperty('recreate', 'false')
     }
+
+    tasks.check.dependsOn checkUnusedDependenciesMain, checkUnusedDependenciesTest
 }
 
 configurations {
