@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Simplify SafeLong implementation
+  links:
+  - https://github.com/palantir/conjure-java/pull/2073
