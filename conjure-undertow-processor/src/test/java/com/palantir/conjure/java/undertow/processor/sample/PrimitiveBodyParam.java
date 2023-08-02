@@ -16,27 +16,23 @@
 
 package com.palantir.conjure.java.undertow.processor.sample;
 
-import com.palantir.conjure.java.undertow.annotations.DeserializerFactory;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
-import com.palantir.conjure.java.undertow.lib.Deserializer;
-import com.palantir.conjure.java.undertow.lib.Endpoint;
-import com.palantir.conjure.java.undertow.lib.TypeMarker;
-import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.annotations.StdDeserializer;
+import io.undertow.server.HttpServerExchange;
+import java.io.IOException;
 
 public interface PrimitiveBodyParam {
 
     @Handle(method = HttpMethod.POST, path = "/post")
     void handlePrimitiveBody(@Handle.Body(IntParamDeserializerFactory.class) int count);
 
-    enum IntParamDeserializerFactory implements DeserializerFactory<Integer> {
+    enum IntParamDeserializerFactory implements StdDeserializer<Integer> {
         INSTANCE;
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <T extends Integer> Deserializer<T> deserializer(
-                TypeMarker<T> _type, UndertowRuntime _runtime, Endpoint _endpoint) {
-            return _exchange -> (T) (Integer) 1;
+        public Integer deserialize(HttpServerExchange _exchange) throws IOException {
+            return 1;
         }
     }
 }
