@@ -27,8 +27,5 @@ dependencies {
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation 'org.junit.jupiter:junit-jupiter'
-
-    annotationProcessor 'org.immutables:value'
-    compileOnly 'org.immutables:value::annotations'
 }
 
