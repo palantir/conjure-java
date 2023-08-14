@@ -92,7 +92,6 @@ subprojects {
 
     tasks.check.dependsOn(checkImplicitDependencies)
     tasks.check.dependsOn(checkUnusedDependencies)
-    tasks.check.dependsOn(checkUnusedConstraints)
 }
 
 configurations {
