@@ -25,7 +25,6 @@ public final class OptionalAlias {
     }
 
     @JsonValue
-    @Safe
     public Optional<@Safe String> get() {
         return value;
     }
@@ -47,7 +46,7 @@ public final class OptionalAlias {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static OptionalAlias of(@Safe @Nonnull Optional<@Safe String> value) {
+    public static OptionalAlias of(@Nonnull Optional<@Safe String> value) {
         return new OptionalAlias(value);
     }
 

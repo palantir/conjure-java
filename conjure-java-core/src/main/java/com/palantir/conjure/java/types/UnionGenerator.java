@@ -34,12 +34,12 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.StableCollectors;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
 import com.palantir.conjure.spec.FieldName;
-import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
 import com.palantir.conjure.spec.UnionDefinition;
@@ -63,7 +63,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
@@ -104,7 +103,7 @@ public final class UnionGenerator {
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(),
                         entry -> ConjureAnnotations.withSafety(
-                                typeMapper.getClassName(entry.getType()), entry.getSafety())));
+                                typeMapper.getClassName(entry.getType()), safetyEvaluator.getUsageTimeSafety(entry))));
         List<FieldSpec> fields =
                 ImmutableList.of(FieldSpec.builder(baseClass, VALUE_FIELD_NAME, Modifier.PRIVATE, Modifier.FINAL)
                         .build());
@@ -119,7 +118,7 @@ public final class UnionGenerator {
                 .addFields(fields)
                 .addMethod(generateConstructor(baseClass))
                 .addMethod(generateGetValue(baseClass))
-                .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion()))
+                .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator))
                 .addMethod(generateAcceptVisitMethod(visitorClass))
                 .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
                 .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
@@ -128,7 +127,7 @@ public final class UnionGenerator {
                 .addTypes(generateWrapperClasses(
                         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
                 .addType(generateUnknownWrapper(baseClass, visitorClass, options))
-                .addMethod(generateEquals(unionClass))
+                .addMethod(MethodSpecs.createEquals(unionClass))
                 .addMethod(MethodSpecs.createEqualTo(unionClass, fields))
                 .addMethod(MethodSpecs.createHashCode(fields))
                 .addMethod(MethodSpecs.createToString(
@@ -168,18 +167,22 @@ public final class UnionGenerator {
     }
 
     private static List<MethodSpec> generateStaticFactories(
-            TypeMapper typeMapper, ClassName unionClass, List<FieldDefinition> memberTypeDefs) {
+            TypeMapper typeMapper,
+            ClassName unionClass,
+            List<FieldDefinition> memberTypeDefs,
+            SafetyEvaluator safetyEvaluator) {
         List<MethodSpec> staticFactories = memberTypeDefs.stream()
                 .map(memberTypeDef -> {
                     FieldName memberName = sanitizeUnknown(memberTypeDef.getFieldName());
-                    TypeName memberType = typeMapper.getClassName(memberTypeDef.getType());
+                    TypeName memberType = ConjureAnnotations.withSafety(
+                            typeMapper.getClassName(memberTypeDef.getType()),
+                            safetyEvaluator.getUsageTimeSafety(memberTypeDef));
                     String variableName = variableName();
                     // memberName is guarded to be a valid Java identifier and not to end in an underscore, so this is
                     // safe
                     MethodSpec.Builder builder = MethodSpec.methodBuilder(JavaNameSanitizer.sanitize(memberName))
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                             .addParameter(ParameterSpec.builder(memberType, variableName)
-                                    .addAnnotations(ConjureAnnotations.safety(memberTypeDef.getSafety()))
                                     .build())
                             .addStatement(
                                     "return new $T(new $T($L))",
@@ -245,20 +248,6 @@ public final class UnionGenerator {
                 .build();
     }
 
-    private static MethodSpec generateEquals(ClassName unionClass) {
-        ParameterSpec other = ParameterSpec.builder(ClassName.OBJECT, "other").build();
-        CodeBlock.Builder codeBuilder = CodeBlock.builder()
-                .add("return this == $1N || ($1N instanceof $2T && equalTo(($2T) $1N))", other, unionClass);
-
-        return MethodSpec.methodBuilder("equals")
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Override.class)
-                .addParameter(other)
-                .returns(TypeName.BOOLEAN)
-                .addStatement("$L", codeBuilder.build())
-                .build();
-    }
-
     private static TypeSpec generateVisitor(
             ClassName unionClass,
             ClassName visitorClass,
@@ -314,8 +303,6 @@ public final class UnionGenerator {
                                     entry.getKey().getDeprecated()))
                             .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                             .addParameter(ParameterSpec.builder(entry.getValue(), variableName)
-                                    .addAnnotations(ConjureAnnotations.safety(
-                                            entry.getKey().getSafety()))
                                     .build())
                             .returns(TYPE_VARIABLE)
                             .build();
@@ -548,9 +535,9 @@ public final class UnionGenerator {
      * of the new unknownVisitor.
      */
     private static TypeName visitorObjectTypeName(NameTypeMetadata member, TypeName visitResultType, Options options) {
-        if (member.type.equals(TypeName.INT)) {
+        if (member.type.withoutAnnotations().equals(TypeName.INT)) {
             return ParameterizedTypeName.get(ClassName.get(IntFunction.class), visitResultType);
-        } else if (member.type.equals(TypeName.DOUBLE)) {
+        } else if (member.type.withoutAnnotations().equals(TypeName.DOUBLE)) {
             return ParameterizedTypeName.get(ClassName.get(DoubleFunction.class), visitResultType);
         } else if (NameTypeMetadata.UNKNOWN.equals(member) && options.unionsWithUnknownValues()) {
             return ParameterizedTypeName.get(
@@ -562,9 +549,7 @@ public final class UnionGenerator {
                     visitResultType);
         } else {
             return ParameterizedTypeName.get(
-                    ClassName.get(Function.class),
-                    member.type.box().annotated(ConjureAnnotations.safety(member.safety)),
-                    visitResultType);
+                    ClassName.get(Function.class), Primitives.box(member.type), visitResultType);
         }
     }
 
@@ -648,9 +633,7 @@ public final class UnionGenerator {
         return Stream.concat(
                 memberTypes.entrySet().stream()
                         .map(entry -> new NameTypeMetadata(
-                                sanitizeUnknown(entry.getKey().getFieldName().get()),
-                                entry.getValue(),
-                                entry.getKey().getSafety()))
+                                sanitizeUnknown(entry.getKey().getFieldName().get()), entry.getValue()))
                         .sorted(Comparator.comparing(p -> p.memberName)),
                 Stream.of(NameTypeMetadata.UNKNOWN));
     }
@@ -954,15 +937,12 @@ public final class UnionGenerator {
     private static final class NameTypeMetadata {
         private final String memberName;
         private final TypeName type;
-        private final Optional<LogSafety> safety;
 
-        static final NameTypeMetadata UNKNOWN =
-                new NameTypeMetadata("unknown", UNKNOWN_MEMBER_TYPE, SafetyEvaluator.UNKNOWN_UNION_VARINT_SAFETY);
+        static final NameTypeMetadata UNKNOWN = new NameTypeMetadata("unknown", UNKNOWN_MEMBER_TYPE);
 
-        private NameTypeMetadata(String memberName, TypeName type, Optional<LogSafety> safety) {
+        private NameTypeMetadata(String memberName, TypeName type) {
             this.memberName = memberName;
             this.type = type;
-            this.safety = safety;
         }
     }
 }

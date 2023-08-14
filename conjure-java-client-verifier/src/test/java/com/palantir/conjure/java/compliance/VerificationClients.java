@@ -40,63 +40,63 @@ public final class VerificationClients {
     private static final DefaultConjureRuntime DEFAULT_CONJURE_RUNTIME =
             DefaultConjureRuntime.builder().build();
 
-    public static AutoDeserializeService autoDeserializeService(VerificationServerRule server) {
+    public static AutoDeserializeService autoDeserializeService(VerificationServerExtension server) {
         return JaxRsClient.create(
                 AutoDeserializeService.class,
-                VerificationServerRule.userAgent,
+                VerificationServerExtension.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
 
-    public static AutoDeserializeServiceBlocking dialogueAutoDeserializeService(VerificationServerRule server) {
+    public static AutoDeserializeServiceBlocking dialogueAutoDeserializeService(VerificationServerExtension server) {
         return dialogue(AutoDeserializeServiceBlocking.class, server);
     }
 
-    public static AutoDeserializeConfirmService confirmService(VerificationServerRule server) {
+    public static AutoDeserializeConfirmService confirmService(VerificationServerExtension server) {
         return JaxRsClient.create(
                 AutoDeserializeConfirmService.class,
-                VerificationServerRule.userAgent,
+                VerificationServerExtension.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
 
-    public static SinglePathParamService singlePathParamService(VerificationServerRule server) {
+    public static SinglePathParamService singlePathParamService(VerificationServerExtension server) {
         return JaxRsClient.create(
                 SinglePathParamService.class,
-                VerificationServerRule.userAgent,
+                VerificationServerExtension.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
 
-    public static SinglePathParamServiceBlocking dialogueSinglePathParamService(VerificationServerRule server) {
+    public static SinglePathParamServiceBlocking dialogueSinglePathParamService(VerificationServerExtension server) {
         return dialogue(SinglePathParamServiceBlocking.class, server);
     }
 
-    public static SingleHeaderService singleHeaderService(VerificationServerRule server) {
+    public static SingleHeaderService singleHeaderService(VerificationServerExtension server) {
         return JaxRsClient.create(
                 SingleHeaderService.class,
-                VerificationServerRule.userAgent,
+                VerificationServerExtension.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
 
-    public static SingleHeaderServiceBlocking dialogueSingleHeaderService(VerificationServerRule server) {
+    public static SingleHeaderServiceBlocking dialogueSingleHeaderService(VerificationServerExtension server) {
         return dialogue(SingleHeaderServiceBlocking.class, server);
     }
 
-    public static SingleQueryParamService singleQueryParamService(VerificationServerRule server) {
+    public static SingleQueryParamService singleQueryParamService(VerificationServerExtension server) {
         return JaxRsClient.create(
                 SingleQueryParamService.class,
-                VerificationServerRule.userAgent,
+                VerificationServerExtension.userAgent,
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());
     }
 
-    public static SingleQueryParamServiceBlocking dialogueSingleQueryParamService(VerificationServerRule server) {
+    public static SingleQueryParamServiceBlocking dialogueSingleQueryParamService(VerificationServerExtension server) {
         return dialogue(SingleQueryParamServiceBlocking.class, server);
     }
 
-    private static <T> T dialogue(Class<T> clazz, VerificationServerRule server) {
+    private static <T> T dialogue(Class<T> clazz, VerificationServerExtension server) {
         ClientConfiguration config = server.getClientConfiguration();
         return DialogueClients.create(
                         Refreshable.only(ServicesConfigBlock.builder().build()))

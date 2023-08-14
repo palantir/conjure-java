@@ -11,15 +11,14 @@ import javax.annotation.processing.Generated;
 @Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
 public final class StringAliasExample implements Comparable<StringAliasExample> {
-    private final String value;
+    private final @Safe String value;
 
-    private StringAliasExample(@Nonnull String value) {
+    private StringAliasExample(@Nonnull @Safe String value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
 
     @JsonValue
-    @Safe
-    public String get() {
+    public @Safe String get() {
         return value;
     }
 
@@ -50,7 +49,7 @@ public final class StringAliasExample implements Comparable<StringAliasExample> 
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static StringAliasExample of(@Safe @Nonnull String value) {
+    public static StringAliasExample of(@Nonnull @Safe String value) {
         return new StringAliasExample(value);
     }
 }

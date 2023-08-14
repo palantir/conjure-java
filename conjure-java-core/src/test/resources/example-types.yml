@@ -13,6 +13,11 @@ types:
       base-type: string
       external:
         java: java.lang.String
+    SafeExternalLong:
+      base-type: safelong
+      external:
+        java: java.lang.Long
+      safety: safe
   definitions:
     default-package: com.palantir.product
     objects:
@@ -25,6 +30,12 @@ types:
       SafeLongExample:
         fields:
           safeLongValue: safelong
+      SafeExternalLongExample:
+        fields:
+          safeExternalLongValue: SafeExternalLong
+          optionalSafeExternalLong: optional<SafeExternalLong>
+          safeExternalLongList: list<SafeExternalLong>
+          safeExternalLongSet: set<SafeExternalLong>
       RidExample:
         fields:
           ridValue: rid
@@ -52,9 +63,14 @@ types:
       OptionalAliasExample:
         fields:
           optionalAlias: OptionalAlias
+      OptionalDoubleAlias:
+        alias: optional<double>
+        safety: unsafe
       ListExample:
         fields:
-          items: list<string>
+          items: 
+            type: list<string>
+            safety: safe
           primitiveItems: list<integer>
           doubleItems: list<double>
           optionalItems: list<optional<string>>
@@ -111,6 +127,7 @@ types:
         alias: boolean
       SafeLongAliasExample:
         alias: safelong
+        safety: safe
       RidAliasExample:
         alias: rid
       BearerTokenAliasExample:
@@ -209,11 +226,24 @@ types:
           listAlias: ListAlias
           setAlias: SetAlias
           mapAlias: MapAliasExample
+          booleanField:
+            type: boolean
+            safety: safe
+          safeInt:
+            type: integer
+            safety: safe
+          unsafeDouble:
+            type: double
+            safety: unsafe
       UnionWithUnknownString:
         union:
           unknown: string
       EmptyUnionTypeExample:
         union: {}
+      ExternalLongUnionExample:
+        docs: A union of a safe long.
+        union:
+          safeLong: SafeExternalLong
       EmptyObjectExample:
         fields: {}
       AliasAsMapKeyExample:
@@ -272,6 +302,8 @@ types:
         alias: ExternalLong
       ExternalLongAliasTwo:
         alias: ExternalLongAliasOne
+      SafeExternalLongAlias:
+        alias: SafeExternalLong
       OptionalAlias:
         alias: optional<string>
         safety: safe

@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix alias-of-optional codegen with safety info
+  links:
+  - https://github.com/palantir/conjure-java/pull/1974

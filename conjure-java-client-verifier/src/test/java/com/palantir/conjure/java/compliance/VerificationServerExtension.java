@@ -40,9 +40,9 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 /**
  * Spins up the 'verification-server' executable which will bind to port 8000, and tears it down at the end of the test.
  */
-public final class VerificationServerRule implements BeforeAllCallback, AfterAllCallback {
+public final class VerificationServerExtension implements BeforeAllCallback, AfterAllCallback {
 
-    private static final SafeLogger log = SafeLoggerFactory.get(VerificationServerRule.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(VerificationServerExtension.class);
     private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
             .trustStorePath(Paths.get("../conjure-java-core/var/security/truststore.jks"))
             .build();

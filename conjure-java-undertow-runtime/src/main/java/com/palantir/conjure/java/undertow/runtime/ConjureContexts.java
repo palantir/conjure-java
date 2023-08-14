@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.undertow.runtime;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.palantir.conjure.java.undertow.lib.Contexts;
@@ -25,6 +26,7 @@ import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
 import java.security.cert.Certificate;
 import java.util.Collections;
@@ -61,6 +63,13 @@ final class ConjureContexts implements Contexts {
         }
 
         @Override
+        public String requestTarget() {
+            String requestUri = exchange.getRequestURI();
+            String queryString = exchange.getQueryString();
+            return Strings.isNullOrEmpty(queryString) ? requestUri : requestUri + "?" + queryString;
+        }
+
+        @Override
         public List<String> header(String headerName) {
             HeaderValues header = exchange.getRequestHeaders().get(headerName);
             return header == null ? ImmutableList.of() : Collections.unmodifiableList(header);
@@ -69,6 +78,11 @@ final class ConjureContexts implements Contexts {
         @Override
         public Optional<String> firstHeader(String headerName) {
             return Optional.ofNullable(exchange.getRequestHeaders().getFirst(headerName));
+        }
+
+        @Override
+        public Optional<String> cookie(String cookieName) {
+            return Optional.ofNullable(exchange.getRequestCookie(cookieName)).map(Cookie::getValue);
         }
 
         @Override

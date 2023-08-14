@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
@@ -165,16 +166,18 @@ public final class ErrorGenerator implements Generator {
                                                     .build()))
                                     .map(arg -> {
                                         TypeName argumentTypeName = typeMapper.getClassName(arg.getType());
-                                        Optional<LogSafety> required = arg.getSafety();
+                                        Optional<LogSafety> underlyingTypeSafety =
+                                                safetyEvaluator.getUsageTimeSafety(arg);
                                         Optional<LogSafety> typeSafety = safetyEvaluator.evaluate(arg.getType());
-                                        if (!SafetyEvaluator.allows(required, typeSafety)) {
+                                        if (!SafetyEvaluator.allows(underlyingTypeSafety, typeSafety)) {
                                             throw new IllegalStateException(String.format(
                                                     "Cannot use %s type %s as a %s parameter in error %s -> %s",
                                                     typeSafety
                                                             .map(Object::toString)
                                                             .orElse("unknown"),
                                                     argumentTypeName,
-                                                    required.map(Object::toString)
+                                                    underlyingTypeSafety
+                                                            .map(Object::toString)
                                                             .orElse("unknown"),
                                                     entry.getErrorName().getName(),
                                                     arg.getFieldName()));
@@ -182,7 +185,7 @@ public final class ErrorGenerator implements Generator {
                                         return ParameterSpec.builder(
                                                         argumentTypeName,
                                                         arg.getFieldName().get())
-                                                .addAnnotations(ConjureAnnotations.safety(arg.getSafety()))
+                                                .addAnnotations(ConjureAnnotations.safety(underlyingTypeSafety))
                                                 .addJavadoc(
                                                         "$L",
                                                         StringUtils.appendIfMissing(
@@ -274,7 +277,10 @@ public final class ErrorGenerator implements Generator {
         methodBuilder.addCode("return new $T($L", ServiceException.class, typeName);
 
         if (withCause) {
-            methodBuilder.addParameter(Throwable.class, "cause");
+            ParameterSpec causeParameter = ParameterSpec.builder(Throwable.class, "cause")
+                    .addAnnotation(Nullable.class)
+                    .build();
+            methodBuilder.addParameter(causeParameter);
             methodBuilder.addCode(", cause");
         }
 
@@ -291,8 +297,7 @@ public final class ErrorGenerator implements Generator {
         Optional<LogSafety> safety = Optional.of(isSafe ? LogSafety.SAFE : LogSafety.UNSAFE);
         String argName = argDefinition.getFieldName().get();
         TypeName argType = ConjureAnnotations.withSafety(typeMapper.getClassName(argDefinition.getType()), safety);
-        ParameterSpec.Builder parameterBuilder =
-                ParameterSpec.builder(argType, argName).addAnnotations(ConjureAnnotations.safety(safety));
+        ParameterSpec.Builder parameterBuilder = ParameterSpec.builder(argType, argName);
         argDefinition
                 .getDocs()
                 .ifPresent(docs ->

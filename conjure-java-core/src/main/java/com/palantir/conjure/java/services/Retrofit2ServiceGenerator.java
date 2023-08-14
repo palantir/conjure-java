@@ -29,6 +29,7 @@ import com.palantir.conjure.java.types.TypeMapper;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.java.util.ParameterOrder;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.spec.ArgumentDefinition;
@@ -68,7 +69,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.lang.model.element.Modifier;
-import javax.ws.rs.core.MediaType;
 
 public final class Retrofit2ServiceGenerator implements Generator {
 
@@ -168,7 +168,7 @@ public final class Retrofit2ServiceGenerator implements Generator {
 
         ServiceGenerators.getJavaDoc(endpointDef).ifPresent(content -> methodBuilder.addJavadoc("$L", content));
 
-        methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box()));
+        methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, Primitives.box(returnType)));
 
         methodBuilder.addParameters(createServiceMethodParameters(endpointDef, argumentTypeMapper, encodedPathArgs));
 
@@ -260,8 +260,8 @@ public final class Retrofit2ServiceGenerator implements Generator {
 
         endpointDef
                 .getReturns()
-                .ifPresent(type ->
-                        methodBuilder.returns(ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, returnType.box())));
+                .ifPresent(type -> methodBuilder.returns(
+                        ParameterizedTypeName.get(LISTENABLE_FUTURE_TYPE, Primitives.box(returnType))));
 
         // replace extraArgs with default values when invoking the complete method
         StringBuilder sb = new StringBuilder(endpointDef.getReturns().isPresent() ? "return $N(" : "$N(");
@@ -356,8 +356,8 @@ public final class Retrofit2ServiceGenerator implements Generator {
 
     private static String getReturnMediaType(TypeName returnType) {
         return returnType.equals(BINARY_RETURN_TYPE) || returnType.equals(OPTIONAL_BINARY_RETURN_TYPE)
-                ? MediaType.APPLICATION_OCTET_STREAM
-                : MediaType.APPLICATION_JSON;
+                ? "application/octet-stream"
+                : "application/json";
     }
 
     private static ClassName httpMethodToClassName(String method) {

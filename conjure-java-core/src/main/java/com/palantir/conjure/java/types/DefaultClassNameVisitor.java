@@ -20,6 +20,7 @@ import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.util.Packages;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.MapType;
@@ -34,6 +35,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import java.nio.ByteBuffer;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -56,16 +59,22 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
 
     @Override
     public TypeName visitList(ListType type) {
-        TypeName itemType = type.getItemType().accept(this).box();
-        return ParameterizedTypeName.get(ClassName.get(java.util.List.class), itemType);
+        TypeName itemType = Primitives.box(type.getItemType().accept(this));
+        return ParameterizedTypeName.get(ClassName.get(List.class), itemType);
+    }
+
+    @Override
+    public TypeName visitSet(SetType type) {
+        TypeName itemType = Primitives.box(type.getItemType().accept(this));
+        return ParameterizedTypeName.get(ClassName.get(Set.class), itemType);
     }
 
     @Override
     public TypeName visitMap(MapType type) {
         return ParameterizedTypeName.get(
-                ClassName.get(java.util.Map.class),
-                type.getKeyType().accept(this).box(),
-                type.getValueType().accept(this).box());
+                ClassName.get(Map.class),
+                Primitives.box(type.getKeyType().accept(this)),
+                Primitives.box(type.getValueType().accept(this)));
     }
 
     @Override
@@ -96,9 +105,9 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
         }
 
         TypeName itemType = type.getItemType().accept(this);
-        if (itemType.isPrimitive()) {
+        if (Primitives.isPrimitive(itemType)) {
             // Safe for primitives (e.g. Booleans with Java 8)
-            itemType = itemType.box();
+            itemType = Primitives.box(itemType);
         }
         return ParameterizedTypeName.get(ClassName.get(Optional.class), itemType);
     }
@@ -151,13 +160,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
         String conjurePackage = externalType.getExternalReference().getPackage();
         ClassName typeName = ClassName.get(
                 conjurePackage, externalType.getExternalReference().getName());
-        return typeName.isBoxedPrimitive() ? typeName.unbox() : typeName;
-    }
-
-    @Override
-    public TypeName visitSet(SetType type) {
-        TypeName itemType = type.getItemType().accept(this).box();
-        return ParameterizedTypeName.get(ClassName.get(Set.class), itemType);
+        return Primitives.isBoxedPrimitive(typeName) ? Primitives.unbox(typeName) : typeName;
     }
 
     @Override

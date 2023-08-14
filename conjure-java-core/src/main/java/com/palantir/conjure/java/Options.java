@@ -20,16 +20,14 @@ import com.google.common.annotations.Beta;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import java.util.Optional;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.core.Response;
 import org.immutables.value.Value;
 
 @Value.Immutable
 public interface Options {
 
     /**
-     * Instructs the {@link JerseyServiceGenerator} to generate binary response endpoints with the {@link Response}
-     * type.
+     * Instructs the {@link JerseyServiceGenerator} to generate binary response endpoints with the
+     * {@code javax.ws.rs.core.Response} type.
      */
     @Value.Default
     default boolean jerseyBinaryAsResponse() {
@@ -37,7 +35,7 @@ public interface Options {
     }
 
     /**
-     * Instructs the {@link JerseyServiceGenerator} to add {@link NotNull} annotations to all auth parameters, as well
+     * Instructs the {@link JerseyServiceGenerator} to add {@link javax.validation.constraints.NotNull} annotations to all auth parameters, as well
      * as all non-optional body params on service endpoints.
      */
     @Value.Default
@@ -115,10 +113,19 @@ public interface Options {
     }
 
     /**
-     * Generates compile-time safe builders to ensure all required attributes are set.
+     * Generates compile-time safe builders to ensure all attributes are set, except those of type list, set, map, or
+     * optional. If {@link Options#useStrictStagedBuilders} is true, this option is ignored.
      */
     @Value.Default
     default boolean useStagedBuilders() {
+        return false;
+    }
+
+    /**
+     * Generates compile-time safe builders to ensure all attributes are set.
+     */
+    @Value.Default
+    default boolean useStrictStagedBuilders() {
         return false;
     }
 

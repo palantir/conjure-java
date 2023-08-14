@@ -21,14 +21,15 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.palantir.gradle.jdks:gradle-jdks:0.27.0'
-        classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.4.0'
-        classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.11.0'
-        classpath 'com.palantir.gradle.conjure:gradle-conjure:5.31.0'
-        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.27.0'
-        classpath 'com.palantir.baseline:gradle-baseline-java:4.183.0'
-        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.11.0'
-        classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.15.0'
+        classpath 'com.palantir.baseline:gradle-baseline-java:5.18.0'
+        classpath 'com.palantir.gradle.conjure:gradle-conjure:5.41.0'
+        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.13.0'
+        classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.12.0'
+        classpath 'com.palantir.gradle.gitversion:gradle-git-version:3.0.0'
+        classpath 'com.palantir.gradle.jdks:gradle-jdks:0.33.0'
+        classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.10.0'
+        classpath 'com.palantir.jakartapackagealignment:jakarta-package-alignment:0.5.0'
+        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.35.0'
         classpath 'gradle.plugin.org.inferred:gradle-processors:3.7.0'
     }
 }
@@ -47,6 +48,7 @@ javaVersions {
 
 allprojects {
     apply plugin: 'com.palantir.java-format'
+    apply plugin: 'com.palantir.jakarta-package-alignment'
     version System.env.CIRCLE_TAG ?: gitVersion()
     group 'com.palantir.conjure.java'
 
@@ -76,7 +78,7 @@ subprojects {
 
     tasks.withType(JavaCompile) {
         options.compilerArgs += ['-Werror']
-        options.errorprone.disable 'PreferSafeLoggingPreconditions', 'PreferSafeLoggableExceptions'
+        options.errorprone.disable 'PreferSafeLoggableExceptions', 'PreferSafeLoggingPreconditions', 'UnnecessaryLambda'
     }
 
     // Run `./gradlew test -Drecreate=true` to recreate all the expected
@@ -90,8 +92,7 @@ subprojects {
         ignore 'org.jetbrains', 'annotations'
     }
 
-    tasks.check.dependsOn(checkImplicitDependencies)
-    tasks.check.dependsOn(checkUnusedDependencies)
+    tasks.check.dependsOn checkImplicitDependencies, checkUnusedDependencies
 }
 
 configurations {

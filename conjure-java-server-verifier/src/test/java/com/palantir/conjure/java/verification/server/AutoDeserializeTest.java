@@ -26,10 +26,12 @@ import com.palantir.conjure.java.verification.server.undertest.JerseyServerUnder
 import com.palantir.conjure.java.verification.server.undertest.UndertowServerUnderTestExtension;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
-import org.junit.Assume;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.parallel.Execution;
@@ -59,7 +61,12 @@ public final class AutoDeserializeTest {
     private static final VerificationClientService verificationService =
             VerificationClients.verificationClientService(VERIFICATION_CLIENT_EXTENSION);
 
-    private static Stream<Arguments> testCases() {
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
+    @MethodSource("testCases")
+    public @interface AutoDeserializeTestCases {}
+
+    static Stream<Arguments> testCases() {
         return Cases.TEST_CASES.getAutoDeserialize().entrySet().stream().flatMap(testCase -> {
             EndpointName endpointName = testCase.getKey();
             PositiveAndNegativeTestCases positiveAndNegativeTestCases = testCase.getValue();
@@ -95,7 +102,7 @@ public final class AutoDeserializeTest {
     }
 
     public void runTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString, int port) {
-        Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
+        Assumptions.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         if (shouldSucceed) {
             expectSuccess(endpointName, index, port);

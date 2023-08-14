@@ -19,8 +19,10 @@ package com.palantir.conjure.java.types;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.Javadoc;
+import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.spec.FieldDefinition;
+import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
@@ -42,7 +44,11 @@ public final class BeanBuilderAuxiliarySettersUtils {
     private BeanBuilderAuxiliarySettersUtils() {}
 
     public static MethodSpec.Builder createCollectionSetterBuilder(
-            String prefix, EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass) {
+            String prefix,
+            EnrichedField enriched,
+            TypeMapper typeMapper,
+            ClassName returnClass,
+            SafetyEvaluator safetyEvaluator) {
         FieldSpec field = enriched.poetSpec();
         FieldDefinition definition = enriched.conjureDef();
         Type type = definition.getType();
@@ -55,26 +61,32 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(returnClass)
                 .addParameter(Parameters.nonnullParameter(
-                        widenParameterIfPossible(field.type, type, typeMapper),
-                        field.name,
-                        enriched.conjureDef().getSafety()));
+                        widenParameterIfPossible(
+                                field.type, type, typeMapper, safetyEvaluator.getUsageTimeSafety(definition)),
+                        field.name));
     }
 
     public static MethodSpec.Builder createOptionalSetterBuilder(
-            EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass) {
+            EnrichedField enriched, TypeMapper typeMapper, ClassName returnClass, SafetyEvaluator safetyEvaluator) {
         FieldSpec field = enriched.poetSpec();
         OptionalType type = enriched.conjureDef().getType().accept(TypeVisitor.OPTIONAL);
         return publicSetter(enriched, returnClass)
                 .addParameter(Parameters.nonnullParameter(
-                        typeMapper.getClassName(type.getItemType()),
-                        field.name,
-                        enriched.conjureDef().getSafety()));
+                        ConjureAnnotations.withSafety(
+                                typeMapper.getClassName(type.getItemType()),
+                                safetyEvaluator.getUsageTimeSafety(enriched.conjureDef())),
+                        field.name));
     }
 
     public static MethodSpec.Builder createItemSetterBuilder(
-            EnrichedField enriched, Type itemType, TypeMapper typeMapper, ClassName returnClass) {
+            EnrichedField enriched,
+            Type itemType,
+            TypeMapper typeMapper,
+            ClassName returnClass,
+            Optional<LogSafety> safety) {
         FieldSpec field = enriched.poetSpec();
-        return publicSetter(enriched, returnClass).addParameter(typeMapper.getClassName(itemType), field.name);
+        return publicSetter(enriched, returnClass)
+                .addParameter(ConjureAnnotations.withSafety(typeMapper.getClassName(itemType), safety), field.name);
     }
 
     public static MethodSpec.Builder createMapSetterBuilder(
@@ -96,10 +108,12 @@ public final class BeanBuilderAuxiliarySettersUtils {
                 .returns(returnClass);
     }
 
-    public static TypeName widenParameterIfPossible(TypeName current, Type type, TypeMapper typeMapper) {
+    public static TypeName widenParameterIfPossible(
+            TypeName current, Type type, TypeMapper typeMapper, Optional<LogSafety> safety) {
         if (type.accept(TypeVisitor.IS_LIST)) {
             Type innerType = type.accept(TypeVisitor.LIST).getItemType();
-            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
+            TypeName innerTypeName =
+                    ConjureAnnotations.withSafety(Primitives.box(typeMapper.getClassName(innerType)), safety);
             if (isWidenableContainedType(innerType)) {
                 innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
@@ -108,7 +122,8 @@ public final class BeanBuilderAuxiliarySettersUtils {
 
         if (type.accept(TypeVisitor.IS_SET)) {
             Type innerType = type.accept(TypeVisitor.SET).getItemType();
-            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
+            TypeName innerTypeName =
+                    ConjureAnnotations.withSafety(Primitives.box(typeMapper.getClassName(innerType)), safety);
             if (isWidenableContainedType(innerType)) {
                 innerTypeName = WildcardTypeName.subtypeOf(innerTypeName);
             }
@@ -121,8 +136,10 @@ public final class BeanBuilderAuxiliarySettersUtils {
             if (!isWidenableContainedType(innerType)) {
                 return current;
             }
-            TypeName innerTypeName = typeMapper.getClassName(innerType).box();
-            return ParameterizedTypeName.get(ClassName.get(Optional.class), WildcardTypeName.subtypeOf(innerTypeName));
+            TypeName innerTypeName = Primitives.box(typeMapper.getClassName(innerType));
+            return ParameterizedTypeName.get(
+                    ClassName.get(Optional.class),
+                    WildcardTypeName.subtypeOf(ConjureAnnotations.withSafety(innerTypeName, safety)));
         }
 
         return current;

@@ -24,6 +24,14 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.product.ConjureErrors;
 import com.palantir.product.ConjureJavaErrors;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 
 public class EteErrors {
@@ -35,6 +43,25 @@ public class EteErrors {
 
         assertThat(ConjureErrors.isInvalidServiceDefinition(remoteException)).isTrue();
         assertThat(ConjureErrors.isInvalidTypeDefinition(remoteException)).isFalse();
+    }
+
+    @Test
+    void causeParameter_isNullable() {
+        Method[] methods = ConjureErrors.class.getMethods();
+        List<Parameter> causeParameters = Arrays.stream(methods)
+                .filter(method -> method.getReturnType().equals(ServiceException.class))
+                .map(Executable::getParameters)
+                .map(parameters -> Arrays.stream(parameters)
+                        .filter(parameter -> parameter.getName().equals("cause"))
+                        .findAny())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toUnmodifiableList());
+        assertThat(causeParameters).isNotEmpty();
+        for (Parameter causeParameter : causeParameters) {
+            Nullable annotation = causeParameter.getAnnotation(Nullable.class);
+            assertThat(annotation).isNotNull();
+        }
     }
 
     @Test

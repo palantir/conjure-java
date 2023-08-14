@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java.compliance;
 
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMultimap;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -26,10 +24,10 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.ClassUtils;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -40,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class SingleParamServicesTest {
 
     @RegisterExtension
-    public static final VerificationServerRule server = new VerificationServerRule();
+    public static final VerificationServerExtension server = new VerificationServerExtension();
 
     private static final Logger log = LoggerFactory.getLogger(SingleParamServicesTest.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
@@ -59,38 +57,39 @@ public class SingleParamServicesTest {
                     VerificationClients.dialogueSingleQueryParamService(server))
             .build();
 
-    private static Collection<Arguments> data() {
-        List<Arguments> objects = new ArrayList<>();
+    static List<Arguments> testCases() {
+        List<Arguments> arguments = new ArrayList<>();
+
         Cases.TEST_CASES.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
             IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
-                    .forEach(i -> objects.add(Arguments.of(
+                    .forEach(i -> arguments.add(Arguments.of(
                             "singleHeaderService", serviceIndex, endpointName, i, singleHeaderTestCases.get(i)))));
         });
 
         Cases.TEST_CASES.getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
             IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
-                    .forEach(i -> objects.add(Arguments.of(
+                    .forEach(i -> arguments.add(Arguments.of(
                             "singlePathParamService", serviceIndex, endpointName, i, singleHeaderTestCases.get(i)))));
         });
 
         Cases.TEST_CASES.getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
             int size = singleQueryTestCases.size();
             IntStream.range(0, 2).forEach(serviceIndex -> IntStream.range(0, size)
-                    .forEach(i -> objects.add(Arguments.of(
+                    .forEach(i -> arguments.add(Arguments.of(
                             "singleQueryParamService", serviceIndex, endpointName, i, singleQueryTestCases.get(i)))));
         });
 
-        return objects;
+        return arguments;
     }
 
     @ParameterizedTest(name = "{0}-{1}/{2}({4})")
-    @MethodSource("data")
+    @MethodSource("testCases")
     public void runTestCase(
             String serviceName, int serviceIndex, EndpointName endpointName, int index, String jsonString)
             throws Exception {
-        assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
+        Assumptions.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
         System.out.printf("Invoking %s %s(%s)%n", serviceName, endpointName, jsonString);
 

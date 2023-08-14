@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Refactor BeanBuilderGenerator to handle all builder generation logic
+  links:
+  - https://github.com/palantir/conjure-java/pull/1980

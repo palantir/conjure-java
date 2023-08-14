@@ -45,6 +45,13 @@ enum CompletedRequestTagTranslator implements TagTranslator<HttpServerExchange> 
         adapter.tag(target, TraceTags.HTTP_METHOD, exchange.getRequestMethod().toString());
         adapter.tag(target, TraceTags.HTTP_URL_SCHEME, exchange.getRequestScheme());
         adapter.tag(target, TraceTags.HTTP_VERSION, exchange.getProtocol().toString());
+        adapter.tag(target, TraceTags.NETWORK_BYTES_WRITTEN, Long.toString(exchange.getResponseBytesSent()));
+        // The amount of content that has been read is nontrivial to glean without using a conduitwrapper,
+        // for now reporting the Content-Length header from requests which aren't chunked is a start.
+        long requestContentLength = exchange.getRequestContentLength();
+        if (requestContentLength >= 0) {
+            adapter.tag(target, TraceTags.NETWORK_BYTES_READ, Long.toString(requestContentLength));
+        }
     }
 
     static String statusString(int statusCode) {

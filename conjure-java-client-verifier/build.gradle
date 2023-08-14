@@ -28,6 +28,7 @@ dependencies {
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
     testImplementation project('verification-server-api')
+    testImplementation 'com.fasterxml.jackson.core:jackson-core'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
@@ -43,8 +44,10 @@ dependencies {
     testImplementation 'com.palantir.conjure.java.runtime:keystores'
     testImplementation 'com.palantir.dialogue:dialogue-clients'
     testImplementation 'com.palantir.dialogue:dialogue-serde'
+    testImplementation 'com.palantir.dialogue:dialogue-target'
     testImplementation 'com.palantir.refreshable:refreshable'
     testImplementation 'com.palantir.safe-logging:logger'
+    testImplementation 'com.palantir.tritium:tritium-registry'
     testImplementation 'org.apache.commons:commons-lang3'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
@@ -73,7 +76,6 @@ project('verification-server-api') {
         implementation 'com.palantir.safe-logging:preconditions'
         implementation 'com.palantir.safe-logging:safe-logging'
         implementation 'com.palantir.tokens:auth-tokens'
-        implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     }
 }
 

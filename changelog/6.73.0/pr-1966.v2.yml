@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: If an Alias, Field, or Argument is an external import type, use the
+    underlying import's safety instead of the declared safety (which will be empty).
+  links:
+  - https://github.com/palantir/conjure-java/pull/1966

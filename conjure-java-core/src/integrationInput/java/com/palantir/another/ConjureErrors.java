@@ -4,6 +4,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.Preconditions;
+import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 import org.jetbrains.annotations.Contract;
 
@@ -21,7 +22,7 @@ public final class ConjureErrors {
         return new ServiceException(DIFFERENT_PACKAGE);
     }
 
-    public static ServiceException differentPackage(Throwable cause) {
+    public static ServiceException differentPackage(@Nullable Throwable cause) {
         return new ServiceException(DIFFERENT_PACKAGE, cause);
     }
 

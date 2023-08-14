@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: The authorization extractor now stores the unverified organization
+    ID in the MDC.
+  links:
+  - https://github.com/palantir/conjure-java/pull/2036

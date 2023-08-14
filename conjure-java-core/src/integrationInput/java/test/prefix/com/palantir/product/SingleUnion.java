@@ -55,7 +55,7 @@ public final class SingleUnion {
     }
 
     @Override
-    public boolean equals(Object other) {
+    public boolean equals(@Nullable Object other) {
         return this == other || (other instanceof SingleUnion && equalTo((SingleUnion) other));
     }
 
@@ -118,7 +118,7 @@ public final class SingleUnion {
             final Function<String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
-                public T visitFoo(String value) {
+                public T visitFoo(@Safe String value) {
                     return fooVisitor.apply(value);
                 }
 

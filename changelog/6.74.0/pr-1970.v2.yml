@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Services generated using `conjure-undertow-annotations` no longer allow
+    null elements in top-level collection body parameters.
+  links:
+  - https://github.com/palantir/conjure-java/pull/1970

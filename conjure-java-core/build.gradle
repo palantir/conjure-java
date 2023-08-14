@@ -46,8 +46,6 @@ dependencies {
     api 'com.palantir.syntactic-paths:syntactic-paths'
     api 'com.palantir.tokens:auth-tokens'
     api 'com.squareup:javapoet'
-    api 'jakarta.annotation:jakarta.annotation-api'
-    api 'jakarta.validation:jakarta.validation-api'
     api 'org.apache.commons:commons-lang3'
     api 'org.slf4j:slf4j-api'
     api 'com.atlassian.commonmark:commonmark'
@@ -65,7 +63,6 @@ dependencies {
     implementation 'com.palantir.safe-logging:preconditions'
     implementation 'com.palantir.safe-logging:safe-logging'
     implementation 'io.undertow:undertow-core'
-    implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     implementation 'org.glassfish.jersey.core:jersey-common'
 
     testImplementation sourceSets.integrationInput.output
@@ -91,9 +88,13 @@ dependencies {
     testImplementation 'io.dropwizard:dropwizard-jersey'
     testImplementation 'io.dropwizard:dropwizard-jetty'
     testImplementation 'io.dropwizard:dropwizard-testing'
+    testImplementation 'javax.validation:validation-api'
     testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.glassfish.jersey.core:jersey-server'
+    testImplementation 'org.jboss.xnio:xnio-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
 
     integrationInputImplementation project(':conjure-lib')
     integrationInputImplementation project(':conjure-undertow-lib')
@@ -103,7 +104,7 @@ dependencies {
     integrationInputImplementation 'com.google.errorprone:error_prone_annotations'
     integrationInputImplementation 'com.google.guava:guava'
     integrationInputImplementation 'com.palantir.conjure.java.api:errors'
-    integrationInputImplementation 'com.palantir.dialogue:dialogue-target'
+    integrationInputImplementation 'com.palantir.dialogue:dialogue-target:3.90.0'
     integrationInputImplementation 'com.palantir.ri:resource-identifier'
     integrationInputImplementation 'com.palantir.safe-logging:preconditions'
     integrationInputImplementation 'com.palantir.safe-logging:safe-logging'
@@ -111,8 +112,9 @@ dependencies {
     integrationInputImplementation 'com.squareup.okhttp3:okhttp'
     integrationInputImplementation 'com.squareup.retrofit2:retrofit'
     integrationInputImplementation 'io.undertow:undertow-core'
-    integrationInputImplementation 'jakarta.validation:jakarta.validation-api'
-    integrationInputImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
+    integrationInputImplementation 'javax.annotation:javax.annotation-api'
+    integrationInputImplementation 'javax.validation:validation-api'
+    integrationInputImplementation 'javax.ws.rs:javax.ws.rs-api'
     integrationInputImplementation 'org.jetbrains:annotations'
 
     annotationProcessor 'org.immutables:value'

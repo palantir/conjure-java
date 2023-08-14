@@ -19,11 +19,9 @@ package com.palantir.conjure.java.lib;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
-import org.immutables.value.Value;
 
 /** A wrapper around a long which is safe for json-serialization as a number without loss of precision. */
-@Value.Immutable
-public abstract class SafeLong implements Comparable<SafeLong> {
+public final class SafeLong implements Comparable<SafeLong> {
 
     private static final long MIN_SAFE_VALUE = -(1L << 53) + 1;
     private static final long MAX_SAFE_VALUE = (1L << 53) - 1;
@@ -31,34 +29,58 @@ public abstract class SafeLong implements Comparable<SafeLong> {
     public static final SafeLong MAX_VALUE = SafeLong.of(MAX_SAFE_VALUE);
     public static final SafeLong MIN_VALUE = SafeLong.of(MIN_SAFE_VALUE);
 
-    @JsonValue
-    @Value.Parameter
-    public abstract long longValue();
+    private final long longValue;
 
-    @Value.Check
-    protected final void check() {
+    private SafeLong(long longValue) {
+        this.longValue = check(longValue);
+    }
+
+    @JsonValue
+    public long longValue() {
+        return longValue;
+    }
+
+    private static long check(long value) {
         Preconditions.checkArgument(
-                MIN_SAFE_VALUE <= longValue() && longValue() <= MAX_SAFE_VALUE,
+                MIN_SAFE_VALUE <= value && value <= MAX_SAFE_VALUE,
                 "number must be safely representable in javascript i.e. "
                         + "lie between -9007199254740991 and 9007199254740991");
+        return value;
     }
 
     public static SafeLong valueOf(String value) {
-        return SafeLong.of(Long.parseLong(value));
+        return of(Long.parseLong(value));
     }
 
     @JsonCreator
     public static SafeLong of(long value) {
-        return ImmutableSafeLong.of(value);
+        return new SafeLong(value);
     }
 
     @Override
-    public final String toString() {
-        return Long.toString(longValue());
+    public String toString() {
+        return Long.toString(longValue);
     }
 
     @Override
-    public final int compareTo(SafeLong other) {
-        return Long.compare(longValue(), other.longValue());
+    public int compareTo(SafeLong other) {
+        return Long.compare(longValue, other.longValue);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        SafeLong safeLong = (SafeLong) other;
+        return longValue == safeLong.longValue;
+    }
+
+    @Override
+    public int hashCode() {
+        return 177573 + Long.hashCode(longValue);
     }
 }

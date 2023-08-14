@@ -16,12 +16,10 @@
 
 package com.palantir.conjure.java.types;
 
-import com.palantir.conjure.java.ConjureAnnotations;
-import com.palantir.conjure.spec.LogSafety;
+import com.palantir.conjure.java.util.Primitives;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 
@@ -30,14 +28,8 @@ final class Parameters {
     private Parameters() {}
 
     static ParameterSpec nonnullParameter(TypeName typeName, String paramName, Modifier... modifiers) {
-        return nonnullParameter(typeName, paramName, Optional.empty(), modifiers);
-    }
-
-    static ParameterSpec nonnullParameter(
-            TypeName typeName, String paramName, Optional<LogSafety> safety, Modifier... modifiers) {
-        ParameterSpec.Builder builder =
-                ParameterSpec.builder(typeName, paramName, modifiers).addAnnotations(ConjureAnnotations.safety(safety));
-        if (typeName.isPrimitive()) {
+        ParameterSpec.Builder builder = ParameterSpec.builder(typeName, paramName, modifiers);
+        if (Primitives.isPrimitive(typeName)) {
             return builder.build();
         }
         return builder.addAnnotation(AnnotationSpec.builder(Nonnull.class).build())
