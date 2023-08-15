@@ -2,10 +2,20 @@
 
 dependencies {
     implementation project(':conjure-undertow-annotations')
+    implementation project(':conjure-undertow-lib')
+    implementation 'com.google.guava:guava'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.tokens:auth-tokens'
+    implementation 'io.undertow:undertow-core'
+
     annotationProcessor project(':conjure-undertow-processor')
 
     testImplementation project(':conjure-java-undertow-runtime')
+    testImplementation 'com.fasterxml.jackson.core:jackson-core'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.jboss.xnio:xnio-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }

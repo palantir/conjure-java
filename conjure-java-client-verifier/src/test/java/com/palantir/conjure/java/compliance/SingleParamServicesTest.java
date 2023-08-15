@@ -42,7 +42,7 @@ public class SingleParamServicesTest {
 
     private static final Logger log = LoggerFactory.getLogger(SingleParamServicesTest.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-    private static ImmutableMultimap<String, Object> servicesMaps = ImmutableMultimap.<String, Object>builder()
+    private static final ImmutableMultimap<String, Object> servicesMaps = ImmutableMultimap.<String, Object>builder()
             .putAll(
                     "singlePathParamService",
                     VerificationClients.singlePathParamService(server),
@@ -91,7 +91,7 @@ public class SingleParamServicesTest {
             throws Exception {
         Assumptions.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
 
-        System.out.println(String.format("Invoking %s %s(%s)", serviceName, endpointName, jsonString));
+        System.out.printf("Invoking %s %s(%s)%n", serviceName, endpointName, jsonString);
 
         Object service = servicesMaps.get(serviceName).asList().get(serviceIndex);
         for (Method method : servicesMaps.get(serviceName).getClass().getMethods()) {

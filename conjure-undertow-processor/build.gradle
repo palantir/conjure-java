@@ -1,16 +1,26 @@
 apply plugin: 'com.palantir.external-publish-jar'
 
 dependencies {
+    implementation project(':conjure-lib')
     implementation project(':conjure-undertow-annotations')
-    implementation 'com.palantir.goethe:goethe'
-    implementation 'com.squareup:javapoet'
+    implementation project(':conjure-undertow-lib')
     implementation 'com.google.auto:auto-common'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
     implementation 'com.google.guava:guava'
     implementation 'com.palantir.common:streams'
+    implementation 'com.palantir.goethe:goethe'
+    implementation 'com.palantir.ri:resource-identifier'
+    implementation 'com.palantir.safe-logging:preconditions'
     implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'com.palantir.tokens:auth-tokens'
+    implementation 'com.squareup:javapoet'
+    implementation 'io.undertow:undertow-core'
 
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
     testImplementation 'com.google.testing.compile:compile-testing'
 
     annotationProcessor 'org.immutables:value'

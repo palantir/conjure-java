@@ -20,7 +20,6 @@ import com.google.common.annotations.Beta;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import java.util.Optional;
-import javax.validation.constraints.NotNull;
 import org.immutables.value.Value;
 
 @Value.Immutable
@@ -36,7 +35,7 @@ public interface Options {
     }
 
     /**
-     * Instructs the {@link JerseyServiceGenerator} to add {@link NotNull} annotations to all auth parameters, as well
+     * Instructs the {@link JerseyServiceGenerator} to add {@link javax.validation.constraints.NotNull} annotations to all auth parameters, as well
      * as all non-optional body params on service endpoints.
      */
     @Value.Default

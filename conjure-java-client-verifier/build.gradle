@@ -28,17 +28,35 @@ dependencies {
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
     testImplementation project('verification-server-api')
-    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'com.fasterxml.jackson.core:jackson-core'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+    testImplementation 'com.google.code.findbugs:jsr305'
+    testImplementation 'com.google.guava:guava'
+    testImplementation 'com.palantir.conjure.java.api:errors'
+    testImplementation 'com.palantir.conjure.java.api:service-config'
+    testImplementation 'com.palantir.conjure.java.api:ssl-config'
+    testImplementation 'com.palantir.conjure.java.runtime:client-config'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jackson-serialization'
     testImplementation 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    testImplementation 'com.palantir.conjure.java.runtime:conjure-java-legacy-clients'
     testImplementation 'com.palantir.conjure.java.runtime:keystores'
     testImplementation 'com.palantir.dialogue:dialogue-clients'
     testImplementation 'com.palantir.dialogue:dialogue-serde'
+    testImplementation 'com.palantir.dialogue:dialogue-target'
+    testImplementation 'com.palantir.refreshable:refreshable'
+    testImplementation 'com.palantir.safe-logging:logger'
+    testImplementation 'com.palantir.tritium:tritium-registry'
+    testImplementation 'org.apache.commons:commons-lang3'
+    testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
+    testImplementation 'org.slf4j:slf4j-api'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'
-    testImplementation 'com.palantir.safe-logging:logger'
 }
 
 project('verification-server-api') {
@@ -47,6 +65,17 @@ project('verification-server-api') {
         api project(':conjure-lib')
         api 'com.palantir.dialogue:dialogue-clients'
         api 'com.palantir.dialogue:dialogue-serde'
+
+        implementation 'com.fasterxml.jackson.core:jackson-annotations'
+        implementation 'com.fasterxml.jackson.core:jackson-databind'
+        implementation 'com.google.code.findbugs:jsr305'
+        implementation 'com.google.errorprone:error_prone_annotations'
+        implementation 'com.google.guava:guava'
+        implementation 'com.palantir.dialogue:dialogue-target'
+        implementation 'com.palantir.ri:resource-identifier'
+        implementation 'com.palantir.safe-logging:preconditions'
+        implementation 'com.palantir.safe-logging:safe-logging'
+        implementation 'com.palantir.tokens:auth-tokens'
     }
 }
 

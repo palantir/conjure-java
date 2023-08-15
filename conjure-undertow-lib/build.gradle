@@ -22,6 +22,14 @@ dependencies {
     api 'io.undertow:undertow-core'
     // Generated code depends on ListenableFuture and immutable collections
     api 'com.google.guava:guava'
+
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
+    implementation 'com.palantir.ri:resource-identifier'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'com.palantir.tokens:auth-tokens'
+
     // Recommend a higher version of wildfly (1.6.0.Final+) then the one shipped with undertow to avoid CVEs.
     runtimeOnly 'org.wildfly.common:wildfly-common'
 }

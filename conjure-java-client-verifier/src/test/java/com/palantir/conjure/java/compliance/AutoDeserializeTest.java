@@ -95,9 +95,9 @@ public final class AutoDeserializeTest {
         Method method = service.getClass().getMethod(endpointName.get(), int.class);
         // Need to set accessible true work around dialogues anonymous class impl
         method.setAccessible(true);
-        System.out.println(String.format(
-                "Test case %s: Invoking %s(%s), expected %s",
-                index, endpointName, jsonString, shouldSucceed ? "success" : "failure"));
+        System.out.printf(
+                "Test case %s: Invoking %s(%s), expected %s%n",
+                index, endpointName, jsonString, shouldSucceed ? "success" : "failure");
 
         if (shouldSucceed) {
             expectSuccess(endpointName, index, service, method);

@@ -20,11 +20,23 @@ mainClassName = 'com.palantir.conjure.java.cli.ConjureJavaCli'
 
 dependencies {
     implementation project(':conjure-java-core')
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
+    implementation 'com.google.guava:guava'
+    implementation 'com.palantir.conjure:conjure-api-objects'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'com.squareup:javapoet'
     implementation 'info.picocli:picocli'
+
     runtimeOnly 'org.slf4j:slf4j-simple'
 
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 
     annotationProcessor 'org.immutables:value'
     compileOnly 'org.immutables:value::annotations'
