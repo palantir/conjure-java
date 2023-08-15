@@ -73,6 +73,7 @@ project('verification-client-api') {
         api project(':conjure-lib')
         api project(':conjure-undertow-lib')
 
+        implementation project(':conjure-java-client-verifier:verification-server-api')
         implementation 'com.fasterxml.jackson.core:jackson-annotations'
         implementation 'com.fasterxml.jackson.core:jackson-databind'
         implementation 'com.google.code.findbugs:jsr305'
@@ -83,7 +84,6 @@ project('verification-client-api') {
         implementation 'com.palantir.safe-logging:safe-logging'
         implementation 'com.palantir.tokens:auth-tokens'
         implementation 'io.undertow:undertow-core'
-        implementation project(':conjure-java-client-verifier:verification-server-api')
     }
 }
 

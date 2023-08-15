@@ -40,9 +40,6 @@ dependencies {
     implementation 'org.jboss.xnio:xnio-api'
     implementation 'org.slf4j:slf4j-api'
 
-    // Required for tests using the slf4j MDC which is not implemented in slf4j-simple
-    testRuntimeOnly 'ch.qos.logback:logback-classic'
-
     testImplementation 'com.fasterxml.jackson.core:jackson-annotations'
     testImplementation 'com.palantir.conjure.java.api:test-utils'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
@@ -52,6 +49,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.mockito:mockito-junit-jupiter'
+
+    // Required for tests using the slf4j MDC which is not implemented in slf4j-simple
+    testRuntimeOnly 'ch.qos.logback:logback-classic'
 
     compileOnly 'org.immutables:value::annotations'
     testCompileOnly 'org.immutables:value::annotations'

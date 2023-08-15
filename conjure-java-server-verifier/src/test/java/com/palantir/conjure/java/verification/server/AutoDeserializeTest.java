@@ -26,8 +26,6 @@ import com.palantir.conjure.java.verification.server.undertest.JerseyServerUnder
 import com.palantir.conjure.java.verification.server.undertest.UndertowServerUnderTestExtension;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
@@ -60,11 +58,6 @@ public final class AutoDeserializeTest {
 
     private static final VerificationClientService verificationService =
             VerificationClients.verificationClientService(VERIFICATION_CLIENT_EXTENSION);
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
-    @MethodSource("testCases")
-    public @interface AutoDeserializeTestCases {}
 
     static Stream<Arguments> testCases() {
         return Cases.TEST_CASES.getAutoDeserialize().entrySet().stream().flatMap(testCase -> {
