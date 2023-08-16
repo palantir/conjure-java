@@ -126,7 +126,8 @@ public final class BeanGenerator {
                 .addAnnotations(safety)
                 .build());
 
-        if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
+        if (poetFields.isEmpty()
+                || (!options.excludeStaticFactoryMethods() && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY)) {
             typeBuilder.addMethod(createStaticFactoryMethod(
                     fields,
                     objectClass,

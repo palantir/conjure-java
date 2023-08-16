@@ -49,6 +49,9 @@ The recommended way to use conjure-java is via a build tool like [gradle-conjure
         --jakartaPackages
                      Generates jax-rs annotated interfaces which use the newer 'jakarta` packages instead of the
                      legacy 'javax' packages.
+        --excludeStaticFactoryMethods
+                     Exclude static factory methods from generated objects with one or more fields. Note that for 
+                     objects without any fields, this will still generate the static factory method.
 
 ### Known Tag Values
 

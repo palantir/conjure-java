@@ -1,0 +1,18 @@
+types:
+  imports:
+    ExampleExternalReference:
+      base-type: string
+      external:
+        java: test.api.ExampleExternalReference
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      StringExampleNoStaticFactory:
+        fields:
+          string: string
+      EmptyExampleNoStaticFactory:
+        fields: {}
+      CovariantListExampleNoStaticFactory:
+        fields:
+          items: list<any>
+          externalItems: list<ExampleExternalReference>
