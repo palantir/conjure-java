@@ -141,7 +141,7 @@ public final class ObjectGeneratorTests {
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
                         ImmutableSet.of(new ObjectGenerator(Options.builder()
-                                .excludeStaticFactoryMethods(true)
+                                .excludeStaticFactoryMethodsForObjectsWithAtLeastOneField(true)
                                 .build())))
                 .emit(def, tempDir);
 

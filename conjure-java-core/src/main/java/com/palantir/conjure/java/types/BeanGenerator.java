@@ -107,7 +107,9 @@ public final class BeanGenerator {
                 .addMethod(createConstructor(fields, poetFields))
                 .addMethods(createGetters(fields, typesMap, options, safetyEvaluator));
 
-        if (!poetFields.isEmpty()) {
+        boolean isEmptyBean = poetFields.isEmpty();
+
+        if (!isEmptyBean) {
             boolean useCachedHashCode = useCachedHashCode(fields);
             typeBuilder
                     .addMethod(MethodSpecs.createEquals(objectClass))
@@ -126,8 +128,11 @@ public final class BeanGenerator {
                 .addAnnotations(safety)
                 .build());
 
-        if (poetFields.isEmpty()
-                || (!options.excludeStaticFactoryMethods() && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY)) {
+        // If the `excludeStaticFactoryMethods` is set, do not create a static factory method, unless the object does
+        // not have any fields.
+        if (isEmptyBean
+                || (!options.excludeStaticFactoryMethodsForObjectsWithAtLeastOneField()
+                        && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY)) {
             typeBuilder.addMethod(createStaticFactoryMethod(
                     fields,
                     objectClass,
@@ -141,7 +146,7 @@ public final class BeanGenerator {
                     .addMethod(createAddFieldIfMissing(nonPrimitiveEnrichedFields.size()));
         }
 
-        if (poetFields.isEmpty()) {
+        if (isEmptyBean) {
             // Need to add JsonSerialize annotation which indicates that the empty bean serializer should be used to
             // serialize this class. Without this annotation no serializer will be set for this class, thus preventing
             // serialization.

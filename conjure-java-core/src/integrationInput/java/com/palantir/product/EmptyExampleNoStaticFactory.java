@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.logsafe.Safe;
 import javax.annotation.processing.Generated;
 
+/**
+ * There are no fields in this type. A static factory method (<code>of</code>) should be generated.
+ */
 @Safe
 @JsonSerialize
 @JsonIgnoreProperties(ignoreUnknown = true)

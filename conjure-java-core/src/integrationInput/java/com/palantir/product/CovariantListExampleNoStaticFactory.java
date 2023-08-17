@@ -12,6 +12,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
@@ -24,12 +25,16 @@ public final class CovariantListExampleNoStaticFactory {
 
     private final List<ExampleExternalReference> externalItems;
 
+    private final Optional<String> optionalField;
+
     private int memoizedHashCode;
 
-    private CovariantListExampleNoStaticFactory(List<Object> items, List<ExampleExternalReference> externalItems) {
-        validateFields(items, externalItems);
+    private CovariantListExampleNoStaticFactory(
+            List<Object> items, List<ExampleExternalReference> externalItems, Optional<String> optionalField) {
+        validateFields(items, externalItems, optionalField);
         this.items = Collections.unmodifiableList(items);
         this.externalItems = Collections.unmodifiableList(externalItems);
+        this.optionalField = optionalField;
     }
 
     @JsonProperty("items")
@@ -40,6 +45,11 @@ public final class CovariantListExampleNoStaticFactory {
     @JsonProperty("externalItems")
     public List<ExampleExternalReference> getExternalItems() {
         return this.externalItems;
+    }
+
+    @JsonProperty("optionalField")
+    public Optional<String> getOptionalField() {
+        return this.optionalField;
     }
 
     @Override
@@ -55,7 +65,9 @@ public final class CovariantListExampleNoStaticFactory {
                 && this.memoizedHashCode != other.memoizedHashCode) {
             return false;
         }
-        return this.items.equals(other.items) && this.externalItems.equals(other.externalItems);
+        return this.items.equals(other.items)
+                && this.externalItems.equals(other.externalItems)
+                && this.optionalField.equals(other.optionalField);
     }
 
     @Override
@@ -65,6 +77,7 @@ public final class CovariantListExampleNoStaticFactory {
             int hash = 1;
             hash = 31 * hash + this.items.hashCode();
             hash = 31 * hash + this.externalItems.hashCode();
+            hash = 31 * hash + this.optionalField.hashCode();
             result = hash;
             memoizedHashCode = result;
         }
@@ -73,13 +86,16 @@ public final class CovariantListExampleNoStaticFactory {
 
     @Override
     public String toString() {
-        return "CovariantListExampleNoStaticFactory{items: " + items + ", externalItems: " + externalItems + '}';
+        return "CovariantListExampleNoStaticFactory{items: " + items + ", externalItems: " + externalItems
+                + ", optionalField: " + optionalField + '}';
     }
 
-    private static void validateFields(List<Object> items, List<ExampleExternalReference> externalItems) {
+    private static void validateFields(
+            List<Object> items, List<ExampleExternalReference> externalItems, Optional<String> optionalField) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, items, "items");
         missingFields = addFieldIfMissing(missingFields, externalItems, "externalItems");
+        missingFields = addFieldIfMissing(missingFields, optionalField, "optionalField");
         if (missingFields != null) {
             throw new SafeIllegalArgumentException(
                     "Some required fields have not been set", SafeArg.of("missingFields", missingFields));
@@ -90,7 +106,7 @@ public final class CovariantListExampleNoStaticFactory {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(2);
+                missingFields = new ArrayList<>(3);
             }
             missingFields.add(fieldName);
         }
@@ -110,12 +126,15 @@ public final class CovariantListExampleNoStaticFactory {
 
         private List<ExampleExternalReference> externalItems = new ArrayList<>();
 
+        private Optional<String> optionalField = Optional.empty();
+
         private Builder() {}
 
         public Builder from(CovariantListExampleNoStaticFactory other) {
             checkNotBuilt();
             items(other.getItems());
             externalItems(other.getExternalItems());
+            optionalField(other.getOptionalField());
             return this;
         }
 
@@ -159,10 +178,23 @@ public final class CovariantListExampleNoStaticFactory {
             return this;
         }
 
+        @JsonSetter(value = "optionalField", nulls = Nulls.SKIP)
+        public Builder optionalField(@Nonnull Optional<String> optionalField) {
+            checkNotBuilt();
+            this.optionalField = Preconditions.checkNotNull(optionalField, "optionalField cannot be null");
+            return this;
+        }
+
+        public Builder optionalField(@Nonnull String optionalField) {
+            checkNotBuilt();
+            this.optionalField = Optional.of(Preconditions.checkNotNull(optionalField, "optionalField cannot be null"));
+            return this;
+        }
+
         public CovariantListExampleNoStaticFactory build() {
             checkNotBuilt();
             this._buildInvoked = true;
-            return new CovariantListExampleNoStaticFactory(items, externalItems);
+            return new CovariantListExampleNoStaticFactory(items, externalItems, optionalField);
         }
 
         private void checkNotBuilt() {
