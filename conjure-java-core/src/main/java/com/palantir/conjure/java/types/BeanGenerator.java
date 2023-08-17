@@ -102,14 +102,16 @@ public final class BeanGenerator {
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addAnnotations(safety)
-                .addFields(poetFields)
-                .addMethod(createConstructor(fields, poetFields))
-                .addMethods(createGetters(fields, typesMap, options, safetyEvaluator));
+                .addAnnotations(safety);
 
         if (poetFields.isEmpty()) {
             addEmptyBean(typeBuilder, prefixedName, safety, objectClass, options);
         } else {
+            typeBuilder
+                    .addFields(poetFields)
+                    .addMethod(createConstructor(fields, poetFields))
+                    .addMethods(createGetters(fields, typesMap, options, safetyEvaluator));
+
             boolean useCachedHashCode = useCachedHashCode(fields);
             typeBuilder
                     .addMethod(MethodSpecs.createEquals(objectClass))
@@ -178,7 +180,6 @@ public final class BeanGenerator {
         }
 
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
-
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         return JavaFile.builder(prefixedName.getPackage(), typeBuilder.build())
@@ -193,6 +194,9 @@ public final class BeanGenerator {
             ImmutableList<AnnotationSpec> safety,
             ClassName objectClass,
             Options options) {
+        // Add ctor
+        typeBuilder.addMethod(createConstructor(ImmutableList.of(), ImmutableList.of()));
+
         // Add toString
         typeBuilder.addMethod(MethodSpecs.createToString(prefixedName.getName(), Collections.emptyList()).toBuilder()
                 .addAnnotations(safety)
