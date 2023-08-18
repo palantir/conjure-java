@@ -191,10 +191,8 @@ public final class BeanGenerator {
             ImmutableList<AnnotationSpec> safety,
             ClassName objectClass,
             Options options) {
-        // Add ctor
         typeBuilder.addMethod(createConstructor(ImmutableList.of(), ImmutableList.of()));
 
-        // Add toString
         typeBuilder.addMethod(MethodSpecs.createToString(prefixedName.getName(), Collections.emptyList()).toBuilder()
                 .addAnnotations(safety)
                 .build());
