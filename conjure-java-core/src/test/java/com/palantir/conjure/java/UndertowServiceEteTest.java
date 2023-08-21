@@ -449,7 +449,7 @@ public final class UndertowServiceEteTest extends TestBase {
                 AuthHeader.valueOf("authHeader"),
                 // Write more bytes than one buffer
                 20000));
-        assertThatThrownBy(() -> ByteStreams.copy(response.byteStream(), ByteStreams.nullOutputStream()))
+        assertThatThrownBy(() -> response.byteStream().transferTo(ByteStreams.nullOutputStream()))
                 .isInstanceOf(IOException.class);
     }
 
