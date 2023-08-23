@@ -102,12 +102,16 @@ public final class BeanGenerator {
 
         TypeSpec.Builder typeBuilder = TypeSpec.classBuilder(prefixedName.getName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addAnnotations(safety)
-                .addFields(poetFields)
-                .addMethod(createConstructor(fields, poetFields))
-                .addMethods(createGetters(fields, typesMap, options, safetyEvaluator));
+                .addAnnotations(safety);
 
-        if (!poetFields.isEmpty()) {
+        if (poetFields.isEmpty()) {
+            addEmptyBean(typeBuilder, prefixedName, safety, objectClass, options);
+        } else {
+            typeBuilder
+                    .addFields(poetFields)
+                    .addMethod(createConstructor(fields, poetFields))
+                    .addMethods(createGetters(fields, typesMap, options, safetyEvaluator));
+
             boolean useCachedHashCode = useCachedHashCode(fields);
             typeBuilder
                     .addMethod(MethodSpecs.createEquals(objectClass))
@@ -117,57 +121,98 @@ public final class BeanGenerator {
             } else {
                 typeBuilder.addMethod(MethodSpecs.createHashCode(poetFields));
             }
-        }
 
-        typeBuilder.addMethod(MethodSpecs.createToString(
-                        prefixedName.getName(),
-                        fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList()))
-                .toBuilder()
-                .addAnnotations(safety)
-                .build());
+            typeBuilder.addMethod(MethodSpecs.createToString(
+                            prefixedName.getName(),
+                            fields.stream().map(EnrichedField::fieldName).collect(Collectors.toList()))
+                    .toBuilder()
+                    .addAnnotations(safety)
+                    .build());
 
-        if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
-            typeBuilder.addMethod(createStaticFactoryMethod(
-                    fields,
-                    objectClass,
-                    safetyEvaluator,
-                    options.useStagedBuilders() && !options.useStrictStagedBuilders()));
-        }
-
-        if (!nonPrimitiveEnrichedFields.isEmpty()) {
-            typeBuilder
-                    .addMethod(createValidateFields(nonPrimitiveEnrichedFields))
-                    .addMethod(createAddFieldIfMissing(nonPrimitiveEnrichedFields.size()));
-        }
-
-        if (poetFields.isEmpty()) {
-            // Need to add JsonSerialize annotation which indicates that the empty bean serializer should be used to
-            // serialize this class. Without this annotation no serializer will be set for this class, thus preventing
-            // serialization.
-            typeBuilder.addAnnotation(JsonSerialize.class).addField(createSingletonField(objectClass));
-            if (!options.strictObjects()) {
-                typeBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
-                        .addMember("ignoreUnknown", "$L", true)
-                        .build());
+            // If the `excludeStaticFactoryMethods` is set, do not create a static factory method, unless the object
+            // does not have any fields.
+            if (!options.excludeStaticFactoryMethodsForObjectsWithAtLeastOneField()
+                    && poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
+                typeBuilder.addMethod(createStaticFactoryMethod(
+                        fields,
+                        objectClass,
+                        safetyEvaluator,
+                        options.useStagedBuilders() && !options.useStrictStagedBuilders()));
             }
-        } else if (options.useStrictStagedBuilders()) {
-            BeanBuilderGenerator.addStrictStagedBuilder(
-                    typeBuilder, typeMapper, safetyEvaluator, objectClass, builderClass, typeDef, typesMap, options);
-        } else if (options.useStagedBuilders()) {
-            BeanBuilderGenerator.addStagedBuilder(
-                    typeBuilder, typeMapper, safetyEvaluator, objectClass, builderClass, typeDef, typesMap, options);
-        } else {
-            BeanBuilderGenerator.addBuilder(
-                    typeBuilder, typeMapper, safetyEvaluator, objectClass, builderClass, typeDef, typesMap, options);
-        }
-        typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
 
+            if (!nonPrimitiveEnrichedFields.isEmpty()) {
+                typeBuilder
+                        .addMethod(createValidateFields(nonPrimitiveEnrichedFields))
+                        .addMethod(createAddFieldIfMissing(nonPrimitiveEnrichedFields.size()));
+            }
+
+            if (options.useStrictStagedBuilders()) {
+                BeanBuilderGenerator.addStrictStagedBuilder(
+                        typeBuilder,
+                        typeMapper,
+                        safetyEvaluator,
+                        objectClass,
+                        builderClass,
+                        typeDef,
+                        typesMap,
+                        options);
+            } else if (options.useStagedBuilders()) {
+                BeanBuilderGenerator.addStagedBuilder(
+                        typeBuilder,
+                        typeMapper,
+                        safetyEvaluator,
+                        objectClass,
+                        builderClass,
+                        typeDef,
+                        typesMap,
+                        options);
+            } else {
+                BeanBuilderGenerator.addBuilder(
+                        typeBuilder,
+                        typeMapper,
+                        safetyEvaluator,
+                        objectClass,
+                        builderClass,
+                        typeDef,
+                        typesMap,
+                        options);
+            }
+        }
+
+        typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
         typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
 
         return JavaFile.builder(prefixedName.getPackage(), typeBuilder.build())
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
+    }
+
+    private static void addEmptyBean(
+            TypeSpec.Builder typeBuilder,
+            com.palantir.conjure.spec.TypeName prefixedName,
+            ImmutableList<AnnotationSpec> safety,
+            ClassName objectClass,
+            Options options) {
+        // Add ctor
+        typeBuilder.addMethod(createConstructor(ImmutableList.of(), ImmutableList.of()));
+
+        // Add toString
+        typeBuilder.addMethod(MethodSpecs.createToString(prefixedName.getName(), Collections.emptyList()).toBuilder()
+                .addAnnotations(safety)
+                .build());
+
+        typeBuilder.addMethod(createStaticFactoryMethodForEmptyBean(objectClass));
+
+        // Need to add JsonSerialize annotation which indicates that the empty bean serializer should be used to
+        // serialize this class. Without this annotation no serializer will be set for this class, thus preventing
+        // serialization.
+        typeBuilder.addAnnotation(JsonSerialize.class).addField(createSingletonField(objectClass));
+        if (!options.strictObjects()) {
+            typeBuilder.addAnnotation(AnnotationSpec.builder(JsonIgnoreProperties.class)
+                    .addMember("ignoreUnknown", "$L", true)
+                    .build());
+        }
     }
 
     private static boolean useCachedHashCode(Collection<EnrichedField> fields) {
@@ -331,35 +376,42 @@ public final class BeanGenerator {
             ClassName objectClass,
             SafetyEvaluator safetyEvaluator,
             boolean useNonStrictStagedBuilders) {
+        if (fields.isEmpty()) {
+            return createStaticFactoryMethodForEmptyBean(objectClass);
+        }
+
         MethodSpec.Builder builder = MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass);
+        builder.addCode("return builder()");
+        fields.forEach(field -> builder.addParameter(ParameterSpec.builder(
+                        getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
+                .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
+                .build()));
 
-        if (fields.isEmpty()) {
-            builder.addAnnotation(ConjureAnnotations.delegatingJsonCreator())
-                    .addCode("return $L;", SINGLETON_INSTANCE_NAME);
-        } else {
-            builder.addCode("return builder()");
-            fields.forEach(field -> builder.addParameter(ParameterSpec.builder(
-                            getTypeNameWithoutOptional(field.poetSpec()), field.poetSpec().name)
-                    .addAnnotations(ConjureAnnotations.safety(safetyEvaluator.getUsageTimeSafety(field.conjureDef())))
-                    .build()));
-
-            Stream<EnrichedField> methodArgs = useNonStrictStagedBuilders
-                    ? fields.stream()
-                            .sorted(Comparator.comparing(BeanBuilderGenerator::stagedBuilderFieldShouldBeInFinalStage))
-                    : fields.stream();
-            methodArgs.map(EnrichedField::poetSpec).forEach(spec -> {
-                if (isOptional(spec)) {
-                    builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
-                } else {
-                    builder.addCode("\n    .$L($L)", spec.name, spec.name);
-                }
-            });
-            builder.addCode("\n    .build();\n");
-        }
+        Stream<EnrichedField> methodArgs = useNonStrictStagedBuilders
+                ? fields.stream()
+                        .sorted(Comparator.comparing(BeanBuilderGenerator::stagedBuilderFieldShouldBeInFinalStage))
+                : fields.stream();
+        methodArgs.map(EnrichedField::poetSpec).forEach(spec -> {
+            if (isOptional(spec)) {
+                builder.addCode("\n    .$L(Optional.of($L))", spec.name, spec.name);
+            } else {
+                builder.addCode("\n    .$L($L)", spec.name, spec.name);
+            }
+        });
+        builder.addCode("\n    .build();\n");
 
         return builder.build();
+    }
+
+    private static MethodSpec createStaticFactoryMethodForEmptyBean(ClassName objectClass) {
+        return MethodSpec.methodBuilder("of")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(objectClass)
+                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
+                .addCode("return $L;", SINGLETON_INSTANCE_NAME)
+                .build();
     }
 
     private static MethodSpec createAddFieldIfMissing(int fieldCount) {

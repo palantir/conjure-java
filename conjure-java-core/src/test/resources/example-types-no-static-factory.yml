@@ -1,0 +1,20 @@
+types:
+  imports:
+    ExampleExternalReference:
+      base-type: string
+      external:
+        java: test.api.ExampleExternalReference
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      EmptyExampleNoStaticFactory:
+        fields: { }
+        docs: There are no fields in this type. A static factory method (`of`) should be generated.
+      StringExampleNoStaticFactory:
+        fields:
+          string: string
+      CovariantListExampleNoStaticFactory:
+        fields:
+          items: list<any>
+          externalItems: list<ExampleExternalReference>
+          optionalField: optional<string>

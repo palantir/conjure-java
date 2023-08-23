@@ -135,6 +135,20 @@ public final class ObjectGeneratorTests {
     }
 
     @Test
+    public void testObjectGenerator_noStaticFactory() throws IOException {
+        ConjureDefinition def =
+                Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types-no-static-factory.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .excludeStaticFactoryMethodsForObjectsWithAtLeastOneField(true)
+                                .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
     public void testObjectGenerator_stagedBuilderAndStrictStagedBuilder() throws IOException {
         // Check that setting enabling staged and strict staged builders is equivalent to only enabling strict staged
         // builders.
