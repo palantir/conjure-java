@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 import com.google.errorprone.annotations.Immutable;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
@@ -28,6 +30,8 @@ import com.palantir.conjure.java.util.Packages;
 import com.palantir.conjure.spec.EnumDefinition;
 import com.palantir.conjure.spec.EnumValueDefinition;
 import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -39,10 +43,15 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
@@ -54,6 +63,10 @@ public final class EnumGenerator {
     private static final String VISIT_METHOD_NAME = "visit";
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
+    public static final String UNKNOWN_TYPE_PARAM_NAME = "unknownType";
+    static final String UNKNOWN_TYPE_NAME = "unknown";
+    private static final String COMPLETED = "completed_";
+    private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
 
     private EnumGenerator() {}
 
@@ -61,26 +74,33 @@ public final class EnumGenerator {
         com.palantir.conjure.spec.TypeName prefixedTypeName =
                 Packages.getPrefixedName(typeDef.getTypeName(), options.packagePrefix());
         ClassName thisClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
-        ClassName enumClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName(), "Value");
-        ClassName visitorClass = ClassName.get(
-                prefixedTypeName.getPackage(), typeDef.getTypeName().getName(), "Visitor");
+        ClassName enumClass = thisClass.nestedClass("Value");
+        ClassName visitorClass = thisClass.nestedClass("Visitor");
+        ClassName visitorBuilderClass = thisClass.nestedClass("VisitorBuilder");
 
         return JavaFile.builder(
-                        prefixedTypeName.getPackage(), createSafeEnum(typeDef, thisClass, enumClass, visitorClass))
+                        prefixedTypeName.getPackage(),
+                        createSafeEnum(typeDef, thisClass, enumClass, visitorClass, visitorBuilderClass))
                 .skipJavaLangImports(true)
                 .indent("    ")
                 .build();
     }
 
     private static TypeSpec createSafeEnum(
-            EnumDefinition typeDef, ClassName thisClass, ClassName enumClass, ClassName visitorClass) {
+            EnumDefinition typeDef,
+            ClassName thisClass,
+            ClassName enumClass,
+            ClassName visitorClass,
+            ClassName visitorBuilderClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addAnnotation(Safe.class)
                 .addAnnotation(Immutable.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addType(createEnum(enumClass, typeDef.getValues(), true))
-                .addType(createVisitor(visitorClass, typeDef.getValues()))
+                .addType(createVisitor(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()))
+                .addType(createVisitorBuilder(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()))
+                .addTypes(generateVisitorBuilderStageInterfaces(thisClass, visitorClass, typeDef.getValues()))
                 .addField(enumClass, VALUE_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
                 .addField(ClassName.get(String.class), STRING_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
                 .addFields(createConstants(typeDef.getValues(), thisClass, enumClass))
@@ -161,7 +181,11 @@ public final class EnumGenerator {
         return enumBuilder.build();
     }
 
-    private static TypeSpec createVisitor(ClassName visitorClass, Iterable<EnumValueDefinition> values) {
+    private static TypeSpec createVisitor(
+            ClassName enumClass,
+            ClassName visitorClass,
+            ClassName visitorBuilderClass,
+            Iterable<EnumValueDefinition> values) {
         return TypeSpec.interfaceBuilder(visitorClass.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addModifiers(Modifier.PUBLIC)
@@ -172,7 +196,22 @@ public final class EnumGenerator {
                         .addParameter(String.class, "unknownValue")
                         .returns(TYPE_VARIABLE)
                         .build())
+                .addMethod(MethodSpec.methodBuilder("builder")
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .addTypeVariable(TYPE_VARIABLE)
+                        .addStatement("return new $T<$T>()", visitorBuilderClass, TYPE_VARIABLE)
+                        .returns(ParameterizedTypeName.get(
+                                visitorStageInterfaceName(
+                                        enumClass,
+                                        stageEnumNames(values).findFirst().get()),
+                                TYPE_VARIABLE))
+                        .build())
                 .build();
+    }
+
+    private static Stream<String> stageEnumNames(Iterable<EnumValueDefinition> values) {
+        return Stream.concat(
+                ImmutableList.copyOf(values).stream().map(EnumValueDefinition::getValue), Stream.of(UNKNOWN_TYPE_NAME));
     }
 
     private static List<MethodSpec> generateMemberVisitMethods(Iterable<EnumValueDefinition> values) {
@@ -187,6 +226,319 @@ public final class EnumGenerator {
             methods.add(methodSpecBuilder.build());
         }
         return methods.build();
+    }
+
+    /** Generates a builder class for the given {@code visitor} class. */
+    private static TypeSpec createVisitorBuilder(
+            ClassName enclosingClass,
+            ClassName visitor,
+            ClassName visitorBuilder,
+            Iterable<EnumValueDefinition> values) {
+        TypeVariableName visitResultType = TypeVariableName.get("T");
+        return TypeSpec.classBuilder(visitorBuilder)
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .addTypeVariable(visitResultType)
+                .addSuperinterfaces(allVisitorBuilderStages(enclosingClass, values, visitResultType))
+                .addFields(allVisitorBuilderFields(values, visitResultType))
+                .addMethods(allVisitorBuilderSetters(enclosingClass, visitResultType, values))
+                .addMethod(builderBuildMethod(visitor, visitResultType, values))
+                .build();
+    }
+
+    /**
+     * Generate all interfaces for the various visitor builder stages on the following pattern.
+     *
+     * <pre>
+     * interface Member1Stage&lt;T&gt; { Member2Stage&lt;T&gt; member1(...) }
+     * interface Member2Stage&lt;T&gt; { Member3Stage&lt;T&gt; member2(...) }
+     * interface Member3Stage&lt;T&gt; { UnknownStage&lt;T&gt; member3(...) }
+     * interface UnknownStage&lt;T&gt; { CompletedStage&lt;T&gt; unknown(...) }
+     * interface CompletedStage&lt;T&gt; { Visitor&lt;T&gt; build(...) }
+     * </pre>
+     */
+    private static List<TypeSpec> generateVisitorBuilderStageInterfaces(
+            ClassName enclosingClass, ClassName visitorClass, Iterable<EnumValueDefinition> values) {
+        TypeVariableName visitResultType = TypeVariableName.get("T");
+        List<TypeSpec> interfaces = new ArrayList<>();
+        PeekingIterator<String> valueIter =
+                Iterators.peekingIterator(stageEnumNames(values).iterator());
+        while (valueIter.hasNext()) {
+            String value = valueIter.next();
+            String nextBuilderStageName = valueIter.hasNext() ? valueIter.peek() : COMPLETED;
+            ClassName nextStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStageName);
+            List<MethodSpec> methods = UNKNOWN_TYPE_NAME.equals(value)
+                    ? unknownSpecificVisitorPrototypes(visitResultType, nextStageClassName)
+                    : ImmutableList.of(visitorBuilderSetterPrototype(value, visitResultType, nextStageClassName)
+                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                            .build());
+            interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, value))
+                    .addTypeVariable(visitResultType)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addMethods(methods)
+                    .build());
+        }
+        interfaces.add(TypeSpec.interfaceBuilder(visitorStageInterfaceName(enclosingClass, COMPLETED))
+                .addTypeVariable(visitResultType)
+                .addModifiers(Modifier.PUBLIC)
+                .addMethod(MethodSpec.methodBuilder("build")
+                        .returns(ParameterizedTypeName.get(visitorClass, visitResultType))
+                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        .build())
+                .build());
+        return interfaces;
+    }
+
+    private static ImmutableList<MethodSpec> unknownSpecificVisitorPrototypes(
+            TypeVariableName visitResultType, ClassName nextStageClassName) {
+        ImmutableList.Builder<MethodSpec> methods = ImmutableList.builder();
+
+        methods.add(MethodSpec.methodBuilder("visitUnknown")
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .addParameter(ParameterSpec.builder(
+                                ParameterizedTypeName.get(
+                                        ClassName.get(Function.class),
+                                        UNKNOWN_MEMBER_TYPE.annotated(AnnotationSpec.builder(Safe.class)
+                                                .build()),
+                                        visitResultType),
+                                visitorFieldName("unknown"))
+                        .addAnnotation(Nonnull.class)
+                        .build())
+                .returns(ParameterizedTypeName.get(nextStageClassName, visitResultType))
+                .build());
+
+        // Throw on unknown
+        methods.add(visitorBuilderUnknownThrowPrototype(visitResultType, nextStageClassName)
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .build());
+
+        return methods.build();
+    }
+
+    /** Generates all the interface type names for the different visitor builder stages. */
+    private static List<TypeName> allVisitorBuilderStages(
+            ClassName enclosingClass, Iterable<EnumValueDefinition> values, TypeVariableName visitResultType) {
+        return Stream.concat(stageEnumNames(values), Stream.of(COMPLETED))
+                .map(stageName -> visitorStageInterfaceName(enclosingClass, stageName))
+                .map(stageType -> ParameterizedTypeName.get(stageType, visitResultType))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Generate all fields of the Visitor builder, on the following format.
+     *
+     * <pre>
+     * Function&lt;MemberType1, T&gt; member1Visitor;
+     * Function&lt;MemberType2, T&gt; member2Visitor;
+     * Function&lt;MemberType3, T&gt; member3Visitor;
+     * Function&lt;UNKNOWN_MEMBER_TYPE, T&gt; unknownVisitor;
+     * </pre>
+     */
+    private static List<FieldSpec> allVisitorBuilderFields(
+            Iterable<EnumValueDefinition> values, TypeVariableName visitResultType) {
+        return stageEnumNames(values)
+                .map(value -> FieldSpec.builder(
+                                UNKNOWN_TYPE_NAME.equals(value)
+                                        ? ParameterizedTypeName.get(
+                                                ClassName.get(Function.class),
+                                                UNKNOWN_MEMBER_TYPE.annotated(AnnotationSpec.builder(Safe.class)
+                                                        .build()),
+                                                visitResultType)
+                                        : visitorObjectTypeName(visitResultType),
+                                visitorFieldName(value),
+                                Modifier.PRIVATE)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Generates setter methods for the visitor builder on the following format.
+     *
+     * <pre>
+     * NextMemberStage&lt;T&gt; memberName(Function&lt;MemberType, T&gt; memberVisitor) {
+     *     this.memberVisitor = memberVisitor;
+     *     return this;
+     * }
+     * </pre>
+     */
+    private static List<MethodSpec> allVisitorBuilderSetters(
+            ClassName enclosingClass, TypeName visitResultType, Iterable<EnumValueDefinition> values) {
+        ImmutableList.Builder<MethodSpec> setterMethods = ImmutableList.builder();
+        PeekingIterator<String> valueIter =
+                Iterators.peekingIterator(stageEnumNames(values).iterator());
+        while (valueIter.hasNext()) {
+            String value = valueIter.next();
+            String nextBuilderStage = valueIter.hasNext() ? valueIter.peek() : COMPLETED;
+            ClassName nextVisitorStageClassName = visitorStageInterfaceName(enclosingClass, nextBuilderStage);
+            if (UNKNOWN_TYPE_NAME.equals(value)) {
+                setterMethods.addAll(
+                        unknownSpecificVisitorSetters(enclosingClass, visitResultType, nextVisitorStageClassName));
+            } else {
+                MethodSpec.Builder setterPrototype =
+                        visitorBuilderSetterPrototype(value, visitResultType, nextVisitorStageClassName);
+                setterMethods.add(setterPrototype
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
+                        .addStatement(
+                                "$L",
+                                Expressions.requireNonNull(
+                                        visitorFieldName(value),
+                                        String.format("%s cannot be null", visitorFieldName(value))))
+                        .addStatement("this.$1L = $1L", visitorFieldName(value))
+                        .addStatement("return this")
+                        .build());
+            }
+        }
+        return setterMethods.build();
+    }
+
+    /**
+     * Generates a prototype for a visitor builder setter that can be turned into an interface method declaration or an
+     * implementation of such interface method. The signature of the returned builder is
+     *
+     * <pre>
+     * NextStage&lt;T&gt; memberName(Function&lt;MemberType, T&gt; memberVisitor)
+     * </pre>
+     */
+    private static MethodSpec.Builder visitorBuilderSetterPrototype(
+            String value, TypeName visitResultType, ClassName nextBuilderStage) {
+        TypeName visitorObject = visitorObjectTypeName(visitResultType);
+        return MethodSpec.methodBuilder(getVisitorMethodName(value))
+                .addParameter(ParameterSpec.builder(visitorObject, visitorFieldName(value))
+                        .addAnnotation(Nonnull.class)
+                        .build())
+                .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
+    }
+
+    /**
+     * Convenience method for generating a {@code Function<MemberType, T>} used for fields and setters of the
+     * visitor builder. Special-cases generation of a {@code BiFunction<String, Map<String, Object>, T>} in the case
+     * of the new unknownVisitor.
+     */
+    private static TypeName visitorObjectTypeName(TypeName visitResultType) {
+        return ParameterizedTypeName.get(ClassName.get(Supplier.class), visitResultType);
+    }
+
+    private static List<MethodSpec> unknownSpecificVisitorSetters(
+            ClassName enclosingClass, TypeName visitResultType, ClassName nextVisitorStageClassName) {
+        ImmutableList.Builder<MethodSpec> methods = ImmutableList.builder();
+
+        String visitorName = visitorFieldName("unknown");
+        methods.add(MethodSpec.methodBuilder("visitUnknown")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addParameter(ParameterSpec.builder(
+                                ParameterizedTypeName.get(
+                                        ClassName.get(Function.class),
+                                        UNKNOWN_MEMBER_TYPE.annotated(AnnotationSpec.builder(Safe.class)
+                                                .build()),
+                                        visitResultType),
+                                visitorName)
+                        .addAnnotation(Nonnull.class)
+                        .build())
+                .returns(ParameterizedTypeName.get(nextVisitorStageClassName, visitResultType))
+                .addStatement(
+                        "$L", Expressions.requireNonNull(visitorName, String.format("%s cannot be null", visitorName)))
+                .addStatement(
+                        "this.$1N = $2L -> $1N.apply($3N)",
+                        visitorName,
+                        UNKNOWN_TYPE_PARAM_NAME,
+                        UNKNOWN_TYPE_PARAM_NAME)
+                .addStatement("return this")
+                .build());
+
+        // Throw on unknown
+        methods.add(visitorBuilderUnknownThrowPrototype(visitResultType, nextVisitorStageClassName)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addStatement(
+                        "this.$N = $L -> { throw new $T($S, $T.of($S, $N)); }",
+                        visitorFieldName("unknown"),
+                        UNKNOWN_TYPE_PARAM_NAME,
+                        SafeIllegalArgumentException.class,
+                        "Unknown variant of the '" + enclosingClass.simpleName() + "' union",
+                        SafeArg.class,
+                        UNKNOWN_TYPE_PARAM_NAME,
+                        UNKNOWN_TYPE_PARAM_NAME)
+                .addStatement("return this")
+                .build());
+
+        return methods.build();
+    }
+
+    private static MethodSpec.Builder visitorBuilderUnknownThrowPrototype(
+            TypeName visitResultType, ClassName nextBuilderStage) {
+        return MethodSpec.methodBuilder("throwOnUnknown")
+                .returns(ParameterizedTypeName.get(nextBuilderStage, visitResultType));
+    }
+
+    /**
+     * Generates the build method for the visitor builder. The result looks as follows:
+     *
+     * <pre>
+     * Visitor&lt;T&gt; build() {
+     *     return new Visitor&lt;T&gt;() {
+     *         [methods delegating to the various visitor function objects]
+     *     }
+     * }
+     * </pre>
+     */
+    private static MethodSpec builderBuildMethod(
+            ClassName visitorClass, TypeName visitResultType, Iterable<EnumValueDefinition> values) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("build")
+                .returns(ParameterizedTypeName.get(visitorClass, visitResultType))
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class);
+
+        // Add statements to copy over visitor handlers to local immutable variables.
+        values.forEach(value -> builder.addStatement(
+                "final $1T $2L = this.$2L",
+                visitorObjectTypeName(visitResultType),
+                visitorFieldName(value.getValue())));
+        builder.addStatement(
+                "final $1T $2L = this.$2L",
+                ParameterizedTypeName.get(
+                        ClassName.get(Function.class),
+                        UNKNOWN_MEMBER_TYPE.annotated(
+                                AnnotationSpec.builder(Safe.class).build()),
+                        visitResultType),
+                visitorFieldName(UNKNOWN_TYPE_NAME));
+
+        return builder.addStatement(
+                        "return $L",
+                        TypeSpec.anonymousClassBuilder("")
+                                .addSuperinterface(ParameterizedTypeName.get(visitorClass, visitResultType))
+                                .addMethods(allDelegatingVisitorMethods(values, visitResultType))
+                                .build())
+                .build();
+    }
+
+    /**
+     * Generate the implementations of the visitor built by the visitor builder. Each method has the shape
+     *
+     * <pre>
+     * T visitMemberName(MemberType value) {
+     *     return memberVisitor.apply(value);
+     * }
+     * </pre>
+     */
+    private static List<MethodSpec> allDelegatingVisitorMethods(
+            Iterable<EnumValueDefinition> values, TypeName visitorResultType) {
+        return stageEnumNames(values)
+                .map(value -> UNKNOWN_TYPE_NAME.equals(value)
+                        ? MethodSpec.methodBuilder(getVisitorMethodName(value))
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(Override.class)
+                                .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
+                                .addStatement("return $N.apply($N)", visitorFieldName(value), UNKNOWN_TYPE_PARAM_NAME)
+                                .returns(visitorResultType)
+                                .build()
+                        : MethodSpec.methodBuilder(getVisitorMethodName(value))
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(Override.class)
+                                .addStatement("return $N.get()", visitorFieldName(value))
+                                .returns(visitorResultType)
+                                .build())
+                .collect(Collectors.toList());
     }
 
     private static MethodSpec generateAcceptVisitMethod(ClassName visitorClass, List<EnumValueDefinition> values) {
@@ -221,7 +573,21 @@ public final class EnumGenerator {
     }
 
     private static String getVisitorMethodName(EnumValueDefinition definition) {
-        return VISIT_METHOD_NAME + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, definition.getValue());
+        return getVisitorMethodName(definition.getValue());
+    }
+
+    private static String getVisitorMethodName(String value) {
+        return VISIT_METHOD_NAME + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, value);
+    }
+
+    /** Generates the name of the interface of a visitor builder stage. */
+    private static ClassName visitorStageInterfaceName(ClassName enclosingClass, String stageName) {
+        return enclosingClass.nestedClass(
+                CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, stageName) + "StageVisitorBuilder");
+    }
+
+    private static String visitorFieldName(String value) {
+        return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, value) + "Visitor";
     }
 
     private static MethodSpec createConstructor(ClassName enumClass) {

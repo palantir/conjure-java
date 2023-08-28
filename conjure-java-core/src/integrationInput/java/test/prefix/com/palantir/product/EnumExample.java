@@ -5,10 +5,14 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.errorprone.annotations.Immutable;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
@@ -152,5 +156,112 @@ public final class EnumExample {
         T visitOneHundred();
 
         T visitUnknown(String unknownValue);
+
+        static <T> OneStageVisitorBuilder<T> builder() {
+            return new VisitorBuilder<T>();
+        }
+    }
+
+    private static final class VisitorBuilder<T>
+            implements OneStageVisitorBuilder<T>,
+                    TwoStageVisitorBuilder<T>,
+                    OneHundredStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T>,
+                    CompletedStageVisitorBuilder<T> {
+        private Supplier<T> oneVisitor;
+
+        private Supplier<T> twoVisitor;
+
+        private Supplier<T> oneHundredVisitor;
+
+        private Function<@Safe String, T> unknownVisitor;
+
+        @Override
+        public TwoStageVisitorBuilder<T> visitOne(@Nonnull Supplier<T> oneVisitor) {
+            Preconditions.checkNotNull(oneVisitor, "oneVisitor cannot be null");
+            this.oneVisitor = oneVisitor;
+            return this;
+        }
+
+        @Override
+        public OneHundredStageVisitorBuilder<T> visitTwo(@Nonnull Supplier<T> twoVisitor) {
+            Preconditions.checkNotNull(twoVisitor, "twoVisitor cannot be null");
+            this.twoVisitor = twoVisitor;
+            return this;
+        }
+
+        @Override
+        public UnknownStageVisitorBuilder<T> visitOneHundred(@Nonnull Supplier<T> oneHundredVisitor) {
+            Preconditions.checkNotNull(oneHundredVisitor, "oneHundredVisitor cannot be null");
+            this.oneHundredVisitor = oneHundredVisitor;
+            return this;
+        }
+
+        @Override
+        public CompletedStageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
+            Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
+            this.unknownVisitor = unknownType -> unknownVisitor.apply(unknownType);
+            return this;
+        }
+
+        @Override
+        public CompletedStageVisitorBuilder<T> throwOnUnknown() {
+            this.unknownVisitor = unknownType -> {
+                throw new SafeIllegalArgumentException(
+                        "Unknown variant of the 'EnumExample' union", SafeArg.of("unknownType", unknownType));
+            };
+            return this;
+        }
+
+        @Override
+        public Visitor<T> build() {
+            final Supplier<T> oneVisitor = this.oneVisitor;
+            final Supplier<T> twoVisitor = this.twoVisitor;
+            final Supplier<T> oneHundredVisitor = this.oneHundredVisitor;
+            final Function<@Safe String, T> unknownVisitor = this.unknownVisitor;
+            return new Visitor<T>() {
+                @Override
+                public T visitOne() {
+                    return oneVisitor.get();
+                }
+
+                @Override
+                public T visitTwo() {
+                    return twoVisitor.get();
+                }
+
+                @Override
+                public T visitOneHundred() {
+                    return oneHundredVisitor.get();
+                }
+
+                @Override
+                public T visitUnknown(String unknownType) {
+                    return unknownVisitor.apply(unknownType);
+                }
+            };
+        }
+    }
+
+    public interface OneStageVisitorBuilder<T> {
+        TwoStageVisitorBuilder<T> visitOne(@Nonnull Supplier<T> oneVisitor);
+    }
+
+    public interface TwoStageVisitorBuilder<T> {
+        OneHundredStageVisitorBuilder<T> visitTwo(@Nonnull Supplier<T> twoVisitor);
+    }
+
+    public interface OneHundredStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> visitOneHundred(@Nonnull Supplier<T> oneHundredVisitor);
+    }
+
+    public interface UnknownStageVisitorBuilder<T> {
+        CompletedStageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor);
+
+        CompletedStageVisitorBuilder<T> throwOnUnknown();
+    }
+
+    public interface CompletedStageVisitorBuilder<T> {
+        Visitor<T> build();
     }
 }

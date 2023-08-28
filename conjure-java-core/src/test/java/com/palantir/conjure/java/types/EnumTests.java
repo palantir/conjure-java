@@ -31,6 +31,7 @@ public class EnumTests {
     public void testVisitOne() {
         EnumExample enumExample = EnumExample.ONE;
         assertThat(enumExample.accept(Visitor.INSTANCE)).isEqualTo("one");
+        assertThat(enumExample.accept(VISITOR_FROM_BUILDER)).isEqualTo("one");
     }
 
     @Test
@@ -43,6 +44,7 @@ public class EnumTests {
         EnumExample enumExample = EnumExample.valueOf("SOME_VALUE");
         assertThat(enumExample.get()).isEqualTo(EnumExample.Value.UNKNOWN);
         assertThat(enumExample.toString()).isEqualTo("SOME_VALUE");
+        assertThat(enumExample.accept(VISITOR_FROM_BUILDER)).isEqualTo("SOME_VALUE");
     }
 
     @Test
@@ -89,4 +91,11 @@ public class EnumTests {
             return unknownValue;
         }
     }
+
+    private static final EnumExample.Visitor<String> VISITOR_FROM_BUILDER = EnumExample.Visitor.<String>builder()
+            .visitOne(() -> "one")
+            .visitTwo(() -> "two")
+            .visitOneHundred(() -> "one hundred")
+            .visitUnknown(unknownType -> unknownType)
+            .build();
 }
