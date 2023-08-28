@@ -19,8 +19,11 @@ package com.palantir.conjure.java.types;
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.product.EnumExample;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
@@ -64,6 +67,17 @@ public class EnumTests {
                 .filter(v -> !v.equals(EnumExample.Value.UNKNOWN))
                 .collect(Collectors.toSet());
         assertThat(valuesFromClass).containsExactlyInAnyOrderElementsOf(valuesFromEnum);
+    }
+
+    @Test
+    public void testSorted() {
+        List<EnumExample> valuesUnsorted = List.of(
+                EnumExample.ONE,
+                EnumExample.valueOf("A"),
+                EnumExample.valueOf("Z"));
+        assertThat(ImmutableList.sortedCopyOf(valuesUnsorted))
+                .describedAs("enum sorting order should equal string value sorting order")
+                .containsExactlyElementsOf(ImmutableList.sortedCopyOf(Comparator.comparing(EnumExample::toString), valuesUnsorted));
     }
 
     private enum Visitor implements EnumExample.Visitor<String> {

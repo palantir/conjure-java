@@ -102,7 +102,10 @@ public final class EnumGenerator {
                 .addMethod(createHashCode())
                 .addMethod(createValueOf(thisClass, typeDef.getValues()))
                 .addMethod(generateAcceptVisitMethod(visitorClass, typeDef.getValues()))
-                .addMethod(createValues(thisClass));
+                .addMethod(createValues(thisClass))
+                .addSuperinterface(
+                        ParameterizedTypeName.get(ClassName.get(Comparable.class), thisClass))
+                .addMethod(createCompareTo(thisClass));
 
         typeDef.getDocs().ifPresent(docs -> wrapper.addJavadoc("$L<p>\n", Javadoc.render(docs)));
 
@@ -330,6 +333,16 @@ public final class EnumGenerator {
                 .addAnnotation(Override.class)
                 .returns(TypeName.INT)
                 .addStatement("return this.string.hashCode()")
+                .build();
+    }
+
+    private static MethodSpec createCompareTo(TypeName thisClass) {
+        return MethodSpec.methodBuilder("compareTo")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(TypeName.INT)
+                .addParameter(ParameterSpec.builder(thisClass, "other").build())
+                .addStatement("return this.string.compareTo(other.string)")
                 .build();
     }
 }

@@ -28,7 +28,7 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 @Safe
 @Immutable
-public final class EnumExample {
+public final class EnumExample implements Comparable<EnumExample> {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
     /**
@@ -112,6 +112,11 @@ public final class EnumExample {
 
     public static List<EnumExample> values() {
         return values;
+    }
+
+    @Override
+    public int compareTo(EnumExample other) {
+        return this.string.compareTo(other.string);
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")

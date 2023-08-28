@@ -26,7 +26,7 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 @Safe
 @Immutable
-public final class SimpleEnum {
+public final class SimpleEnum implements Comparable<SimpleEnum> {
     public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
 
     private static final List<SimpleEnum> values = Collections.unmodifiableList(Arrays.asList(VALUE));
@@ -86,6 +86,11 @@ public final class SimpleEnum {
 
     public static List<SimpleEnum> values() {
         return values;
+    }
+
+    @Override
+    public int compareTo(SimpleEnum other) {
+        return this.string.compareTo(other.string);
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
