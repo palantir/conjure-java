@@ -71,13 +71,11 @@ public class EnumTests {
 
     @Test
     public void testSorted() {
-        List<EnumExample> valuesUnsorted = List.of(
-                EnumExample.ONE,
-                EnumExample.valueOf("A"),
-                EnumExample.valueOf("Z"));
+        List<EnumExample> valuesUnsorted = List.of(EnumExample.ONE, EnumExample.valueOf("A"), EnumExample.valueOf("Z"));
         assertThat(ImmutableList.sortedCopyOf(valuesUnsorted))
                 .describedAs("enum sorting order should equal string value sorting order")
-                .containsExactlyElementsOf(ImmutableList.sortedCopyOf(Comparator.comparing(EnumExample::toString), valuesUnsorted));
+                .containsExactlyElementsOf(
+                        ImmutableList.sortedCopyOf(Comparator.comparing(EnumExample::toString), valuesUnsorted));
     }
 
     private enum Visitor implements EnumExample.Visitor<String> {

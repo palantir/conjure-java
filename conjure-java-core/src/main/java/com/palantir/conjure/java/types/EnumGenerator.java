@@ -103,8 +103,7 @@ public final class EnumGenerator {
                 .addMethod(createValueOf(thisClass, typeDef.getValues()))
                 .addMethod(generateAcceptVisitMethod(visitorClass, typeDef.getValues()))
                 .addMethod(createValues(thisClass))
-                .addSuperinterface(
-                        ParameterizedTypeName.get(ClassName.get(Comparable.class), thisClass))
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(Comparable.class), thisClass))
                 .addMethod(createCompareTo(thisClass));
 
         typeDef.getDocs().ifPresent(docs -> wrapper.addJavadoc("$L<p>\n", Javadoc.render(docs)));
