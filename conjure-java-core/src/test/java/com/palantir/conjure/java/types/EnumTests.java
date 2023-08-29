@@ -18,7 +18,9 @@ package com.palantir.conjure.java.types;
 
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.product.EnumExample;
 import java.util.Arrays;
 import java.util.Set;
@@ -32,6 +34,7 @@ public class EnumTests {
         EnumExample enumExample = EnumExample.ONE;
         assertThat(enumExample.accept(Visitor.INSTANCE)).isEqualTo("one");
         assertThat(enumExample.accept(VISITOR_FROM_BUILDER)).isEqualTo("one");
+        assertThat(enumExample.accept(VISITOR_FROM_BUILDER_THROW_ON_UNKNOWN)).isEqualTo("one");
     }
 
     @Test
@@ -45,6 +48,9 @@ public class EnumTests {
         assertThat(enumExample.get()).isEqualTo(EnumExample.Value.UNKNOWN);
         assertThat(enumExample.toString()).isEqualTo("SOME_VALUE");
         assertThat(enumExample.accept(VISITOR_FROM_BUILDER)).isEqualTo("SOME_VALUE");
+        assertThatThrownBy(() -> enumExample.accept(VISITOR_FROM_BUILDER_THROW_ON_UNKNOWN))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageStartingWith("Unknown variant of the 'EnumExample' union");
     }
 
     @Test
@@ -98,4 +104,12 @@ public class EnumTests {
             .visitOneHundred(() -> "one hundred")
             .visitUnknown(unknownType -> unknownType)
             .build();
+
+    private static final EnumExample.Visitor<String> VISITOR_FROM_BUILDER_THROW_ON_UNKNOWN =
+            EnumExample.Visitor.<String>builder()
+                    .visitOne(() -> "one")
+                    .visitTwo(() -> "two")
+                    .visitOneHundred(() -> "one hundred")
+                    .throwOnUnknown()
+                    .build();
 }
