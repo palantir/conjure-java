@@ -167,7 +167,7 @@ public final class EnumExample {
                     TwoStageVisitorBuilder<T>,
                     OneHundredStageVisitorBuilder<T>,
                     UnknownStageVisitorBuilder<T>,
-                    CompletedStageVisitorBuilder<T> {
+                    Completed_StageVisitorBuilder<T> {
         private Supplier<T> oneVisitor;
 
         private Supplier<T> twoVisitor;
@@ -198,14 +198,14 @@ public final class EnumExample {
         }
 
         @Override
-        public CompletedStageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
+        public Completed_StageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor) {
             Preconditions.checkNotNull(unknownVisitor, "unknownVisitor cannot be null");
             this.unknownVisitor = unknownType -> unknownVisitor.apply(unknownType);
             return this;
         }
 
         @Override
-        public CompletedStageVisitorBuilder<T> throwOnUnknown() {
+        public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalArgumentException(
                         "Unknown variant of the 'EnumExample' union", SafeArg.of("unknownType", unknownType));
@@ -256,12 +256,12 @@ public final class EnumExample {
     }
 
     public interface UnknownStageVisitorBuilder<T> {
-        CompletedStageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor);
+        Completed_StageVisitorBuilder<T> visitUnknown(@Nonnull Function<@Safe String, T> unknownVisitor);
 
-        CompletedStageVisitorBuilder<T> throwOnUnknown();
+        Completed_StageVisitorBuilder<T> throwOnUnknown();
     }
 
-    public interface CompletedStageVisitorBuilder<T> {
+    public interface Completed_StageVisitorBuilder<T> {
         Visitor<T> build();
     }
 }
