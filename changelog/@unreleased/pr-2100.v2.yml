@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Enum visitor builders now work when an enum value is named COMPLETED
+  links:
+  - https://github.com/palantir/conjure-java/pull/2100

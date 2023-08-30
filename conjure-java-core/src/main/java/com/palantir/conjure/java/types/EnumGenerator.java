@@ -63,9 +63,11 @@ public final class EnumGenerator {
     private static final String VISIT_METHOD_NAME = "visit";
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
-    public static final String UNKNOWN_TYPE_PARAM_NAME = "unknownType";
-    static final String UNKNOWN_TYPE_NAME = "unknown";
+    private static final String UNKNOWN_TYPE_PARAM_NAME = "unknownType";
+    private static final String UNKNOWN_TYPE_NAME = "unknown";
     private static final String COMPLETED = "completed_";
+    private static final String STAGE_VISITOR_BUILDER = "StageVisitorBuilder";
+    private static final String VISITOR_FIELD_NAME_SUFFIX = "Visitor";
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
 
     private EnumGenerator() {}
@@ -577,17 +579,24 @@ public final class EnumGenerator {
     }
 
     private static String getVisitorMethodName(String value) {
-        return VISIT_METHOD_NAME + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, value);
+        return VISIT_METHOD_NAME + formatName(value, CaseFormat.UPPER_CAMEL);
     }
 
     /** Generates the name of the interface of a visitor builder stage. */
     private static ClassName visitorStageInterfaceName(ClassName enclosingClass, String stageName) {
-        return enclosingClass.nestedClass(
-                CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, stageName) + "StageVisitorBuilder");
+        return enclosingClass.nestedClass(formatName(stageName, CaseFormat.UPPER_CAMEL) + STAGE_VISITOR_BUILDER);
     }
 
     private static String visitorFieldName(String value) {
-        return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, value) + "Visitor";
+        return formatName(value, CaseFormat.LOWER_CAMEL) + VISITOR_FIELD_NAME_SUFFIX;
+    }
+
+    private static String formatName(String value, CaseFormat camelCase) {
+        String formatted = CaseFormat.UPPER_UNDERSCORE.to(camelCase, value);
+        if (value.endsWith("_")) {
+            formatted += "_";
+        }
+        return formatted;
     }
 
     private static MethodSpec createConstructor(ClassName enumClass) {

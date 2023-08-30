@@ -19,27 +19,30 @@ import javax.annotation.processing.Generated;
 
 /**
  * This class is used instead of a native enum to support unknown values.
- * Rather than throw an exception, the {@link SimpleEnum#valueOf} method defaults to a new instantiation of
- * {@link SimpleEnum} where {@link SimpleEnum#get} will return {@link SimpleEnum.Value#UNKNOWN}.
+ * Rather than throw an exception, the {@link EnumNameTestExample#valueOf} method defaults to a new instantiation of
+ * {@link EnumNameTestExample} where {@link EnumNameTestExample#get} will return {@link EnumNameTestExample.Value#UNKNOWN}.
  * <p>
- * For example, {@code SimpleEnum.valueOf("corrupted value").get()} will return {@link SimpleEnum.Value#UNKNOWN},
- * but {@link SimpleEnum#toString} will return "corrupted value".
+ * For example, {@code EnumNameTestExample.valueOf("corrupted value").get()} will return {@link EnumNameTestExample.Value#UNKNOWN},
+ * but {@link EnumNameTestExample#toString} will return "corrupted value".
  * <p>
  * There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 @Safe
 @Immutable
-public final class SimpleEnum {
-    public static final SimpleEnum VALUE = new SimpleEnum(Value.VALUE, "VALUE");
+public final class EnumNameTestExample {
+    public static final EnumNameTestExample INCOMPLETE = new EnumNameTestExample(Value.INCOMPLETE, "INCOMPLETE");
 
-    private static final List<SimpleEnum> values = Collections.unmodifiableList(Arrays.asList(VALUE));
+    public static final EnumNameTestExample COMPLETED = new EnumNameTestExample(Value.COMPLETED, "COMPLETED");
+
+    private static final List<EnumNameTestExample> values =
+            Collections.unmodifiableList(Arrays.asList(INCOMPLETE, COMPLETED));
 
     private final Value value;
 
     private final String string;
 
-    private SimpleEnum(Value value, String string) {
+    private EnumNameTestExample(Value value, String string) {
         this.value = value;
         this.string = string;
     }
@@ -58,8 +61,8 @@ public final class SimpleEnum {
     public boolean equals(@Nullable Object other) {
         return (this == other)
                 || (this.value == Value.UNKNOWN
-                        && other instanceof SimpleEnum
-                        && this.string.equals(((SimpleEnum) other).string));
+                        && other instanceof EnumNameTestExample
+                        && this.string.equals(((EnumNameTestExample) other).string));
     }
 
     @Override
@@ -68,58 +71,78 @@ public final class SimpleEnum {
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static SimpleEnum valueOf(@Nonnull @Safe String value) {
+    public static EnumNameTestExample valueOf(@Nonnull @Safe String value) {
         Preconditions.checkNotNull(value, "value cannot be null");
         String upperCasedValue = value.toUpperCase(Locale.ROOT);
         switch (upperCasedValue) {
-            case "VALUE":
-                return VALUE;
+            case "INCOMPLETE":
+                return INCOMPLETE;
+            case "COMPLETED":
+                return COMPLETED;
             default:
-                return new SimpleEnum(Value.UNKNOWN, upperCasedValue);
+                return new EnumNameTestExample(Value.UNKNOWN, upperCasedValue);
         }
     }
 
     public <T> T accept(Visitor<T> visitor) {
         switch (value) {
-            case VALUE:
-                return visitor.visitValue();
+            case INCOMPLETE:
+                return visitor.visitIncomplete();
+            case COMPLETED:
+                return visitor.visitCompleted();
             default:
                 return visitor.visitUnknown(string);
         }
     }
 
-    public static List<SimpleEnum> values() {
+    public static List<EnumNameTestExample> values() {
         return values;
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public enum Value {
-        VALUE,
+        INCOMPLETE,
+
+        COMPLETED,
 
         UNKNOWN
     }
 
     @Generated("com.palantir.conjure.java.types.EnumGenerator")
     public interface Visitor<T> {
-        T visitValue();
+        T visitIncomplete();
+
+        T visitCompleted();
 
         T visitUnknown(String unknownValue);
 
-        static <T> ValueStageVisitorBuilder<T> builder() {
+        static <T> IncompleteStageVisitorBuilder<T> builder() {
             return new VisitorBuilder<T>();
         }
     }
 
     private static final class VisitorBuilder<T>
-            implements ValueStageVisitorBuilder<T>, UnknownStageVisitorBuilder<T>, Completed_StageVisitorBuilder<T> {
-        private Supplier<T> valueVisitor;
+            implements IncompleteStageVisitorBuilder<T>,
+                    CompletedStageVisitorBuilder<T>,
+                    UnknownStageVisitorBuilder<T>,
+                    Completed_StageVisitorBuilder<T> {
+        private Supplier<T> incompleteVisitor;
+
+        private Supplier<T> completedVisitor;
 
         private Function<@Safe String, T> unknownVisitor;
 
         @Override
-        public UnknownStageVisitorBuilder<T> visitValue(@Nonnull Supplier<T> valueVisitor) {
-            Preconditions.checkNotNull(valueVisitor, "valueVisitor cannot be null");
-            this.valueVisitor = valueVisitor;
+        public CompletedStageVisitorBuilder<T> visitIncomplete(@Nonnull Supplier<T> incompleteVisitor) {
+            Preconditions.checkNotNull(incompleteVisitor, "incompleteVisitor cannot be null");
+            this.incompleteVisitor = incompleteVisitor;
+            return this;
+        }
+
+        @Override
+        public UnknownStageVisitorBuilder<T> visitCompleted(@Nonnull Supplier<T> completedVisitor) {
+            Preconditions.checkNotNull(completedVisitor, "completedVisitor cannot be null");
+            this.completedVisitor = completedVisitor;
             return this;
         }
 
@@ -134,19 +157,25 @@ public final class SimpleEnum {
         public Completed_StageVisitorBuilder<T> throwOnUnknown() {
             this.unknownVisitor = unknownType -> {
                 throw new SafeIllegalArgumentException(
-                        "Unknown variant of the 'SimpleEnum' union", SafeArg.of("unknownType", unknownType));
+                        "Unknown variant of the 'EnumNameTestExample' union", SafeArg.of("unknownType", unknownType));
             };
             return this;
         }
 
         @Override
         public Visitor<T> build() {
-            final Supplier<T> valueVisitor = this.valueVisitor;
+            final Supplier<T> incompleteVisitor = this.incompleteVisitor;
+            final Supplier<T> completedVisitor = this.completedVisitor;
             final Function<@Safe String, T> unknownVisitor = this.unknownVisitor;
             return new Visitor<T>() {
                 @Override
-                public T visitValue() {
-                    return valueVisitor.get();
+                public T visitIncomplete() {
+                    return incompleteVisitor.get();
+                }
+
+                @Override
+                public T visitCompleted() {
+                    return completedVisitor.get();
                 }
 
                 @Override
@@ -157,8 +186,12 @@ public final class SimpleEnum {
         }
     }
 
-    public interface ValueStageVisitorBuilder<T> {
-        UnknownStageVisitorBuilder<T> visitValue(@Nonnull Supplier<T> valueVisitor);
+    public interface IncompleteStageVisitorBuilder<T> {
+        CompletedStageVisitorBuilder<T> visitIncomplete(@Nonnull Supplier<T> incompleteVisitor);
+    }
+
+    public interface CompletedStageVisitorBuilder<T> {
+        UnknownStageVisitorBuilder<T> visitCompleted(@Nonnull Supplier<T> completedVisitor);
     }
 
     public interface UnknownStageVisitorBuilder<T> {

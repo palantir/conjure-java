@@ -89,6 +89,10 @@ types:
           items: map<string, string>
           optionalItems: map<string, optional<string>>
           aliasOptionalItems: map<string, OptionalAlias>
+      EnumNameTestExample:
+        values:
+          - INCOMPLETE
+          - COMPLETED
       EnumExample:
         docs: |
           This enumerates the numbers 1:2 also 100.
