@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -180,5 +181,30 @@ public final class BytesTests {
     public void testSerDe_cannotMapEmptyArray() {
         ObjectMapper mapper = new ObjectMapper();
         assertThatThrownBy(() -> mapper.readValue("[]", Bytes.class)).isInstanceOf(JsonParseException.class);
+    }
+
+    @Test
+    public void testUnsignedComparator() {
+        Comparator<Bytes> comparator = Bytes.unsigned();
+        assertThat(Bytes.from(new byte[] {1})).usingComparator(comparator).isEqualTo(Bytes.from(new byte[] {1}));
+        assertThat(Bytes.from(new byte[] {-1})).usingComparator(comparator).isEqualTo(Bytes.from(new byte[] {-1}));
+        checkComparator(comparator, Bytes.from(new byte[] {-1, 0, 1}), Bytes.from(new byte[] {-1, 0, 2}));
+        checkComparator(comparator, Bytes.from(new byte[] {1, 0, 1}), Bytes.from(new byte[] {-1, 0, 1}));
+    }
+
+    @Test
+    public void testSignedComparator() {
+        Comparator<Bytes> comparator = Bytes.signed();
+        assertThat(Bytes.from(new byte[] {1})).usingComparator(comparator).isEqualTo(Bytes.from(new byte[] {1}));
+        assertThat(Bytes.from(new byte[] {-1})).usingComparator(comparator).isEqualTo(Bytes.from(new byte[] {-1}));
+        checkComparator(comparator, Bytes.from(new byte[] {-1, 0, 1}), Bytes.from(new byte[] {-1, 0, 2}));
+        checkComparator(comparator, Bytes.from(new byte[] {-1, 0, 1}), Bytes.from(new byte[] {1, 0, 1}));
+    }
+
+    private static void checkComparator(Comparator<Bytes> comparator, Bytes lesser, Bytes greater) {
+        assertThat(comparator.compare(lesser, lesser)).isZero();
+        assertThat(comparator.compare(lesser, greater)).isLessThan(0);
+        assertThat(comparator.compare(greater, lesser)).isGreaterThan(0);
+        assertThat(comparator.compare(greater, greater)).isZero();
     }
 }

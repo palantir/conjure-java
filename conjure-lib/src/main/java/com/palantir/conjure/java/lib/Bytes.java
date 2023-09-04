@@ -24,11 +24,14 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.primitives.SignedBytes;
+import com.google.common.primitives.UnsignedBytes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Comparator;
 
 /** An immutable {@code byte[]} wrapper. */
 @JsonSerialize(using = Bytes.Serializer.class)
@@ -112,6 +115,14 @@ public final class Bytes {
         local.get(safe);
 
         return new Bytes(safe);
+    }
+
+    public static Comparator<Bytes> signed() {
+        return (x, y) -> SignedBytes.lexicographicalComparator().compare(x.safe, y.safe);
+    }
+
+    public static Comparator<Bytes> unsigned() {
+        return (x, y) -> UnsignedBytes.lexicographicalComparator().compare(x.safe, y.safe);
     }
 
     static final class Serializer extends JsonSerializer<Bytes> {
