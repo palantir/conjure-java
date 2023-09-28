@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: The `@Incubating` annotation is no longer applied to server interfaces.
+  links:
+  - https://github.com/palantir/conjure-java/pull/2108
