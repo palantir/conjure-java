@@ -79,13 +79,6 @@ public final class ConjureAnnotations {
                 .build();
     }
 
-    public static ImmutableList<AnnotationSpec> incubating(EndpointDefinition definition) {
-        if (definition.getTags().contains("incubating")) {
-            return INCUBATING;
-        }
-        return ImmutableList.of();
-    }
-
     public static ImmutableList<AnnotationSpec> safety(Optional<LogSafety> value) {
         return value.map(safety -> {
                     switch (safety.get()) {
