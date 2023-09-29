@@ -119,10 +119,10 @@ public enum ConjureExceptions implements ExceptionHandler {
     }
 
     // RemoteExceptions are thrown by Conjure clients to indicate a remote/service-side problem.
-    // We forward these exceptions, but change the ErrorType to INTERNAL unless it was a 403, i.e., the problem is now
-    // considered internal to *this* service rather than the originating service. This means in particular
-    // that Conjure errors are defined only local to a given service and these error types don't
-    // propagate through other services.
+    // We forward these exceptions, but change the ErrorType to INTERNAL unless it was a 401 or 403, i.e.,
+    // the problem is now considered internal to *this* service rather than the originating service.
+    // This means in particular that Conjure errors are defined only local to a given service and these
+    // error types don't propagate through other services.
     private static void remoteException(HttpServerExchange exchange, RemoteException remoteException) {
         if (remoteException.getStatus() == 401 || remoteException.getStatus() == 403) {
             log.info(
