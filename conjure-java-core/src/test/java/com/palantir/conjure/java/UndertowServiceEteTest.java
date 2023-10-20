@@ -429,6 +429,12 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void testRegexPath() {
+        assertThat(client.pathParamRegex(AuthHeader.valueOf("bearer"), "foo", "bar", "baz"))
+                .isEqualTo("foo,bar,baz");
+    }
+
+    @Test
     public void testBinaryOptionalEmptyResponse() {
         Optional<ResponseBody> response =
                 Futures.getUnchecked(binaryClient.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")));

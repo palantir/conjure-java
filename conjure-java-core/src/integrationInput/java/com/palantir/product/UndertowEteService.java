@@ -89,6 +89,11 @@ public interface UndertowEteService {
     long externalLongPath(AuthHeader authHeader, long param);
 
     /**
+     * @apiNote {@code GET /base/path/{paramOne}/{paramTwo:.+}/{paramThree:.*}}
+     */
+    String pathParamRegex(AuthHeader authHeader, String paramOne, String paramTwo, String paramThree);
+
+    /**
      * @apiNote {@code GET /base/optionalExternalLong}
      */
     Optional<Long> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param);
