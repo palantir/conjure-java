@@ -728,7 +728,7 @@ public final class EteServiceEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/base/path/{paramOne}/{paramTwo:.+}/{paramThree:.*}";
+            return "/base/path/{paramOne}/{paramTwo}/{paramThree}";
         }
 
         @Override
