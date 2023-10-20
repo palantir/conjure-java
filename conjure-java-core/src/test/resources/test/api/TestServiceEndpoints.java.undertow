@@ -668,7 +668,7 @@ public final class TestServiceEndpoints implements UndertowService {
 
         @Override
         public String template() {
-            return "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve";
+            return "/catalog/datasets/{datasetRid}/branches/{branch}/resolve";
         }
 
         @Override

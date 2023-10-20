@@ -126,6 +126,12 @@ public interface EteServiceBlocking {
     long externalLongPath(AuthHeader authHeader, long param);
 
     /**
+     * @apiNote {@code GET /base/path/{paramOne}/{paramTwo:.+}/{paramThree:.*}}
+     */
+    @ClientEndpoint(method = "GET", path = "/base/path/{paramOne}/{paramTwo:.+}/{paramThree:.*}")
+    String pathParamRegex(AuthHeader authHeader, String paramOne, String paramTwo, String paramThree);
+
+    /**
      * @apiNote {@code GET /base/optionalExternalLong}
      */
     @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
@@ -315,6 +321,12 @@ public interface EteServiceBlocking {
 
             private final Deserializer<Long> externalLongPathDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Long>() {});
+
+            private final EndpointChannel pathParamRegexChannel =
+                    _endpointChannelFactory.endpoint(DialogueEteEndpoints.pathParamRegex);
+
+            private final Deserializer<String> pathParamRegexDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<String>() {});
 
             private final EndpointChannel optionalExternalLongQueryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteEndpoints.optionalExternalLongQuery);
@@ -540,6 +552,17 @@ public interface EteServiceBlocking {
                 _request.putPathParams("param", Objects.toString(param));
                 return _runtime.clients()
                         .callBlocking(externalLongPathChannel, _request.build(), externalLongPathDeserializer);
+            }
+
+            @Override
+            public String pathParamRegex(AuthHeader authHeader, String paramOne, String paramTwo, String paramThree) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("paramOne", _plainSerDe.serializeString(paramOne));
+                _request.putPathParams("paramTwo", _plainSerDe.serializeString(paramTwo));
+                _request.putPathParams("paramThree", _plainSerDe.serializeString(paramThree));
+                return _runtime.clients()
+                        .callBlocking(pathParamRegexChannel, _request.build(), pathParamRegexDeserializer);
             }
 
             @Override

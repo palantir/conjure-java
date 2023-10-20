@@ -59,6 +59,7 @@ public final class EteServiceEndpoints implements UndertowService {
                 new BinaryEndpoint(runtime, delegate),
                 new PathEndpoint(runtime, delegate),
                 new ExternalLongPathEndpoint(runtime, delegate),
+                new PathParamRegexEndpoint(runtime, delegate),
                 new OptionalExternalLongQueryEndpoint(runtime, delegate),
                 new NotNullBodyEndpoint(runtime, delegate),
                 new AliasOneEndpoint(runtime, delegate),
@@ -687,6 +688,57 @@ public final class EteServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "externalLongPath";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class PathParamRegexEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final UndertowEteService delegate;
+
+        private final Serializer<String> serializer;
+
+        PathParamRegexEndpoint(UndertowRuntime runtime, UndertowEteService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<String>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            Map<String, String> pathParams =
+                    exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).getParameters();
+            String paramOne = runtime.plainSerDe().deserializeString(pathParams.get("paramOne"));
+            String paramTwo = runtime.plainSerDe().deserializeString(pathParams.get("paramTwo"));
+            String paramThree = runtime.plainSerDe().deserializeString(pathParams.get("paramThree"));
+            String result = delegate.pathParamRegex(authHeader, paramOne, paramTwo, paramThree);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/base/path/{paramOne}/{paramTwo}/{paramThree}";
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String name() {
+            return "pathParamRegex";
         }
 
         @Override

@@ -105,6 +105,11 @@ public class EteResource implements EteService {
     }
 
     @Override
+    public String pathParamRegex(AuthHeader authHeader, String paramOne, String paramTwo, String paramThree) {
+        return paramOne + "," + paramTwo + "," + paramThree;
+    }
+
+    @Override
     public Optional<Long> optionalExternalLongQuery(AuthHeader _authHeader, Optional<Long> param) {
         return param;
     }
