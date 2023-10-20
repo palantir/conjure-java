@@ -18,6 +18,7 @@ package com.palantir.conjure.java.undertow.runtime;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -90,6 +91,12 @@ public final class Encodings {
                     // validation (setter null checks) fail in our objects.
                     throw FrameworkException.unprocessableEntity(
                             "Failed to deserialize request",
+                            e,
+                            SafeArg.of("contentType", getContentType()),
+                            SafeArg.of("type", type));
+                } catch (StreamConstraintsException e) {
+                    throw FrameworkException.unprocessableEntity(
+                            "Stream constraint violation deserializing request",
                             e,
                             SafeArg.of("contentType", getContentType()),
                             SafeArg.of("type", type));

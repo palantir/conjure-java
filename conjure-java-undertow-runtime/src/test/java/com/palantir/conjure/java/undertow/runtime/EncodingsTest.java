@@ -157,6 +157,34 @@ final class EncodingsTest {
     }
 
     @Test
+    @SuppressWarnings("InputStreamSlowMultibyteRead")
+    void json_deserialize_largeStringsExceedConstraints() {
+        int length = 100 * 1024 * 1024;
+        InputStream jsonStringStream = new InputStream() {
+            int position = 0;
+
+            // test code
+            @Override
+            public int read() {
+                if (position == 0 || position == length + 1) {
+                    position++;
+                    return 0x22; // "
+                }
+                if (position <= length) {
+                    position++;
+                    return 0x30; // 0
+                }
+                return -1; // EOF
+            }
+        };
+        assertThatThrownBy(() -> deserialize(jsonStringStream, new TypeMarker<String>() {}))
+                .isInstanceOfSatisfying(FrameworkException.class, frameworkException -> assertThat(frameworkException)
+                        .hasMessageContaining("Stream constraint violation")
+                        .extracting(FrameworkException::getStatusCode)
+                        .isEqualTo(422));
+    }
+
+    @Test
     void cbor_supportsContentType() {
         assertThat(cbor.supportsContentType("application/cbor")).isTrue();
         assertThat(cbor.supportsContentType("application/cbor; charset=utf-8")).isTrue();
