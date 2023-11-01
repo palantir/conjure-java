@@ -220,21 +220,6 @@ public interface EteServiceRetrofit {
 }
 ```
 
-### Retrofit2 clients
-
-Use [conjure-java-runtime's `Retrofit2Client`](https://github.com/palantir/conjure-java-runtime#conjure-java-retrofit2-client) which configures Retrofit2 with sensible defaults:
-
-
-```java
-RecipeBookServiceRetrofit recipes = Retrofit2Client.create(
-            RecipeBookServiceRetrofit.class,
-            userAgent,
-            hostMetrics,
-            clientConfiguration);
-
-Call<List<Recipe>> asyncResults = recipes.getRecipes();
-```
-
 ## Undertow
 
 In the undertow setting, for a `ServiceName` conjure defined service, conjure will generate an interface: `ServiceName` to be extended by your resource and an [UndertowService](https://github.com/palantir/conjure-java/blob/develop/conjure-undertow-lib/src/main/java/com/palantir/conjure/java/undertow/lib/UndertowService.java) named `ServiceNameEndpoints`

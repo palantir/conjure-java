@@ -23,19 +23,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
-import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.product.EmptyPathService;
-import com.palantir.product.EteBinaryServiceRetrofit;
-import com.palantir.product.EteService;
+import com.palantir.product.EteBinaryServiceBlocking;
+import com.palantir.product.EteServiceBlocking;
 import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
@@ -45,6 +44,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -56,7 +56,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -75,16 +74,15 @@ public final class JerseyServiceEteTest extends TestBase {
     @TempDir
     public static File folder;
 
+    // Has a side effect that is necessary for this test, even though it looks unused
     public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(EteTestServer.class);
 
-    private final EteService client;
-    private final EteBinaryServiceRetrofit binary;
+    private final EteServiceBlocking client;
+    private final EteBinaryServiceBlocking binaryClient;
 
     public JerseyServiceEteTest() {
-        client = JaxRsClient.create(
-                EteService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        binary = Retrofit2Client.create(
-                EteBinaryServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+        this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration());
+        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration());
     }
 
     @Test
@@ -164,16 +162,15 @@ public final class JerseyServiceEteTest extends TestBase {
 
     @Test
     public void test_optionalBinary_present() throws IOException {
-        Optional<ResponseBody> response =
-                Futures.getUnchecked(binary.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")));
+        Optional<InputStream> response = binaryClient.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader"));
         assertThat(response).isPresent();
-        assertThat(response.get().string()).isEqualTo("Hello World!");
+        assertThat(new String(response.get().readAllBytes(), StandardCharsets.UTF_8))
+                .isEqualTo("Hello World!");
     }
 
     @Test
     public void test_optionalBinary_empty() throws IOException {
-        Optional<ResponseBody> response =
-                Futures.getUnchecked(binary.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")));
+        Optional<InputStream> response = binaryClient.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader"));
         assertThat(response).isNotPresent();
     }
 

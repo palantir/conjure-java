@@ -25,9 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.stefanbirkner.systemlambda.SystemLambda;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -35,7 +33,6 @@ import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
-import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
@@ -43,13 +40,14 @@ import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
 import com.palantir.conjure.java.undertow.runtime.ConjureHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
+import com.palantir.dialogue.BinaryRequestBody;
+import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
+import com.palantir.product.EteBinaryServiceBlocking;
 import com.palantir.product.EteBinaryServiceEndpoints;
-import com.palantir.product.EteBinaryServiceRetrofit;
-import com.palantir.product.EteService;
+import com.palantir.product.EteServiceBlocking;
 import com.palantir.product.EteServiceEndpoints;
-import com.palantir.product.EteServiceRetrofit;
 import com.palantir.product.NestedStringAliasExample;
 import com.palantir.product.SimpleEnum;
 import com.palantir.product.StringAliasExample;
@@ -59,6 +57,7 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -78,10 +77,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import okio.BufferedSink;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -101,19 +96,13 @@ public final class UndertowServiceEteTest extends TestBase {
 
     private static Undertow server;
 
-    private final EteService client;
+    private final EteServiceBlocking client;
 
-    private final EteServiceRetrofit retrofitClient;
-
-    private final EteBinaryServiceRetrofit binaryClient;
+    private final EteBinaryServiceBlocking binaryClient;
 
     public UndertowServiceEteTest() {
-        client = JaxRsClient.create(
-                EteService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        retrofitClient = Retrofit2Client.create(
-                EteServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
-        binaryClient = Retrofit2Client.create(
-                EteBinaryServiceRetrofit.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+        this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration());
+        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration());
     }
 
     @BeforeAll
@@ -185,8 +174,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void optional_empty_from_a_server_has_empty_status() {
-        assertThat(Futures.getUnchecked(retrofitClient.optionalEmpty(AuthHeader.valueOf("authHeader"))))
-                .isEmpty();
+        assertThat(client.optionalEmpty(AuthHeader.valueOf("authHeader"))).isEmpty();
     }
 
     @Test
@@ -286,15 +274,12 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    @SuppressWarnings("MustBeClosedChecker")
     public void testBinaryPost() throws Exception {
         byte[] expected = "Hello, World".getBytes(StandardCharsets.UTF_8);
-        ResponseBody response = binaryClient
-                .postBinary(
-                        AuthHeader.valueOf("authHeader"),
-                        RequestBody.create(MediaType.parse("application/octet-stream"), expected))
-                .get();
-        assertThat(response.contentType()).isEqualTo(MediaType.parse("application/octet-stream"));
-        assertThat(response.bytes()).isEqualTo(expected);
+        InputStream response = binaryClient.postBinary(
+                AuthHeader.valueOf("authHeader"), BinaryRequestBody.of(new ByteArrayInputStream(expected)));
+        assertThat(response.readAllBytes()).isEqualTo(expected);
     }
 
     @Test
@@ -390,74 +375,56 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    public void testUnknownContentType() {
-        assertThatThrownBy(() -> {
-                    try {
-                        Futures.getUnchecked(binaryClient.postBinary(
-                                AuthHeader.valueOf("authHeader"),
-                                RequestBody.create(MediaType.parse("application/unsupported"), new byte[] {1, 2, 3})));
-                    } catch (UncheckedExecutionException e) {
-                        throw e.getCause();
-                    }
-                })
-                .isInstanceOf(RemoteException.class)
-                .hasMessageContaining("INVALID_ARGUMENT");
-    }
-
-    @Test
     public void testSlashesInPathParam() {
         String expected = "foo/bar/baz/%2F";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(Futures.getUnchecked(retrofitClient.path(AuthHeader.valueOf("bearer"), expected)))
-                .isEqualTo(expected);
+        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
     }
 
     @Test
     public void testPlusInPathParam() {
         String expected = "foo+bar";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(Futures.getUnchecked(retrofitClient.path(AuthHeader.valueOf("bearer"), expected)))
-                .isEqualTo(expected);
+        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
     }
 
     @Test
     public void testSpaceInPathParam() {
         String expected = "foo bar";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(Futures.getUnchecked(retrofitClient.path(AuthHeader.valueOf("bearer"), expected)))
-                .isEqualTo(expected);
+        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
     }
 
     @Test
     public void testBinaryOptionalEmptyResponse() {
-        Optional<ResponseBody> response =
-                Futures.getUnchecked(binaryClient.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader")));
+        Optional<InputStream> response = binaryClient.getOptionalBinaryEmpty(AuthHeader.valueOf("authHeader"));
         assertThat(response).isNotPresent();
     }
 
     @Test
     public void testBinaryOptionalPresentResponse() throws Exception {
-        Optional<ResponseBody> response =
-                Futures.getUnchecked(binaryClient.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader")));
+        Optional<InputStream> response = binaryClient.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader"));
         assertThat(response).isPresent();
-        assertThat(response.get().string()).isEqualTo("Hello World!");
+        assertThat(new String(response.get().readAllBytes(), StandardCharsets.UTF_8))
+                .isEqualTo("Hello World!");
     }
 
     @Test
+    @SuppressWarnings("MustBeClosedChecker")
     public void testBinaryServerSideFailureAfterManyBytesSent() {
-        ResponseBody response = Futures.getUnchecked(binaryClient.getBinaryFailure(
+        InputStream response = binaryClient.getBinaryFailure(
                 AuthHeader.valueOf("authHeader"),
                 // Write more bytes than one buffer
-                20000));
-        assertThatThrownBy(() -> response.byteStream().transferTo(ByteStreams.nullOutputStream()))
-                .isInstanceOf(IOException.class);
+                20000);
+        assertThatThrownBy(response::readAllBytes).isInstanceOf(IOException.class);
     }
 
     @Test
+    @SuppressWarnings("MustBeClosedChecker")
     public void testBinaryServerSideFailureAfterFewBytesSent() {
         assertThatThrownBy(() -> {
                     try {
-                        Futures.getUnchecked(binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1));
+                        binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1);
                     } catch (UncheckedExecutionException e) {
                         throw e.getCause();
                     }
@@ -470,38 +437,22 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testBinaryServerSideFailureAfterFewBytesReceived() {
         byte[] data = new byte[1024];
         ThreadLocalRandom.current().nextBytes(data);
-        assertThatThrownBy(() -> {
-                    try {
-                        Futures.getUnchecked(binaryClient.postBinaryThrows(
-                                AuthHeader.valueOf("authHeader"), 1024 * 1024, new RequestBody() {
-                                    @Override
-                                    public MediaType contentType() {
-                                        return MediaType.get("application/octet-stream");
-                                    }
-
-                                    @Override
-                                    public void writeTo(BufferedSink sink) throws IOException {
-                                        // 1gb
-                                        for (int i = 0; i < 1024 * 1024; i++) {
-                                            sink.write(data);
-                                        }
-                                    }
-                                }));
-                    } catch (UncheckedExecutionException e) {
-                        throw e.getCause();
-                    }
-                })
+        assertThatThrownBy(() -> binaryClient.postBinaryThrows(
+                        AuthHeader.valueOf("authHeader"),
+                        1024 * 1024,
+                        BinaryRequestBody.of(new ByteArrayInputStream(data))))
                 .isInstanceOfSatisfying(
                         RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
     }
 
     @Test
     @Timeout(20)
+    @SuppressWarnings("MustBeClosedChecker")
     public void testBinaryResponseClientDisconnect() throws Exception {
         String output = SystemLambda.tapSystemErrAndOut(() -> {
             binaryClient
                     .getBinaryFailure(AuthHeader.valueOf("authHeader"), Integer.MAX_VALUE)
-                    .get()
+                    // Closing the stream triggers the conditions for this test to pass
                     .close();
             // Unfortunately there's no great way to tell when the server has finished processing
             // our request.
