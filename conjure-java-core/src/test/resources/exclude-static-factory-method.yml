@@ -1,0 +1,8 @@
+types:
+  definitions:
+    default-package: com.palantir.product
+    objects:
+      TestObject:
+        fields:
+          myRequiredField: string
+          myOptionalField: optional<string>

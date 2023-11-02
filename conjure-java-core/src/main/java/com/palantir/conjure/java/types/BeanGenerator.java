@@ -78,6 +78,7 @@ public final class BeanGenerator {
     /** The name of the singleton instance field generated for empty types. */
     private static final String SINGLETON_INSTANCE_NAME = "INSTANCE";
 
+    @SuppressWarnings("CyclomaticComplexity")
     public static JavaFile generateBeanType(
             TypeMapper typeMapper,
             SafetyEvaluator safetyEvaluator,
@@ -126,7 +127,7 @@ public final class BeanGenerator {
                 .addAnnotations(safety)
                 .build());
 
-        if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY) {
+        if (poetFields.size() <= MAX_NUM_PARAMS_FOR_FACTORY && !options.excludeStaticFactoryMethod()) {
             typeBuilder.addMethod(createStaticFactoryMethod(
                     fields,
                     objectClass,

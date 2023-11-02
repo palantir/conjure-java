@@ -225,6 +225,15 @@ public final class ConjureJavaCli implements Runnable {
         private boolean excludeEmptyCollections;
 
         @CommandLine.Option(
+                names = "--excludeStaticFactoryMethod",
+                defaultValue = "false",
+                description =
+                        "Instructs the object generator to omit the static factory methods.  These methods (named "
+                                + "\"of\") make all arguments mandatory, including optionals, and are problematic for "
+                                + "projects attempting to maintain a more stable API/ABI.")
+        private boolean excludeStaticFactoryMethod;
+
+        @CommandLine.Option(
                 names = "--unionsWithUnknownValues",
                 defaultValue = "false",
                 description = "Union visitors expose the values of unknowns in addition to their types.")
@@ -301,6 +310,7 @@ public final class ConjureJavaCli implements Runnable {
                             .excludeEmptyOptionals(excludeEmptyOptionals)
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
+                            .excludeStaticFactoryMethod(excludeStaticFactoryMethod)
                             .build())
                     .build();
         }

@@ -163,6 +163,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * Instructs the object generator to omit the static factory methods.  These methods (named "of") make all arguments
+     * mandatory, including optionals, and are problematic for projects attempting to maintain a more stable API/ABI.
+     */
+    @Value.Default
+    default boolean excludeStaticFactoryMethod() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();
