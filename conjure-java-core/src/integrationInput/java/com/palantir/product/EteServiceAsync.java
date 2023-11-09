@@ -247,8 +247,6 @@ public interface EteServiceAsync {
      */
     static EteServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteServiceAsync() {
-            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
-
             private final EndpointChannel stringChannel = _endpointChannelFactory.endpoint(DialogueEteEndpoints.string);
 
             private final Deserializer<String> stringDeserializer =
@@ -445,6 +443,8 @@ public interface EteServiceAsync {
 
             private final Deserializer<Void> receiveListOfStringsDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             @Override
             public ListenableFuture<String> string(AuthHeader authHeader) {

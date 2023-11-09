@@ -10,7 +10,6 @@ import com.palantir.dialogue.DialogueServiceFactory;
 import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.EndpointChannelFactory;
-import com.palantir.dialogue.PlainSerDe;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.TypeMarker;
 import java.lang.Boolean;
@@ -32,8 +31,6 @@ public interface EmptyPathServiceAsync {
      */
     static EmptyPathServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EmptyPathServiceAsync() {
-            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
-
             private final EndpointChannel emptyPathChannel =
                     _endpointChannelFactory.endpoint(DialogueEmptyPathEndpoints.emptyPath);
 

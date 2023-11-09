@@ -32,13 +32,13 @@ public interface CookieServiceAsync {
      */
     static CookieServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceAsync() {
-            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
-
             private final EndpointChannel eatCookiesChannel =
                     _endpointChannelFactory.endpoint(DialogueCookieEndpoints.eatCookies);
 
             private final Deserializer<Void> eatCookiesDeserializer =
                     _runtime.bodySerDe().emptyBodyDeserializer();
+
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             @Override
             public ListenableFuture<Void> eatCookies(BearerToken token) {

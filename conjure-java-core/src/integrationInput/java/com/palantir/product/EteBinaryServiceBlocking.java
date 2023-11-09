@@ -67,8 +67,6 @@ public interface EteBinaryServiceBlocking {
      */
     static EteBinaryServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteBinaryServiceBlocking() {
-            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
-
             private final EndpointChannel postBinaryChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.postBinary);
 
@@ -86,6 +84,8 @@ public interface EteBinaryServiceBlocking {
 
             private final EndpointChannel getAliasedChannel =
                     _endpointChannelFactory.endpoint(DialogueEteBinaryEndpoints.getAliased);
+
+            private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
 
             @Override
             public InputStream postBinary(AuthHeader authHeader, BinaryRequestBody body) {

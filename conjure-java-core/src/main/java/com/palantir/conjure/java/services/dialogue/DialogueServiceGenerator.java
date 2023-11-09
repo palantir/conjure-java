@@ -67,24 +67,25 @@ public final class DialogueServiceGenerator implements Generator {
         TypeNameResolver typeNameResolver = typeName -> Preconditions.checkNotNull(
                 types.get(typeName), "Referenced unknown TypeName", SafeArg.of("typeName", typeName));
 
-        StaticFactoryMethodGenerator asyncGenerator = new DefaultStaticFactoryMethodGenerator(
-                options,
-                typeNameResolver,
-                parameterMapper,
-                new ReturnTypeMapper(returnTypes),
-                StaticFactoryMethodType.ASYNC);
+        return conjureDefinition.getServices().stream().flatMap(serviceDef -> {
+            StaticFactoryMethodGenerator asyncGenerator = new DefaultStaticFactoryMethodGenerator(
+                    options,
+                    typeNameResolver,
+                    parameterMapper,
+                    new ReturnTypeMapper(returnTypes),
+                    StaticFactoryMethodType.ASYNC);
 
-        StaticFactoryMethodGenerator blockingGenerator = new DefaultStaticFactoryMethodGenerator(
-                options,
-                typeNameResolver,
-                parameterMapper,
-                new ReturnTypeMapper(returnTypes),
-                StaticFactoryMethodType.BLOCKING);
+            StaticFactoryMethodGenerator blockingGenerator = new DefaultStaticFactoryMethodGenerator(
+                    options,
+                    typeNameResolver,
+                    parameterMapper,
+                    new ReturnTypeMapper(returnTypes),
+                    StaticFactoryMethodType.BLOCKING);
 
-        return conjureDefinition.getServices().stream()
-                .flatMap(serviceDef -> Stream.of(
-                        endpoints.endpointsClass(serviceDef),
-                        interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
-                        interfaceGenerator.generateAsync(serviceDef, asyncGenerator)));
+            return Stream.of(
+                    endpoints.endpointsClass(serviceDef),
+                    interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
+                    interfaceGenerator.generateAsync(serviceDef, asyncGenerator));
+        });
     }
 }
