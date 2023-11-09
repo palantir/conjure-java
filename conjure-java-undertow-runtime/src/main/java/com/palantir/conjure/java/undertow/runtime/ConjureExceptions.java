@@ -176,7 +176,7 @@ public enum ConjureExceptions implements ExceptionHandler {
     private static void error(HttpServerExchange exchange, Error error) {
         // log errors in order to associate the log line with the correct traceId but
         // avoid doing work beyond setting a 500 response code, no response body is sent.
-        log.error("Error handling request", error);
+        log.error("Error thrown while handling request", error);
         // The writeResponse method terminates responses if data has already been sent to clients
         // do not interpret partial data as a full response.
         writeResponse(exchange, Optional.empty(), ErrorType.INTERNAL.httpErrorCode());
@@ -220,13 +220,13 @@ public enum ConjureExceptions implements ExceptionHandler {
     private static void log(ServiceException serviceException, Throwable exceptionForLogging) {
         if (serviceException.getErrorType().httpErrorCode() / 100 == 4 /* client error */) {
             log.info(
-                    "Error handling request",
+                    "ServiceException thrown while handling request",
                     SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
                     SafeArg.of("errorName", serviceException.getErrorType().name()),
                     exceptionForLogging);
         } else {
             log.error(
-                    "Error handling request",
+                    "ServiceException thrown while handling request",
                     SafeArg.of("errorInstanceId", serviceException.getErrorInstanceId()),
                     SafeArg.of("errorName", serviceException.getErrorType().name()),
                     exceptionForLogging);
