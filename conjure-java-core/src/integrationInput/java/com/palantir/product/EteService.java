@@ -112,6 +112,15 @@ public interface EteService {
     long externalLongPath(@HeaderParam("Authorization") @NotNull AuthHeader authHeader, @PathParam("param") long param);
 
     @GET
+    @Path("base/path/{paramOne}/{paramTwo:.+}/{paramThree:.*}")
+    @ClientEndpoint(method = "GET", path = "/base/path/{paramOne}/{paramTwo:.+}/{paramThree:.*}")
+    String pathParamRegex(
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @PathParam("paramOne") String paramOne,
+            @PathParam("paramTwo") String paramTwo,
+            @PathParam("paramThree") String paramThree);
+
+    @GET
     @Path("base/optionalExternalLong")
     @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
     Optional<Long> optionalExternalLongQuery(

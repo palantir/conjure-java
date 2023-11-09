@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.services;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -53,6 +54,7 @@ import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.EndpointName;
 import com.palantir.conjure.spec.ExternalReference;
 import com.palantir.conjure.spec.HeaderAuthType;
+import com.palantir.conjure.spec.HttpPath;
 import com.palantir.conjure.spec.ListType;
 import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.OptionalType;
@@ -95,10 +97,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.lang.model.element.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
 final class UndertowServiceHandlerGenerator {
+
+    private static final Pattern REGEX_PATH_TEMPLATES =
+            Pattern.compile("\\{([a-zA-Z0-9]+)" + "(" + Pattern.quote(":.+") + "|" + Pattern.quote(":.*") + ")" + "}");
 
     private static final String EXCHANGE_VAR_NAME = "exchange";
     private static final String DELEGATE_VAR_NAME = "delegate";
@@ -329,7 +336,7 @@ final class UndertowServiceHandlerGenerator {
                         .addModifiers(Modifier.PUBLIC)
                         .addAnnotation(Override.class)
                         .returns(String.class)
-                        .addStatement("return $1S", endpointDefinition.getHttpPath())
+                        .addStatement("return $1S", normalizeHttpPathTemplates(endpointDefinition.getHttpPath()))
                         .build())
                 .addMethod(MethodSpec.methodBuilder("serviceName")
                         .addModifiers(Modifier.PUBLIC)
@@ -1167,5 +1174,18 @@ final class UndertowServiceHandlerGenerator {
             return sanitizeVarName(value + "_", endpoint, evaluator);
         }
         return value;
+    }
+
+    /**
+     * The Conjure spec allows for regex path param validations ("{param:.+}" and "{param:.*}"), however Undertow does
+     * not support these for path templates. Based on that, we strip these validation regexes from the http path
+     * template.
+     * @see "https://github.com/palantir/conjure-java/pull/2119"
+     */
+    @VisibleForTesting
+    static HttpPath normalizeHttpPathTemplates(HttpPath httpPath) {
+        Matcher matcher = REGEX_PATH_TEMPLATES.matcher(httpPath.get());
+        String normalized = matcher.replaceAll("{$1}");
+        return HttpPath.of(normalized);
     }
 }

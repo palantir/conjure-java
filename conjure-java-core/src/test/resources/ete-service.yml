@@ -111,6 +111,18 @@ services:
           param: Long
         returns: Long
 
+      # The Conjure spec technically supports path params regexes even though they are unused
+      pathParamRegex:
+        http: GET /path/{paramOne}/{paramTwo:.+}/{paramThree:.*}
+        args:
+          paramOne:
+            type: string
+          paramTwo:
+            type: string
+          paramThree:
+            type: string
+        returns: string
+
       optionalExternalLongQuery:
         http: GET /optionalExternalLong
         args:

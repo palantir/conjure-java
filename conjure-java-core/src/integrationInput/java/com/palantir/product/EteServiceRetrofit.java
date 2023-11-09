@@ -107,6 +107,15 @@ public interface EteServiceRetrofit {
     @ClientEndpoint(method = "GET", path = "/base/externalLong/{param}")
     ListenableFuture<Long> externalLongPath(@Header("Authorization") AuthHeader authHeader, @Path("param") long param);
 
+    @GET("./base/path/{paramOne}/{paramTwo}/{paramThree}")
+    @Headers({"hr-path-template: /base/path/{paramOne}/{paramTwo}/{paramThree}", "Accept: application/json"})
+    @ClientEndpoint(method = "GET", path = "/base/path/{paramOne}/{paramTwo:.+}/{paramThree:.*}")
+    ListenableFuture<String> pathParamRegex(
+            @Header("Authorization") AuthHeader authHeader,
+            @Path("paramOne") String paramOne,
+            @Path(value = "paramTwo", encoded = true) String paramTwo,
+            @Path(value = "paramThree", encoded = true) String paramThree);
+
     @GET("./base/optionalExternalLong")
     @Headers({"hr-path-template: /base/optionalExternalLong", "Accept: application/json"})
     @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")

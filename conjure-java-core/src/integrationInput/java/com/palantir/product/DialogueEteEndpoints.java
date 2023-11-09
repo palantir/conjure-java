@@ -431,6 +431,41 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
+    pathParamRegex {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("base")
+                .fixed("path")
+                .variable("paramOne")
+                .variable("paramTwo")
+                .variable("paramThree")
+                .build();
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "EteService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "pathParamRegex";
+        }
+
+        @Override
+        public String version() {
+            return "1.2.3";
+        }
+    },
+
     optionalExternalLongQuery {
         private final PathTemplate pathTemplate = PathTemplate.builder()
                 .fixed("base")
