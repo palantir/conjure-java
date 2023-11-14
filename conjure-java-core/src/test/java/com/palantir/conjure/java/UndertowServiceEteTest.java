@@ -450,16 +450,20 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    @Timeout(200)
+    @Timeout(20)
     public void testBinaryServerSideFailureAfterFewBytesReceived() {
-        byte[] data = new byte[1024];
+        int chunkSize = 1024;
+        int expectedBytes = chunkSize * 1024;
+        int chunksToSend = 1024 * 16;
+
+        byte[] data = new byte[chunkSize];
         ThreadLocalRandom.current().nextBytes(data);
         assertThatThrownBy(() -> binaryClient.postBinaryThrows(
-                        AuthHeader.valueOf("authHeader"), 1024 * 1024, new BinaryRequestBody() {
+                        AuthHeader.valueOf("authHeader"), expectedBytes, new BinaryRequestBody() {
                             @Override
                             public void write(OutputStream sink) throws IOException {
                                 // 1gb
-                                for (int i = 0; i < 1024 * 1024; i++) {
+                                for (int i = 0; i < chunksToSend * chunkSize; i++) {
                                     sink.write(data);
                                 }
                             }
