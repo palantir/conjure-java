@@ -14,6 +14,11 @@
   ~ limitations under the License.
   -->
 
+<!--
+  ~ Logback is brought in by dropwizard which is necessary for some of our tests.
+  ~ Without this file it logs at debug level which is so verbose it causes this test
+  ~ to timeout.
+-->
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
