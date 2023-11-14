@@ -455,10 +455,11 @@ public final class UndertowServiceEteTest extends TestBase {
         byte[] data = new byte[1024];
         ThreadLocalRandom.current().nextBytes(data);
         assertThatThrownBy(() -> binaryClient.postBinaryThrows(
-                        AuthHeader.valueOf("authHeader"), 1024 * 2, new BinaryRequestBody() {
+                        AuthHeader.valueOf("authHeader"), 1024 * 1024, new BinaryRequestBody() {
                             @Override
                             public void write(OutputStream sink) throws IOException {
-                                for (int i = 0; i < 1024 * 1; i++) {
+                                // 1gb
+                                for (int i = 0; i < 1024 * 1024; i++) {
                                     sink.write(data);
                                 }
                             }
