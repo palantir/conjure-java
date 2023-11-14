@@ -274,12 +274,12 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    @SuppressWarnings("MustBeClosedChecker")
     public void testBinaryPost() throws Exception {
         byte[] expected = "Hello, World".getBytes(StandardCharsets.UTF_8);
-        InputStream response = binaryClient.postBinary(
-                AuthHeader.valueOf("authHeader"), BinaryRequestBody.of(new ByteArrayInputStream(expected)));
-        assertThat(response.readAllBytes()).isEqualTo(expected);
+        try (InputStream response = binaryClient.postBinary(
+                AuthHeader.valueOf("authHeader"), BinaryRequestBody.of(new ByteArrayInputStream(expected)))) {
+            assertThat(response.readAllBytes()).isEqualTo(expected);
+        }
     }
 
     @Test
@@ -375,6 +375,22 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
+    public void testUnknownContentType() throws Exception {
+        URL url = new URL("http://0.0.0.0:8080/test-example/api/binary");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/unsupported");
+        con.setRequestProperty(
+                HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
+        con.setDoOutput(true);
+        con.getOutputStream().write(new byte[] {1, 2, 3});
+        assertThat(con.getResponseCode()).isEqualTo(415);
+        SerializableError serializableError =
+                CLIENT_OBJECT_MAPPER.readValue(con.getErrorStream(), SerializableError.class);
+        assertThat(serializableError.errorCode()).isEqualTo("INVALID_ARGUMENT");
+    }
+
+    @Test
     public void testSlashesInPathParam() {
         String expected = "foo/bar/baz/%2F";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
@@ -410,21 +426,22 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    @SuppressWarnings("MustBeClosedChecker")
-    public void testBinaryServerSideFailureAfterManyBytesSent() {
-        InputStream response = binaryClient.getBinaryFailure(
+    public void testBinaryServerSideFailureAfterManyBytesSent() throws IOException {
+        try (InputStream response = binaryClient.getBinaryFailure(
                 AuthHeader.valueOf("authHeader"),
                 // Write more bytes than one buffer
-                20000);
-        assertThatThrownBy(response::readAllBytes).isInstanceOf(IOException.class);
+                20000)) {
+            assertThatThrownBy(response::readAllBytes).isInstanceOf(IOException.class);
+        }
     }
 
     @Test
-    @SuppressWarnings("MustBeClosedChecker")
     public void testBinaryServerSideFailureAfterFewBytesSent() {
         assertThatThrownBy(() -> {
                     try {
-                        binaryClient.getBinaryFailure(AuthHeader.valueOf("authHeader"), 1);
+                        binaryClient
+                                .getBinaryFailure(AuthHeader.valueOf("authHeader"), 1)
+                                .close();
                     } catch (UncheckedExecutionException e) {
                         throw e.getCause();
                     }
@@ -438,9 +455,14 @@ public final class UndertowServiceEteTest extends TestBase {
         byte[] data = new byte[1024];
         ThreadLocalRandom.current().nextBytes(data);
         assertThatThrownBy(() -> binaryClient.postBinaryThrows(
-                        AuthHeader.valueOf("authHeader"),
-                        1024 * 1024,
-                        BinaryRequestBody.of(new ByteArrayInputStream(data))))
+                        AuthHeader.valueOf("authHeader"), 1024 * 2, new BinaryRequestBody() {
+                            @Override
+                            public void write(OutputStream sink) throws IOException {
+                                for (int i = 0; i < 1024 * 1; i++) {
+                                    sink.write(data);
+                                }
+                            }
+                        }))
                 .isInstanceOfSatisfying(
                         RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
     }
