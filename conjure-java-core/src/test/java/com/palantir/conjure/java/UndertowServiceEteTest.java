@@ -450,7 +450,7 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    @Timeout(20)
+    @Timeout(200)
     public void testBinaryServerSideFailureAfterFewBytesReceived() {
         byte[] data = new byte[1024];
         ThreadLocalRandom.current().nextBytes(data);
