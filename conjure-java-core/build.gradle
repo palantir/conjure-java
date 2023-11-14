@@ -104,7 +104,7 @@ dependencies {
     integrationInputImplementation 'com.google.errorprone:error_prone_annotations'
     integrationInputImplementation 'com.google.guava:guava'
     integrationInputImplementation 'com.palantir.conjure.java.api:errors'
-    integrationInputImplementation 'com.palantir.dialogue:dialogue-target:3.99.0'
+    integrationInputImplementation 'com.palantir.dialogue:dialogue-target:3.100.0'
     integrationInputImplementation 'com.palantir.ri:resource-identifier'
     integrationInputImplementation 'com.palantir.safe-logging:preconditions'
     integrationInputImplementation 'com.palantir.safe-logging:safe-logging'
