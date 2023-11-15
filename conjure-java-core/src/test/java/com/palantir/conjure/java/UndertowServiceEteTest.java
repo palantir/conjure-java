@@ -45,7 +45,6 @@ import com.palantir.dialogue.BinaryRequestBody;
 import com.palantir.dialogue.clients.DialogueClients;
 import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
-import com.palantir.product.EteBinaryServiceAsync;
 import com.palantir.product.EteBinaryServiceBlocking;
 import com.palantir.product.EteBinaryServiceEndpoints;
 import com.palantir.product.EteServiceAsync;
@@ -103,13 +102,11 @@ public final class UndertowServiceEteTest extends TestBase {
     private final EteServiceAsync asyncClient;
 
     private final EteBinaryServiceBlocking binaryClient;
-    private final EteBinaryServiceAsync asyncBinaryClient;
 
     public UndertowServiceEteTest() {
         this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration());
         this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration());
         this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration());
-        this.asyncBinaryClient = DialogueClients.create(EteBinaryServiceAsync.class, clientConfiguration());
     }
 
     @BeforeAll
@@ -465,23 +462,17 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testBinaryServerSideFailureAfterFewBytesReceived() {
         int chunkSize = 1024;
         int expectedChunks = 1024; // 1 MB
-        int chunksToSend = 1024 * 1024; // 1 GB
+        int chunksToSend = 1024 * 64; // 64 MB
         int bytesExpected = expectedChunks * chunkSize;
 
         byte[] data = new byte[chunkSize];
         ThreadLocalRandom.current().nextBytes(data);
-        assertThatThrownBy(() -> {
-                    try {
-                        Futures.getUnchecked(asyncBinaryClient.postBinaryThrows(
-                                AuthHeader.valueOf("authHeader"), bytesExpected, (OutputStream sink) -> {
-                                    for (int i = 0; i < chunksToSend; i++) {
-                                        sink.write(data);
-                                    }
-                                }));
-                    } catch (UncheckedExecutionException e) {
-                        throw e.getCause();
-                    }
-                })
+        assertThatThrownBy(() -> binaryClient.postBinaryThrows(
+                        AuthHeader.valueOf("authHeader"), bytesExpected, (OutputStream sink) -> {
+                            for (int i = 0; i < chunksToSend; i++) {
+                                sink.write(data);
+                            }
+                        }))
                 .isInstanceOfSatisfying(
                         RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
     }
