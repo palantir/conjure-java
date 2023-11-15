@@ -164,8 +164,9 @@ public final class JerseyServiceEteTest extends TestBase {
     public void test_optionalBinary_present() throws IOException {
         Optional<InputStream> response = binaryClient.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader"));
         assertThat(response).isPresent();
-        assertThat(new String(response.get().readAllBytes(), StandardCharsets.UTF_8))
-                .isEqualTo("Hello World!");
+        try (InputStream is = response.get()) {
+            assertThat(new String(is.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo("Hello World!");
+        }
     }
 
     @Test

@@ -26,6 +26,7 @@ import com.github.stefanbirkner.systemlambda.SystemLambda;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -46,6 +47,7 @@ import com.palantir.product.EmptyPathService;
 import com.palantir.product.EmptyPathServiceEndpoints;
 import com.palantir.product.EteBinaryServiceBlocking;
 import com.palantir.product.EteBinaryServiceEndpoints;
+import com.palantir.product.EteServiceAsync;
 import com.palantir.product.EteServiceBlocking;
 import com.palantir.product.EteServiceEndpoints;
 import com.palantir.product.NestedStringAliasExample;
@@ -97,11 +99,13 @@ public final class UndertowServiceEteTest extends TestBase {
     private static Undertow server;
 
     private final EteServiceBlocking client;
+    private final EteServiceAsync asyncClient;
 
     private final EteBinaryServiceBlocking binaryClient;
 
     public UndertowServiceEteTest() {
         this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration());
+        this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration());
         this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration());
     }
 
@@ -394,21 +398,24 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testSlashesInPathParam() {
         String expected = "foo/bar/baz/%2F";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
+        assertThat(Futures.getUnchecked(asyncClient.path(AuthHeader.valueOf("bearer"), expected)))
+                .isEqualTo(expected);
     }
 
     @Test
     public void testPlusInPathParam() {
         String expected = "foo+bar";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
+        assertThat(Futures.getUnchecked(asyncClient.path(AuthHeader.valueOf("bearer"), expected)))
+                .isEqualTo(expected);
     }
 
     @Test
     public void testSpaceInPathParam() {
         String expected = "foo bar";
         assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
-        assertThat(client.path(AuthHeader.valueOf("bearer"), expected)).isEqualTo(expected);
+        assertThat(Futures.getUnchecked(asyncClient.path(AuthHeader.valueOf("bearer"), expected)))
+                .isEqualTo(expected);
     }
 
     @Test
@@ -421,8 +428,9 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testBinaryOptionalPresentResponse() throws Exception {
         Optional<InputStream> response = binaryClient.getOptionalBinaryPresent(AuthHeader.valueOf("authHeader"));
         assertThat(response).isPresent();
-        assertThat(new String(response.get().readAllBytes(), StandardCharsets.UTF_8))
-                .isEqualTo("Hello World!");
+        try (InputStream is = response.get()) {
+            assertThat(new String(is.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo("Hello World!");
+        }
     }
 
     @Test
