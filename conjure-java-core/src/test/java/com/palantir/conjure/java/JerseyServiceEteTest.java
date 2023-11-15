@@ -188,7 +188,7 @@ public final class JerseyServiceEteTest extends TestBase {
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/notNullBody");
+        URL url = new URL("http://0.0.0.0:" + PORT + "/test-example/api/base/notNullBody");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setDoOutput(true);

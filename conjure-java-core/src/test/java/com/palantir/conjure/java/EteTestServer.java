@@ -56,6 +56,10 @@ public final class EteTestServer extends Application<Configuration> {
     private static final X509TrustManager TRUST_MANAGER =
             SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION);
 
+    public static ClientConfiguration clientConfiguration() {
+        return clientConfiguration(8080);
+    }
+
     public static ClientConfiguration clientConfiguration(int port) {
         return ClientConfiguration.builder()
                 .from(ClientConfigurations.of(
