@@ -86,11 +86,10 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.junit.jupiter.api.parallel.ResourceLock;
 
 @Execution(ExecutionMode.CONCURRENT)
-@ResourceLock("port:8080")
 public final class UndertowServiceEteTest extends TestBase {
+    private static final int PORT = 8085;
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     @TempDir
@@ -104,9 +103,9 @@ public final class UndertowServiceEteTest extends TestBase {
     private final EteBinaryServiceBlocking binaryClient;
 
     public UndertowServiceEteTest() {
-        this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration());
-        this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration());
-        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration());
+        this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration(PORT));
+        this.asyncClient = DialogueClients.create(EteServiceAsync.class, clientConfiguration(PORT));
+        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(PORT));
     }
 
     @BeforeAll
@@ -120,7 +119,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
         server = Undertow.builder()
                 .setServerOption(UndertowOptions.DECODE_URL, false)
-                .addHttpListener(8080, "0.0.0.0")
+                .addHttpListener(PORT, "0.0.0.0")
                 .setHandler(Handlers.path().addPrefixPath("/test-example/api", handler))
                 .build();
         server.start();
@@ -136,7 +135,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void jaxrs_client_can_make_a_call_to_an_empty_path() {
         EmptyPathService emptyPathClient = JaxRsClient.create(
-                EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+                EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration(PORT));
         assertThat(emptyPathClient.emptyPath()).isTrue();
     }
 
@@ -237,8 +236,8 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testCborContent() throws Exception {
         ObjectMapper cborMapper = ObjectMappers.newCborClientObjectMapper();
         // postString method
-        HttpURLConnection connection =
-                (HttpURLConnection) new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        HttpURLConnection connection = (HttpURLConnection)
+                new URL("http://localhost:" + PORT + "/test-example/api/base/notNullBody").openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty(
                 HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
@@ -260,8 +259,8 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testContentLengthSet() throws Exception {
         // postString method
-        HttpURLConnection connection =
-                (HttpURLConnection) new URL("http://localhost:8080/test-example/api/base/notNullBody").openConnection();
+        HttpURLConnection connection = (HttpURLConnection)
+                new URL("http://localhost:" + PORT + "/test-example/api/base/notNullBody").openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty(
                 HttpHeaders.AUTHORIZATION, AuthHeader.valueOf("authHeader").toString());
@@ -329,7 +328,7 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testExternalImportOptionalEmptyBodyZeroLength_noContentType() throws IOException {
         // Empty optional request body parameters may be encoded as JSON 'null' or an empty HTTP request body.
         // Feign and Retrofit clients send JSON 'null', here we test that a non-present body works as expected.
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/external/optional-body");
+        URL url = new URL("http://0.0.0.0:" + PORT + "/test-example/api/base/external/optional-body");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty(
@@ -343,7 +342,7 @@ public final class UndertowServiceEteTest extends TestBase {
         // Feign and Retrofit clients send JSON 'null', here we test that a non-present body works as expected.
         // In this test case, we include "Content-Type: application/json" for backwards compatibility with
         // clients that always set request content-type regardless of the presence of a body.
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/external/optional-body");
+        URL url = new URL("http://0.0.0.0:" + PORT + "/test-example/api/base/external/optional-body");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -354,7 +353,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testGetMethodsAllowHeadRequests() throws IOException {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/string");
+        URL url = new URL("http://0.0.0.0:" + PORT + "/test-example/api/base/string");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("HEAD");
         con.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
@@ -368,7 +367,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testOptionsOnGetIncludesHead() throws IOException {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/string");
+        URL url = new URL("http://0.0.0.0:" + PORT + "/test-example/api/base/string");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("OPTIONS");
         con.setRequestProperty(HttpHeaders.ACCEPT, "application/json");
@@ -380,7 +379,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testUnknownContentType() throws Exception {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/binary");
+        URL url = new URL("http://0.0.0.0:" + PORT + "/test-example/api/binary");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/unsupported");
@@ -458,7 +457,7 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    @Timeout(40)
+    @Timeout(20)
     public void testBinaryServerSideFailureAfterFewBytesReceived() {
         int chunkSize = 1024 * 1024; // 1 MB
         int expectedChunks = 1; // 1 MB
@@ -488,7 +487,7 @@ public final class UndertowServiceEteTest extends TestBase {
                     .close();
             // Unfortunately there's no great way to tell when the server has finished processing
             // our request.
-            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100));
+            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(500));
         });
         assertThat(output).contains("INFO", "aborted by the client");
     }
@@ -500,7 +499,7 @@ public final class UndertowServiceEteTest extends TestBase {
 
     @Test
     public void testVoidMethodRespondsNoContent() throws Exception {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/no-return");
+        URL url = new URL("http://0.0.0.0:" + PORT + "/test-example/api/base/no-return");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty(
@@ -568,7 +567,7 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     private static HttpURLConnection preparePostRequest() throws IOException {
-        URL url = new URL("http://0.0.0.0:8080/test-example/api/base/notNullBody");
+        URL url = new URL("http://0.0.0.0:" + PORT + "/test-example/api/base/notNullBody");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setDoOutput(true);

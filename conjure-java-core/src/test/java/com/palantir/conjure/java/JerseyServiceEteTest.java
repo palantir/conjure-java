@@ -63,12 +63,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.junit.jupiter.api.parallel.ResourceLock;
 
 @Execution(ExecutionMode.CONCURRENT)
 @ExtendWith(DropwizardExtensionsSupport.class)
-@ResourceLock("port:8080")
 public final class JerseyServiceEteTest extends TestBase {
+    private static final int PORT = 8080;
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     @TempDir
@@ -81,14 +80,14 @@ public final class JerseyServiceEteTest extends TestBase {
     private final EteBinaryServiceBlocking binaryClient;
 
     public JerseyServiceEteTest() {
-        this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration());
-        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration());
+        this.client = DialogueClients.create(EteServiceBlocking.class, clientConfiguration(PORT));
+        this.binaryClient = DialogueClients.create(EteBinaryServiceBlocking.class, clientConfiguration(PORT));
     }
 
     @Test
     public void jaxrs_client_can_make_a_call_to_an_empty_path() throws Exception {
         EmptyPathService emptyPathClient = JaxRsClient.create(
-                EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration());
+                EmptyPathService.class, clientUserAgent(), new HostMetricsRegistry(), clientConfiguration(PORT));
         assertThat(emptyPathClient.emptyPath()).isTrue();
     }
 
