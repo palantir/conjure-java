@@ -63,9 +63,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 @Execution(ExecutionMode.CONCURRENT)
 @ExtendWith(DropwizardExtensionsSupport.class)
+@ResourceLock("port:8080")
 public final class JerseyServiceEteTest extends TestBase {
     private static final int PORT = 8080;
     private static final ObjectMapper CLIENT_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
