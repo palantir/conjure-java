@@ -62,6 +62,7 @@ public final class EteTestServer extends Application<Configuration> {
                         ImmutableList.of("http://localhost:8080/test-example/api"), SSL_SOCKET_FACTORY, TRUST_MANAGER))
                 // Disable retries to avoid spinning unnecessarily on negative tests
                 .maxNumRetries(0)
+                .userAgent(clientUserAgent())
                 .build();
     }
 
