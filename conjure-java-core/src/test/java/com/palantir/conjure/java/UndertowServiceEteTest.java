@@ -458,11 +458,11 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     @Test
-    @Timeout(20)
+    @Timeout(40)
     public void testBinaryServerSideFailureAfterFewBytesReceived() {
-        int chunkSize = 1024;
-        int expectedChunks = 1024; // 1 MB
-        int chunksToSend = 1024 * 64; // 64 MB
+        int chunkSize = 1024 * 1024; // 1 MB
+        int expectedChunks = 1; // 1 MB
+        int chunksToSend = 1024; // 1 GB
         int bytesExpected = expectedChunks * chunkSize;
 
         byte[] data = new byte[chunkSize];
