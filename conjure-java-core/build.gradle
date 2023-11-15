@@ -83,7 +83,7 @@ dependencies {
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation 'com.palantir.tracing:tracing'
     testImplementation 'com.squareup.okhttp3:okhttp'
-    testImplementation 'com.squareup.okio:okio'
+    testImplementation 'com.squareup.okio:okio-jvm'
     testImplementation 'io.dropwizard:dropwizard-core'
     testImplementation 'io.dropwizard:dropwizard-jersey'
     testImplementation 'io.dropwizard:dropwizard-jetty'
