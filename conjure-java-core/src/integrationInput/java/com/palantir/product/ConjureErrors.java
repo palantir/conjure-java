@@ -14,15 +14,11 @@ import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureErrors {
-    /**
-     * Invalid Conjure service definition.
-     */
+    /** Invalid Conjure service definition. */
     public static final ErrorType INVALID_SERVICE_DEFINITION =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidServiceDefinition");
 
-    /**
-     * Invalid Conjure type definition.
-     */
+    /** Invalid Conjure type definition. */
     public static final ErrorType INVALID_TYPE_DEFINITION =
             ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "Conjure:InvalidTypeDefinition");
 
@@ -93,9 +89,7 @@ public final class ConjureErrors {
         }
     }
 
-    /**
-     * Returns true if the {@link RemoteException} is named Conjure:InvalidServiceDefinition
-     */
+    /** Returns true if the {@link RemoteException} is named Conjure:InvalidServiceDefinition */
     public static boolean isInvalidServiceDefinition(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return INVALID_SERVICE_DEFINITION
@@ -103,9 +97,7 @@ public final class ConjureErrors {
                 .equals(remoteException.getError().errorName());
     }
 
-    /**
-     * Returns true if the {@link RemoteException} is named Conjure:InvalidTypeDefinition
-     */
+    /** Returns true if the {@link RemoteException} is named Conjure:InvalidTypeDefinition */
     public static boolean isInvalidTypeDefinition(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return INVALID_TYPE_DEFINITION.name().equals(remoteException.getError().errorName());

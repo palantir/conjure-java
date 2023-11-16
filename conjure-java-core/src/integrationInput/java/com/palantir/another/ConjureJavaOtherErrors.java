@@ -10,9 +10,7 @@ import org.jetbrains.annotations.Contract;
 
 @Generated("com.palantir.conjure.java.types.ErrorGenerator")
 public final class ConjureJavaOtherErrors {
-    /**
-     * Failed to compile Conjure definition to Java code.
-     */
+    /** Failed to compile Conjure definition to Java code. */
     public static final ErrorType JAVA_COMPILATION_FAILED =
             ErrorType.create(ErrorType.Code.INTERNAL, "ConjureJavaOther:JavaCompilationFailed");
 
@@ -38,9 +36,7 @@ public final class ConjureJavaOtherErrors {
         }
     }
 
-    /**
-     * Returns true if the {@link RemoteException} is named ConjureJavaOther:JavaCompilationFailed
-     */
+    /** Returns true if the {@link RemoteException} is named ConjureJavaOther:JavaCompilationFailed */
     public static boolean isJavaCompilationFailed(RemoteException remoteException) {
         Preconditions.checkNotNull(remoteException, "remote exception must not be null");
         return JAVA_COMPILATION_FAILED.name().equals(remoteException.getError().errorName());

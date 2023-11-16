@@ -18,14 +18,14 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
 /**
- * This class is used instead of a native enum to support unknown values.
- * Rather than throw an exception, the {@link EnumNameTestExample#valueOf} method defaults to a new instantiation of
- * {@link EnumNameTestExample} where {@link EnumNameTestExample#get} will return {@link EnumNameTestExample.Value#UNKNOWN}.
- * <p>
- * For example, {@code EnumNameTestExample.valueOf("corrupted value").get()} will return {@link EnumNameTestExample.Value#UNKNOWN},
- * but {@link EnumNameTestExample#toString} will return "corrupted value".
- * <p>
- * There is no method to access all instantiations of this class, since they cannot be known at compile time.
+ * This class is used instead of a native enum to support unknown values. Rather than throw an exception, the
+ * {@link EnumNameTestExample#valueOf} method defaults to a new instantiation of {@link EnumNameTestExample} where
+ * {@link EnumNameTestExample#get} will return {@link EnumNameTestExample.Value#UNKNOWN}.
+ *
+ * <p>For example, {@code EnumNameTestExample.valueOf("corrupted value").get()} will return
+ * {@link EnumNameTestExample.Value#UNKNOWN}, but {@link EnumNameTestExample#toString} will return "corrupted value".
+ *
+ * <p>There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 @Safe

@@ -40,14 +40,13 @@ import test.prefix.com.palantir.product.CreateDatasetRequest;
 import test.prefix.com.palantir.product.datasets.BackingFileSystem;
 import test.prefix.com.palantir.product.datasets.Dataset;
 
-/**
- * A Markdown description of the service.
- */
+/** A Markdown description of the service. */
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(TestServiceAsync.Factory.class)
 public interface TestServiceAsync {
     /**
      * Returns a mapping from file system id to backing file system configuration.
+     *
      * @apiNote {@code GET /catalog/fileSystems}
      */
     @Incubating
@@ -57,51 +56,38 @@ public interface TestServiceAsync {
 
     /**
      * foo $bar
+     *
      * @apiNote {@code POST /catalog/datasets}
      */
     @ClientEndpoint(method = "POST", path = "/catalog/datasets")
     ListenableFuture<Dataset> createDataset(
             AuthHeader authHeader, @Safe String testHeaderArg, CreateDatasetRequest request);
 
-    /**
-     * @apiNote {@code GET /catalog/datasets/{datasetRid}}
-     */
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}")
     ListenableFuture<Optional<Dataset>> getDataset(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
-    /**
-     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw}
-     */
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw")
     ListenableFuture<InputStream> getRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
-    /**
-     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased}
-     */
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-aliased} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-aliased")
     ListenableFuture<InputStream> getAliasedRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
-    /**
-     * @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe}
-     */
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/raw-maybe} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/raw-maybe")
     ListenableFuture<Optional<InputStream>> maybeGetRawData(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
-    /**
-     * @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased}
-     */
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/string-aliased} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/string-aliased")
     ListenableFuture<AliasedString> getAliasedString(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
-    /**
-     * @apiNote {@code POST /catalog/datasets/upload-raw}
-     */
+    /** @apiNote {@code POST /catalog/datasets/upload-raw} */
     @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw")
     ListenableFuture<Void> uploadRawData(AuthHeader authHeader, @Safe BinaryRequestBody input);
 
-    /**
-     * @apiNote {@code POST /catalog/datasets/upload-raw-aliased}
-     */
+    /** @apiNote {@code POST /catalog/datasets/upload-raw-aliased} */
     @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw-aliased")
     ListenableFuture<Void> uploadAliasedRawData(AuthHeader authHeader, BinaryRequestBody input);
 
@@ -114,6 +100,7 @@ public interface TestServiceAsync {
 
     /**
      * Gets all branches of this dataset.
+     *
      * @apiNote {@code GET /catalog/datasets/{datasetRid}/branchesDeprecated}
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
@@ -122,22 +109,16 @@ public interface TestServiceAsync {
     @Deprecated
     ListenableFuture<Set<String>> getBranchesDeprecated(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
-    /**
-     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve}
-     */
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
     ListenableFuture<Optional<String>> resolveBranch(
             AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, String branch);
 
-    /**
-     * @apiNote {@code GET /catalog/datasets/{datasetRid}/testParam}
-     */
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/testParam} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/testParam")
     ListenableFuture<Optional<String>> testParam(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
-    /**
-     * @apiNote {@code POST /catalog/test-query-params}
-     */
+    /** @apiNote {@code POST /catalog/test-query-params} */
     @ClientEndpoint(method = "POST", path = "/catalog/test-query-params")
     ListenableFuture<Integer> testQueryParams(
             AuthHeader authHeader,
@@ -148,9 +129,7 @@ public interface TestServiceAsync {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
-    /**
-     * @apiNote {@code POST /catalog/test-no-response-query-params}
-     */
+    /** @apiNote {@code POST /catalog/test-no-response-query-params} */
     @ClientEndpoint(method = "POST", path = "/catalog/test-no-response-query-params")
     ListenableFuture<Void> testNoResponseQueryParams(
             AuthHeader authHeader,
@@ -161,47 +140,33 @@ public interface TestServiceAsync {
             Optional<ResourceIdentifier> optionalEnd,
             String query);
 
-    /**
-     * @apiNote {@code GET /catalog/boolean}
-     */
+    /** @apiNote {@code GET /catalog/boolean} */
     @ClientEndpoint(method = "GET", path = "/catalog/boolean")
     ListenableFuture<Boolean> testBoolean(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /catalog/double}
-     */
+    /** @apiNote {@code GET /catalog/double} */
     @ClientEndpoint(method = "GET", path = "/catalog/double")
     ListenableFuture<Double> testDouble(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /catalog/integer}
-     */
+    /** @apiNote {@code GET /catalog/integer} */
     @ClientEndpoint(method = "GET", path = "/catalog/integer")
     ListenableFuture<Integer> testInteger(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code POST /catalog/optional}
-     */
+    /** @apiNote {@code POST /catalog/optional} */
     @ClientEndpoint(method = "POST", path = "/catalog/optional")
     ListenableFuture<Optional<String>> testPostOptional(AuthHeader authHeader, Optional<String> maybeString);
 
-    /**
-     * @apiNote {@code GET /catalog/optional-integer-double}
-     */
+    /** @apiNote {@code GET /catalog/optional-integer-double} */
     @ClientEndpoint(method = "GET", path = "/catalog/optional-integer-double")
     ListenableFuture<Void> testOptionalIntegerAndDouble(
             AuthHeader authHeader, OptionalInt maybeInteger, OptionalDouble maybeDouble);
 
-    /**
-     * @apiNote {@code GET /catalog/datasets/{datasetRid}/strings}
-     */
+    /** @apiNote {@code GET /catalog/datasets/{datasetRid}/strings} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/strings")
     ListenableFuture<Void> getForStrings(
             AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, Set<AliasedString> strings);
 
-    /**
-     * Creates an asynchronous/non-blocking client for a TestService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a TestService service. */
     static TestServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new TestServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
@@ -589,9 +554,7 @@ public interface TestServiceAsync {
         };
     }
 
-    /**
-     * Creates an asynchronous/non-blocking client for a TestService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a TestService service. */
     static TestServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
         if (_channel instanceof EndpointChannelFactory) {
             return of((EndpointChannelFactory) _channel, _runtime);

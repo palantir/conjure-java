@@ -38,12 +38,16 @@ import javax.annotation.processing.Generated;
 public interface EteServiceBlocking {
     /**
      * foo bar baz.
+     *
      * <h2>Very Important Documentation</h2>
-     * <p>This documentation provides a <em>list</em>:</p>
+     *
+     * <p>This documentation provides a <em>list</em>:
+     *
      * <ul>
-     * <li>Docs rule</li>
-     * <li>Lists are wonderful</li>
+     *   <li>Docs rule
+     *   <li>Lists are wonderful
      * </ul>
+     *
      * @apiNote {@code GET /base/string}
      */
     @ClientEndpoint(method = "GET", path = "/base/string")
@@ -51,167 +55,119 @@ public interface EteServiceBlocking {
 
     /**
      * one <em>two</em> three.
+     *
      * @apiNote {@code GET /base/integer}
      */
     @ClientEndpoint(method = "GET", path = "/base/integer")
     int integer(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/double}
-     */
+    /** @apiNote {@code GET /base/double} */
     @ClientEndpoint(method = "GET", path = "/base/double")
     double double_(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/boolean}
-     */
+    /** @apiNote {@code GET /base/boolean} */
     @ClientEndpoint(method = "GET", path = "/base/boolean")
     boolean boolean_(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/safelong}
-     */
+    /** @apiNote {@code GET /base/safelong} */
     @ClientEndpoint(method = "GET", path = "/base/safelong")
     SafeLong safelong(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/rid}
-     */
+    /** @apiNote {@code GET /base/rid} */
     @ClientEndpoint(method = "GET", path = "/base/rid")
     ResourceIdentifier rid(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/bearertoken}
-     */
+    /** @apiNote {@code GET /base/bearertoken} */
     @ClientEndpoint(method = "GET", path = "/base/bearertoken")
     BearerToken bearertoken(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/optionalString}
-     */
+    /** @apiNote {@code GET /base/optionalString} */
     @ClientEndpoint(method = "GET", path = "/base/optionalString")
     Optional<String> optionalString(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/optionalEmpty}
-     */
+    /** @apiNote {@code GET /base/optionalEmpty} */
     @ClientEndpoint(method = "GET", path = "/base/optionalEmpty")
     Optional<String> optionalEmpty(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/datetime}
-     */
+    /** @apiNote {@code GET /base/datetime} */
     @ClientEndpoint(method = "GET", path = "/base/datetime")
     OffsetDateTime datetime(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/binary}
-     */
+    /** @apiNote {@code GET /base/binary} */
     @ClientEndpoint(method = "GET", path = "/base/binary")
     @MustBeClosed
     InputStream binary(AuthHeader authHeader);
 
     /**
      * Path endpoint.
+     *
      * @apiNote {@code GET /base/path/{param}}
      * @param param Documentation for <code>param</code>
      */
     @ClientEndpoint(method = "GET", path = "/base/path/{param}")
     String path(AuthHeader authHeader, String param);
 
-    /**
-     * @apiNote {@code GET /base/externalLong/{param}}
-     */
+    /** @apiNote {@code GET /base/externalLong/{param}} */
     @ClientEndpoint(method = "GET", path = "/base/externalLong/{param}")
     long externalLongPath(AuthHeader authHeader, long param);
 
-    /**
-     * @apiNote {@code GET /base/optionalExternalLong}
-     */
+    /** @apiNote {@code GET /base/optionalExternalLong} */
     @ClientEndpoint(method = "GET", path = "/base/optionalExternalLong")
     Optional<Long> optionalExternalLongQuery(AuthHeader authHeader, Optional<Long> param);
 
-    /**
-     * @apiNote {@code POST /base/notNullBody}
-     */
+    /** @apiNote {@code POST /base/notNullBody} */
     @ClientEndpoint(method = "POST", path = "/base/notNullBody")
     StringAliasExample notNullBody(AuthHeader authHeader, StringAliasExample notNullBody);
 
-    /**
-     * @apiNote {@code GET /base/aliasOne}
-     */
+    /** @apiNote {@code GET /base/aliasOne} */
     @ClientEndpoint(method = "GET", path = "/base/aliasOne")
     StringAliasExample aliasOne(AuthHeader authHeader, StringAliasExample queryParamName);
 
-    /**
-     * @apiNote {@code GET /base/optionalAliasOne}
-     */
+    /** @apiNote {@code GET /base/optionalAliasOne} */
     @ClientEndpoint(method = "GET", path = "/base/optionalAliasOne")
     StringAliasExample optionalAliasOne(AuthHeader authHeader, Optional<StringAliasExample> queryParamName);
 
-    /**
-     * @apiNote {@code GET /base/aliasTwo}
-     */
+    /** @apiNote {@code GET /base/aliasTwo} */
     @ClientEndpoint(method = "GET", path = "/base/aliasTwo")
     NestedStringAliasExample aliasTwo(AuthHeader authHeader, NestedStringAliasExample queryParamName);
 
-    /**
-     * @apiNote {@code POST /base/external/notNullBody}
-     */
+    /** @apiNote {@code POST /base/external/notNullBody} */
     @ClientEndpoint(method = "POST", path = "/base/external/notNullBody")
     StringAliasExample notNullBodyExternalImport(AuthHeader authHeader, StringAliasExample notNullBody);
 
-    /**
-     * @apiNote {@code POST /base/external/optional-body}
-     */
+    /** @apiNote {@code POST /base/external/optional-body} */
     @ClientEndpoint(method = "POST", path = "/base/external/optional-body")
     Optional<StringAliasExample> optionalBodyExternalImport(AuthHeader authHeader, Optional<StringAliasExample> body);
 
-    /**
-     * @apiNote {@code POST /base/external/optional-query}
-     */
+    /** @apiNote {@code POST /base/external/optional-query} */
     @ClientEndpoint(method = "POST", path = "/base/external/optional-query")
     Optional<StringAliasExample> optionalQueryExternalImport(AuthHeader authHeader, Optional<StringAliasExample> query);
 
-    /**
-     * @apiNote {@code POST /base/no-return}
-     */
+    /** @apiNote {@code POST /base/no-return} */
     @ClientEndpoint(method = "POST", path = "/base/no-return")
     void noReturn(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /base/enum/query}
-     */
+    /** @apiNote {@code GET /base/enum/query} */
     @ClientEndpoint(method = "GET", path = "/base/enum/query")
     SimpleEnum enumQuery(AuthHeader authHeader, SimpleEnum queryParamName);
 
-    /**
-     * @apiNote {@code GET /base/enum/list/query}
-     */
+    /** @apiNote {@code GET /base/enum/list/query} */
     @ClientEndpoint(method = "GET", path = "/base/enum/list/query")
     List<SimpleEnum> enumListQuery(AuthHeader authHeader, List<SimpleEnum> queryParamName);
 
-    /**
-     * @apiNote {@code GET /base/enum/optional/query}
-     */
+    /** @apiNote {@code GET /base/enum/optional/query} */
     @ClientEndpoint(method = "GET", path = "/base/enum/optional/query")
     Optional<SimpleEnum> optionalEnumQuery(AuthHeader authHeader, Optional<SimpleEnum> queryParamName);
 
-    /**
-     * @apiNote {@code GET /base/enum/header}
-     */
+    /** @apiNote {@code GET /base/enum/header} */
     @ClientEndpoint(method = "GET", path = "/base/enum/header")
     SimpleEnum enumHeader(AuthHeader authHeader, SimpleEnum headerParameter);
 
-    /**
-     * @apiNote {@code GET /base/alias-long}
-     */
+    /** @apiNote {@code GET /base/alias-long} */
     @ClientEndpoint(method = "GET", path = "/base/alias-long")
     Optional<LongAlias> aliasLongEndpoint(AuthHeader authHeader, Optional<LongAlias> input);
 
-    /**
-     * @apiNote {@code GET /base/datasets/{datasetRid}/strings}
-     */
+    /** @apiNote {@code GET /base/datasets/{datasetRid}/strings} */
     @ClientEndpoint(method = "GET", path = "/base/datasets/{datasetRid}/strings")
     void complexQueryParameters(
             AuthHeader authHeader,
@@ -220,27 +176,19 @@ public interface EteServiceBlocking {
             Set<Long> longs,
             Set<Integer> ints);
 
-    /**
-     * @apiNote {@code PUT /base/list/optionals}
-     */
+    /** @apiNote {@code PUT /base/list/optionals} */
     @ClientEndpoint(method = "PUT", path = "/base/list/optionals")
     void receiveListOfOptionals(AuthHeader authHeader, List<Optional<String>> value);
 
-    /**
-     * @apiNote {@code PUT /base/set/optionals}
-     */
+    /** @apiNote {@code PUT /base/set/optionals} */
     @ClientEndpoint(method = "PUT", path = "/base/set/optionals")
     void receiveSetOfOptionals(AuthHeader authHeader, Set<Optional<String>> value);
 
-    /**
-     * @apiNote {@code PUT /base/list/strings}
-     */
+    /** @apiNote {@code PUT /base/list/strings} */
     @ClientEndpoint(method = "PUT", path = "/base/list/strings")
     void receiveListOfStrings(AuthHeader authHeader, List<String> value);
 
-    /**
-     * Creates a synchronous/blocking client for a EteService service.
-     */
+    /** Creates a synchronous/blocking client for a EteService service. */
     static EteServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new EteServiceBlocking() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
@@ -754,9 +702,7 @@ public interface EteServiceBlocking {
         };
     }
 
-    /**
-     * Creates an asynchronous/non-blocking client for a EteService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a EteService service. */
     static EteServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
         if (_channel instanceof EndpointChannelFactory) {
             return of((EndpointChannelFactory) _channel, _runtime);
