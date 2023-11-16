@@ -41,6 +41,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api'
 
     testImplementation 'com.fasterxml.jackson.core:jackson-annotations'
+    testImplementation 'com.github.stefanbirkner:system-lambda'
     testImplementation 'com.palantir.conjure.java.api:test-utils'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation 'org.assertj:assertj-core'
