@@ -131,7 +131,8 @@ public final class ConjureHandlerTest {
             URL url = new URL("http://localhost:12345/test");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            connection.getInputStream().readAllBytes();
+            // necessary to execute the request
+            connection.getResponseCode();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
