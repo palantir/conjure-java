@@ -331,7 +331,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testExternalImportOptionalEmptyBodyZeroLength_noContentType() throws IOException {
         // Empty optional request body parameters may be encoded as JSON 'null' or an empty HTTP request body.
-        // Feign and Retrofit clients send JSON 'null', here we test that a non-present body works as expected.
+        // Feign clients send JSON 'null', here we test that a non-present body works as expected.
         HttpURLConnection con = openConnectionToTestApi("/base/external/optional-body");
         con.setRequestMethod("POST");
         con.setRequestProperty(
@@ -342,7 +342,7 @@ public final class UndertowServiceEteTest extends TestBase {
     @Test
     public void testExternalImportOptionalEmptyBodyZeroLength_withContentType() throws IOException {
         // Empty optional request body parameters may be encoded as JSON 'null' or an empty HTTP request body.
-        // Feign and Retrofit clients send JSON 'null', here we test that a non-present body works as expected.
+        // Feign send JSON 'null', here we test that a non-present body works as expected.
         // In this test case, we include "Content-Type: application/json" for backwards compatibility with
         // clients that always set request content-type regardless of the presence of a body.
         HttpURLConnection con = openConnectionToTestApi("/base/external/optional-body");
@@ -565,7 +565,7 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {
-        URL url = new URL("http://0.0.0.0:" + port + "/test-example/api" + path);
+        URL url = new URL("http://localhost:" + port + "/test-example/api" + path);
         return (HttpURLConnection) url.openConnection();
     }
 

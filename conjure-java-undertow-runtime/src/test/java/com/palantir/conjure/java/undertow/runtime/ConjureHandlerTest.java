@@ -26,12 +26,11 @@ import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.util.Methods;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,8 +40,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public final class ConjureHandlerTest {
-
-    private static final OkHttpClient client = new OkHttpClient.Builder().build();
 
     private Undertow server;
 
@@ -129,11 +126,13 @@ public final class ConjureHandlerTest {
         verify(innerObserver, never()).control();
     }
 
-    private static Response execute() {
-        Request request =
-                new Request.Builder().get().url("http://localhost:12345/test").build();
+    private static void execute() {
         try {
-            return client.newCall(request).execute();
+            URL url = new URL("http://localhost:12345/test");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            // necessary to execute the request
+            connection.getResponseCode();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

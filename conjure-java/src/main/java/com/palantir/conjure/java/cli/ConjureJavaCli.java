@@ -27,7 +27,6 @@ import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Generator;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.services.JerseyServiceGenerator;
-import com.palantir.conjure.java.services.Retrofit2ServiceGenerator;
 import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
@@ -118,12 +117,6 @@ public final class ConjureJavaCli implements Runnable {
                 defaultValue = "false",
                 description = "Generate interfaces for dialogue clients")
         private boolean generateDialogue;
-
-        @CommandLine.Option(
-                names = "--retrofit",
-                defaultValue = "false",
-                description = "Generate retrofit interfaces for streaming/async clients")
-        private boolean generateRetrofit;
 
         @CommandLine.Option(
                 names = "--jerseyBinaryAsResponse",
@@ -254,9 +247,6 @@ public final class ConjureJavaCli implements Runnable {
                 if (config.generateJersey()) {
                     generatorBuilder.add(new JerseyServiceGenerator(config.options()));
                 }
-                if (config.generateRetrofit()) {
-                    generatorBuilder.add(new Retrofit2ServiceGenerator(config.options()));
-                }
                 if (config.generateUndertow()) {
                     generatorBuilder.add(new UndertowServiceGenerator(config.options()));
                 }
@@ -279,7 +269,6 @@ public final class ConjureJavaCli implements Runnable {
                     .outputDirectory(new File(output))
                     .generateJersey(generateJersey)
                     .generateObjects(generateObjects)
-                    .generateRetrofit(generateRetrofit)
                     .generateUndertow(generateUndertow)
                     .generateDialogue(generateDialogue)
                     .options(Options.builder()
