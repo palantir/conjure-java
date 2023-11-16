@@ -19,49 +19,60 @@ package com.palantir.conjure.java.undertow.runtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.stefanbirkner.systemlambda.SystemLambda;
-import com.google.common.util.concurrent.Uninterruptibles;
 import io.undertow.Undertow;
+import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class ClientDisconnectTest {
+public class ConjureExceptionDisconnectTest {
 
-    private Undertow server;
-    private CountDownLatch latch = new CountDownLatch(1);
+    private static Undertow server;
+    private static CountDownLatch latch = new CountDownLatch(1);
 
-    @BeforeEach
-    public void before() {
+    @BeforeAll
+    public static void before() {
         server = Undertow.builder()
                 .addHttpListener(12345, "localhost")
                 .setHandler(new ConjureExceptionHandler(
-                        _exchange -> Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(50)),
-                        (_e, _t) -> latch.countDown()))
+                        _e -> {
+                            Thread.sleep(Duration.ofMillis(50).toMillis());
+                            throw new IOException();
+                        },
+                        (exchange, throwable) -> {
+                            ConjureExceptions.INSTANCE.handle(exchange, throwable);
+                            latch.countDown();
+                        }))
                 .build();
         server.start();
     }
 
-    @AfterEach
-    public void after() {
+    @AfterAll
+    public static void after() {
         server.stop();
     }
 
     @Test
+    @SuppressWarnings("FutureReturnValueIgnored")
     public void testClientDisconnect() throws Exception {
         String output = SystemLambda.tapSystemErrAndOut(() -> {
             URL url = new URL("http://localhost:12345");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            // necessary to execute the request
-            connection.getResponseCode();
-            connection.disconnect();
+            connection.setReadTimeout(10);
+            try {
+                connection.getResponseCode();
+            } catch (SocketTimeoutException _e) {
+                connection.disconnect();
+            }
         });
-        assertThat(latch.await(1000, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(latch.await(100, TimeUnit.MILLISECONDS)).isTrue();
         assertThat(output).contains("INFO", "aborted by the client");
     }
 }
