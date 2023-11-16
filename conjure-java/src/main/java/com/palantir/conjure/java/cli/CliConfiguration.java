@@ -39,11 +39,6 @@ public interface CliConfiguration {
     }
 
     @Value.Default
-    default boolean generateRetrofit() {
-        return false;
-    }
-
-    @Value.Default
     default boolean generateUndertow() {
         return false;
     }
@@ -62,9 +57,7 @@ public interface CliConfiguration {
     default void check() {
         Preconditions.checkArgument(input().isFile(), "Target must exist and be a file");
         Preconditions.checkArgument(outputDirectory().isDirectory(), "Output must exist and be a directory");
-        long count = Arrays.asList(
-                        generateObjects(), generateJersey(), generateRetrofit(), generateUndertow(), generateDialogue())
-                .stream()
+        long count = Arrays.asList(generateObjects(), generateJersey(), generateUndertow(), generateDialogue()).stream()
                 .filter(b -> b)
                 .count();
         Preconditions.checkArgument(count == 1, "Must specify exactly one project to generate");
