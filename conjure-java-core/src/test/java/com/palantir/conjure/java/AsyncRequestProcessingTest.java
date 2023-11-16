@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
@@ -46,6 +45,9 @@ import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,9 +56,7 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import javax.ws.rs.core.HttpHeaders;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -131,110 +131,79 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     @Test
     public void testNoDelay() throws IOException {
-        try (Response response = requestToDelayEndpoint(OptionalInt.empty())) {
-            assertThat(response).matches(Response::isSuccessful);
-            assertThat(response.body().string()).isEqualTo("\"Completed immediately\"");
-        }
+        HttpURLConnection connection = requestToDelayEndpoint(OptionalInt.empty());
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(getResponseBody(connection)).isEqualTo("\"Completed immediately\"");
     }
 
     @Test
     public void testTinyDelay() throws IOException {
-        try (Response response = requestToDelayEndpoint(OptionalInt.of(0))) {
-            assertThat(response).matches(Response::isSuccessful);
-            assertThat(response.body().string()).isEqualTo("\"Completed after 0ms\"");
-        }
+        HttpURLConnection connection = requestToDelayEndpoint(OptionalInt.of(0));
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(getResponseBody(connection)).isEqualTo("\"Completed after 0ms\"");
     }
 
     @Test
     public void testSmallDelay() throws IOException {
-        try (Response response = requestToDelayEndpoint(OptionalInt.of(100))) {
-            assertThat(response).matches(Response::isSuccessful);
-            assertThat(response.body().string()).isEqualTo("\"Completed after 100ms\"");
-        }
+        HttpURLConnection connection = requestToDelayEndpoint(OptionalInt.of(100));
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(getResponseBody(connection)).isEqualTo("\"Completed after 100ms\"");
     }
 
     @Test
     public void testTimeout() throws IOException {
-        try (Response response = requestToDelayEndpoint(OptionalInt.of(2000))) {
-            assertThat(response).matches(resp -> resp.code() == 500);
-            SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
-            assertThat(error.errorCode()).isEqualTo("TIMEOUT");
-            assertThat(error.errorName()).isEqualTo("Conjure:AsyncRequestProcessingTimeout");
-            assertThat(error.parameters()).containsEntry("timeoutSeconds", "1");
-        }
+        HttpURLConnection connection = requestToDelayEndpoint(OptionalInt.of(2000));
+        assertThat(connection.getResponseCode()).isEqualTo(500);
+        SerializableError error = CLIENT_MAPPER.readValue(getErrorBody(connection), SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo("TIMEOUT");
+        assertThat(error.errorName()).isEqualTo("Conjure:AsyncRequestProcessingTimeout");
+        assertThat(error.parameters()).containsEntry("timeoutSeconds", "1");
     }
 
     @Test
     public void testFiveSecondTimeoutIsNotReached() throws IOException {
-        try (Response response = requestToDelayEndpointWithFiveSecondTimeout(OptionalInt.of(2000))) {
-            assertThat(response).matches(Response::isSuccessful);
-            assertThat(response.body().string()).isEqualTo("\"Completed after 2000ms\"");
-        }
+        HttpURLConnection connection = requestToDelayEndpointWithFiveSecondTimeout(OptionalInt.of(2000));
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(getResponseBody(connection)).isEqualTo("\"Completed after 2000ms\"");
     }
 
     @Test
     public void testExceptionThrownInHandlerMethod() throws IOException {
-        try (Response response = client().newCall(new Request.Builder()
-                        .get()
-                        .url("http://localhost:" + PORT + "/async/throws")
-                        .build())
-                .execute()) {
-            assertThat(response).matches(resp -> resp.code() == ErrorType.CONFLICT.httpErrorCode());
-            SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
-            assertThat(error.errorCode()).isEqualTo("CONFLICT");
-        }
+        HttpURLConnection connection = openConnectionToTestServer("/async/throws");
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        SerializableError error = CLIENT_MAPPER.readValue(getErrorBody(connection), SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo("CONFLICT");
     }
 
     @Test
     public void testFailedFuture() throws IOException {
-        try (Response response = client().newCall(new Request.Builder()
-                        .get()
-                        .url("http://localhost:" + PORT + "/async/failed-future")
-                        .build())
-                .execute()) {
-            assertThat(response).matches(resp -> resp.code() == ErrorType.CONFLICT.httpErrorCode());
-            SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
-            assertThat(error.errorCode()).isEqualTo("CONFLICT");
-        }
+        HttpURLConnection connection = openConnectionToTestServer("/async/failed-future");
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        SerializableError error = CLIENT_MAPPER.readValue(getErrorBody(connection), SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo("CONFLICT");
     }
 
     @Test
     public void testFailedFutureAsyncDelay() throws IOException {
-        try (Response response = client().newCall(new Request.Builder()
-                        .get()
-                        .url("http://localhost:" + PORT + "/async/failed-future?delayMillis=100")
-                        .build())
-                .execute()) {
-            assertThat(response).matches(resp -> resp.code() == ErrorType.CONFLICT.httpErrorCode());
-            SerializableError error = CLIENT_MAPPER.readValue(response.body().byteStream(), SerializableError.class);
-            assertThat(error.errorCode()).isEqualTo("CONFLICT");
-        }
+        HttpURLConnection connection = openConnectionToTestServer("/async/failed-future?delayMillis=100");
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        SerializableError error = CLIENT_MAPPER.readValue(getErrorBody(connection), SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo("CONFLICT");
     }
 
     @Test
     public void testAsyncOptionalBinaryNotPresent() throws IOException {
-        try (Response response = client().newCall(new Request.Builder()
-                        .get()
-                        .url("http://localhost:" + PORT + "/async/binary")
-                        .build())
-                .execute()) {
-            assertThat(response).matches(resp -> resp.code() == 204);
-            assertThat(response.header(HttpHeaders.CONTENT_TYPE)).isNull();
-        }
+        HttpURLConnection connection = openConnectionToTestServer("/async/binary");
+        assertThat(connection.getResponseCode()).isEqualTo(204);
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_TYPE)).isNull();
     }
 
     @Test
     public void testAsyncOptionalBinaryPresent() throws IOException {
-        try (Response response = client().newCall(new Request.Builder()
-                        .get()
-                        .url("http://localhost:" + PORT + "/async/binary?stringValue=Hello")
-                        .build())
-                .execute()) {
-            assertThat(response).matches(resp -> resp.code() == 200);
-            assertThat(response.header(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
-            assertThat(new String(response.body().bytes(), StandardCharsets.UTF_8))
-                    .isEqualTo("Hello");
-        }
+        HttpURLConnection connection = openConnectionToTestServer("/async/binary?stringValue=Hello");
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_TYPE)).startsWith("application/octet-stream");
+        assertThat(getResponseBody(connection)).isEqualTo("Hello");
     }
 
     @Test
@@ -257,40 +226,40 @@ public final class AsyncRequestProcessingTest extends TestBase {
         }
     }
 
-    private static Response requestToDelayEndpoint(OptionalInt delay) {
-        Request request = new Request.Builder()
-                .get()
-                .url("http://localhost:"
-                        + PORT
-                        + "/async/delay"
-                        + (delay.isPresent() ? "?delayMillis=" + delay.getAsInt() : ""))
-                .build();
-        try {
-            return client().newCall(request).execute();
+    private static HttpURLConnection requestToDelayEndpoint(OptionalInt delay) {
+        return openConnectionToTestServer(
+                "/async/delay" + (delay.isPresent() ? "?delayMillis=" + delay.getAsInt() : ""));
+    }
+
+    private static HttpURLConnection requestToDelayEndpointWithFiveSecondTimeout(OptionalInt delay) {
+        return openConnectionToTestServer(
+                "/async/delay-5s-timeout" + (delay.isPresent() ? "?delayMillis=" + delay.getAsInt() : ""));
+    }
+
+    private static String getResponseBody(HttpURLConnection connection) {
+        try (InputStream response = connection.getInputStream()) {
+            return new String(response.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static Response requestToDelayEndpointWithFiveSecondTimeout(OptionalInt delay) {
-        Request request = new Request.Builder()
-                .get()
-                .url("http://localhost:"
-                        + PORT
-                        + "/async/delay-5s-timeout"
-                        + (delay.isPresent() ? "?delayMillis=" + delay.getAsInt() : ""))
-                .build();
-        try {
-            return client().newCall(request).execute();
+    private static String getErrorBody(HttpURLConnection connection) {
+        try (InputStream response = connection.getErrorStream()) {
+            return new String(response.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static OkHttpClient client() {
-        return new OkHttpClient.Builder()
-                .retryOnConnectionFailure(false)
-                .cache(null)
-                .build();
+    private static HttpURLConnection openConnectionToTestServer(String path) {
+        try {
+            URL url = new URL("http://0.0.0.0:" + PORT + path);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            return connection;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

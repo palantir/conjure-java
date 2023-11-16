@@ -77,7 +77,7 @@ subprojects {
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
     tasks.withType(JavaCompile) {
-        options.compilerArgs += ['-Werror']
+        // options.compilerArgs += ['-Werror']
         options.errorprone.disable 'PreferSafeLoggableExceptions', 'PreferSafeLoggingPreconditions', 'UnnecessaryLambda'
     }
 

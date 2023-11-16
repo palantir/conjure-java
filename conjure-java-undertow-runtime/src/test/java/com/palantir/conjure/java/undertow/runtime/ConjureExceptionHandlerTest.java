@@ -34,21 +34,16 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.BlockingHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public final class ConjureExceptionHandlerTest {
-
-    private static final OkHttpClient client = new OkHttpClient.Builder()
-            .followRedirects(false) // we want to explicitly test the 'Location' header
-            .build();
 
     private RuntimeException exception;
     private Undertow server;
@@ -74,11 +69,12 @@ public final class ConjureExceptionHandlerTest {
     @Test
     public void handlesServiceException() throws IOException {
         exception = new ServiceException(ErrorType.CONFLICT, SafeArg.of("foo", "bar"));
-        Response response = execute();
-        assertThat(response.body().string())
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
+        assertThat(getErrorBody(connection))
                 .contains("{\"errorCode\":\"CONFLICT\"")
                 .contains("\"parameters\":{\"foo\":\"bar\"}}");
-        assertThat(response.code()).isEqualTo(ErrorType.CONFLICT.httpErrorCode());
     }
 
     @Test
@@ -86,7 +82,7 @@ public final class ConjureExceptionHandlerTest {
         SerializableError remoteError =
                 SerializableError.forException(new ServiceException(ErrorType.CONFLICT, SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.CONFLICT.httpErrorCode());
-        Response response = execute();
+        HttpURLConnection connection = execute();
 
         // Propagates errorInstanceId and changes error code and name to INTERNAL
         // Does not propagate args
@@ -98,9 +94,9 @@ public final class ConjureExceptionHandlerTest {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
-        assertThat(response.body().string()).isEqualTo(stream.toString(StandardCharsets.UTF_8));
         // remote exceptions should result in 500 status
-        assertThat(response.code()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
+        assertThat(getErrorBody(connection)).isEqualTo(stream.toString(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -108,7 +104,7 @@ public final class ConjureExceptionHandlerTest {
         SerializableError remoteError = SerializableError.forException(
                 new ServiceException(ErrorType.create(Code.UNAUTHORIZED, "Test:ErrorName"), SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.UNAUTHORIZED.httpErrorCode());
-        Response response = execute();
+        HttpURLConnection connection = execute();
 
         // Propagates errorInstanceId and does not change error code and name
         // Does not propagate args
@@ -120,8 +116,8 @@ public final class ConjureExceptionHandlerTest {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
-        assertThat(response.body().string()).isEqualTo(stream.toString(StandardCharsets.UTF_8));
-        assertThat(response.code()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
+        assertThat(getErrorBody(connection)).isEqualTo(stream.toString(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -129,7 +125,7 @@ public final class ConjureExceptionHandlerTest {
         SerializableError remoteError = SerializableError.forException(new ServiceException(
                 ErrorType.create(Code.PERMISSION_DENIED, "Test:ErrorName"), SafeArg.of("foo", "bar")));
         exception = new RemoteException(remoteError, ErrorType.PERMISSION_DENIED.httpErrorCode());
-        Response response = execute();
+        HttpURLConnection connection = execute();
 
         // Propagates errorInstanceId and does not change error code and name
         // Does not propagate args
@@ -141,64 +137,65 @@ public final class ConjureExceptionHandlerTest {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         Encodings.json().serializer(new TypeMarker<SerializableError>() {}).serialize(expectedPropagatedError, stream);
 
-        assertThat(response.body().string()).isEqualTo(stream.toString(StandardCharsets.UTF_8));
-        assertThat(response.code()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
+        assertThat(getErrorBody(connection)).isEqualTo(stream.toString(StandardCharsets.UTF_8));
     }
 
     @Test
     public void handlesQosExceptionThrottleWithoutDuration() throws IOException {
         exception = QosException.throttle();
-        Response response = execute();
+        HttpURLConnection connection = execute();
 
-        assertThat(response.code()).isEqualTo(429);
-        assertThat(response.body().string()).isEmpty();
-        assertThat(response.headers().toMultimap()).doesNotContainKey("Retry-After");
-        assertThat(response.headers().toMultimap()).containsOnlyKeys("connection", "content-length", "date");
+        assertThat(connection.getResponseCode()).isEqualTo(429);
+        assertThat(connection.getErrorStream()).isNull();
+        assertThat(connection.getHeaderFields()).doesNotContainKey("Retry-After");
+        assertThat(connection.getHeaderFields()).containsKeys("Connection", "Content-Length", "Date");
     }
 
     @Test
     public void handlesQosExceptionThrottleWithDuration() throws IOException {
         exception = QosException.throttle(Duration.ofMinutes(2));
-        Response response = execute();
+        HttpURLConnection connection = execute();
 
-        assertThat(response.code()).isEqualTo(429);
-        assertThat(response.headers().toMultimap()).containsEntry("Retry-After", ImmutableList.of("120"));
-        assertThat(response.body().string()).isEmpty();
+        assertThat(connection.getResponseCode()).isEqualTo(429);
+        assertThat(connection.getHeaderFields()).containsEntry("Retry-After", ImmutableList.of("120"));
+        assertThat(connection.getErrorStream()).isNull();
     }
 
     @Test
     public void handlesQosExceptionRetryOther() throws IOException {
         exception = QosException.retryOther(new URL("http://foo"));
-        Response response = execute();
+        HttpURLConnection connection = execute();
 
-        assertThat(response.code()).isEqualTo(308);
-        assertThat(response.headers().toMultimap()).containsEntry("Location", ImmutableList.of("http://foo"));
-        assertThat(response.body().string()).isEmpty();
+        assertThat(connection.getResponseCode()).isEqualTo(308);
+        assertThat(connection.getHeaderFields()).containsEntry("Location", ImmutableList.of("http://foo"));
+        assertThat(connection.getErrorStream()).isNull();
     }
 
     @Test
     public void handlesQosExceptionUnavailable() throws IOException {
         exception = QosException.unavailable();
-        Response response = execute();
+        HttpURLConnection connection = execute();
 
-        assertThat(response.code()).isEqualTo(503);
-        assertThat(response.body().string()).isEmpty();
+        assertThat(connection.getResponseCode()).isEqualTo(503);
+        assertThat(connection.getErrorStream()).isNull();
     }
 
     @Test
     public void handlesIllegalArgumentException() throws IOException {
         exception = new IllegalArgumentException("Foo");
-        Response response = execute();
-        assertThat(response.body().string()).contains("{\"errorCode\":\"INVALID_ARGUMENT\"");
-        assertThat(response.code()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
+        assertThat(getErrorBody(connection)).contains("{\"errorCode\":\"INVALID_ARGUMENT\"");
     }
 
     @Test
     public void handlesRuntimeException() throws IOException {
         exception = new RuntimeException("Foo");
-        Response response = execute();
-        assertThat(response.body().string()).contains("{\"errorCode\":\"INTERNAL\"");
-        assertThat(response.code()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
+        HttpURLConnection connection = execute();
+        assertThat(connection.getResponseCode()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
+        assertThat(getErrorBody(connection)).contains("{\"errorCode\":\"INTERNAL\"");
     }
 
     @Test
@@ -214,9 +211,9 @@ public final class ConjureExceptionHandlerTest {
                 .build();
         server.start();
 
-        Response response = execute();
-        assertThat(response.body().string()).isEmpty();
-        assertThat(response.code()).isEqualTo(500);
+        HttpURLConnection connection = execute();
+        assertThat(connection.getResponseCode()).isEqualTo(500);
+        assertThat(connection.getErrorStream()).isNull();
     }
 
     @Test
@@ -230,11 +227,20 @@ public final class ConjureExceptionHandlerTest {
                 .doesNotThrowAnyException();
     }
 
-    private static Response execute() {
-        Request request =
-                new Request.Builder().get().url("http://localhost:12345").build();
+    private static String getErrorBody(HttpURLConnection connection) {
+        try (InputStream response = connection.getErrorStream()) {
+            return new String(response.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static HttpURLConnection execute() {
         try {
-            return client.newCall(request).execute();
+            URL url = new URL("http://0.0.0.0:12345");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            return connection;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

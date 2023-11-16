@@ -43,7 +43,6 @@ dependencies {
     testImplementation 'com.fasterxml.jackson.core:jackson-annotations'
     testImplementation 'com.palantir.conjure.java.api:test-utils'
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
-    testImplementation 'com.squareup.okhttp3:okhttp'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

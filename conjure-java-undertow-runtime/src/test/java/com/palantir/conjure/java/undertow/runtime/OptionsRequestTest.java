@@ -20,28 +20,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
-import com.google.errorprone.annotations.MustBeClosed;
 import com.palantir.conjure.java.undertow.lib.Endpoint;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.ResponseCodeHandler;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.util.UUID;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public final class OptionsRequestTest {
-
-    private static final OkHttpClient client = new OkHttpClient.Builder()
-            .followRedirects(false)
-            .retryOnConnectionFailure(false)
-            .build();
 
     private Undertow server;
     private int port;
@@ -71,62 +64,55 @@ public final class OptionsRequestTest {
     }
 
     @Test
-    public void test_getAndPost() {
-        try (Response response = execute("/first")) {
-            assertThat(response.code()).isEqualTo(204);
-            assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, GET, HEAD, POST");
-        }
+    public void test_getAndPost() throws IOException {
+        HttpURLConnection connection = execute("/first");
+        assertThat(connection.getResponseCode()).isEqualTo(204);
+        assertThat(connection.getHeaderField(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, GET, HEAD, POST");
     }
 
     @Test
-    public void test_webSecurityHeaders() {
-        try (Response response = execute("/first")) {
-            assertThat(response.code()).isEqualTo(204);
-            assertThat(response.header(HttpHeaders.CONTENT_SECURITY_POLICY)).isNotNull();
-        }
+    public void test_webSecurityHeaders() throws IOException {
+        HttpURLConnection connection = execute("/first");
+        assertThat(connection.getResponseCode()).isEqualTo(204);
+        assertThat(connection.getHeaderField(HttpHeaders.CONTENT_SECURITY_POLICY))
+                .isNotNull();
     }
 
     @Test
-    public void test_parameterized() {
-        try (Response response = execute("/second/paramValue/and/secondParam")) {
-            assertThat(response.code()).isEqualTo(204);
-            assertThat(response.header(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, PUT");
-        }
+    public void test_parameterized() throws IOException {
+        HttpURLConnection connection = execute("/second/paramValue/and/secondParam");
+        assertThat(connection.getResponseCode()).isEqualTo(204);
+        assertThat(connection.getHeaderField(HttpHeaders.ALLOW)).isEqualTo("OPTIONS, PUT");
     }
 
     @Test
-    public void test_customOptionsEndpoint() {
-        try (Response response = execute("GET", "/third")) {
-            assertThat(response.code()).isEqualTo(200);
-            assertThat(response.header(HttpHeaders.ALLOW)).isNull();
-        }
-        try (Response response = execute("OPTIONS", "/third")) {
-            assertThat(response.code()).isEqualTo(418);
-            assertThat(response.header(HttpHeaders.ALLOW)).isNull();
-        }
+    public void test_customOptionsEndpoint() throws IOException {
+        HttpURLConnection connection = execute("GET", "/third");
+        assertThat(connection.getResponseCode()).isEqualTo(200);
+        assertThat(connection.getHeaderField(HttpHeaders.ALLOW)).isNull();
+
+        HttpURLConnection otherConnection = execute("OPTIONS", "/third");
+        assertThat(otherConnection.getResponseCode()).isEqualTo(418);
+        assertThat(otherConnection.getHeaderField(HttpHeaders.ALLOW)).isNull();
     }
 
     @Test
-    public void test_customOptionsEndpointWithNoOtherMethods() {
-        try (Response response = execute("OPTIONS", "/fourth")) {
-            assertThat(response.code()).isEqualTo(418);
-            assertThat(response.header(HttpHeaders.ALLOW)).isNull();
-        }
+    public void test_customOptionsEndpointWithNoOtherMethods() throws IOException {
+        HttpURLConnection connection = execute("OPTIONS", "/fourth");
+        assertThat(connection.getResponseCode()).isEqualTo(418);
+        assertThat(connection.getHeaderField(HttpHeaders.ALLOW)).isNull();
     }
 
-    @MustBeClosed
-    private Response execute(String path) {
+    private HttpURLConnection execute(String path) {
         return execute("OPTIONS", path);
     }
 
-    @MustBeClosed
-    private Response execute(String method, String path) {
-        Request request = new Request.Builder()
-                .method(method, null)
-                .url("http://localhost:" + port + path)
-                .build();
+    private HttpURLConnection execute(String method, String path) {
         try {
-            return client.newCall(request).execute();
+            URL url = new URL("http://0.0.0.0:" + port + path);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod(method);
+            return connection;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
