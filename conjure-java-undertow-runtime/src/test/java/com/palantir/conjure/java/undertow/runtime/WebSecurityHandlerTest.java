@@ -21,10 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.net.HttpHeaders;
 import io.undertow.Undertow;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -91,14 +89,6 @@ public class WebSecurityHandlerTest {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             return connection;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static String getResponseBody(HttpURLConnection connection) {
-        try (InputStream response = connection.getInputStream()) {
-            return new String(response.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
