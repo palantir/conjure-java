@@ -22,9 +22,8 @@ import com.google.common.net.HttpHeaders;
 import io.undertow.Undertow;
 import io.undertow.util.Headers;
 import java.io.IOException;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,8 +31,6 @@ import org.junit.jupiter.api.Test;
 public class NoCachingResponseHandlerTest {
 
     private static Undertow server;
-
-    private static final OkHttpClient client = new OkHttpClient.Builder().build();
 
     @BeforeAll
     public static void beforeClass() {
@@ -57,12 +54,11 @@ public class NoCachingResponseHandlerTest {
 
     @Test
     public void testCacheControl() throws IOException {
-        try (Response response = client.newCall(new Request.Builder()
-                        .get()
-                        .url("http://localhost:12345")
-                        .build())
-                .execute()) {
-            assertThat(response.header(HttpHeaders.CACHE_CONTROL)).isEqualTo("no-cache, no-store, must-revalidate");
-        }
+        URL url = new URL("http://localhost:12345");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.getHeaderField(HttpHeaders.CACHE_CONTROL);
+        assertThat(connection.getHeaderField(HttpHeaders.CACHE_CONTROL))
+                .isEqualTo("no-cache, no-store, must-revalidate");
     }
 }

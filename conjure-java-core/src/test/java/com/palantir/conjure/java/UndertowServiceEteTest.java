@@ -565,7 +565,7 @@ public final class UndertowServiceEteTest extends TestBase {
     }
 
     private static HttpURLConnection openConnectionToTestApi(String path) throws IOException {
-        URL url = new URL("http://0.0.0.0:" + port + "/test-example/api" + path);
+        URL url = new URL("http://localhost:" + port + "/test-example/api" + path);
         return (HttpURLConnection) url.openConnection();
     }
 
