@@ -87,7 +87,7 @@ public class WebSecurityHandlerTest {
 
     private static HttpURLConnection openConnectionToTestServer() {
         try {
-            URL url = new URL("http://0.0.0.0:12345");
+            URL url = new URL("http://localhost:12345");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             return connection;

@@ -254,7 +254,7 @@ public final class AsyncRequestProcessingTest extends TestBase {
 
     private static HttpURLConnection openConnectionToTestServer(String path) {
         try {
-            URL url = new URL("http://0.0.0.0:" + PORT + path);
+            URL url = new URL("http://localhost:" + PORT + path);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             return connection;

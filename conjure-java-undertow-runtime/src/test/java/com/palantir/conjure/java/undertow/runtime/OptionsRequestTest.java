@@ -109,7 +109,7 @@ public final class OptionsRequestTest {
 
     private HttpURLConnection execute(String method, String path) {
         try {
-            URL url = new URL("http://0.0.0.0:" + port + path);
+            URL url = new URL("http://localhost:" + port + path);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod(method);
             return connection;
