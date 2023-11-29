@@ -19,15 +19,15 @@ import javax.annotation.processing.Generated;
 
 /**
  * This enumerates the numbers 1:2 also 100.
- * <p>
- * This class is used instead of a native enum to support unknown values.
- * Rather than throw an exception, the {@link EnumExample#valueOf} method defaults to a new instantiation of
- * {@link EnumExample} where {@link EnumExample#get} will return {@link EnumExample.Value#UNKNOWN}.
- * <p>
- * For example, {@code EnumExample.valueOf("corrupted value").get()} will return {@link EnumExample.Value#UNKNOWN},
+ *
+ * <p>This class is used instead of a native enum to support unknown values. Rather than throw an exception, the
+ * {@link EnumExample#valueOf} method defaults to a new instantiation of {@link EnumExample} where
+ * {@link EnumExample#get} will return {@link EnumExample.Value#UNKNOWN}.
+ *
+ * <p>For example, {@code EnumExample.valueOf("corrupted value").get()} will return {@link EnumExample.Value#UNKNOWN},
  * but {@link EnumExample#toString} will return "corrupted value".
- * <p>
- * There is no method to access all instantiations of this class, since they cannot be known at compile time.
+ *
+ * <p>There is no method to access all instantiations of this class, since they cannot be known at compile time.
  */
 @Generated("com.palantir.conjure.java.types.EnumGenerator")
 @Safe
@@ -35,14 +35,13 @@ import javax.annotation.processing.Generated;
 public final class EnumExample {
     public static final EnumExample ONE = new EnumExample(Value.ONE, "ONE");
 
-    /**
-     * @deprecated Prefer <code>ONE</code> where possible.
-     */
+    /** @deprecated Prefer <code>ONE</code> where possible. */
     @Deprecated
     public static final EnumExample TWO = new EnumExample(Value.TWO, "TWO");
 
     /**
      * Value of 100.
+     *
      * @deprecated One is easier to manage.
      */
     @Deprecated
@@ -122,14 +121,13 @@ public final class EnumExample {
     public enum Value {
         ONE,
 
-        /**
-         * @deprecated Prefer <code>ONE</code> where possible.
-         */
+        /** @deprecated Prefer <code>ONE</code> where possible. */
         @Deprecated
         TWO,
 
         /**
          * Value of 100.
+         *
          * @deprecated One is easier to manage.
          */
         @Deprecated
@@ -142,14 +140,13 @@ public final class EnumExample {
     public interface Visitor<T> {
         T visitOne();
 
-        /**
-         * @deprecated Prefer <code>ONE</code> where possible.
-         */
+        /** @deprecated Prefer <code>ONE</code> where possible. */
         @Deprecated
         T visitTwo();
 
         /**
          * Value of 100.
+         *
          * @deprecated One is easier to manage.
          */
         @Deprecated

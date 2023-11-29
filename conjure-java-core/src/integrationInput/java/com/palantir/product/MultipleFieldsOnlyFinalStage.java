@@ -84,27 +84,21 @@ public final class MultipleFieldsOnlyFinalStage {
         return this.itemsSet;
     }
 
-    /**
-     * @deprecated this list is deprecated
-     */
+    /** @deprecated this list is deprecated */
     @JsonProperty("itemsOld")
     @Deprecated
     public List<String> getItemsOld() {
         return this.itemsOld;
     }
 
-    /**
-     * @deprecated this map is deprecated
-     */
+    /** @deprecated this map is deprecated */
     @JsonProperty("itemsMapOld")
     @Deprecated
     public Map<String, Integer> getItemsMapOld() {
         return this.itemsMapOld;
     }
 
-    /**
-     * @deprecated this optional is deprecated
-     */
+    /** @deprecated this optional is deprecated */
     @JsonProperty("optionalItemOld")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @Deprecated
@@ -112,9 +106,7 @@ public final class MultipleFieldsOnlyFinalStage {
         return this.optionalItemOld;
     }
 
-    /**
-     * @deprecated this set is deprecated
-     */
+    /** @deprecated this set is deprecated */
     @JsonProperty("itemsSetOld")
     @Deprecated
     public Set<String> getItemsSetOld() {
@@ -315,9 +307,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this list is deprecated
-         */
+        /** @deprecated this list is deprecated */
         @Deprecated
         @JsonSetter(value = "itemsOld", nulls = Nulls.SKIP)
         public Builder itemsOld(@Nonnull Iterable<String> itemsOld) {
@@ -327,9 +317,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this list is deprecated
-         */
+        /** @deprecated this list is deprecated */
         @Deprecated
         public Builder addAllItemsOld(@Nonnull Iterable<String> itemsOld) {
             checkNotBuilt();
@@ -337,9 +325,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this list is deprecated
-         */
+        /** @deprecated this list is deprecated */
         @Deprecated
         public Builder itemsOld(String itemsOld) {
             checkNotBuilt();
@@ -347,9 +333,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this map is deprecated
-         */
+        /** @deprecated this map is deprecated */
         @Deprecated
         @JsonSetter(value = "itemsMapOld", nulls = Nulls.SKIP)
         public Builder itemsMapOld(@Nonnull Map<String, Integer> itemsMapOld) {
@@ -359,9 +343,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this map is deprecated
-         */
+        /** @deprecated this map is deprecated */
         @Deprecated
         public Builder putAllItemsMapOld(@Nonnull Map<String, Integer> itemsMapOld) {
             checkNotBuilt();
@@ -369,9 +351,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this map is deprecated
-         */
+        /** @deprecated this map is deprecated */
         @Deprecated
         public Builder itemsMapOld(String key, int value) {
             checkNotBuilt();
@@ -379,9 +359,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @JsonSetter(value = "optionalItemOld", nulls = Nulls.SKIP)
         public Builder optionalItemOld(@Nonnull Optional<String> optionalItemOld) {
@@ -390,9 +368,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         public Builder optionalItemOld(@Nonnull String optionalItemOld) {
             checkNotBuilt();
@@ -401,9 +377,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this set is deprecated
-         */
+        /** @deprecated this set is deprecated */
         @Deprecated
         @JsonSetter(value = "itemsSetOld", nulls = Nulls.SKIP)
         public Builder itemsSetOld(@Nonnull Iterable<String> itemsSetOld) {
@@ -413,9 +387,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this set is deprecated
-         */
+        /** @deprecated this set is deprecated */
         @Deprecated
         public Builder addAllItemsSetOld(@Nonnull Iterable<String> itemsSetOld) {
             checkNotBuilt();
@@ -424,9 +396,7 @@ public final class MultipleFieldsOnlyFinalStage {
             return this;
         }
 
-        /**
-         * @deprecated this set is deprecated
-         */
+        /** @deprecated this set is deprecated */
         @Deprecated
         public Builder itemsSetOld(String itemsSetOld) {
             checkNotBuilt();

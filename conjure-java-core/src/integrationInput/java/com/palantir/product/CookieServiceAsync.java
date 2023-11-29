@@ -21,15 +21,11 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(CookieServiceAsync.Factory.class)
 public interface CookieServiceAsync {
-    /**
-     * @apiNote {@code GET /cookies}
-     */
+    /** @apiNote {@code GET /cookies} */
     @ClientEndpoint(method = "GET", path = "/cookies")
     ListenableFuture<Void> eatCookies(BearerToken token);
 
-    /**
-     * Creates an asynchronous/non-blocking client for a CookieService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a CookieService service. */
     static CookieServiceAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceAsync() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
@@ -55,9 +51,7 @@ public interface CookieServiceAsync {
         };
     }
 
-    /**
-     * Creates an asynchronous/non-blocking client for a CookieService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a CookieService service. */
     static CookieServiceAsync of(Channel _channel, ConjureRuntime _runtime) {
         if (_channel instanceof EndpointChannelFactory) {
             return of((EndpointChannelFactory) _channel, _runtime);

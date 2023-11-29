@@ -20,15 +20,11 @@ import javax.annotation.processing.Generated;
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueInterfaceGenerator")
 @DialogueService(CookieServiceBlocking.Factory.class)
 public interface CookieServiceBlocking {
-    /**
-     * @apiNote {@code GET /cookies}
-     */
+    /** @apiNote {@code GET /cookies} */
     @ClientEndpoint(method = "GET", path = "/cookies")
     void eatCookies(BearerToken token);
 
-    /**
-     * Creates a synchronous/blocking client for a CookieService service.
-     */
+    /** Creates a synchronous/blocking client for a CookieService service. */
     static CookieServiceBlocking of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
         return new CookieServiceBlocking() {
             private final PlainSerDe _plainSerDe = _runtime.plainSerDe();
@@ -54,9 +50,7 @@ public interface CookieServiceBlocking {
         };
     }
 
-    /**
-     * Creates an asynchronous/non-blocking client for a CookieService service.
-     */
+    /** Creates an asynchronous/non-blocking client for a CookieService service. */
     static CookieServiceBlocking of(Channel _channel, ConjureRuntime _runtime) {
         if (_channel instanceof EndpointChannelFactory) {
             return of((EndpointChannelFactory) _channel, _runtime);

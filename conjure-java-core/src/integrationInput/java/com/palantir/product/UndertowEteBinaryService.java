@@ -8,34 +8,25 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
 public interface UndertowEteBinaryService {
-    /**
-     * @apiNote {@code POST /binary}
-     */
+    /** @apiNote {@code POST /binary} */
     BinaryResponseBody postBinary(AuthHeader authHeader, InputStream body);
 
-    /**
-     * @apiNote {@code POST /binary/throws}
-     */
+    /** @apiNote {@code POST /binary/throws} */
     BinaryResponseBody postBinaryThrows(AuthHeader authHeader, int bytesToRead, InputStream body);
 
-    /**
-     * @apiNote {@code GET /binary/optional/present}
-     */
+    /** @apiNote {@code GET /binary/optional/present} */
     Optional<BinaryResponseBody> getOptionalBinaryPresent(AuthHeader authHeader);
 
-    /**
-     * @apiNote {@code GET /binary/optional/empty}
-     */
+    /** @apiNote {@code GET /binary/optional/empty} */
     Optional<BinaryResponseBody> getOptionalBinaryEmpty(AuthHeader authHeader);
 
     /**
      * Throws an exception after partially writing a binary response.
+     *
      * @apiNote {@code GET /binary/failure}
      */
     BinaryResponseBody getBinaryFailure(AuthHeader authHeader, int numBytes);
 
-    /**
-     * @apiNote {@code GET /binary/aliased}
-     */
+    /** @apiNote {@code GET /binary/aliased} */
     Optional<BinaryResponseBody> getAliased(AuthHeader authHeader);
 }

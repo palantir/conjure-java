@@ -15,11 +15,14 @@ import javax.annotation.processing.Generated;
 enum DialogueEteEndpoints implements Endpoint {
     /**
      * foo bar baz.
+     *
      * <h2>Very Important Documentation</h2>
-     * <p>This documentation provides a <em>list</em>:</p>
+     *
+     * <p>This documentation provides a <em>list</em>:
+     *
      * <ul>
-     * <li>Docs rule</li>
-     * <li>Lists are wonderful</li>
+     *   <li>Docs rule
+     *   <li>Lists are wonderful
      * </ul>
      */
     string {
@@ -59,9 +62,7 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
-    /**
-     * one <em>two</em> three.
-     */
+    /** one <em>two</em> three. */
     integer {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("base").fixed("integer").build();
@@ -362,9 +363,7 @@ enum DialogueEteEndpoints implements Endpoint {
         }
     },
 
-    /**
-     * Path endpoint.
-     */
+    /** Path endpoint. */
     path {
         private final PathTemplate pathTemplate = PathTemplate.builder()
                 .fixed("base")

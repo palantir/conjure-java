@@ -75,9 +75,7 @@ public final class MultipleOrderedStages {
         return this.mappedRids;
     }
 
-    /**
-     * @deprecated this optional is deprecated
-     */
+    /** @deprecated this optional is deprecated */
     @JsonProperty("optionalItem")
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @Deprecated
@@ -184,15 +182,11 @@ public final class MultipleOrderedStages {
 
         Completed_StageBuilder mappedRids(ResourceIdentifier key, String value);
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         Completed_StageBuilder optionalItem(@Nonnull Optional<OneField> optionalItem);
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         Completed_StageBuilder optionalItem(@Nonnull OneField optionalItem);
     }
@@ -228,16 +222,12 @@ public final class MultipleOrderedStages {
         @Override
         Builder mappedRids(ResourceIdentifier key, String value);
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @Override
         Builder optionalItem(@Nonnull Optional<OneField> optionalItem);
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @Override
         Builder optionalItem(@Nonnull OneField optionalItem);
@@ -331,9 +321,7 @@ public final class MultipleOrderedStages {
             return this;
         }
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @Override
         @JsonSetter(value = "optionalItem", nulls = Nulls.SKIP)
@@ -343,9 +331,7 @@ public final class MultipleOrderedStages {
             return this;
         }
 
-        /**
-         * @deprecated this optional is deprecated
-         */
+        /** @deprecated this optional is deprecated */
         @Deprecated
         @Override
         public Builder optionalItem(@Nonnull OneField optionalItem) {

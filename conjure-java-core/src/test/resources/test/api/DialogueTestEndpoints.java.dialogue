@@ -14,9 +14,7 @@ import javax.annotation.processing.Generated;
 
 @Generated("com.palantir.conjure.java.services.dialogue.DialogueEndpointsGenerator")
 enum DialogueTestEndpoints implements Endpoint {
-    /**
-     * Returns a mapping from file system id to backing file system configuration.
-     */
+    /** Returns a mapping from file system id to backing file system configuration. */
     getFileSystems {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("catalog").fixed("fileSystems").build();
@@ -54,9 +52,7 @@ enum DialogueTestEndpoints implements Endpoint {
         }
     },
 
-    /**
-     * foo $bar
-     */
+    /** foo $bar */
     createDataset {
         private final PathTemplate pathTemplate =
                 PathTemplate.builder().fixed("catalog").fixed("datasets").build();
@@ -356,9 +352,7 @@ enum DialogueTestEndpoints implements Endpoint {
         }
     },
 
-    /**
-     * Gets all branches of this dataset.
-     */
+    /** Gets all branches of this dataset. */
     getBranchesDeprecated {
         private final PathTemplate pathTemplate = PathTemplate.builder()
                 .fixed("catalog")

@@ -29,26 +29,20 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.processing.Generated;
 
-/**
- * A Markdown description of the service.
- */
+/** A Markdown description of the service. */
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/")
 @Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
 public interface TestService {
-    /**
-     * Returns a mapping from file system id to backing file system configuration.
-     */
+    /** Returns a mapping from file system id to backing file system configuration. */
     @GET
     @Path("catalog/fileSystems")
     @Incubating
     @ClientEndpoint(method = "GET", path = "/catalog/fileSystems")
     Map<String, BackingFileSystem> getFileSystems(@HeaderParam("Authorization") AuthHeader authHeader);
 
-    /**
-     * foo $bar
-     */
+    /** foo $bar */
     @POST
     @Path("catalog/datasets")
     @ClientEndpoint(method = "POST", path = "/catalog/datasets")
@@ -107,9 +101,7 @@ public interface TestService {
     @ClientEndpoint(method = "POST", path = "/catalog/datasets/upload-raw-aliased")
     void uploadAliasedRawData(@HeaderParam("Authorization") AuthHeader authHeader, InputStream input);
 
-    /**
-     * @param datasetRid A valid dataset resource identifier.
-     */
+    /** @param datasetRid A valid dataset resource identifier. */
     @GET
     @Path("catalog/datasets/{datasetRid}/branches")
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches")
@@ -119,6 +111,7 @@ public interface TestService {
 
     /**
      * Gets all branches of this dataset.
+     *
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */

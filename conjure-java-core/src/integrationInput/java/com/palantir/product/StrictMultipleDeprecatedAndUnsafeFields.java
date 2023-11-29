@@ -65,6 +65,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
     /**
      * these are docs.
+     *
      * @deprecated this is deprecated.
      */
     @JsonProperty("myList")
@@ -74,9 +75,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         return this.myList;
     }
 
-    /**
-     * @deprecated this is deprecated.
-     */
+    /** @deprecated this is deprecated. */
     @JsonProperty("bearerTokenValue")
     @Deprecated
     public BearerToken getBearerTokenValue() {
@@ -308,6 +307,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
 
         /**
          * these are docs.
+         *
          * @deprecated this is deprecated.
          */
         @Deprecated
@@ -319,9 +319,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
             return this;
         }
 
-        /**
-         * @deprecated this is deprecated.
-         */
+        /** @deprecated this is deprecated. */
         @Deprecated
         @Override
         @JsonSetter("bearerTokenValue")
