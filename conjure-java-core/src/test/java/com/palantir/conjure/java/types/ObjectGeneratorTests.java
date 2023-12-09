@@ -73,6 +73,24 @@ public final class ObjectGeneratorTests {
     }
 
     @Test
+    public void testObjectGenerator_allExampleEnumTypes() throws IOException {
+        ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-enum-types.yml")));
+        List<Path> files = new GenerationCoordinator(
+                        MoreExecutors.directExecutor(),
+                        ImmutableSet.of(new ObjectGenerator(Options.builder()
+                                .useImmutableBytes(true)
+                                .strictObjects(true)
+                                .nonNullCollections(true)
+                                .excludeEmptyOptionals(true)
+                                .unionsWithUnknownValues(true)
+                                .jetbrainsContractAnnotations(true)
+                                .build())))
+                .emit(def, tempDir);
+
+        assertThatFilesAreTheSame(files, REFERENCE_FILES_FOLDER);
+    }
+
+    @Test
     public void testObjectGenerator_byteBufferCompatibility() throws IOException {
         ConjureDefinition def =
                 Conjure.parse(ImmutableList.of(new File("src/test/resources/example-binary-types.yml")));

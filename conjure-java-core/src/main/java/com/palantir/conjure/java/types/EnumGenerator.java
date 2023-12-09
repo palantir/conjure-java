@@ -69,6 +69,8 @@ public final class EnumGenerator {
     private static final String STAGE_VISITOR_BUILDER = "StageVisitorBuilder";
     private static final String VISITOR_FIELD_NAME_SUFFIX = "Visitor";
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
+    /** The largest number of values allowed in the enum before we stop generating visitor builders. */
+    private static final int MAXIMUM_ENUM_VALUE_COUNT_FOR_VISITOR_BUILDERS = 50;
 
     private EnumGenerator() {}
 
@@ -100,10 +102,14 @@ public final class EnumGenerator {
                 .addAnnotation(Immutable.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addType(createEnum(enumClass, typeDef.getValues(), true))
-                .addType(createVisitor(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()))
-                .addType(createVisitorBuilder(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()))
-                .addTypes(generateVisitorBuilderStageInterfaces(thisClass, visitorClass, typeDef.getValues()))
-                .addField(enumClass, VALUE_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
+                .addType(createVisitor(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()));
+
+        if (typeDef.getValues().size() <= MAXIMUM_ENUM_VALUE_COUNT_FOR_VISITOR_BUILDERS) {
+            wrapper.addType(createVisitorBuilder(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()))
+                    .addTypes(generateVisitorBuilderStageInterfaces(thisClass, visitorClass, typeDef.getValues()));
+        }
+
+        wrapper.addField(enumClass, VALUE_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
                 .addField(ClassName.get(String.class), STRING_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
                 .addFields(createConstants(typeDef.getValues(), thisClass, enumClass))
                 .addField(createValuesList(thisClass, typeDef.getValues()))
@@ -187,8 +193,8 @@ public final class EnumGenerator {
             ClassName enumClass,
             ClassName visitorClass,
             ClassName visitorBuilderClass,
-            Iterable<EnumValueDefinition> values) {
-        return TypeSpec.interfaceBuilder(visitorClass.simpleName())
+            List<EnumValueDefinition> values) {
+        TypeSpec.Builder wrapper = TypeSpec.interfaceBuilder(visitorClass.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addModifiers(Modifier.PUBLIC)
                 .addTypeVariable(TYPE_VARIABLE)
@@ -197,18 +203,20 @@ public final class EnumGenerator {
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                         .addParameter(String.class, "unknownValue")
                         .returns(TYPE_VARIABLE)
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("builder")
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                        .addTypeVariable(TYPE_VARIABLE)
-                        .addStatement("return new $T<$T>()", visitorBuilderClass, TYPE_VARIABLE)
-                        .returns(ParameterizedTypeName.get(
-                                visitorStageInterfaceName(
-                                        enumClass,
-                                        stageEnumNames(values).findFirst().get()),
-                                TYPE_VARIABLE))
-                        .build())
-                .build();
+                        .build());
+        if (values.size() <= MAXIMUM_ENUM_VALUE_COUNT_FOR_VISITOR_BUILDERS) {
+            wrapper.addMethod(MethodSpec.methodBuilder("builder")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addTypeVariable(TYPE_VARIABLE)
+                    .addStatement("return new $T<$T>()", visitorBuilderClass, TYPE_VARIABLE)
+                    .returns(ParameterizedTypeName.get(
+                            visitorStageInterfaceName(
+                                    enumClass,
+                                    stageEnumNames(values).findFirst().get()),
+                            TYPE_VARIABLE))
+                    .build());
+        }
+        return wrapper.build();
     }
 
     private static Stream<String> stageEnumNames(Iterable<EnumValueDefinition> values) {
