@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Omit the enum visitor builder for large enums
+  links:
+  - https://github.com/palantir/conjure-java/pull/2144
