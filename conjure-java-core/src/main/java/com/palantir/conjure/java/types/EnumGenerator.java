@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -68,6 +69,7 @@ public final class EnumGenerator {
     private static final String COMPLETED = "completed_";
     private static final String STAGE_VISITOR_BUILDER = "StageVisitorBuilder";
     private static final String VISITOR_FIELD_NAME_SUFFIX = "Visitor";
+    private static final int MAX_VALUES_FOR_STAGED_BUILDER = 100;
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
 
     private EnumGenerator() {}
@@ -78,7 +80,9 @@ public final class EnumGenerator {
         ClassName thisClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
         ClassName enumClass = thisClass.nestedClass("Value");
         ClassName visitorClass = thisClass.nestedClass("Visitor");
-        ClassName visitorBuilderClass = thisClass.nestedClass("VisitorBuilder");
+        Optional<ClassName> visitorBuilderClass = typeDef.getValues().size() <= MAX_VALUES_FOR_STAGED_BUILDER
+                ? Optional.of(thisClass.nestedClass("VisitorBuilder"))
+                : Optional.empty();
 
         return JavaFile.builder(
                         prefixedTypeName.getPackage(),
@@ -93,17 +97,20 @@ public final class EnumGenerator {
             ClassName thisClass,
             ClassName enumClass,
             ClassName visitorClass,
-            ClassName visitorBuilderClass) {
+            Optional<ClassName> visitorBuilderClass) {
         TypeSpec.Builder wrapper = TypeSpec.classBuilder(typeDef.getTypeName().getName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addAnnotation(Safe.class)
                 .addAnnotation(Immutable.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addType(createEnum(enumClass, typeDef.getValues(), true))
-                .addType(createVisitor(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()))
-                .addType(createVisitorBuilder(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()))
-                .addTypes(generateVisitorBuilderStageInterfaces(thisClass, visitorClass, typeDef.getValues()))
-                .addField(enumClass, VALUE_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
+                .addType(createVisitor(thisClass, visitorClass, visitorBuilderClass, typeDef.getValues()));
+        if (visitorBuilderClass.isPresent()) {
+            wrapper.addType(createVisitorBuilder(
+                            thisClass, visitorClass, visitorBuilderClass.get(), typeDef.getValues()))
+                    .addTypes(generateVisitorBuilderStageInterfaces(thisClass, visitorClass, typeDef.getValues()));
+        }
+        wrapper.addField(enumClass, VALUE_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
                 .addField(ClassName.get(String.class), STRING_PARAMETER, Modifier.PRIVATE, Modifier.FINAL)
                 .addFields(createConstants(typeDef.getValues(), thisClass, enumClass))
                 .addField(createValuesList(thisClass, typeDef.getValues()))
@@ -186,9 +193,9 @@ public final class EnumGenerator {
     private static TypeSpec createVisitor(
             ClassName enumClass,
             ClassName visitorClass,
-            ClassName visitorBuilderClass,
+            Optional<ClassName> visitorBuilderClass,
             Iterable<EnumValueDefinition> values) {
-        return TypeSpec.interfaceBuilder(visitorClass.simpleName())
+        TypeSpec.Builder typeSpec = TypeSpec.interfaceBuilder(visitorClass.simpleName())
                 .addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(EnumGenerator.class))
                 .addModifiers(Modifier.PUBLIC)
                 .addTypeVariable(TYPE_VARIABLE)
@@ -197,18 +204,20 @@ public final class EnumGenerator {
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                         .addParameter(String.class, "unknownValue")
                         .returns(TYPE_VARIABLE)
-                        .build())
-                .addMethod(MethodSpec.methodBuilder("builder")
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                        .addTypeVariable(TYPE_VARIABLE)
-                        .addStatement("return new $T<$T>()", visitorBuilderClass, TYPE_VARIABLE)
-                        .returns(ParameterizedTypeName.get(
-                                visitorStageInterfaceName(
-                                        enumClass,
-                                        stageEnumNames(values).findFirst().get()),
-                                TYPE_VARIABLE))
-                        .build())
-                .build();
+                        .build());
+        if (visitorBuilderClass.isPresent()) {
+            typeSpec = typeSpec.addMethod(MethodSpec.methodBuilder("builder")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .addTypeVariable(TYPE_VARIABLE)
+                    .addStatement("return new $T<$T>()", visitorBuilderClass.get(), TYPE_VARIABLE)
+                    .returns(ParameterizedTypeName.get(
+                            visitorStageInterfaceName(
+                                    enumClass,
+                                    stageEnumNames(values).findFirst().get()),
+                            TYPE_VARIABLE))
+                    .build());
+        }
+        return typeSpec.build();
     }
 
     private static Stream<String> stageEnumNames(Iterable<EnumValueDefinition> values) {
