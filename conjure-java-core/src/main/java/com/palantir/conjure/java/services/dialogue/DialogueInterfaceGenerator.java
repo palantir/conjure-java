@@ -166,7 +166,15 @@ public final class DialogueInterfaceGenerator {
                 .forEach(referenceType -> methodBuilder.addAnnotation(
                         ClassName.get(referenceType.getPackage(), referenceType.getName())));
 
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
+        endpointDef.getDeprecated().ifPresent(_deprecatedValue -> {
+            if (endpointDef.getTags().contains("deprecated-for-removal")) {
+                methodBuilder.addAnnotation(AnnotationSpec.builder(Deprecated.class)
+                        .addMember("forRemoval", "true")
+                        .build());
+            } else {
+                methodBuilder.addAnnotation(Deprecated.class);
+            }
+        });
         methodBuilder.addJavadoc("$L", ServiceGenerators.getJavaDocWithRequestLine(endpointDef));
 
         TypeName returnType = returnTypeMapper.apply(endpointDef.getReturns());

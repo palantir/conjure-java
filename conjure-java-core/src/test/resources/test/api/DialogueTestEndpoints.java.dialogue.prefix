@@ -387,6 +387,48 @@ enum DialogueTestEndpoints implements Endpoint {
         }
     },
 
+    /** Gets all branches of this dataset. */
+    getBranchesDeprecatedForRemoval {
+        private final PathTemplate pathTemplate = PathTemplate.builder()
+                .fixed("catalog")
+                .fixed("datasets")
+                .variable("datasetRid")
+                .fixed("branchesDeprecatedForRemoval")
+                .build();
+
+        private final ImmutableSet<String> tags = ImmutableSet.of("deprecated-for-removal");
+
+        @Override
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            pathTemplate.fill(params, url);
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.GET;
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String endpointName() {
+            return "getBranchesDeprecatedForRemoval";
+        }
+
+        @Override
+        public String version() {
+            return VERSION;
+        }
+
+        @Override
+        public Set<String> tags() {
+            return tags;
+        }
+    },
+
     resolveBranch {
         private final PathTemplate pathTemplate = PathTemplate.builder()
                 .fixed("catalog")

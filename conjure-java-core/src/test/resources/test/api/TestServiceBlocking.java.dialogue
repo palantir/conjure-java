@@ -110,6 +110,17 @@ public interface TestServiceBlocking {
     @Deprecated
     Set<String> getBranchesDeprecated(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @apiNote {@code GET /catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval}
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval")
+    @Deprecated(forRemoval = true)
+    Set<String> getBranchesDeprecatedForRemoval(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
+
     /** @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve} */
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
     Optional<String> resolveBranch(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid, String branch);
@@ -230,6 +241,12 @@ public interface TestServiceBlocking {
                     _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranchesDeprecated);
 
             private final Deserializer<Set<String>> getBranchesDeprecatedDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
+
+            private final EndpointChannel getBranchesDeprecatedForRemovalChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.getBranchesDeprecatedForRemoval);
+
+            private final Deserializer<Set<String>> getBranchesDeprecatedForRemovalDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Set<String>>() {});
 
             private final EndpointChannel resolveBranchChannel =
@@ -406,6 +423,19 @@ public interface TestServiceBlocking {
                 return _runtime.clients()
                         .callBlocking(
                                 getBranchesDeprecatedChannel, _request.build(), getBranchesDeprecatedDeserializer);
+            }
+
+            @Override
+            @SuppressWarnings("deprecation")
+            public Set<String> getBranchesDeprecatedForRemoval(AuthHeader authHeader, ResourceIdentifier datasetRid) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                _request.putPathParams("datasetRid", _plainSerDe.serializeRid(datasetRid));
+                return _runtime.clients()
+                        .callBlocking(
+                                getBranchesDeprecatedForRemovalChannel,
+                                _request.build(),
+                                getBranchesDeprecatedForRemovalDeserializer);
             }
 
             @Override

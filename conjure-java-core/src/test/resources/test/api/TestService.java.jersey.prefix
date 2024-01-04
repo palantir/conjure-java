@@ -123,6 +123,20 @@ public interface TestService {
             @HeaderParam("Authorization") AuthHeader authHeader,
             @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
 
+    /**
+     * Gets all branches of this dataset.
+     *
+     * @param datasetRid A valid dataset resource identifier.
+     * @deprecated use getBranches instead
+     */
+    @GET
+    @Path("catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval")
+    @Deprecated
+    @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval")
+    Set<String> getBranchesDeprecatedForRemoval(
+            @HeaderParam("Authorization") AuthHeader authHeader,
+            @Safe @PathParam("datasetRid") ResourceIdentifier datasetRid);
+
     @GET
     @Path("catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve")
