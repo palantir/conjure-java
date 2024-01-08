@@ -96,7 +96,6 @@ com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider:2.15.3 (1 constraints: 4
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.15.3 (3 constraints: 5a22f1f5)
 com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.15.3 (2 constraints: df2e0e6a)
 com.fasterxml.jackson.module:jackson-module-parameter-names:2.15.3 (1 constraints: b20e5a5e)
-com.github.stefanbirkner:system-lambda:1.2.0 (1 constraints: 0505f635)
 com.google.auto.value:auto-value:1.7.4 (1 constraints: 1f1221fb)
 com.google.auto.value:auto-value-annotations:1.7.4 (1 constraints: 640a29b9)
 com.google.testing.compile:compile-testing:0.19 (1 constraints: de04f630)
