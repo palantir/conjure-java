@@ -39,6 +39,7 @@ import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
+import io.dropwizard.logging.ExternalLoggingFactory;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.DataOutputStream;
