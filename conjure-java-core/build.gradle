@@ -83,6 +83,7 @@ dependencies {
     testImplementation 'io.dropwizard:dropwizard-core'
     testImplementation 'io.dropwizard:dropwizard-jersey'
     testImplementation 'io.dropwizard:dropwizard-jetty'
+    testImplementation 'io.dropwizard:dropwizard-logging'
     testImplementation 'io.dropwizard:dropwizard-testing'
     testImplementation 'javax.validation:validation-api'
     testImplementation 'org.assertj:assertj-core'
