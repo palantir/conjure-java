@@ -67,7 +67,7 @@ allprojects {
                 details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
                 details.because "The error_prone_annotations dependency must be low to avoid forcing consumers to use newer releases"
             }
-            if (details.requested.group.startsWith('com.fasterxml.jackson') && details.requested.version == '2.16.0') {
+            if (details.requested.group.startsWith('com.fasterxml.jackson') && (details.requested.version == '2.16.0' || details.requested.version == '2.16.1')) {
                 details.useTarget group: details.requested.group, name: details.requested.name, version: '2.15.3'
                 details.because 'https://github.com/FasterXML/jackson-databind/pull/4230'
             }
