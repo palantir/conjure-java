@@ -68,7 +68,6 @@ dependencies {
     testImplementation project(':conjure-java-undertow-runtime')
     testImplementation 'com.fasterxml.jackson.core:jackson-core'
     testImplementation 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider'
-    testImplementation 'com.github.stefanbirkner:system-lambda'
     testImplementation 'com.palantir.conjure.java.api:service-config'
     testImplementation 'com.palantir.conjure.java.api:ssl-config'
     testImplementation 'com.palantir.conjure.java.runtime:client-config'
