@@ -39,6 +39,7 @@ import com.palantir.product.StringAliasExample;
 import com.palantir.ri.ResourceIdentifier;
 import com.palantir.tokens.auth.AuthHeader;
 import io.dropwizard.Configuration;
+import io.dropwizard.logging.ExternalLoggingFactory;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.DataOutputStream;
@@ -76,7 +77,15 @@ public final class JerseyServiceEteTest extends TestBase {
     public static File folder;
 
     // Has a side effect that is necessary for this test, even though it looks unused
-    public static final DropwizardAppExtension<Configuration> RULE = new DropwizardAppExtension<>(EteTestServer.class);
+    public static final DropwizardAppExtension<Configuration> RULE =
+            new DropwizardAppExtension<>(EteTestServer.class, new Configuration() {
+                {
+                    // DefaultLoggingFactory always resets the level to DEBUG after all tests have executed,
+                    // which can cause problems on other test classes
+                    // due to https://issues.apache.org/jira/browse/HTTPCLIENT-2313
+                    setLoggingFactory(new ExternalLoggingFactory());
+                }
+            });
 
     private final EteServiceBlocking client;
     private final EteBinaryServiceBlocking binaryClient;

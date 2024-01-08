@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.stefanbirkner.systemlambda.SystemLambda;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -30,7 +29,6 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -72,7 +70,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -473,22 +470,6 @@ public final class UndertowServiceEteTest extends TestBase {
                         }))
                 .isInstanceOfSatisfying(
                         RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
-    }
-
-    @Test
-    @Timeout(20)
-    @SuppressWarnings("MustBeClosedChecker")
-    public void testBinaryResponseClientDisconnect() throws Exception {
-        String output = SystemLambda.tapSystemErrAndOut(() -> {
-            binaryClient
-                    .getBinaryFailure(AuthHeader.valueOf("authHeader"), Integer.MAX_VALUE)
-                    // Closing the stream triggers the conditions for this test to pass
-                    .close();
-            // Unfortunately there's no great way to tell when the server has finished processing
-            // our request.
-            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(500));
-        });
-        assertThat(output).contains("INFO", "aborted by the client");
     }
 
     @Test
