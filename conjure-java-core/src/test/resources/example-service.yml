@@ -158,6 +158,21 @@ services:
         docs: |
           Gets all branches of this dataset.
         deprecated: use getBranches instead
+      getBranchesDeprecatedForRemoval:
+        http: GET /datasets/{datasetRid}/branchesDeprecatedForRemoval
+        args:
+          datasetRid:
+            type: rid
+            docs: |
+              A valid dataset resource identifier.
+            markers:
+              - Safe
+        returns: set<string>
+        docs: |
+          Gets all branches of this dataset.
+        deprecated: use getBranches instead
+        tags:
+          - deprecated-for-removal
 
       resolveBranch:
         http: GET /datasets/{datasetRid}/branches/{branch:.+}/resolve
