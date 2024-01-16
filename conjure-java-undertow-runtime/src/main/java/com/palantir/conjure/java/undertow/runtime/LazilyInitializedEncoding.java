@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.google.common.base.Suppliers;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
 import java.io.IOException;
@@ -46,8 +47,18 @@ final class LazilyInitializedEncoding implements Encoding {
     }
 
     @Override
+    public <T> Serializer<T> serializer(TypeMarker<T> type, Endpoint endpoint) {
+        return new LazilyInitializedSerializer<>(() -> delegate.serializer(type, endpoint));
+    }
+
+    @Override
     public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
         return new LazilyInitializedDeserializer<>(() -> delegate.deserializer(type));
+    }
+
+    @Override
+    public <T> Deserializer<T> deserializer(TypeMarker<T> type, Endpoint endpoint) {
+        return new LazilyInitializedDeserializer<>(() -> delegate.deserializer(type, endpoint));
     }
 
     @Override
@@ -77,6 +88,11 @@ final class LazilyInitializedEncoding implements Encoding {
         public void serialize(T value, OutputStream output) throws IOException {
             delegate.get().serialize(value, output);
         }
+
+        @Override
+        public String toString() {
+            return "LazilyInitializedSerializer{" + delegate + '}';
+        }
     }
 
     private static final class LazilyInitializedDeserializer<T> implements Deserializer<T> {
@@ -90,6 +106,11 @@ final class LazilyInitializedEncoding implements Encoding {
         @Override
         public T deserialize(InputStream input) throws IOException {
             return delegate.get().deserialize(input);
+        }
+
+        @Override
+        public String toString() {
+            return "LazilyInitializedDeserializer{" + delegate + '}';
         }
     }
 }
