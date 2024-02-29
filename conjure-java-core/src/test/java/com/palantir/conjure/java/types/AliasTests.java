@@ -16,17 +16,21 @@
 
 package com.palantir.conjure.java.types;
 
+import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.product.DoubleAliasExample;
 import com.palantir.product.ExternalLongAliasOne;
 import com.palantir.product.ExternalLongAliasTwo;
 import com.palantir.product.UuidAliasExample;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 public class AliasTests {
@@ -37,6 +41,20 @@ public class AliasTests {
         assertThatThrownBy(() -> UuidAliasExample.of(null))
                 .isInstanceOf(SafeNullPointerException.class)
                 .hasMessage("value cannot be null");
+    }
+
+    @Test
+    void testValueOf_validUuid_succeeds() {
+        UUID uuid = UUID.randomUUID();
+        assertThat(UuidAliasExample.valueOf(uuid.toString())).isEqualTo(UuidAliasExample.of(uuid));
+    }
+
+    @Test
+    void testValueOf_invalidUuid_throwsSafeException() {
+        assertThatLoggableExceptionThrownBy(() -> UuidAliasExample.valueOf("not-a-uuid"))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("Unable to parse as UUID")
+                .hasExactlyArgs(UnsafeArg.of("input", "not-a-uuid"));
     }
 
     @Test
