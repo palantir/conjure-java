@@ -223,6 +223,12 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Union visitors expose the values of unknowns in addition to their types.")
         private boolean unionsWithUnknownValues;
 
+        @CommandLine.Option(
+                names = "--externalFallbackTypes",
+                defaultValue = "false",
+                description = "Java external type imports are generated using their fallback type.")
+        private boolean externalFallbackTypes;
+
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -253,7 +259,7 @@ public final class ConjureJavaCli implements Runnable {
                 if (config.generateDialogue()) {
                     generatorBuilder.add(new DialogueServiceGenerator(config.options()));
                 }
-                new GenerationCoordinator(executor, generatorBuilder.build())
+                new GenerationCoordinator(executor, generatorBuilder.build(), config.options())
                         .emit(conjureDefinition, config.outputDirectory());
             } catch (IOException e) {
                 throw new SafeRuntimeException("Error parsing definition", e);
@@ -290,6 +296,7 @@ public final class ConjureJavaCli implements Runnable {
                             .excludeEmptyOptionals(excludeEmptyOptionals)
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
+                            .externalFallbackTypes(externalFallbackTypes)
                             .build())
                     .build();
         }

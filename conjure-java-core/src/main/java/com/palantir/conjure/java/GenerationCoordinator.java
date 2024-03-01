@@ -30,10 +30,16 @@ public class GenerationCoordinator {
 
     private final Executor executor;
     private final Set<Generator> generators;
+    private final Options options;
 
-    public GenerationCoordinator(Executor executor, Set<Generator> generators) {
+    public GenerationCoordinator(Executor executor, Set<Generator> generators, Options options) {
         this.executor = executor;
         this.generators = generators;
+        this.options = options;
+    }
+
+    public GenerationCoordinator(Executor executor, Set<Generator> generators) {
+        this(executor, generators, Options.empty());
     }
 
     /**
@@ -41,8 +47,9 @@ public class GenerationCoordinator {
      * the instance's service and type generators.
      */
     public List<Path> emit(ConjureDefinition conjureDefinition, File outputDir) {
+        ConjureDefinition definition = new ExternalImportFilter(options).filter(conjureDefinition);
         return MoreStreams.inCompletionOrder(
-                        generators.stream().flatMap(generator -> generator.generate(conjureDefinition)),
+                        generators.stream().flatMap(generator -> generator.generate(definition)),
                         f -> Goethe.formatAndEmit(f, outputDir.toPath()),
                         executor,
                         Runtime.getRuntime().availableProcessors())
