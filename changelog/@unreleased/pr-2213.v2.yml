@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Java generator supports ignoring external type imports using the `externalFallbackTypes`
+    generator option
+  links:
+  - https://github.com/palantir/conjure-java/pull/2213
