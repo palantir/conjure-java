@@ -16,21 +16,24 @@
 
 package com.palantir.conjure.java.cli;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import com.palantir.conjure.java.Options;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import picocli.CommandLine;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import picocli.CommandLine;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public final class ConjureJavaCliTest {
 
@@ -133,6 +136,10 @@ public final class ConjureJavaCliTest {
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Target must exist and be a file");
+
+        assertThatThrownBy(() -> ConjureJavaCli.inProcessExecution(args))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("Target must exist and be a file");
     }
 
     @Test
@@ -140,6 +147,10 @@ public final class ConjureJavaCliTest {
         String[] args = {"generate", targetFile.getAbsolutePath(), "bar"};
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
+                .hasMessageContaining("Output must exist and be a directory");
+
+        assertThatThrownBy(() -> ConjureJavaCli.inProcessExecution(args))
+                .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Output must exist and be a directory");
     }
 
@@ -149,6 +160,10 @@ public final class ConjureJavaCliTest {
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
                 .hasMessageContaining("Must specify exactly one project to generate");
+
+        assertThatThrownBy(() -> ConjureJavaCli.inProcessExecution(args))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasMessageContaining("Must specify exactly one project to generate");
     }
 
     @Test
@@ -156,6 +171,10 @@ public final class ConjureJavaCliTest {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects", "--jersey"};
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
+                .hasMessageContaining("Must specify exactly one project to generate");
+
+        assertThatThrownBy(() -> ConjureJavaCli.inProcessExecution(args))
+                .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasMessageContaining("Must specify exactly one project to generate");
     }
 
@@ -183,6 +202,10 @@ public final class ConjureJavaCliTest {
         String[] args = {"generate", targetFile.getAbsolutePath(), tempDir.getAbsolutePath(), "--objects"};
         assertThatThrownBy(() -> CommandLine.run(new ConjureJavaCli(), args))
                 .isInstanceOf(CommandLine.ExecutionException.class)
+                .hasMessageContaining("Error parsing definition");
+
+        assertThatThrownBy(() -> ConjureJavaCli.inProcessExecution(args))
+                .isInstanceOf(SafeRuntimeException.class)
                 .hasMessageContaining("Error parsing definition");
     }
 

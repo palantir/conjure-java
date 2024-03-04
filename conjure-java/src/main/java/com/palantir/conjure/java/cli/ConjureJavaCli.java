@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.palantir.conjure.java.GenerationCoordinator;
@@ -31,6 +32,7 @@ import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.java.types.ErrorGenerator;
 import com.palantir.conjure.java.types.ObjectGenerator;
+import com.palantir.conjure.java.undertow.lib.ExceptionHandler;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.squareup.javapoet.ClassName;
@@ -55,12 +57,39 @@ public final class ConjureJavaCli implements Runnable {
     private static final ClassName _loaded = ClassName.get(Runnable.class);
 
     public static void main(String[] args) {
-        CommandLine.run(new ConjureJavaCli(), args);
+        System.exit(new CommandLine(new ConjureJavaCli()).execute(args));
+    }
+
+    public static void inProcessExecution(String[] args) {
+        ExceptionHandler exceptionHandler = new ExceptionHandler();
+        new CommandLine(new ConjureJavaCli())
+                .setExecutionExceptionHandler(exceptionHandler)
+                .execute(args);
+        exceptionHandler.maybeRethrowException();
     }
 
     @Override
     public void run() {
         CommandLine.usage(this, System.out);
+    }
+
+    public static final class ExceptionHandler implements CommandLine.IExecutionExceptionHandler {
+
+        private Optional<Exception> thrownException = Optional.empty();
+
+        @Override
+        public int handleExecutionException(Exception ex, CommandLine _commandLine, CommandLine.ParseResult _parseResult)
+                throws Exception {
+            thrownException = Optional.ofNullable(ex);
+            if (thrownException.isEmpty()) {
+                return 0;
+            }
+            return -1;
+        }
+
+        private void maybeRethrowException() {
+            thrownException.ifPresent(Throwables::throwIfUnchecked);
+        }
     }
 
     @CommandLine.Command(
