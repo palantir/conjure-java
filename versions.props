@@ -35,7 +35,7 @@ org.immutables:value = 2.10.1
 org.javassist:javassist = 3.22.0-GA
 org.jetbrains:annotations = 24.1.0
 org.junit.jupiter:* = 5.10.2
-org.mockito:* = 5.10.0
+org.mockito:* = 5.11.0
 org.slf4j:* = 1.7.36
 org.wildfly.common:wildfly-common = 1.7.0.Final
 
