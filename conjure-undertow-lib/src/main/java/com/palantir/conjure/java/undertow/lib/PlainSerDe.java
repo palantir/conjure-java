@@ -99,7 +99,7 @@ public interface PlainSerDe {
 
     Set<Integer> deserializeIntegerSet(@Nullable Iterable<String> in);
 
-    ResourceIdentifier deserializeRid(String in);
+    ResourceIdentifier deserializeRid(@Nullable String in);
 
     ResourceIdentifier deserializeRid(@Nullable Iterable<String> in);
 
