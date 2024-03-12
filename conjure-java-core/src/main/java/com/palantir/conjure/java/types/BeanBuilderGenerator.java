@@ -677,11 +677,28 @@ public final class BeanBuilderGenerator {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             if (shouldClearFirst) {
+                if (options.nonNullCollections()) {
+                    return CodeBlocks.statement(
+                            "this.$1N = $2T.newNullChecked$3T($4L)",
+                            spec.name,
+                            ConjureCollections.class,
+                            type.accept(COLLECTION_CONCRETE_TYPE),
+                            Expressions.requireNonNull(
+                                    spec.name, enriched.fieldName().get() + " cannot be null"));
+                }
                 return CodeBlocks.statement(
                         "this.$1N = $2T.new$3T($4L)",
                         spec.name,
                         ConjureCollections.class,
                         type.accept(COLLECTION_CONCRETE_TYPE),
+                        Expressions.requireNonNull(
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
+            }
+            if (options.nonNullCollections()) {
+                return CodeBlocks.statement(
+                        "$1T.addAllNonNull(this.$2N, $3L)",
+                        ConjureCollections.class,
+                        spec.name,
                         Expressions.requireNonNull(
                                 spec.name, enriched.fieldName().get() + " cannot be null"));
             }

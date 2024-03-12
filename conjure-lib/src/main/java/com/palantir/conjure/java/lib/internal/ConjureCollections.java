@@ -47,6 +47,20 @@ public final class ConjureCollections {
 
     // explicitly need to return mutable list for generated builders
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
+    public static <T> void addAllNonNull(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
+        Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
+        if (elementsToAdd instanceof Collection) {
+            // This special-casing allows us to take advantage of the more performant
+            // ArrayList#addAll method which does a single System.arraycopy.
+            addTo.addAll((Collection<T>) elementsToAdd);
+        } else {
+            for (T element : elementsToAdd) {
+                addTo.add(Preconditions.checkNotNull(element, "item in collection cannot be null"));
+            }
+        }
+    }
+
+    @SuppressWarnings({"IllegalType", "unchecked"}) // explicitly need to return mutable list for generated builders
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
         if (iterable instanceof Collection) {
@@ -59,7 +73,20 @@ public final class ConjureCollections {
         return list;
     }
 
-    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
+    @SuppressWarnings({"IllegalType", "unchecked"}) // explicitly need to return mutable list for generated builders
+    public static <T> ArrayList<T> newNullCheckedArrayList(Iterable<? extends T> iterable) {
+        Preconditions.checkNotNull(iterable, "iterable cannot be null");
+        if (iterable instanceof Collection) {
+            return new ArrayList<>((Collection<T>) iterable);
+        }
+        ArrayList<T> list = new ArrayList<>();
+        for (T item : iterable) {
+            list.add(Preconditions.checkNotNull(item, "item in collection cannot be null"));
+        }
+        return list;
+    }
+
+    @SuppressWarnings("IllegalType") // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
         if (iterable instanceof Collection) {
@@ -68,6 +95,19 @@ public final class ConjureCollections {
         LinkedHashSet<T> set = new LinkedHashSet<>();
         for (T item : iterable) {
             set.add(item);
+        }
+        return set;
+    }
+
+    @SuppressWarnings("IllegalType") // explicitly need to return mutable list for generated builders
+    public static <T> LinkedHashSet<T> newNullCheckedLinkedHashSet(Iterable<? extends T> iterable) {
+        Preconditions.checkNotNull(iterable, "iterable cannot be null");
+        if (iterable instanceof Collection) {
+            return new LinkedHashSet<>((Collection<T>) iterable);
+        }
+        LinkedHashSet<T> set = new LinkedHashSet<>();
+        for (T item : iterable) {
+            set.add(Preconditions.checkNotNull(item, "item in collection cannot be null"));
         }
         return set;
     }
