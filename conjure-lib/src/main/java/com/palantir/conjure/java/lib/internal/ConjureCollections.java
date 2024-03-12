@@ -60,7 +60,7 @@ public final class ConjureCollections {
         }
     }
 
-    @SuppressWarnings({"IllegalType", "unchecked"}) // explicitly need to return mutable list for generated builders
+    @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
         if (iterable instanceof Collection) {
@@ -86,7 +86,7 @@ public final class ConjureCollections {
         return list;
     }
 
-    @SuppressWarnings("IllegalType") // explicitly need to return mutable list for generated builders
+    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
         if (iterable instanceof Collection) {
@@ -99,7 +99,7 @@ public final class ConjureCollections {
         return set;
     }
 
-    @SuppressWarnings("IllegalType") // explicitly need to return mutable list for generated builders
+    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newNullCheckedLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
         if (iterable instanceof Collection) {
