@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.services.UndertowServiceGenerator;
 import com.palantir.conjure.java.services.dialogue.DialogueServiceGenerator;
 import com.palantir.conjure.spec.ConjureDefinition;
 import java.io.File;
@@ -56,7 +57,10 @@ public final class ExternalTypeFallbackTests {
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/external-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
-                        ImmutableSet.of(new ObjectGenerator(options), new DialogueServiceGenerator(options)),
+                        ImmutableSet.of(
+                                new ObjectGenerator(options),
+                                new DialogueServiceGenerator(options),
+                                new UndertowServiceGenerator(options)),
                         options)
                 .emit(def, tempDir);
 
