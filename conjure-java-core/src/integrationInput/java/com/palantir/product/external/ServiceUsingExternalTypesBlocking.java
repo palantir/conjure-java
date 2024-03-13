@@ -14,7 +14,6 @@ import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Safe;
-import java.lang.Long;
 import java.lang.Override;
 import java.lang.String;
 import java.util.List;
@@ -26,7 +25,7 @@ import javax.annotation.processing.Generated;
 public interface ServiceUsingExternalTypesBlocking {
     /** @apiNote {@code PUT /external/{path}} */
     @ClientEndpoint(method = "PUT", path = "/external/{path}")
-    Map<Long, Long> external(@Safe String path, @Safe List<String> body);
+    Map<String, String> external(@Safe String path, @Safe List<String> body);
 
     /** Creates a synchronous/blocking client for a ServiceUsingExternalTypes service. */
     static ServiceUsingExternalTypesBlocking of(
@@ -40,11 +39,11 @@ public interface ServiceUsingExternalTypesBlocking {
             private final EndpointChannel externalChannel =
                     _endpointChannelFactory.endpoint(DialogueServiceUsingExternalTypesEndpoints.external);
 
-            private final Deserializer<Map<Long, Long>> externalDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Map<Long, Long>>() {});
+            private final Deserializer<Map<String, String>> externalDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Map<String, String>>() {});
 
             @Override
-            public Map<Long, Long> external(String path, List<String> body) {
+            public Map<String, String> external(String path, List<String> body) {
                 Request.Builder _request = Request.builder();
                 _request.putPathParams("path", _plainSerDe.serializeString(path));
                 _request.body(externalSerializer.serialize(body));

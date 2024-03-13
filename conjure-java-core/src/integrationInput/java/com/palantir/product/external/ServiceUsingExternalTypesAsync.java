@@ -15,7 +15,6 @@ import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Serializer;
 import com.palantir.dialogue.TypeMarker;
 import com.palantir.logsafe.Safe;
-import java.lang.Long;
 import java.lang.Override;
 import java.lang.String;
 import java.util.List;
@@ -27,7 +26,7 @@ import javax.annotation.processing.Generated;
 public interface ServiceUsingExternalTypesAsync {
     /** @apiNote {@code PUT /external/{path}} */
     @ClientEndpoint(method = "PUT", path = "/external/{path}")
-    ListenableFuture<Map<Long, Long>> external(@Safe String path, @Safe List<String> body);
+    ListenableFuture<Map<String, String>> external(@Safe String path, @Safe List<String> body);
 
     /** Creates an asynchronous/non-blocking client for a ServiceUsingExternalTypes service. */
     static ServiceUsingExternalTypesAsync of(EndpointChannelFactory _endpointChannelFactory, ConjureRuntime _runtime) {
@@ -40,11 +39,11 @@ public interface ServiceUsingExternalTypesAsync {
             private final EndpointChannel externalChannel =
                     _endpointChannelFactory.endpoint(DialogueServiceUsingExternalTypesEndpoints.external);
 
-            private final Deserializer<Map<Long, Long>> externalDeserializer =
-                    _runtime.bodySerDe().deserializer(new TypeMarker<Map<Long, Long>>() {});
+            private final Deserializer<Map<String, String>> externalDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Map<String, String>>() {});
 
             @Override
-            public ListenableFuture<Map<Long, Long>> external(String path, List<String> body) {
+            public ListenableFuture<Map<String, String>> external(String path, List<String> body) {
                 Request.Builder _request = Request.builder();
                 _request.putPathParams("path", _plainSerDe.serializeString(path));
                 _request.body(externalSerializer.serialize(body));
