@@ -1078,6 +1078,11 @@ final class UndertowServiceHandlerGenerator {
                     }
 
                     @Override
+                    public String visitF32() {
+                        return "get";
+                    }
+
+                    @Override
                     public String visitDouble() {
                         return "getAsDouble";
                     }

@@ -16,6 +16,7 @@
 
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
         gradlePluginPortal() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
@@ -55,6 +56,7 @@ allprojects {
     group 'com.palantir.conjure.java'
 
     repositories {
+        mavenLocal()
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 
