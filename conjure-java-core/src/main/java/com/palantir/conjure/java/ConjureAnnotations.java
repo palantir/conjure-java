@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
 import com.palantir.conjure.java.lib.internal.Incubating;
+import com.palantir.conjure.java.lib.internal.ServerEndpoint;
 import com.palantir.conjure.spec.Documentation;
 import com.palantir.conjure.spec.EndpointDefinition;
 import com.palantir.conjure.spec.LogSafety;
@@ -74,6 +75,22 @@ public final class ConjureAnnotations {
 
     private static AnnotationSpec clientEndpoint(EndpointDefinition definition) {
         return AnnotationSpec.builder(ClientEndpoint.class)
+                .addMember("method", "$S", definition.getHttpMethod().get())
+                .addMember("path", "$S", definition.getHttpPath().get())
+                .build();
+    }
+
+    public static ImmutableList<AnnotationSpec> getServerEndpointAnnotations(EndpointDefinition definition) {
+        ImmutableList.Builder<AnnotationSpec> result = ImmutableList.builder();
+        if (definition.getTags().contains("incubating")) {
+            result.add(INCUBATING_SPEC);
+        }
+        result.add(serverEndpoint(definition));
+        return result.build();
+    }
+
+    private static AnnotationSpec serverEndpoint(EndpointDefinition definition) {
+        return AnnotationSpec.builder(ServerEndpoint.class)
                 .addMember("method", "$S", definition.getHttpMethod().get())
                 .addMember("path", "$S", definition.getHttpPath().get())
                 .build();
