@@ -653,7 +653,7 @@ public final class TestServiceEndpoints implements UndertowService {
         }
 
         @Override
-        @SuppressWarnings("deprecation")
+        @SuppressWarnings({"deprecation", "removal"})
         public void handleRequest(HttpServerExchange exchange) throws IOException {
             AuthHeader authHeader = runtime.auth().header(exchange);
             RequestContext requestContext = runtime.contexts().createContext(exchange, this);

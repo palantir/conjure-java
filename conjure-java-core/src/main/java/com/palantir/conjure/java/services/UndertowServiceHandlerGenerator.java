@@ -234,12 +234,18 @@ final class UndertowServiceHandlerGenerator {
                 .addCode(endpointInvocation(
                         endpointDefinition, typeDefinitions, typeMapper, returnTypeMapper, safetyEvaluator));
 
-        endpointDefinition
-                .getDeprecated()
-                .ifPresent(deprecatedDocsValue ->
-                        handleMethodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
-                                .addMember("value", "$S", "deprecation")
-                                .build()));
+        endpointDefinition.getDeprecated().ifPresent(_deprecatedValue -> {
+            if (endpointDefinition.getTags().contains("deprecated-for-removal")) {
+                handleMethodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                        .addMember("value", "$S", "deprecation")
+                        .addMember("value", "$S", "removal")
+                        .build());
+            } else {
+                handleMethodBuilder.addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+                        .addMember("value", "$S", "deprecation")
+                        .build());
+            }
+        });
 
         MethodSpec.Builder ctorBuilder = MethodSpec.constructorBuilder()
                 .addParameter(UndertowRuntime.class, RUNTIME_VAR_NAME)

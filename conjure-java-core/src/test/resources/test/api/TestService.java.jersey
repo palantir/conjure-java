@@ -132,7 +132,7 @@ public interface TestService {
      */
     @GET
     @Path("catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval")
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @ClientEndpoint(method = "GET", path = "/catalog/datasets/{datasetRid}/branchesDeprecatedForRemoval")
     Set<String> getBranchesDeprecatedForRemoval(
             @HeaderParam("Authorization") @NotNull AuthHeader authHeader,

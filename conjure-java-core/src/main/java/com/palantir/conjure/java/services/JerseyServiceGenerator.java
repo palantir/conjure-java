@@ -187,10 +187,15 @@ public final class JerseyServiceGenerator implements Generator {
                     .build());
         }
 
-        endpointDef
-                .getDeprecated()
-                .ifPresent(
-                        deprecatedDocsValue -> methodBuilder.addAnnotation(ClassName.get("java.lang", "Deprecated")));
+        endpointDef.getDeprecated().ifPresent(_deprecatedValue -> {
+            if (endpointDef.getTags().contains("deprecated-for-removal")) {
+                methodBuilder.addAnnotation(AnnotationSpec.builder(Deprecated.class)
+                        .addMember("forRemoval", "true")
+                        .build());
+            } else {
+                methodBuilder.addAnnotation(Deprecated.class);
+            }
+        });
 
         methodBuilder.addAnnotations(ConjureAnnotations.getClientEndpointAnnotations(endpointDef));
 
