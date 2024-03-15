@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Bytes has signed and unsigned comparators
+  links:
+  - https://github.com/palantir/conjure-java/pull/2102
