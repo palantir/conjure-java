@@ -1,0 +1,7 @@
+package test.prefix.com.palantir.another;
+
+import javax.annotation.processing.Generated;
+
+/** This service has no endpoints. */
+@Generated("com.palantir.conjure.java.services.UndertowServiceInterfaceGenerator")
+public interface TestEmptyService {}

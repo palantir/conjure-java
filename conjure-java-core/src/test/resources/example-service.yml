@@ -278,3 +278,12 @@ services:
           strings:
             type: set<AliasedString>
             param-type: query
+  TestEmptyService:
+    name: Empty Test Service
+    package: com.palantir.another
+    default-auth: header
+    base-path: /testEmptyService
+    docs: |
+      This service has no endpoints.
+
+    endpoints: {}
