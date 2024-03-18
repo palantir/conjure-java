@@ -82,9 +82,13 @@ public final class DialogueServiceGenerator implements Generator {
                 StaticFactoryMethodType.BLOCKING);
 
         return conjureDefinition.getServices().stream()
-                .flatMap(serviceDef -> Stream.of(
-                        endpoints.endpointsClass(serviceDef),
-                        interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
-                        interfaceGenerator.generateAsync(serviceDef, asyncGenerator)));
+                .flatMap(serviceDef -> !serviceDef.getEndpoints().isEmpty()
+                        ? Stream.of(
+                                endpoints.endpointsClass(serviceDef),
+                                interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
+                                interfaceGenerator.generateAsync(serviceDef, asyncGenerator))
+                        : Stream.of(
+                                interfaceGenerator.generateBlocking(serviceDef, blockingGenerator),
+                                interfaceGenerator.generateAsync(serviceDef, asyncGenerator)));
     }
 }
