@@ -36,6 +36,8 @@ import com.palantir.product.EmptyObjectExample;
 import com.palantir.product.EnumExample;
 import com.palantir.product.ExternalLongAliasExample;
 import com.palantir.product.ExternalStringAliasExample;
+import com.palantir.product.FloatAliasExample;
+import com.palantir.product.FloatExample;
 import com.palantir.product.IntegerAliasExample;
 import com.palantir.product.ListAlias;
 import com.palantir.product.ListExample;
@@ -113,6 +115,28 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void float_alias_should_deserialize_nan() throws IOException {
+        assertThat(mapper.readValue("\"NaN\"", FloatAliasExample.class).get()).isNaN();
+    }
+
+    @Test
+    public void float_alias_should_deserialize_negative_zero() throws IOException {
+        FloatAliasExample conjureType = mapper.readValue("-0.0", FloatAliasExample.class);
+        assertThat(conjureType).hasToString("-0.0");
+        assertThat(conjureType).isEqualTo(FloatAliasExample.of(-0.0f));
+        assertThat(conjureType).isEqualTo(FloatAliasExample.of(0.0f));
+    }
+
+    @Test
+    public void float_alias_should_deserialize_infinity() throws IOException {
+        assertThat(mapper.readValue("\"Infinity\"", FloatAliasExample.class).get())
+                .isEqualTo(Float.POSITIVE_INFINITY);
+
+        assertThat(mapper.readValue("\"-Infinity\"", FloatAliasExample.class).get())
+                .isEqualTo(Float.NEGATIVE_INFINITY);
+    }
+
+    @Test
     public void testPresentOptionalDeserializesWithElement() throws Exception {
         assertThat(mapper.readValue("{\"item\": \"a\"}", OptionalExample.class).getItem())
                 .contains("a");
@@ -132,6 +156,34 @@ public final class WireFormatTests {
     public void double_nan_fields_should_deserialize_from_a_string() throws Exception {
         DoubleExample deserialized = mapper.readValue("{\"doubleValue\":\"NaN\"}", DoubleExample.class);
         assertThat(deserialized.getDoubleValue()).isNaN();
+    }
+
+    @Test
+    public void float_nan_fields_should_be_serialized_as_a_string() throws Exception {
+        assertThat(mapper.writeValueAsString(FloatExample.of(Float.NaN))).isEqualTo("{\"floatValue\":\"NaN\"}");
+    }
+
+    @Test
+    public void float_nan_fields_should_deserialize_from_a_string() throws Exception {
+        FloatExample deserialized = mapper.readValue("{\"floatValue\":\"NaN\"}", FloatExample.class);
+        assertThat(deserialized.getFloatValue()).isNaN();
+    }
+
+    @Test
+    public void float_precision_deserialization() throws Exception {
+        FloatExample deserialized = mapper.readValue("{\"floatValue\":5.050000190734863}", FloatExample.class);
+        assertThat(deserialized.getFloatValue()).isEqualTo(5.05f);
+    }
+
+    @Test
+    public void float_precision_serialization() throws Exception {
+        assertThat(mapper.writeValueAsString(FloatExample.of(5.05f))).isEqualTo("{\"floatValue\":5.05}");
+    }
+
+    @Test
+    public void float_deserializes_out_of_range_values_as_infinity() throws Exception {
+        FloatExample deserialized = mapper.readValue("{\"floatValue\":1.7976931348623157E308}", FloatExample.class);
+        assertThat(deserialized.getFloatValue()).isEqualTo(Float.POSITIVE_INFINITY);
     }
 
     @Test
@@ -263,6 +315,7 @@ public final class WireFormatTests {
         assertThat(StringAliasExample.of("a")).isEqualTo(StringAliasExample.of("a"));
         assertThat(IntegerAliasExample.of(103)).isEqualTo(IntegerAliasExample.of(103));
         assertThat(DoubleAliasExample.of(10.3)).isEqualTo(DoubleAliasExample.of(10.3));
+        assertThat(FloatAliasExample.of(10.3f)).isEqualTo(FloatAliasExample.of(10.3f));
 
         Bytes bytes = Bytes.from(new byte[] {0, 1, 2});
         assertThat(BinaryAliasExample.of(bytes)).isEqualTo(BinaryAliasExample.of(bytes));
@@ -283,6 +336,8 @@ public final class WireFormatTests {
                 .isEqualTo(IntegerAliasExample.of(103).hashCode());
         assertThat(DoubleAliasExample.of(10.3).hashCode())
                 .isEqualTo(DoubleAliasExample.of(10.3).hashCode());
+        assertThat(FloatAliasExample.of(10.3f).hashCode())
+                .isEqualTo(FloatAliasExample.of(10.3f).hashCode());
         Bytes bytes = Bytes.from(new byte[] {0, 1, 2});
         assertThat(BinaryAliasExample.of(bytes).hashCode())
                 .isEqualTo(BinaryAliasExample.of(bytes).hashCode());
@@ -296,6 +351,9 @@ public final class WireFormatTests {
                 .isEqualTo(IntegerAliasExample.of(103).hashCode());
         assertThat(DoubleAliasExample.of(10.3).hashCode())
                 .isEqualTo(DoubleAliasExample.of(10.3).hashCode());
+        assertThat(FloatAliasExample.of(10.3f).hashCode())
+                .isEqualTo(FloatAliasExample.of(10.3f).hashCode());
+
         ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[] {0, 1, 2});
         assertThat(com.palantir.binary.BinaryAliasExample.of(byteBuffer).hashCode())
                 .isEqualTo(com.palantir.binary.BinaryAliasExample.of(byteBuffer).hashCode());
@@ -524,6 +582,12 @@ public final class WireFormatTests {
     }
 
     @Test
+    public void float_alias_should_deserialize_without_decimal_point() throws Exception {
+        // frontends can send numbers like this!
+        assertThat(mapper.readValue("100", FloatAliasExample.class)).isEqualTo(FloatAliasExample.of(100.0f));
+    }
+
+    @Test
     public void testUuidType_roundTrip() throws Exception {
         String serialized = "{\"uuid\":\"0db30881-8f3e-46f4-a8bb-df5883bf7eb8\"}";
         UuidExample deserialized = UuidExample.of(UUID.fromString("0db30881-8f3e-46f4-a8bb-df5883bf7eb8"));
@@ -586,6 +650,7 @@ public final class WireFormatTests {
     public void testEmptyOptionalFieldSerialization_nonEmptyValues() throws IOException {
         PrimitiveOptionalsExample original = PrimitiveOptionalsExample.builder()
                 .num(OptionalDouble.of(0D))
+                .optionalFloat(Optional.of(10.3f))
                 .bool(Optional.of(Boolean.FALSE))
                 .integer(OptionalInt.of(0))
                 .map(ImmutableMap.of())
@@ -602,7 +667,7 @@ public final class WireFormatTests {
         String json = mapper.writeValueAsString(original);
         assertThat(mapper.readValue(json, new TypeReference<Map<String, Object>>() {}))
                 .as("Unexpected number of fields in '%s'", json)
-                .hasSize(13);
+                .hasSize(14);
         PrimitiveOptionalsExample recreated = mapper.readValue(json, PrimitiveOptionalsExample.class);
         assertThat(recreated)
                 .as("Failed to recreate the original object using '%s'", json)

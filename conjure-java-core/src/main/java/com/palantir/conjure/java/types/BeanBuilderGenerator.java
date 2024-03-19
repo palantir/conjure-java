@@ -45,6 +45,7 @@ import com.palantir.conjure.spec.MapType;
 import com.palantir.conjure.spec.ObjectDefinition;
 import com.palantir.conjure.spec.OptionalType;
 import com.palantir.conjure.spec.PrimitiveType;
+import com.palantir.conjure.spec.PrimitiveType.Value;
 import com.palantir.conjure.spec.SetType;
 import com.palantir.conjure.spec.Type;
 import com.palantir.conjure.spec.TypeDefinition;
@@ -798,7 +799,7 @@ public final class BeanBuilderGenerator {
     }
 
     private static final EnumSet<PrimitiveType.Value> OPTIONAL_PRIMITIVES =
-            EnumSet.of(PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
+            EnumSet.of(PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN, Value.F32);
 
     /** Check if the optionalType contains a primitive boolean, double or integer. */
     private boolean isPrimitiveOptional(OptionalType optionalType) {

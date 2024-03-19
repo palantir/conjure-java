@@ -68,6 +68,7 @@ public final class TestServiceEndpoints implements UndertowService {
                 new TestNoResponseQueryParamsEndpoint(runtime, delegate),
                 new TestBooleanEndpoint(runtime, delegate),
                 new TestDoubleEndpoint(runtime, delegate),
+                new TestFloatEndpoint(runtime, delegate),
                 new TestIntegerEndpoint(runtime, delegate),
                 new TestPostOptionalEndpoint(runtime, delegate),
                 new TestOptionalIntegerAndDoubleEndpoint(runtime, delegate),
@@ -1008,6 +1009,52 @@ public final class TestServiceEndpoints implements UndertowService {
         @Override
         public String name() {
             return "testDouble";
+        }
+
+        @Override
+        public HttpHandler handler() {
+            return this;
+        }
+    }
+
+    private static final class TestFloatEndpoint implements HttpHandler, Endpoint {
+        private final UndertowRuntime runtime;
+
+        private final TestService delegate;
+
+        private final Serializer<Float> serializer;
+
+        TestFloatEndpoint(UndertowRuntime runtime, TestService delegate) {
+            this.runtime = runtime;
+            this.delegate = delegate;
+            this.serializer = runtime.bodySerDe().serializer(new TypeMarker<Float>() {}, this);
+        }
+
+        @Override
+        public void handleRequest(HttpServerExchange exchange) throws IOException {
+            AuthHeader authHeader = runtime.auth().header(exchange);
+            float result = delegate.testFloat(authHeader);
+            serializer.serialize(result, exchange);
+        }
+
+        @Override
+        public HttpString method() {
+            return Methods.GET;
+        }
+
+        @Override
+        public String template() {
+            return "/catalog/float";
+        }
+
+        @Override
+        public String serviceName() {
+            return "TestService";
+        }
+
+        @Override
+        public String name() {
+            return "testFloat";
         }
 
         @Override

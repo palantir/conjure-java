@@ -187,6 +187,11 @@ public interface TestService {
     double testDouble(@HeaderParam("Authorization") AuthHeader authHeader);
 
     @GET
+    @Path("catalog/float")
+    @ClientEndpoint(method = "GET", path = "/catalog/float")
+    float testFloat(@HeaderParam("Authorization") AuthHeader authHeader);
+
+    @GET
     @Path("catalog/integer")
     @ClientEndpoint(method = "GET", path = "/catalog/integer")
     int testInteger(@HeaderParam("Authorization") AuthHeader authHeader);

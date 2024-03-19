@@ -16,7 +16,7 @@
 
 buildscript {
     repositories {
-        mavenLocal()
+        mavenLocal()suppressPomMetadataWarningsFor()
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
         gradlePluginPortal() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
@@ -46,7 +46,7 @@ apply plugin: 'com.palantir.failure-reports'
 
 javaVersions {
     libraryTarget = 11
-    runtime = 21
+    runtime = 17
 }
 
 allprojects {

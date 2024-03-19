@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.lang.Boolean;
 import java.lang.Deprecated;
 import java.lang.Double;
+import java.lang.Float;
 import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
@@ -159,6 +160,10 @@ public interface TestServiceAsync {
     /** @apiNote {@code GET /catalog/double} */
     @ClientEndpoint(method = "GET", path = "/catalog/double")
     ListenableFuture<Double> testDouble(AuthHeader authHeader);
+
+    /** @apiNote {@code GET /catalog/float} */
+    @ClientEndpoint(method = "GET", path = "/catalog/float")
+    ListenableFuture<Float> testFloat(AuthHeader authHeader);
 
     /** @apiNote {@code GET /catalog/integer} */
     @ClientEndpoint(method = "GET", path = "/catalog/integer")
@@ -293,6 +298,12 @@ public interface TestServiceAsync {
 
             private final Deserializer<Double> testDoubleDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
+
+            private final EndpointChannel testFloatChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testFloat);
+
+            private final Deserializer<Float> testFloatDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Float>() {});
 
             private final EndpointChannel testIntegerChannel =
                     _endpointChannelFactory.endpoint(DialogueTestEndpoints.testInteger);
@@ -530,6 +541,13 @@ public interface TestServiceAsync {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients().call(testDoubleChannel, _request.build(), testDoubleDeserializer);
+            }
+
+            @Override
+            public ListenableFuture<Float> testFloat(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients().call(testFloatChannel, _request.build(), testFloatDeserializer);
             }
 
             @Override

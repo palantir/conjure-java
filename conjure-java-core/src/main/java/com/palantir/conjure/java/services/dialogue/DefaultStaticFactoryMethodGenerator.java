@@ -436,6 +436,7 @@ public final class DefaultStaticFactoryMethodGenerator implements StaticFactoryM
             .put(PrimitiveType.Value.BOOLEAN, "Boolean")
             .put(PrimitiveType.Value.DATETIME, "DateTime")
             .put(PrimitiveType.Value.DOUBLE, "Double")
+            .put(PrimitiveType.Value.F32, "Float")
             .put(PrimitiveType.Value.INTEGER, "Integer")
             .put(PrimitiveType.Value.RID, "Rid")
             .put(PrimitiveType.Value.SAFELONG, "SafeLong")
