@@ -48,6 +48,9 @@ types:
       DoubleExample:
         fields:
           doubleValue: double
+      FloatExample:
+        fields:
+          floatValue: f32
       BinaryExample:
         fields:
           binary: binary
@@ -125,6 +128,8 @@ types:
         alias: StringAliasExample
       DoubleAliasExample:
         alias: double
+      FloatAliasExample:
+        alias: f32
       IntegerAliasExample:
         alias: integer
       BooleanAliasExample:
@@ -155,6 +160,7 @@ types:
       PrimitiveOptionalsExample:
         fields:
           num: optional<double>
+          optionalFloat: optional<f32>
           bool: optional<boolean>
           integer: optional<integer>
           safelong: optional<safelong>

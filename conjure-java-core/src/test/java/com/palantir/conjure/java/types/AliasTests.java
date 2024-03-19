@@ -26,6 +26,7 @@ import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.product.DoubleAliasExample;
 import com.palantir.product.ExternalLongAliasOne;
 import com.palantir.product.ExternalLongAliasTwo;
+import com.palantir.product.FloatAliasExample;
 import com.palantir.product.UuidAliasExample;
 import org.junit.jupiter.api.Test;
 
@@ -68,5 +69,26 @@ public class AliasTests {
         // Doesn't fit in an int, but does fit comfortably in a double; looks like a long
         assertThat(TEST_MAPPER.readValue("9667500000", DoubleAliasExample.class))
                 .isEqualTo(DoubleAliasExample.of(9667500000.0));
+    }
+
+    @Test
+    public void testValueOf_largeFloat_lossyDouble() throws JsonProcessingException {
+        // So large it doesn't fit in a float; jackson silently drops precision
+        assertThat(TEST_MAPPER.readValue("9007199254740992.234", FloatAliasExample.class))
+                .isEqualTo(FloatAliasExample.of(9007199300000000.0f));
+    }
+
+    @Test
+    public void testValueOf_largeFloat_double() throws JsonProcessingException {
+        // Doesn't fit in an int, but does fit in a float
+        assertThat(TEST_MAPPER.readValue("9667500000.0", FloatAliasExample.class))
+                .isEqualTo(FloatAliasExample.of(9667500000.0f));
+    }
+
+    @Test
+    public void testValueOf_largeFloat_long() throws JsonProcessingException {
+        // So large it doesn't fit in a float; jackson silently drops precision
+        assertThat(TEST_MAPPER.readValue("9667512345", FloatAliasExample.class))
+                .isEqualTo(FloatAliasExample.of(9667512300.0f));
     }
 }

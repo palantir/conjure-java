@@ -114,6 +114,9 @@ public interface TestService {
     /** @apiNote {@code GET /catalog/double} */
     double testDouble(AuthHeader authHeader);
 
+    /** @apiNote {@code GET /catalog/float} */
+    float testFloat(AuthHeader authHeader);
+
     /** @apiNote {@code GET /catalog/integer} */
     int testInteger(AuthHeader authHeader);
 

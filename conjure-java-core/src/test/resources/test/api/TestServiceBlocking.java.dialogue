@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.lang.Boolean;
 import java.lang.Deprecated;
 import java.lang.Double;
+import java.lang.Float;
 import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
@@ -159,6 +160,10 @@ public interface TestServiceBlocking {
     @ClientEndpoint(method = "GET", path = "/catalog/double")
     double testDouble(AuthHeader authHeader);
 
+    /** @apiNote {@code GET /catalog/float} */
+    @ClientEndpoint(method = "GET", path = "/catalog/float")
+    float testFloat(AuthHeader authHeader);
+
     /** @apiNote {@code GET /catalog/integer} */
     @ClientEndpoint(method = "GET", path = "/catalog/integer")
     int testInteger(AuthHeader authHeader);
@@ -290,6 +295,12 @@ public interface TestServiceBlocking {
 
             private final Deserializer<Double> testDoubleDeserializer =
                     _runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
+
+            private final EndpointChannel testFloatChannel =
+                    _endpointChannelFactory.endpoint(DialogueTestEndpoints.testFloat);
+
+            private final Deserializer<Float> testFloatDeserializer =
+                    _runtime.bodySerDe().deserializer(new TypeMarker<Float>() {});
 
             private final EndpointChannel testIntegerChannel =
                     _endpointChannelFactory.endpoint(DialogueTestEndpoints.testInteger);
@@ -525,6 +536,13 @@ public interface TestServiceBlocking {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 return _runtime.clients().callBlocking(testDoubleChannel, _request.build(), testDoubleDeserializer);
+            }
+
+            @Override
+            public float testFloat(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams("Authorization", authHeader.toString());
+                return _runtime.clients().callBlocking(testFloatChannel, _request.build(), testFloatDeserializer);
             }
 
             @Override

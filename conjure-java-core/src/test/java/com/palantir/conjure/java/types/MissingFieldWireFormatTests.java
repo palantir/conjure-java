@@ -31,6 +31,7 @@ import com.palantir.product.BooleanExample;
 import com.palantir.product.DateTimeExample;
 import com.palantir.product.DoubleExample;
 import com.palantir.product.EnumFieldExample;
+import com.palantir.product.FloatExample;
 import com.palantir.product.IntegerExample;
 import com.palantir.product.ListExample;
 import com.palantir.product.MapExample;
@@ -100,6 +101,14 @@ public class MissingFieldWireFormatTests {
                 .isInstanceOf(SafeIllegalArgumentException.class)
                 .hasLogMessage("Some required fields have not been set")
                 .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("doubleValue")));
+    }
+
+    @Test
+    public void missing_float_field_should_throw() throws Exception {
+        assertThatLoggableExceptionThrownBy(() -> mapper.readValue("{}", FloatExample.class))
+                .isInstanceOf(SafeIllegalArgumentException.class)
+                .hasLogMessage("Some required fields have not been set")
+                .hasExactlyArgs(SafeArg.of("missingFields", ImmutableList.of("floatValue")));
     }
 
     @Test

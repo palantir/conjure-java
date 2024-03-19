@@ -29,6 +29,7 @@ import com.palantir.product.BooleanExample;
 import com.palantir.product.DateTimeExample;
 import com.palantir.product.DoubleExample;
 import com.palantir.product.EnumFieldExample;
+import com.palantir.product.FloatExample;
 import com.palantir.product.IntegerExample;
 import com.palantir.product.ListExample;
 import com.palantir.product.MapExample;
@@ -94,6 +95,13 @@ public class NullFieldWireFormatTests {
         assertThatThrownBy(() -> mapper.readValue("{\"doubleValue\":null}", DoubleExample.class))
                 .isInstanceOf(JsonMappingException.class)
                 .hasMessageContaining("Cannot map `null` into type `double`");
+    }
+
+    @Test
+    public void null_float_field_should_throw() {
+        assertThatThrownBy(() -> mapper.readValue("{\"floatValue\":null}", FloatExample.class))
+                .isInstanceOf(JsonMappingException.class)
+                .hasMessageContaining("Cannot map `null` into type `float`");
     }
 
     @Test

@@ -369,6 +369,10 @@ public final class AliasGenerator {
                 return CodeBlock.builder()
                         .addStatement("return of($T.parseDouble(value))", boxedTypeName)
                         .build();
+            case F32:
+                return CodeBlock.builder()
+                        .addStatement("return of($T.parseFloat(value))", boxedTypeName)
+                        .build();
             case INTEGER:
                 return CodeBlock.builder()
                         .addStatement("return of($T.parseInt(value))", boxedTypeName)
@@ -536,6 +540,13 @@ public final class AliasGenerator {
         public Optional<MethodSpec> visitInteger() {
             return Optional.of(createCompareTo(aliasName, (thisValue, otherValue) -> CodeBlock.builder()
                     .add("$T.compare($L, $L)", Integer.class, thisValue, otherValue)
+                    .build()));
+        }
+
+        @Override
+        public Optional<MethodSpec> visitF32() {
+            return Optional.of(createCompareTo(aliasName, (thisValue, otherValue) -> CodeBlock.builder()
+                    .add("$T.compare($L, $L)", Float.class, thisValue, otherValue)
                     .build()));
         }
 

@@ -248,6 +248,10 @@ services:
         http: GET /double
         returns: double
 
+      testFloat:
+        http: GET /float
+        returns: f32
+
       testInteger:
         http: GET /integer
         returns: integer

@@ -17,6 +17,7 @@ import com.palantir.tokens.auth.AuthHeader;
 import java.io.InputStream;
 import java.lang.Boolean;
 import java.lang.Double;
+import java.lang.Float;
 import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
@@ -172,6 +173,11 @@ public final class DialogueTestService {
             }
 
             @Override
+            public float testFloat(AuthHeader authHeader) {
+                return RemoteExceptions.getUnchecked(delegate.testFloat(authHeader));
+            }
+
+            @Override
             public int testInteger(AuthHeader authHeader) {
                 return RemoteExceptions.getUnchecked(delegate.testInteger(authHeader));
             }
@@ -267,6 +273,9 @@ public final class DialogueTestService {
 
             private final Deserializer<Double> testDoubleDeserializer =
                     runtime.bodySerDe().deserializer(new TypeMarker<Double>() {});
+
+            private final Deserializer<Float> testFloatDeserializer =
+                    runtime.bodySerDe().deserializer(new TypeMarker<Float>() {});
 
             private final Deserializer<Integer> testIntegerDeserializer =
                     runtime.bodySerDe().deserializer(new TypeMarker<Integer>() {});
@@ -556,6 +565,18 @@ public final class DialogueTestService {
                 return Futures.transform(
                         channel.execute(DialogueTestEndpoints.testDouble, _request.build()),
                         testDoubleDeserializer::deserialize,
+                        MoreExecutors.directExecutor());
+            }
+
+            @Override
+            public ListenableFuture<Float> testFloat(AuthHeader authHeader) {
+                Request.Builder _request = Request.builder();
+                _request.putHeaderParams(
+                        "Authorization",
+                        plainSerDe.serializeBearerToken(authHeader.getBearerToken()));
+                return Futures.transform(
+                        channel.execute(DialogueTestEndpoints.testFloat, _request.build()),
+                        testFloatDeserializer::deserialize,
                         MoreExecutors.directExecutor());
             }
 

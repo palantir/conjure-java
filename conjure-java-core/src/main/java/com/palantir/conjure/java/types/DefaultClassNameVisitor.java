@@ -99,6 +99,7 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
                 case UUID:
                 case DATETIME:
                 case BINARY:
+                case F32:
                 case ANY:
                     // treat normally
             }
@@ -124,6 +125,8 @@ public final class DefaultClassNameVisitor implements ClassNameVisitor {
                 return TypeName.INT;
             case DOUBLE:
                 return TypeName.DOUBLE;
+            case F32:
+                return TypeName.FLOAT;
             case SAFELONG:
                 return ClassName.get(SafeLong.class);
             case BINARY:

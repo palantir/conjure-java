@@ -31,6 +31,8 @@ import javax.annotation.processing.Generated;
 public final class PrimitiveOptionalsExample {
     private final OptionalDouble num;
 
+    private final Optional<Float> optionalFloat;
+
     private final Optional<Boolean> bool;
 
     private final OptionalInt integer;
@@ -69,6 +71,7 @@ public final class PrimitiveOptionalsExample {
 
     private PrimitiveOptionalsExample(
             OptionalDouble num,
+            Optional<Float> optionalFloat,
             Optional<Boolean> bool,
             OptionalInt integer,
             Optional<SafeLong> safelong,
@@ -88,6 +91,7 @@ public final class PrimitiveOptionalsExample {
             OptionalSetAliasExample aliasOptionalSet) {
         validateFields(
                 num,
+                optionalFloat,
                 bool,
                 integer,
                 safelong,
@@ -106,6 +110,7 @@ public final class PrimitiveOptionalsExample {
                 aliasOptionalList,
                 aliasOptionalSet);
         this.num = num;
+        this.optionalFloat = optionalFloat;
         this.bool = bool;
         this.integer = integer;
         this.safelong = safelong;
@@ -129,6 +134,12 @@ public final class PrimitiveOptionalsExample {
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public OptionalDouble getNum() {
         return this.num;
+    }
+
+    @JsonProperty("optionalFloat")
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    public Optional<Float> getOptionalFloat() {
+        return this.optionalFloat;
     }
 
     @JsonProperty("bool")
@@ -246,6 +257,7 @@ public final class PrimitiveOptionalsExample {
             return false;
         }
         return this.num.equals(other.num)
+                && this.optionalFloat.equals(other.optionalFloat)
                 && this.bool.equals(other.bool)
                 && this.integer.equals(other.integer)
                 && this.safelong.equals(other.safelong)
@@ -271,6 +283,7 @@ public final class PrimitiveOptionalsExample {
         if (result == 0) {
             int hash = 1;
             hash = 31 * hash + this.num.hashCode();
+            hash = 31 * hash + this.optionalFloat.hashCode();
             hash = 31 * hash + this.bool.hashCode();
             hash = 31 * hash + this.integer.hashCode();
             hash = 31 * hash + this.safelong.hashCode();
@@ -297,16 +310,17 @@ public final class PrimitiveOptionalsExample {
     @Override
     @DoNotLog
     public String toString() {
-        return "PrimitiveOptionalsExample{num: " + num + ", bool: " + bool + ", integer: " + integer + ", safelong: "
-                + safelong + ", rid: " + rid + ", bearertoken: " + bearertoken + ", uuid: " + uuid + ", map: " + map
-                + ", list: " + list + ", set: " + set + ", aliasOne: " + aliasOne + ", aliasTwo: " + aliasTwo
-                + ", aliasList: " + aliasList + ", aliasMap: " + aliasMap + ", aliasOptional: " + aliasOptional
-                + ", aliasOptionalMap: " + aliasOptionalMap + ", aliasOptionalList: " + aliasOptionalList
-                + ", aliasOptionalSet: " + aliasOptionalSet + '}';
+        return "PrimitiveOptionalsExample{num: " + num + ", optionalFloat: " + optionalFloat + ", bool: " + bool
+                + ", integer: " + integer + ", safelong: " + safelong + ", rid: " + rid + ", bearertoken: "
+                + bearertoken + ", uuid: " + uuid + ", map: " + map + ", list: " + list + ", set: " + set
+                + ", aliasOne: " + aliasOne + ", aliasTwo: " + aliasTwo + ", aliasList: " + aliasList + ", aliasMap: "
+                + aliasMap + ", aliasOptional: " + aliasOptional + ", aliasOptionalMap: " + aliasOptionalMap
+                + ", aliasOptionalList: " + aliasOptionalList + ", aliasOptionalSet: " + aliasOptionalSet + '}';
     }
 
     private static void validateFields(
             OptionalDouble num,
+            Optional<Float> optionalFloat,
             Optional<Boolean> bool,
             OptionalInt integer,
             Optional<SafeLong> safelong,
@@ -326,6 +340,7 @@ public final class PrimitiveOptionalsExample {
             OptionalSetAliasExample aliasOptionalSet) {
         List<String> missingFields = null;
         missingFields = addFieldIfMissing(missingFields, num, "num");
+        missingFields = addFieldIfMissing(missingFields, optionalFloat, "optionalFloat");
         missingFields = addFieldIfMissing(missingFields, bool, "bool");
         missingFields = addFieldIfMissing(missingFields, integer, "integer");
         missingFields = addFieldIfMissing(missingFields, safelong, "safelong");
@@ -353,7 +368,7 @@ public final class PrimitiveOptionalsExample {
         List<String> missingFields = prev;
         if (fieldValue == null) {
             if (missingFields == null) {
-                missingFields = new ArrayList<>(18);
+                missingFields = new ArrayList<>(19);
             }
             missingFields.add(fieldName);
         }
@@ -369,6 +384,8 @@ public final class PrimitiveOptionalsExample {
         boolean _buildInvoked;
 
         private OptionalDouble num = OptionalDouble.empty();
+
+        private Optional<Float> optionalFloat = Optional.empty();
 
         private Optional<Boolean> bool = Optional.empty();
 
@@ -409,6 +426,7 @@ public final class PrimitiveOptionalsExample {
         public Builder from(PrimitiveOptionalsExample other) {
             checkNotBuilt();
             num(other.getNum());
+            optionalFloat(other.getOptionalFloat());
             bool(other.getBool());
             integer(other.getInteger());
             safelong(other.getSafelong());
@@ -439,6 +457,19 @@ public final class PrimitiveOptionalsExample {
         public Builder num(double num) {
             checkNotBuilt();
             this.num = OptionalDouble.of(num);
+            return this;
+        }
+
+        @JsonSetter(value = "optionalFloat", nulls = Nulls.SKIP)
+        public Builder optionalFloat(@Nonnull Optional<Float> optionalFloat) {
+            checkNotBuilt();
+            this.optionalFloat = Preconditions.checkNotNull(optionalFloat, "optionalFloat cannot be null");
+            return this;
+        }
+
+        public Builder optionalFloat(float optionalFloat) {
+            checkNotBuilt();
+            this.optionalFloat = Optional.of(optionalFloat);
             return this;
         }
 
@@ -638,6 +669,7 @@ public final class PrimitiveOptionalsExample {
             this._buildInvoked = true;
             return new PrimitiveOptionalsExample(
                     num,
+                    optionalFloat,
                     bool,
                     integer,
                     safelong,

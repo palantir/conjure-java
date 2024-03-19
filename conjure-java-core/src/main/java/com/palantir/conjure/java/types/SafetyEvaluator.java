@@ -253,6 +253,11 @@ public final class SafetyEvaluator {
         }
 
         @Override
+        public Optional<LogSafety> visitF32() {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<LogSafety> visitDouble() {
             return Optional.empty();
         }
