@@ -123,13 +123,14 @@ public final class SetExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newLinkedHashSet(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newNullCheckedLinkedHashSet(
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAllNonNull(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -142,14 +143,14 @@ public final class SetExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems = ConjureCollections.newLinkedHashSet(
+            this.doubleItems = ConjureCollections.newNullCheckedLinkedHashSet(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 
         public Builder addAllDoubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllNonNull(
                     this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }

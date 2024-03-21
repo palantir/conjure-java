@@ -673,15 +673,33 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
+    @SuppressWarnings("checkstyle:cyclomaticcomplexity")
     private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             if (shouldClearFirst) {
+                if (options.nonNullCollections()) {
+                    return CodeBlocks.statement(
+                            "this.$1N = $2T.newNullChecked$3T($4L)",
+                            spec.name,
+                            ConjureCollections.class,
+                            type.accept(COLLECTION_CONCRETE_TYPE),
+                            Expressions.requireNonNull(
+                                    spec.name, enriched.fieldName().get() + " cannot be null"));
+                }
                 return CodeBlocks.statement(
                         "this.$1N = $2T.new$3T($4L)",
                         spec.name,
                         ConjureCollections.class,
                         type.accept(COLLECTION_CONCRETE_TYPE),
+                        Expressions.requireNonNull(
+                                spec.name, enriched.fieldName().get() + " cannot be null"));
+            }
+            if (options.nonNullCollections()) {
+                return CodeBlocks.statement(
+                        "$1T.addAllNonNull(this.$2N, $3L)",
+                        ConjureCollections.class,
+                        spec.name,
                         Expressions.requireNonNull(
                                 spec.name, enriched.fieldName().get() + " cannot be null"));
             }
@@ -759,7 +777,8 @@ public final class BeanBuilderGenerator {
 
         if (type.accept(TypeVisitor.IS_MAP)) {
             return ImmutableList.of(
-                    createCollectionSetter("putAll", enriched, override), createMapSetter(enriched, override));
+                    createCollectionSetter("putAll", enriched, override),
+                    createMapSetter(enriched, override, options.nonNullCollections()));
         }
 
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
@@ -819,13 +838,20 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
-    private MethodSpec createMapSetter(EnrichedField enriched, boolean override) {
-        return BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(enriched, typeMapper, builderClass)
+    private MethodSpec createMapSetter(EnrichedField enriched, boolean override, boolean nonNullCollections) {
+        MethodSpec.Builder builder = BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(
+                        enriched, typeMapper, builderClass)
                 .addAnnotations(ConjureAnnotations.override(override))
-                .addCode(verifyNotBuilt())
-                .addStatement("this.$1N.put(key, value)", enriched.poetSpec().name)
-                .addStatement("return this")
-                .build();
+                .addCode(verifyNotBuilt());
+        if (nonNullCollections) {
+            builder.addStatement(
+                    "this.$1N.put(key, $2L)",
+                    enriched.poetSpec().name,
+                    Expressions.requireNonNull("value", enriched.fieldName().get() + " cannot be null"));
+        } else {
+            builder.addStatement("this.$1N.put(key, value)", enriched.poetSpec().name);
+        }
+        return builder.addStatement("return this").build();
     }
 
     private MethodSpec createBuild(

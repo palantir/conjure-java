@@ -119,7 +119,7 @@ public final class AnyMapExample {
 
         public Builder items(String key, Object value) {
             checkNotBuilt();
-            this.items.put(key, value);
+            this.items.put(key, Preconditions.checkNotNull(value, "items cannot be null"));
             return this;
         }
 
