@@ -270,7 +270,7 @@ public final class MultipleFieldsOnlyFinalStage {
 
         public Builder itemsMap(String key, int value) {
             checkNotBuilt();
-            this.itemsMap.put(key, Preconditions.checkNotNull(value, "itemsMap cannot be null"));
+            this.itemsMap.put(key, value);
             return this;
         }
 
@@ -355,7 +355,7 @@ public final class MultipleFieldsOnlyFinalStage {
         @Deprecated
         public Builder itemsMapOld(String key, int value) {
             checkNotBuilt();
-            this.itemsMapOld.put(key, Preconditions.checkNotNull(value, "itemsMapOld cannot be null"));
+            this.itemsMapOld.put(key, value);
             return this;
         }
 

@@ -220,7 +220,7 @@ public final class AliasAsMapKeyExample {
 
         public Builder strings(StringAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.strings.put(key, value);
+            this.strings.put(key, Preconditions.checkNotNull(value, "strings cannot be null"));
             return this;
         }
 
@@ -239,7 +239,7 @@ public final class AliasAsMapKeyExample {
 
         public Builder rids(RidAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.rids.put(key, value);
+            this.rids.put(key, Preconditions.checkNotNull(value, "rids cannot be null"));
             return this;
         }
 
@@ -259,7 +259,7 @@ public final class AliasAsMapKeyExample {
 
         public Builder bearertokens(BearerTokenAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.bearertokens.put(key, value);
+            this.bearertokens.put(key, Preconditions.checkNotNull(value, "bearertokens cannot be null"));
             return this;
         }
 
@@ -278,7 +278,7 @@ public final class AliasAsMapKeyExample {
 
         public Builder integers(IntegerAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.integers.put(key, value);
+            this.integers.put(key, Preconditions.checkNotNull(value, "integers cannot be null"));
             return this;
         }
 
@@ -297,7 +297,7 @@ public final class AliasAsMapKeyExample {
 
         public Builder safelongs(SafeLongAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.safelongs.put(key, value);
+            this.safelongs.put(key, Preconditions.checkNotNull(value, "safelongs cannot be null"));
             return this;
         }
 
@@ -316,7 +316,7 @@ public final class AliasAsMapKeyExample {
 
         public Builder datetimes(DateTimeAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.datetimes.put(key, value);
+            this.datetimes.put(key, Preconditions.checkNotNull(value, "datetimes cannot be null"));
             return this;
         }
 
@@ -335,7 +335,7 @@ public final class AliasAsMapKeyExample {
 
         public Builder uuids(UuidAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.uuids.put(key, value);
+            this.uuids.put(key, Preconditions.checkNotNull(value, "uuids cannot be null"));
             return this;
         }
 

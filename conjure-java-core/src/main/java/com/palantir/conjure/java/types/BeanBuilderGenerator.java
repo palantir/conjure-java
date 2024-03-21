@@ -844,12 +844,12 @@ public final class BeanBuilderGenerator {
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt());
         if (nonNullCollections) {
-            builder.addStatement("this.$1N.put(key, value)", enriched.poetSpec().name);
-        } else {
             builder.addStatement(
                     "this.$1N.put(key, $2L)",
                     enriched.poetSpec().name,
                     Expressions.requireNonNull("value", enriched.fieldName().get() + " cannot be null"));
+        } else {
+            builder.addStatement("this.$1N.put(key, value)", enriched.poetSpec().name);
         }
         return builder.addStatement("return this").build();
     }

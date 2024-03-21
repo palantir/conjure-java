@@ -164,7 +164,7 @@ public final class MapExample {
 
         public Builder items(String key, String value) {
             checkNotBuilt();
-            this.items.put(key, value);
+            this.items.put(key, Preconditions.checkNotNull(value, "items cannot be null"));
             return this;
         }
 
@@ -184,7 +184,7 @@ public final class MapExample {
 
         public Builder optionalItems(String key, Optional<String> value) {
             checkNotBuilt();
-            this.optionalItems.put(key, value);
+            this.optionalItems.put(key, Preconditions.checkNotNull(value, "optionalItems cannot be null"));
             return this;
         }
 
@@ -205,7 +205,7 @@ public final class MapExample {
 
         public Builder aliasOptionalItems(String key, OptionalAlias value) {
             checkNotBuilt();
-            this.aliasOptionalItems.put(key, value);
+            this.aliasOptionalItems.put(key, Preconditions.checkNotNull(value, "aliasOptionalItems cannot be null"));
             return this;
         }
 

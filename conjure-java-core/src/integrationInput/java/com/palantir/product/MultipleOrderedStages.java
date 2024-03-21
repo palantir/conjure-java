@@ -317,7 +317,7 @@ public final class MultipleOrderedStages {
         @Override
         public Builder mappedRids(ResourceIdentifier key, String value) {
             checkNotBuilt();
-            this.mappedRids.put(key, Preconditions.checkNotNull(value, "mappedRids cannot be null"));
+            this.mappedRids.put(key, value);
             return this;
         }
 

@@ -361,7 +361,7 @@ public final class ManyFieldExample {
         @Deprecated
         public Builder map(String key, String value) {
             checkNotBuilt();
-            this.map.put(key, Preconditions.checkNotNull(value, "map cannot be null"));
+            this.map.put(key, value);
             return this;
         }
 
