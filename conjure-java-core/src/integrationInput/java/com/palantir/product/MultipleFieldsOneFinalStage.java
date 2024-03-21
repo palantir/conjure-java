@@ -227,7 +227,7 @@ public final class MultipleFieldsOneFinalStage {
         @Override
         public Builder mappedRids(ResourceIdentifier key, String value) {
             checkNotBuilt();
-            this.mappedRids.put(key, value);
+            this.mappedRids.put(key, Preconditions.checkNotNull(value, "mappedRids cannot be null"));
             return this;
         }
 

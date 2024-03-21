@@ -45,8 +45,7 @@ public final class ConjureCollections {
         }
     }
 
-    // explicitly need to return mutable list for generated builders
-    @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
+    @SuppressWarnings("unchecked")
     public static <T> void addAllNonNull(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
         Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
         if (elementsToAdd instanceof Collection) {
@@ -60,6 +59,7 @@ public final class ConjureCollections {
         }
     }
 
+    // explicitly need to return mutable list for generated builders
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");

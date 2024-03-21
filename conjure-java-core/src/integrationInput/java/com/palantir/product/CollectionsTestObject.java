@@ -248,7 +248,7 @@ public final class CollectionsTestObject {
 
         public Builder itemsMap(String key, int value) {
             checkNotBuilt();
-            this.itemsMap.put(key, value);
+            this.itemsMap.put(key, Preconditions.checkNotNull(value, "itemsMap cannot be null"));
             return this;
         }
 
