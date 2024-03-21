@@ -127,6 +127,7 @@ final class ExternalImportFilter {
                 // Remove markers, which are required to be external type imports
                 .markers(ImmutableList.of())
                 .args(Lists.transform(definition.getArgs(), this::filter))
+                .returns(definition.getReturns().map(this::filter).map(TypeWithSafety::type))
                 .build();
     }
 
