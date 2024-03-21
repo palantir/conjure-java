@@ -298,14 +298,15 @@ public final class ManyFieldExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newNullCheckedArrayList(
+                    Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         /** docs for items field with exciting character$ used by javapoet. */
         public Builder addAllItems(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAllNonNull(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -320,14 +321,15 @@ public final class ManyFieldExample {
         @JsonSetter(value = "set", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder set(@Nonnull Iterable<String> set) {
             checkNotBuilt();
-            this.set = ConjureCollections.newLinkedHashSet(Preconditions.checkNotNull(set, "set cannot be null"));
+            this.set = ConjureCollections.newNullCheckedLinkedHashSet(
+                    Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
         /** docs for set field */
         public Builder addAllSet(@Nonnull Iterable<String> set) {
             checkNotBuilt();
-            ConjureCollections.addAll(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
+            ConjureCollections.addAllNonNull(this.set, Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 

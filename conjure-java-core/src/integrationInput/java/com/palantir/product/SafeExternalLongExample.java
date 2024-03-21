@@ -191,14 +191,14 @@ public final class SafeExternalLongExample {
         @JsonSetter(value = "safeExternalLongList", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safeExternalLongList(@Nonnull Iterable<? extends @Safe Long> safeExternalLongList) {
             checkNotBuilt();
-            this.safeExternalLongList = ConjureCollections.newArrayList(
+            this.safeExternalLongList = ConjureCollections.newNullCheckedArrayList(
                     Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
             return this;
         }
 
         public Builder addAllSafeExternalLongList(@Nonnull Iterable<? extends @Safe Long> safeExternalLongList) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllNonNull(
                     this.safeExternalLongList,
                     Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
             return this;
@@ -213,14 +213,14 @@ public final class SafeExternalLongExample {
         @JsonSetter(value = "safeExternalLongSet", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
-            this.safeExternalLongSet = ConjureCollections.newLinkedHashSet(
+            this.safeExternalLongSet = ConjureCollections.newNullCheckedLinkedHashSet(
                     Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
             return this;
         }
 
         public Builder addAllSafeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllNonNull(
                     this.safeExternalLongSet,
                     Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
             return this;

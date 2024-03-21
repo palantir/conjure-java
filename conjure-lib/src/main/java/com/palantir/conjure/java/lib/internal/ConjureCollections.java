@@ -73,7 +73,8 @@ public final class ConjureCollections {
         return list;
     }
 
-    @SuppressWarnings({"IllegalType", "unchecked"}) // explicitly need to return mutable list for generated builders
+    // explicitly need to return mutable list for generated builders
+    @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newNullCheckedArrayList(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
         if (iterable instanceof Collection) {
