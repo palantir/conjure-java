@@ -21,7 +21,6 @@ import com.palantir.logsafe.SafeArg;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.Objects;
 
 /**
  * Captures generic type information.
@@ -59,6 +58,23 @@ public abstract class TypeMarker<T> {
     }
 
     @Override
+    public final boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other instanceof TypeMarker) {
+            TypeMarker<?> that = (TypeMarker<?>) other;
+            return type.equals(that.type);
+        }
+        return false;
+    }
+
+    @Override
+    public final int hashCode() {
+        return type.hashCode();
+    }
+
+    @Override
     public final String toString() {
         return "TypeMarker{type=" + type + '}';
     }
@@ -71,20 +87,6 @@ public abstract class TypeMarker<T> {
     private static final class WrappingTypeMarker extends TypeMarker<Object> {
         private WrappingTypeMarker(Type type) {
             super(type);
-        }
-
-        @Override
-        public int hashCode() {
-            return getType().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (other instanceof WrappingTypeMarker) {
-                WrappingTypeMarker otherMarker = (WrappingTypeMarker) other;
-                return Objects.equals(getType(), otherMarker.getType());
-            }
-            return false;
         }
     }
 }
