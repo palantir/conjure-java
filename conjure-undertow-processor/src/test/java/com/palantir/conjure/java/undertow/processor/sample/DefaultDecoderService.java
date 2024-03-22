@@ -22,6 +22,8 @@ import com.palantir.conjure.java.undertow.annotations.CollectionParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.HttpMethod;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoder;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.ri.ResourceIdentifier;
 import java.time.OffsetDateTime;
 import java.util.Collection;
@@ -49,6 +51,8 @@ public interface DefaultDecoderService {
             @Handle.QueryParam("optionalSafeLongParam") Optional<SafeLong> optionalSafeLongParam,
             @Handle.QueryParam("uuidParam") UUID uuidParam,
             @Handle.QueryParam(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
+            @Handle.QueryParam(value = "constructorDecoderParam", decoder = ConstructorStringCollectionDecoder.class)
+                    String constructorDecoderParam,
             @Handle.QueryParam("constructor") Constructor constructor,
             @Handle.QueryParam("ofFactory") OfFactory ofFactory,
             @Handle.QueryParam("valueOfFactory") ValueOfFactory valueOfFactory,
@@ -70,6 +74,8 @@ public interface DefaultDecoderService {
             @Handle.FormParam("optionalSafeLongParam") Optional<SafeLong> optionalSafeLongParam,
             @Handle.FormParam("uuidParam") UUID uuidParam,
             @Handle.FormParam(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
+            @Handle.FormParam(value = "constructorDecoderParam", decoder = ConstructorStringCollectionDecoder.class)
+                    String constructorDecoderParam,
             @Handle.FormParam("constructor") Constructor constructor,
             @Handle.FormParam("ofFactory") OfFactory ofFactory,
             @Handle.FormParam("valueOfFactory") ValueOfFactory valueOfFactory,
@@ -86,6 +92,8 @@ public interface DefaultDecoderService {
             @Handle.Header("floatBoxed") Float floatBoxed,
             @Handle.Header("floatUnboxed") float floatUnboxed,
             @Handle.Header(value = "decoderParam", decoder = StringCollectionDecoder.class) String decoderParam,
+            @Handle.Header(value = "constructorDecoderParam", decoder = ConstructorStringCollectionDecoder.class)
+                    String constructorDecoderParam,
             @Handle.Header("constructor") Constructor constructor,
             @Handle.Header("ofFactory") OfFactory ofFactory,
             @Handle.Header("valueOfFactory") ValueOfFactory valueOfFactory,
@@ -94,12 +102,13 @@ public interface DefaultDecoderService {
 
     @Handle(
             method = HttpMethod.GET,
-            path = "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{floatBoxed}/{floatUnboxed}/{constructor}"
-                    + "/{ofFactory}/{valueOfFactory}/{fromStringFactory}/{createFactory}")
+            path = "/pathParam/{stringParam}/{booleanParam}/{decoderParam}/{constructorDecoderParam}/{floatBoxed}"
+                    + "/{floatUnboxed}/{constructor}/{ofFactory}/{valueOfFactory}/{fromStringFactory}/{createFactory}")
     String pathParam(
             @Handle.PathParam String stringParam,
             @Handle.PathParam Boolean booleanParam,
             @Handle.PathParam(decoder = StringDecoder.class) String decoderParam,
+            @Handle.PathParam(decoder = ConstructorStringDecoder.class) String constructorDecoderParam,
             @Handle.PathParam Float floatBoxed,
             @Handle.PathParam float floatUnboxed,
             @Handle.PathParam Constructor constructor,
@@ -117,8 +126,28 @@ public interface DefaultDecoderService {
         }
     }
 
+    final class ConstructorStringCollectionDecoder implements CollectionParamDecoder<String> {
+
+        ConstructorStringCollectionDecoder(UndertowRuntime _runtime, Endpoint _endpoint) {}
+
+        @Override
+        public String decode(Collection<String> value) {
+            return Iterables.getOnlyElement(value);
+        }
+    }
+
     enum StringDecoder implements ParamDecoder<String> {
         INSTANCE;
+
+        @Override
+        public String decode(String value) {
+            return value;
+        }
+    }
+
+    final class ConstructorStringDecoder implements ParamDecoder<String> {
+
+        ConstructorStringDecoder(UndertowRuntime _runtime, Endpoint _endpoint) {}
 
         @Override
         public String decode(String value) {

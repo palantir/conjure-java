@@ -18,8 +18,6 @@ package com.palantir.conjure.java.undertow.processor.data;
 
 import com.google.auto.common.MoreTypes;
 import com.google.common.collect.MoreCollectors;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import javax.lang.model.element.Element;
@@ -32,18 +30,14 @@ final class Instantiables {
 
     private Instantiables() {}
 
+    static CodeBlock instantiate(TypeMirror mirror) {
+        return instantiate(MoreTypes.asDeclared(mirror));
+    }
+
     /**
      * Produces a {@link CodeBlock} of instantiation code for the provided type.
      * This supports both no-arg class constructors and single-value enum singletons.
      */
-    static CodeBlock instantiate(TypeMirror mirror) {
-        DeclaredType declaredType = MoreTypes.asDeclared(mirror);
-        if (declaredType == null) {
-            throw new SafeIllegalStateException("TypeMirror is not a DeclaredType", SafeArg.of("type", mirror));
-        }
-        return instantiate(declaredType);
-    }
-
     static CodeBlock instantiate(DeclaredType declaredType) {
         TypeElement typeElement = (TypeElement) declaredType.asElement();
         if (typeElement.getKind() == ElementKind.ENUM) {
