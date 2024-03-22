@@ -21,6 +21,7 @@ import com.palantir.logsafe.SafeArg;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Objects;
 
 /**
  * Captures generic type information.
@@ -49,6 +50,10 @@ public abstract class TypeMarker<T> {
                 SafeArg.of("typeVariable", type));
     }
 
+    private TypeMarker(Type type) {
+        this.type = Preconditions.checkNotNull(type, "Type is required");
+    }
+
     public final Type getType() {
         return type;
     }
@@ -56,5 +61,30 @@ public abstract class TypeMarker<T> {
     @Override
     public final String toString() {
         return "TypeMarker{type=" + type + '}';
+    }
+
+    /** Create a new {@link TypeMarker} instance wrapping the provided {@link Type}. */
+    public static TypeMarker<?> of(Type type) {
+        return new WrappingTypeMarker(type);
+    }
+
+    private static final class WrappingTypeMarker extends TypeMarker<Object> {
+        private WrappingTypeMarker(Type type) {
+            super(type);
+        }
+
+        @Override
+        public int hashCode() {
+            return getType().hashCode();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof WrappingTypeMarker) {
+                WrappingTypeMarker otherMarker = (WrappingTypeMarker) other;
+                return Objects.equals(getType(), otherMarker.getType());
+            }
+            return false;
+        }
     }
 }
