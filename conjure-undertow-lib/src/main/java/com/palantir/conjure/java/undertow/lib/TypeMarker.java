@@ -42,11 +42,24 @@ public abstract class TypeMarker<T> {
                 genericSuperclass instanceof ParameterizedType,
                 "Class is not parameterized",
                 SafeArg.of("class", genericSuperclass));
-        type = ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0];
+        Type typeArgument = ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0];
+        Preconditions.checkArgument(
+                !(typeArgument instanceof TypeVariable),
+                "TypeMarker does not support variable types",
+                SafeArg.of("typeVariable", typeArgument));
+        this.type = typeArgument;
+    }
+
+    private TypeMarker(Type type) {
         Preconditions.checkArgument(
                 !(type instanceof TypeVariable),
                 "TypeMarker does not support variable types",
                 SafeArg.of("typeVariable", type));
+        this.type = type;
+    }
+
+    public static <T> TypeMarker<T> of(Type type) {
+        return new TypeMarker<>(type) {};
     }
 
     public final Type getType() {
