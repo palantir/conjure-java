@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: '`ParamDecoder` and `CollectionParamDecoder` types can not be instantiated
+    with constructors that take `UndertowRuntime` and/or `Endpoint`.'
+  links:
+  - https://github.com/palantir/conjure-java/pull/2267

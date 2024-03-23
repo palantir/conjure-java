@@ -17,15 +17,19 @@
 package com.palantir.conjure.java.undertow.processor.data;
 
 import com.google.auto.common.MoreElements;
+import com.google.auto.common.MoreTypes;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.MoreCollectors;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.annotations.DefaultParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
 import com.palantir.conjure.java.undertow.annotations.ParamDecoders;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
 import com.palantir.conjure.java.undertow.lib.RequestContext;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.conjure.java.undertow.processor.data.ParameterType.SafeLoggingAnnotation;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -301,7 +305,8 @@ public final class ParamTypesResolver {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultParamDecoder.class)) {
-            return Instantiables.instantiate(typeMirror);
+            DeclaredType declaredType = MoreTypes.asDeclared(typeMirror);
+            return getParamDecoderConstructor(declaredType).orElseGet(() -> Instantiables.instantiate(declaredType));
         }
 
         // For param decoders, we don't support list and set container types.
@@ -326,7 +331,8 @@ public final class ParamTypesResolver {
         // If the default marker interface is not used (overwritten by user), we want to use the user-provided decoder.
         TypeMirror typeMirror = annotationReflector.getAnnotationValue("decoder", TypeMirror.class);
         if (!context.isSameTypes(typeMirror, DefaultParamDecoder.class)) {
-            return Instantiables.instantiate(typeMirror);
+            DeclaredType declaredType = MoreTypes.asDeclared(typeMirror);
+            return getParamDecoderConstructor(declaredType).orElseGet(() -> Instantiables.instantiate(typeMirror));
         }
 
         Optional<TypeMirror> innerListType = context.getGenericInnerType(List.class, parameterType);
@@ -347,6 +353,32 @@ public final class ParamTypesResolver {
                             SafeArg.of("supportedTypes", SUPPORTED_CLASSES));
                     return CodeBlock.of("// error");
                 });
+    }
+
+    private Optional<CodeBlock> getParamDecoderConstructor(DeclaredType declaredType) {
+        TypeElement typeElement = (TypeElement) declaredType.asElement();
+        return typeElement.getEnclosedElements().stream()
+                .filter(element -> element.getKind() == ElementKind.CONSTRUCTOR)
+                .map(ExecutableElement.class::cast)
+                .filter(element -> !element.getModifiers().contains(Modifier.PRIVATE)
+                        && element.getThrownTypes().stream().allMatch(this::isRuntimeException)
+                        && !element.getParameters().isEmpty())
+                .map(element -> {
+                    List<CodeBlock> args = new ArrayList<>();
+                    for (VariableElement parameter : element.getParameters()) {
+                        TypeName parameterTypeName = TypeName.get(parameter.asType());
+                        if (parameterTypeName.equals(ClassName.get(UndertowRuntime.class))) {
+                            args.add(CodeBlock.of("runtime"));
+                        } else if (parameterTypeName.equals(ClassName.get(Endpoint.class))) {
+                            args.add(CodeBlock.of("this"));
+                        } else {
+                            return null;
+                        }
+                    }
+                    return CodeBlock.of("new $T($L)", TypeName.get(declaredType), CodeBlock.join(args, ", "));
+                })
+                .filter(Objects::nonNull)
+                .collect(MoreCollectors.toOptional());
     }
 
     /**
@@ -415,7 +447,6 @@ public final class ParamTypesResolver {
 
     private Optional<CodeBlock> getFactoryDecoderFactoryFunction(DeclaredType declaredType, String methodName) {
         TypeElement typeElement = (TypeElement) declaredType.asElement();
-        // T valueOf(String)
         return typeElement.getEnclosedElements().stream()
                 .filter(element -> element.getKind() == ElementKind.METHOD)
                 .map(ExecutableElement.class::cast)
@@ -427,21 +458,20 @@ public final class ParamTypesResolver {
                         && isString(element.getParameters().get(0).asType())
                         && Objects.equals(TypeName.get(declaredType), TypeName.get(element.getReturnType())))
                 .map(_element -> CodeBlock.of("$T::" + methodName, TypeName.get(declaredType)))
-                .findFirst();
+                .collect(MoreCollectors.toOptional());
     }
 
     private Optional<CodeBlock> getConstructorDecoderFactoryFunction(DeclaredType declaredType) {
         TypeElement typeElement = (TypeElement) declaredType.asElement();
-        // new T(String)
         return typeElement.getEnclosedElements().stream()
                 .filter(element -> element.getKind() == ElementKind.CONSTRUCTOR)
                 .map(ExecutableElement.class::cast)
                 .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
                         && element.getThrownTypes().stream().allMatch(this::isRuntimeException)
                         && element.getParameters().size() == 1
-                        && TypeName.get(element.getParameters().get(0).asType()).equals(ClassName.get(String.class)))
+                        && isString(element.getParameters().get(0).asType()))
                 .map(_element -> CodeBlock.of("$T::new", TypeName.get(declaredType)))
-                .findFirst();
+                .collect(MoreCollectors.toOptional());
     }
 
     @VisibleForTesting
