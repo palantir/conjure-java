@@ -168,17 +168,20 @@ Note that file form parameters are currently not supported by this annotation bu
 
 Per default, conjure-undertow-processor supports decoding parameters for all [plain Conjure types](https://palantir.github.io/conjure/#/docs/spec/wire?id=_7-plain-format)
 as well as primitives and types that have one of the following:
-1. A public static method named `valueOf` that accepts a single String argument.
-1. A public constructor that accepts a single String argument.
-1. A public static method named `of` that accepts a single String argument.
-1. A public static method named `fromString` that accepts a single String argument.
-1. A public static method named `create` that accepts a single String argument.
+1. A public static method named `valueOf` that accepts a single `String` argument.
+1. A public constructor that accepts a single `String` argument.
+1. A public static method named `of` that accepts a single `String` argument.
+1. A public static method named `fromString` that accepts a single `String` argument.
+1. A public static method named `create` that accepts a single `String` argument.
 
 In the presence of more than one eligible method or constructor, the first matching element following the ordering above is used.
 
 For other parameter types, you can provide a custom decoder by providing an implementation of
 either [`ParamDecoder`](src/main/java/com/palantir/conjure/java/undertow/annotations/ParamDecoder.java) or
-[`CollectionParamDecoder`](src/main/java/com/palantir/conjure/java/undertow/annotations/CollectionParamDecoder.java).
+[`CollectionParamDecoder`](src/main/java/com/palantir/conjure/java/undertow/annotations/CollectionParamDecoder.java) that is one of the following:
+- An enum with a single value.
+- A class with a constructor that accepts no arguments.
+- A class with a constructor that accepts some combination of `UndertowRuntime` and/or `Endpoint` arguments.
 
 ```java
 public interface MyService {
@@ -189,14 +192,16 @@ public interface MyService {
                     Optional<MyType> queryParam);
 
     enum MyCollectionParamDecoder implements CollectionParamDecoder<Optional<MyType>> {
-        INSTANCE;
+
+        private final PlainSerDe serde;
+
+        MyCollectionParamDecoder(UndertowRuntime runtime) {
+            this.serde = runtime.plainSerDe();
+        }
 
         @Override
         public Optional<MyType> decode(Collection<String> value) {
-            if (value.isEmpty()) {
-                return Optional.empty();
-            }
-            return Optional.of(MyType.from(Iterables.getOnlyElement(value)));
+            return serde.deserializeOptionalComplex(values, MyType::from);
         }
     }
 }
@@ -204,7 +209,9 @@ public interface MyService {
 
 Similarly, you can provide your own behavior for serializing and deserializing the request body by providing an
 implementation of either [`SerializerFactory`](src/main/java/com/palantir/conjure/java/undertow/annotations/SerializerFactory.java)
-or [`DeserializerFactory`](src/main/java/com/palantir/conjure/java/undertow/annotations/DeserializerFactory.java):
+or [`DeserializerFactory`](src/main/java/com/palantir/conjure/java/undertow/annotations/DeserializerFactory.java) that is one of the following:
+- An enum with a single value.
+- A class with a constructor that accepts no arguments.
 
 ```java
 public interface MyService {
