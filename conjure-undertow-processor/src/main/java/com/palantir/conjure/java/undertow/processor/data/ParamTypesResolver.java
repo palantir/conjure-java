@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.MoreCollectors;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.undertow.annotations.DefaultParamDecoder;
 import com.palantir.conjure.java.undertow.annotations.Handle;
@@ -356,11 +357,11 @@ public final class ParamTypesResolver {
 
     private Optional<CodeBlock> getParamDecoderConstructor(DeclaredType declaredType) {
         TypeElement typeElement = (TypeElement) declaredType.asElement();
-        // new T(String)
         return typeElement.getEnclosedElements().stream()
                 .filter(element -> element.getKind() == ElementKind.CONSTRUCTOR)
                 .map(ExecutableElement.class::cast)
-                .filter(element -> element.getThrownTypes().stream().allMatch(this::isRuntimeException)
+                .filter(element -> !element.getModifiers().contains(Modifier.PRIVATE)
+                        && element.getThrownTypes().stream().allMatch(this::isRuntimeException)
                         && !element.getParameters().isEmpty())
                 .map(element -> {
                     List<CodeBlock> args = new ArrayList<>();
@@ -377,7 +378,7 @@ public final class ParamTypesResolver {
                     return CodeBlock.of("new $T($L)", TypeName.get(declaredType), CodeBlock.join(args, ", "));
                 })
                 .filter(Objects::nonNull)
-                .findFirst();
+                .collect(MoreCollectors.toOptional());
     }
 
     /**
@@ -457,7 +458,7 @@ public final class ParamTypesResolver {
                         && isString(element.getParameters().get(0).asType())
                         && Objects.equals(TypeName.get(declaredType), TypeName.get(element.getReturnType())))
                 .map(_element -> CodeBlock.of("$T::" + methodName, TypeName.get(declaredType)))
-                .findFirst();
+                .collect(MoreCollectors.toOptional());
     }
 
     private Optional<CodeBlock> getConstructorDecoderFactoryFunction(DeclaredType declaredType) {
@@ -468,9 +469,9 @@ public final class ParamTypesResolver {
                 .filter(element -> element.getModifiers().contains(Modifier.PUBLIC)
                         && element.getThrownTypes().stream().allMatch(this::isRuntimeException)
                         && element.getParameters().size() == 1
-                        && TypeName.get(element.getParameters().get(0).asType()).equals(ClassName.get(String.class)))
+                        && isString(element.getParameters().get(0).asType()))
                 .map(_element -> CodeBlock.of("$T::new", TypeName.get(declaredType)))
-                .findFirst();
+                .collect(MoreCollectors.toOptional());
     }
 
     @VisibleForTesting
