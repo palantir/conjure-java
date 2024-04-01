@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.lib;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,8 +32,7 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
         this(16);
     }
 
-    @VisibleForTesting
-    void resizeIfNecessary(int toAdd) {
+    private void resizeIfNecessary(int toAdd) {
         if (size + toAdd > elements.length) {
             elements = Arrays.copyOf(elements, newCapacity(size + toAdd));
         }
@@ -166,10 +164,5 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException();
         }
-    }
-
-    @VisibleForTesting
-    double[] getElements() {
-        return elements;
     }
 }
