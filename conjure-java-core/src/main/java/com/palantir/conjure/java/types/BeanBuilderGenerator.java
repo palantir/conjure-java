@@ -602,7 +602,7 @@ public final class BeanBuilderGenerator {
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
             CollectionType collectionType = type.accept(COLLECTION_CONCRETE_TYPE);
-            if (collectionType.storeAsPrimitives()) {
+            if (collectionType.isParameterized()) {
                 spec.initializer("new $T()", collectionType.getClazz());
             } else {
                 spec.initializer("new $T<>()", collectionType.getClazz());
@@ -801,7 +801,7 @@ public final class BeanBuilderGenerator {
 
         if (type.accept(TypeVisitor.IS_LIST)) {
             CollectionType collectionType = type.accept(COLLECTION_CONCRETE_TYPE);
-            if (collectionType.storeAsPrimitives()) {
+            if (collectionType.isParameterized()) {
                 return ImmutableList.of(
                         createPrimitiveCollectionSetter(enriched),
                         createCollectionSetter("addAll", enriched, override),
@@ -982,19 +982,19 @@ public final class BeanBuilderGenerator {
 
     private static final class CollectionType {
         private final Class<?> clazz;
-        private final boolean storeAsPrimitives;
+        private final boolean isParameterized;
 
-        CollectionType(Class<?> clazz, boolean storeAsPrimitives) {
+        CollectionType(Class<?> clazz, boolean isParameterized) {
             this.clazz = clazz;
-            this.storeAsPrimitives = storeAsPrimitives;
+            this.isParameterized = isParameterized;
         }
 
         public Class<?> getClazz() {
             return clazz;
         }
 
-        public boolean storeAsPrimitives() {
-            return storeAsPrimitives;
+        public boolean isParameterized() {
+            return isParameterized;
         }
     }
 }
