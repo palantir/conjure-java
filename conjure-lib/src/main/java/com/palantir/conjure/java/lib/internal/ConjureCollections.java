@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.lib.internal;
 
+import com.palantir.conjure.java.lib.DoubleArrayList;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,5 +71,23 @@ public final class ConjureCollections {
             set.add(item);
         }
         return set;
+    }
+
+    // explicitly need to return mutable list for generated builders
+    public static DoubleArrayList newDoubleArrayList(Iterable<Double> iterable) {
+        Preconditions.checkNotNull(iterable, "iterable cannot be null");
+        if (iterable instanceof Collection) {
+            return new DoubleArrayList((Collection<Double>) iterable);
+        }
+        DoubleArrayList list = new DoubleArrayList();
+        for (Double item : iterable) {
+            list.add(item);
+        }
+        return list;
+    }
+
+    public static DoubleArrayList newDoubleArrayList(double[] doubleArray) {
+        Preconditions.checkNotNull(doubleArray, "array cannot be null");
+        return new DoubleArrayList(doubleArray);
     }
 }
