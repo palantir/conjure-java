@@ -57,7 +57,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -702,29 +701,6 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
-    private MethodSpec createPrimitiveCollectionSetter(EnrichedField enriched) {
-        FieldSpec field = enriched.poetSpec();
-        Type type = enriched.conjureDef().getType();
-
-        Type innerType = type.accept(TypeVisitor.LIST).getItemType();
-        TypeName innerTypeName = ConjureAnnotations.withSafety(
-                Primitives.unbox(typeMapper.getClassName(innerType)),
-                safetyEvaluator.getUsageTimeSafety(enriched.conjureDef()));
-
-        MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
-                .addParameter(Parameters.nonnullParameter(ArrayTypeName.of(innerTypeName), field.name))
-                .addCode(verifyNotBuilt())
-                .addCode(CodeBlocks.statement(
-                        "this.$1N = $2T.new$3T($4L)",
-                        enriched.poetSpec().name,
-                        ConjureCollections.class,
-                        type.accept(COLLECTION_CONCRETE_TYPE).getClazz(),
-                        Expressions.requireNonNull(
-                                enriched.poetSpec().name, enriched.fieldName().get() + " cannot be null")));
-
-        return setterBuilder.addStatement("return this").build();
-    }
-
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
@@ -800,17 +776,9 @@ public final class BeanBuilderGenerator {
         Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(enriched.conjureDef());
 
         if (type.accept(TypeVisitor.IS_LIST)) {
-            CollectionType collectionType = type.accept(COLLECTION_CONCRETE_TYPE);
-            if (collectionType.isParameterized()) {
-                return ImmutableList.of(
-                        createPrimitiveCollectionSetter(enriched),
-                        createCollectionSetter("addAll", enriched, override),
-                        createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
-            } else {
-                return ImmutableList.of(
-                        createCollectionSetter("addAll", enriched, override),
-                        createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
-            }
+            return ImmutableList.of(
+                    createCollectionSetter("addAll", enriched, override),
+                    createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {

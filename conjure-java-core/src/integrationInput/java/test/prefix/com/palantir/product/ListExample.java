@@ -239,13 +239,6 @@ public final class ListExample {
             return this;
         }
 
-        public Builder doubleItems(@Nonnull double[] doubleItems) {
-            checkNotBuilt();
-            this.doubleItems = ConjureCollections.newDoubleArrayList(
-                    Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
-            return this;
-        }
-
         public Builder addAllDoubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
             ConjureCollections.addAll(

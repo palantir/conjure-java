@@ -85,9 +85,4 @@ public final class ConjureCollections {
         }
         return list;
     }
-
-    public static DoubleArrayList newDoubleArrayList(double[] doubleArray) {
-        Preconditions.checkNotNull(doubleArray, "array cannot be null");
-        return new DoubleArrayList(doubleArray);
-    }
 }
