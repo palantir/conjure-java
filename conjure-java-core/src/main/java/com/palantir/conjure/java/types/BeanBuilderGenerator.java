@@ -602,7 +602,7 @@ public final class BeanBuilderGenerator {
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
             CollectionType collectionType = type.accept(COLLECTION_CONCRETE_TYPE);
-            if (collectionType.isPrimitive()) {
+            if (collectionType.storeAsPrimitives()) {
                 spec.initializer("new $T()", collectionType.getClazz());
             } else {
                 spec.initializer("new $T<>()", collectionType.getClazz());
@@ -801,7 +801,7 @@ public final class BeanBuilderGenerator {
 
         if (type.accept(TypeVisitor.IS_LIST)) {
             CollectionType collectionType = type.accept(COLLECTION_CONCRETE_TYPE);
-            if (collectionType.isPrimitive()) {
+            if (collectionType.storeAsPrimitives()) {
                 return ImmutableList.of(
                         createPrimitiveCollectionSetter(enriched),
                         createCollectionSetter("addAll", enriched, override),
@@ -982,19 +982,19 @@ public final class BeanBuilderGenerator {
 
     private static final class CollectionType {
         private final Class<?> clazz;
-        private final boolean isPrimitive;
+        private final boolean storeAsPrimitives;
 
-        CollectionType(Class<?> clazz, boolean isPrimitive) {
+        CollectionType(Class<?> clazz, boolean storeAsPrimitives) {
             this.clazz = clazz;
-            this.isPrimitive = isPrimitive;
+            this.storeAsPrimitives = storeAsPrimitives;
         }
 
         public Class<?> getClazz() {
             return clazz;
         }
 
-        public boolean isPrimitive() {
-            return isPrimitive;
+        public boolean storeAsPrimitives() {
+            return storeAsPrimitives;
         }
     }
 }

@@ -16,10 +16,11 @@
 
 package com.palantir.conjure.java.lib;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Objects;
 import java.util.RandomAccess;
 
 public final class DoubleArrayList extends AbstractList<Double> implements RandomAccess {
@@ -42,21 +43,19 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
 
     public DoubleArrayList(Collection<Double> collection) {
         elements = new double[collection.size()];
-        Double[] array = collection.toArray(Double[]::new);
         size = collection.size();
         if (size != 0) {
-            for (int idx = 0; idx < size; idx++) {
-                elements[idx] = array[idx];
+            int idx = 0;
+            for (Double value : collection) {
+                elements[idx] = value;
+                idx++;
             }
         }
     }
 
     public DoubleArrayList(double[] doubleArray) {
-        elements = new double[doubleArray.length];
         size = doubleArray.length;
-        if (size != 0) {
-            elements = Arrays.copyOf(doubleArray, size);
-        }
+        elements = Arrays.copyOf(doubleArray, size);
     }
 
     @Override
@@ -66,79 +65,60 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
 
     @Override
     public void add(int index, Double toAdd) {
+        checkIndexInAddRange(index);
+        resizeIfNecessary(1);
         if (index == size) {
             resizeIfNecessary(1);
             size++;
-        } else if (index > size) {
-            resizeIfNecessary(index - size + 1);
-            size = index + 1;
         } else {
             resizeIfNecessary(1);
             // Move over all entries
-            System.arraycopy(elements, index, elements, index + 1, size - index - 1);
+            System.arraycopy(elements, index, elements, index + 1, size - index);
+            size++;
         }
 
         elements[index] = toAdd;
     }
 
     @Override
-    public boolean remove(Object obj) {
-        int idx = indexOf(obj);
-        if (idx == -1) {
-            return false;
-        }
-
-        System.arraycopy(elements, idx + 1, elements, idx, size - idx - 1);
-        // Technically not necessary, doing for hygiene
-        elements[size] = 0;
-        size--;
-
-        return false;
-    }
-
-    @Override
     public Double remove(int index) {
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException();
-        }
+        Objects.checkIndex(index, size);
         double oldValue = elements[index];
-        System.arraycopy(elements, index + 1, elements, index, size - index - 1);
-        elements[size] = 0;
+        if (index != size - 1) {
+            System.arraycopy(elements, index + 1, elements, index, size - index - 1);
+        }
         size--;
 
         return oldValue;
     }
 
     @Override
-    public Iterator<Double> iterator() {
-        // TODO: Implement as the default one doesn't do deletion
-        return super.iterator();
-    }
-
-    @Override
     public void clear() {
-        for (int i = 0; i < size; i++) {
-            elements[i] = 0;
-        }
         size = 0;
     }
 
     @Override
     public Double get(int index) {
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException();
-        }
-
+        Objects.checkIndex(index, size);
         return elements[index];
     }
 
     @Override
     public Double set(int index, Double element) {
-        if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException();
-        }
+        Objects.checkIndex(index, size);
         double oldValue = elements[index];
         elements[index] = element;
         return oldValue;
+    }
+
+    private void checkIndexInAddRange(int index) {
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    @VisibleForTesting
+    double[] getElements() {
+        return elements;
     }
 }
