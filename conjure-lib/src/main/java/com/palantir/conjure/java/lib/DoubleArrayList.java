@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.RandomAccess;
-import org.jetbrains.annotations.NotNull;
 
 public final class DoubleArrayList extends AbstractList<Double> implements RandomAccess {
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
@@ -125,7 +124,7 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
     }
 
     @Override
-    public boolean addAll(@NotNull Collection<? extends Double> collection) {
+    public boolean addAll(Collection<? extends Double> collection) {
         return addAll(size, collection);
     }
 
