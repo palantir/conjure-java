@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.palantir.conjure.java.lib.DoubleArrayList;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
@@ -170,7 +169,7 @@ public final class ListExample {
 
         private List<Integer> primitiveItems = new ArrayList<>();
 
-        private List<Double> doubleItems = new DoubleArrayList();
+        private List<Double> doubleItems = new ArrayList<>();
 
         private List<Optional<String>> optionalItems = new ArrayList<>();
 
@@ -234,7 +233,7 @@ public final class ListExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems = ConjureCollections.newDoubleArrayList(
+            this.doubleItems = ConjureCollections.newArrayList(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }

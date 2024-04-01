@@ -104,7 +104,7 @@ public final class BeanBuilderGenerator {
 
                         @Override
                         public CollectionType visitDouble() {
-                            return new CollectionType(DoubleArrayList.class, true);
+                            return new CollectionType(DoubleArrayList.class, ArrayList.class, true);
                         }
                     });
                 }
@@ -602,7 +602,11 @@ public final class BeanBuilderGenerator {
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
             CollectionType collectionType = type.accept(COLLECTION_CONCRETE_TYPE);
             if (collectionType.isParameterized()) {
-                spec.initializer("new $T()", collectionType.getClazz());
+                if (options.nonNullCollections()) {
+                    spec.initializer("new $T()", collectionType.getClazz());
+                } else {
+                    spec.initializer("new $T<>()", collectionType.getFallbackClazz());
+                }
             } else {
                 spec.initializer("new $T<>()", collectionType.getClazz());
             }
@@ -706,13 +710,23 @@ public final class BeanBuilderGenerator {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             if (shouldClearFirst) {
-                return CodeBlocks.statement(
-                        "this.$1N = $2T.new$3T($4L)",
-                        spec.name,
-                        ConjureCollections.class,
-                        type.accept(COLLECTION_CONCRETE_TYPE).getClazz(),
-                        Expressions.requireNonNull(
-                                spec.name, enriched.fieldName().get() + " cannot be null"));
+                if (options.nonNullCollections()) {
+                    return CodeBlocks.statement(
+                            "this.$1N = $2T.new$3T($4L)",
+                            spec.name,
+                            ConjureCollections.class,
+                            type.accept(COLLECTION_CONCRETE_TYPE).getClazz(),
+                            Expressions.requireNonNull(
+                                    spec.name, enriched.fieldName().get() + " cannot be null"));
+                } else {
+                    return CodeBlocks.statement(
+                            "this.$1N = $2T.new$3T($4L)",
+                            spec.name,
+                            ConjureCollections.class,
+                            type.accept(COLLECTION_CONCRETE_TYPE).getFallbackClazz(),
+                            Expressions.requireNonNull(
+                                    spec.name, enriched.fieldName().get() + " cannot be null"));
+                }
             }
             return CodeBlocks.statement(
                     "$1T.addAll(this.$2N, $3L)",
@@ -724,7 +738,6 @@ public final class BeanBuilderGenerator {
                 return CodeBlocks.statement(
                         "this.$1N = new $2T<>($3L)",
                         spec.name,
-                        // Note (to remove before merge): Maps will always be parameterized so no need to check for that
                         type.accept(COLLECTION_CONCRETE_TYPE).getClazz(),
                         Expressions.requireNonNull(
                                 spec.name, enriched.fieldName().get() + " cannot be null"));
@@ -950,10 +963,18 @@ public final class BeanBuilderGenerator {
 
     private static final class CollectionType {
         private final Class<?> clazz;
+        private final Class<?> fallbackClazz;
         private final boolean isParameterized;
+
+        CollectionType(Class<?> clazz, Class<?> fallbackClazz, boolean isParameterized) {
+            this.clazz = clazz;
+            this.fallbackClazz = fallbackClazz;
+            this.isParameterized = isParameterized;
+        }
 
         CollectionType(Class<?> clazz, boolean isParameterized) {
             this.clazz = clazz;
+            this.fallbackClazz = clazz;
             this.isParameterized = isParameterized;
         }
 
@@ -963,6 +984,10 @@ public final class BeanBuilderGenerator {
 
         public boolean isParameterized() {
             return isParameterized;
+        }
+
+        public Class<?> getFallbackClazz() {
+            return fallbackClazz;
         }
     }
 }
