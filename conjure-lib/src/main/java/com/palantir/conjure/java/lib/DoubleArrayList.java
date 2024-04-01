@@ -22,8 +22,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.RandomAccess;
+import org.jetbrains.annotations.NotNull;
 
 public final class DoubleArrayList extends AbstractList<Double> implements RandomAccess {
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
     private int size = 0;
     private double[] elements;
 
@@ -31,10 +33,36 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
         this(16);
     }
 
-    private void resizeIfNecessary(int toAdd) {
+    @VisibleForTesting
+    void resizeIfNecessary(int toAdd) {
         if (size + toAdd > elements.length) {
-            elements = Arrays.copyOf(elements, Math.max(size + toAdd, elements.length * 2));
+            elements = Arrays.copyOf(elements, newCapacity(size + toAdd));
         }
+    }
+
+    @SuppressWarnings("ThrowError")
+    private int newCapacity(int minCapacity) {
+        int oldCapacity = elements.length;
+        // increase by 50%
+        int newCapacity = oldCapacity + (oldCapacity >> 1);
+        if (newCapacity - minCapacity <= 0) {
+            if (elements.length == 0) {
+                return Math.max(10, minCapacity);
+            }
+            if (minCapacity < 0) {
+                throw new OutOfMemoryError();
+            }
+            return minCapacity;
+        }
+        return (newCapacity - MAX_ARRAY_SIZE <= 0) ? newCapacity : hugeCapacity(minCapacity);
+    }
+
+    @SuppressWarnings("ThrowError")
+    private static int hugeCapacity(int minCapacity) {
+        if (minCapacity < 0) {
+            throw new OutOfMemoryError();
+        }
+        return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE : MAX_ARRAY_SIZE;
     }
 
     public DoubleArrayList(int initialCapacity) {
@@ -78,6 +106,29 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
         }
 
         elements[index] = toAdd;
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends Double> collection) {
+        checkIndexInAddRange(index);
+        int numToAdd = collection.size();
+        if (numToAdd == 0) {
+            return false;
+        }
+        resizeIfNecessary(numToAdd);
+        System.arraycopy(elements, index, elements, index + numToAdd, size - index);
+        int offset = 0;
+        for (Double element : collection) {
+            elements[index + offset] = element;
+            offset++;
+        }
+        size += numToAdd;
+        return true;
+    }
+
+    @Override
+    public boolean addAll(@NotNull Collection<? extends Double> collection) {
+        return addAll(size, collection);
     }
 
     @Override

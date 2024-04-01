@@ -28,16 +28,13 @@ public class DoubleArrayListTest {
     @Test
     void initialization_sanity() {
         DoubleArrayList doubleArrayList = new DoubleArrayList(5);
-        assertThat(doubleArrayList.getElements()).hasSize(5);
         assertThat(doubleArrayList.size()).isEqualTo(0);
 
         doubleArrayList = new DoubleArrayList(List.of(1.0, 2.0, 3.0));
-        assertThat(doubleArrayList.getElements()).hasSize(3);
         assertThat(doubleArrayList.size()).isEqualTo(3);
 
         double[] doubles = new double[] {1.0, 2.0, 3.0};
         doubleArrayList = new DoubleArrayList(doubles);
-        assertThat(doubleArrayList.getElements()).hasSize(3);
         assertThat(doubleArrayList.size()).isEqualTo(3);
         // Assert we aren't just holding a reference to this array.
         doubles[0] = 2.0;
@@ -47,18 +44,14 @@ public class DoubleArrayListTest {
     @Test
     void addToEnd_test() {
         DoubleArrayList doubleArrayList = new DoubleArrayList(0);
-        assertThat(doubleArrayList.getElements()).hasSize(0);
 
         doubleArrayList.add(1.0);
-        assertThat(doubleArrayList.getElements()).hasSize(1);
         assertThat(doubleArrayList.get(0)).isEqualTo(1.0);
 
         doubleArrayList.add(2.0);
-        assertThat(doubleArrayList.getElements()).hasSize(2);
         assertThat(doubleArrayList.get(1)).isEqualTo(2.0);
 
         doubleArrayList.add(3.0);
-        assertThat(doubleArrayList.getElements()).hasSize(4); // doubling size
         assertThat(doubleArrayList.get(2)).isEqualTo(3.0);
         assertThatIndexOutOfBoundsException().isThrownBy(() -> doubleArrayList.get(3));
     }
@@ -66,25 +59,21 @@ public class DoubleArrayListTest {
     @Test
     void addToIndex_test() {
         DoubleArrayList doubleArrayList = new DoubleArrayList(0);
-        assertThat(doubleArrayList.getElements()).hasSize(0);
         List<Double> expected = new ArrayList<>();
 
         doubleArrayList.add(0, 1.0);
         expected.add(0, 1.0);
         assertThat(doubleArrayList.size()).isEqualTo(1);
-        assertThat(doubleArrayList.getElements()).hasSize(1);
         assertThat(doubleArrayList.get(0)).isEqualTo(1.0);
 
         doubleArrayList.add(0, 2.0);
         expected.add(0, 2.0);
         assertThat(doubleArrayList.size()).isEqualTo(2);
-        assertThat(doubleArrayList.getElements()).hasSize(2);
         assertThat(doubleArrayList.get(0)).isEqualTo(2.0);
 
         doubleArrayList.add(1, 3.0);
         expected.add(1, 3.0);
         assertThat(doubleArrayList.size()).isEqualTo(3);
-        assertThat(doubleArrayList.getElements()).hasSize(4);
         assertThat(doubleArrayList.get(1)).isEqualTo(3.0);
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> doubleArrayList.add(4, 4.0));
@@ -102,13 +91,11 @@ public class DoubleArrayListTest {
         Double expectedRemovedValue = expected.remove(1);
         assertThat(removedValue).isEqualTo(expectedRemovedValue);
         assertThat(doubleArrayList.size()).isEqualTo(3);
-        assertThat(doubleArrayList.getElements()).hasSize(4);
         assertDoubleArrayListAndDoubleListEqual(doubleArrayList, expected);
 
         doubleArrayList.remove(2);
         expected.remove(2);
         assertThat(doubleArrayList.size()).isEqualTo(2);
-        assertThat(doubleArrayList.getElements()).hasSize(4);
         assertDoubleArrayListAndDoubleListEqual(doubleArrayList, expected);
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> doubleArrayList.remove(2));
@@ -117,13 +104,11 @@ public class DoubleArrayListTest {
         doubleArrayList.remove(0);
         expected.remove(0);
         assertThat(doubleArrayList.size()).isEqualTo(1);
-        assertThat(doubleArrayList.getElements()).hasSize(4);
         assertDoubleArrayListAndDoubleListEqual(doubleArrayList, expected);
 
         doubleArrayList.remove(0);
         expected.remove(0);
         assertThat(doubleArrayList.size()).isEqualTo(0);
-        assertThat(doubleArrayList.getElements()).hasSize(4);
         assertDoubleArrayListAndDoubleListEqual(doubleArrayList, expected);
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> doubleArrayList.remove(0));
@@ -137,7 +122,6 @@ public class DoubleArrayListTest {
 
         doubleArrayList.clear();
         expected.clear();
-        assertThat(doubleArrayList.getElements()).hasSize(4);
         assertDoubleArrayListAndDoubleListEqual(doubleArrayList, expected);
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> doubleArrayList.remove(0));
@@ -158,6 +142,28 @@ public class DoubleArrayListTest {
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> doubleArrayList.set(4, 1.0));
         assertThatIndexOutOfBoundsException().isThrownBy(() -> expected.set(4, 1.0));
+    }
+
+    @Test
+    void addAll_sanity() {
+        DoubleArrayList doubleArrayList = new DoubleArrayList(List.of(0.1, 0.2, 0.3));
+        List<Double> expected = new ArrayList<>(List.of(0.1, 0.2, 0.3));
+
+        doubleArrayList.addAll(3, List.of(4.0, 5.0));
+        expected.addAll(3, List.of(4.0, 5.0));
+        assertDoubleArrayListAndDoubleListEqual(doubleArrayList, expected);
+
+        // Force resize
+        doubleArrayList.addAll(2, List.of(6.0, 7.0, 6.0, 7.0, 6.0, 7.0, 6.0, 7.0));
+        expected.addAll(2, List.of(6.0, 7.0, 6.0, 7.0, 6.0, 7.0, 6.0, 7.0));
+        assertDoubleArrayListAndDoubleListEqual(doubleArrayList, expected);
+
+        doubleArrayList.addAll(List.of(4.0, 5.0));
+        expected.addAll(List.of(4.0, 5.0));
+        assertDoubleArrayListAndDoubleListEqual(doubleArrayList, expected);
+
+        assertThatIndexOutOfBoundsException().isThrownBy(() -> doubleArrayList.addAll(16, List.of(1.0)));
+        assertThatIndexOutOfBoundsException().isThrownBy(() -> expected.addAll(16, List.of(1.0)));
     }
 
     private static void assertDoubleArrayListAndDoubleListEqual(DoubleArrayList doubleArrayList, List<Double> list) {
