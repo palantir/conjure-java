@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.lib;
 
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +25,7 @@ import java.util.Objects;
 import java.util.RandomAccess;
 
 public final class DoubleArrayList extends AbstractList<Double> implements RandomAccess {
+    private static final double[] EMPTY_ELEMENTDATA = {};
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
     private int size = 0;
     private double[] elements;
@@ -63,13 +66,21 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
     }
 
     public DoubleArrayList(int initialCapacity) {
-        elements = new double[initialCapacity];
+        if (initialCapacity > 0) {
+            elements = new double[initialCapacity];
+        } else if (initialCapacity == 0) {
+            this.elements = EMPTY_ELEMENTDATA;
+        } else {
+            throw new SafeIllegalArgumentException("Illegal capacity", SafeArg.of("capacity", initialCapacity));
+        }
     }
 
     public DoubleArrayList(Collection<Double> collection) {
-        elements = new double[collection.size()];
         size = collection.size();
-        if (size != 0) {
+        if (size == 0) {
+            this.elements = EMPTY_ELEMENTDATA;
+        } else {
+            elements = new double[collection.size()];
             int idx = 0;
             for (Double value : collection) {
                 elements[idx] = value;
@@ -80,7 +91,11 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
 
     public DoubleArrayList(double[] doubleArray) {
         size = doubleArray.length;
-        elements = Arrays.copyOf(doubleArray, size);
+        if (size == 0) {
+            this.elements = EMPTY_ELEMENTDATA;
+        } else {
+            elements = Arrays.copyOf(doubleArray, size);
+        }
     }
 
     @Override

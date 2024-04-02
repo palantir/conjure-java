@@ -17,8 +17,10 @@
 package com.palantir.conjure.java.lib;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
 
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,8 @@ public class DoubleArrayListTest {
         // Assert we aren't just holding a reference to this array.
         doubles[0] = 2.0;
         assertThat(doubleArrayList.get(0)).isEqualTo(1.0);
+
+        assertThatExceptionOfType(SafeIllegalArgumentException.class).isThrownBy(() -> new DoubleArrayList(-1));
     }
 
     @Test
