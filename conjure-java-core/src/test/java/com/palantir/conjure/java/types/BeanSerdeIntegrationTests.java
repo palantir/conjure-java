@@ -42,6 +42,7 @@ import com.palantir.product.RidExample;
 import com.palantir.product.SafeLongExample;
 import com.palantir.product.SetExample;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -77,6 +78,15 @@ public final class BeanSerdeIntegrationTests {
     public void testListFailsOnNestedNulls() {
         assertThatThrownBy(() -> mapper.readValue("{\"nestedItems\": [[null]]}", ListExample.class))
                 .isInstanceOf(InvalidNullException.class);
+    }
+
+    @Test
+    public void testDoubleList() throws Exception {
+        ListExample example =
+                ListExample.builder().doubleItems(List.of(0.0, 1.0, 2.0)).build();
+        String serialized = mapper.writeValueAsString(example);
+        ListExample deserialized = mapper.readValue(serialized, ListExample.class);
+        assertThat(deserialized).isEqualTo(example);
     }
 
     @Test

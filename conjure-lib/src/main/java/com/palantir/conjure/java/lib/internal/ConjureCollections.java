@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.lib.internal;
 
-import com.palantir.conjure.java.lib.DoubleArrayList;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;

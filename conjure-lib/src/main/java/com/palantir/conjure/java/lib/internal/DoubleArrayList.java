@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.lib;
+package com.palantir.conjure.java.lib.internal;
 
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -35,8 +35,13 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
     }
 
     private void resizeIfNecessary(int toAdd) {
-        if (size + toAdd > elements.length) {
-            elements = Arrays.copyOf(elements, newCapacity(size + toAdd));
+        int minCapacity = size + toAdd;
+        if (minCapacity < 0) {
+            throw new OutOfMemoryError();
+        }
+
+        if (minCapacity > elements.length) {
+            elements = Arrays.copyOf(elements, newCapacity(minCapacity));
         }
     }
 
@@ -107,15 +112,11 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
     public void add(int index, Double toAdd) {
         checkIndexInAddRange(index);
         resizeIfNecessary(1);
-        if (index == size) {
-            resizeIfNecessary(1);
-            size++;
-        } else {
-            resizeIfNecessary(1);
+        if (index != size) {
             // Move over all entries
             System.arraycopy(elements, index, elements, index + 1, size - index);
-            size++;
         }
+        size++;
 
         elements[index] = toAdd;
     }
