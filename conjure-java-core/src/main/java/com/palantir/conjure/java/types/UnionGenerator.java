@@ -63,6 +63,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
@@ -82,6 +83,7 @@ public final class UnionGenerator {
     private static final String VISIT_UNKNOWN_METHOD_NAME = "visitUnknown";
     private static final String COMPLETED = "completed_";
     private static final TypeVariableName TYPE_VARIABLE = TypeVariableName.get("T");
+    private static final int MAX_VALUES_FOR_BUILDER = 100;
 
     // If the member type is not known, a String containing the name of the unknown type is used.
     private static final TypeName UNKNOWN_MEMBER_TYPE = ClassName.get(String.class);
@@ -98,7 +100,9 @@ public final class UnionGenerator {
         ClassName unionClass = ClassName.get(prefixedTypeName.getPackage(), prefixedTypeName.getName());
         ClassName baseClass = unionClass.nestedClass("Base");
         ClassName visitorClass = unionClass.nestedClass("Visitor");
-        ClassName visitorBuilderClass = unionClass.nestedClass("VisitorBuilder");
+        Optional<ClassName> maybeVisitorBuilderClass = typeDef.getUnion().size() <= MAX_VALUES_FOR_BUILDER
+                ? Optional.of(unionClass.nestedClass("VisitorBuilder"))
+                : Optional.empty();
         Map<FieldDefinition, TypeName> memberTypes = typeDef.getUnion().stream()
                 .collect(StableCollectors.toLinkedMap(
                         Function.identity(),
@@ -120,9 +124,13 @@ public final class UnionGenerator {
                 .addMethod(generateGetValue(baseClass))
                 .addMethods(generateStaticFactories(typeMapper, unionClass, typeDef.getUnion(), safetyEvaluator))
                 .addMethod(generateAcceptVisitMethod(visitorClass))
-                .addType(generateVisitor(unionClass, visitorClass, memberTypes, visitorBuilderClass, options))
+                .addType(generateVisitor(unionClass, visitorClass, memberTypes, maybeVisitorBuilderClass, options));
+
+        maybeVisitorBuilderClass.ifPresent(visitorBuilderClass -> typeBuilder
                 .addType(generateVisitorBuilder(unionClass, visitorClass, visitorBuilderClass, memberTypes, options))
-                .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options))
+                .addTypes(generateVisitorBuilderStageInterfaces(unionClass, visitorClass, memberTypes, options)));
+
+        typeBuilder
                 .addType(generateBase(baseClass, visitorClass, memberTypes))
                 .addTypes(generateWrapperClasses(
                         typeMapper, typesMap, baseClass, visitorClass, typeDef.getUnion(), options))
@@ -252,7 +260,7 @@ public final class UnionGenerator {
             ClassName unionClass,
             ClassName visitorClass,
             Map<FieldDefinition, TypeName> memberTypes,
-            ClassName visitorBuilderClass,
+            Optional<ClassName> maybeVisitorBuilderClass,
             Options options) {
         TypeSpec.Builder visitorBuilder = TypeSpec.interfaceBuilder(visitorClass)
                 .addModifiers(Modifier.PUBLIC)
@@ -270,7 +278,7 @@ public final class UnionGenerator {
                     .build());
         }
         visitorBuilder.addMethod(visitUnknownBuilder.build());
-        visitorBuilder
+        maybeVisitorBuilderClass.ifPresent(visitorBuilderClass -> visitorBuilder
                 .addMethod(MethodSpec.methodBuilder("builder")
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .addTypeVariable(TYPE_VARIABLE)
@@ -284,7 +292,7 @@ public final class UnionGenerator {
                                                 .memberName),
                                 TYPE_VARIABLE))
                         .build())
-                .build();
+                .build());
         return visitorBuilder.build();
     }
 
@@ -473,24 +481,24 @@ public final class UnionGenerator {
         return sortedStageNameTypePairs(memberTypeMap)
                 .map(pair -> NameTypeMetadata.UNKNOWN.equals(pair) && options.unionsWithUnknownValues()
                         ? MethodSpec.methodBuilder(visitMethodName(pair.memberName))
-                                .addModifiers(Modifier.PUBLIC)
-                                .addAnnotation(Override.class)
-                                .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
-                                .addParameter(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
-                                .addStatement(
-                                        "return $N.apply($N, $N)",
-                                        visitorFieldName(pair.memberName),
-                                        UNKNOWN_TYPE_PARAM_NAME,
-                                        UNKNOWN_VALUE_PARAM_NAME)
-                                .returns(visitorResultType)
-                                .build()
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
+                        .addParameter(UNKNOWN_MEMBER_TYPE, UNKNOWN_TYPE_PARAM_NAME)
+                        .addParameter(UNKNOWN_VALUE_TYPE, UNKNOWN_VALUE_PARAM_NAME)
+                        .addStatement(
+                                "return $N.apply($N, $N)",
+                                visitorFieldName(pair.memberName),
+                                UNKNOWN_TYPE_PARAM_NAME,
+                                UNKNOWN_VALUE_PARAM_NAME)
+                        .returns(visitorResultType)
+                        .build()
                         : MethodSpec.methodBuilder(visitMethodName(pair.memberName))
-                                .addModifiers(Modifier.PUBLIC)
-                                .addAnnotation(Override.class)
-                                .addParameter(pair.type, variableName())
-                                .addStatement("return $N.apply($N)", visitorFieldName(pair.memberName), variableName())
-                                .returns(visitorResultType)
-                                .build())
+                        .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(Override.class)
+                        .addParameter(pair.type, variableName())
+                        .addStatement("return $N.apply($N)", visitorFieldName(pair.memberName), variableName())
+                        .returns(visitorResultType)
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -932,7 +940,8 @@ public final class UnionGenerator {
         return "unknown".equalsIgnoreCase(input.get()) ? FieldName.of(input.get() + '_') : input;
     }
 
-    private UnionGenerator() {}
+    private UnionGenerator() {
+    }
 
     private static final class NameTypeMetadata {
         private final String memberName;
