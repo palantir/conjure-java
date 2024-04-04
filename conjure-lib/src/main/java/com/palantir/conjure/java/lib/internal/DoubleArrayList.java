@@ -18,6 +18,7 @@ package com.palantir.conjure.java.lib.internal;
 
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +38,7 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
     private void resizeIfNecessary(int toAdd) {
         int minCapacity = size + toAdd;
         if (minCapacity < 0) {
-            throw new OutOfMemoryError();
+            throw new SafeRuntimeException("DoubleArrayList has exceeded max size");
         }
 
         if (minCapacity > elements.length) {
@@ -55,7 +56,7 @@ public final class DoubleArrayList extends AbstractList<Double> implements Rando
                 return Math.max(10, minCapacity);
             }
             if (minCapacity < 0) {
-                throw new OutOfMemoryError();
+                throw new SafeRuntimeException("DoubleArrayList has exceeded max size");
             }
             return minCapacity;
         }
