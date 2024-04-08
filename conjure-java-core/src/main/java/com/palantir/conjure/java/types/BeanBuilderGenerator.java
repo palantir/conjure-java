@@ -33,6 +33,7 @@ import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.TypeFunctions;
+import com.palantir.conjure.java.visitor.DefaultPrimitiveTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
@@ -82,23 +83,6 @@ import org.apache.commons.lang3.StringUtils;
 
 public final class BeanBuilderGenerator {
 
-    private static final Type.Visitor<Class<?>> COLLECTION_CONCRETE_TYPE = new DefaultTypeVisitor<>() {
-        @Override
-        public Class<?> visitList(ListType _value) {
-            return ArrayList.class;
-        }
-
-        @Override
-        public Class<?> visitSet(SetType _value) {
-            return LinkedHashSet.class;
-        }
-
-        @Override
-        public Class<?> visitMap(MapType _value) {
-            return LinkedHashMap.class;
-        }
-    };
-
     private static final String BUILT_FIELD = "_buildInvoked";
     private static final String CHECK_NOT_BUILT_METHOD = "checkNotBuilt";
     private static final String BUILDER_IMPLEMENTATION_NAME = "Builder";
@@ -106,6 +90,7 @@ public final class BeanBuilderGenerator {
     private static final String STAGED_BUILDER_INTERFACE_NAME = "Builder";
     /* The name of the class implementing the interface extending all stage interfaces. */
     private static final String STAGED_BUILDER_IMPLEMENTATION_NAME = "DefaultBuilder";
+    private static final boolean DO_NOT_USE_NON_NULL_COLLECTION_FACTORY = false;
 
     private final TypeMapper typeMapper;
     private final SafetyEvaluator safetyEvaluator;
@@ -577,7 +562,8 @@ public final class BeanBuilderGenerator {
                 ConjureAnnotations.withSafety(typeMapper.getClassName(type), safetyEvaluator.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
-            spec.initializer("new $T<>()", type.accept(COLLECTION_CONCRETE_TYPE));
+            CollectionType collectionType = getCollectionType(type);
+            spec.initializer("new $T<>()", collectionType.getClazz());
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(type)));
         } else if (type.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
@@ -673,17 +659,29 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             if (shouldClearFirst) {
-                return CodeBlocks.statement(
-                        "this.$1N = $2T.new$3T($4L)",
-                        spec.name,
-                        ConjureCollections.class,
-                        type.accept(COLLECTION_CONCRETE_TYPE),
-                        Expressions.requireNonNull(
-                                spec.name, enriched.fieldName().get() + " cannot be null"));
+                CollectionType collectionType = getCollectionType(type);
+                if (collectionType.useNonNullFactory()) {
+                    return CodeBlocks.statement(
+                            "this.$1N = $2T.newNonNull$3T($4L)",
+                            spec.name,
+                            ConjureCollections.class,
+                            collectionType.getClazz(),
+                            Expressions.requireNonNull(
+                                    spec.name, enriched.fieldName().get() + " cannot be null"));
+                } else {
+                    return CodeBlocks.statement(
+                            "this.$1N = $2T.new$3T($4L)",
+                            spec.name,
+                            ConjureCollections.class,
+                            collectionType.getClazz(),
+                            Expressions.requireNonNull(
+                                    spec.name, enriched.fieldName().get() + " cannot be null"));
+                }
             }
             return CodeBlocks.statement(
                     "$1T.addAll(this.$2N, $3L)",
@@ -695,7 +693,7 @@ public final class BeanBuilderGenerator {
                 return CodeBlocks.statement(
                         "this.$1N = new $2T<>($3L)",
                         spec.name,
-                        type.accept(COLLECTION_CONCRETE_TYPE),
+                        getCollectionType(type).getClazz(),
                         Expressions.requireNonNull(
                                 spec.name, enriched.fieldName().get() + " cannot be null"));
             }
@@ -916,5 +914,74 @@ public final class BeanBuilderGenerator {
                 throw new SafeIllegalStateException("Encountered unknown type", SafeArg.of("type", unknownType));
             }
         });
+    }
+
+    private CollectionType getCollectionType(Type type) {
+        return type.accept(new DefaultTypeVisitor<>() {
+            @Override
+            public CollectionType visitList(ListType _value) {
+                return _value.getItemType().accept(new DefaultTypeVisitor<>() {
+                    @Override
+                    public CollectionType visitDefault() {
+                        return new CollectionType(
+                                ArrayList.class, options.nonNullCollections() && !isOptionalInnerType(type));
+                    }
+
+                    @Override
+                    public CollectionType visitPrimitive(PrimitiveType primitiveType) {
+                        return primitiveType.accept(new DefaultPrimitiveTypeVisitor<>() {
+
+                            @Override
+                            public CollectionType visitDefault() {
+                                return new CollectionType(ArrayList.class, options.nonNullCollections());
+                            }
+
+                            @Override
+                            public CollectionType visitAny() {
+                                return new CollectionType(ArrayList.class, DO_NOT_USE_NON_NULL_COLLECTION_FACTORY);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public CollectionType visitOptional(OptionalType _value) {
+                        return new CollectionType(ArrayList.class, DO_NOT_USE_NON_NULL_COLLECTION_FACTORY);
+                    }
+                });
+            }
+
+            @Override
+            public CollectionType visitSet(SetType _value) {
+                return new CollectionType(LinkedHashSet.class);
+            }
+
+            @Override
+            public CollectionType visitMap(MapType _value) {
+                return new CollectionType(LinkedHashMap.class);
+            }
+        });
+    }
+
+    private static final class CollectionType {
+        private final Class<?> clazz;
+        private final boolean useNonNullFactory;
+
+        CollectionType(Class<?> clazz, boolean useNonNullFactory) {
+            this.clazz = clazz;
+            this.useNonNullFactory = useNonNullFactory;
+        }
+
+        CollectionType(Class<?> clazz) {
+            this.clazz = clazz;
+            this.useNonNullFactory = DO_NOT_USE_NON_NULL_COLLECTION_FACTORY;
+        }
+
+        public Class<?> getClazz() {
+            return clazz;
+        }
+
+        public boolean useNonNullFactory() {
+            return useNonNullFactory;
+        }
     }
 }

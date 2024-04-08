@@ -170,7 +170,7 @@ public final class ExternalLongExample {
         @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder listExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
             checkNotBuilt();
-            this.listExternalLong = ConjureCollections.newArrayList(
+            this.listExternalLong = ConjureCollections.newNonNullArrayList(
                     Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
             return this;
         }

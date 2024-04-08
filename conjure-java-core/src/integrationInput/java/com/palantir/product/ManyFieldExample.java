@@ -298,7 +298,8 @@ public final class ManyFieldExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items =
+                    ConjureCollections.newNonNullArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 

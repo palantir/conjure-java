@@ -59,6 +59,24 @@ public final class ConjureCollections {
         return list;
     }
 
+    // explicitly need to return mutable list for generated builders
+    @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
+    public static <T> ArrayList<T> newNonNullArrayList(Iterable<? extends T> iterable) {
+        Preconditions.checkNotNull(iterable, "iterable cannot be null");
+        if (iterable instanceof Collection) {
+            for (T item : iterable) {
+                Preconditions.checkNotNull(item, "iterable cannot contain null elements");
+            }
+            return new ArrayList<>((Collection<T>) iterable);
+        }
+        ArrayList<T> list = new ArrayList<>();
+        for (T item : iterable) {
+            Preconditions.checkNotNull(item, "iterable cannot contain null elements");
+            list.add(item);
+        }
+        return list;
+    }
+
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");

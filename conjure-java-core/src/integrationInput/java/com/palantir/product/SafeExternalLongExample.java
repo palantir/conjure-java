@@ -191,7 +191,7 @@ public final class SafeExternalLongExample {
         @JsonSetter(value = "safeExternalLongList", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safeExternalLongList(@Nonnull Iterable<? extends @Safe Long> safeExternalLongList) {
             checkNotBuilt();
-            this.safeExternalLongList = ConjureCollections.newArrayList(
+            this.safeExternalLongList = ConjureCollections.newNonNullArrayList(
                     Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
             return this;
         }

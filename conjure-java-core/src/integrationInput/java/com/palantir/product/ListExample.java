@@ -191,7 +191,8 @@ public final class ListExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<@Safe String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items =
+                    ConjureCollections.newNonNullArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -210,7 +211,7 @@ public final class ListExample {
         @JsonSetter(value = "primitiveItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder primitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
-            this.primitiveItems = ConjureCollections.newArrayList(
+            this.primitiveItems = ConjureCollections.newNonNullArrayList(
                     Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
@@ -231,7 +232,7 @@ public final class ListExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems = ConjureCollections.newArrayList(
+            this.doubleItems = ConjureCollections.newNonNullArrayList(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
@@ -295,7 +296,7 @@ public final class ListExample {
         @JsonSetter(value = "nestedItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder nestedItems(@Nonnull Iterable<? extends List<String>> nestedItems) {
             checkNotBuilt();
-            this.nestedItems = ConjureCollections.newArrayList(
+            this.nestedItems = ConjureCollections.newNonNullArrayList(
                     Preconditions.checkNotNull(nestedItems, "nestedItems cannot be null"));
             return this;
         }
