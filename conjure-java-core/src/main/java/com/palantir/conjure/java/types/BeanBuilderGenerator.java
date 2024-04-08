@@ -562,8 +562,7 @@ public final class BeanBuilderGenerator {
                 ConjureAnnotations.withSafety(typeMapper.getClassName(type), safetyEvaluator.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
-            CollectionType collectionType = getCollectionType(type);
-            spec.initializer("new $T<>()", collectionType.getClazz());
+            spec.initializer("new $T<>()", getCollectionType(type).getClazz());
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(type)));
         } else if (type.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
@@ -941,11 +940,6 @@ public final class BeanBuilderGenerator {
                                 return new CollectionType(ArrayList.class, DO_NOT_USE_NON_NULL_COLLECTION_FACTORY);
                             }
                         });
-                    }
-
-                    @Override
-                    public CollectionType visitOptional(OptionalType _value) {
-                        return new CollectionType(ArrayList.class, DO_NOT_USE_NON_NULL_COLLECTION_FACTORY);
                     }
                 });
             }
