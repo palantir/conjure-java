@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
@@ -136,6 +137,7 @@ public final class StrictFourFields {
         return missingFields;
     }
 
+    @CheckReturnValue
     public static MyListStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -143,6 +145,7 @@ public final class StrictFourFields {
     public interface MyListStageBuilder {
         BearerTokenValueStageBuilder myList(@Nonnull Iterable<String> myList);
 
+        @CheckReturnValue
         Builder from(StrictFourFields other);
     }
 
@@ -161,6 +164,7 @@ public final class StrictFourFields {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictFourFields build();
     }
 
@@ -173,6 +177,7 @@ public final class StrictFourFields {
         @Override
         Builder myList(@Nonnull Iterable<String> myList);
 
+        @CheckReturnValue
         @Override
         Builder from(StrictFourFields other);
 
@@ -188,6 +193,7 @@ public final class StrictFourFields {
         @Override
         Builder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
 
+        @CheckReturnValue
         @Override
         StrictFourFields build();
     }
@@ -257,6 +263,7 @@ public final class StrictFourFields {
         }
 
         @Override
+        @CheckReturnValue
         public StrictFourFields build() {
             checkNotBuilt();
             this._buildInvoked = true;

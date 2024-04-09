@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
@@ -153,6 +154,7 @@ public final class MultipleOrderedStages {
         return missingFields;
     }
 
+    @CheckReturnValue
     public static TokenStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -160,6 +162,7 @@ public final class MultipleOrderedStages {
     public interface TokenStageBuilder {
         ItemStageBuilder token(@Nonnull OneField token);
 
+        @CheckReturnValue
         Builder from(MultipleOrderedStages other);
     }
 
@@ -168,6 +171,7 @@ public final class MultipleOrderedStages {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         MultipleOrderedStages build();
 
         Completed_StageBuilder items(@Nonnull Iterable<SafeLong> items);
@@ -195,12 +199,14 @@ public final class MultipleOrderedStages {
         @Override
         Builder token(@Nonnull OneField token);
 
+        @CheckReturnValue
         @Override
         Builder from(MultipleOrderedStages other);
 
         @Override
         Builder item(@Nonnull String item);
 
+        @CheckReturnValue
         @Override
         MultipleOrderedStages build();
 
@@ -341,6 +347,7 @@ public final class MultipleOrderedStages {
         }
 
         @Override
+        @CheckReturnValue
         public MultipleOrderedStages build() {
             checkNotBuilt();
             this._buildInvoked = true;

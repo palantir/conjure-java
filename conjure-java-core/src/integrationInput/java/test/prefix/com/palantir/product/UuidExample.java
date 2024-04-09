@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -72,6 +73,7 @@ public final class UuidExample {
         return missingFields;
     }
 
+    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }
@@ -98,6 +100,7 @@ public final class UuidExample {
             return this;
         }
 
+        @CheckReturnValue
         public UuidExample build() {
             checkNotBuilt();
             this._buildInvoked = true;

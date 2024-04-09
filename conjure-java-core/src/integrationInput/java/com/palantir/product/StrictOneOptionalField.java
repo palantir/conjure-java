@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -75,6 +76,7 @@ public final class StrictOneOptionalField {
         return missingFields;
     }
 
+    @CheckReturnValue
     public static OptionalItemStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -84,10 +86,12 @@ public final class StrictOneOptionalField {
 
         Completed_StageBuilder optionalItem(@Nonnull String optionalItem);
 
+        @CheckReturnValue
         Builder from(StrictOneOptionalField other);
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictOneOptionalField build();
     }
 
@@ -98,9 +102,11 @@ public final class StrictOneOptionalField {
         @Override
         Builder optionalItem(@Nonnull String optionalItem);
 
+        @CheckReturnValue
         @Override
         Builder from(StrictOneOptionalField other);
 
+        @CheckReturnValue
         @Override
         StrictOneOptionalField build();
     }
@@ -137,6 +143,7 @@ public final class StrictOneOptionalField {
         }
 
         @Override
+        @CheckReturnValue
         public StrictOneOptionalField build() {
             checkNotBuilt();
             this._buildInvoked = true;

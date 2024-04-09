@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -75,6 +76,7 @@ public final class StrictOneField {
         return missingFields;
     }
 
+    @CheckReturnValue
     public static BearerTokenValueStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -82,10 +84,12 @@ public final class StrictOneField {
     public interface BearerTokenValueStageBuilder {
         Completed_StageBuilder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
 
+        @CheckReturnValue
         Builder from(StrictOneField other);
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictOneField build();
     }
 
@@ -93,9 +97,11 @@ public final class StrictOneField {
         @Override
         Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
 
+        @CheckReturnValue
         @Override
         Builder from(StrictOneField other);
 
+        @CheckReturnValue
         @Override
         StrictOneField build();
     }
@@ -125,6 +131,7 @@ public final class StrictOneField {
         }
 
         @Override
+        @CheckReturnValue
         public StrictOneField build() {
             checkNotBuilt();
             this._buildInvoked = true;

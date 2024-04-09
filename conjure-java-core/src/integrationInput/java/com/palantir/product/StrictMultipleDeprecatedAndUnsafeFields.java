@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
@@ -189,6 +190,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         return missingFields;
     }
 
+    @CheckReturnValue
     public static MyListStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -196,6 +198,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     public interface MyListStageBuilder {
         BearerTokenValueStageBuilder myList(@Nonnull Iterable<@Unsafe String> myList);
 
+        @CheckReturnValue
         Builder from(StrictMultipleDeprecatedAndUnsafeFields other);
     }
 
@@ -226,6 +229,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictMultipleDeprecatedAndUnsafeFields build();
     }
 
@@ -241,6 +245,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         @Override
         Builder myList(@Nonnull Iterable<@Unsafe String> myList);
 
+        @CheckReturnValue
         @Override
         Builder from(StrictMultipleDeprecatedAndUnsafeFields other);
 
@@ -265,6 +270,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         @Override
         Builder strictFourFieldsObject(@Nonnull StrictFourFields strictFourFieldsObject);
 
+        @CheckReturnValue
         @Override
         StrictMultipleDeprecatedAndUnsafeFields build();
     }
@@ -399,6 +405,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         }
 
         @Override
+        @CheckReturnValue
         public StrictMultipleDeprecatedAndUnsafeFields build() {
             checkNotBuilt();
             this._buildInvoked = true;

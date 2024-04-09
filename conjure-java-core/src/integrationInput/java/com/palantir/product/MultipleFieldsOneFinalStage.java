@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -129,6 +130,7 @@ public final class MultipleFieldsOneFinalStage {
         return missingFields;
     }
 
+    @CheckReturnValue
     public static TokenStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -136,10 +138,12 @@ public final class MultipleFieldsOneFinalStage {
     public interface TokenStageBuilder {
         Completed_StageBuilder token(@Nonnull OneField token);
 
+        @CheckReturnValue
         Builder from(MultipleFieldsOneFinalStage other);
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         MultipleFieldsOneFinalStage build();
 
         Completed_StageBuilder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
@@ -161,9 +165,11 @@ public final class MultipleFieldsOneFinalStage {
         @Override
         Builder token(@Nonnull OneField token);
 
+        @CheckReturnValue
         @Override
         Builder from(MultipleFieldsOneFinalStage other);
 
+        @CheckReturnValue
         @Override
         MultipleFieldsOneFinalStage build();
 
@@ -259,6 +265,7 @@ public final class MultipleFieldsOneFinalStage {
         }
 
         @Override
+        @CheckReturnValue
         public MultipleFieldsOneFinalStage build() {
             checkNotBuilt();
             this._buildInvoked = true;

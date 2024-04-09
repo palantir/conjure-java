@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
@@ -180,6 +181,7 @@ public final class BeanBuilderGenerator {
         addJsonDeserializeUsingBuilderAnnotation(specBuilder, BUILDER_IMPLEMENTATION_NAME);
         specBuilder
                 .addMethod(MethodSpec.methodBuilder("builder")
+                        .addAnnotation(CheckReturnValue.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(builderClass)
                         .addStatement("return new $T()", builderClass)
@@ -285,6 +287,7 @@ public final class BeanBuilderGenerator {
         specBuilder
                 .addType(builderInterface)
                 .addMethod(MethodSpec.methodBuilder("builder")
+                        .addAnnotation(CheckReturnValue.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(interfaceClassNames.get(0))
                         .addStatement("return new $N()", STAGED_BUILDER_IMPLEMENTATION_NAME)
@@ -339,6 +342,7 @@ public final class BeanBuilderGenerator {
         interfaces
                 .get(0)
                 .addMethod(MethodSpec.methodBuilder("from")
+                        .addAnnotation(CheckReturnValue.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                         .returns(builderClass)
                         .addParameter(objectClass, "other")
@@ -353,6 +357,7 @@ public final class BeanBuilderGenerator {
         return TypeSpec.interfaceBuilder(completedStageClass)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethod(MethodSpec.methodBuilder("build")
+                        .addAnnotation(CheckReturnValue.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                         .returns(Primitives.box(objectClass))
                         .build())
@@ -832,6 +837,7 @@ public final class BeanBuilderGenerator {
             Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields, boolean override) {
         MethodSpec.Builder method = MethodSpec.methodBuilder("build")
                 .addAnnotations(ConjureAnnotations.override(override))
+                .addAnnotation(CheckReturnValue.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(objectClass)
                 .addCode(verifyNotBuilt())
