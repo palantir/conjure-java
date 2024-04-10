@@ -50,7 +50,6 @@ public final class DoubleExample {
         return builder().doubleValue(doubleValue).build();
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

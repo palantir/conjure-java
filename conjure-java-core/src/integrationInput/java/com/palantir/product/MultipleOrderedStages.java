@@ -154,7 +154,6 @@ public final class MultipleOrderedStages {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static TokenStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -162,7 +161,6 @@ public final class MultipleOrderedStages {
     public interface TokenStageBuilder {
         ItemStageBuilder token(@Nonnull OneField token);
 
-        @CheckReturnValue
         Builder from(MultipleOrderedStages other);
     }
 
@@ -199,7 +197,6 @@ public final class MultipleOrderedStages {
         @Override
         Builder token(@Nonnull OneField token);
 
-        @CheckReturnValue
         @Override
         Builder from(MultipleOrderedStages other);
 

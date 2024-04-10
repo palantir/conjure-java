@@ -362,7 +362,6 @@ public final class PrimitiveOptionalsExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

@@ -88,7 +88,6 @@ public final class StrictOneCollectionField {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static MyListStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -96,7 +95,6 @@ public final class StrictOneCollectionField {
     public interface MyListStageBuilder {
         Completed_StageBuilder myList(@Nonnull Iterable<String> myList);
 
-        @CheckReturnValue
         Builder from(StrictOneCollectionField other);
     }
 
@@ -109,7 +107,6 @@ public final class StrictOneCollectionField {
         @Override
         Builder myList(@Nonnull Iterable<String> myList);
 
-        @CheckReturnValue
         @Override
         Builder from(StrictOneCollectionField other);
 

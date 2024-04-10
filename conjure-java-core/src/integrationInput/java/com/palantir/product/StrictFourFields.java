@@ -137,7 +137,6 @@ public final class StrictFourFields {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static MyListStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -145,7 +144,6 @@ public final class StrictFourFields {
     public interface MyListStageBuilder {
         BearerTokenValueStageBuilder myList(@Nonnull Iterable<String> myList);
 
-        @CheckReturnValue
         Builder from(StrictFourFields other);
     }
 
@@ -177,7 +175,6 @@ public final class StrictFourFields {
         @Override
         Builder myList(@Nonnull Iterable<String> myList);
 
-        @CheckReturnValue
         @Override
         Builder from(StrictFourFields other);
 

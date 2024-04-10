@@ -104,7 +104,6 @@ public final class CovariantOptionalExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

@@ -202,7 +202,6 @@ public final class ManyFieldExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

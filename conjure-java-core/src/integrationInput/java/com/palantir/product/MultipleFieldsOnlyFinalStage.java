@@ -197,7 +197,6 @@ public final class MultipleFieldsOnlyFinalStage {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

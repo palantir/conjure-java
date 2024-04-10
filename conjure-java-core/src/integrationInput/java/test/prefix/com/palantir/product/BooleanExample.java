@@ -50,7 +50,6 @@ public final class BooleanExample {
         return builder().coin(coin).build();
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

@@ -76,7 +76,6 @@ public final class StrictOneOptionalField {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static OptionalItemStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -86,7 +85,6 @@ public final class StrictOneOptionalField {
 
         Completed_StageBuilder optionalItem(@Nonnull String optionalItem);
 
-        @CheckReturnValue
         Builder from(StrictOneOptionalField other);
     }
 
@@ -102,7 +100,6 @@ public final class StrictOneOptionalField {
         @Override
         Builder optionalItem(@Nonnull String optionalItem);
 
-        @CheckReturnValue
         @Override
         Builder from(StrictOneOptionalField other);
 

@@ -71,7 +71,6 @@ public final class AnyExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

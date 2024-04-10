@@ -73,7 +73,6 @@ public final class UuidExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

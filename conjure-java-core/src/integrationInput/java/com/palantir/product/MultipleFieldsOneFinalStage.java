@@ -130,7 +130,6 @@ public final class MultipleFieldsOneFinalStage {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static TokenStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -138,7 +137,6 @@ public final class MultipleFieldsOneFinalStage {
     public interface TokenStageBuilder {
         Completed_StageBuilder token(@Nonnull OneField token);
 
-        @CheckReturnValue
         Builder from(MultipleFieldsOneFinalStage other);
     }
 
@@ -165,7 +163,6 @@ public final class MultipleFieldsOneFinalStage {
         @Override
         Builder token(@Nonnull OneField token);
 
-        @CheckReturnValue
         @Override
         Builder from(MultipleFieldsOneFinalStage other);
 

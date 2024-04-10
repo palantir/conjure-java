@@ -156,7 +156,6 @@ public final class ListExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

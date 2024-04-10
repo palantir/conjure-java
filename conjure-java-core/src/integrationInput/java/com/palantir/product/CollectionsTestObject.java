@@ -178,7 +178,6 @@ public final class CollectionsTestObject {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

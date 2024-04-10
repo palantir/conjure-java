@@ -72,7 +72,6 @@ public final class RidExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

@@ -75,7 +75,6 @@ public final class BearerTokenExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

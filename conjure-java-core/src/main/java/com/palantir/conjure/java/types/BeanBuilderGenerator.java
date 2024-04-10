@@ -181,7 +181,6 @@ public final class BeanBuilderGenerator {
         addJsonDeserializeUsingBuilderAnnotation(specBuilder, BUILDER_IMPLEMENTATION_NAME);
         specBuilder
                 .addMethod(MethodSpec.methodBuilder("builder")
-                        .addAnnotation(CheckReturnValue.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(builderClass)
                         .addStatement("return new $T()", builderClass)
@@ -287,7 +286,6 @@ public final class BeanBuilderGenerator {
         specBuilder
                 .addType(builderInterface)
                 .addMethod(MethodSpec.methodBuilder("builder")
-                        .addAnnotation(CheckReturnValue.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                         .returns(interfaceClassNames.get(0))
                         .addStatement("return new $N()", STAGED_BUILDER_IMPLEMENTATION_NAME)
@@ -342,7 +340,6 @@ public final class BeanBuilderGenerator {
         interfaces
                 .get(0)
                 .addMethod(MethodSpec.methodBuilder("from")
-                        .addAnnotation(CheckReturnValue.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                         .returns(builderClass)
                         .addParameter(objectClass, "other")

@@ -124,7 +124,6 @@ public final class StrictThreeFields {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static MyListStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -132,7 +131,6 @@ public final class StrictThreeFields {
     public interface MyListStageBuilder {
         BearerTokenValueStageBuilder myList(@Nonnull Iterable<String> myList);
 
-        @CheckReturnValue
         Builder from(StrictThreeFields other);
     }
 
@@ -156,7 +154,6 @@ public final class StrictThreeFields {
         @Override
         Builder myList(@Nonnull Iterable<String> myList);
 
-        @CheckReturnValue
         @Override
         Builder from(StrictThreeFields other);
 

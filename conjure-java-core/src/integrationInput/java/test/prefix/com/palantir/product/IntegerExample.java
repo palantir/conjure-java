@@ -50,7 +50,6 @@ public final class IntegerExample {
         return builder().integer(integer).build();
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

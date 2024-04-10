@@ -50,7 +50,6 @@ public final class SingleFieldNotStrict {
         return builder().foo(foo).build();
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }

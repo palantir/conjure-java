@@ -190,7 +190,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static MyListStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -198,7 +197,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     public interface MyListStageBuilder {
         BearerTokenValueStageBuilder myList(@Nonnull Iterable<@Unsafe String> myList);
 
-        @CheckReturnValue
         Builder from(StrictMultipleDeprecatedAndUnsafeFields other);
     }
 
@@ -245,7 +243,6 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         @Override
         Builder myList(@Nonnull Iterable<@Unsafe String> myList);
 
-        @CheckReturnValue
         @Override
         Builder from(StrictMultipleDeprecatedAndUnsafeFields other);
 

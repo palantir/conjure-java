@@ -76,7 +76,6 @@ public final class OneField {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static BearerTokenValueStageBuilder builder() {
         return new DefaultBuilder();
     }
@@ -84,7 +83,6 @@ public final class OneField {
     public interface BearerTokenValueStageBuilder {
         Completed_StageBuilder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
 
-        @CheckReturnValue
         Builder from(OneField other);
     }
 
@@ -97,7 +95,6 @@ public final class OneField {
         @Override
         Builder bearerTokenValue(@Nonnull BearerToken bearerTokenValue);
 
-        @CheckReturnValue
         @Override
         Builder from(OneField other);
 

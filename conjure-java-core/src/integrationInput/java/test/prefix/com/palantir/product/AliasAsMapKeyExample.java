@@ -171,7 +171,6 @@ public final class AliasAsMapKeyExample {
         return missingFields;
     }
 
-    @CheckReturnValue
     public static Builder builder() {
         return new Builder();
     }
