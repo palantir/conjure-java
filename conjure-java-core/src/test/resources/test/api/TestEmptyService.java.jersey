@@ -1,0 +1,14 @@
+package com.palantir.another;
+
+import javax.annotation.processing.Generated;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+/** This service has no endpoints. */
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Path("/")
+@Generated("com.palantir.conjure.java.services.JerseyServiceGenerator")
+public interface TestEmptyService {}

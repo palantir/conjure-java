@@ -1,0 +1,26 @@
+package test.prefix.com.palantir.another;
+
+import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.undertow.lib.Endpoint;
+import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
+import com.palantir.conjure.java.undertow.lib.UndertowService;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated("com.palantir.conjure.java.services.UndertowServiceHandlerGenerator")
+public final class TestEmptyServiceEndpoints implements UndertowService {
+    private final TestEmptyService delegate;
+
+    private TestEmptyServiceEndpoints(TestEmptyService delegate) {
+        this.delegate = delegate;
+    }
+
+    public static UndertowService of(TestEmptyService delegate) {
+        return new TestEmptyServiceEndpoints(delegate);
+    }
+
+    @Override
+    public List<Endpoint> endpoints(UndertowRuntime runtime) {
+        return ImmutableList.of();
+    }
+}
