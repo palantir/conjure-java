@@ -1,5 +1,5 @@
 type: improvement
 improvement:
-  description: Add @CheckReturnValue to builder(), build(), and from() methods
+  description: Add @CheckReturnValue to build() methods
   links:
   - https://github.com/palantir/conjure-java/pull/2282
