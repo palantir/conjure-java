@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
@@ -353,6 +354,7 @@ public final class BeanBuilderGenerator {
         return TypeSpec.interfaceBuilder(completedStageClass)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethod(MethodSpec.methodBuilder("build")
+                        .addAnnotation(CheckReturnValue.class)
                         .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                         .returns(Primitives.box(objectClass))
                         .build())
@@ -832,6 +834,7 @@ public final class BeanBuilderGenerator {
             Collection<EnrichedField> enrichedFields, Collection<FieldSpec> fields, boolean override) {
         MethodSpec.Builder method = MethodSpec.methodBuilder("build")
                 .addAnnotations(ConjureAnnotations.override(override))
+                .addAnnotation(CheckReturnValue.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(objectClass)
                 .addCode(verifyNotBuilt())

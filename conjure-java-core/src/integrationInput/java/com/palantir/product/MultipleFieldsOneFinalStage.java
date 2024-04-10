@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -140,6 +141,7 @@ public final class MultipleFieldsOneFinalStage {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         MultipleFieldsOneFinalStage build();
 
         Completed_StageBuilder mappedRids(@Nonnull Map<ResourceIdentifier, String> mappedRids);
@@ -164,6 +166,7 @@ public final class MultipleFieldsOneFinalStage {
         @Override
         Builder from(MultipleFieldsOneFinalStage other);
 
+        @CheckReturnValue
         @Override
         MultipleFieldsOneFinalStage build();
 
@@ -259,6 +262,7 @@ public final class MultipleFieldsOneFinalStage {
         }
 
         @Override
+        @CheckReturnValue
         public MultipleFieldsOneFinalStage build() {
             checkNotBuilt();
             this._buildInvoked = true;
