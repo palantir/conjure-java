@@ -177,7 +177,7 @@ public final class ExternalLongExample {
 
         public Builder addAllListExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.listExternalLong,
                     Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
             return this;
@@ -185,6 +185,7 @@ public final class ExternalLongExample {
 
         public Builder listExternalLong(long listExternalLong) {
             checkNotBuilt();
+            Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null");
             this.listExternalLong.add(listExternalLong);
             return this;
         }

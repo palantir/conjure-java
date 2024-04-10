@@ -45,6 +45,23 @@ public final class ConjureCollections {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> void addAllAndCheckNonNull(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
+        Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
+        // If we know the number of elements we are adding and the addTo Collection is an ArrayList, we can eagerly
+        // resize it to only do one grow() of the array.
+        if (elementsToAdd instanceof Collection) {
+            Collection<T> collectionElementsToAdd = (Collection<T>) elementsToAdd;
+            if (addTo instanceof ArrayList) {
+                ((ArrayList<T>) addTo).ensureCapacity(collectionElementsToAdd.size() + addTo.size());
+            }
+        }
+        for (T element : elementsToAdd) {
+            Preconditions.checkNotNull(element, "elementsToAdd cannot contain null elements");
+            addTo.add(element);
+        }
+    }
+
     // explicitly need to return mutable list for generated builders
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
@@ -62,19 +79,12 @@ public final class ConjureCollections {
     // explicitly need to return mutable list for generated builders
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newNonNullArrayList(Iterable<? extends T> iterable) {
-        Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            for (T item : iterable) {
-                Preconditions.checkNotNull(item, "iterable cannot contain null elements");
-            }
-            return new ArrayList<>((Collection<T>) iterable);
-        }
-        ArrayList<T> list = new ArrayList<>();
-        for (T item : iterable) {
+        ArrayList<T> arrayList = newArrayList(iterable);
+        for (T item : arrayList) {
             Preconditions.checkNotNull(item, "iterable cannot contain null elements");
-            list.add(item);
         }
-        return list;
+
+        return arrayList;
     }
 
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
@@ -88,5 +98,15 @@ public final class ConjureCollections {
             set.add(item);
         }
         return set;
+    }
+
+    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
+    public static <T> LinkedHashSet<T> newNonNullLinkedHashSet(Iterable<? extends T> iterable) {
+        LinkedHashSet<T> linkedHashSet = newLinkedHashSet(iterable);
+        for (T item : linkedHashSet) {
+            Preconditions.checkNotNull(item, "iterable cannot contain null elements");
+        }
+
+        return linkedHashSet;
     }
 }

@@ -198,7 +198,7 @@ public final class SafeExternalLongExample {
 
         public Builder addAllSafeExternalLongList(@Nonnull Iterable<? extends @Safe Long> safeExternalLongList) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.safeExternalLongList,
                     Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
             return this;
@@ -206,6 +206,7 @@ public final class SafeExternalLongExample {
 
         public Builder safeExternalLongList(@Safe long safeExternalLongList) {
             checkNotBuilt();
+            Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null");
             this.safeExternalLongList.add(safeExternalLongList);
             return this;
         }
@@ -213,14 +214,14 @@ public final class SafeExternalLongExample {
         @JsonSetter(value = "safeExternalLongSet", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
-            this.safeExternalLongSet = ConjureCollections.newLinkedHashSet(
+            this.safeExternalLongSet = ConjureCollections.newNonNullLinkedHashSet(
                     Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
             return this;
         }
 
         public Builder addAllSafeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.safeExternalLongSet,
                     Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
             return this;
@@ -228,6 +229,7 @@ public final class SafeExternalLongExample {
 
         public Builder safeExternalLongSet(@Safe long safeExternalLongSet) {
             checkNotBuilt();
+            Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null");
             this.safeExternalLongSet.add(safeExternalLongSet);
             return this;
         }
