@@ -70,10 +70,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -560,7 +560,12 @@ public final class BeanBuilderGenerator {
         TypeName typeName =
                 ConjureAnnotations.withSafety(typeMapper.getClassName(type), safetyEvaluator.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
-        if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
+        if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
+            spec.initializer(
+                    "$1T.new$2T()",
+                    ConjureCollections.class,
+                    getCollectionType(type).getClazz());
+        } else if (type.accept(TypeVisitor.IS_MAP)) {
             spec.initializer("new $T<>()", getCollectionType(type).getClazz());
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(type)));
@@ -934,12 +939,12 @@ public final class BeanBuilderGenerator {
         return type.accept(new DefaultTypeVisitor<>() {
             @Override
             public CollectionType visitList(ListType _value) {
-                return new CollectionType(ArrayList.class, options.nonNullCollections());
+                return new CollectionType(List.class, options.nonNullCollections());
             }
 
             @Override
             public CollectionType visitSet(SetType _value) {
-                return new CollectionType(LinkedHashSet.class, options.nonNullCollections());
+                return new CollectionType(Set.class, options.nonNullCollections());
             }
 
             @Override
@@ -951,6 +956,7 @@ public final class BeanBuilderGenerator {
 
     private static final class CollectionType {
         private final Class<?> clazz;
+
         private final boolean useNonNullFactory;
 
         CollectionType(Class<?> clazz, boolean useNonNullFactory) {

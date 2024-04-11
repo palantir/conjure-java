@@ -20,6 +20,8 @@ import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Utility functions for conjure. Consumers should prefer to use something like guava instead of using these functions
@@ -62,7 +64,9 @@ public final class ConjureCollections {
         }
     }
 
+    // Prefer to use newList(iterable)
     // explicitly need to return mutable list for generated builders
+    @Deprecated
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
@@ -76,17 +80,8 @@ public final class ConjureCollections {
         return list;
     }
 
-    // explicitly need to return mutable list for generated builders
-    @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
-    public static <T> ArrayList<T> newNonNullArrayList(Iterable<? extends T> iterable) {
-        ArrayList<T> arrayList = newArrayList(iterable);
-        for (T item : arrayList) {
-            Preconditions.checkNotNull(item, "iterable cannot contain null elements");
-        }
-
-        return arrayList;
-    }
-
+    // Prefer to use newSet(iterable)
+    @Deprecated
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
@@ -100,8 +95,51 @@ public final class ConjureCollections {
         return set;
     }
 
+    public static <T> List<T> newList() {
+        return new ArrayList<>();
+    }
+
+    public static <T> List<T> newList(Iterable<? extends T> iterable) {
+        Preconditions.checkNotNull(iterable, "iterable cannot be null");
+        if (iterable instanceof Collection) {
+            return new ArrayList<>((Collection<T>) iterable);
+        }
+        List<T> list = new ArrayList<>();
+        for (T item : iterable) {
+            list.add(item);
+        }
+        return list;
+    }
+
+    // explicitly need to return mutable list for generated builders
+    @SuppressWarnings({"unchecked", "NonApiType"})
+    public static <T> List<T> newNonNullList(Iterable<? extends T> iterable) {
+        List<T> arrayList = newList(iterable);
+        for (T item : arrayList) {
+            Preconditions.checkNotNull(item, "iterable cannot contain null elements");
+        }
+
+        return arrayList;
+    }
+
+    public static <T> Set<T> newSet() {
+        return new LinkedHashSet<>();
+    }
+
+    public static <T> Set<T> newSet(Iterable<? extends T> iterable) {
+        Preconditions.checkNotNull(iterable, "iterable cannot be null");
+        if (iterable instanceof Collection) {
+            return new LinkedHashSet<>((Collection<T>) iterable);
+        }
+        Set<T> set = new LinkedHashSet<>();
+        for (T item : iterable) {
+            set.add(item);
+        }
+        return set;
+    }
+
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
-    public static <T> LinkedHashSet<T> newNonNullLinkedHashSet(Iterable<? extends T> iterable) {
+    public static <T> LinkedHashSet<T> newNonNullSet(Iterable<? extends T> iterable) {
         LinkedHashSet<T> linkedHashSet = newLinkedHashSet(iterable);
         for (T item : linkedHashSet) {
             Preconditions.checkNotNull(item, "iterable cannot contain null elements");
