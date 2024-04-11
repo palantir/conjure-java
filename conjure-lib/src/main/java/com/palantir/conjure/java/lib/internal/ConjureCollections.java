@@ -109,4 +109,24 @@ public final class ConjureCollections {
 
         return linkedHashSet;
     }
+
+    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
+    public static ArrayList<Double> newNonNullDoubleArrayList(Iterable<Double> iterable) {
+        return newNonNullArrayList(iterable);
+    }
+
+    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
+    public static ArrayList<Integer> newNonNullIntegerArrayList(Iterable<Integer> iterable) {
+        return newNonNullArrayList(iterable);
+    }
+
+    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
+    public static ArrayList<Boolean> newNonNullBooleanArrayList(Iterable<Boolean> iterable) {
+        return newNonNullArrayList(iterable);
+    }
+
+    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
+    public static ArrayList<Long> newNonNullLongArrayList(Iterable<Long> iterable) {
+        return newNonNullArrayList(iterable);
+    }
 }

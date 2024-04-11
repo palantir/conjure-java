@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
+import com.palantir.conjure.java.lib.internal.DoubleArrayList;
+import com.palantir.conjure.java.lib.internal.IntegerArrayList;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -165,9 +167,9 @@ public final class ListExample {
 
         private List<@Safe String> items = new ArrayList<>();
 
-        private List<Integer> primitiveItems = new ArrayList<>();
+        private List<Integer> primitiveItems = new IntegerArrayList();
 
-        private List<Double> doubleItems = new ArrayList<>();
+        private List<Double> doubleItems = new DoubleArrayList();
 
         private List<Optional<String>> optionalItems = new ArrayList<>();
 
@@ -213,7 +215,7 @@ public final class ListExample {
         @JsonSetter(value = "primitiveItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder primitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
-            this.primitiveItems = ConjureCollections.newNonNullArrayList(
+            this.primitiveItems = ConjureCollections.newNonNullIntegerArrayList(
                     Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
@@ -235,7 +237,7 @@ public final class ListExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems = ConjureCollections.newNonNullArrayList(
+            this.doubleItems = ConjureCollections.newNonNullDoubleArrayList(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
