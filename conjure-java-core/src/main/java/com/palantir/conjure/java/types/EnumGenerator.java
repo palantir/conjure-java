@@ -133,7 +133,10 @@ public final class EnumGenerator {
                 .addMethod(generateAcceptVisitMethod(visitorClass, typeDef.getValues()))
                 .addMethod(createValues(thisClass));
 
-        typeDef.getDocs().ifPresent(docs -> wrapper.addJavadoc("$L<p>\n", Javadoc.render(docs)));
+        typeDef.getDocs().ifPresent(docs -> {
+            wrapper.addJavadoc("$L<p>\n", Javadoc.render(docs));
+            wrapper.addAnnotations(ConjureAnnotations.jsonClassDescription(docs));
+        });
 
         wrapper.addJavadoc(
                 "This class is used instead of a native enum to support unknown values.\n"

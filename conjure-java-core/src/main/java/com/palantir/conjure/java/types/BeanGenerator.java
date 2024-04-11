@@ -177,7 +177,10 @@ public final class BeanGenerator {
         }
         typeBuilder.addAnnotation(ConjureAnnotations.getConjureGeneratedAnnotation(BeanGenerator.class));
 
-        typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
+        typeDef.getDocs().ifPresent(docs -> {
+            typeBuilder.addJavadoc("$L", Javadoc.render(docs));
+            typeBuilder.addAnnotations(ConjureAnnotations.jsonClassDescription(docs));
+        });
 
         return JavaFile.builder(prefixedName.getPackage(), typeBuilder.build())
                 .skipJavaLangImports(true)
@@ -331,6 +334,9 @@ public final class BeanGenerator {
             getterBuilder.addStatement("return this.$N", field.poetSpec().name);
         }
 
+        field.conjureDef()
+                .getDocs()
+                .ifPresent(docs -> getterBuilder.addAnnotations(ConjureAnnotations.jsonPropertyDescription(docs)));
         Javadoc.render(field.conjureDef().getDocs(), field.conjureDef().getDeprecated())
                 .ifPresent(javadoc -> getterBuilder.addJavadoc("$L", javadoc));
         field.conjureDef().getDeprecated().ifPresent(_deprecated -> getterBuilder.addAnnotation(Deprecated.class));

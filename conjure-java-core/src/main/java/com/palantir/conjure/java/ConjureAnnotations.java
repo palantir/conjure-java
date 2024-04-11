@@ -16,7 +16,9 @@
 
 package com.palantir.conjure.java;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.palantir.conjure.java.lib.internal.ClientEndpoint;
@@ -84,6 +86,18 @@ public final class ConjureAnnotations {
             return INCUBATING;
         }
         return ImmutableList.of();
+    }
+
+    public static ImmutableList<AnnotationSpec> jsonPropertyDescription(Documentation documentation) {
+        return ImmutableList.of(AnnotationSpec.builder(JsonPropertyDescription.class)
+                .addMember("value", "$S", documentation.get().trim())
+                .build());
+    }
+
+    public static ImmutableList<AnnotationSpec> jsonClassDescription(Documentation documentation) {
+        return ImmutableList.of(AnnotationSpec.builder(JsonClassDescription.class)
+                .addMember("value", "$S", documentation.get().trim())
+                .build());
     }
 
     public static ImmutableList<AnnotationSpec> safety(Optional<LogSafety> value) {

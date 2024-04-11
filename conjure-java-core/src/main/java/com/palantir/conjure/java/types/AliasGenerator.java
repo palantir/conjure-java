@@ -224,7 +224,10 @@ public final class AliasGenerator {
                     .build());
         }
 
-        typeDef.getDocs().ifPresent(docs -> spec.addJavadoc("$L", Javadoc.render(docs)));
+        typeDef.getDocs().ifPresent(docs -> {
+            spec.addJavadoc("$L", Javadoc.render(docs));
+            spec.addAnnotations(ConjureAnnotations.jsonClassDescription(docs));
+        });
 
         return JavaFile.builder(prefixedTypeName.getPackage(), spec.build())
                 .skipJavaLangImports(true)

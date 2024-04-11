@@ -147,7 +147,10 @@ public final class UnionGenerator {
                         .addAnnotations(safety)
                         .build());
 
-        typeDef.getDocs().ifPresent(docs -> typeBuilder.addJavadoc("$L", Javadoc.render(docs)));
+        typeDef.getDocs().ifPresent(docs -> {
+            typeBuilder.addJavadoc("$L", Javadoc.render(docs));
+            typeBuilder.addAnnotations(ConjureAnnotations.jsonClassDescription(docs));
+        });
 
         return JavaFile.builder(prefixedTypeName.getPackage(), typeBuilder.build())
                 .skipJavaLangImports(true)
