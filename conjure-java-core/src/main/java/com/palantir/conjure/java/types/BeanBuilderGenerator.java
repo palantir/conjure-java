@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.internal.ConjureCollectionType;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -73,7 +74,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -562,11 +562,11 @@ public final class BeanBuilderGenerator {
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             spec.initializer(
-                    "$1T.new$2T()",
+                    "$1T.new$2L()",
                     ConjureCollections.class,
-                    getCollectionType(type).getClazz());
+                    getCollectionType(type).getConjureCollectionType().getCollectionName());
         } else if (type.accept(TypeVisitor.IS_MAP)) {
-            spec.initializer("new $T<>()", getCollectionType(type).getClazz());
+            spec.initializer("new $T<>()", LinkedHashMap.class);
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(type)));
         } else if (type.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
@@ -670,18 +670,18 @@ public final class BeanBuilderGenerator {
             if (shouldClearFirst) {
                 if (collectionType.useNonNullFactory()) {
                     return CodeBlocks.statement(
-                            "this.$1N = $2T.newNonNull$3T($4L)",
+                            "this.$1N = $2T.newNonNull$3L($4L)",
                             spec.name,
                             ConjureCollections.class,
-                            collectionType.getClazz(),
+                            collectionType.getConjureCollectionType().getCollectionName(),
                             Expressions.requireNonNull(
                                     spec.name, enriched.fieldName().get() + " cannot be null"));
                 } else {
                     return CodeBlocks.statement(
-                            "this.$1N = $2T.new$3T($4L)",
+                            "this.$1N = $2T.new$3L($4L)",
                             spec.name,
                             ConjureCollections.class,
-                            collectionType.getClazz(),
+                            collectionType.getConjureCollectionType().getCollectionName(),
                             Expressions.requireNonNull(
                                     spec.name, enriched.fieldName().get() + " cannot be null"));
                 }
@@ -706,7 +706,7 @@ public final class BeanBuilderGenerator {
                 return CodeBlocks.statement(
                         "this.$1N = new $2T<>($3L)",
                         spec.name,
-                        getCollectionType(type).getClazz(),
+                        LinkedHashMap.class,
                         Expressions.requireNonNull(
                                 spec.name, enriched.fieldName().get() + " cannot be null"));
             }
@@ -939,38 +939,28 @@ public final class BeanBuilderGenerator {
         return type.accept(new DefaultTypeVisitor<>() {
             @Override
             public CollectionType visitList(ListType _value) {
-                return new CollectionType(List.class, options.nonNullCollections());
+                return new CollectionType(ConjureCollectionType.LIST, options.nonNullCollections());
             }
 
             @Override
             public CollectionType visitSet(SetType _value) {
-                return new CollectionType(Set.class, options.nonNullCollections());
-            }
-
-            @Override
-            public CollectionType visitMap(MapType _value) {
-                return new CollectionType(LinkedHashMap.class);
+                return new CollectionType(ConjureCollectionType.SET, options.nonNullCollections());
             }
         });
     }
 
     private static final class CollectionType {
-        private final Class<?> clazz;
+        private final ConjureCollectionType conjureCollectionType;
 
         private final boolean useNonNullFactory;
 
-        CollectionType(Class<?> clazz, boolean useNonNullFactory) {
-            this.clazz = clazz;
+        CollectionType(ConjureCollectionType conjureCollectionType, boolean useNonNullFactory) {
+            this.conjureCollectionType = conjureCollectionType;
             this.useNonNullFactory = useNonNullFactory;
         }
 
-        CollectionType(Class<?> clazz) {
-            this.clazz = clazz;
-            this.useNonNullFactory = DO_NOT_USE_NON_NULL_COLLECTION_FACTORY;
-        }
-
-        public Class<?> getClazz() {
-            return clazz;
+        public ConjureCollectionType getConjureCollectionType() {
+            return conjureCollectionType;
         }
 
         public boolean useNonNullFactory() {
