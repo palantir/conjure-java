@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
@@ -144,6 +145,7 @@ public final class StrictThreeFields {
     }
 
     public interface Completed_StageBuilder {
+        @CheckReturnValue
         StrictThreeFields build();
     }
 
@@ -164,6 +166,7 @@ public final class StrictThreeFields {
         @Override
         Builder optionalItem(@Nonnull String optionalItem);
 
+        @CheckReturnValue
         @Override
         StrictThreeFields build();
     }
@@ -222,6 +225,7 @@ public final class StrictThreeFields {
         }
 
         @Override
+        @CheckReturnValue
         public StrictThreeFields build() {
             checkNotBuilt();
             this._buildInvoked = true;
