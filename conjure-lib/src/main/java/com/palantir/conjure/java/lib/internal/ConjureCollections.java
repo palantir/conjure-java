@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.lib.internal;
 
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -176,12 +177,12 @@ public final class ConjureCollections {
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Long> newLongArrayList() {
+    public static List<SafeLong> newLongArrayList() {
         return newList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Long> newNonNullLongArrayList(Iterable<Long> iterable) {
+    public static List<SafeLong> newNonNullLongArrayList(Iterable<SafeLong> iterable) {
         return newNonNullList(iterable);
     }
 }
