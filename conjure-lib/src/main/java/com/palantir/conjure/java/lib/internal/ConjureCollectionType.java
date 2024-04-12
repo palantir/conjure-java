@@ -16,7 +16,21 @@
 
 package com.palantir.conjure.java.lib.internal;
 
-import java.util.ArrayList;
+public enum ConjureCollectionType {
+    LIST("List"),
+    DOUBLE_ARRAY_LIST("DoubleArrayList"),
+    INTEGER_ARRAY_LIST("IntegerArrayList"),
+    BOOLEAN_ARRAY_LIST("BooleanArrayList"),
+    LONG_ARRAY_LIST("LongArrayList"),
+    SET("Set");
 
-@SuppressWarnings("checkstyle:IllegalType")
-public class IntegerArrayList extends ArrayList<Integer> {}
+    private final String collectionName;
+
+    ConjureCollectionType(String collectionName) {
+        this.collectionName = collectionName;
+    }
+
+    public String getCollectionName() {
+        return collectionName;
+    }
+}

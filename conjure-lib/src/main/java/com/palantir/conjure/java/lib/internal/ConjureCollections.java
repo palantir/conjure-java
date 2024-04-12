@@ -145,23 +145,43 @@ public final class ConjureCollections {
         return set;
     }
 
-    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
-    public static List<Double> newNonNullDoubleList(Iterable<Double> iterable) {
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Double> newDoubleArrayList() {
+        return newList();
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Double> newNonNullDoubleArrayList(Iterable<Double> iterable) {
         return newNonNullList(iterable);
     }
 
-    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
-    public static List<Integer> newNonNullIntegerList(Iterable<Integer> iterable) {
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Integer> newIntegerArrayList() {
+        return newList();
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Integer> newNonNullIntegerArrayList(Iterable<Integer> iterable) {
         return newNonNullList(iterable);
     }
 
-    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
-    public static List<Boolean> newNonNullBooleanList(Iterable<Boolean> iterable) {
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Boolean> newBooleanArrayList() {
+        return newList();
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Boolean> newNonNullBooleanArrayList(Iterable<Boolean> iterable) {
         return newNonNullList(iterable);
     }
 
-    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
-    public static List<Long> newNonNullLongList(Iterable<Long> iterable) {
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Long> newLongArrayList() {
+        return newList();
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Long> newNonNullLongArrayList(Iterable<Long> iterable) {
         return newNonNullList(iterable);
     }
 }

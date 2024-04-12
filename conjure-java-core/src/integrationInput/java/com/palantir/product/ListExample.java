@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
-import com.palantir.conjure.java.lib.internal.DoubleArrayList;
-import com.palantir.conjure.java.lib.internal.IntegerArrayList;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
@@ -167,9 +165,9 @@ public final class ListExample {
 
         private List<@Safe String> items = ConjureCollections.newList();
 
-        private List<Integer> primitiveItems = ConjureCollections.newList();
+        private List<Integer> primitiveItems = ConjureCollections.newIntegerArrayList();
 
-        private List<Double> doubleItems = ConjureCollections.newList();
+        private List<Double> doubleItems = ConjureCollections.newDoubleArrayList();
 
         private List<Optional<String>> optionalItems = ConjureCollections.newList();
 
@@ -214,7 +212,7 @@ public final class ListExample {
         @JsonSetter(value = "primitiveItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder primitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
-            this.primitiveItems = ConjureCollections.newNonNullIntegerList(
+            this.primitiveItems = ConjureCollections.newNonNullIntegerArrayList(
                     Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
@@ -236,7 +234,7 @@ public final class ListExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems = ConjureCollections.newNonNullDoubleList(
+            this.doubleItems = ConjureCollections.newNonNullDoubleArrayList(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
