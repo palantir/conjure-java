@@ -111,8 +111,6 @@ public final class ConjureCollections {
         return list;
     }
 
-    // explicitly need to return mutable list for generated builders
-    @SuppressWarnings({"unchecked", "NonApiType"})
     public static <T> List<T> newNonNullList(Iterable<? extends T> iterable) {
         List<T> arrayList = newList(iterable);
         for (T item : arrayList) {
@@ -138,13 +136,12 @@ public final class ConjureCollections {
         return set;
     }
 
-    @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
-    public static <T> LinkedHashSet<T> newNonNullSet(Iterable<? extends T> iterable) {
-        LinkedHashSet<T> linkedHashSet = newLinkedHashSet(iterable);
-        for (T item : linkedHashSet) {
+    public static <T> Set<T> newNonNullSet(Iterable<? extends T> iterable) {
+        Set<T> set = newLinkedHashSet(iterable);
+        for (T item : set) {
             Preconditions.checkNotNull(item, "iterable cannot contain null elements");
         }
 
-        return linkedHashSet;
+        return set;
     }
 }
