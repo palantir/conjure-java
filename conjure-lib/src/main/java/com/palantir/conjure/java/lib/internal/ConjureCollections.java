@@ -137,7 +137,7 @@ public final class ConjureCollections {
     }
 
     public static <T> Set<T> newNonNullSet(Iterable<? extends T> iterable) {
-        Set<T> set = newLinkedHashSet(iterable);
+        Set<T> set = newSet(iterable);
         for (T item : set) {
             Preconditions.checkNotNull(item, "iterable cannot contain null elements");
         }
