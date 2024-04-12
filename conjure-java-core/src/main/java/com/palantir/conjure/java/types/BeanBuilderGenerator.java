@@ -74,10 +74,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -95,8 +95,6 @@ public final class BeanBuilderGenerator {
     private static final String STAGED_BUILDER_IMPLEMENTATION_NAME = "DefaultBuilder";
     private static final boolean USE_NON_NULL_COLLECTION_FACTORY = true;
     private static final boolean DO_NOT_USE_NON_NULL_COLLECTION_FACTORY = false;
-    private static final boolean IS_PARAMETERIZED_COLLECTION = true;
-    private static final boolean NOT_PARAMETERIZED_COLLECTION = false;
 
     private final TypeMapper typeMapper;
     private final SafetyEvaluator safetyEvaluator;
@@ -567,13 +565,13 @@ public final class BeanBuilderGenerator {
         TypeName typeName =
                 ConjureAnnotations.withSafety(typeMapper.getClassName(type), safetyEvaluator.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
-        if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET) || type.accept(TypeVisitor.IS_MAP)) {
-            CollectionType collectionType = getCollectionType(type);
-            if (collectionType.isParameterized()) {
-                spec.initializer("new $T<>()", getCollectionType(type).getClazz());
-            } else {
-                spec.initializer("new $T()", getCollectionType(type).getClazz());
-            }
+        if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
+            spec.initializer(
+                    "$1T.new$2T()",
+                    ConjureCollections.class,
+                    getCollectionType(type).getClazz());
+        } else if (type.accept(TypeVisitor.IS_MAP)) {
+            spec.initializer("new $T<>()", getCollectionType(type).getClazz());
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
             spec.initializer("$T.empty()", asRawType(typeMapper.getClassName(type)));
         } else if (type.accept(MoreVisitors.IS_INTERNAL_REFERENCE)) {
@@ -947,14 +945,12 @@ public final class BeanBuilderGenerator {
             @Override
             public CollectionType visitList(ListType value) {
                 if (!options.nonNullCollections()) {
-                    return new CollectionType(
-                            ArrayList.class, DO_NOT_USE_NON_NULL_COLLECTION_FACTORY, IS_PARAMETERIZED_COLLECTION);
+                    return new CollectionType(ArrayList.class, DO_NOT_USE_NON_NULL_COLLECTION_FACTORY);
                 }
                 return value.getItemType().accept(new DefaultTypeVisitor<>() {
                     @Override
                     public CollectionType visitDefault() {
-                        return new CollectionType(
-                                ArrayList.class, USE_NON_NULL_COLLECTION_FACTORY, IS_PARAMETERIZED_COLLECTION);
+                        return new CollectionType(ArrayList.class, USE_NON_NULL_COLLECTION_FACTORY);
                     }
 
                     @Override
@@ -963,32 +959,22 @@ public final class BeanBuilderGenerator {
 
                             @Override
                             public CollectionType visitDefault() {
-                                return new CollectionType(
-                                        ArrayList.class, USE_NON_NULL_COLLECTION_FACTORY, IS_PARAMETERIZED_COLLECTION);
+                                return new CollectionType(ArrayList.class, USE_NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitDouble() {
-                                return new CollectionType(
-                                        DoubleArrayList.class,
-                                        USE_NON_NULL_COLLECTION_FACTORY,
-                                        NOT_PARAMETERIZED_COLLECTION);
+                                return new CollectionType(DoubleArrayList.class, USE_NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitInteger() {
-                                return new CollectionType(
-                                        IntegerArrayList.class,
-                                        USE_NON_NULL_COLLECTION_FACTORY,
-                                        NOT_PARAMETERIZED_COLLECTION);
+                                return new CollectionType(IntegerArrayList.class, USE_NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitBoolean() {
-                                return new CollectionType(
-                                        BooleanArrayList.class,
-                                        USE_NON_NULL_COLLECTION_FACTORY,
-                                        NOT_PARAMETERIZED_COLLECTION);
+                                return new CollectionType(BooleanArrayList.class, USE_NON_NULL_COLLECTION_FACTORY);
                             }
                         });
                     }
@@ -997,8 +983,7 @@ public final class BeanBuilderGenerator {
 
             @Override
             public CollectionType visitSet(SetType _value) {
-                return new CollectionType(
-                        LinkedHashSet.class, options.nonNullCollections(), IS_PARAMETERIZED_COLLECTION);
+                return new CollectionType(Set.class, options.nonNullCollections());
             }
 
             @Override
@@ -1010,19 +995,17 @@ public final class BeanBuilderGenerator {
 
     private static final class CollectionType {
         private final Class<?> clazz;
-        private final boolean useNonNullFactory;
-        private final boolean isParameterized;
 
-        CollectionType(Class<?> clazz, boolean useNonNullFactory, boolean isParameterized) {
+        private final boolean useNonNullFactory;
+
+        CollectionType(Class<?> clazz, boolean useNonNullFactory) {
             this.clazz = clazz;
             this.useNonNullFactory = useNonNullFactory;
-            this.isParameterized = isParameterized;
         }
 
         CollectionType(Class<?> clazz) {
             this.clazz = clazz;
             this.useNonNullFactory = DO_NOT_USE_NON_NULL_COLLECTION_FACTORY;
-            this.isParameterized = IS_PARAMETERIZED_COLLECTION;
         }
 
         public Class<?> getClazz() {
@@ -1031,10 +1014,6 @@ public final class BeanBuilderGenerator {
 
         public boolean useNonNullFactory() {
             return useNonNullFactory;
-        }
-
-        public boolean isParameterized() {
-            return isParameterized;
         }
     }
 }

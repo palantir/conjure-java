@@ -13,7 +13,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -218,9 +217,9 @@ public final class ManyFieldExample {
 
         private Optional<String> optionalItem = Optional.empty();
 
-        private List<String> items = new ArrayList<>();
+        private List<String> items = ConjureCollections.newList();
 
-        private Set<String> set = new LinkedHashSet<>();
+        private Set<String> set = ConjureCollections.newSet();
 
         private Map<String, String> map = new LinkedHashMap<>();
 
@@ -300,7 +299,7 @@ public final class ManyFieldExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -322,7 +321,7 @@ public final class ManyFieldExample {
         @JsonSetter(value = "set", nulls = Nulls.SKIP)
         public Builder set(@Nonnull Iterable<String> set) {
             checkNotBuilt();
-            this.set = ConjureCollections.newLinkedHashSet(Preconditions.checkNotNull(set, "set cannot be null"));
+            this.set = ConjureCollections.newSet(Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 

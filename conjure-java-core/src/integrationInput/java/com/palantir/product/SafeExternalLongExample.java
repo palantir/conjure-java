@@ -12,7 +12,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -147,9 +146,9 @@ public final class SafeExternalLongExample {
 
         private Optional<@Safe Long> optionalSafeExternalLong = Optional.empty();
 
-        private List<@Safe Long> safeExternalLongList = new ArrayList<>();
+        private List<@Safe Long> safeExternalLongList = ConjureCollections.newList();
 
-        private Set<@Safe Long> safeExternalLongSet = new LinkedHashSet<>();
+        private Set<@Safe Long> safeExternalLongSet = ConjureCollections.newSet();
 
         private boolean _safeExternalLongValueInitialized = false;
 
@@ -191,7 +190,7 @@ public final class SafeExternalLongExample {
         @JsonSetter(value = "safeExternalLongList", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safeExternalLongList(@Nonnull Iterable<? extends @Safe Long> safeExternalLongList) {
             checkNotBuilt();
-            this.safeExternalLongList = ConjureCollections.newNonNullArrayList(
+            this.safeExternalLongList = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
             return this;
         }
@@ -214,7 +213,7 @@ public final class SafeExternalLongExample {
         @JsonSetter(value = "safeExternalLongSet", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safeExternalLongSet(@Nonnull Iterable<? extends @Safe Long> safeExternalLongSet) {
             checkNotBuilt();
-            this.safeExternalLongSet = ConjureCollections.newNonNullLinkedHashSet(
+            this.safeExternalLongSet = ConjureCollections.newNonNullSet(
                     Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
             return this;
         }

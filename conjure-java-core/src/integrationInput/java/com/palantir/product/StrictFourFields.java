@@ -197,7 +197,7 @@ public final class StrictFourFields {
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
-        private List<String> myList = new ArrayList<>();
+        private List<String> myList = ConjureCollections.newList();
 
         private BearerToken bearerTokenValue;
 
@@ -221,7 +221,7 @@ public final class StrictFourFields {
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
         public Builder myList(@Nonnull Iterable<String> myList) {
             checkNotBuilt();
-            this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
+            this.myList = ConjureCollections.newList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;
         }
 
