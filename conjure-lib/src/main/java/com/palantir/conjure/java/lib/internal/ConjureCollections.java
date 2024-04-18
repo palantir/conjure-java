@@ -148,41 +148,41 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newDoubleArrayList() {
-        return newList();
+        return new ConjureDoubleList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleArrayList(Iterable<Double> iterable) {
-        return newNonNullList(iterable);
+        return new ConjureDoubleList(iterable);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newIntegerArrayList() {
-        return newList();
+        return new ConjureIntegerList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerArrayList(Iterable<Integer> iterable) {
-        return newNonNullList(iterable);
+        return new ConjureIntegerList(iterable);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Boolean> newBooleanArrayList() {
-        return newList();
+        return new ConjureBooleanList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Boolean> newNonNullBooleanArrayList(Iterable<Boolean> iterable) {
-        return newNonNullList(iterable);
+        return new ConjureBooleanList(iterable);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newSafeLongArrayList() {
-        return newList();
+        return new ConjureSafeLongList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongArrayList(Iterable<SafeLong> iterable) {
-        return newNonNullList(iterable);
+        return new ConjureSafeLongList(iterable);
     }
 }

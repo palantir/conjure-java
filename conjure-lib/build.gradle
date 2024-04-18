@@ -24,6 +24,7 @@ dependencies {
     api 'com.palantir.conjure.java.api:errors'
     api 'com.google.errorprone:error_prone_annotations'
 
+    implementation 'org.eclipse.collections:eclipse-collections'
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.palantir.safe-logging:safe-logging'
