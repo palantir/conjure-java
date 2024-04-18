@@ -109,7 +109,7 @@ public final class SafeLongExample {
 
         private SafeLong safeLongValue;
 
-        private List<SafeLong> safeLongList = ConjureCollections.newLongArrayList();
+        private List<SafeLong> safeLongList = ConjureCollections.newSafeLongArrayList();
 
         private Builder() {}
 
@@ -130,7 +130,7 @@ public final class SafeLongExample {
         @JsonSetter(value = "safeLongList", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safeLongList(@Nonnull Iterable<SafeLong> safeLongList) {
             checkNotBuilt();
-            this.safeLongList = ConjureCollections.newNonNullLongArrayList(
+            this.safeLongList = ConjureCollections.newNonNullSafeLongArrayList(
                     Preconditions.checkNotNull(safeLongList, "safeLongList cannot be null"));
             return this;
         }

@@ -177,12 +177,12 @@ public final class ConjureCollections {
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<SafeLong> newLongArrayList() {
+    public static List<SafeLong> newSafeLongArrayList() {
         return newList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<SafeLong> newNonNullLongArrayList(Iterable<SafeLong> iterable) {
+    public static List<SafeLong> newNonNullSafeLongArrayList(Iterable<SafeLong> iterable) {
         return newNonNullList(iterable);
     }
 }
