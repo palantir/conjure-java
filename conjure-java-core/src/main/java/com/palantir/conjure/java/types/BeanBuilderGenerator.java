@@ -983,7 +983,7 @@ public final class BeanBuilderGenerator {
                             @Override
                             public CollectionType visitSafelong() {
                                 return new CollectionType(
-                                        ConjureCollectionType.LONG_ARRAY_LIST, USE_NON_NULL_COLLECTION_FACTORY);
+                                        ConjureCollectionType.SAFE_LONG_ARRAY_LIST, USE_NON_NULL_COLLECTION_FACTORY);
                             }
                         });
                     }
