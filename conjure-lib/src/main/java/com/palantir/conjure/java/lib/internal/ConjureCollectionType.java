@@ -21,7 +21,7 @@ public enum ConjureCollectionType {
     DOUBLE_ARRAY_LIST("DoubleArrayList"),
     INTEGER_ARRAY_LIST("IntegerArrayList"),
     BOOLEAN_ARRAY_LIST("BooleanArrayList"),
-    LONG_ARRAY_LIST("LongArrayList"),
+    SAFE_LONG_ARRAY_LIST("SafeLongArrayList"),
     SET("Set");
 
     private final String collectionName;
