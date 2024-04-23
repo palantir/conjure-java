@@ -136,7 +136,7 @@ public final class SetExample {
 
         public Builder items(String items) {
             checkNotBuilt();
-            this.items.add(items);
+            this.items.add(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -157,7 +157,7 @@ public final class SetExample {
 
         public Builder doubleItems(double doubleItems) {
             checkNotBuilt();
-            this.doubleItems.add(doubleItems);
+            this.doubleItems.add(Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 

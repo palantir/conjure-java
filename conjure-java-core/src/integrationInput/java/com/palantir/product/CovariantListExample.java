@@ -135,7 +135,7 @@ public final class CovariantListExample {
 
         public Builder items(Object items) {
             checkNotBuilt();
-            this.items.add(items);
+            this.items.add(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -156,7 +156,7 @@ public final class CovariantListExample {
 
         public Builder externalItems(ExampleExternalReference externalItems) {
             checkNotBuilt();
-            this.externalItems.add(externalItems);
+            this.externalItems.add(Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 

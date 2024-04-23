@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -152,7 +153,7 @@ public final class MapExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Map<String, String> items) {
             checkNotBuilt();
-            this.items = new LinkedHashMap<>(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newNullCheckedLinkedHashMap(items);
             return this;
         }
 
@@ -164,15 +165,16 @@ public final class MapExample {
 
         public Builder items(String key, String value) {
             checkNotBuilt();
-            this.items.put(key, Preconditions.checkNotNull(value, "items cannot be null"));
+            this.items.put(
+                    Preconditions.checkNotNull(key, "items cannot have a null key"),
+                    Preconditions.checkNotNull(value, "items cannot have a null value"));
             return this;
         }
 
         @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder optionalItems(@Nonnull Map<String, Optional<String>> optionalItems) {
             checkNotBuilt();
-            this.optionalItems =
-                    new LinkedHashMap<>(Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
+            this.optionalItems = ConjureCollections.newNullCheckedLinkedHashMap(optionalItems);
             return this;
         }
 
@@ -184,15 +186,16 @@ public final class MapExample {
 
         public Builder optionalItems(String key, Optional<String> value) {
             checkNotBuilt();
-            this.optionalItems.put(key, Preconditions.checkNotNull(value, "optionalItems cannot be null"));
+            this.optionalItems.put(
+                    Preconditions.checkNotNull(key, "optionalItems cannot have a null key"),
+                    Preconditions.checkNotNull(value, "optionalItems cannot have a null value"));
             return this;
         }
 
         @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalItems(@Nonnull Map<String, OptionalAlias> aliasOptionalItems) {
             checkNotBuilt();
-            this.aliasOptionalItems = new LinkedHashMap<>(
-                    Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
+            this.aliasOptionalItems = ConjureCollections.newNullCheckedLinkedHashMap(aliasOptionalItems);
             return this;
         }
 
@@ -205,7 +208,9 @@ public final class MapExample {
 
         public Builder aliasOptionalItems(String key, OptionalAlias value) {
             checkNotBuilt();
-            this.aliasOptionalItems.put(key, Preconditions.checkNotNull(value, "aliasOptionalItems cannot be null"));
+            this.aliasOptionalItems.put(
+                    Preconditions.checkNotNull(key, "aliasOptionalItems cannot have a null key"),
+                    Preconditions.checkNotNull(value, "aliasOptionalItems cannot have a null value"));
             return this;
         }
 

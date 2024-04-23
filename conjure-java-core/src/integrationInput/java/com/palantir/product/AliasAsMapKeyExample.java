@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -208,7 +209,7 @@ public final class AliasAsMapKeyExample {
         @JsonSetter(value = "strings", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder strings(@Nonnull Map<StringAliasExample, ManyFieldExample> strings) {
             checkNotBuilt();
-            this.strings = new LinkedHashMap<>(Preconditions.checkNotNull(strings, "strings cannot be null"));
+            this.strings = ConjureCollections.newNullCheckedLinkedHashMap(strings);
             return this;
         }
 
@@ -220,14 +221,16 @@ public final class AliasAsMapKeyExample {
 
         public Builder strings(StringAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.strings.put(key, Preconditions.checkNotNull(value, "strings cannot be null"));
+            this.strings.put(
+                    Preconditions.checkNotNull(key, "strings cannot have a null key"),
+                    Preconditions.checkNotNull(value, "strings cannot have a null value"));
             return this;
         }
 
         @JsonSetter(value = "rids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder rids(@Nonnull Map<RidAliasExample, ManyFieldExample> rids) {
             checkNotBuilt();
-            this.rids = new LinkedHashMap<>(Preconditions.checkNotNull(rids, "rids cannot be null"));
+            this.rids = ConjureCollections.newNullCheckedLinkedHashMap(rids);
             return this;
         }
 
@@ -239,15 +242,16 @@ public final class AliasAsMapKeyExample {
 
         public Builder rids(RidAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.rids.put(key, Preconditions.checkNotNull(value, "rids cannot be null"));
+            this.rids.put(
+                    Preconditions.checkNotNull(key, "rids cannot have a null key"),
+                    Preconditions.checkNotNull(value, "rids cannot have a null value"));
             return this;
         }
 
         @JsonSetter(value = "bearertokens", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder bearertokens(@Nonnull Map<BearerTokenAliasExample, ManyFieldExample> bearertokens) {
             checkNotBuilt();
-            this.bearertokens =
-                    new LinkedHashMap<>(Preconditions.checkNotNull(bearertokens, "bearertokens cannot be null"));
+            this.bearertokens = ConjureCollections.newNullCheckedLinkedHashMap(bearertokens);
             return this;
         }
 
@@ -259,14 +263,16 @@ public final class AliasAsMapKeyExample {
 
         public Builder bearertokens(BearerTokenAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.bearertokens.put(key, Preconditions.checkNotNull(value, "bearertokens cannot be null"));
+            this.bearertokens.put(
+                    Preconditions.checkNotNull(key, "bearertokens cannot have a null key"),
+                    Preconditions.checkNotNull(value, "bearertokens cannot have a null value"));
             return this;
         }
 
         @JsonSetter(value = "integers", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder integers(@Nonnull Map<IntegerAliasExample, ManyFieldExample> integers) {
             checkNotBuilt();
-            this.integers = new LinkedHashMap<>(Preconditions.checkNotNull(integers, "integers cannot be null"));
+            this.integers = ConjureCollections.newNullCheckedLinkedHashMap(integers);
             return this;
         }
 
@@ -278,14 +284,16 @@ public final class AliasAsMapKeyExample {
 
         public Builder integers(IntegerAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.integers.put(key, Preconditions.checkNotNull(value, "integers cannot be null"));
+            this.integers.put(
+                    Preconditions.checkNotNull(key, "integers cannot have a null key"),
+                    Preconditions.checkNotNull(value, "integers cannot have a null value"));
             return this;
         }
 
         @JsonSetter(value = "safelongs", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder safelongs(@Nonnull Map<SafeLongAliasExample, ManyFieldExample> safelongs) {
             checkNotBuilt();
-            this.safelongs = new LinkedHashMap<>(Preconditions.checkNotNull(safelongs, "safelongs cannot be null"));
+            this.safelongs = ConjureCollections.newNullCheckedLinkedHashMap(safelongs);
             return this;
         }
 
@@ -297,14 +305,16 @@ public final class AliasAsMapKeyExample {
 
         public Builder safelongs(SafeLongAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.safelongs.put(key, Preconditions.checkNotNull(value, "safelongs cannot be null"));
+            this.safelongs.put(
+                    Preconditions.checkNotNull(key, "safelongs cannot have a null key"),
+                    Preconditions.checkNotNull(value, "safelongs cannot have a null value"));
             return this;
         }
 
         @JsonSetter(value = "datetimes", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder datetimes(@Nonnull Map<DateTimeAliasExample, ManyFieldExample> datetimes) {
             checkNotBuilt();
-            this.datetimes = new LinkedHashMap<>(Preconditions.checkNotNull(datetimes, "datetimes cannot be null"));
+            this.datetimes = ConjureCollections.newNullCheckedLinkedHashMap(datetimes);
             return this;
         }
 
@@ -316,14 +326,16 @@ public final class AliasAsMapKeyExample {
 
         public Builder datetimes(DateTimeAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.datetimes.put(key, Preconditions.checkNotNull(value, "datetimes cannot be null"));
+            this.datetimes.put(
+                    Preconditions.checkNotNull(key, "datetimes cannot have a null key"),
+                    Preconditions.checkNotNull(value, "datetimes cannot have a null value"));
             return this;
         }
 
         @JsonSetter(value = "uuids", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder uuids(@Nonnull Map<UuidAliasExample, ManyFieldExample> uuids) {
             checkNotBuilt();
-            this.uuids = new LinkedHashMap<>(Preconditions.checkNotNull(uuids, "uuids cannot be null"));
+            this.uuids = ConjureCollections.newNullCheckedLinkedHashMap(uuids);
             return this;
         }
 
@@ -335,7 +347,9 @@ public final class AliasAsMapKeyExample {
 
         public Builder uuids(UuidAliasExample key, ManyFieldExample value) {
             checkNotBuilt();
-            this.uuids.put(key, Preconditions.checkNotNull(value, "uuids cannot be null"));
+            this.uuids.put(
+                    Preconditions.checkNotNull(key, "uuids cannot have a null key"),
+                    Preconditions.checkNotNull(value, "uuids cannot have a null value"));
             return this;
         }
 

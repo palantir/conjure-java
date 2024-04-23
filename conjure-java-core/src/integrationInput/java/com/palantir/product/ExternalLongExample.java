@@ -185,7 +185,7 @@ public final class ExternalLongExample {
 
         public Builder listExternalLong(long listExternalLong) {
             checkNotBuilt();
-            this.listExternalLong.add(listExternalLong);
+            this.listExternalLong.add(Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
             return this;
         }
 

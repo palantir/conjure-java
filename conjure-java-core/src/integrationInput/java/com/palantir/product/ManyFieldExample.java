@@ -313,7 +313,7 @@ public final class ManyFieldExample {
         /** docs for items field with exciting character$ used by javapoet. */
         public Builder items(String items) {
             checkNotBuilt();
-            this.items.add(items);
+            this.items.add(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -336,7 +336,7 @@ public final class ManyFieldExample {
         /** docs for set field */
         public Builder set(String set) {
             checkNotBuilt();
-            this.set.add(set);
+            this.set.add(Preconditions.checkNotNull(set, "set cannot be null"));
             return this;
         }
 
@@ -345,7 +345,7 @@ public final class ManyFieldExample {
         @JsonSetter(value = "map", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder map(@Nonnull Map<String, String> map) {
             checkNotBuilt();
-            this.map = new LinkedHashMap<>(Preconditions.checkNotNull(map, "map cannot be null"));
+            this.map = ConjureCollections.newNullCheckedLinkedHashMap(map);
             return this;
         }
 
@@ -361,7 +361,9 @@ public final class ManyFieldExample {
         @Deprecated
         public Builder map(String key, String value) {
             checkNotBuilt();
-            this.map.put(key, Preconditions.checkNotNull(value, "map cannot be null"));
+            this.map.put(
+                    Preconditions.checkNotNull(key, "map cannot have a null key"),
+                    Preconditions.checkNotNull(value, "map cannot have a null value"));
             return this;
         }
 

@@ -204,7 +204,7 @@ public final class ListExample {
 
         public Builder items(@Safe String items) {
             checkNotBuilt();
-            this.items.add(items);
+            this.items.add(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -225,7 +225,7 @@ public final class ListExample {
 
         public Builder primitiveItems(int primitiveItems) {
             checkNotBuilt();
-            this.primitiveItems.add(primitiveItems);
+            this.primitiveItems.add(Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
 
@@ -246,7 +246,7 @@ public final class ListExample {
 
         public Builder doubleItems(double doubleItems) {
             checkNotBuilt();
-            this.doubleItems.add(doubleItems);
+            this.doubleItems.add(Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 
@@ -267,7 +267,7 @@ public final class ListExample {
 
         public Builder optionalItems(Optional<String> optionalItems) {
             checkNotBuilt();
-            this.optionalItems.add(optionalItems);
+            this.optionalItems.add(Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
@@ -289,7 +289,8 @@ public final class ListExample {
 
         public Builder aliasOptionalItems(OptionalAlias aliasOptionalItems) {
             checkNotBuilt();
-            this.aliasOptionalItems.add(aliasOptionalItems);
+            this.aliasOptionalItems.add(
+                    Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
             return this;
         }
 
@@ -310,7 +311,7 @@ public final class ListExample {
 
         public Builder nestedItems(List<String> nestedItems) {
             checkNotBuilt();
-            this.nestedItems.add(nestedItems);
+            this.nestedItems.add(Preconditions.checkNotNull(nestedItems, "nestedItems cannot be null"));
             return this;
         }
 

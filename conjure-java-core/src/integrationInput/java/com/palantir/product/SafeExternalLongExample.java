@@ -206,7 +206,8 @@ public final class SafeExternalLongExample {
 
         public Builder safeExternalLongList(@Safe long safeExternalLongList) {
             checkNotBuilt();
-            this.safeExternalLongList.add(safeExternalLongList);
+            this.safeExternalLongList.add(
+                    Preconditions.checkNotNull(safeExternalLongList, "safeExternalLongList cannot be null"));
             return this;
         }
 
@@ -228,7 +229,8 @@ public final class SafeExternalLongExample {
 
         public Builder safeExternalLongSet(@Safe long safeExternalLongSet) {
             checkNotBuilt();
-            this.safeExternalLongSet.add(safeExternalLongSet);
+            this.safeExternalLongSet.add(
+                    Preconditions.checkNotNull(safeExternalLongSet, "safeExternalLongSet cannot be null"));
             return this;
         }
 

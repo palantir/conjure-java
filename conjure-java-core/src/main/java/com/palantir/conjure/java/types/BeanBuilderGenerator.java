@@ -710,6 +710,15 @@ public final class BeanBuilderGenerator {
                     Expressions.requireNonNull(spec.name, enriched.fieldName().get() + " cannot be null"));
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             if (shouldClearFirst) {
+                if (options.nonNullCollections()) {
+                    return CodeBlocks.statement(
+                            "this.$1N = $2T.newNullChecked$3T($4L)",
+                            spec.name,
+                            ConjureCollections.class,
+                            type.accept(COLLECTION_CONCRETE_TYPE),
+                            // The argument is null checked in ConjureCollections.newNullChecked<concreteType>
+                            spec.name);
+                }
                 return CodeBlocks.statement(
                         "this.$1N = new $2T<>($3L)",
                         spec.name,
@@ -833,7 +842,12 @@ public final class BeanBuilderGenerator {
                         enriched, itemType, typeMapper, builderClass, safety)
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt())
-                .addStatement("this.$1N.add($1N)", field.name)
+                .addStatement(
+                        "this.$1N.add($2L)",
+                        field.name,
+                        options.nonNullCollections()
+                                ? Expressions.requireNonNull(field.name, field.name + " cannot be null")
+                                : field.name)
                 .addStatement("return this")
                 .build();
     }
@@ -845,9 +859,13 @@ public final class BeanBuilderGenerator {
                 .addCode(verifyNotBuilt());
         if (nonNullCollections) {
             builder.addStatement(
-                    "this.$1N.put(key, $2L)",
+                    "this.$1N.put($2L, $3L)",
                     enriched.poetSpec().name,
-                    Expressions.requireNonNull("value", enriched.fieldName().get() + " cannot be null"));
+                    options.nonNullCollections()
+                            ? Expressions.requireNonNull(
+                                    "key", enriched.fieldName().get() + " cannot have a null key")
+                            : "key",
+                    Expressions.requireNonNull("value", enriched.fieldName().get() + " cannot have a null value"));
         } else {
             builder.addStatement("this.$1N.put(key, value)", enriched.poetSpec().name);
         }

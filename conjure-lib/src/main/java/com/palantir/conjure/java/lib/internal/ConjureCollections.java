@@ -19,7 +19,9 @@ package com.palantir.conjure.java.lib.internal;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 
 /**
  * Utility functions for conjure. Consumers should prefer to use something like guava instead of using these functions
@@ -45,17 +47,10 @@ public final class ConjureCollections {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> void addAllNonNull(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
         Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
-        if (elementsToAdd instanceof Collection) {
-            // This special-casing allows us to take advantage of the more performant
-            // ArrayList#addAll method which does a single System.arraycopy.
-            addTo.addAll((Collection<T>) elementsToAdd);
-        } else {
-            for (T element : elementsToAdd) {
-                addTo.add(Preconditions.checkNotNull(element, "item in collection cannot be null"));
-            }
+        for (T element : elementsToAdd) {
+            addTo.add(Preconditions.checkNotNull(element, "item in collection cannot be null"));
         }
     }
 
@@ -74,12 +69,9 @@ public final class ConjureCollections {
     }
 
     // explicitly need to return mutable list for generated builders
-    @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
+    @SuppressWarnings({"IllegalType", "NonApiType"})
     public static <T> ArrayList<T> newNullCheckedArrayList(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            return new ArrayList<>((Collection<T>) iterable);
-        }
         ArrayList<T> list = new ArrayList<>();
         for (T item : iterable) {
             list.add(Preconditions.checkNotNull(item, "item in collection cannot be null"));
@@ -103,13 +95,22 @@ public final class ConjureCollections {
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newNullCheckedLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            return new LinkedHashSet<>((Collection<T>) iterable);
-        }
         LinkedHashSet<T> set = new LinkedHashSet<>();
         for (T item : iterable) {
             set.add(Preconditions.checkNotNull(item, "item in collection cannot be null"));
         }
         return set;
+    }
+
+    @SuppressWarnings({"IllegalType", "NonApiType"})
+    public static <K, V> LinkedHashMap<K, V> newNullCheckedLinkedHashMap(Map<? extends K, ? extends V> map) {
+        Preconditions.checkNotNull(map, "map cannot be null");
+        LinkedHashMap<K, V> linkedHashMap = new LinkedHashMap<>();
+        for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+            linkedHashMap.put(
+                    Preconditions.checkNotNull(entry.getKey(), "key in map cannot be null"),
+                    Preconditions.checkNotNull(entry.getValue(), "value in map cannot be null"));
+        }
+        return linkedHashMap;
     }
 }
