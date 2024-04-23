@@ -28,13 +28,16 @@ public final class UuidAliasExample {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof UuidAliasExample && this.value.equals(((UuidAliasExample) other).value));
+        return this == other || (other instanceof UuidAliasExample && equalTo((UuidAliasExample) other));
+    }
+
+    private boolean equalTo(UuidAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     public static UuidAliasExample valueOf(String value) {

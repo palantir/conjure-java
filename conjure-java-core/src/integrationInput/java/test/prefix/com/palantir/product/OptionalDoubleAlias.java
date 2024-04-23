@@ -37,13 +37,16 @@ public final class OptionalDoubleAlias {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof OptionalDoubleAlias && this.value.equals(((OptionalDoubleAlias) other).value));
+        return this == other || (other instanceof OptionalDoubleAlias && equalTo((OptionalDoubleAlias) other));
+    }
+
+    private boolean equalTo(OptionalDoubleAlias other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

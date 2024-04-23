@@ -27,15 +27,16 @@ public final class DoubleAliasExample implements Comparable<DoubleAliasExample> 
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof DoubleAliasExample
-                        && Double.doubleToLongBits(this.value)
-                                == Double.doubleToLongBits(((DoubleAliasExample) other).value));
+        return this == other || (other instanceof DoubleAliasExample && equalTo((DoubleAliasExample) other));
+    }
+
+    private boolean equalTo(DoubleAliasExample other) {
+        return Double.doubleToLongBits(this.value) == Double.doubleToLongBits(other.value);
     }
 
     @Override
     public int hashCode() {
-        return Double.hashCode(value);
+        return Double.hashCode(this.value);
     }
 
     @Override

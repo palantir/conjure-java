@@ -27,12 +27,16 @@ public final class StringAliasOne implements Comparable<StringAliasOne> {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof StringAliasOne && this.value.equals(((StringAliasOne) other).value));
+        return this == other || (other instanceof StringAliasOne && equalTo((StringAliasOne) other));
+    }
+
+    private boolean equalTo(StringAliasOne other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @Override

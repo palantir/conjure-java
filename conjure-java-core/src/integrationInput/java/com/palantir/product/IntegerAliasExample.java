@@ -25,13 +25,16 @@ public final class IntegerAliasExample implements Comparable<IntegerAliasExample
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof IntegerAliasExample && this.value == ((IntegerAliasExample) other).value);
+        return this == other || (other instanceof IntegerAliasExample && equalTo((IntegerAliasExample) other));
+    }
+
+    private boolean equalTo(IntegerAliasExample other) {
+        return this.value == other.value;
     }
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(value);
+        return this.value;
     }
 
     @Override

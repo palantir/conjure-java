@@ -25,13 +25,16 @@ public final class BooleanAliasExample {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof BooleanAliasExample && this.value == ((BooleanAliasExample) other).value);
+        return this == other || (other instanceof BooleanAliasExample && equalTo((BooleanAliasExample) other));
+    }
+
+    private boolean equalTo(BooleanAliasExample other) {
+        return this.value == other.value;
     }
 
     @Override
     public int hashCode() {
-        return Boolean.hashCode(value);
+        return Boolean.hashCode(this.value);
     }
 
     public static BooleanAliasExample valueOf(String value) {

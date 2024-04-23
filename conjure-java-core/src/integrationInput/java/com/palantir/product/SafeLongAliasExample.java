@@ -31,13 +31,16 @@ public final class SafeLongAliasExample implements Comparable<SafeLongAliasExamp
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof SafeLongAliasExample && this.value.equals(((SafeLongAliasExample) other).value));
+        return this == other || (other instanceof SafeLongAliasExample && equalTo((SafeLongAliasExample) other));
+    }
+
+    private boolean equalTo(SafeLongAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @Override

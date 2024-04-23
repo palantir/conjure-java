@@ -28,13 +28,16 @@ public final class ExternalStringAliasExample {
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other
-                || (other instanceof ExternalStringAliasExample
-                        && this.value.equals(((ExternalStringAliasExample) other).value));
+                || (other instanceof ExternalStringAliasExample && equalTo((ExternalStringAliasExample) other));
+    }
+
+    private boolean equalTo(ExternalStringAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

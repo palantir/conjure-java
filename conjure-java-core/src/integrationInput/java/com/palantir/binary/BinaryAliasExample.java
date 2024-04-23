@@ -28,13 +28,16 @@ public final class BinaryAliasExample {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof BinaryAliasExample && this.value.equals(((BinaryAliasExample) other).value));
+        return this == other || (other instanceof BinaryAliasExample && equalTo((BinaryAliasExample) other));
+    }
+
+    private boolean equalTo(BinaryAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

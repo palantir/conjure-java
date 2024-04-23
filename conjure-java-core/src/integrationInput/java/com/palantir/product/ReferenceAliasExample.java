@@ -27,13 +27,16 @@ public final class ReferenceAliasExample {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof ReferenceAliasExample && this.value.equals(((ReferenceAliasExample) other).value));
+        return this == other || (other instanceof ReferenceAliasExample && equalTo((ReferenceAliasExample) other));
+    }
+
+    private boolean equalTo(ReferenceAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
