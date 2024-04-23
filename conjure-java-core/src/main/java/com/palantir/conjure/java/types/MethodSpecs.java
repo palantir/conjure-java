@@ -170,7 +170,10 @@ public final class MethodSpecs {
                 return createHashInput(fieldSpec);
             } else {
                 return CodeBlock.of(
-                        "$1T.$2N($3L)", Primitives.box(fieldSpec.type), "hashCode", createHashInput(fieldSpec));
+                        "$1T.$2N($3L)",
+                        Primitives.box(fieldSpec.type).withoutAnnotations(),
+                        "hashCode",
+                        createHashInput(fieldSpec));
             }
         }
         return CodeBlock.of("$L.hashCode()", createHashInput(fieldSpec));
