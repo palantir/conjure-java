@@ -786,8 +786,7 @@ public final class BeanBuilderGenerator {
 
         if (type.accept(TypeVisitor.IS_MAP)) {
             return ImmutableList.of(
-                    createCollectionSetter("putAll", enriched, override),
-                    createMapSetter(enriched, override, options.nonNullCollections()));
+                    createCollectionSetter("putAll", enriched, override), createMapSetter(enriched, override));
         }
 
         if (type.accept(TypeVisitor.IS_OPTIONAL)) {
@@ -852,12 +851,12 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
-    private MethodSpec createMapSetter(EnrichedField enriched, boolean override, boolean nonNullCollections) {
+    private MethodSpec createMapSetter(EnrichedField enriched, boolean override) {
         MethodSpec.Builder builder = BeanBuilderAuxiliarySettersUtils.createMapSetterBuilder(
                         enriched, typeMapper, builderClass)
                 .addAnnotations(ConjureAnnotations.override(override))
                 .addCode(verifyNotBuilt());
-        if (nonNullCollections) {
+        if (options.nonNullCollections()) {
             builder.addStatement(
                     "this.$1N.put($2L, $3L)",
                     enriched.poetSpec().name,
