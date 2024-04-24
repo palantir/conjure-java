@@ -30,14 +30,16 @@ public final class BearerTokenAliasExample {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof BearerTokenAliasExample
-                        && this.value.equals(((BearerTokenAliasExample) other).value));
+        return this == other || (other instanceof BearerTokenAliasExample && equalTo((BearerTokenAliasExample) other));
+    }
+
+    private boolean equalTo(BearerTokenAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     public static BearerTokenAliasExample valueOf(@DoNotLog String value) {

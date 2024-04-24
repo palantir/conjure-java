@@ -27,13 +27,16 @@ public final class ExternalLongAliasTwo {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof ExternalLongAliasTwo && this.value.equals(((ExternalLongAliasTwo) other).value));
+        return this == other || (other instanceof ExternalLongAliasTwo && equalTo((ExternalLongAliasTwo) other));
+    }
+
+    private boolean equalTo(ExternalLongAliasTwo other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     public static ExternalLongAliasTwo valueOf(String value) {

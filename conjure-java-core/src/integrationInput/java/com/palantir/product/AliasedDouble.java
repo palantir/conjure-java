@@ -27,15 +27,16 @@ public final class AliasedDouble implements Comparable<AliasedDouble> {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof AliasedDouble
-                        && Double.doubleToLongBits(this.value)
-                                == Double.doubleToLongBits(((AliasedDouble) other).value));
+        return this == other || (other instanceof AliasedDouble && equalTo((AliasedDouble) other));
+    }
+
+    private boolean equalTo(AliasedDouble other) {
+        return Double.doubleToLongBits(this.value) == Double.doubleToLongBits(other.value);
     }
 
     @Override
     public int hashCode() {
-        return Double.hashCode(value);
+        return Double.hashCode(this.value);
     }
 
     @Override

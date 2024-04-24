@@ -25,12 +25,16 @@ public final class AliasedInteger implements Comparable<AliasedInteger> {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof AliasedInteger && this.value == ((AliasedInteger) other).value);
+        return this == other || (other instanceof AliasedInteger && equalTo((AliasedInteger) other));
+    }
+
+    private boolean equalTo(AliasedInteger other) {
+        return this.value == other.value;
     }
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(value);
+        return this.value;
     }
 
     @Override
