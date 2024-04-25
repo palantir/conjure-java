@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.lib.internal.ConjureCollectionType;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -965,6 +964,21 @@ public final class BeanBuilderGenerator {
 
         public boolean useNonNullFactory() {
             return useNonNullFactory;
+        }
+    }
+
+    private enum ConjureCollectionType {
+        LIST("List"),
+        SET("Set");
+
+        private final String collectionName;
+
+        ConjureCollectionType(String collectionName) {
+            this.collectionName = collectionName;
+        }
+
+        public String getCollectionName() {
+            return collectionName;
         }
     }
 }
