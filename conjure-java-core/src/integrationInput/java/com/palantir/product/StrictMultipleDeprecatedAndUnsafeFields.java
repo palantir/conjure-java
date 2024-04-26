@@ -277,7 +277,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
-        private List<@Unsafe String> myList = new ArrayList<>();
+        private List<@Unsafe String> myList = ConjureCollections.newList();
 
         private BearerToken bearerTokenValue;
 
@@ -318,7 +318,7 @@ public final class StrictMultipleDeprecatedAndUnsafeFields {
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
         public Builder myList(@Nonnull Iterable<@Unsafe String> myList) {
             checkNotBuilt();
-            this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
+            this.myList = ConjureCollections.newList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;
         }
 

@@ -14,7 +14,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -206,21 +205,21 @@ public final class MultipleFieldsOnlyFinalStage {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<String> items = new ArrayList<>();
+        private List<String> items = ConjureCollections.newList();
 
         private Map<String, Integer> itemsMap = new LinkedHashMap<>();
 
         private Optional<String> optionalItem = Optional.empty();
 
-        private Set<String> itemsSet = new LinkedHashSet<>();
+        private Set<String> itemsSet = ConjureCollections.newSet();
 
-        private List<String> itemsOld = new ArrayList<>();
+        private List<String> itemsOld = ConjureCollections.newList();
 
         private Map<String, Integer> itemsMapOld = new LinkedHashMap<>();
 
         private Optional<String> optionalItemOld = Optional.empty();
 
-        private Set<String> itemsSetOld = new LinkedHashSet<>();
+        private Set<String> itemsSetOld = ConjureCollections.newSet();
 
         private Builder() {}
 
@@ -240,7 +239,7 @@ public final class MultipleFieldsOnlyFinalStage {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -291,8 +290,7 @@ public final class MultipleFieldsOnlyFinalStage {
         @JsonSetter(value = "itemsSet", nulls = Nulls.SKIP)
         public Builder itemsSet(@Nonnull Iterable<String> itemsSet) {
             checkNotBuilt();
-            this.itemsSet = ConjureCollections.newLinkedHashSet(
-                    Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
+            this.itemsSet = ConjureCollections.newSet(Preconditions.checkNotNull(itemsSet, "itemsSet cannot be null"));
             return this;
         }
 
@@ -313,8 +311,7 @@ public final class MultipleFieldsOnlyFinalStage {
         @JsonSetter(value = "itemsOld", nulls = Nulls.SKIP)
         public Builder itemsOld(@Nonnull Iterable<String> itemsOld) {
             checkNotBuilt();
-            this.itemsOld =
-                    ConjureCollections.newArrayList(Preconditions.checkNotNull(itemsOld, "itemsOld cannot be null"));
+            this.itemsOld = ConjureCollections.newList(Preconditions.checkNotNull(itemsOld, "itemsOld cannot be null"));
             return this;
         }
 
@@ -383,8 +380,8 @@ public final class MultipleFieldsOnlyFinalStage {
         @JsonSetter(value = "itemsSetOld", nulls = Nulls.SKIP)
         public Builder itemsSetOld(@Nonnull Iterable<String> itemsSetOld) {
             checkNotBuilt();
-            this.itemsSetOld = ConjureCollections.newLinkedHashSet(
-                    Preconditions.checkNotNull(itemsSetOld, "itemsSetOld cannot be null"));
+            this.itemsSetOld =
+                    ConjureCollections.newSet(Preconditions.checkNotNull(itemsSetOld, "itemsSetOld cannot be null"));
             return this;
         }
 

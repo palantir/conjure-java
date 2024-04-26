@@ -164,17 +164,17 @@ public final class ListExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<@Safe String> items = new ArrayList<>();
+        private List<@Safe String> items = ConjureCollections.newList();
 
-        private List<Integer> primitiveItems = new ArrayList<>();
+        private List<Integer> primitiveItems = ConjureCollections.newList();
 
-        private List<Double> doubleItems = new ArrayList<>();
+        private List<Double> doubleItems = ConjureCollections.newList();
 
-        private List<Optional<String>> optionalItems = new ArrayList<>();
+        private List<Optional<String>> optionalItems = ConjureCollections.newList();
 
-        private List<OptionalAlias> aliasOptionalItems = new ArrayList<>();
+        private List<OptionalAlias> aliasOptionalItems = ConjureCollections.newList();
 
-        private List<List<String>> nestedItems = new ArrayList<>();
+        private List<List<String>> nestedItems = ConjureCollections.newList();
 
         private Builder() {}
 
@@ -192,18 +192,20 @@ public final class ListExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<@Safe String> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newNonNullList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<@Safe String> items) {
             checkNotBuilt();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAllAndCheckNonNull(
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(@Safe String items) {
             checkNotBuilt();
+            Preconditions.checkNotNull(items, "items cannot be null");
             this.items.add(items);
             return this;
         }
@@ -211,20 +213,21 @@ public final class ListExample {
         @JsonSetter(value = "primitiveItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder primitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
-            this.primitiveItems = ConjureCollections.newArrayList(
+            this.primitiveItems = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
 
         public Builder addAllPrimitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.primitiveItems, Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
 
         public Builder primitiveItems(int primitiveItems) {
             checkNotBuilt();
+            Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null");
             this.primitiveItems.add(primitiveItems);
             return this;
         }
@@ -232,20 +235,21 @@ public final class ListExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems = ConjureCollections.newArrayList(
+            this.doubleItems = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 
         public Builder addAllDoubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.doubleItems, Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }
 
         public Builder doubleItems(double doubleItems) {
             checkNotBuilt();
+            Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null");
             this.doubleItems.add(doubleItems);
             return this;
         }
@@ -253,20 +257,21 @@ public final class ListExample {
         @JsonSetter(value = "optionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder optionalItems(@Nonnull Iterable<Optional<String>> optionalItems) {
             checkNotBuilt();
-            this.optionalItems = ConjureCollections.newArrayList(
+            this.optionalItems = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
         public Builder addAllOptionalItems(@Nonnull Iterable<Optional<String>> optionalItems) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.optionalItems, Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null"));
             return this;
         }
 
         public Builder optionalItems(Optional<String> optionalItems) {
             checkNotBuilt();
+            Preconditions.checkNotNull(optionalItems, "optionalItems cannot be null");
             this.optionalItems.add(optionalItems);
             return this;
         }
@@ -274,14 +279,14 @@ public final class ListExample {
         @JsonSetter(value = "aliasOptionalItems", nulls = Nulls.SKIP, contentNulls = Nulls.AS_EMPTY)
         public Builder aliasOptionalItems(@Nonnull Iterable<OptionalAlias> aliasOptionalItems) {
             checkNotBuilt();
-            this.aliasOptionalItems = ConjureCollections.newArrayList(
+            this.aliasOptionalItems = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
             return this;
         }
 
         public Builder addAllAliasOptionalItems(@Nonnull Iterable<OptionalAlias> aliasOptionalItems) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.aliasOptionalItems,
                     Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null"));
             return this;
@@ -289,6 +294,7 @@ public final class ListExample {
 
         public Builder aliasOptionalItems(OptionalAlias aliasOptionalItems) {
             checkNotBuilt();
+            Preconditions.checkNotNull(aliasOptionalItems, "aliasOptionalItems cannot be null");
             this.aliasOptionalItems.add(aliasOptionalItems);
             return this;
         }
@@ -296,20 +302,21 @@ public final class ListExample {
         @JsonSetter(value = "nestedItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder nestedItems(@Nonnull Iterable<? extends List<String>> nestedItems) {
             checkNotBuilt();
-            this.nestedItems = ConjureCollections.newArrayList(
+            this.nestedItems = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(nestedItems, "nestedItems cannot be null"));
             return this;
         }
 
         public Builder addAllNestedItems(@Nonnull Iterable<? extends List<String>> nestedItems) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.nestedItems, Preconditions.checkNotNull(nestedItems, "nestedItems cannot be null"));
             return this;
         }
 
         public Builder nestedItems(List<String> nestedItems) {
             checkNotBuilt();
+            Preconditions.checkNotNull(nestedItems, "nestedItems cannot be null");
             this.nestedItems.add(nestedItems);
             return this;
         }

@@ -20,6 +20,8 @@ import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Utility functions for conjure. Consumers should prefer to use something like guava instead of using these functions
@@ -45,6 +47,24 @@ public final class ConjureCollections {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> void addAllAndCheckNonNull(Collection<T> addTo, Iterable<? extends T> elementsToAdd) {
+        Preconditions.checkNotNull(elementsToAdd, "elementsToAdd cannot be null");
+        // If we know the number of elements we are adding and the addTo Collection is an ArrayList, we can eagerly
+        // resize it to only do one grow() of the array.
+        if (elementsToAdd instanceof Collection) {
+            Collection<T> collectionElementsToAdd = (Collection<T>) elementsToAdd;
+            if (addTo instanceof ArrayList) {
+                ((ArrayList<T>) addTo).ensureCapacity(collectionElementsToAdd.size() + addTo.size());
+            }
+        }
+        for (T element : elementsToAdd) {
+            Preconditions.checkNotNull(element, "elementsToAdd cannot contain null elements");
+            addTo.add(element);
+        }
+    }
+
+    // Prefer to use newList(iterable)
     // explicitly need to return mutable list for generated builders
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
@@ -59,6 +79,7 @@ public final class ConjureCollections {
         return list;
     }
 
+    // Prefer to use newSet(iterable)
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
@@ -69,6 +90,40 @@ public final class ConjureCollections {
         for (T item : iterable) {
             set.add(item);
         }
+        return set;
+    }
+
+    public static <T> List<T> newList() {
+        return new ArrayList<>();
+    }
+
+    public static <T> List<T> newList(Iterable<? extends T> iterable) {
+        return newArrayList(iterable);
+    }
+
+    public static <T> List<T> newNonNullList(Iterable<? extends T> iterable) {
+        List<T> arrayList = newList(iterable);
+        for (T item : arrayList) {
+            Preconditions.checkNotNull(item, "iterable cannot contain null elements");
+        }
+
+        return arrayList;
+    }
+
+    public static <T> Set<T> newSet() {
+        return new LinkedHashSet<>();
+    }
+
+    public static <T> Set<T> newSet(Iterable<? extends T> iterable) {
+        return newLinkedHashSet(iterable);
+    }
+
+    public static <T> Set<T> newNonNullSet(Iterable<? extends T> iterable) {
+        Set<T> set = newSet(iterable);
+        for (T item : set) {
+            Preconditions.checkNotNull(item, "iterable cannot contain null elements");
+        }
+
         return set;
     }
 }

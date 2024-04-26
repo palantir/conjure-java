@@ -130,7 +130,7 @@ public final class ExternalLongExample {
 
         private Optional<Long> optionalExternalLong = Optional.empty();
 
-        private List<Long> listExternalLong = new ArrayList<>();
+        private List<Long> listExternalLong = ConjureCollections.newList();
 
         private boolean _externalLongInitialized = false;
 
@@ -171,14 +171,14 @@ public final class ExternalLongExample {
         @JsonSetter(value = "listExternalLong", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder listExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
             checkNotBuilt();
-            this.listExternalLong = ConjureCollections.newArrayList(
+            this.listExternalLong = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
             return this;
         }
 
         public Builder addAllListExternalLong(@Nonnull Iterable<? extends Long> listExternalLong) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.listExternalLong,
                     Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null"));
             return this;
@@ -186,6 +186,7 @@ public final class ExternalLongExample {
 
         public Builder listExternalLong(long listExternalLong) {
             checkNotBuilt();
+            Preconditions.checkNotNull(listExternalLong, "listExternalLong cannot be null");
             this.listExternalLong.add(listExternalLong);
             return this;
         }

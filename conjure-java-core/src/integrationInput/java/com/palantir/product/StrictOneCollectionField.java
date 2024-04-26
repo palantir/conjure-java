@@ -120,7 +120,7 @@ public final class StrictOneCollectionField {
     static final class DefaultBuilder implements Builder {
         boolean _buildInvoked;
 
-        private List<String> myList = new ArrayList<>();
+        private List<String> myList = ConjureCollections.newList();
 
         private DefaultBuilder() {}
 
@@ -135,7 +135,7 @@ public final class StrictOneCollectionField {
         @JsonSetter(value = "myList", nulls = Nulls.SKIP)
         public Builder myList(@Nonnull Iterable<String> myList) {
             checkNotBuilt();
-            this.myList = ConjureCollections.newArrayList(Preconditions.checkNotNull(myList, "myList cannot be null"));
+            this.myList = ConjureCollections.newList(Preconditions.checkNotNull(myList, "myList cannot be null"));
             return this;
         }
 

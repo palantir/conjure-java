@@ -17,7 +17,6 @@ import com.palantir.ri.ResourceIdentifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -245,7 +244,7 @@ public final class MultipleOrderedStages {
 
         private String item;
 
-        private Set<SafeLong> items = new LinkedHashSet<>();
+        private Set<SafeLong> items = ConjureCollections.newSet();
 
         private Map<ResourceIdentifier, String> mappedRids = new LinkedHashMap<>();
 
@@ -284,7 +283,7 @@ public final class MultipleOrderedStages {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<SafeLong> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newLinkedHashSet(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newSet(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 

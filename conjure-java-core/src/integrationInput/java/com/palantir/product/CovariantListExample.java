@@ -107,9 +107,9 @@ public final class CovariantListExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<Object> items = new ArrayList<>();
+        private List<Object> items = ConjureCollections.newList();
 
-        private List<ExampleExternalReference> externalItems = new ArrayList<>();
+        private List<ExampleExternalReference> externalItems = ConjureCollections.newList();
 
         private Builder() {}
 
@@ -123,18 +123,20 @@ public final class CovariantListExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder items(@Nonnull Iterable<?> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newNonNullList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder addAllItems(@Nonnull Iterable<?> items) {
             checkNotBuilt();
-            ConjureCollections.addAll(this.items, Preconditions.checkNotNull(items, "items cannot be null"));
+            ConjureCollections.addAllAndCheckNonNull(
+                    this.items, Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
         public Builder items(Object items) {
             checkNotBuilt();
+            Preconditions.checkNotNull(items, "items cannot be null");
             this.items.add(items);
             return this;
         }
@@ -142,20 +144,21 @@ public final class CovariantListExample {
         @JsonSetter(value = "externalItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder externalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             checkNotBuilt();
-            this.externalItems = ConjureCollections.newArrayList(
+            this.externalItems = ConjureCollections.newNonNullList(
                     Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 
         public Builder addAllExternalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             checkNotBuilt();
-            ConjureCollections.addAll(
+            ConjureCollections.addAllAndCheckNonNull(
                     this.externalItems, Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
 
         public Builder externalItems(ExampleExternalReference externalItems) {
             checkNotBuilt();
+            Preconditions.checkNotNull(externalItems, "externalItems cannot be null");
             this.externalItems.add(externalItems);
             return this;
         }

@@ -109,9 +109,9 @@ public final class CovariantListExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<Object> items = new ArrayList<>();
+        private List<Object> items = ConjureCollections.newList();
 
-        private List<ExampleExternalReference> externalItems = new ArrayList<>();
+        private List<ExampleExternalReference> externalItems = ConjureCollections.newList();
 
         private Builder() {}
 
@@ -125,7 +125,7 @@ public final class CovariantListExample {
         @JsonSetter(value = "items", nulls = Nulls.SKIP)
         public Builder items(@Nonnull Iterable<?> items) {
             checkNotBuilt();
-            this.items = ConjureCollections.newArrayList(Preconditions.checkNotNull(items, "items cannot be null"));
+            this.items = ConjureCollections.newList(Preconditions.checkNotNull(items, "items cannot be null"));
             return this;
         }
 
@@ -144,7 +144,7 @@ public final class CovariantListExample {
         @JsonSetter(value = "externalItems", nulls = Nulls.SKIP)
         public Builder externalItems(@Nonnull Iterable<? extends ExampleExternalReference> externalItems) {
             checkNotBuilt();
-            this.externalItems = ConjureCollections.newArrayList(
+            this.externalItems = ConjureCollections.newList(
                     Preconditions.checkNotNull(externalItems, "externalItems cannot be null"));
             return this;
         }
