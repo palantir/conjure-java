@@ -34,7 +34,7 @@ public final class SafeDoubleAliasExample implements Comparable<SafeDoubleAliasE
     }
 
     private boolean equalTo(SafeDoubleAliasExample other) {
-        return this.value == other.value;
+        return Double.doubleToLongBits(this.value) == Double.doubleToLongBits(other.value);
     }
 
     @Override
