@@ -46,6 +46,10 @@ public final class Primitives {
         }
     }
 
+    public static boolean isDouble(TypeName type) {
+        return type.withoutAnnotations().equals(TypeName.DOUBLE);
+    }
+
     public static boolean isPrimitive(TypeName type) {
         return getPrimitiveType(type).isPresent();
     }
