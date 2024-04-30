@@ -3,34 +3,37 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.logsafe.Safe;
 import java.math.BigDecimal;
 import javax.annotation.Nullable;
 import javax.annotation.processing.Generated;
 
+@Safe
 @Generated("com.palantir.conjure.java.types.AliasGenerator")
-public final class DoubleAliasExample implements Comparable<DoubleAliasExample> {
-    private final double value;
+public final class SafeDoubleAliasExample implements Comparable<SafeDoubleAliasExample> {
+    private final @Safe double value;
 
-    private DoubleAliasExample(double value) {
+    private SafeDoubleAliasExample(@Safe double value) {
         this.value = value;
     }
 
     @JsonValue
-    public double get() {
+    public @Safe double get() {
         return value;
     }
 
     @Override
+    @Safe
     public String toString() {
         return String.valueOf(value);
     }
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other || (other instanceof DoubleAliasExample && equalTo((DoubleAliasExample) other));
+        return this == other || (other instanceof SafeDoubleAliasExample && equalTo((SafeDoubleAliasExample) other));
     }
 
-    private boolean equalTo(DoubleAliasExample other) {
+    private boolean equalTo(SafeDoubleAliasExample other) {
         return Double.doubleToLongBits(this.value) == Double.doubleToLongBits(other.value);
     }
 
@@ -40,44 +43,44 @@ public final class DoubleAliasExample implements Comparable<DoubleAliasExample> 
     }
 
     @Override
-    public int compareTo(DoubleAliasExample other) {
+    public int compareTo(SafeDoubleAliasExample other) {
         return Double.compare(value, other.get());
     }
 
-    public static DoubleAliasExample valueOf(String value) {
+    public static SafeDoubleAliasExample valueOf(@Safe String value) {
         return of(Double.parseDouble(value));
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static DoubleAliasExample of(double value) {
-        return new DoubleAliasExample(value);
+    public static SafeDoubleAliasExample of(@Safe double value) {
+        return new SafeDoubleAliasExample(value);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static DoubleAliasExample of(long value) {
+    public static SafeDoubleAliasExample of(@Safe long value) {
         long safeValue = SafeLong.of(value).longValue();
-        return new DoubleAliasExample((double) safeValue);
+        return new SafeDoubleAliasExample((double) safeValue);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static DoubleAliasExample of(int value) {
-        return new DoubleAliasExample((double) value);
+    public static SafeDoubleAliasExample of(@Safe int value) {
+        return new SafeDoubleAliasExample((double) value);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    private static DoubleAliasExample of(BigDecimal value) {
-        return new DoubleAliasExample(value.doubleValue());
+    private static SafeDoubleAliasExample of(@Safe BigDecimal value) {
+        return new SafeDoubleAliasExample(value.doubleValue());
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static DoubleAliasExample of(String value) {
+    public static SafeDoubleAliasExample of(@Safe String value) {
         switch (value) {
             case "NaN":
-                return DoubleAliasExample.of(Double.NaN);
+                return SafeDoubleAliasExample.of(Double.NaN);
             case "Infinity":
-                return DoubleAliasExample.of(Double.POSITIVE_INFINITY);
+                return SafeDoubleAliasExample.of(Double.POSITIVE_INFINITY);
             case "-Infinity":
-                return DoubleAliasExample.of(Double.NEGATIVE_INFINITY);
+                return SafeDoubleAliasExample.of(Double.NEGATIVE_INFINITY);
             default:
                 throw new IllegalArgumentException("Cannot deserialize string into double: " + value);
         }

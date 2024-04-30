@@ -67,7 +67,6 @@ public final class ConjureCollections {
 
     // Prefer to use newList(iterable)
     // explicitly need to return mutable list for generated builders
-    @Deprecated
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
@@ -82,7 +81,6 @@ public final class ConjureCollections {
     }
 
     // Prefer to use newSet(iterable)
-    @Deprecated
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
@@ -101,15 +99,7 @@ public final class ConjureCollections {
     }
 
     public static <T> List<T> newList(Iterable<? extends T> iterable) {
-        Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            return new ArrayList<>((Collection<T>) iterable);
-        }
-        List<T> list = new ArrayList<>();
-        for (T item : iterable) {
-            list.add(item);
-        }
-        return list;
+        return newArrayList(iterable);
     }
 
     public static <T> List<T> newNonNullList(Iterable<? extends T> iterable) {
@@ -126,15 +116,7 @@ public final class ConjureCollections {
     }
 
     public static <T> Set<T> newSet(Iterable<? extends T> iterable) {
-        Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            return new LinkedHashSet<>((Collection<T>) iterable);
-        }
-        Set<T> set = new LinkedHashSet<>();
-        for (T item : iterable) {
-            set.add(item);
-        }
-        return set;
+        return newLinkedHashSet(iterable);
     }
 
     public static <T> Set<T> newNonNullSet(Iterable<? extends T> iterable) {
@@ -145,7 +127,6 @@ public final class ConjureCollections {
 
         return set;
     }
-
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newDoubleArrayList() {
         return newList();

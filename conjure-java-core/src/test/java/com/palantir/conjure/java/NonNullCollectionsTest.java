@@ -36,12 +36,13 @@ public class NonNullCollectionsTest {
     public void throwsNpe() {
         // ListExample is using code generated with the nonNullCollections flag set to true. Thus, we should not be able
         // to add a null to the collection in any way.
+        Iterable<String> nullCollection = Collections.singleton(null);
+
         assertThatExceptionOfType(NullPointerException.class)
-                .isThrownBy(() ->
-                        ListExample.builder().items(Collections.singleton(null)).build());
-        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> ListExample.builder()
-                .addAllItems(Collections.singleton(null))
-                .build());
+                .isThrownBy(() -> ListExample.builder().items(nullCollection).build());
+        assertThatExceptionOfType(NullPointerException.class)
+                .isThrownBy(
+                        () -> ListExample.builder().addAllItems(nullCollection).build());
         assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> ListExample.builder().items((String) null).build());
     }

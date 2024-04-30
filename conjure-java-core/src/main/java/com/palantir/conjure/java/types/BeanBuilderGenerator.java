@@ -28,7 +28,6 @@ import com.google.common.collect.PeekingIterator;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.lib.internal.ConjureCollectionType;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -1013,6 +1012,25 @@ public final class BeanBuilderGenerator {
 
         public boolean useNonNullFactory() {
             return useNonNullFactory;
+        }
+    }
+
+    private enum ConjureCollectionType {
+        LIST("List"),
+        DOUBLE_ARRAY_LIST("DoubleArrayList"),
+        INTEGER_ARRAY_LIST("IntegerArrayList"),
+        BOOLEAN_ARRAY_LIST("BooleanArrayList"),
+        SAFE_LONG_ARRAY_LIST("SafeLongArrayList"),
+        SET("Set");
+
+        private final String collectionName;
+
+        ConjureCollectionType(String collectionName) {
+            this.collectionName = collectionName;
+        }
+
+        public String getCollectionName() {
+            return collectionName;
         }
     }
 }

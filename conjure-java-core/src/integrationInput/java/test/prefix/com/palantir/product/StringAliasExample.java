@@ -30,13 +30,16 @@ public final class StringAliasExample implements Comparable<StringAliasExample> 
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof StringAliasExample && this.value.equals(((StringAliasExample) other).value));
+        return this == other || (other instanceof StringAliasExample && equalTo((StringAliasExample) other));
+    }
+
+    private boolean equalTo(StringAliasExample other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @Override

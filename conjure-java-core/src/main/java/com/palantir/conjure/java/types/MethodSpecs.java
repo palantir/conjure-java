@@ -90,7 +90,7 @@ public final class MethodSpecs {
         String thisField = "this." + field.name;
         String otherField = "other." + field.name;
 
-        if (field.type.equals(TypeName.DOUBLE)) {
+        if (Primitives.isDouble(field.type)) {
             return CodeBlock.of(
                     "$1T.doubleToLongBits($2L) == $1T.doubleToLongBits($3L)", Double.class, thisField, otherField);
         } else if (Primitives.isPrimitive(field.type)) {
@@ -170,7 +170,10 @@ public final class MethodSpecs {
                 return createHashInput(fieldSpec);
             } else {
                 return CodeBlock.of(
-                        "$1T.$2N($3L)", Primitives.box(fieldSpec.type), "hashCode", createHashInput(fieldSpec));
+                        "$1T.$2N($3L)",
+                        Primitives.box(fieldSpec.type).withoutAnnotations(),
+                        "hashCode",
+                        createHashInput(fieldSpec));
             }
         }
         return CodeBlock.of("$L.hashCode()", createHashInput(fieldSpec));
