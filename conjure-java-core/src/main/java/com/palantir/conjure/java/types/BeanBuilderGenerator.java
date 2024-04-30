@@ -90,8 +90,6 @@ public final class BeanBuilderGenerator {
     private static final String STAGED_BUILDER_INTERFACE_NAME = "Builder";
     /* The name of the class implementing the interface extending all stage interfaces. */
     private static final String STAGED_BUILDER_IMPLEMENTATION_NAME = "DefaultBuilder";
-    private static final boolean USE_NON_NULL_COLLECTION_FACTORY = true;
-    private static final boolean DO_NOT_USE_NON_NULL_COLLECTION_FACTORY = false;
 
     private final TypeMapper typeMapper;
     private final SafetyEvaluator safetyEvaluator;
@@ -944,12 +942,15 @@ public final class BeanBuilderGenerator {
             @Override
             public CollectionType visitList(ListType value) {
                 if (!options.nonNullCollections()) {
-                    return new CollectionType(ConjureCollectionType.LIST, DO_NOT_USE_NON_NULL_COLLECTION_FACTORY);
+                    return new CollectionType(
+                            ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
                 }
                 return value.getItemType().accept(new DefaultTypeVisitor<>() {
                     @Override
                     public CollectionType visitDefault() {
-                        return new CollectionType(ConjureCollectionType.LIST, USE_NON_NULL_COLLECTION_FACTORY);
+                        return new CollectionType(
+                                ConjureCollectionType.LIST,
+                                ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                     }
 
                     @Override
@@ -958,31 +959,37 @@ public final class BeanBuilderGenerator {
 
                             @Override
                             public CollectionType visitDefault() {
-                                return new CollectionType(ConjureCollectionType.LIST, USE_NON_NULL_COLLECTION_FACTORY);
+                                return new CollectionType(
+                                        ConjureCollectionType.LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitDouble() {
                                 return new CollectionType(
-                                        ConjureCollectionType.DOUBLE_ARRAY_LIST, USE_NON_NULL_COLLECTION_FACTORY);
+                                        ConjureCollectionType.DOUBLE_ARRAY_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitInteger() {
                                 return new CollectionType(
-                                        ConjureCollectionType.INTEGER_ARRAY_LIST, USE_NON_NULL_COLLECTION_FACTORY);
+                                        ConjureCollectionType.INTEGER_ARRAY_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitBoolean() {
                                 return new CollectionType(
-                                        ConjureCollectionType.BOOLEAN_ARRAY_LIST, USE_NON_NULL_COLLECTION_FACTORY);
+                                        ConjureCollectionType.BOOLEAN_ARRAY_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitSafelong() {
                                 return new CollectionType(
-                                        ConjureCollectionType.SAFE_LONG_ARRAY_LIST, USE_NON_NULL_COLLECTION_FACTORY);
+                                        ConjureCollectionType.SAFE_LONG_ARRAY_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
                         });
                     }
@@ -991,7 +998,13 @@ public final class BeanBuilderGenerator {
 
             @Override
             public CollectionType visitSet(SetType _value) {
-                return new CollectionType(ConjureCollectionType.SET, options.nonNullCollections());
+                if (options.nonNullCollections()) {
+                    return new CollectionType(
+                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                } else {
+                    return new CollectionType(
+                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
+                }
             }
         });
     }
@@ -999,11 +1012,12 @@ public final class BeanBuilderGenerator {
     private static final class CollectionType {
         private final ConjureCollectionType conjureCollectionType;
 
-        private final boolean useNonNullFactory;
+        private final ConjureCollectionNullHandlingMode nullHandlingMode;
 
-        CollectionType(ConjureCollectionType conjureCollectionType, boolean useNonNullFactory) {
+        CollectionType(
+                ConjureCollectionType conjureCollectionType, ConjureCollectionNullHandlingMode nullHandlingMode) {
             this.conjureCollectionType = conjureCollectionType;
-            this.useNonNullFactory = useNonNullFactory;
+            this.nullHandlingMode = nullHandlingMode;
         }
 
         public ConjureCollectionType getConjureCollectionType() {
@@ -1011,7 +1025,7 @@ public final class BeanBuilderGenerator {
         }
 
         public boolean useNonNullFactory() {
-            return useNonNullFactory;
+            return nullHandlingMode.shouldUseNonNullFactory();
         }
     }
 
@@ -1031,6 +1045,21 @@ public final class BeanBuilderGenerator {
 
         public String getCollectionName() {
             return collectionName;
+        }
+    }
+
+    private enum ConjureCollectionNullHandlingMode {
+        NON_NULL_COLLECTION_FACTORY(true),
+        NULLABLE_COLLECTION_FACTORY(false);
+
+        private final boolean useNonNullFactory;
+
+        ConjureCollectionNullHandlingMode(boolean useNonNullFactory) {
+            this.useNonNullFactory = useNonNullFactory;
+        }
+
+        public boolean shouldUseNonNullFactory() {
+            return useNonNullFactory;
         }
     }
 }
