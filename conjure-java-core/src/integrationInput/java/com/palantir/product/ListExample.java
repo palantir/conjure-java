@@ -164,17 +164,17 @@ public final class ListExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<@Safe String> items = ConjureCollections.newList();
+        private List<@Safe String> items = ConjureCollections.newNonNullList();
 
-        private List<Integer> primitiveItems = ConjureCollections.newIntegerArrayList();
+        private List<Integer> primitiveItems = ConjureCollections.newNonNullIntegerList();
 
-        private List<Double> doubleItems = ConjureCollections.newDoubleArrayList();
+        private List<Double> doubleItems = ConjureCollections.newNonNullDoubleList();
 
-        private List<Optional<String>> optionalItems = ConjureCollections.newList();
+        private List<Optional<String>> optionalItems = ConjureCollections.newNonNullList();
 
-        private List<OptionalAlias> aliasOptionalItems = ConjureCollections.newList();
+        private List<OptionalAlias> aliasOptionalItems = ConjureCollections.newNonNullList();
 
-        private List<List<String>> nestedItems = ConjureCollections.newList();
+        private List<List<String>> nestedItems = ConjureCollections.newNonNullList();
 
         private Builder() {}
 
@@ -213,7 +213,7 @@ public final class ListExample {
         @JsonSetter(value = "primitiveItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder primitiveItems(@Nonnull Iterable<Integer> primitiveItems) {
             checkNotBuilt();
-            this.primitiveItems = ConjureCollections.newNonNullIntegerArrayList(
+            this.primitiveItems = ConjureCollections.newNonNullIntegerList(
                     Preconditions.checkNotNull(primitiveItems, "primitiveItems cannot be null"));
             return this;
         }
@@ -235,7 +235,7 @@ public final class ListExample {
         @JsonSetter(value = "doubleItems", nulls = Nulls.SKIP, contentNulls = Nulls.FAIL)
         public Builder doubleItems(@Nonnull Iterable<Double> doubleItems) {
             checkNotBuilt();
-            this.doubleItems = ConjureCollections.newNonNullDoubleArrayList(
+            this.doubleItems = ConjureCollections.newNonNullDoubleList(
                     Preconditions.checkNotNull(doubleItems, "doubleItems cannot be null"));
             return this;
         }

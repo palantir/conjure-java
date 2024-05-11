@@ -107,9 +107,9 @@ public final class SetExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private Set<String> items = ConjureCollections.newSet();
+        private Set<String> items = ConjureCollections.newNonNullSet();
 
-        private Set<Double> doubleItems = ConjureCollections.newSet();
+        private Set<Double> doubleItems = ConjureCollections.newNonNullSet();
 
         private Builder() {}
 

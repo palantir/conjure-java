@@ -562,10 +562,18 @@ public final class BeanBuilderGenerator {
                 ConjureAnnotations.withSafety(typeMapper.getClassName(type), safetyEvaluator.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
-            spec.initializer(
-                    "$1T.new$2L()",
-                    ConjureCollections.class,
-                    getCollectionType(type).getConjureCollectionType().getCollectionName());
+            CollectionType collectionType = getCollectionType(type);
+            if (collectionType.useNonNullFactory()) {
+                spec.initializer(
+                        "$1T.newNonNull$2L()",
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName());
+            } else {
+                spec.initializer(
+                        "$1T.new$2L()",
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName());
+            }
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             spec.initializer("new $T<>()", LinkedHashMap.class);
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
@@ -967,28 +975,28 @@ public final class BeanBuilderGenerator {
                             @Override
                             public CollectionType visitDouble() {
                                 return new CollectionType(
-                                        ConjureCollectionType.DOUBLE_ARRAY_LIST,
+                                        ConjureCollectionType.DOUBLE_LIST,
                                         ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitInteger() {
                                 return new CollectionType(
-                                        ConjureCollectionType.INTEGER_ARRAY_LIST,
+                                        ConjureCollectionType.INTEGER_LIST,
                                         ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitBoolean() {
                                 return new CollectionType(
-                                        ConjureCollectionType.BOOLEAN_ARRAY_LIST,
+                                        ConjureCollectionType.BOOLEAN_LIST,
                                         ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
 
                             @Override
                             public CollectionType visitSafelong() {
                                 return new CollectionType(
-                                        ConjureCollectionType.SAFE_LONG_ARRAY_LIST,
+                                        ConjureCollectionType.SAFE_LONG_LIST,
                                         ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                             }
                         });
@@ -1031,10 +1039,10 @@ public final class BeanBuilderGenerator {
 
     private enum ConjureCollectionType {
         LIST("List"),
-        DOUBLE_ARRAY_LIST("DoubleArrayList"),
-        INTEGER_ARRAY_LIST("IntegerArrayList"),
-        BOOLEAN_ARRAY_LIST("BooleanArrayList"),
-        SAFE_LONG_ARRAY_LIST("SafeLongArrayList"),
+        DOUBLE_LIST("DoubleList"),
+        INTEGER_LIST("IntegerList"),
+        BOOLEAN_LIST("BooleanList"),
+        SAFE_LONG_LIST("SafeLongList"),
         SET("Set");
 
         private final String collectionName;

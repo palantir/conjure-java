@@ -107,9 +107,9 @@ public final class CovariantListExample {
     public static final class Builder {
         boolean _buildInvoked;
 
-        private List<Object> items = ConjureCollections.newList();
+        private List<Object> items = ConjureCollections.newNonNullList();
 
-        private List<ExampleExternalReference> externalItems = ConjureCollections.newList();
+        private List<ExampleExternalReference> externalItems = ConjureCollections.newNonNullList();
 
         private Builder() {}
 
