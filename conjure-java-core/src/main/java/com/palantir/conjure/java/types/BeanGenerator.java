@@ -492,8 +492,8 @@ public final class BeanGenerator {
      * Any types we generate directly will produce an efficient hashCode, but collections may be large, and we must
      * traverse through optionals.
      */
-    private static final class FieldRequiresMemoizedHashCode extends DefaultTypeVisitor<Boolean> {
-        private static final DefaultTypeVisitor<Boolean> INSTANCE = new FieldRequiresMemoizedHashCode();
+    static final class FieldRequiresMemoizedHashCode extends DefaultTypeVisitor<Boolean> {
+        static final DefaultTypeVisitor<Boolean> INSTANCE = new FieldRequiresMemoizedHashCode();
 
         @Override
         public Boolean visitOptional(OptionalType value) {

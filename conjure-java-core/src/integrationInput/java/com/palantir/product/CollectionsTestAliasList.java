@@ -15,6 +15,8 @@ public final class CollectionsTestAliasList {
 
     private final List<Integer> value;
 
+    private int memoizedHashCode;
+
     private CollectionsTestAliasList(@Nonnull List<Integer> value) {
         this.value = Preconditions.checkNotNull(value, "value cannot be null");
     }
@@ -36,13 +38,26 @@ public final class CollectionsTestAliasList {
     @Override
     public boolean equals(@Nullable Object other) {
         return this == other
-                || (other instanceof CollectionsTestAliasList
-                        && this.value.equals(((CollectionsTestAliasList) other).value));
+                || (other instanceof CollectionsTestAliasList && equalTo((CollectionsTestAliasList) other));
+    }
+
+    private boolean equalTo(CollectionsTestAliasList other) {
+        if (this.memoizedHashCode != 0
+                && other.memoizedHashCode != 0
+                && this.memoizedHashCode != other.memoizedHashCode) {
+            return false;
+        }
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        int result = memoizedHashCode;
+        if (result == 0) {
+            result = this.value.hashCode();
+            memoizedHashCode = result;
+        }
+        return result;
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

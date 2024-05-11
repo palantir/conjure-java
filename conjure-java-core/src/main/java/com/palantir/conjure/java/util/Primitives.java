@@ -40,10 +40,14 @@ public final class Primitives {
     public static TypeName box(TypeName type) {
         if (isPrimitive(type)) {
             List<AnnotationSpec> annotations = type.annotations;
-            return PRIMITIVES.get(getPrimitiveType(type).get()).annotated(annotations);
+            return PRIMITIVES.get(getPrimitiveType(type).orElseThrow()).annotated(annotations);
         } else {
             return type;
         }
+    }
+
+    public static boolean isDouble(TypeName type) {
+        return type.withoutAnnotations().equals(TypeName.DOUBLE);
     }
 
     public static boolean isPrimitive(TypeName type) {
@@ -61,8 +65,6 @@ public final class Primitives {
 
     private static Optional<TypeName> getPrimitiveType(TypeName type) {
         TypeName rawType = type.withoutAnnotations();
-        return PRIMITIVES.keySet().stream()
-                .filter(typeName -> typeName.equals(rawType))
-                .findAny();
+        return PRIMITIVES.containsKey(rawType) ? Optional.of(rawType) : Optional.empty();
     }
 }

@@ -216,9 +216,9 @@ public final class ManyFieldExample {
 
         private Optional<String> optionalItem = Optional.empty();
 
-        private List<String> items = ConjureCollections.newList();
+        private List<String> items = ConjureCollections.newNonNullList();
 
-        private Set<String> set = ConjureCollections.newSet();
+        private Set<String> set = ConjureCollections.newNonNullSet();
 
         private Map<String, String> map = new LinkedHashMap<>();
 

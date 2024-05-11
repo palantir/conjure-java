@@ -28,13 +28,16 @@ public final class DangerousLongAlias {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof DangerousLongAlias && this.value == ((DangerousLongAlias) other).value);
+        return this == other || (other instanceof DangerousLongAlias && equalTo((DangerousLongAlias) other));
+    }
+
+    private boolean equalTo(DangerousLongAlias other) {
+        return this.value == other.value;
     }
 
     @Override
     public int hashCode() {
-        return Long.hashCode(value);
+        return Long.hashCode(this.value);
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)

@@ -20,17 +20,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.product.DoubleAliasExample;
 import com.palantir.product.ExternalLongAliasOne;
 import com.palantir.product.ExternalLongAliasTwo;
+import com.palantir.product.SafeDoubleAliasExample;
 import com.palantir.product.UuidAliasExample;
 import org.junit.jupiter.api.Test;
 
 public class AliasTests {
-    private static final ObjectMapper TEST_MAPPER = ObjectMappers.newServerObjectMapper();
+    private static final ObjectMapper TEST_MAPPER = ObjectMappers.newServerObjectMapper()
+            .configure(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS.mappedFeature(), true);
 
     @Test
     public void testNullValueSafeLoggable() {
@@ -68,5 +71,11 @@ public class AliasTests {
         // Doesn't fit in an int, but does fit comfortably in a double; looks like a long
         assertThat(TEST_MAPPER.readValue("9667500000", DoubleAliasExample.class))
                 .isEqualTo(DoubleAliasExample.of(9667500000.0));
+    }
+
+    @Test
+    public void testNaNEqualityOnSafeDoubleAlias() throws JsonProcessingException {
+        assertThat(TEST_MAPPER.readValue("NaN", SafeDoubleAliasExample.class))
+                .isEqualTo(SafeDoubleAliasExample.of(Double.NaN));
     }
 }

@@ -30,13 +30,16 @@ public final class AliasToExternal implements Comparable<AliasToExternal> {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof AliasToExternal && this.value.equals(((AliasToExternal) other).value));
+        return this == other || (other instanceof AliasToExternal && equalTo((AliasToExternal) other));
+    }
+
+    private boolean equalTo(AliasToExternal other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @Override

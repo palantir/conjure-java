@@ -67,7 +67,6 @@ public final class ConjureCollections {
 
     // Prefer to use newList(iterable)
     // explicitly need to return mutable list for generated builders
-    @Deprecated
     @SuppressWarnings({"IllegalType", "unchecked", "NonApiType"})
     public static <T> ArrayList<T> newArrayList(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
@@ -82,7 +81,6 @@ public final class ConjureCollections {
     }
 
     // Prefer to use newSet(iterable)
-    @Deprecated
     @SuppressWarnings({"IllegalType", "NonApiType"}) // explicitly need to return mutable list for generated builders
     public static <T> LinkedHashSet<T> newLinkedHashSet(Iterable<? extends T> iterable) {
         Preconditions.checkNotNull(iterable, "iterable cannot be null");
@@ -101,15 +99,11 @@ public final class ConjureCollections {
     }
 
     public static <T> List<T> newList(Iterable<? extends T> iterable) {
-        Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            return new ArrayList<>((Collection<T>) iterable);
-        }
-        List<T> list = new ArrayList<>();
-        for (T item : iterable) {
-            list.add(item);
-        }
-        return list;
+        return newArrayList(iterable);
+    }
+
+    public static <T> List<T> newNonNullList() {
+        return new ArrayList<>();
     }
 
     public static <T> List<T> newNonNullList(Iterable<? extends T> iterable) {
@@ -126,15 +120,11 @@ public final class ConjureCollections {
     }
 
     public static <T> Set<T> newSet(Iterable<? extends T> iterable) {
-        Preconditions.checkNotNull(iterable, "iterable cannot be null");
-        if (iterable instanceof Collection) {
-            return new LinkedHashSet<>((Collection<T>) iterable);
-        }
-        Set<T> set = new LinkedHashSet<>();
-        for (T item : iterable) {
-            set.add(item);
-        }
-        return set;
+        return newLinkedHashSet(iterable);
+    }
+
+    public static <T> Set<T> newNonNullSet() {
+        return new LinkedHashSet<>();
     }
 
     public static <T> Set<T> newNonNullSet(Iterable<? extends T> iterable) {
@@ -145,44 +135,43 @@ public final class ConjureCollections {
 
         return set;
     }
-
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Double> newDoubleArrayList() {
+    public static List<Double> newNonNullDoubleList() {
         return new ConjureDoubleList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Double> newNonNullDoubleArrayList(Iterable<Double> iterable) {
+    public static List<Double> newNonNullDoubleList(Iterable<Double> iterable) {
         return new ConjureDoubleList(iterable);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Integer> newIntegerArrayList() {
+    public static List<Integer> newNonNullIntegerList() {
         return new ConjureIntegerList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Integer> newNonNullIntegerArrayList(Iterable<Integer> iterable) {
+    public static List<Integer> newNonNullIntegerList(Iterable<Integer> iterable) {
         return new ConjureIntegerList(iterable);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Boolean> newBooleanArrayList() {
+    public static List<Boolean> newNonNullBooleanList() {
         return new ConjureBooleanList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<Boolean> newNonNullBooleanArrayList(Iterable<Boolean> iterable) {
+    public static List<Boolean> newNonNullBooleanList(Iterable<Boolean> iterable) {
         return new ConjureBooleanList(iterable);
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<SafeLong> newSafeLongArrayList() {
+    public static List<SafeLong> newNonNullSafeLongList() {
         return new ConjureSafeLongList();
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
-    public static List<SafeLong> newNonNullSafeLongArrayList(Iterable<SafeLong> iterable) {
+    public static List<SafeLong> newNonNullSafeLongList(Iterable<SafeLong> iterable) {
         return new ConjureSafeLongList(iterable);
     }
 }

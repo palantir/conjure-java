@@ -147,9 +147,9 @@ public final class SafeExternalLongExample {
 
         private Optional<@Safe Long> optionalSafeExternalLong = Optional.empty();
 
-        private List<@Safe Long> safeExternalLongList = ConjureCollections.newList();
+        private List<@Safe Long> safeExternalLongList = ConjureCollections.newNonNullList();
 
-        private Set<@Safe Long> safeExternalLongSet = ConjureCollections.newSet();
+        private Set<@Safe Long> safeExternalLongSet = ConjureCollections.newNonNullSet();
 
         private boolean _safeExternalLongValueInitialized = false;
 

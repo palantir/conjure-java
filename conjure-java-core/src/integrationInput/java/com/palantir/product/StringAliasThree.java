@@ -27,13 +27,16 @@ public final class StringAliasThree {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        return this == other
-                || (other instanceof StringAliasThree && this.value.equals(((StringAliasThree) other).value));
+        return this == other || (other instanceof StringAliasThree && equalTo((StringAliasThree) other));
+    }
+
+    private boolean equalTo(StringAliasThree other) {
+        return this.value.equals(other.value);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return this.value.hashCode();
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
