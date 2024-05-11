@@ -135,6 +135,7 @@ public final class ConjureCollections {
 
         return set;
     }
+
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList() {
         return newList();
