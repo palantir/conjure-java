@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Add codegen for primitive optimized conjure collections
+  links:
+  - https://github.com/palantir/conjure-java/pull/2306
