@@ -677,7 +677,7 @@ public final class BeanBuilderGenerator {
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             CollectionType collectionType = getCollectionType(type);
             if (shouldClearFirst) {
-                if (collectionType.useNonNullFactory()) {
+                if (collectionType.useNonNullFactory() && options.primitiveOptimizedCollections()) {
                     return CodeBlocks.statement(
                             "this.$1N = $2T.newNonNull$3L($4L)",
                             spec.name,
