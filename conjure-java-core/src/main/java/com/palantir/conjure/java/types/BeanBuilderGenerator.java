@@ -34,6 +34,7 @@ import com.palantir.conjure.java.util.JavaNameSanitizer;
 import com.palantir.conjure.java.util.Javadoc;
 import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.TypeFunctions;
+import com.palantir.conjure.java.visitor.DefaultPrimitiveTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
@@ -89,7 +90,6 @@ public final class BeanBuilderGenerator {
     private static final String STAGED_BUILDER_INTERFACE_NAME = "Builder";
     /* The name of the class implementing the interface extending all stage interfaces. */
     private static final String STAGED_BUILDER_IMPLEMENTATION_NAME = "DefaultBuilder";
-    private static final boolean DO_NOT_USE_NON_NULL_COLLECTION_FACTORY = false;
 
     private final TypeMapper typeMapper;
     private final SafetyEvaluator safetyEvaluator;
@@ -562,10 +562,18 @@ public final class BeanBuilderGenerator {
                 ConjureAnnotations.withSafety(typeMapper.getClassName(type), safetyEvaluator.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
-            spec.initializer(
-                    "$1T.new$2L()",
-                    ConjureCollections.class,
-                    getCollectionType(type).getConjureCollectionType().getCollectionName());
+            CollectionType collectionType = getCollectionType(type);
+            if (collectionType.useNonNullFactory() && options.primitiveOptimizedCollections()) {
+                spec.initializer(
+                        "$1T.newNonNull$2L()",
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName());
+            } else {
+                spec.initializer(
+                        "$1T.new$2L()",
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName());
+            }
         } else if (type.accept(TypeVisitor.IS_MAP)) {
             spec.initializer("new $T<>()", LinkedHashMap.class);
         } else if (type.accept(TypeVisitor.IS_OPTIONAL)) {
@@ -940,13 +948,77 @@ public final class BeanBuilderGenerator {
     private CollectionType getCollectionType(Type type) {
         return type.accept(new DefaultTypeVisitor<>() {
             @Override
-            public CollectionType visitList(ListType _value) {
-                return new CollectionType(ConjureCollectionType.LIST, options.nonNullCollections());
+            public CollectionType visitList(ListType value) {
+                if (!options.nonNullCollections()) {
+                    return new CollectionType(
+                            ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
+                }
+
+                if (!options.primitiveOptimizedCollections()) {
+                    return new CollectionType(
+                            ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                }
+
+                return value.getItemType().accept(new DefaultTypeVisitor<>() {
+                    @Override
+                    public CollectionType visitDefault() {
+                        return new CollectionType(
+                                ConjureCollectionType.LIST,
+                                ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                    }
+
+                    @Override
+                    public CollectionType visitPrimitive(PrimitiveType primitiveType) {
+                        return primitiveType.accept(new DefaultPrimitiveTypeVisitor<>() {
+
+                            @Override
+                            public CollectionType visitDefault() {
+                                return new CollectionType(
+                                        ConjureCollectionType.LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+
+                            @Override
+                            public CollectionType visitDouble() {
+                                return new CollectionType(
+                                        ConjureCollectionType.DOUBLE_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+
+                            @Override
+                            public CollectionType visitInteger() {
+                                return new CollectionType(
+                                        ConjureCollectionType.INTEGER_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+
+                            @Override
+                            public CollectionType visitBoolean() {
+                                return new CollectionType(
+                                        ConjureCollectionType.BOOLEAN_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+
+                            @Override
+                            public CollectionType visitSafelong() {
+                                return new CollectionType(
+                                        ConjureCollectionType.SAFE_LONG_LIST,
+                                        ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                            }
+                        });
+                    }
+                });
             }
 
             @Override
             public CollectionType visitSet(SetType _value) {
-                return new CollectionType(ConjureCollectionType.SET, options.nonNullCollections());
+                if (options.nonNullCollections()) {
+                    return new CollectionType(
+                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                } else {
+                    return new CollectionType(
+                            ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
+                }
             }
         });
     }
@@ -954,11 +1026,12 @@ public final class BeanBuilderGenerator {
     private static final class CollectionType {
         private final ConjureCollectionType conjureCollectionType;
 
-        private final boolean useNonNullFactory;
+        private final ConjureCollectionNullHandlingMode nullHandlingMode;
 
-        CollectionType(ConjureCollectionType conjureCollectionType, boolean useNonNullFactory) {
+        CollectionType(
+                ConjureCollectionType conjureCollectionType, ConjureCollectionNullHandlingMode nullHandlingMode) {
             this.conjureCollectionType = conjureCollectionType;
-            this.useNonNullFactory = useNonNullFactory;
+            this.nullHandlingMode = nullHandlingMode;
         }
 
         public ConjureCollectionType getConjureCollectionType() {
@@ -966,12 +1039,16 @@ public final class BeanBuilderGenerator {
         }
 
         public boolean useNonNullFactory() {
-            return useNonNullFactory;
+            return nullHandlingMode.shouldUseNonNullFactory();
         }
     }
 
     private enum ConjureCollectionType {
         LIST("List"),
+        DOUBLE_LIST("DoubleList"),
+        INTEGER_LIST("IntegerList"),
+        BOOLEAN_LIST("BooleanList"),
+        SAFE_LONG_LIST("SafeLongList"),
         SET("Set");
 
         private final String collectionName;
@@ -982,6 +1059,21 @@ public final class BeanBuilderGenerator {
 
         public String getCollectionName() {
             return collectionName;
+        }
+    }
+
+    private enum ConjureCollectionNullHandlingMode {
+        NON_NULL_COLLECTION_FACTORY(true),
+        NULLABLE_COLLECTION_FACTORY(false);
+
+        private final boolean useNonNullFactory;
+
+        ConjureCollectionNullHandlingMode(boolean useNonNullFactory) {
+            this.useNonNullFactory = useNonNullFactory;
+        }
+
+        public boolean shouldUseNonNullFactory() {
+            return useNonNullFactory;
         }
     }
 }

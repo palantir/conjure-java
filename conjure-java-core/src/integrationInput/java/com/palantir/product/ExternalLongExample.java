@@ -130,7 +130,7 @@ public final class ExternalLongExample {
 
         private Optional<Long> optionalExternalLong = Optional.empty();
 
-        private List<Long> listExternalLong = ConjureCollections.newList();
+        private List<Long> listExternalLong = ConjureCollections.newNonNullList();
 
         private boolean _externalLongInitialized = false;
 

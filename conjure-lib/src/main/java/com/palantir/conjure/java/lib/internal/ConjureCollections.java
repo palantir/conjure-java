@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.lib.internal;
 
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -101,6 +102,10 @@ public final class ConjureCollections {
         return newArrayList(iterable);
     }
 
+    public static <T> List<T> newNonNullList() {
+        return new ArrayList<>();
+    }
+
     public static <T> List<T> newNonNullList(Iterable<? extends T> iterable) {
         List<T> arrayList = newList(iterable);
         for (T item : arrayList) {
@@ -118,6 +123,10 @@ public final class ConjureCollections {
         return newLinkedHashSet(iterable);
     }
 
+    public static <T> Set<T> newNonNullSet() {
+        return new LinkedHashSet<>();
+    }
+
     public static <T> Set<T> newNonNullSet(Iterable<? extends T> iterable) {
         Set<T> set = newSet(iterable);
         for (T item : set) {
@@ -125,5 +134,45 @@ public final class ConjureCollections {
         }
 
         return set;
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Double> newNonNullDoubleList() {
+        return newList();
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Double> newNonNullDoubleList(Iterable<Double> iterable) {
+        return newNonNullList(iterable);
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Integer> newNonNullIntegerList() {
+        return newList();
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Integer> newNonNullIntegerList(Iterable<Integer> iterable) {
+        return newNonNullList(iterable);
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Boolean> newNonNullBooleanList() {
+        return newList();
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<Boolean> newNonNullBooleanList(Iterable<Boolean> iterable) {
+        return newNonNullList(iterable);
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<SafeLong> newNonNullSafeLongList() {
+        return newList();
+    }
+
+    // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
+    public static List<SafeLong> newNonNullSafeLongList(Iterable<SafeLong> iterable) {
+        return newNonNullList(iterable);
     }
 }
