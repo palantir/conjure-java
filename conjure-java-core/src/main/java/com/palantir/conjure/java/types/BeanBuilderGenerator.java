@@ -949,10 +949,16 @@ public final class BeanBuilderGenerator {
         return type.accept(new DefaultTypeVisitor<>() {
             @Override
             public CollectionType visitList(ListType value) {
-                if (!options.nonNullCollections() || !options.primitiveOptimizedCollections()) {
+                if (!options.nonNullCollections()) {
                     return new CollectionType(
                             ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
                 }
+
+                if (!options.primitiveOptimizedCollections()) {
+                    return new CollectionType(
+                            ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
+                }
+
                 return value.getItemType().accept(new DefaultTypeVisitor<>() {
                     @Override
                     public CollectionType visitDefault() {
@@ -1006,7 +1012,7 @@ public final class BeanBuilderGenerator {
 
             @Override
             public CollectionType visitSet(SetType _value) {
-                if (options.nonNullCollections() && options.primitiveOptimizedCollections()) {
+                if (options.nonNullCollections()) {
                     return new CollectionType(
                             ConjureCollectionType.SET, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                 } else {
