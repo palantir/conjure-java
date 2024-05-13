@@ -563,7 +563,7 @@ public final class BeanBuilderGenerator {
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             CollectionType collectionType = getCollectionType(type);
-            if (collectionType.useNonNullFactory()) {
+            if (collectionType.useNonNullFactory() && options.primitiveOptimizedCollections()) {
                 spec.initializer(
                         "$1T.newNonNull$2L()",
                         ConjureCollections.class,
@@ -677,7 +677,7 @@ public final class BeanBuilderGenerator {
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             CollectionType collectionType = getCollectionType(type);
             if (shouldClearFirst) {
-                if (collectionType.useNonNullFactory() && options.primitiveOptimizedCollections()) {
+                if (collectionType.useNonNullFactory()) {
                     return CodeBlocks.statement(
                             "this.$1N = $2T.newNonNull$3L($4L)",
                             spec.name,
