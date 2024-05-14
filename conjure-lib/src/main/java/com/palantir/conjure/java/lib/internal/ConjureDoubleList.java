@@ -19,26 +19,19 @@ package com.palantir.conjure.java.lib.internal;
 import com.palantir.logsafe.exceptions.SafeUnsupportedOperationException;
 import java.util.AbstractList;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.RandomAccess;
 import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
+import org.eclipse.collections.impl.utility.Iterate;
 
-public final class ConjureDoubleList extends AbstractList<Double> implements RandomAccess {
+/**
+ * ConjureDoubleList is a boxed list wrapper for the eclipse-collections DoubleArrayList. In eclipse-collections 12,
+ * a BoxedMutableDoubleList will be released. Once available, ConjureDoubleList should be replaced with that.
+ */
+final class ConjureDoubleList extends AbstractList<Double> implements RandomAccess {
     private final DoubleArrayList delegate;
 
-    public ConjureDoubleList() {
-        this.delegate = new DoubleArrayList();
-    }
-
-    public ConjureDoubleList(Iterable<Double> iterable) {
-        if (iterable instanceof Collection) {
-            this.delegate = new DoubleArrayList(((Collection<Double>) iterable).size());
-        } else {
-            this.delegate = new DoubleArrayList();
-        }
-        for (double e : iterable) {
-            delegate.add(e);
-        }
+    ConjureDoubleList(DoubleArrayList delegate) {
+        this.delegate = delegate;
     }
 
     @Override
@@ -53,23 +46,14 @@ public final class ConjureDoubleList extends AbstractList<Double> implements Ran
 
     @Override
     public Double get(int index) {
-        Objects.checkIndex(index, delegate.size());
         return delegate.get(index);
     }
 
     @Override
-    public boolean addAll(int _index, Collection<? extends Double> _collection) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends Double> collection) {
-        delegate.ensureCapacity(collection.size() + delegate.size());
-        boolean added = true;
-        for (double element : collection) {
-            added &= delegate.add(element);
-        }
-        return added;
+    public boolean addAll(int index, Collection<? extends Double> collection) {
+        double[] target = new double[collection.size()];
+        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.doubleValue());
+        return delegate.addAllAtIndex(index, target);
     }
 
     @Override

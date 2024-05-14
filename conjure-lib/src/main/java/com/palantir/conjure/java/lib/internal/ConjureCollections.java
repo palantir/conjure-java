@@ -23,6 +23,10 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import org.eclipse.collections.impl.list.mutable.primitive.BooleanArrayList;
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
+import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
+import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 
 /**
  * Utility functions for conjure. Consumers should prefer to use something like guava instead of using these functions
@@ -138,41 +142,79 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList() {
-        return new ConjureDoubleList();
+        return new ConjureDoubleList(new DoubleArrayList());
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList(Iterable<Double> iterable) {
-        return new ConjureDoubleList(iterable);
+        List<Double> doubleList;
+        if (iterable instanceof Collection) {
+            doubleList = new ConjureDoubleList(new DoubleArrayList(((Collection<Double>) iterable).size()));
+        } else {
+            doubleList = new ConjureDoubleList(new DoubleArrayList());
+        }
+        addAll(doubleList, iterable);
+
+        return doubleList;
     }
+
+    /**
+     * The following Conjure boxed list wrappers for the eclipse-collections [type]ArrayList are temporary (except
+     * ConjureSafeLongList). In eclipse-collections 12, a BoxedMutable[type]List will be released. Once available,
+     * Conjure[type]List should be replaced with that.
+     */
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList() {
-        return new ConjureIntegerList();
+        return new ConjureIntegerList(new IntArrayList());
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList(Iterable<Integer> iterable) {
-        return new ConjureIntegerList(iterable);
+        List<Integer> integerList;
+        if (iterable instanceof Collection) {
+            integerList = new ConjureIntegerList(new IntArrayList(((Collection<Integer>) iterable).size()));
+        } else {
+            integerList = new ConjureIntegerList(new IntArrayList());
+        }
+        addAll(integerList, iterable);
+
+        return integerList;
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Boolean> newNonNullBooleanList() {
-        return new ConjureBooleanList();
+        return new ConjureBooleanList(new BooleanArrayList());
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Boolean> newNonNullBooleanList(Iterable<Boolean> iterable) {
-        return new ConjureBooleanList(iterable);
+        List<Boolean> booleanList;
+        if (iterable instanceof Collection) {
+            booleanList = new ConjureBooleanList(new BooleanArrayList(((Collection<Boolean>) iterable).size()));
+        } else {
+            booleanList = new ConjureBooleanList(new BooleanArrayList());
+        }
+        addAll(booleanList, iterable);
+
+        return booleanList;
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongList() {
-        return new ConjureSafeLongList();
+        return new ConjureSafeLongList(new LongArrayList());
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongList(Iterable<SafeLong> iterable) {
-        return new ConjureSafeLongList(iterable);
+        List<SafeLong> safeLongList;
+        if (iterable instanceof Collection) {
+            safeLongList = new ConjureSafeLongList(new LongArrayList(((Collection<SafeLong>) iterable).size()));
+        } else {
+            safeLongList = new ConjureSafeLongList(new LongArrayList());
+        }
+        addAll(safeLongList, iterable);
+
+        return safeLongList;
     }
 }

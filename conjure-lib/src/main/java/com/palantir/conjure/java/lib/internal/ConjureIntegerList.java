@@ -19,26 +19,19 @@ package com.palantir.conjure.java.lib.internal;
 import com.palantir.logsafe.exceptions.SafeUnsupportedOperationException;
 import java.util.AbstractList;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.RandomAccess;
 import org.eclipse.collections.impl.list.mutable.primitive.IntArrayList;
+import org.eclipse.collections.impl.utility.Iterate;
 
-public final class ConjureIntegerList extends AbstractList<Integer> implements RandomAccess {
+/**
+ * ConjureIntegerList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 12,
+ * a BoxedMutableIntList will be released. Once available, ConjureIntegerList should be replaced with that.
+ */
+final class ConjureIntegerList extends AbstractList<Integer> implements RandomAccess {
     private final IntArrayList delegate;
 
-    public ConjureIntegerList() {
-        this.delegate = new IntArrayList();
-    }
-
-    public ConjureIntegerList(Iterable<Integer> iterable) {
-        if (iterable instanceof Collection) {
-            this.delegate = new IntArrayList(((Collection<Integer>) iterable).size());
-        } else {
-            this.delegate = new IntArrayList();
-        }
-        for (int e : iterable) {
-            delegate.add(e);
-        }
+    ConjureIntegerList(IntArrayList delegate) {
+        this.delegate = delegate;
     }
 
     @Override
@@ -53,23 +46,14 @@ public final class ConjureIntegerList extends AbstractList<Integer> implements R
 
     @Override
     public Integer get(int index) {
-        Objects.checkIndex(index, delegate.size());
         return delegate.get(index);
     }
 
     @Override
-    public boolean addAll(int _index, Collection<? extends Integer> _collection) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends Integer> collection) {
-        delegate.ensureCapacity(collection.size() + delegate.size());
-        boolean added = true;
-        for (int element : collection) {
-            added &= delegate.add(element);
-        }
-        return added;
+    public boolean addAll(int index, Collection<? extends Integer> collection) {
+        int[] target = new int[collection.size()];
+        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.intValue());
+        return delegate.addAllAtIndex(index, target);
     }
 
     @Override

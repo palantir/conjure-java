@@ -20,26 +20,19 @@ import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.logsafe.exceptions.SafeUnsupportedOperationException;
 import java.util.AbstractList;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.RandomAccess;
 import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
+import org.eclipse.collections.impl.utility.Iterate;
 
-public final class ConjureSafeLongList extends AbstractList<SafeLong> implements RandomAccess {
+/**
+ * ConjureSafeLongList is a boxed list wrapper for the eclipse-collections LongArrayList. This handles boxing/unboxing
+ * with SafeLongs.
+ */
+final class ConjureSafeLongList extends AbstractList<SafeLong> implements RandomAccess {
     private final LongArrayList delegate;
 
-    public ConjureSafeLongList() {
-        this.delegate = new LongArrayList();
-    }
-
-    public ConjureSafeLongList(Iterable<SafeLong> iterable) {
-        if (iterable instanceof Collection) {
-            this.delegate = new LongArrayList(((Collection<SafeLong>) iterable).size());
-        } else {
-            this.delegate = new LongArrayList();
-        }
-        for (SafeLong e : iterable) {
-            delegate.add(e.longValue());
-        }
+    ConjureSafeLongList(LongArrayList delegate) {
+        this.delegate = delegate;
     }
 
     @Override
@@ -54,23 +47,14 @@ public final class ConjureSafeLongList extends AbstractList<SafeLong> implements
 
     @Override
     public SafeLong get(int index) {
-        Objects.checkIndex(index, delegate.size());
         return SafeLong.of(delegate.get(index));
     }
 
     @Override
-    public boolean addAll(int _index, Collection<? extends SafeLong> _collection) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends SafeLong> collection) {
-        delegate.ensureCapacity(collection.size() + delegate.size());
-        boolean added = true;
-        for (SafeLong element : collection) {
-            added &= delegate.add(element.longValue());
-        }
-        return added;
+    public boolean addAll(int index, Collection<? extends SafeLong> collection) {
+        long[] target = new long[collection.size()];
+        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.longValue());
+        return delegate.addAllAtIndex(index, target);
     }
 
     @Override

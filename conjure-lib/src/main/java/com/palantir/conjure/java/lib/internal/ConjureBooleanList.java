@@ -19,27 +19,19 @@ package com.palantir.conjure.java.lib.internal;
 import com.palantir.logsafe.exceptions.SafeUnsupportedOperationException;
 import java.util.AbstractList;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.RandomAccess;
 import org.eclipse.collections.impl.list.mutable.primitive.BooleanArrayList;
+import org.eclipse.collections.impl.utility.Iterate;
 
-@SuppressWarnings("checkstyle:OuterTypeFilename")
-public final class ConjureBooleanList extends AbstractList<Boolean> implements RandomAccess {
+/**
+ * ConjureBooleanList is a boxed list wrapper for the eclipse-collections BooleanArrayList. In eclipse-collections 12,
+ * a BoxedMutableBooleanList will be released. Once available, ConjureBooleanList should be replaced with that.
+ */
+final class ConjureBooleanList extends AbstractList<Boolean> implements RandomAccess {
     private final BooleanArrayList delegate;
 
-    public ConjureBooleanList() {
-        this.delegate = new BooleanArrayList();
-    }
-
-    public ConjureBooleanList(Iterable<Boolean> iterable) {
-        if (iterable instanceof Collection) {
-            this.delegate = new BooleanArrayList(((Collection<Boolean>) iterable).size());
-        } else {
-            this.delegate = new BooleanArrayList();
-        }
-        for (boolean e : iterable) {
-            delegate.add(e);
-        }
+    ConjureBooleanList(BooleanArrayList delegate) {
+        this.delegate = delegate;
     }
 
     @Override
@@ -54,21 +46,14 @@ public final class ConjureBooleanList extends AbstractList<Boolean> implements R
 
     @Override
     public Boolean get(int index) {
-        Objects.checkIndex(index, delegate.size());
         return delegate.get(index);
     }
 
     @Override
-    public boolean addAll(int _index, Collection<? extends Boolean> _collection) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends Boolean> collection) {
-        for (boolean element : collection) {
-            delegate.add(element);
-        }
-        return true;
+    public boolean addAll(int index, Collection<? extends Boolean> collection) {
+        boolean[] target = new boolean[collection.size()];
+        Iterate.forEachWithIndex(collection, (each, parameter) -> target[parameter] = each.booleanValue());
+        return delegate.addAllAtIndex(index, target);
     }
 
     @Override
