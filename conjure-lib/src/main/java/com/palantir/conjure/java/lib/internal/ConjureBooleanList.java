@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.lib.internal;
 
-import com.palantir.logsafe.exceptions.SafeUnsupportedOperationException;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.RandomAccess;
@@ -57,17 +56,17 @@ final class ConjureBooleanList extends AbstractList<Boolean> implements RandomAc
     }
 
     @Override
-    public Boolean remove(int _index) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+    public Boolean remove(int index) {
+        return delegate.removeAtIndex(index);
     }
 
     @Override
     public void clear() {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+        delegate.clear();
     }
 
     @Override
-    public Boolean set(int _index, Boolean _element) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+    public Boolean set(int index, Boolean element) {
+        return delegate.set(index, element);
     }
 }

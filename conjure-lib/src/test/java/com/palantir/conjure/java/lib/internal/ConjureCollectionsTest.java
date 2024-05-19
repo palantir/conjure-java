@@ -41,6 +41,16 @@ public class ConjureCollectionsTest {
         assertThat(doubleList.get(0)).isEqualTo(1.0);
         assertThat(doubleList.get(1)).isEqualTo(2.0);
         assertThat(doubleList.get(2)).isEqualTo(3.0);
+
+        double setValue = doubleList.set(2, 4.0);
+        assertThat(setValue).isEqualTo(3.0);
+        double removedValue = doubleList.remove(1);
+        assertThat(removedValue).isEqualTo(2.0);
+        assertThat(doubleList.get(0)).isEqualTo(1.0);
+        assertThat(doubleList.get(1)).isEqualTo(4.0);
+
+        doubleList.clear();
+        assertThat(doubleList).hasSize(0);
     }
 
     @Test
@@ -61,5 +71,15 @@ public class ConjureCollectionsTest {
         assertThat(safeLongList.get(0)).isEqualTo(SafeLong.of(1L));
         assertThat(safeLongList.get(1)).isEqualTo(SafeLong.of(2L));
         assertThat(safeLongList.get(2)).isEqualTo(SafeLong.of(3L));
+
+        SafeLong setValue = safeLongList.set(2, SafeLong.of(4L));
+        assertThat(setValue).isEqualTo(SafeLong.of(3L));
+        SafeLong removedValue = safeLongList.remove(1);
+        assertThat(removedValue).isEqualTo(SafeLong.of(2L));
+        assertThat(safeLongList.get(0)).isEqualTo(SafeLong.of(1L));
+        assertThat(safeLongList.get(1)).isEqualTo(SafeLong.of(4L));
+
+        safeLongList.clear();
+        assertThat(safeLongList).hasSize(0);
     }
 }

@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.lib.internal;
 
 import com.palantir.conjure.java.lib.SafeLong;
-import com.palantir.logsafe.exceptions.SafeUnsupportedOperationException;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.RandomAccess;
@@ -58,17 +57,17 @@ final class ConjureSafeLongList extends AbstractList<SafeLong> implements Random
     }
 
     @Override
-    public SafeLong remove(int _index) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+    public SafeLong remove(int index) {
+        return SafeLong.of(delegate.removeAtIndex(index));
     }
 
     @Override
     public void clear() {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+        delegate.clear();
     }
 
     @Override
-    public SafeLong set(int _index, SafeLong _element) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+    public SafeLong set(int index, SafeLong element) {
+        return SafeLong.of(delegate.set(index, element.longValue()));
     }
 }

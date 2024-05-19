@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.lib.internal;
 
-import com.palantir.logsafe.exceptions.SafeUnsupportedOperationException;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.RandomAccess;
@@ -57,17 +56,17 @@ final class ConjureDoubleList extends AbstractList<Double> implements RandomAcce
     }
 
     @Override
-    public Double remove(int _index) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+    public Double remove(int index) {
+        return delegate.removeAtIndex(index);
     }
 
     @Override
     public void clear() {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+        delegate.clear();
     }
 
     @Override
-    public Double set(int _index, Double _element) {
-        throw new SafeUnsupportedOperationException("This operation is unsupported");
+    public Double set(int index, Double element) {
+        return delegate.set(index, element);
     }
 }
