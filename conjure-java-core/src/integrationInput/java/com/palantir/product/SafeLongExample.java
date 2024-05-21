@@ -135,6 +135,13 @@ public final class SafeLongExample {
             return this;
         }
 
+        public Builder safeLongList(@Nonnull long[] safeLongList) {
+            checkNotBuilt();
+            this.safeLongList = ConjureCollections.newNonNullSafeLongList(
+                    Preconditions.checkNotNull(safeLongList, "safeLongList cannot be null"));
+            return this;
+        }
+
         public Builder addAllSafeLongList(@Nonnull Iterable<SafeLong> safeLongList) {
             checkNotBuilt();
             ConjureCollections.addAllAndCheckNonNull(

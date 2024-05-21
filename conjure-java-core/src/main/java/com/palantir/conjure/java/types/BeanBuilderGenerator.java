@@ -28,6 +28,7 @@ import com.google.common.collect.PeekingIterator;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.ConjureAnnotations;
 import com.palantir.conjure.java.Options;
+import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.java.lib.internal.ConjureCollections;
 import com.palantir.conjure.java.types.BeanGenerator.EnrichedField;
 import com.palantir.conjure.java.util.JavaNameSanitizer;
@@ -57,6 +58,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -671,6 +673,36 @@ public final class BeanBuilderGenerator {
                 .build();
     }
 
+    private MethodSpec createPrimitiveCollectionSetter(EnrichedField enriched) {
+        FieldSpec field = enriched.poetSpec();
+        Type type = enriched.conjureDef().getType();
+
+        Type innerType = type.accept(TypeVisitor.LIST).getItemType();
+        TypeName boxedTypeName = typeMapper.getClassName(innerType);
+        TypeName innerTypeName;
+        // SafeLong is just a special case of long
+        if (boxedTypeName.equals(ClassName.get(SafeLong.class))) {
+            innerTypeName = ConjureAnnotations.withSafety(
+                    TypeName.LONG, safetyEvaluator.getUsageTimeSafety(enriched.conjureDef()));
+        } else {
+            innerTypeName = ConjureAnnotations.withSafety(
+                    Primitives.unbox(boxedTypeName), safetyEvaluator.getUsageTimeSafety(enriched.conjureDef()));
+        }
+        CollectionType collectionType = getCollectionType(type);
+        MethodSpec.Builder setterBuilder = BeanBuilderAuxiliarySettersUtils.publicSetter(enriched, builderClass)
+                .addParameter(Parameters.nonnullParameter(ArrayTypeName.of(innerTypeName), field.name))
+                .addCode(verifyNotBuilt())
+                .addCode(CodeBlocks.statement(
+                        "this.$1N = $2T.newNonNull$3L($4L)",
+                        enriched.poetSpec().name,
+                        ConjureCollections.class,
+                        collectionType.getConjureCollectionType().getCollectionName(),
+                        Expressions.requireNonNull(
+                                enriched.poetSpec().name, enriched.fieldName().get() + " cannot be null")));
+
+        return setterBuilder.addStatement("return this").build();
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     private CodeBlock typeAwareAssignment(EnrichedField enriched, Type type, boolean shouldClearFirst) {
         FieldSpec spec = enriched.poetSpec();
@@ -766,9 +798,18 @@ public final class BeanBuilderGenerator {
         Optional<LogSafety> safety = safetyEvaluator.getUsageTimeSafety(enriched.conjureDef());
 
         if (type.accept(TypeVisitor.IS_LIST)) {
-            return ImmutableList.of(
-                    createCollectionSetter("addAll", enriched, override),
-                    createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
+            CollectionType collectionType = getCollectionType(type);
+            if (collectionType.getConjureCollectionType().isPrimitiveCollection()
+                    && collectionType.useNonNullFactory()) {
+                return ImmutableList.of(
+                        createPrimitiveCollectionSetter(enriched),
+                        createCollectionSetter("addAll", enriched, override),
+                        createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
+            } else {
+                return ImmutableList.of(
+                        createCollectionSetter("addAll", enriched, override),
+                        createItemSetter(enriched, type.accept(TypeVisitor.LIST).getItemType(), override, safety));
+            }
         }
 
         if (type.accept(TypeVisitor.IS_SET)) {
@@ -820,7 +861,9 @@ public final class BeanBuilderGenerator {
     private static final EnumSet<PrimitiveType.Value> OPTIONAL_PRIMITIVES =
             EnumSet.of(PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
 
-    /** Check if the optionalType contains a primitive boolean, double or integer. */
+    /**
+     * Check if the optionalType contains a primitive boolean, double or integer.
+     */
     private boolean isPrimitiveOptional(OptionalType optionalType) {
         return optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
                 && OPTIONAL_PRIMITIVES.contains(
@@ -1044,21 +1087,27 @@ public final class BeanBuilderGenerator {
     }
 
     private enum ConjureCollectionType {
-        LIST("List"),
-        DOUBLE_LIST("DoubleList"),
-        INTEGER_LIST("IntegerList"),
-        BOOLEAN_LIST("BooleanList"),
-        SAFE_LONG_LIST("SafeLongList"),
-        SET("Set");
+        LIST("List", false),
+        DOUBLE_LIST("DoubleList", true),
+        INTEGER_LIST("IntegerList", true),
+        BOOLEAN_LIST("BooleanList", true),
+        SAFE_LONG_LIST("SafeLongList", true),
+        SET("Set", false);
 
         private final String collectionName;
+        private final Boolean primitiveCollection;
 
-        ConjureCollectionType(String collectionName) {
+        ConjureCollectionType(String collectionName, Boolean primitiveCollection) {
             this.collectionName = collectionName;
+            this.primitiveCollection = primitiveCollection;
         }
 
         public String getCollectionName() {
             return collectionName;
+        }
+
+        public Boolean isPrimitiveCollection() {
+            return primitiveCollection;
         }
     }
 
