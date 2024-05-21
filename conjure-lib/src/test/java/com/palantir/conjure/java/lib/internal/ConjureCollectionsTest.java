@@ -17,8 +17,10 @@
 package com.palantir.conjure.java.lib.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import com.palantir.conjure.java.lib.SafeLong;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +53,12 @@ public class ConjureCollectionsTest {
 
         doubleList.clear();
         assertThat(doubleList).hasSize(0);
+
+        doubleList = ConjureCollections.newNonNullDoubleList(new double[] {0.1, 0.2, 0.3});
+        assertThat(doubleList).hasSize(3);
+        assertThat(doubleList.get(0)).isEqualTo(0.1);
+        assertThat(doubleList.get(1)).isEqualTo(0.2);
+        assertThat(doubleList.get(2)).isEqualTo(0.3);
     }
 
     @Test
@@ -81,5 +89,15 @@ public class ConjureCollectionsTest {
 
         safeLongList.clear();
         assertThat(safeLongList).hasSize(0);
+
+        safeLongList = ConjureCollections.newNonNullSafeLongList(new long[] {1L, 2L, 3L});
+        assertThat(safeLongList).hasSize(3);
+        assertThat(safeLongList.get(0)).isEqualTo(SafeLong.of(1L));
+        assertThat(safeLongList.get(1)).isEqualTo(SafeLong.of(2L));
+        assertThat(safeLongList.get(2)).isEqualTo(SafeLong.of(3L));
+
+        assertThatExceptionOfType(SafeIllegalArgumentException.class)
+                .isThrownBy(() -> ConjureCollections.newNonNullSafeLongList(
+                        new long[] {1L, 2L, SafeLong.MAX_VALUE.longValue() + 1}));
     }
 }
