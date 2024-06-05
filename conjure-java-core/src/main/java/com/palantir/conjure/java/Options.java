@@ -175,7 +175,7 @@ public interface Options {
      */
     @Value.Default
     default boolean primitiveOptimizedCollections() {
-        return false;
+        return true;
     }
 
     Optional<String> packagePrefix();
