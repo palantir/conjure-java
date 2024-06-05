@@ -1,0 +1,5 @@
+type: feature
+feature:
+  description: Enable primitive collection by default
+  links:
+  - https://github.com/palantir/conjure-java/pull/2317
