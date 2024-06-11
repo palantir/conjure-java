@@ -25,7 +25,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.conjure.defs.Conjure;
 import com.palantir.conjure.java.GenerationCoordinator;
 import com.palantir.conjure.java.Options;
-import com.palantir.conjure.java.lib.SafeLong;
 import com.palantir.conjure.spec.AliasDefinition;
 import com.palantir.conjure.spec.ConjureDefinition;
 import com.palantir.conjure.spec.ErrorCode;
@@ -44,7 +43,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -58,8 +56,6 @@ public final class ObjectGeneratorTests {
 
     @Test
     public void testObjectGenerator_allExamples() throws IOException {
-        List<SafeLong> longs = new ArrayList<>();
-        assertThat(longs).hasSize(0);
         ConjureDefinition def = Conjure.parse(ImmutableList.of(new File("src/test/resources/example-types.yml")));
         List<Path> files = new GenerationCoordinator(
                         MoreExecutors.directExecutor(),
