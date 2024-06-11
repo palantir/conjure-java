@@ -229,12 +229,6 @@ public final class ConjureJavaCli implements Runnable {
                 description = "Java external type imports are generated using their fallback type.")
         private boolean externalFallbackTypes;
 
-        @CommandLine.Option(
-                names = "--primitiveOptimizedCollections",
-                defaultValue = "false",
-                description = "Enables codegen for primitive optimized collections.")
-        private boolean primitiveOptimizedCollections;
-
         @SuppressWarnings("unused")
         @CommandLine.Unmatched
         private List<String> unmatchedOptions;
@@ -303,7 +297,6 @@ public final class ConjureJavaCli implements Runnable {
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .externalFallbackTypes(externalFallbackTypes)
-                            .primitiveOptimizedCollections(primitiveOptimizedCollections)
                             .build())
                     .build();
         }
