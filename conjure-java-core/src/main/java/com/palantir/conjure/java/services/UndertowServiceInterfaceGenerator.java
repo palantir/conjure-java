@@ -36,6 +36,7 @@ import com.palantir.conjure.spec.LogSafety;
 import com.palantir.conjure.spec.ServiceDefinition;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -94,7 +95,15 @@ final class UndertowServiceInterfaceGenerator {
                 .addParameters(createServiceMethodParameters(endpointDef, safetyEvaluator, typeMapper))
                 .addAnnotations(ConjureAnnotations.incubating(endpointDef));
 
-        endpointDef.getDeprecated().ifPresent(deprecatedDocsValue -> methodBuilder.addAnnotation(Deprecated.class));
+        endpointDef.getDeprecated().ifPresent(_deprecatedValue -> {
+            if (endpointDef.getTags().contains("deprecated-for-removal")) {
+                methodBuilder.addAnnotation(AnnotationSpec.builder(Deprecated.class)
+                        .addMember("forRemoval", "true")
+                        .build());
+            } else {
+                methodBuilder.addAnnotation(Deprecated.class);
+            }
+        });
 
         methodBuilder.addJavadoc("$L", ServiceGenerators.getJavaDocWithRequestLine(endpointDef));
 

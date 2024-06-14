@@ -79,7 +79,7 @@ public interface TestService {
      * @param datasetRid A valid dataset resource identifier.
      * @deprecated use getBranches instead
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     Set<String> getBranchesDeprecatedForRemoval(AuthHeader authHeader, @Safe ResourceIdentifier datasetRid);
 
     /** @apiNote {@code GET /catalog/datasets/{datasetRid}/branches/{branch:.+}/resolve} */
