@@ -40,4 +40,19 @@ class AnnotatedResourceTest {
             server.stop();
         }
     }
+
+    @Test
+    void testTrailingSlashEndpoint() throws IOException {
+        Undertow server = TestHelper.started(AnnotatedResourceEndpoints.of(new AnnotatedResource()));
+        try {
+            int port = TestHelper.getPort(server);
+            HttpURLConnection connection =
+                    (HttpURLConnection) new URL("http://localhost:" + port + "/ping/").openConnection();
+            assertThat(connection.getResponseCode()).isEqualTo(200);
+            assertThat(connection.getContentType()).startsWith("application/json");
+            assertThat(connection.getInputStream()).hasContent("\"pong/\"");
+        } finally {
+            server.stop();
+        }
+    }
 }
