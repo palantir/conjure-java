@@ -800,7 +800,8 @@ public final class BeanBuilderGenerator {
         if (type.accept(TypeVisitor.IS_LIST)) {
             CollectionType collectionType = getCollectionType(type);
             if (collectionType.getConjureCollectionType().isPrimitiveCollection()
-                    && collectionType.useNonNullFactory()) {
+                    && collectionType.useNonNullFactory()
+                    && options.primitiveCollectionArraySetters()) {
                 return ImmutableList.of(
                         createPrimitiveCollectionSetter(enriched),
                         createCollectionSetter("addAll", enriched, override),

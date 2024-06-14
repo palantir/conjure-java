@@ -178,6 +178,15 @@ public interface Options {
         return false;
     }
 
+    /**
+     * When set, enables codegen for array setters for primitive optimized collections.
+     * This feature is experimental and subject to change.
+     */
+    @Value.Default
+    default boolean primitiveCollectionArraySetters() {
+        return false;
+    }
+
     Optional<String> packagePrefix();
 
     Optional<String> apiVersion();
