@@ -166,7 +166,7 @@ public interface Options {
     /** When set, external type imports are generated as their fallback types. */
     @Value.Default
     default boolean externalFallbackTypes() {
-        return fals;
+        return false;
     }
 
     Optional<String> packagePrefix();
