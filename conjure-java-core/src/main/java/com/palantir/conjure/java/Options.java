@@ -170,15 +170,6 @@ public interface Options {
     }
 
     /**
-     * When set, enables codegen for primitive optimized collections.
-     * This feature is experimental and subject to change.
-     */
-    @Value.Default
-    default boolean primitiveOptimizedCollections() {
-        return false;
-    }
-
-    /**
      * When set, enables codegen for array setters for primitive optimized collections.
      * This feature is experimental and subject to change.
      */

@@ -230,12 +230,6 @@ public final class ConjureJavaCli implements Runnable {
         private boolean externalFallbackTypes;
 
         @CommandLine.Option(
-                names = "--primitiveOptimizedCollections",
-                defaultValue = "false",
-                description = "Enables codegen for primitive optimized collections.")
-        private boolean primitiveOptimizedCollections;
-
-        @CommandLine.Option(
                 names = "--primitiveCollectionArraySetters",
                 defaultValue = "false",
                 description = "Ecodegen for array setters for primitive optimized collections.")
@@ -309,7 +303,6 @@ public final class ConjureJavaCli implements Runnable {
                             .excludeEmptyCollections(excludeEmptyCollections)
                             .unionsWithUnknownValues(unionsWithUnknownValues)
                             .externalFallbackTypes(externalFallbackTypes)
-                            .primitiveOptimizedCollections(primitiveOptimizedCollections)
                             .primitiveCollectionArraySetters(primitiveCollectionArraySetters)
                             .build())
                     .build();

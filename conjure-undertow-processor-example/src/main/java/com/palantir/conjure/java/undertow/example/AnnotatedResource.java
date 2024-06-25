@@ -25,4 +25,9 @@ public final class AnnotatedResource {
     public String ping() {
         return "pong";
     }
+
+    @Handle(method = HttpMethod.GET, path = "/ping/")
+    public String ping2() {
+        return "pong/";
+    }
 }

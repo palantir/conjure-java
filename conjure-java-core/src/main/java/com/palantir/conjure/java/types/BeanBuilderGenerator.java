@@ -565,7 +565,7 @@ public final class BeanBuilderGenerator {
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
         if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             CollectionType collectionType = getCollectionType(type);
-            if (collectionType.useNonNullFactory() && options.primitiveOptimizedCollections()) {
+            if (collectionType.useNonNullFactory()) {
                 spec.initializer(
                         "$1T.newNonNull$2L()",
                         ConjureCollections.class,
@@ -996,11 +996,6 @@ public final class BeanBuilderGenerator {
                 if (!options.nonNullCollections()) {
                     return new CollectionType(
                             ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NULLABLE_COLLECTION_FACTORY);
-                }
-
-                if (!options.primitiveOptimizedCollections()) {
-                    return new CollectionType(
-                            ConjureCollectionType.LIST, ConjureCollectionNullHandlingMode.NON_NULL_COLLECTION_FACTORY);
                 }
 
                 return value.getItemType().accept(new DefaultTypeVisitor<>() {
