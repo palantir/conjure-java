@@ -521,8 +521,16 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testListOfNull() {
         assertThatThrownBy(() ->
                         client.receiveListOfStrings(AuthHeader.valueOf("authHeader"), Collections.singletonList(null)))
-                .isInstanceOfSatisfying(
-                        RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
+                .isInstanceOfSatisfying(RemoteException.class, re -> {
+                    assertThat(re.getStatus())
+                            .isIn(
+                                    // Jackson < 2.17 throws `NullPointerException` resulting in HTTP 400
+                                    400,
+                                    // Jackson > 2.17 throws "MismatchedInputException: Guava `Collection` of type
+                                    // `com.google.common.collect.ImmutableList<java.lang.String>` does not accept
+                                    // `null` values" resulting in HTTP 422
+                                    422);
+                });
     }
 
     @BeforeAll
