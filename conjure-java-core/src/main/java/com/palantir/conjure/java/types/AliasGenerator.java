@@ -39,6 +39,8 @@ import com.palantir.conjure.visitor.TypeDefinitionVisitor;
 import com.palantir.conjure.visitor.TypeVisitor;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -383,7 +385,14 @@ public final class AliasGenerator {
                         .build();
             case UUID:
                 return CodeBlock.builder()
+                        .beginControlFlow("try")
                         .addStatement("return of($T.fromString(value))", aliasTypeName.withoutAnnotations())
+                        .nextControlFlow("catch (IllegalArgumentException e)")
+                        .addStatement(
+                                "throw new $T(\"Unable to parse as UUID\", e, $T.of(\"input\", value))",
+                                SafeIllegalArgumentException.class,
+                                UnsafeArg.class)
+                        .endControlFlow()
                         .build();
             case DATETIME:
                 return CodeBlock.builder()

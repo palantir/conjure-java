@@ -3,6 +3,8 @@ package com.palantir.product;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,7 +43,11 @@ public final class UuidAliasExample {
     }
 
     public static UuidAliasExample valueOf(String value) {
-        return of(UUID.fromString(value));
+        try {
+            return of(UUID.fromString(value));
+        } catch (IllegalArgumentException e) {
+            throw new SafeIllegalArgumentException("Unable to parse as UUID", e, UnsafeArg.of("input", value));
+        }
     }
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
