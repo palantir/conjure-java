@@ -521,8 +521,9 @@ public final class UndertowServiceEteTest extends TestBase {
     public void testListOfNull() {
         assertThatThrownBy(() ->
                         client.receiveListOfStrings(AuthHeader.valueOf("authHeader"), Collections.singletonList(null)))
-                .isInstanceOfSatisfying(
-                        RemoteException.class, re -> assertThat(re.getStatus()).isEqualTo(400));
+                .isInstanceOfSatisfying(RemoteException.class, re -> {
+                    assertThat(re.getStatus()).isEqualTo(422);
+                });
     }
 
     @BeforeAll
