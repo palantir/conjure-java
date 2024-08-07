@@ -474,6 +474,11 @@ public final class BeanGenerator {
             return Primitives.isPrimitive(poetSpec().type);
         }
 
+        @Value.Derived
+        default boolean hasDefault() {
+            return conjureDef().getDefault().isPresent();
+        }
+
         static EnrichedField of(FieldName fieldName, FieldDefinition conjureDef, FieldSpec poetSpec) {
             return ImmutableEnrichedField.of(fieldName, conjureDef, poetSpec);
         }

@@ -36,6 +36,7 @@ import com.palantir.conjure.java.util.Primitives;
 import com.palantir.conjure.java.util.TypeFunctions;
 import com.palantir.conjure.java.visitor.DefaultPrimitiveTypeVisitor;
 import com.palantir.conjure.java.visitor.DefaultTypeVisitor;
+import com.palantir.conjure.java.visitor.DefaultValueCodeBlockExtractor;
 import com.palantir.conjure.java.visitor.DefaultableTypeVisitor;
 import com.palantir.conjure.java.visitor.MoreVisitors;
 import com.palantir.conjure.spec.ExternalReference;
@@ -151,7 +152,8 @@ public final class BeanBuilderGenerator {
 
     public static boolean stagedBuilderFieldShouldBeInFinalStage(EnrichedField field) {
         Type type = field.conjureDef().getType();
-        return type.accept(TypeVisitor.IS_LIST)
+        return field.hasDefault()
+                || type.accept(TypeVisitor.IS_LIST)
                 || type.accept(TypeVisitor.IS_SET)
                 || type.accept(TypeVisitor.IS_MAP)
                 || type.accept(TypeVisitor.IS_OPTIONAL);
@@ -458,8 +460,9 @@ public final class BeanBuilderGenerator {
     }
 
     private Collection<MethodSpec> maybeCreateValidateFieldsMethods(Collection<EnrichedField> enrichedFields) {
-        List<EnrichedField> primitives =
-                enrichedFields.stream().filter(EnrichedField::isPrimitive).collect(Collectors.toList());
+        List<EnrichedField> primitives = enrichedFields.stream()
+                .filter(BeanBuilderGenerator::isUninitializedPrimitive)
+                .collect(Collectors.toList());
 
         if (primitives.isEmpty()) {
             return Collections.emptyList();
@@ -520,7 +523,7 @@ public final class BeanBuilderGenerator {
 
     private Collection<FieldSpec> primitivesInitializedFields(Collection<EnrichedField> enrichedFields) {
         return enrichedFields.stream()
-                .filter(EnrichedField::isPrimitive)
+                .filter(BeanBuilderGenerator::isUninitializedPrimitive)
                 .map(field -> FieldSpec.builder(TypeName.BOOLEAN, deriveFieldInitializedName(field), Modifier.PRIVATE)
                         .initializer("false")
                         .build())
@@ -561,7 +564,12 @@ public final class BeanBuilderGenerator {
         TypeName typeName =
                 ConjureAnnotations.withSafety(typeMapper.getClassName(type), safetyEvaluator.getUsageTimeSafety(field));
         FieldSpec.Builder spec = FieldSpec.builder(typeName, JavaNameSanitizer.sanitize(fieldName), Modifier.PRIVATE);
-        if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
+
+        if (field.getDefault().isPresent()) {
+            spec.initializer(field.getDefault()
+                    .get()
+                    .accept(new DefaultValueCodeBlockExtractor(type, asRawType(typeMapper.getClassName(type)))));
+        } else if (type.accept(TypeVisitor.IS_LIST) || type.accept(TypeVisitor.IS_SET)) {
             CollectionType collectionType = getCollectionType(type);
             if (collectionType.useNonNullFactory()) {
                 spec.initializer(
@@ -647,7 +655,7 @@ public final class BeanBuilderGenerator {
                 .addCode(verifyNotBuilt())
                 .addCode(typeAwareAssignment(enriched, type, shouldClearFirst));
 
-        if (enriched.isPrimitive()) {
+        if (isUninitializedPrimitive(enriched)) {
             setterBuilder.addCode("this.$L = true;", deriveFieldInitializedName(enriched));
         }
 
@@ -821,10 +829,14 @@ public final class BeanBuilderGenerator {
             EnumSet.of(PrimitiveType.Value.INTEGER, PrimitiveType.Value.DOUBLE, PrimitiveType.Value.BOOLEAN);
 
     /** Check if the optionalType contains a primitive boolean, double or integer. */
-    private boolean isPrimitiveOptional(OptionalType optionalType) {
+    private static boolean isPrimitiveOptional(OptionalType optionalType) {
         return optionalType.getItemType().accept(TypeVisitor.IS_PRIMITIVE)
                 && OPTIONAL_PRIMITIVES.contains(
                         optionalType.getItemType().accept(TypeVisitor.PRIMITIVE).get());
+    }
+
+    private static boolean isUninitializedPrimitive(EnrichedField field) {
+        return field.isPrimitive() && !field.hasDefault();
     }
 
     private MethodSpec createItemSetter(
@@ -864,7 +876,7 @@ public final class BeanBuilderGenerator {
                 .addCode(verifyNotBuilt())
                 .addStatement("this.$N = true", BUILT_FIELD);
 
-        if (enrichedFields.stream().anyMatch(EnrichedField::isPrimitive)) {
+        if (enrichedFields.stream().anyMatch(BeanBuilderGenerator::isUninitializedPrimitive)) {
             method.addStatement("validatePrimitiveFieldsHaveBeenInitialized()");
         }
 

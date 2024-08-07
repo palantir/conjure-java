@@ -17,6 +17,7 @@
 buildscript {
     repositories {
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+        mavenLocal() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
         gradlePluginPortal() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 
@@ -56,6 +57,7 @@ allprojects {
 
     repositories {
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+        mavenLocal() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 
     configurations.all {
