@@ -61,4 +61,13 @@ public class NoCachingResponseHandlerTest {
         assertThat(connection.getHeaderField(HttpHeaders.CACHE_CONTROL))
                 .isEqualTo("no-cache, no-store, must-revalidate");
     }
+
+    @Test
+    public void testCacheControl_override() throws IOException {
+        URL url = new URL("http://localhost:12345?override=true");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.getHeaderField(HttpHeaders.CACHE_CONTROL);
+        assertThat(connection.getHeaderField(HttpHeaders.CACHE_CONTROL)).isEqualTo("custom override");
+    }
 }
