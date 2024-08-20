@@ -50,7 +50,7 @@ public final class VerificationServerExtension implements BeforeAllCallback, Aft
     static final UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("test", "develop"));
     private static final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
             .from(ClientConfigurations.of(
-                    ImmutableList.of("http://localhost:" + PORT + "/"),
+                    ImmutableList.of("http://127.0.0.1:" + PORT + "/"),
                     SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
                     SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION)))
             .userAgent(userAgent)

@@ -47,7 +47,7 @@ public final class VerificationClientExtension implements BeforeAllCallback, Aft
             .build();
     private static final int PORT = 16297;
     private static final ClientConfiguration clientConfiguration = ClientConfigurations.of(
-            ImmutableList.of("http://localhost:" + PORT + "/"),
+            ImmutableList.of("http://127.0.0.1:" + PORT + "/"),
             SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
             SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION));
 
