@@ -19,7 +19,7 @@ public final class EmptyObjectExample {
         return "EmptyObjectExample{}";
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static EmptyObjectExample of() {
         return INSTANCE;
     }

@@ -21,7 +21,7 @@ public final class EmptyObjectNotStrict {
         return "EmptyObjectNotStrict{}";
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static EmptyObjectNotStrict of() {
         return INSTANCE;
     }
