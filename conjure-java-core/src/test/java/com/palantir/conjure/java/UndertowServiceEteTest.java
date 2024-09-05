@@ -433,7 +433,19 @@ public final class UndertowServiceEteTest extends TestBase {
         try (InputStream response = binaryClient.getBinaryFailure(
                 AuthHeader.valueOf("authHeader"),
                 // Write more bytes than one buffer
-                20000)) {
+                20000,
+                false)) {
+            assertThatThrownBy(response::readAllBytes).isInstanceOf(IOException.class);
+        }
+    }
+
+    @Test
+    public void testBinaryServerSideFailureAfterManyBytesSentTryWithResources() throws IOException {
+        try (InputStream response = binaryClient.getBinaryFailure(
+                AuthHeader.valueOf("authHeader"),
+                // Write more bytes than one buffer
+                20000,
+                true)) {
             assertThatThrownBy(response::readAllBytes).isInstanceOf(IOException.class);
         }
     }
@@ -443,7 +455,21 @@ public final class UndertowServiceEteTest extends TestBase {
         assertThatThrownBy(() -> {
                     try {
                         binaryClient
-                                .getBinaryFailure(AuthHeader.valueOf("authHeader"), 1)
+                                .getBinaryFailure(AuthHeader.valueOf("authHeader"), 1, false)
+                                .close();
+                    } catch (UncheckedExecutionException e) {
+                        throw e.getCause();
+                    }
+                })
+                .isInstanceOf(RemoteException.class);
+    }
+
+    @Test
+    public void testBinaryServerSideFailureAfterFewBytesSentTryWithResources() {
+        assertThatThrownBy(() -> {
+                    try {
+                        binaryClient
+                                .getBinaryFailure(AuthHeader.valueOf("authHeader"), 1, true)
                                 .close();
                     } catch (UncheckedExecutionException e) {
                         throw e.getCause();

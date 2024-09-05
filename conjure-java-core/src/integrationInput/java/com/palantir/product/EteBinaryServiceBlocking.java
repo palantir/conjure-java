@@ -47,7 +47,7 @@ public interface EteBinaryServiceBlocking {
      */
     @ClientEndpoint(method = "GET", path = "/binary/failure")
     @MustBeClosed
-    InputStream getBinaryFailure(AuthHeader authHeader, int numBytes);
+    InputStream getBinaryFailure(AuthHeader authHeader, int numBytes, boolean useTryWithResources);
 
     /** @apiNote {@code GET /binary/aliased} */
     @ClientEndpoint(method = "GET", path = "/binary/aliased")
@@ -124,10 +124,11 @@ public interface EteBinaryServiceBlocking {
             }
 
             @Override
-            public InputStream getBinaryFailure(AuthHeader authHeader, int numBytes) {
+            public InputStream getBinaryFailure(AuthHeader authHeader, int numBytes, boolean useTryWithResources) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
+                _request.putQueryParams("useTryWithResources", _plainSerDe.serializeBoolean(useTryWithResources));
                 return _runtime.clients()
                         .callBlocking(
                                 getBinaryFailureChannel,

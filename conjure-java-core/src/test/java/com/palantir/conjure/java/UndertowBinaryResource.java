@@ -62,8 +62,8 @@ final class UndertowBinaryResource implements UndertowEteBinaryService {
     }
 
     @Override
-    public BinaryResponseBody getBinaryFailure(AuthHeader _authHeader, int numBytes) {
-        return responseBody -> {
+    public BinaryResponseBody getBinaryFailure(AuthHeader _authHeader, int numBytes, boolean tryWithResources) {
+        BinaryResponseBody binaryResponseBody = responseBody -> {
             byte[] buffer = new byte[Math.min(8 * 1024, numBytes)];
             int remainingBytes = numBytes;
             while (remainingBytes > 0) {
@@ -74,6 +74,14 @@ final class UndertowBinaryResource implements UndertowEteBinaryService {
             }
             throw new SafeRuntimeException("failure");
         };
+        if (tryWithResources) {
+            return responseBody -> {
+                try (responseBody) {
+                    binaryResponseBody.write(responseBody);
+                }
+            };
+        }
+        return binaryResponseBody;
     }
 
     @Override

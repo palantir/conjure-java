@@ -91,7 +91,12 @@ final class ConjureBodySerDe implements BodySerDe {
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, BINARY_CONTENT_TYPE);
         Tracer.fastStartSpan(TracedEncoding.SERIALIZE_OPERATION);
         try {
-            value.write(exchange.getOutputStream());
+            // We wrap the provided outputstream to prevent premature closure, otherwise a common pattern of
+            // using try-with-resources structures within BinaryResponseBody prevents failures from being
+            // understood by clients. try-with-resource ends up calling OutputStream.close before the
+            // exception handler is invoked, which tells the server (and then client) that the response bytes
+            // have been fully sent successfully.
+            value.write(new UnclosableOutputStream(exchange.getOutputStream()));
         } finally {
             Tracer.fastCompleteSpan(SerializeBinaryTagTranslator.INSTANCE, SerializeBinaryTagTranslator.INSTANCE);
         }
