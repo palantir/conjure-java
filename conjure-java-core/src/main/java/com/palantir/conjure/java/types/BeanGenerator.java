@@ -405,7 +405,7 @@ public final class BeanGenerator {
         return MethodSpec.methodBuilder("of")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(objectClass)
-                .addAnnotation(ConjureAnnotations.delegatingJsonCreator())
+                .addAnnotation(ConjureAnnotations.propertiesJsonCreator())
                 .addCode("return $L;", SINGLETON_INSTANCE_NAME)
                 .build();
     }
