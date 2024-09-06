@@ -44,7 +44,7 @@ public interface EteBinaryServiceAsync {
      * @apiNote {@code GET /binary/failure}
      */
     @ClientEndpoint(method = "GET", path = "/binary/failure")
-    ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes);
+    ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes, boolean useTryWithResources);
 
     /** @apiNote {@code GET /binary/aliased} */
     @ClientEndpoint(method = "GET", path = "/binary/aliased")
@@ -122,10 +122,12 @@ public interface EteBinaryServiceAsync {
             }
 
             @Override
-            public ListenableFuture<InputStream> getBinaryFailure(AuthHeader authHeader, int numBytes) {
+            public ListenableFuture<InputStream> getBinaryFailure(
+                    AuthHeader authHeader, int numBytes, boolean useTryWithResources) {
                 Request.Builder _request = Request.builder();
                 _request.putHeaderParams("Authorization", authHeader.toString());
                 _request.putQueryParams("numBytes", _plainSerDe.serializeInteger(numBytes));
+                _request.putQueryParams("useTryWithResources", _plainSerDe.serializeBoolean(useTryWithResources));
                 return _runtime.clients()
                         .call(
                                 getBinaryFailureChannel,

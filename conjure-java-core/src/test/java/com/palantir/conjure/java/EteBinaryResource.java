@@ -62,13 +62,21 @@ final class EteBinaryResource implements EteBinaryService {
     }
 
     @Override
-    public StreamingOutput getBinaryFailure(AuthHeader _authHeader, int numBytes) {
-        return responseBody -> {
+    public StreamingOutput getBinaryFailure(AuthHeader _authHeader, int numBytes, boolean tryWithResources) {
+        StreamingOutput streamingOutput = responseBody -> {
             byte[] data = new byte[numBytes];
             new Random().nextBytes(data);
             responseBody.write(data);
             throw new SafeRuntimeException("failure");
         };
+        if (tryWithResources) {
+            return responseBody -> {
+                try (responseBody) {
+                    streamingOutput.write(responseBody);
+                }
+            };
+        }
+        return streamingOutput;
     }
 
     @Override

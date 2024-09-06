@@ -56,7 +56,9 @@ public interface EteBinaryService {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ClientEndpoint(method = "GET", path = "/binary/failure")
     StreamingOutput getBinaryFailure(
-            @HeaderParam("Authorization") @NotNull AuthHeader authHeader, @QueryParam("numBytes") int numBytes);
+            @HeaderParam("Authorization") @NotNull AuthHeader authHeader,
+            @QueryParam("numBytes") int numBytes,
+            @QueryParam("useTryWithResources") boolean useTryWithResources);
 
     @GET
     @Path("binary/aliased")
