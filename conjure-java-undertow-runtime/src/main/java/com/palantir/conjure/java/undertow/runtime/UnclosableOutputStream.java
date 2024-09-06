@@ -67,6 +67,6 @@ final class UnclosableOutputStream extends OutputStream {
 
     @Override
     public String toString() {
-        return "CloseShieldingOutputStream{" + delegate + '}';
+        return "UnclosableOutputStream{" + delegate + '}';
     }
 }
