@@ -54,9 +54,11 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
             ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials");
 
     private final PlainSerDe plainSerDe;
+    private final JsonWebTokenHandler jsonWebTokenHandler;
 
-    ConjureAuthorizationExtractor(PlainSerDe plainSerDe) {
+    ConjureAuthorizationExtractor(PlainSerDe plainSerDe, JsonWebTokenHandler jsonWebTokenHandler) {
         this.plainSerDe = plainSerDe;
+        this.jsonWebTokenHandler = jsonWebTokenHandler;
     }
 
     /**
@@ -96,6 +98,9 @@ final class ConjureAuthorizationExtractor implements AuthorizationExtractor {
             jwt.getUnverifiedTokenId().ifPresent(tokenIdSetter);
             jwt.getUnverifiedOrganizationId().ifPresent(organizationIdSetter);
         }
+
+        // may throw
+        jsonWebTokenHandler.handle(exchange, parsedJwt);
     }
 
     /**

@@ -27,15 +27,9 @@ import com.palantir.conjure.java.undertow.lib.MarkerCallback;
 import com.palantir.conjure.java.undertow.lib.PlainSerDe;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.logsafe.Preconditions;
-import com.palantir.tokens.auth.AuthHeader;
-import com.palantir.tokens.auth.BearerToken;
-import com.palantir.tokens.auth.UnverifiedJsonWebToken;
-import io.undertow.server.HttpServerExchange;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.BiConsumer;
 
 /** {@link ConjureUndertowRuntime} provides functionality required by generated handlers. */
 public final class ConjureUndertowRuntime implements UndertowRuntime {
@@ -52,8 +46,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
                 builder.encodings.isEmpty()
                         ? ImmutableList.of(Encodings.json(), Encodings.smile(), Encodings.cbor())
                         : builder.encodings);
-        this.auth = new OnSetRequestTokenAuthExtractor(
-                new ConjureAuthorizationExtractor(plainSerDe()), builder.onSetRequestToken);
+        this.auth = new ConjureAuthorizationExtractor(plainSerDe(), builder.jsonWebTokenHandler);
         this.exceptionHandler = builder.exceptionHandler;
         this.markerCallback = MarkerCallbacks.fold(builder.paramMarkers);
         this.async = new ConjureAsyncRequestProcessing(builder.asyncTimeout, builder.exceptionHandler);
@@ -104,8 +97,7 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         private Duration asyncTimeout = Duration.ofMinutes(3);
         private ExceptionHandler exceptionHandler = ConjureExceptions.INSTANCE;
         private RequestArgHandler requestArgHandler = DefaultRequestArgHandler.INSTANCE;
-        private BiConsumer<HttpServerExchange, Optional<UnverifiedJsonWebToken>> onSetRequestToken =
-                (_exchange, _token) -> {};
+        private JsonWebTokenHandler jsonWebTokenHandler = (_exchange, _token) -> {};
         private final List<Encoding> encodings = new ArrayList<>();
         private final List<ParamMarker> paramMarkers = new ArrayList<>();
 
@@ -142,50 +134,13 @@ public final class ConjureUndertowRuntime implements UndertowRuntime {
         }
 
         @CanIgnoreReturnValue
-        public Builder onSetRequestToken(BiConsumer<HttpServerExchange, Optional<UnverifiedJsonWebToken>> callback) {
-            onSetRequestToken = callback;
+        public Builder jsonWebTokenHandler(JsonWebTokenHandler value) {
+            jsonWebTokenHandler = Preconditions.checkNotNull(value, "jsonWebTokenHandler is required");
             return this;
         }
 
         public ConjureUndertowRuntime build() {
             return new ConjureUndertowRuntime(this);
-        }
-    }
-
-    private static final class OnSetRequestTokenAuthExtractor implements AuthorizationExtractor {
-        private final AuthorizationExtractor delegate;
-        private final BiConsumer<HttpServerExchange, Optional<UnverifiedJsonWebToken>> onSetRequestToken;
-
-        private OnSetRequestTokenAuthExtractor(
-                AuthorizationExtractor delegate,
-                BiConsumer<HttpServerExchange, Optional<UnverifiedJsonWebToken>> onSetRequestToken) {
-            this.delegate = delegate;
-            this.onSetRequestToken = onSetRequestToken;
-        }
-
-        @Override
-        public AuthHeader header(HttpServerExchange exchange) {
-            AuthHeader result = delegate.header(exchange);
-            Optional<UnverifiedJsonWebToken> token = exchange.getAttachment(Attachments.UNVERIFIED_JWT);
-            Preconditions.checkNotNull(token, "jwt in exchange attachment is null");
-            onSetRequestToken.accept(exchange, token);
-            return result;
-        }
-
-        @Override
-        public BearerToken cookie(HttpServerExchange exchange, String cookieName) {
-            BearerToken result = delegate.cookie(exchange, cookieName);
-            Optional<UnverifiedJsonWebToken> token = exchange.getAttachment(Attachments.UNVERIFIED_JWT);
-            Preconditions.checkNotNull(token, "jwt in exchange attachment is null");
-            onSetRequestToken.accept(exchange, token);
-            return result;
-        }
-
-        @Override
-        public void setRequestToken(HttpServerExchange exchange, Optional<UnverifiedJsonWebToken> token) {
-            delegate.setRequestToken(exchange, token);
-            // may throw
-            onSetRequestToken.accept(exchange, token);
         }
     }
 }
