@@ -20,13 +20,16 @@ import static com.palantir.conjure.java.api.testing.Assertions.assertThatService
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.undertow.HttpServerExchanges;
 import com.palantir.conjure.java.undertow.lib.UndertowRuntime;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens.auth.UnverifiedJsonWebToken;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.Headers;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 public final class AuthTest {
@@ -89,5 +92,60 @@ public final class AuthTest {
         exchange.getRequestCookies().put(cookieName, new CookieImpl(cookieName, ""));
         assertThatServiceExceptionThrownBy(() -> CONTEXT.auth().cookie(exchange, cookieName))
                 .hasType(ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials"));
+    }
+
+    @Test
+    public void testAuthHeaderTriggersJsonWebTokenHandler() {
+        TestJsonWebTokenHandler handler = new TestJsonWebTokenHandler();
+        UndertowRuntime runtime =
+                ConjureUndertowRuntime.builder().jsonWebTokenHandler(handler).build();
+
+        AuthHeader expected = AuthHeader.of(BearerToken.valueOf("token"));
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, expected.toString());
+
+        assertThat(runtime.auth().header(exchange)).isEqualTo(expected);
+        assertThat(handler.fired).isTrue();
+    }
+
+    @Test
+    public void testAuthCookieTriggersJsonWebTokenHandler() {
+        TestJsonWebTokenHandler handler = new TestJsonWebTokenHandler();
+        UndertowRuntime runtime =
+                ConjureUndertowRuntime.builder().jsonWebTokenHandler(handler).build();
+
+        BearerToken expected = BearerToken.valueOf("token");
+        String cookieName = "Auth-Token";
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestCookies().put(cookieName, new CookieImpl(cookieName, "token"));
+
+        assertThat(runtime.auth().cookie(exchange, cookieName)).isEqualTo(expected);
+        assertThat(handler.fired).isTrue();
+    }
+
+    @Test
+    public void testJsonWebHandlerThrowsWhenAuthTokenSet() {
+        ErrorType error = ErrorType.create(ErrorType.Code.INTERNAL, "Foo:Bar");
+        UndertowRuntime runtime = ConjureUndertowRuntime.builder()
+                .jsonWebTokenHandler((_exchange, _token) -> {
+                    throw new ServiceException(error);
+                })
+                .build();
+
+        AuthHeader expected = AuthHeader.of(BearerToken.valueOf("token"));
+        HttpServerExchange exchange = HttpServerExchanges.createStub();
+        exchange.getRequestHeaders().add(Headers.AUTHORIZATION, expected.toString());
+
+        assertThatServiceExceptionThrownBy(() -> runtime.auth().header(exchange))
+                .hasType(error);
+    }
+
+    private static final class TestJsonWebTokenHandler implements JsonWebTokenHandler {
+        private boolean fired = false;
+
+        @Override
+        public void handle(HttpServerExchange _exchange, Optional<UnverifiedJsonWebToken> _token) {
+            fired = true;
+        }
     }
 }
