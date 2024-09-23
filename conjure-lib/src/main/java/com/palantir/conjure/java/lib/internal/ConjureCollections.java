@@ -154,9 +154,7 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Double> newNonNullDoubleList(double[] doubles) {
-        double[] conjureCopy = new double[doubles.length];
-        System.arraycopy(doubles, 0, conjureCopy, 0, doubles.length);
-        return new ConjureDoubleList(DoubleArrayList.newListWith(conjureCopy));
+        return new ConjureDoubleList(DoubleArrayList.newListWith(doubles.clone()));
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -179,9 +177,7 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Integer> newNonNullIntegerList(int[] integers) {
-        int[] conjureCopy = new int[integers.length];
-        System.arraycopy(integers, 0, conjureCopy, 0, integers.length);
-        return new ConjureIntegerList(IntArrayList.newListWith(conjureCopy));
+        return new ConjureIntegerList(IntArrayList.newListWith(integers.clone()));
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -204,9 +200,7 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<Boolean> newNonNullBooleanList(boolean[] booleans) {
-        boolean[] conjureCopy = new boolean[booleans.length];
-        System.arraycopy(booleans, 0, conjureCopy, 0, booleans.length);
-        return new ConjureBooleanList(BooleanArrayList.newListWith(conjureCopy));
+        return new ConjureBooleanList(BooleanArrayList.newListWith(booleans.clone()));
     }
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
@@ -229,8 +223,7 @@ public final class ConjureCollections {
 
     // This method returns a list that can't handle nulls. Do not use this unless the nonNullCollections flag is set
     public static List<SafeLong> newNonNullSafeLongList(long[] longs) {
-        long[] conjureCopy = new long[longs.length];
-        System.arraycopy(longs, 0, conjureCopy, 0, longs.length);
+        long[] conjureCopy = longs.clone();
         for (long value : conjureCopy) {
             if (!safeLongCheck(value)) {
                 throw new SafeIllegalArgumentException(
