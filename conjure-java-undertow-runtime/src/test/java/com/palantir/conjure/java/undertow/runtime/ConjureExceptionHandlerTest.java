@@ -23,6 +23,9 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ErrorType.Code;
 import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason;
+import com.palantir.conjure.java.api.errors.QosReason.DueTo;
+import com.palantir.conjure.java.api.errors.QosReason.RetryHint;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
@@ -178,6 +181,21 @@ public final class ConjureExceptionHandlerTest {
         HttpURLConnection connection = execute();
 
         assertThat(connection.getResponseCode()).isEqualTo(503);
+        assertThat(connection.getErrorStream()).isNull();
+    }
+
+    @Test
+    public void handlesQosExceptionUnavailableWithMetadata() throws IOException {
+        exception = QosException.unavailable(QosReason.builder()
+                .reason("reason")
+                .retryHint(RetryHint.DO_NOT_RETRY)
+                .dueTo(DueTo.CUSTOM)
+                .build());
+        HttpURLConnection connection = execute();
+
+        assertThat(connection.getResponseCode()).isEqualTo(503);
+        assertThat(connection.getHeaderFields()).containsEntry("Qos-Retry-Hint", ImmutableList.of("do-not-retry"));
+        assertThat(connection.getHeaderFields()).containsEntry("Qos-Due-To", ImmutableList.of("custom"));
         assertThat(connection.getErrorStream()).isNull();
     }
 

@@ -19,6 +19,8 @@ package com.palantir.conjure.java.undertow.runtime;
 import com.google.common.util.concurrent.RateLimiter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReasons;
+import com.palantir.conjure.java.api.errors.QosReasons.QosResponseEncodingAdapter;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
@@ -31,6 +33,7 @@ import com.palantir.logsafe.logger.SafeLoggerFactory;
 import io.undertow.io.UndertowOutputStream;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.temporal.ChronoUnit;
@@ -93,6 +96,7 @@ public enum ConjureExceptions implements ExceptionHandler {
 
     private static void qosException(HttpServerExchange exchange, QosException qosException) {
         qosException.accept(QOS_EXCEPTION_HEADERS).accept(exchange);
+        QosReasons.encodeToResponse(qosException.getReason(), exchange, UndertowQosResponseEncodingAdapter.INSTANCE);
 
         if (log.isDebugEnabled()) {
             log.debug("Quality-of-Service error handling request", qosException);
@@ -287,4 +291,13 @@ public enum ConjureExceptions implements ExceptionHandler {
                     return _exchange -> {};
                 }
             };
+
+    private enum UndertowQosResponseEncodingAdapter implements QosResponseEncodingAdapter<HttpServerExchange> {
+        INSTANCE;
+
+        @Override
+        public void setHeader(HttpServerExchange exchange, String headerName, String headerValue) {
+            exchange.getResponseHeaders().put(HttpString.tryFromString(headerName), headerValue);
+        }
+    }
 }
