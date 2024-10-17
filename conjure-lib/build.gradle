@@ -28,6 +28,7 @@ dependencies {
     implementation 'org.eclipse.collections:eclipse-collections-api'
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
     implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.google.guava:guava'
     implementation 'com.palantir.safe-logging:safe-logging'
 
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
