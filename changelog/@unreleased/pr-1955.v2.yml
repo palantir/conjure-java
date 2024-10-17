@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Distinguish error logging between thrown Errors and ServiceExceptions
+  links:
+  - https://github.com/palantir/conjure-java/pull/1955
