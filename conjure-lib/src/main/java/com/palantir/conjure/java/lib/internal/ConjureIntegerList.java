@@ -16,6 +16,15 @@
 
 package com.palantir.conjure.java.lib.internal;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.io.IOException;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.RandomAccess;
@@ -26,6 +35,8 @@ import org.eclipse.collections.impl.utility.Iterate;
  * ConjureIntegerList is a boxed list wrapper for the eclipse-collections IntArrayList. In eclipse-collections 12,
  * a BoxedMutableIntList will be released. Once available, ConjureIntegerList should be replaced with that.
  */
+@JsonSerialize(using = ConjureIntegerList.Serializer.class)
+@JsonDeserialize(using = ConjureIntegerList.Deserializer.class)
 final class ConjureIntegerList extends AbstractList<Integer> implements RandomAccess {
     private final IntArrayList delegate;
 
@@ -68,5 +79,23 @@ final class ConjureIntegerList extends AbstractList<Integer> implements RandomAc
     @Override
     public Integer set(int index, Integer element) {
         return delegate.set(index, element);
+    }
+
+    static final class Serializer extends JsonSerializer<ConjureIntegerList> {
+        @Override
+        public void serialize(ConjureIntegerList val, JsonGenerator gen, SerializerProvider _serializer)
+                throws IOException {
+            int[] integers = val.delegate.toArray();
+            gen.writeArray(integers, 0, integers.length);
+        }
+    }
+
+    static final class Deserializer extends JsonDeserializer<ConjureIntegerList> {
+        @Override
+        public ConjureIntegerList deserialize(JsonParser parser, DeserializationContext _ctxt) throws IOException {
+            // Avoid making a copy of the value from jackson
+            int[] integers = parser.readValueAs(int[].class);
+            return new ConjureIntegerList(new IntArrayList(integers));
+        }
     }
 }
